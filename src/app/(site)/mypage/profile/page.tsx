@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
+import { requireUser } from "@/lib/auth/session";
+import { getProfileRepository } from "@/lib/repositories/profile-repository";
+import { findCareerProfileByUserId } from "@/lib/repositories";
+import { ProfileEditForm } from "@/features/profile/profile-edit-form";
+
+export const metadata: Metadata = { title: "내 정보 수정 | 한평생 바로취업" };
+
+export default async function MyPageProfileEditPage() {
+  const user = await requireUser("/mypage/profile");
+  const [profile, careerProfile] = await Promise.all([
+    getProfileRepository().findById(user.id),
+    findCareerProfileByUserId(user.id),
+  ]);
+
+  if (!profile) {
+    return (
+      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+        <p className="text-sm text-slate-500">프로필 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+      <Link href="/mypage" className="mb-4 flex items-center gap-1 text-sm text-slate-500 hover:text-brand-blue-600">
+        <ArrowLeft className="size-4" />
+        마이페이지로 돌아가기
+      </Link>
+
+      <h1 className="text-2xl font-bold text-slate-900">내 정보 수정</h1>
+      <p className="mt-2 text-[15px] text-slate-500">
+        입력한 정보는 맞춤 직업/채용/지원제도 추천에 활용됩니다.
+      </p>
+
+      <div className="mt-8 rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
+        <ProfileEditForm profile={profile} careerProfile={careerProfile} />
+      </div>
+    </div>
+  );
+}

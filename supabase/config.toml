@@ -1,0 +1,9 @@
+# Supabase local 설정 (CLI 사용 시)
+# https://supabase.com/docs/guides/cli/config
+
+[project]
+id = "baro-career"
+
+[db]
+port = 54322
+major_version = 15
