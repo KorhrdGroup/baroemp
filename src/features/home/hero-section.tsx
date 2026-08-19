@@ -11,7 +11,7 @@ export function HeroSection() {
           <p className="text-[15px] font-semibold text-brand-blue-600">
             중장년의 새로운 시작, 한평생 함께합니다
           </p>
-          <h1 className="mt-4 text-3xl font-extrabold leading-[1.35] tracking-tight text-slate-900 sm:text-[2.75rem] sm:leading-[1.3]">
+          <h1 className="mt-4 font-dongnim text-3xl font-normal leading-[1.35] tracking-tight text-slate-900 sm:text-[2.75rem] sm:leading-[1.3]">
             내게 맞는 일자리를 찾고
             <br />
             <span className="text-brand-blue-600">취업 성공까지 한 번에!</span>
