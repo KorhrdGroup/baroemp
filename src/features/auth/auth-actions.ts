@@ -150,7 +150,10 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
 
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
-    return { error: "로그인 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해주세요." };
+    // Mock Mode: Supabase 미설정 시 아무 이메일/비밀번호로나 가짜 세션을 만들어 로그인시킨다.
+    const { createMockSession } = await import("@/lib/auth/mock-session");
+    await createMockSession(email);
+    redirect(next);
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -179,6 +182,10 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
 
 export async function signOutAction(): Promise<void> {
   const supabase = await createServerSupabaseClient();
+  if (!supabase) {
+    const { clearMockSession } = await import("@/lib/auth/mock-session");
+    await clearMockSession();
+  }
   if (supabase) {
     const { data } = await supabase.auth.getUser();
     if (data.user) {

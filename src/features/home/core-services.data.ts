@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { FileSearch, Briefcase, Coins, FileEdit, UserRound, GraduationCap } from "lucide-react";
+import { FileSearch, Briefcase, Coins, FileEdit } from "lucide-react";
 
 export interface CoreServiceItem {
   id: string;
@@ -46,21 +46,5 @@ export const coreServices: CoreServiceItem[] = [
     badge: "무료",
     href: "/resume",
     icon: FileEdit,
-  },
-  {
-    id: "consulting",
-    title: "1:1 취업컨설팅",
-    description: "전문가와 맞춤 상담",
-    badge: "유료",
-    href: "/consulting",
-    icon: UserRound,
-  },
-  {
-    id: "training",
-    title: "취업교육 (오픈 예정)",
-    description: "자격증·실무교육 과정 안내",
-    badge: "준비중",
-    href: "/resume",
-    icon: GraduationCap,
   },
 ];

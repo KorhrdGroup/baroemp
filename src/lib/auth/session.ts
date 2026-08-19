@@ -30,7 +30,11 @@ export interface CurrentUser {
  */
 export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const supabase = await createServerSupabaseClient();
-  if (!supabase) return null;
+  if (!supabase) {
+    // Mock Mode: Supabase 미설정 개발 환경에서는 가짜 세션 쿠키로 로그인 상태를 흉내낸다.
+    const { readMockSessionUser } = await import("./mock-session");
+    return readMockSessionUser();
+  }
 
   const {
     data: { user },

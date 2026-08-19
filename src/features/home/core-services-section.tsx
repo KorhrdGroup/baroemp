@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 
 export function CoreServicesSection() {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+    <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {coreServices.map((service) => {
           const Icon = service.icon;
           return (

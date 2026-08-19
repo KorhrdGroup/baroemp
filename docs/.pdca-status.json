@@ -1,0 +1,123 @@
+{
+  "version": "2.0",
+  "lastUpdated": "2026-08-19T01:41:48.588Z",
+  "activeFeatures": [
+    "home",
+    "scratchpad",
+    "auth"
+  ],
+  "primaryFeature": "home",
+  "features": {
+    "home": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-08-19T00:57:43.962Z",
+        "lastUpdated": "2026-08-19T00:58:11.112Z"
+      },
+      "lastFile": "/Users/korhrd/Documents/GitHub/baro-career/src/features/home/core-services-section.tsx"
+    },
+    "scratchpad": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-08-19T01:25:52.225Z",
+        "lastUpdated": "2026-08-19T01:27:46.971Z"
+      },
+      "lastFile": "/private/tmp/claude-501/-Users-korhrd-Documents-GitHub-baro-career/b292f05e-34b4-43c1-bece-a2333f3e6cd5/scratchpad/make_assessment_pdf.py"
+    },
+    "auth": {
+      "phase": "do",
+      "phaseNumber": 3,
+      "matchRate": null,
+      "iterationCount": 0,
+      "requirements": [],
+      "documents": {},
+      "timestamps": {
+        "started": "2026-08-19T01:41:32.459Z",
+        "lastUpdated": "2026-08-19T01:41:48.588Z"
+      },
+      "lastFile": "/Users/korhrd/Documents/GitHub/baro-career/src/features/auth/auth-actions.ts"
+    }
+  },
+  "pipeline": {
+    "currentPhase": 1,
+    "level": "Dynamic",
+    "phaseHistory": []
+  },
+  "session": {
+    "startedAt": "2026-08-19T00:50:36.900Z",
+    "onboardingCompleted": false,
+    "lastActivity": "2026-08-19T01:41:48.588Z"
+  },
+  "history": [
+    {
+      "timestamp": "2026-08-19T00:57:43.962Z",
+      "feature": "home",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T00:57:48.221Z",
+      "feature": "home",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T00:58:02.903Z",
+      "feature": "home",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T00:58:11.112Z",
+      "feature": "home",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T01:25:52.225Z",
+      "feature": "scratchpad",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T01:27:46.971Z",
+      "feature": "scratchpad",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T01:41:32.459Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T01:41:37.796Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T01:41:43.603Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    },
+    {
+      "timestamp": "2026-08-19T01:41:48.588Z",
+      "feature": "auth",
+      "phase": "do",
+      "action": "updated"
+    }
+  ]
+}
