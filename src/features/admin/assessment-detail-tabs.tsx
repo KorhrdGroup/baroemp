@@ -40,8 +40,8 @@ function KpiCard({ label, value }: { label: string; value: string | number }) {
   return (
     <Card className="rounded-xl border-0 py-0 shadow-none ring-1 ring-slate-200">
       <CardContent className="px-4 py-4">
-        <p className="text-[12px] text-slate-400">{label}</p>
-        <p className="mt-1 text-2xl font-bold text-slate-900">{value}</p>
+        <p className="text-label-2 text-slate-400">{label}</p>
+        <p className="mt-1 text-title-2 font-bold text-slate-900">{value}</p>
       </CardContent>
     </Card>
   );
@@ -57,13 +57,13 @@ function QuestionOrderInput({ assessmentId, questionId, orderIndex }: { assessme
         type="number"
         value={value}
         onChange={(e) => setValue(Number(e.target.value))}
-        className="h-8 w-16 text-[12px]"
+        className="h-8 w-16 text-label-2"
       />
       <Button
         size="sm"
         variant="outline"
         disabled={pending || value === orderIndex}
-        className="h-8 px-2 text-[12px]"
+        className="h-8 px-2 text-label-2"
         onClick={() => startTransition(async () => { await updateQuestionOrderAction(assessmentId, questionId, value); })}
       >
         저장
@@ -79,7 +79,7 @@ function ActiveToggleButton({ assessmentId, isActive }: { assessmentId: string; 
       size="sm"
       variant={isActive ? "outline" : "default"}
       disabled={pending}
-      className={isActive ? "h-8 rounded-lg text-[12px]" : "h-8 rounded-lg bg-brand-blue-500 text-[12px] hover:bg-brand-blue-600"}
+      className={isActive ? "h-8 rounded-lg text-label-2" : "h-8 rounded-lg bg-brand-blue-500 text-label-2 hover:bg-brand-blue-600"}
       onClick={() => startTransition(async () => { await toggleAssessmentActiveAction(assessmentId); })}
     >
       {isActive ? "비활성화" : "활성화"}
@@ -103,8 +103,8 @@ export function AssessmentDetailTabs({
     <div className="space-y-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-xl font-bold text-slate-900">{assessment.title}</h1>
-          <p className="mt-1 text-[13px] text-slate-500">{assessment.description}</p>
+          <h1 className="text-title-3 font-bold text-slate-900">{assessment.title}</h1>
+          <p className="mt-1 text-label-1 text-slate-500">{assessment.description}</p>
         </div>
         <div className="flex items-center gap-2">
           <Badge className={assessment.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}>
@@ -131,7 +131,7 @@ export function AssessmentDetailTabs({
           </div>
           <Card className="mt-4 rounded-xl border-0 py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="border-b border-slate-100 px-4 py-3">
-              <CardTitle className="text-[14px]">섹션 구성</CardTitle>
+              <CardTitle className="text-label-1">섹션 구성</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-wrap gap-2 px-4 py-4">
               {[...assessment.sections].sort((a, b) => a.order - b.order).map((section) => (
@@ -149,19 +149,19 @@ export function AssessmentDetailTabs({
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                    <TableHead className="text-[12px]">순서</TableHead>
-                    <TableHead className="text-[12px]">섹션</TableHead>
-                    <TableHead className="text-[12px]">질문</TableHead>
-                    <TableHead className="text-[12px]">유형</TableHead>
-                    <TableHead className="text-[12px]">필수</TableHead>
-                    <TableHead className="text-[12px]">Profile Field</TableHead>
-                    <TableHead className="text-[12px]">Dimension</TableHead>
-                    <TableHead className="text-[12px]">선택지</TableHead>
+                    <TableHead className="text-label-2">순서</TableHead>
+                    <TableHead className="text-label-2">섹션</TableHead>
+                    <TableHead className="text-label-2">질문</TableHead>
+                    <TableHead className="text-label-2">유형</TableHead>
+                    <TableHead className="text-label-2">필수</TableHead>
+                    <TableHead className="text-label-2">Profile Field</TableHead>
+                    <TableHead className="text-label-2">Dimension</TableHead>
+                    <TableHead className="text-label-2">선택지</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {questions.map((q) => (
-                    <TableRow key={q.id} className="text-[13px]">
+                    <TableRow key={q.id} className="text-label-1">
                       <TableCell>
                         <QuestionOrderInput assessmentId={assessment.id} questionId={q.id} orderIndex={q.orderIndex} />
                       </TableCell>
@@ -186,21 +186,21 @@ export function AssessmentDetailTabs({
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                    <TableHead className="text-[12px]">이름</TableHead>
-                    <TableHead className="text-[12px]">연령대</TableHead>
-                    <TableHead className="text-[12px]">지역</TableHead>
-                    <TableHead className="text-[12px]">검사일</TableHead>
-                    <TableHead className="text-[12px]">TOP1 직업</TableHead>
-                    <TableHead className="text-[12px]">TOP1 점수</TableHead>
-                    <TableHead className="text-[12px]">취업희망시기</TableHead>
-                    <TableHead className="text-[12px]">교육의향</TableHead>
-                    <TableHead className="text-[12px]">Lead Score</TableHead>
-                    <TableHead className="text-[12px]">상담상태</TableHead>
+                    <TableHead className="text-label-2">이름</TableHead>
+                    <TableHead className="text-label-2">연령대</TableHead>
+                    <TableHead className="text-label-2">지역</TableHead>
+                    <TableHead className="text-label-2">검사일</TableHead>
+                    <TableHead className="text-label-2">TOP1 직업</TableHead>
+                    <TableHead className="text-label-2">TOP1 점수</TableHead>
+                    <TableHead className="text-label-2">취업희망시기</TableHead>
+                    <TableHead className="text-label-2">교육의향</TableHead>
+                    <TableHead className="text-label-2">Lead Score</TableHead>
+                    <TableHead className="text-label-2">상담상태</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {resultRows.map((row) => (
-                    <TableRow key={row.resultId} className="text-[13px]">
+                    <TableRow key={row.resultId} className="text-label-1">
                       <TableCell className="font-semibold">
                         {row.userId ? (
                           <Link href={`/admin/users/${row.userId}`} className="text-brand-blue-600 hover:underline">
@@ -247,9 +247,9 @@ export function AssessmentDetailTabs({
           <div className="grid gap-4 lg:grid-cols-2">
             <Card className="rounded-xl border-0 py-0 shadow-none ring-1 ring-slate-200">
               <CardHeader className="border-b border-slate-100 px-4 py-3">
-                <CardTitle className="text-[14px]">TOP 추천직업</CardTitle>
+                <CardTitle className="text-label-1">TOP 추천직업</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 px-4 py-4 text-[13px]">
+              <CardContent className="space-y-2 px-4 py-4 text-label-1">
                 {analytics.topOccupations.map((o) => (
                   <div key={o.occupationId} className="flex items-center justify-between">
                     <span>{o.occupationName}</span>
@@ -262,9 +262,9 @@ export function AssessmentDetailTabs({
 
             <Card className="rounded-xl border-0 py-0 shadow-none ring-1 ring-slate-200">
               <CardHeader className="border-b border-slate-100 px-4 py-3">
-                <CardTitle className="text-[14px]">지역별 완료 분포</CardTitle>
+                <CardTitle className="text-label-1">지역별 완료 분포</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 px-4 py-4 text-[13px]">
+              <CardContent className="space-y-2 px-4 py-4 text-label-1">
                 {analytics.regionBreakdown.map((r) => (
                   <div key={r.key} className="flex items-center justify-between">
                     <span>{r.key}</span>
@@ -277,9 +277,9 @@ export function AssessmentDetailTabs({
 
             <Card className="rounded-xl border-0 py-0 shadow-none ring-1 ring-slate-200">
               <CardHeader className="border-b border-slate-100 px-4 py-3">
-                <CardTitle className="text-[14px]">교육의향 분포</CardTitle>
+                <CardTitle className="text-label-1">교육의향 분포</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 px-4 py-4 text-[13px]">
+              <CardContent className="space-y-2 px-4 py-4 text-label-1">
                 {analytics.educationWillingnessDistribution.map((e) => (
                   <div key={e.bucket} className="flex items-center justify-between">
                     <span>{e.bucket}</span>
@@ -292,9 +292,9 @@ export function AssessmentDetailTabs({
 
             <Card className="rounded-xl border-0 py-0 shadow-none ring-1 ring-slate-200">
               <CardHeader className="border-b border-slate-100 px-4 py-3">
-                <CardTitle className="text-[14px]">취업희망시기 분포</CardTitle>
+                <CardTitle className="text-label-1">취업희망시기 분포</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-2 px-4 py-4 text-[13px]">
+              <CardContent className="space-y-2 px-4 py-4 text-label-1">
                 {analytics.desiredStartTimingDistribution.map((t) => (
                   <div key={t.key} className="flex items-center justify-between">
                     <span>{t.key}</span>

@@ -46,7 +46,7 @@ export function AdminHeader({ admin }: { admin?: AdminHeaderUser }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-brand-blue-50"
+                    className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-label-1 text-slate-700 hover:bg-brand-blue-50"
                   >
                     <Icon className="size-4 text-slate-400" />
                     {item.label}
@@ -65,7 +65,7 @@ export function AdminHeader({ admin }: { admin?: AdminHeaderUser }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors",
+                  "rounded-md px-3 py-1.5 text-label-1 font-medium transition-colors",
                   active
                     ? "bg-brand-blue-50 text-brand-blue-600"
                     : "text-slate-600 hover:bg-slate-50",
@@ -89,12 +89,12 @@ export function AdminHeader({ admin }: { admin?: AdminHeaderUser }) {
           </span>
         </Button>
         <div className="hidden items-center gap-2 border-l border-slate-200 pl-3 sm:flex">
-          <span className="text-[13px] font-medium text-slate-700">{admin?.name || admin?.email || "관리자"}</span>
-          <Link href="/" className="text-[12px] text-slate-400 hover:text-brand-blue-600">
+          <span className="text-label-1 font-medium text-slate-700">{admin?.name || admin?.email || "관리자"}</span>
+          <Link href="/" className="text-label-2 text-slate-400 hover:text-brand-blue-600">
             사이트
           </Link>
           <form action={signOutAction}>
-            <button type="submit" className="text-[12px] text-slate-400 hover:text-red-500">
+            <button type="submit" className="text-label-2 text-slate-400 hover:text-red-500">
               로그아웃
             </button>
           </form>

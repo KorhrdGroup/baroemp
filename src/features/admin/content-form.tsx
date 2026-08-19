@@ -58,7 +58,7 @@ export function ContentForm({ content }: ContentFormProps) {
         });
       }}
     >
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-label-1 text-red-600">{error}</p>}
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2 md:col-span-2">
@@ -149,7 +149,7 @@ export function ContentForm({ content }: ContentFormProps) {
         </div>
 
         <div className="flex items-end gap-2 pb-1">
-          <label className="flex items-center gap-2 text-sm text-slate-700">
+          <label className="flex items-center gap-2 text-label-1 text-slate-700">
             <input
               type="checkbox"
               name="isPaid"

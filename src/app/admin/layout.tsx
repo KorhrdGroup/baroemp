@@ -20,13 +20,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     return (
       <div className="flex min-h-screen items-center justify-center bg-slate-50 p-6">
         <div className="max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-          <h1 className="text-lg font-semibold text-slate-900">접근 권한이 없습니다</h1>
-          <p className="mt-2 text-sm text-slate-500">
+          <h1 className="text-body-1 font-semibold text-slate-900">접근 권한이 없습니다</h1>
+          <p className="mt-2 text-label-1 text-slate-500">
             관리자(ADMIN) 권한이 있는 계정으로 로그인해야 이 페이지에 접근할 수 있습니다.
           </p>
           <Link
             href="/"
-            className="mt-6 inline-block rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+            className="mt-6 inline-block rounded-md bg-slate-900 px-4 py-2 text-label-1 font-medium text-white hover:bg-slate-700"
           >
             홈으로 돌아가기
           </Link>

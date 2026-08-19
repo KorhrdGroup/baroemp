@@ -63,13 +63,13 @@ export function ResumeTemplatePicker({
             {selected === template.id && (
               <CheckCircle2 className="absolute right-4 top-4 size-5 text-brand-blue-500" />
             )}
-            <p className="text-base font-bold text-slate-900">{template.name}</p>
-            <p className="mt-2 text-[13px] leading-6 text-slate-500">{template.description}</p>
+            <p className="text-body-2 font-bold text-slate-900">{template.name}</p>
+            <p className="mt-2 text-label-1 text-slate-500">{template.description}</p>
           </button>
         ))}
       </div>
 
-      {error && <p className="mt-4 text-sm text-rose-500">{error}</p>}
+      {error && <p className="mt-4 text-label-1 text-rose-500">{error}</p>}
 
       <div className="mt-8 flex justify-end">
         <Button size="lg" onClick={handleCreate} disabled={!selected || isCreating} className="min-w-[200px]">

@@ -22,16 +22,16 @@ export default function AdminConsultationsPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                <TableHead className="text-[12px]">상담ID</TableHead>
-                <TableHead className="text-[12px]">회원ID</TableHead>
-                <TableHead className="text-[12px]">채널</TableHead>
-                <TableHead className="text-[12px]">상태</TableHead>
-                <TableHead className="text-[12px]">희망일시</TableHead>
+                <TableHead className="text-label-2">상담ID</TableHead>
+                <TableHead className="text-label-2">회원ID</TableHead>
+                <TableHead className="text-label-2">채널</TableHead>
+                <TableHead className="text-label-2">상태</TableHead>
+                <TableHead className="text-label-2">희망일시</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {mockConsultations.map((item) => (
-                <TableRow key={item.id} className="text-[13px]">
+                <TableRow key={item.id} className="text-label-1">
                   <TableCell className="font-semibold">{item.id}</TableCell>
                   <TableCell className="text-slate-500">{item.userId}</TableCell>
                   <TableCell>{item.channel}</TableCell>

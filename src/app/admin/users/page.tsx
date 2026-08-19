@@ -107,9 +107,9 @@ export default async function AdminUsersPage({
           name="q"
           defaultValue={sp.q ?? ""}
           placeholder="이름 / 이메일 / 전화번호 검색"
-          className="h-9 w-56 rounded-lg border border-slate-200 px-3 text-[13px]"
+          className="h-9 w-56 rounded-lg border border-slate-200 px-3 text-label-1"
         />
-        <select name="grade" defaultValue={sp.grade ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-[13px]">
+        <select name="grade" defaultValue={sp.grade ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-label-1">
           <option value="">Lead 전체</option>
           {(["A", "B", "C", "D"] as LeadGrade[]).map((g) => (
             <option key={g} value={g}>
@@ -120,7 +120,7 @@ export default async function AdminUsersPage({
         <select
           name="employmentStatus"
           defaultValue={sp.employmentStatus ?? ""}
-          className="h-9 rounded-lg border border-slate-200 px-2 text-[13px]"
+          className="h-9 rounded-lg border border-slate-200 px-2 text-label-1"
         >
           <option value="">취업상태 전체</option>
           {Object.entries(EMPLOYMENT_STATUS_LABELS).map(([code, label]) => (
@@ -129,7 +129,7 @@ export default async function AdminUsersPage({
             </option>
           ))}
         </select>
-        <select name="region" defaultValue={sp.region ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-[13px]">
+        <select name="region" defaultValue={sp.region ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-label-1">
           <option value="">지역 전체</option>
           {Object.entries(REGION_LABELS).map(([code, label]) => (
             <option key={code} value={code}>
@@ -137,22 +137,22 @@ export default async function AdminUsersPage({
             </option>
           ))}
         </select>
-        <select name="marketing" defaultValue={sp.marketing ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-[13px]">
+        <select name="marketing" defaultValue={sp.marketing ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-label-1">
           <option value="">마케팅동의 전체</option>
           <option value="y">동의</option>
           <option value="n">미동의</option>
         </select>
-        <button type="submit" className="h-9 rounded-lg bg-brand-blue-500 px-4 text-[13px] font-medium text-white">
+        <button type="submit" className="h-9 rounded-lg bg-brand-blue-500 px-4 text-label-1 font-medium text-white">
           검색
         </button>
         {(sp.q || sp.grade || sp.employmentStatus || sp.region || sp.marketing) && (
-          <Link href="/admin/users" className="text-[12px] text-slate-400 hover:text-brand-blue-600">
+          <Link href="/admin/users" className="text-label-2 text-slate-400 hover:text-brand-blue-600">
             초기화
           </Link>
         )}
       </form>
 
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-[12px]">
+      <div className="mb-3 flex flex-wrap items-center gap-2 text-label-2">
         <span className="text-slate-400">지원금 세그먼트:</span>
         {(Object.keys(SEGMENT_LABEL) as SupportSegment[]).map((key) => (
           <Link
@@ -173,24 +173,24 @@ export default async function AdminUsersPage({
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                <TableHead className="text-[12px]">이름</TableHead>
-                <TableHead className="text-[12px]">이메일</TableHead>
-                <TableHead className="text-[12px]">전화번호</TableHead>
-                <TableHead className="text-[12px]">지역</TableHead>
-                <TableHead className="text-[12px]">취업상태</TableHead>
-                <TableHead className="text-[12px]">Primary Interest</TableHead>
-                <TableHead className="text-[12px]">유입</TableHead>
-                <TableHead className="text-[12px]">가입일</TableHead>
-                <TableHead className="text-[12px]">지원금 관심</TableHead>
-                <TableHead className="text-[12px]">Lead</TableHead>
-                <TableHead className="text-[12px]">마케팅동의</TableHead>
+                <TableHead className="text-label-2">이름</TableHead>
+                <TableHead className="text-label-2">이메일</TableHead>
+                <TableHead className="text-label-2">전화번호</TableHead>
+                <TableHead className="text-label-2">지역</TableHead>
+                <TableHead className="text-label-2">취업상태</TableHead>
+                <TableHead className="text-label-2">Primary Interest</TableHead>
+                <TableHead className="text-label-2">유입</TableHead>
+                <TableHead className="text-label-2">가입일</TableHead>
+                <TableHead className="text-label-2">지원금 관심</TableHead>
+                <TableHead className="text-label-2">Lead</TableHead>
+                <TableHead className="text-label-2">마케팅동의</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredUsers.map((user) => {
                 const summary = supportSummaries.get(user.id);
                 return (
-                  <TableRow key={user.id} className="text-[13px]">
+                  <TableRow key={user.id} className="text-label-1">
                     <TableCell className="font-semibold">
                       <Link
                         href={`/admin/users/${user.id}`}
@@ -205,7 +205,7 @@ export default async function AdminUsersPage({
                         {user.isTestAccount && (
                           <Badge
                             variant="outline"
-                            className="rounded-md border-amber-300 text-[10px] text-amber-600"
+                            className="rounded-md border-amber-300 text-label-2 text-amber-600"
                             title="0015_seed.sql / e2e·smoke 스크립트가 생성한 개발용 테스트 계정입니다. 운영 전 정리 대상 (@baro.local)."
                           >
                             테스트
@@ -222,22 +222,22 @@ export default async function AdminUsersPage({
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
                         {summary?.hasCompletedAssessment && (
-                          <Badge variant="outline" className="rounded-md text-[11px]">
+                          <Badge variant="outline" className="rounded-md text-label-2">
                             검사완료
                           </Badge>
                         )}
                         {summary && summary.highEligibilityCount > 0 && (
-                          <Badge className="rounded-md border-0 bg-emerald-50 text-[11px] text-emerald-700">
+                          <Badge className="rounded-md border-0 bg-emerald-50 text-label-2 text-emerald-700">
                             높은가능성 {summary.highEligibilityCount}
                           </Badge>
                         )}
                         {summary?.trainingInterest && (
-                          <Badge variant="outline" className="rounded-md text-[11px]">
+                          <Badge variant="outline" className="rounded-md text-label-2">
                             #교육지원관심
                           </Badge>
                         )}
                         {summary?.regionalInterest && (
-                          <Badge variant="outline" className="rounded-md text-[11px]">
+                          <Badge variant="outline" className="rounded-md text-label-2">
                             #지역지원관심
                           </Badge>
                         )}
@@ -252,7 +252,7 @@ export default async function AdminUsersPage({
                     <TableCell>
                       <Badge
                         className={cn(
-                          "rounded-md border-0 px-2 text-[11px] font-bold",
+                          "rounded-md border-0 px-2 text-label-2 font-bold",
                           gradeClass(user.leadGrade),
                         )}
                       >
@@ -263,9 +263,9 @@ export default async function AdminUsersPage({
                     <TableCell>
                       {/* 스펙 31번: Lead Grade와 별개 축으로 표시 - "영업 가능"이 아니라 "마케팅 수신 동의" 상태만 표시한다. */}
                       {user.marketingConsent ? (
-                        <Badge className="rounded-md border-0 bg-brand-blue-50 text-[11px] text-brand-blue-700">동의</Badge>
+                        <Badge className="rounded-md border-0 bg-brand-blue-50 text-label-2 text-brand-blue-700">동의</Badge>
                       ) : (
-                        <Badge variant="outline" className="rounded-md text-[11px] text-slate-400">
+                        <Badge variant="outline" className="rounded-md text-label-2 text-slate-400">
                           미동의
                         </Badge>
                       )}
@@ -286,7 +286,7 @@ export default async function AdminUsersPage({
       </div>
 
       {totalPages > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-2 text-[13px]">
+        <div className="mt-4 flex items-center justify-center gap-2 text-label-1">
           <Link
             href={buildHref(sp, { page: String(Math.max(1, page - 1)) })}
             className={cn(

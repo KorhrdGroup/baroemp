@@ -39,7 +39,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               type="button"
               onClick={() => onChange({ type: "SINGLE", optionId: option.id })}
               className={cn(
-                "flex min-h-14 items-center justify-between rounded-xl border px-5 py-4 text-left text-base font-medium transition-colors",
+                "flex min-h-14 items-center justify-between rounded-xl border px-5 py-4 text-left text-body-2 font-medium transition-colors",
                 selected
                   ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
@@ -69,7 +69,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 onChange({ type: "MULTI", optionIds: next });
               }}
               className={cn(
-                "flex min-h-14 items-center justify-between rounded-xl border px-5 py-4 text-left text-base font-medium transition-colors",
+                "flex min-h-14 items-center justify-between rounded-xl border px-5 py-4 text-left text-body-2 font-medium transition-colors",
                 selected
                   ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
@@ -87,7 +87,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             </button>
           );
         })}
-        <p className="text-sm text-slate-400">해당하는 항목이 없다면 선택하지 않고 다음으로 넘어가셔도 됩니다.</p>
+        <p className="text-label-1 text-slate-400">해당하는 항목이 없다면 선택하지 않고 다음으로 넘어가셔도 됩니다.</p>
       </div>
     );
   }
@@ -108,7 +108,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 type="button"
                 onClick={() => onChange({ type: "SCALE", value: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-2xl border text-lg font-bold transition-colors",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-2xl border text-body-1 font-bold transition-colors",
                   selected
                     ? "border-brand-blue-500 bg-brand-blue-500 text-white"
                     : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
@@ -119,7 +119,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             );
           })}
         </div>
-        <div className="mt-2 flex justify-between text-[13px] text-slate-400">
+        <div className="mt-2 flex justify-between text-label-1 text-slate-400">
           <span>{min}점</span>
           <span>{max}점</span>
         </div>
@@ -138,10 +138,10 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
           inputMode="numeric"
           value={current ?? ""}
           onChange={(e) => onChange({ type: "NUMBER", value: e.target.value === "" ? undefined : Number(e.target.value) })}
-          className="h-14 w-40 rounded-xl border border-border px-4 text-lg font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+          className="h-14 w-40 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
           placeholder="0"
         />
-        {unit && <span className="text-base text-slate-500">{unit}</span>}
+        {unit && <span className="text-body-2 text-slate-500">{unit}</span>}
       </div>
     );
   }
@@ -153,7 +153,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
         value={current ?? ""}
         onChange={(e) => onChange({ type: "TEXT", value: e.target.value })}
         rows={3}
-        className="w-full rounded-xl border border-border px-4 py-3 text-base text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+        className="w-full rounded-xl border border-border px-4 py-3 text-body-2 text-slate-800 focus:border-brand-blue-400 focus:outline-none"
         placeholder="자유롭게 입력해주세요."
       />
     );
@@ -171,7 +171,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               type="button"
               onClick={() => onChange({ type: "REGION", sido: code })}
               className={cn(
-                "min-h-12 rounded-xl border px-3 py-3 text-[15px] font-medium transition-colors",
+                "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
                 selected
                   ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
@@ -198,7 +198,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             onChange={(e) =>
               onChange({ type: "SALARY_RANGE", min: e.target.value === "" ? undefined : Number(e.target.value), max: current.max })
             }
-            className="h-14 w-32 rounded-xl border border-border px-4 text-lg font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+            className="h-14 w-32 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
             placeholder="최소"
           />
           <span className="text-slate-400">~</span>
@@ -210,11 +210,11 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             onChange={(e) =>
               onChange({ type: "SALARY_RANGE", min: current.min, max: e.target.value === "" ? undefined : Number(e.target.value) })
             }
-            className="h-14 w-32 rounded-xl border border-border px-4 text-lg font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+            className="h-14 w-32 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
             placeholder="최대"
           />
         </div>
-        <span className="text-base text-slate-500">만원</span>
+        <span className="text-body-2 text-slate-500">만원</span>
       </div>
     );
   }

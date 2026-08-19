@@ -22,18 +22,18 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
   return (
     <div className="space-y-6">
       <div className="rounded-3xl border border-border bg-gradient-to-br from-brand-blue-50 to-white p-6 sm:p-8">
-        <p className="text-sm font-semibold text-brand-blue-600">검사 결과</p>
-        <h1 className="mt-1 text-2xl font-extrabold text-slate-900 sm:text-3xl">회원님께 잘 맞는 직업을 찾았습니다</h1>
-        <p className="mt-3 max-w-2xl text-[15px] leading-7 text-slate-600">{result.summary}</p>
+        <p className="text-label-1 font-semibold text-brand-blue-600">검사 결과</p>
+        <h1 className="mt-1 text-title-2 font-extrabold text-slate-900 sm:text-headline-3">회원님께 잘 맞는 직업을 찾았습니다</h1>
+        <p className="mt-3 max-w-2xl text-body-2-reading text-slate-600">{result.summary}</p>
         {top && (
-          <p className="mt-3 text-[13px] text-slate-400">
+          <p className="mt-3 text-label-1 text-slate-400">
             추천 가능성은 확정적인 취업 결과가 아닌, 성향·조건 기반의 참고 정보입니다.
           </p>
         )}
         {result.generatedTags.length > 0 && (
           <div className="mt-5 flex flex-wrap gap-2">
             {result.generatedTags.map((tag) => (
-              <span key={tag} className="rounded-full bg-white px-3 py-1 text-[13px] font-medium text-brand-blue-600 ring-1 ring-brand-blue-100">
+              <span key={tag} className="rounded-full bg-white px-3 py-1 text-label-1 font-medium text-brand-blue-600 ring-1 ring-brand-blue-100">
                 {tag}
               </span>
             ))}
@@ -65,8 +65,8 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
 
       {contentRecs.length > 0 && (
         <div className="rounded-2xl border border-border bg-white p-6 sm:p-8">
-          <h2 className="text-lg font-bold text-slate-900">이 결과를 바탕으로 도움이 될 콘텐츠</h2>
-          <p className="mt-1 text-[13px] text-slate-400">회원님의 Career Profile을 기반으로 추천된 콘텐츠입니다.</p>
+          <h2 className="text-body-1 font-bold text-slate-900">이 결과를 바탕으로 도움이 될 콘텐츠</h2>
+          <p className="mt-1 text-label-1 text-slate-400">회원님의 Career Profile을 기반으로 추천된 콘텐츠입니다.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {contentRecs.map((content) => (
               <TrackedLink
@@ -85,8 +85,8 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
                 }
                 className="rounded-xl border border-border p-4 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/40"
               >
-                <p className="text-[15px] font-semibold text-slate-800">{content.title}</p>
-                <p className="mt-1 text-[13px] text-slate-500">{content.summary ?? content.shortDescription}</p>
+                <p className="text-body-2 font-semibold text-slate-800">{content.title}</p>
+                <p className="mt-1 text-label-1 text-slate-500">{content.summary ?? content.shortDescription}</p>
               </TrackedLink>
             ))}
           </div>
@@ -96,7 +96,7 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
       <div className="flex flex-col gap-3 rounded-2xl bg-slate-50 p-6 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-3">
           <UserPlus className="size-5 text-brand-blue-600" />
-          <p className="text-[14px] text-slate-600">
+          <p className="text-label-1 text-slate-600">
             {isAnonymous
               ? "회원가입하면 이 결과를 저장하고 1:1 상담을 받을 수 있어요."
               : "마이페이지에서 이 결과를 언제든 다시 확인할 수 있어요."}

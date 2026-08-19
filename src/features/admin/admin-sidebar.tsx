@@ -16,8 +16,8 @@ export function AdminSidebar() {
           <Briefcase className="size-4" />
         </span>
         <div>
-          <p className="text-sm font-bold text-slate-900">한평생 오피스</p>
-          <p className="text-[11px] text-slate-400">바로취업 Admin</p>
+          <p className="text-label-1 font-bold text-slate-900">한평생 오피스</p>
+          <p className="text-label-2 text-slate-400">바로취업 Admin</p>
         </div>
       </div>
 
@@ -34,7 +34,7 @@ export function AdminSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors",
+                "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-label-1 font-medium transition-colors",
                 active
                   ? "bg-brand-blue-50 text-brand-blue-600"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",

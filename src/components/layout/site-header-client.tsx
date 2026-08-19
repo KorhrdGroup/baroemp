@@ -35,7 +35,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
             <span className="flex size-9 items-center justify-center rounded-xl bg-brand-blue-500 text-white">
               <Briefcase className="size-5" />
             </span>
-            <span className="text-lg font-bold tracking-tight text-brand-navy-900">
+            <span className="text-body-1 font-bold tracking-tight text-brand-navy-900">
               {siteConfig.name}
             </span>
           </Link>
@@ -46,7 +46,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-[15px] font-medium text-slate-700 transition-colors hover:bg-brand-blue-50 hover:text-brand-blue-600",
+                  "rounded-lg px-3 py-2 text-body-2 font-medium text-slate-700 transition-colors hover:bg-brand-blue-50 hover:text-brand-blue-600",
                 )}
               >
                 {item.label}
@@ -108,7 +108,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                     key={item.href}
                     href={item.href}
                     onClick={() => setMobileOpen(false)}
-                    className="rounded-lg px-3 py-3 text-base font-medium text-slate-700 hover:bg-brand-blue-50"
+                    className="rounded-lg px-3 py-3 text-body-2 font-medium text-slate-700 hover:bg-brand-blue-50"
                   >
                     {item.label}
                   </Link>

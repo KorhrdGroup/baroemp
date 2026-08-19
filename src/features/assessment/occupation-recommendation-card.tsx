@@ -57,44 +57,44 @@ export function OccupationRecommendationCard({
         <div className="flex items-center gap-4">
           <span
             className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-xl text-base font-bold",
+              "flex size-10 shrink-0 items-center justify-center rounded-xl text-body-2 font-bold",
               rank === 1 ? "bg-brand-blue-500 text-white" : "bg-slate-100 text-slate-500",
             )}
           >
             {rank}
           </span>
           <div>
-            <p className="text-lg font-bold text-slate-900 sm:text-xl">{rec.occupationName}</p>
-            <p className="mt-1 text-[13px] text-slate-400">{occupation?.category ?? "추천 직업"}</p>
+            <p className="text-body-1 font-bold text-slate-900 sm:text-title-3">{rec.occupationName}</p>
+            <p className="mt-1 text-label-1 text-slate-400">{occupation?.category ?? "추천 직업"}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn("hidden rounded-full px-3 py-1 text-[13px] font-semibold ring-1 sm:inline-flex", GRADE_STYLE[rec.grade])}>
+          <span className={cn("hidden rounded-full px-3 py-1 text-label-1 font-semibold ring-1 sm:inline-flex", GRADE_STYLE[rec.grade])}>
             {rec.grade}
           </span>
           <div className="text-right">
-            <p className="text-2xl font-extrabold text-brand-blue-600">{rec.totalScore}</p>
-            <p className="text-[11px] text-slate-400">적합도</p>
+            <p className="text-title-2 font-extrabold text-brand-blue-600">{rec.totalScore}</p>
+            <p className="text-label-2 text-slate-400">적합도</p>
           </div>
           <ChevronDown className="size-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
         </div>
       </summary>
 
       <div className="border-t border-slate-100 px-5 py-6 sm:px-7">
-        <span className={cn("inline-flex rounded-full px-3 py-1 text-[13px] font-semibold ring-1 sm:hidden", GRADE_STYLE[rec.grade])}>
+        <span className={cn("inline-flex rounded-full px-3 py-1 text-label-1 font-semibold ring-1 sm:hidden", GRADE_STYLE[rec.grade])}>
           {rec.grade}
         </span>
 
         {occupation?.description && (
-          <p className="mt-3 text-[15px] leading-7 text-slate-600">{occupation.description}</p>
+          <p className="mt-3 text-body-2-reading text-slate-600">{occupation.description}</p>
         )}
 
         {/* 세부 적합도 */}
         <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {SUBSCORES.map(({ key, label }) => (
             <div key={label}>
-              <p className="text-[12px] text-slate-400">{label}</p>
-              <p className="mt-0.5 text-lg font-bold text-slate-800">{rec[key] as number}</p>
+              <p className="text-label-2 text-slate-400">{label}</p>
+              <p className="mt-0.5 text-body-1 font-bold text-slate-800">{rec[key] as number}</p>
               <Progress value={rec[key] as number} className="mt-1 h-1.5" />
             </div>
           ))}
@@ -103,14 +103,14 @@ export function OccupationRecommendationCard({
         {/* 현재 준비도 */}
         <div className="mt-6 rounded-xl bg-brand-blue-50/60 p-4">
           <div className="flex items-center justify-between">
-            <p className="flex items-center gap-1.5 text-[14px] font-semibold text-brand-blue-700">
+            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
               <GraduationCap className="size-4" /> 현재 준비도
             </p>
-            <p className="text-lg font-bold text-brand-blue-700">{rec.readinessScore}점</p>
+            <p className="text-body-1 font-bold text-brand-blue-700">{rec.readinessScore}점</p>
           </div>
           <Progress value={rec.readinessScore} className="mt-2 h-2" />
           {rec.readinessProjection.length > 0 && (
-            <ul className="mt-3 space-y-1 text-[13px] text-brand-blue-800">
+            <ul className="mt-3 space-y-1 text-label-1 text-brand-blue-800">
               {rec.readinessProjection.map((p) => (
                 <li key={p.contentId}>
                   {p.contentTitle} 완료 시 예상 준비도 <strong>{p.projectedScore}점</strong>
@@ -123,10 +123,10 @@ export function OccupationRecommendationCard({
         {/* 왜 추천되었는지 / 고려할 점 */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div>
-            <p className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-700">
+            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
               <Sparkles className="size-4 text-brand-blue-500" /> 왜 추천되었나요
             </p>
-            <ul className="mt-2 space-y-1.5 text-[14px] leading-6 text-slate-600">
+            <ul className="mt-2 space-y-1.5 text-label-1 text-slate-600">
               {rec.reasons.map((reason) => (
                 <li key={reason}>· {reason}</li>
               ))}
@@ -134,10 +134,10 @@ export function OccupationRecommendationCard({
           </div>
           {rec.risks.length > 0 && (
             <div>
-              <p className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-700">
+              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                 <AlertTriangle className="size-4 text-amber-500" /> 고려할 점
               </p>
-              <ul className="mt-2 space-y-1.5 text-[14px] leading-6 text-slate-600">
+              <ul className="mt-2 space-y-1.5 text-label-1 text-slate-600">
                 {rec.risks.map((risk) => (
                   <li key={risk}>· {risk}</li>
                 ))}
@@ -149,19 +149,19 @@ export function OccupationRecommendationCard({
         {/* 부족한 조건 / 필요한 자격 */}
         {(rec.missingConditions.length > 0 || rec.requiredQualifications.length > 0) && (
           <div className="mt-6">
-            <p className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-700">
+            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
               <ListChecks className="size-4 text-slate-500" /> 필요한 자격 · 부족한 조건
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {rec.requiredQualifications.map((q) => (
-                <span key={q} className="rounded-full bg-slate-100 px-3 py-1 text-[13px] text-slate-600">
+                <span key={q} className="rounded-full bg-slate-100 px-3 py-1 text-label-1 text-slate-600">
                   {q}
                 </span>
               ))}
               {rec.missingConditions
                 .filter((c) => !rec.requiredQualifications.includes(c))
                 .map((c) => (
-                  <span key={c} className="rounded-full bg-amber-50 px-3 py-1 text-[13px] text-amber-700">
+                  <span key={c} className="rounded-full bg-amber-50 px-3 py-1 text-label-1 text-amber-700">
                     {c}
                   </span>
                 ))}
@@ -171,8 +171,8 @@ export function OccupationRecommendationCard({
 
         {/* Career Path */}
         <div className="mt-6">
-          <p className="text-[14px] font-semibold text-slate-700">예상 준비경로</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-[13px] text-slate-500">
+          <p className="text-label-1 font-semibold text-slate-700">예상 준비경로</p>
+          <div className="mt-2 flex flex-wrap items-center gap-2 text-label-1 text-slate-500">
             {["현재 상태", "필요 자격", "실무 준비", "이력서/면접", "채용지원"].map((step, i) => (
               <span key={step} className="flex items-center gap-2">
                 <span className="rounded-full border border-border px-3 py-1.5">{step}</span>
@@ -184,13 +184,13 @@ export function OccupationRecommendationCard({
 
         {/* 관련 채용공고 */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-border px-4 py-4">
-          <div className="text-[14px] text-slate-600">
+          <div className="text-label-1 text-slate-600">
             <p className="flex items-center gap-1.5">
               <MapPin className="size-4 text-slate-400" />
               {regionLabel ? `${regionLabel} 지역 ` : ""}현재 관련 채용공고 <strong className="text-slate-800">{postingCount}건</strong>
             </p>
             {jobCount && jobCount.highMatchCount > 0 && (
-              <p className="mt-1 text-[13px] text-brand-blue-600">
+              <p className="mt-1 text-label-1 text-brand-blue-600">
                 회원님의 조건과 높은 일치 <strong>{jobCount.highMatchCount}건</strong>
               </p>
             )}
@@ -202,7 +202,7 @@ export function OccupationRecommendationCard({
             userId={userId}
             anonymousId={anonymousId}
             href={rec.jobCategoryCode ? `/jobs?category=${rec.jobCategoryCode}` : "/jobs"}
-            className="rounded-lg bg-brand-blue-500 px-4 py-2 text-[13px] font-semibold text-white hover:bg-brand-blue-600"
+            className="rounded-lg bg-brand-blue-500 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
           >
             채용공고 보기
           </TrackedLink>
@@ -212,14 +212,14 @@ export function OccupationRecommendationCard({
         <div className="mt-3 flex flex-wrap justify-end gap-4">
           <Link
             href={`/career-gap?occupation=${rec.occupationId}`}
-            className="flex items-center gap-1.5 text-[13px] font-semibold text-brand-blue-600 hover:underline"
+            className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-600 hover:underline"
           >
             <GraduationCap className="size-4" />
             이 직업 취업 준비도 분석
           </Link>
           <Link
             href={`/resume/new?occupation=${rec.occupationId}&title=${encodeURIComponent(rec.occupationName)}`}
-            className="flex items-center gap-1.5 text-[13px] font-semibold text-brand-blue-600 hover:underline"
+            className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-600 hover:underline"
           >
             <FileText className="size-4" />
             {rec.occupationName} 취업용 이력서 준비하기

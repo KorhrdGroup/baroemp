@@ -47,38 +47,38 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             {typeof matchScore === "number" && (
-              <Badge className="rounded-full border-0 bg-brand-blue-500 text-[11px] font-semibold text-white">
+              <Badge className="rounded-full border-0 bg-brand-blue-500 text-label-2 font-semibold text-white">
                 매칭 {matchScore}점
               </Badge>
             )}
             {job.isBeginnerFriendly && (
-              <Badge className="rounded-full border-0 bg-emerald-50 text-[11px] font-semibold text-emerald-700">
+              <Badge className="rounded-full border-0 bg-emerald-50 text-label-2 font-semibold text-emerald-700">
                 신입가능
               </Badge>
             )}
             {midlifeRecommended && (
-              <Badge className="rounded-full border-0 bg-amber-50 text-[11px] font-semibold text-amber-700">
+              <Badge className="rounded-full border-0 bg-amber-50 text-label-2 font-semibold text-amber-700">
                 중장년 추천
               </Badge>
             )}
             {requiresQualification && (
-              <Badge variant="outline" className="rounded-full text-[11px] text-slate-500">
+              <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
                 자격 관련
               </Badge>
             )}
             {closingSoon && (
-              <Badge className="rounded-full border-0 bg-rose-50 text-[11px] font-semibold text-rose-600">
+              <Badge className="rounded-full border-0 bg-rose-50 text-label-2 font-semibold text-rose-600">
                 마감임박
               </Badge>
             )}
           </div>
           <Link href={`/jobs/${job.id}`} className="mt-2 block">
-            <h3 className="line-clamp-2 text-lg font-bold text-slate-900 hover:text-brand-blue-600">{job.title}</h3>
+            <h3 className="line-clamp-2 text-body-1 font-bold text-slate-900 hover:text-brand-blue-600">{job.title}</h3>
           </Link>
-          <p className="mt-1 text-sm font-medium text-slate-500">{job.companyName}</p>
+          <p className="mt-1 text-label-1 font-medium text-slate-500">{job.companyName}</p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-2">
-          <p className="text-right text-base font-bold text-brand-blue-600">{job.salaryText ?? "협의 가능"}</p>
+          <p className="text-right text-body-2 font-bold text-brand-blue-600">{job.salaryText ?? "협의 가능"}</p>
           <JobBookmarkButton
             jobId={job.id}
             jobCategory={job.jobCategory}
@@ -88,7 +88,7 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-4 text-sm text-slate-500">
+      <div className="mt-4 flex flex-wrap items-center gap-4 text-label-1 text-slate-500">
         <span className="flex items-center gap-1">
           <MapPin className="size-4" />
           {job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
@@ -106,20 +106,20 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
       </div>
 
       {matchReasonLabel && (
-        <p className="mt-3 rounded-lg bg-brand-blue-50/70 px-3 py-2 text-[13px] text-brand-blue-700">
+        <p className="mt-3 rounded-lg bg-brand-blue-50/70 px-3 py-2 text-label-1 text-brand-blue-700">
           {matchReasonLabel}
         </p>
       )}
 
-      <p className="mt-3 line-clamp-2 flex-1 text-sm leading-6 text-slate-600">{job.description}</p>
+      <p className="mt-3 line-clamp-2 flex-1 text-label-1 text-slate-600">{job.description}</p>
 
       <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-        <span className="text-xs text-slate-400">
+        <span className="text-label-2 text-slate-400">
           {job.externalSource ? `출처 · ${job.externalSource === "work24" ? "고용24" : job.externalSource}` : "직접등록"}
         </span>
         <Link
           href={`/jobs/${job.id}`}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-[13px] font-semibold text-white hover:bg-slate-700"
+          className="rounded-lg bg-slate-900 px-4 py-2 text-label-1 font-semibold text-white hover:bg-slate-700"
         >
           상세보기
         </Link>

@@ -151,11 +151,11 @@ export function CoverLetterEditor({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-border">
         <div className="min-w-0 flex-1">
-          <Label className="text-xs text-slate-400">자기소개서 이름</Label>
+          <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9 max-w-xs" />
         </div>
         <div className="flex items-center gap-2">
-          {saveMessage && <span className="text-xs text-slate-400">{saveMessage}</span>}
+          {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
           <Button size="sm" onClick={() => void handleSave()} disabled={isSaving}>
             {isSaving && <Loader2 className="size-4 animate-spin" />}
             저장
@@ -165,10 +165,10 @@ export function CoverLetterEditor({
 
       <Card className="rounded-2xl border-0 ring-1 ring-border">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-semibold text-slate-500">
+          <CardTitle className="text-label-1 font-semibold text-slate-500">
             {experienceBank.length > 0 ? "경험뱅크에서 문항별로 사용할 경험을 선택하세요" : "경험뱅크가 비어있어요"}
           </CardTitle>
-          <Link href="/experience-bank" className="text-[13px] font-medium text-brand-blue-600 hover:underline">
+          <Link href="/experience-bank" className="text-label-1 font-medium text-brand-blue-600 hover:underline">
             경험뱅크 관리 →
           </Link>
         </CardHeader>
@@ -179,11 +179,11 @@ export function CoverLetterEditor({
           <Card key={section._key} className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader className="flex flex-row items-start justify-between gap-3">
               <div className="flex-1">
-                <p className="text-xs font-semibold text-slate-400">문항 {idx + 1}</p>
+                <p className="text-label-2 font-semibold text-slate-400">문항 {idx + 1}</p>
                 <Input
                   value={section.question}
                   onChange={(e) => updateSection(section._key, { question: e.target.value })}
-                  className="mt-1 h-9 border-0 px-0 text-base font-bold shadow-none focus-visible:ring-0"
+                  className="mt-1 h-9 border-0 px-0 text-body-2 font-bold shadow-none focus-visible:ring-0"
                 />
               </div>
               <div className="flex items-center gap-1">
@@ -205,7 +205,7 @@ export function CoverLetterEditor({
                 rows={6}
                 placeholder="이 질문에 대한 답변을 작성해주세요."
               />
-              <div className="flex items-center justify-between text-[12px] text-slate-400">
+              <div className="flex items-center justify-between text-label-2 text-slate-400">
                 <span>
                   {section.content?.length ?? 0}
                   {section.characterLimit ? ` / ${section.characterLimit}자` : "자"}
@@ -237,7 +237,7 @@ export function CoverLetterEditor({
                   {experienceBank.map((exp) => {
                     const checked = (selectedExperiences[section._key] ?? []).includes(exp.id);
                     return (
-                      <label key={exp.id} className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[12px] ring-1 ring-border">
+                      <label key={exp.id} className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-label-2 ring-1 ring-border">
                         <Checkbox
                           checked={checked}
                           onCheckedChange={(v) =>
@@ -258,7 +258,7 @@ export function CoverLetterEditor({
               )}
 
               {suggestions[section._key] && (
-                <div className="rounded-lg bg-brand-blue-50 p-3 text-[13px]">
+                <div className="rounded-lg bg-brand-blue-50 p-3 text-label-1">
                   {suggestions[section._key].text && (
                     <>
                       <p className="whitespace-pre-line text-slate-700">{suggestions[section._key].text}</p>
@@ -310,7 +310,7 @@ export function CoverLetterEditor({
         </Button>
         <div className="flex items-center gap-3">
           {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
-          <Link href="/resume" className="text-xs text-slate-400 hover:underline">
+          <Link href="/resume" className="text-label-2 text-slate-400 hover:underline">
             목록으로
           </Link>
         </div>

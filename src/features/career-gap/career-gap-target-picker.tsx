@@ -72,7 +72,7 @@ export function CareerGapTargetPicker({
     <div className="space-y-6">
       {suggested.length > 0 && (
         <div className="rounded-2xl border border-border bg-white p-5">
-          <p className="flex items-center gap-1.5 text-[14px] font-semibold text-slate-700">
+          <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
             <Sparkles className="size-4 text-brand-blue-500" /> 추천 직업
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -82,14 +82,14 @@ export function CareerGapTargetPicker({
                 type="button"
                 onClick={() => selectOccupation(s.occupationId)}
                 className={cn(
-                  "rounded-full border px-4 py-2 text-[14px] font-medium transition-colors",
+                  "rounded-full border px-4 py-2 text-label-1 font-medium transition-colors",
                   occupationId === s.occupationId
                     ? "border-brand-blue-500 bg-brand-blue-500 text-white"
                     : "border-border bg-white text-slate-600 hover:border-brand-blue-300",
                 )}
               >
                 {s.occupationName}
-                <span className={cn("ml-1.5 text-[11px]", occupationId === s.occupationId ? "text-white/80" : "text-slate-400")}>
+                <span className={cn("ml-1.5 text-label-2", occupationId === s.occupationId ? "text-white/80" : "text-slate-400")}>
                   {s.source}
                 </span>
               </button>
@@ -99,7 +99,7 @@ export function CareerGapTargetPicker({
       )}
 
       <div className="rounded-2xl border border-border bg-white p-5">
-        <p className="text-[14px] font-semibold text-slate-700">직접 선택</p>
+        <p className="text-label-1 font-semibold text-slate-700">직접 선택</p>
         <div className="mt-3">
           <Select value={occupationId} onValueChange={selectOccupation}>
             <SelectTrigger className="w-full">
@@ -117,7 +117,7 @@ export function CareerGapTargetPicker({
 
         {occupationId && destinations.length > 0 && (
           <div className="mt-4">
-            <p className="mb-2 text-[13px] font-medium text-slate-500">
+            <p className="mb-2 text-label-1 font-medium text-slate-500">
               어떤 취업처를 생각하고 계세요? (선택하지 않으면 {selectedOccupation?.name} 전체로 분석해요)
             </p>
             <Select value={destinationId} onValueChange={setDestinationId}>
@@ -136,12 +136,12 @@ export function CareerGapTargetPicker({
         )}
       </div>
 
-      {error && <p className="text-[13px] text-rose-600">{error}</p>}
+      {error && <p className="text-label-1 text-rose-600">{error}</p>}
 
       <Button
         onClick={handleSubmit}
         disabled={isPending || !occupationId}
-        className="h-12 w-full rounded-xl bg-brand-blue-500 text-[15px] font-semibold hover:bg-brand-blue-600"
+        className="h-12 w-full rounded-xl bg-brand-blue-500 text-body-2 font-semibold hover:bg-brand-blue-600"
       >
         {isPending ? (
           <>

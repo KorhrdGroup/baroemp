@@ -25,9 +25,9 @@ export function EmptyState({ icon: Icon = Sparkles, title, description, action, 
       <span className="flex size-14 items-center justify-center rounded-2xl bg-white text-brand-blue-500 shadow-sm ring-1 ring-border">
         <Icon className="size-7" />
       </span>
-      <h3 className="mt-5 text-xl font-bold text-slate-900">{title}</h3>
+      <h3 className="mt-5 text-title-3 font-bold text-slate-900">{title}</h3>
       {description && (
-        <p className="mt-2 max-w-md text-[15px] leading-7 text-slate-500">{description}</p>
+        <p className="mt-2 max-w-md text-body-2-reading text-slate-500">{description}</p>
       )}
       {action && <div className="mt-6">{action}</div>}
     </div>

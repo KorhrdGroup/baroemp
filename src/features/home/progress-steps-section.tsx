@@ -19,7 +19,7 @@ export function ProgressStepsSection() {
                     {index > 0 && <span className="absolute left-0 top-1/2 h-px w-full -translate-x-full bg-border" />}
                     <span
                       className={
-                        "mx-auto flex size-9 items-center justify-center rounded-full text-sm font-bold sm:size-10 " +
+                        "mx-auto flex size-9 items-center justify-center rounded-full text-label-1 font-bold sm:size-10 " +
                         (index === 0
                           ? "bg-brand-blue-500 text-white"
                           : "bg-slate-100 text-slate-400")
@@ -28,14 +28,14 @@ export function ProgressStepsSection() {
                       {step.step}
                     </span>
                   </div>
-                  <p className="mt-2 text-sm font-semibold text-slate-800 sm:text-base">{step.title}</p>
-                  <p className="mt-0.5 hidden text-xs text-slate-400 sm:block">{step.description}</p>
+                  <p className="mt-2 text-label-1 font-semibold text-slate-800 sm:text-body-2">{step.title}</p>
+                  <p className="mt-0.5 hidden text-label-2 text-slate-400 sm:block">{step.description}</p>
                 </li>
               ))}
             </ol>
 
             <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-between">
-              <p className="text-sm text-slate-500">
+              <p className="text-label-1 text-slate-500">
                 진단부터 취업 준비 상황을 한 번에 관리하고 싶으신가요?
               </p>
               <Button className="bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
@@ -48,17 +48,17 @@ export function ProgressStepsSection() {
           </div>
 
           <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-border">
-            <p className="text-sm font-semibold text-slate-500">오늘의 추천</p>
+            <p className="text-label-1 font-semibold text-slate-500">오늘의 추천</p>
             <div className="mt-3 rounded-xl bg-brand-blue-50 p-4">
-              <p className="text-sm font-semibold text-brand-blue-700">
+              <p className="text-label-1 font-semibold text-brand-blue-700">
                 김평생님, 이런 일자리 어떠세요?
               </p>
-              <p className="mt-2 text-base font-bold text-slate-900">재가복지센터 사회복지사</p>
-              <p className="mt-1 text-sm text-slate-500">직무경력 3년 · 사례관리 담당</p>
+              <p className="mt-2 text-body-2 font-bold text-slate-900">재가복지센터 사회복지사</p>
+              <p className="mt-1 text-label-1 text-slate-500">직무경력 3년 · 사례관리 담당</p>
             </div>
             <Link
               href="/jobs"
-              className="mt-4 text-sm font-semibold text-brand-blue-600 hover:underline"
+              className="mt-4 text-label-1 font-semibold text-brand-blue-600 hover:underline"
             >
               자세히 보기
             </Link>

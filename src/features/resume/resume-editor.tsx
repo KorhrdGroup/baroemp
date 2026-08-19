@@ -212,7 +212,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
       <div className="space-y-4 print:hidden">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-border">
           <div className="min-w-0 flex-1">
-            <Label htmlFor="resume-title" className="text-xs text-slate-400">
+            <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
               이력서 이름
             </Label>
             <Input
@@ -226,7 +226,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
             <Badge variant="outline" className="rounded-full">
               완성도 {detail.resume.completeness}%
             </Badge>
-            {saveMessage && <span className="text-xs text-slate-400">{saveMessage}</span>}
+            {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
             <Button variant="outline" size="sm" onClick={handleReview} disabled={isReviewing}>
               {isReviewing ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
               AI 이력서 점검
@@ -244,7 +244,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
               ? `/career-gap?occupation=${resume.targetOccupationId}${resume.targetJobId ? `&job=${resume.targetJobId}` : ""}`
               : "/career-gap"
           }
-          className="flex h-11 items-center justify-center gap-2 rounded-xl border border-brand-blue-200 bg-brand-blue-50/60 text-[14px] font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
+          className="flex h-11 items-center justify-center gap-2 rounded-xl border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
         >
           <Target className="size-4" />
           지원직무 대비 이력서 점검
@@ -253,11 +253,11 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
         {reviewResult && (
           <Card className="rounded-2xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
             <CardHeader>
-              <CardTitle className="flex items-center justify-between text-base">
+              <CardTitle className="flex items-center justify-between text-body-2">
                 AI 점검 결과 <Badge className="bg-brand-blue-500">{reviewResult.score}점</Badge>
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-[13px]">
+            <CardContent className="space-y-2 text-label-1">
               {reviewResult.strengths.length > 0 && (
                 <div>
                   <p className="font-semibold text-emerald-700">잘 작성된 부분</p>
@@ -303,7 +303,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           {showSection("BASIC_INFO") && (
             <Card className="rounded-2xl border-0 ring-1 ring-border">
               <CardHeader>
-                <CardTitle className="text-base">기본정보</CardTitle>
+                <CardTitle className="text-body-2">기본정보</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
                 <Field label="이름">
@@ -331,7 +331,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           {showSection("SUMMARY") && (
             <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">핵심 경력 / 한 줄 소개</CardTitle>
+                <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개</CardTitle>
                 <Button variant="outline" size="sm" onClick={handleGenerateSummary} disabled={isGeneratingSummary}>
                   {isGeneratingSummary ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
                   AI로 생성
@@ -345,7 +345,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
                   rows={3}
                 />
                 {summarySuggestion && (
-                  <div className="mt-2 rounded-lg bg-brand-blue-50 p-3 text-[13px]">
+                  <div className="mt-2 rounded-lg bg-brand-blue-50 p-3 text-label-1">
                     <p className="text-slate-700">{summarySuggestion}</p>
                     <div className="mt-2 flex gap-2">
                       <Button size="sm" onClick={() => { setForm((f) => ({ ...f, summary: summarySuggestion })); setSummarySuggestion(null); }}>
@@ -364,7 +364,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           {showSection("EXPERIENCE") && (
             <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">경력</CardTitle>
+                <CardTitle className="text-body-2">경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -374,11 +374,11 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {experiences.length === 0 && <p className="text-sm text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>}
+                {experiences.length === 0 && <p className="text-label-1 text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>}
                 {experiences.map((exp, idx) => (
                   <div key={exp._key} className="space-y-2 rounded-xl bg-slate-50 p-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-slate-400">경력 {idx + 1}</p>
+                      <p className="text-label-2 font-semibold text-slate-400">경력 {idx + 1}</p>
                       <Button variant="ghost" size="sm" onClick={() => setExperiences((prev) => prev.filter((e) => e._key !== exp._key))}>
                         <Trash2 className="size-4 text-slate-400" />
                       </Button>
@@ -405,7 +405,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
                         />
                       </Field>
                     </div>
-                    <label className="flex items-center gap-2 text-[13px] text-slate-600">
+                    <label className="flex items-center gap-2 text-label-1 text-slate-600">
                       <Checkbox checked={exp.isCurrent} onCheckedChange={(v) => updateAt(setExperiences, exp._key, { isCurrent: Boolean(v) })} />
                       현재 재직중
                     </label>
@@ -426,7 +426,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
                       <RewriteButton onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")} disabled={isRewriting} />
                     </Field>
                     {rewriteTarget?.key === exp._key && (
-                      <div className="rounded-lg bg-white p-3 text-[13px] ring-1 ring-brand-blue-200">
+                      <div className="rounded-lg bg-white p-3 text-label-1 ring-1 ring-brand-blue-200">
                         <p className="text-slate-700">{rewriteTarget.text}</p>
                         <div className="mt-2 flex gap-2">
                           <Button
@@ -456,7 +456,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           {showSection("EDUCATION") && (
             <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">학력</CardTitle>
+                <CardTitle className="text-body-2">학력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -466,11 +466,11 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {educations.length === 0 && <p className="text-sm text-slate-400">최종학력 위주로 간단히 입력하셔도 됩니다.</p>}
+                {educations.length === 0 && <p className="text-label-1 text-slate-400">최종학력 위주로 간단히 입력하셔도 됩니다.</p>}
                 {educations.map((edu, idx) => (
                   <div key={edu._key} className="space-y-2 rounded-xl bg-slate-50 p-4">
                     <div className="flex items-center justify-between">
-                      <p className="text-xs font-semibold text-slate-400">학력 {idx + 1}</p>
+                      <p className="text-label-2 font-semibold text-slate-400">학력 {idx + 1}</p>
                       <Button variant="ghost" size="sm" onClick={() => setEducations((prev) => prev.filter((e) => e._key !== edu._key))}>
                         <Trash2 className="size-4 text-slate-400" />
                       </Button>
@@ -502,7 +502,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           {showSection("QUALIFICATION") && (
             <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">보유 자격</CardTitle>
+                <CardTitle className="text-body-2">보유 자격</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -512,7 +512,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {qualifications.length === 0 && <p className="text-sm text-slate-400">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
+                {qualifications.length === 0 && <p className="text-label-1 text-slate-400">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
                 {qualifications.map((q, idx) => (
                   <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-4 sm:grid-cols-4">
                     <Field label={`자격명 ${idx + 1}`}>
@@ -538,7 +538,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           {showSection("SKILLS") && (
             <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
               <CardHeader>
-                <CardTitle className="text-base">보유 스킬</CardTitle>
+                <CardTitle className="text-body-2">보유 스킬</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
@@ -582,7 +582,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           {showSection("TRAINING") && (
             <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">교육/훈련</CardTitle>
+                <CardTitle className="text-body-2">교육/훈련</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -614,7 +614,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           {(showSection("PROJECT") || showSection("ACTIVITY")) && (
             <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-base">기타 (수상/프로젝트/대외활동/봉사/외국어)</CardTitle>
+                <CardTitle className="text-body-2">기타 (수상/프로젝트/대외활동/봉사/외국어)</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -624,7 +624,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {items.length === 0 && <p className="text-sm text-slate-400">모든 사용자에게 필수는 아닙니다. 있으면 추가해주세요.</p>}
+                {items.length === 0 && <p className="text-label-1 text-slate-400">모든 사용자에게 필수는 아닙니다. 있으면 추가해주세요.</p>}
                 {items.map((item) => (
                   <div key={item._key} className="grid gap-2 rounded-xl bg-slate-50 p-4 sm:grid-cols-4">
                     <Select value={item.sectionType} onValueChange={(v) => updateAt(setItems, item._key, { sectionType: v as ResumeItemSectionType })}>
@@ -655,7 +655,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           <Button variant="ghost" size="sm" className="text-rose-500" onClick={() => void handleDelete(resume.id)}>
             <Trash2 className="size-4" /> 이력서 삭제
           </Button>
-          <Link href="/resume" className="text-xs text-slate-400 hover:underline">
+          <Link href="/resume" className="text-label-2 text-slate-400 hover:underline">
             목록으로
           </Link>
         </div>
@@ -664,7 +664,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
       <div className={activeTab === "form" ? "hidden lg:block" : "block"}>
         <div className="sticky top-4 space-y-3">
           <div className="flex items-center justify-between print:hidden">
-            <p className="text-sm font-semibold text-slate-500">미리보기</p>
+            <p className="text-label-1 font-semibold text-slate-500">미리보기</p>
             <Button variant="outline" size="sm" onClick={handlePrint}>
               <Printer className="size-4" /> PDF로 저장/인쇄
             </Button>
@@ -687,7 +687,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1">
-      <Label className="text-[12px] text-slate-500">{label}</Label>
+      <Label className="text-label-2 text-slate-500">{label}</Label>
       {children}
     </div>
   );
@@ -699,7 +699,7 @@ function RewriteButton({ onClick, disabled }: { onClick: () => void; disabled: b
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="mt-1 flex items-center gap-1 text-[12px] font-medium text-brand-blue-600 hover:underline disabled:opacity-50"
+      className="mt-1 flex items-center gap-1 text-label-2 font-medium text-brand-blue-600 hover:underline disabled:opacity-50"
     >
       {disabled ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
       AI로 다듬기

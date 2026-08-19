@@ -21,8 +21,8 @@ export function HeroIllustration() {
           <CheckCircle2 className="size-5" />
         </span>
         <div className="text-left">
-          <p className="text-xs text-slate-400">직업진단 완료</p>
-          <p className="text-sm font-semibold text-slate-800">적합도 85%</p>
+          <p className="text-label-2 text-slate-400">직업진단 완료</p>
+          <p className="text-label-1 font-semibold text-slate-800">적합도 85%</p>
         </div>
       </div>
 
@@ -31,8 +31,8 @@ export function HeroIllustration() {
           <IdCard className="size-5" />
         </span>
         <div className="text-left">
-          <p className="text-xs text-slate-400">서류 첨삭</p>
-          <p className="text-sm font-semibold text-slate-800">이력서 완성</p>
+          <p className="text-label-2 text-slate-400">서류 첨삭</p>
+          <p className="text-label-1 font-semibold text-slate-800">이력서 완성</p>
         </div>
       </div>
 
@@ -41,8 +41,8 @@ export function HeroIllustration() {
           <KeyRound className="size-5" />
         </span>
         <div className="text-left">
-          <p className="text-xs text-slate-400">전국 채용</p>
-          <p className="text-sm font-semibold text-slate-800">1,200건 매칭</p>
+          <p className="text-label-2 text-slate-400">전국 채용</p>
+          <p className="text-label-1 font-semibold text-slate-800">1,200건 매칭</p>
         </div>
       </div>
     </div>

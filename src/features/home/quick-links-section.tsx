@@ -18,10 +18,10 @@ export function QuickLinksSection() {
               <span className="flex size-11 items-center justify-center rounded-full bg-brand-blue-50 text-brand-blue-600">
                 <Icon className="size-5" />
               </span>
-              <p className="text-sm font-semibold text-slate-800">{service.title}</p>
+              <p className="text-label-1 font-semibold text-slate-800">{service.title}</p>
               <Link
                 href={service.href}
-                className="rounded-full border border-border px-4 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-brand-blue-300 hover:text-brand-blue-600"
+                className="rounded-full border border-border px-4 py-1.5 text-label-2 font-medium text-slate-600 transition-colors hover:border-brand-blue-300 hover:text-brand-blue-600"
               >
                 바로가기
               </Link>

@@ -23,7 +23,7 @@ export function RecalculateLeadButton({ userId }: { userId: string }) {
       >
         {pending ? "재계산 중..." : "Lead 점수 재계산"}
       </Button>
-      {message && <p className="text-[11px] text-slate-500">{message}</p>}
+      {message && <p className="text-label-2 text-slate-500">{message}</p>}
     </div>
   );
 }

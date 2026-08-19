@@ -64,9 +64,9 @@ export default async function CareerGapEntryPage({
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <p className="text-sm font-semibold text-brand-blue-600">취업 준비도 확인</p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">어떤 직업을 준비하고 계세요?</h1>
-        <p className="mt-2 text-[15px] leading-6 text-slate-500">
+        <p className="text-label-1 font-semibold text-brand-blue-600">취업 준비도 확인</p>
+        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">어떤 직업을 준비하고 계세요?</h1>
+        <p className="mt-2 text-body-2-reading text-slate-500">
           실제 채용공고 데이터를 바탕으로 현재 준비 상태를 확인하고, 무엇을 보완하면 지원할 수 있는 일자리가
           늘어나는지 알려드려요.
         </p>

@@ -105,7 +105,7 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
   return (
     <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-10">
       <Progress value={progressPercent} className="h-2" />
-      <div className="mt-4 flex items-center justify-between text-sm font-semibold text-brand-blue-600">
+      <div className="mt-4 flex items-center justify-between text-label-1 font-semibold text-brand-blue-600">
         <span>
           {sectionIndex + 1} / {sections.length} {section?.label}
         </span>
@@ -114,17 +114,17 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
         </span>
       </div>
 
-      <h2 className="mt-4 text-xl font-bold leading-8 text-slate-900 sm:text-2xl">
+      <h2 className="mt-4 text-title-3 font-bold text-slate-900 sm:text-title-2">
         {question.questionText}
-        {!question.required && <span className="ml-2 text-sm font-normal text-slate-400">(선택)</span>}
+        {!question.required && <span className="ml-2 text-label-1 font-normal text-slate-400">(선택)</span>}
       </h2>
-      {question.description && <p className="mt-2 text-[15px] leading-7 text-slate-500">{question.description}</p>}
+      {question.description && <p className="mt-2 text-body-2-reading text-slate-500">{question.description}</p>}
 
       <div className="mt-6">
         <QuestionRenderer question={question} value={value} onChange={handleChange} />
       </div>
 
-      {error && <p className="mt-4 text-sm font-medium text-red-500">{error}</p>}
+      {error && <p className="mt-4 text-label-1 font-medium text-red-500">{error}</p>}
 
       <div className="mt-8 flex items-center justify-between gap-3">
         <Button variant="outline" onClick={handlePrev} disabled={currentIndex === 0 || submitting} className="h-12 rounded-xl px-5">
@@ -134,7 +134,7 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
         <Button
           onClick={handleNext}
           disabled={submitting || (question.required && !canProceed)}
-          className="h-12 rounded-xl bg-brand-blue-500 px-6 text-base font-semibold hover:bg-brand-blue-600"
+          className="h-12 rounded-xl bg-brand-blue-500 px-6 text-body-2 font-semibold hover:bg-brand-blue-600"
         >
           {submitting ? (
             <Loader2 className="size-4 animate-spin" />

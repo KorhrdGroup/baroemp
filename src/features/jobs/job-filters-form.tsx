@@ -94,7 +94,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="직업명, 회사명으로 검색"
-            className="h-auto border-0 p-0 text-sm shadow-none focus-visible:ring-0"
+            className="h-auto border-0 p-0 text-label-1 shadow-none focus-visible:ring-0"
           />
         </div>
 

@@ -50,7 +50,7 @@ export default async function AdminAssessmentDetailPage({
 
   return (
     <div className="space-y-4">
-      <Link href="/admin/assessments" className="inline-flex items-center gap-1 text-[13px] text-brand-blue-600 hover:underline">
+      <Link href="/admin/assessments" className="inline-flex items-center gap-1 text-label-1 text-brand-blue-600 hover:underline">
         <ChevronLeft className="size-4" /> 검사 목록
       </Link>
       <AssessmentDetailTabs assessment={assessment} resultRows={resultRows} analytics={analytics} />

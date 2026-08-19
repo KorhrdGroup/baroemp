@@ -19,12 +19,12 @@ export function CoreServicesSection() {
                 <Icon className="size-6" />
               </span>
               <div>
-                <p className="text-[15px] font-semibold text-slate-900">{service.title}</p>
-                <p className="mt-1 text-xs leading-5 text-slate-500">{service.description}</p>
+                <p className="text-body-2 font-semibold text-slate-900">{service.title}</p>
+                <p className="mt-1 text-label-2 text-slate-500">{service.description}</p>
               </div>
               <Badge
                 className={cn(
-                  "rounded-full border-0 px-2.5 py-0.5 text-[11px] font-semibold",
+                  "rounded-full border-0 px-2.5 py-0.5 text-label-2 font-semibold",
                   service.badge === "무료" && "bg-brand-blue-50 text-brand-blue-600",
                   service.badge === "유료" && "bg-amber-50 text-amber-600",
                   service.badge === "준비중" && "bg-slate-100 text-slate-500",

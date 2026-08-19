@@ -48,6 +48,43 @@
   --radius-2xl: 14px;
   --radius-3xl: 16px;
   --radius-4xl: 16px;
+
+  /* HDS 타이포 스케일 (Figma: HDS / Typography) */
+  --text-display-1: 72px;
+  --text-display-1--line-height: 100.8px;
+  --text-display-2: 64px;
+  --text-display-2--line-height: 89.6px;
+  --text-headline-1: 42px;
+  --text-headline-1--line-height: 50.4px;
+  --text-headline-2: 36px;
+  --text-headline-2--line-height: 43.2px;
+  --text-headline-3: 28px;
+  --text-headline-3--line-height: 33.6px;
+  --text-title-1: 26px;
+  --text-title-1--line-height: 31.2px;
+  --text-title-2: 24px;
+  --text-title-2--line-height: 28.8px;
+  --text-title-3: 20px;
+  --text-title-3--line-height: 24px;
+  --text-body-1: 18px;
+  --text-body-1--line-height: 21.6px;
+  --text-body-1-reading: 18px;
+  --text-body-1-reading--line-height: 25.2px;
+  --text-body-2: 16px;
+  --text-body-2--line-height: 19.2px;
+  --text-body-2-reading: 16px;
+  --text-body-2-reading--line-height: 22.4px;
+  --text-label-1: 14px;
+  --text-label-1--line-height: 19.6px;
+  --text-label-2: 12px;
+  --text-label-2--line-height: 16.8px;
+
+  /* 굵기 체계. Semibold(600)는 HDS에 없는 프로젝트 확장값 */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
   /* HDS Atomic - 디자인 시스템 정식 이름 */
   --color-atomic-mono-50: var(--atomic-mono-50);
   --color-atomic-mono-100: var(--atomic-mono-100);
@@ -129,6 +166,9 @@
   --sidebar-accent-foreground: var(--atomic-mono-50);
   --sidebar-border: var(--atomic-blue-800);
   --sidebar-ring: var(--atomic-blue-500);
+
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
 
   /* HDS Atomic 팔레트 (Figma: HDS / Atomic) */
   --atomic-mono-50: #FAFAFA;

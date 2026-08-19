@@ -41,7 +41,7 @@ function ChipToggle({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-full border px-3.5 py-1.5 text-[13px] font-medium transition-colors",
+        "rounded-full border px-3.5 py-1.5 text-label-1 font-medium transition-colors",
         selected
           ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
           : "border-border text-slate-600 hover:border-brand-blue-300",
@@ -60,43 +60,43 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
   return (
     <form action={formAction} className="space-y-8">
       {state.success && (
-        <div className="rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-700" role="status">
+        <div className="rounded-lg bg-emerald-50 px-3 py-2.5 text-label-1 text-emerald-700" role="status">
           변경사항이 저장되었습니다.
         </div>
       )}
       {state.error && (
-        <div className="rounded-lg bg-red-50 px-3 py-2.5 text-sm text-red-600" role="alert">
+        <div className="rounded-lg bg-red-50 px-3 py-2.5 text-label-1 text-red-600" role="alert">
           {state.error}
         </div>
       )}
 
       <section className="space-y-4">
-        <h2 className="text-base font-bold text-slate-900">내 정보</h2>
+        <h2 className="text-body-2 font-bold text-slate-900">내 정보</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="name" className="mb-1.5">
               이름
             </Label>
             <Input id="name" name="name" defaultValue={profile.name} required />
-            {state.fieldErrors?.name && <p className="mt-1 text-xs text-red-600">{state.fieldErrors.name}</p>}
+            {state.fieldErrors?.name && <p className="mt-1 text-label-2 text-red-600">{state.fieldErrors.name}</p>}
           </div>
           <div>
             <Label htmlFor="phone" className="mb-1.5">
               휴대전화번호
             </Label>
             <Input id="phone" name="phone" type="tel" defaultValue={profile.phone} placeholder="010-1234-5678" />
-            {state.fieldErrors?.phone && <p className="mt-1 text-xs text-red-600">{state.fieldErrors.phone}</p>}
+            {state.fieldErrors?.phone && <p className="mt-1 text-label-2 text-red-600">{state.fieldErrors.phone}</p>}
           </div>
           <div>
             <Label className="mb-1.5">이메일</Label>
             <Input value={profile.email ?? ""} disabled />
-            <p className="mt-1 text-xs text-slate-400">이메일은 변경할 수 없습니다.</p>
+            <p className="mt-1 text-label-2 text-slate-400">이메일은 변경할 수 없습니다.</p>
           </div>
         </div>
       </section>
 
       <section className="space-y-4 border-t border-slate-100 pt-6">
-        <h2 className="text-base font-bold text-slate-900">취업 프로필</h2>
+        <h2 className="text-body-2 font-bold text-slate-900">취업 프로필</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -107,7 +107,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
               id="employmentStatus"
               name="employmentStatus"
               defaultValue={careerProfile?.employmentStatus ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
             >
               <option value="">선택 안함</option>
               {Object.entries(EMPLOYMENT_STATUS_LABELS).map(([code, label]) => (
@@ -126,7 +126,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
               id="region"
               name="region"
               defaultValue={careerProfile?.region ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
             >
               <option value="">선택 안함</option>
               {Object.entries(REGION_LABELS).map(([code, label]) => (
@@ -145,7 +145,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
               id="desiredStartTiming"
               name="desiredStartTiming"
               defaultValue={careerProfile?.desiredStartTiming ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-sm"
+              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
             >
               <option value="">선택 안함</option>
               {Object.entries(DESIRED_START_TIMING_LABELS).map(([code, label]) => (
@@ -233,7 +233,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
           ))}
         </div>
 
-        <label className="flex items-center gap-2 text-sm text-slate-700">
+        <label className="flex items-center gap-2 text-label-1 text-slate-700">
           <Checkbox name="isOpenToTraining" defaultChecked={careerProfile?.isOpenToTraining ?? false} />
           직업훈련·교육 과정에 참여할 의향이 있어요
         </label>

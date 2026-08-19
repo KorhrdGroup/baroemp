@@ -14,7 +14,7 @@ export function PopularJobsSection() {
         action={
           <Link
             href="/jobs"
-            className="flex items-center gap-1 text-sm font-semibold text-brand-blue-600 hover:underline"
+            className="flex items-center gap-1 text-label-1 font-semibold text-brand-blue-600 hover:underline"
           >
             전체 직업 보기
             <ArrowRight className="size-4" />
@@ -32,7 +32,7 @@ export function PopularJobsSection() {
             <div className="flex items-start justify-between gap-3">
               <div className="flex flex-wrap gap-1.5">
                 {role.isBeginnerFriendly && (
-                  <Badge className="rounded-full border-0 bg-brand-blue-50 text-[11px] font-semibold text-brand-blue-600">
+                  <Badge className="rounded-full border-0 bg-brand-blue-50 text-label-2 font-semibold text-brand-blue-600">
                     신입가능
                   </Badge>
                 )}
@@ -40,7 +40,7 @@ export function PopularJobsSection() {
                   <Badge
                     key={tag}
                     variant="outline"
-                    className="rounded-full text-[11px] font-medium text-slate-500"
+                    className="rounded-full text-label-2 font-medium text-slate-500"
                   >
                     {tag}
                   </Badge>
@@ -48,18 +48,18 @@ export function PopularJobsSection() {
               </div>
               <div className="flex items-center gap-1 text-amber-500">
                 <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                <span className="text-xs font-semibold text-slate-600">
+                <span className="text-label-2 font-semibold text-slate-600">
                   {role.midlifeRecommendationScore.toFixed(1)}
                 </span>
               </div>
             </div>
 
-            <h3 className="mt-4 text-lg font-bold text-slate-900 group-hover:text-brand-blue-600">
+            <h3 className="mt-4 text-body-1 font-bold text-slate-900 group-hover:text-brand-blue-600">
               {role.name}
             </h3>
-            <p className="mt-1 text-sm leading-6 text-slate-500">{role.shortDescription}</p>
+            <p className="mt-1 text-label-1 text-slate-500">{role.shortDescription}</p>
 
-            <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
+            <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-label-1">
               <span className="text-slate-500">
                 채용중 <span className="font-semibold text-slate-800">{role.openPositionCount.toLocaleString()}건</span>
               </span>

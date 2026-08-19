@@ -125,27 +125,27 @@ function ResumeTemplateFormDialog({
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[12px] text-slate-500">코드</Label>
+              <Label className="text-label-2 text-slate-500">코드</Label>
               <Input className="mt-1" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} disabled={Boolean(template)} />
             </div>
             <div>
-              <Label className="text-[12px] text-slate-500">대상 유형</Label>
+              <Label className="text-label-2 text-slate-500">대상 유형</Label>
               <Input className="mt-1" value={targetType} onChange={(e) => setTargetType(e.target.value)} />
             </div>
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">이름</Label>
+            <Label className="text-label-2 text-slate-500">이름</Label>
             <Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">설명</Label>
+            <Label className="text-label-2 text-slate-500">설명</Label>
             <Textarea className="mt-1" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">Section 구성 (체크 + 순서)</Label>
+            <Label className="text-label-2 text-slate-500">Section 구성 (체크 + 순서)</Label>
             <div className="mt-2 space-y-1.5">
               {sections.map((section) => (
-                <div key={section} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-1.5 text-[13px]">
+                <div key={section} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-1.5 text-label-1">
                   <span>{section}</span>
                   <div className="flex items-center gap-1">
                     <Button variant="ghost" size="sm" onClick={() => moveSection(section, -1)}>
@@ -167,14 +167,14 @@ function ResumeTemplateFormDialog({
                   key={s}
                   type="button"
                   onClick={() => toggleSection(s)}
-                  className="rounded-full border border-dashed border-border px-2.5 py-1 text-[12px] text-slate-500 hover:border-brand-blue-300"
+                  className="rounded-full border border-dashed border-border px-2.5 py-1 text-label-2 text-slate-500 hover:border-brand-blue-300"
                 >
                   + {s}
                 </button>
               ))}
             </div>
           </div>
-          {error && <p className="text-sm text-rose-500">{error}</p>}
+          {error && <p className="text-label-1 text-rose-500">{error}</p>}
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit} disabled={isSaving}>
@@ -211,21 +211,21 @@ function ResumeTemplatesTab({ initialTemplates }: { initialTemplates: ResumeTemp
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-              <TableHead className="text-[12px]">이름</TableHead>
-              <TableHead className="text-[12px]">코드</TableHead>
-              <TableHead className="text-[12px]">Section</TableHead>
-              <TableHead className="text-[12px]">상태</TableHead>
-              <TableHead className="text-[12px] text-right">관리</TableHead>
+              <TableHead className="text-label-2">이름</TableHead>
+              <TableHead className="text-label-2">코드</TableHead>
+              <TableHead className="text-label-2">Section</TableHead>
+              <TableHead className="text-label-2">상태</TableHead>
+              <TableHead className="text-label-2 text-right">관리</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {templates.map((t) => (
-              <TableRow key={t.id} className="text-[13px]">
+              <TableRow key={t.id} className="text-label-1">
                 <TableCell className="font-semibold">{t.name}</TableCell>
                 <TableCell className="text-slate-500">{t.code}</TableCell>
                 <TableCell className="max-w-[260px] truncate text-slate-500">{t.sections.join(", ")}</TableCell>
                 <TableCell>
-                  <Badge variant={t.status === "active" ? "default" : "outline"} className="rounded-full text-[11px]">
+                  <Badge variant={t.status === "active" ? "default" : "outline"} className="rounded-full text-label-2">
                     {t.status === "active" ? "활성" : "비활성"}
                   </Badge>
                 </TableCell>
@@ -312,24 +312,24 @@ function CoverLetterTemplateFormDialog({
         <div className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <Label className="text-[12px] text-slate-500">코드</Label>
+              <Label className="text-label-2 text-slate-500">코드</Label>
               <Input className="mt-1" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} disabled={Boolean(template)} />
             </div>
             <div>
-              <Label className="text-[12px] text-slate-500">대상 유형</Label>
+              <Label className="text-label-2 text-slate-500">대상 유형</Label>
               <Input className="mt-1" value={targetType} onChange={(e) => setTargetType(e.target.value)} />
             </div>
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">이름</Label>
+            <Label className="text-label-2 text-slate-500">이름</Label>
             <Input className="mt-1" value={name} onChange={(e) => setName(e.target.value)} />
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">설명</Label>
+            <Label className="text-label-2 text-slate-500">설명</Label>
             <Textarea className="mt-1" rows={2} value={description} onChange={(e) => setDescription(e.target.value)} />
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">문항</Label>
+            <Label className="text-label-2 text-slate-500">문항</Label>
             <div className="mt-2 space-y-2">
               {questions.map((q, idx) => (
                 <div key={idx} className="space-y-1.5 rounded-lg bg-slate-50 p-3">
@@ -362,7 +362,7 @@ function CoverLetterTemplateFormDialog({
               <Plus className="size-3.5" /> 문항 추가
             </Button>
           </div>
-          {error && <p className="text-sm text-rose-500">{error}</p>}
+          {error && <p className="text-label-1 text-rose-500">{error}</p>}
         </div>
         <DialogFooter>
           <Button onClick={handleSubmit} disabled={isSaving}>
@@ -399,21 +399,21 @@ function CoverLetterTemplatesTab({ initialTemplates }: { initialTemplates: Cover
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-              <TableHead className="text-[12px]">이름</TableHead>
-              <TableHead className="text-[12px]">코드</TableHead>
-              <TableHead className="text-[12px]">문항수</TableHead>
-              <TableHead className="text-[12px]">상태</TableHead>
-              <TableHead className="text-[12px] text-right">관리</TableHead>
+              <TableHead className="text-label-2">이름</TableHead>
+              <TableHead className="text-label-2">코드</TableHead>
+              <TableHead className="text-label-2">문항수</TableHead>
+              <TableHead className="text-label-2">상태</TableHead>
+              <TableHead className="text-label-2 text-right">관리</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {templates.map((t) => (
-              <TableRow key={t.id} className="text-[13px]">
+              <TableRow key={t.id} className="text-label-1">
                 <TableCell className="font-semibold">{t.name}</TableCell>
                 <TableCell className="text-slate-500">{t.code}</TableCell>
                 <TableCell>{t.defaultQuestions.length}개</TableCell>
                 <TableCell>
-                  <Badge variant={t.status === "active" ? "default" : "outline"} className="rounded-full text-[11px]">
+                  <Badge variant={t.status === "active" ? "default" : "outline"} className="rounded-full text-label-2">
                     {t.status === "active" ? "활성" : "비활성"}
                   </Badge>
                 </TableCell>
@@ -446,8 +446,8 @@ function UsageTab({ stats }: { stats: ResumeUsageStats }) {
           { label: "공고연결 이력서", value: stats.jobLinkedResumes },
         ].map((s) => (
           <div key={s.label} className="rounded-xl bg-white p-4 ring-1 ring-slate-200">
-            <p className="text-[12px] text-slate-400">{s.label}</p>
-            <p className="mt-1 text-xl font-bold text-slate-900">{s.value}</p>
+            <p className="text-label-2 text-slate-400">{s.label}</p>
+            <p className="mt-1 text-title-3 font-bold text-slate-900">{s.value}</p>
           </div>
         ))}
       </div>
@@ -455,13 +455,13 @@ function UsageTab({ stats }: { stats: ResumeUsageStats }) {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-              <TableHead className="text-[12px]">Template</TableHead>
-              <TableHead className="text-[12px]">작성 건수</TableHead>
+              <TableHead className="text-label-2">Template</TableHead>
+              <TableHead className="text-label-2">작성 건수</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {stats.byTemplate.map((row) => (
-              <TableRow key={row.templateId ?? "none"} className="text-[13px]">
+              <TableRow key={row.templateId ?? "none"} className="text-label-1">
                 <TableCell className="font-semibold">{row.templateName}</TableCell>
                 <TableCell>{row.count}건</TableCell>
               </TableRow>

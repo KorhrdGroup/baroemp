@@ -152,8 +152,8 @@ export default async function MyPage() {
     <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">마이페이지</h1>
-          <p className="mt-2 text-[15px] text-slate-500">
+          <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">마이페이지</h1>
+          <p className="mt-2 text-body-2 text-slate-500">
             {profile.name ?? "회원"}님의 Career Profile과 활동 이력을 확인할 수 있는 공간입니다.
           </p>
         </div>
@@ -169,11 +169,11 @@ export default async function MyPage() {
         {/* A. 내 정보 */}
         <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-1.5 text-base">
+            <CardTitle className="flex items-center gap-1.5 text-body-2">
               <UserRound className="size-4" /> 내 정보
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-[14px] text-slate-600">
+          <CardContent className="space-y-2 text-label-1 text-slate-600">
             <p>
               <span className="text-slate-400">이름</span> · {profile.name ?? "-"}
             </p>
@@ -192,11 +192,11 @@ export default async function MyPage() {
         {/* B. 취업 프로필 */}
         <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-1.5 text-base">
+            <CardTitle className="flex items-center gap-1.5 text-body-2">
               <Briefcase className="size-4" /> 취업 프로필
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-2 text-[14px] text-slate-600">
+          <CardContent className="space-y-2 text-label-1 text-slate-600">
             <p>
               <span className="text-slate-400">취업상태</span> · {labelEmploymentStatus(careerProfile?.employmentStatus)}
             </p>
@@ -224,7 +224,7 @@ export default async function MyPage() {
             {lead && (
               <p className="pt-1">
                 <span className="text-slate-400">Lead</span> ·{" "}
-                <Badge className="rounded-md border-0 bg-brand-blue-50 text-[11px] text-brand-blue-700">
+                <Badge className="rounded-md border-0 bg-brand-blue-50 text-label-2 text-brand-blue-700">
                   {lead.score.grade}등급 {lead.score.totalScore}점
                 </Badge>
               </p>
@@ -236,9 +236,9 @@ export default async function MyPage() {
         {latestResult ? (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="text-base">최근 직업진단 결과</CardTitle>
+              <CardTitle className="text-body-2">최근 직업진단 결과</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-[14px] text-slate-600">
+            <CardContent className="space-y-3 text-label-1 text-slate-600">
               <p className="text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</p>
               <div className="space-y-1.5">
                 {latestResult.recommendations.slice(0, 3).map((rec, i) => (
@@ -266,9 +266,9 @@ export default async function MyPage() {
         ) : (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="text-base">직업진단</CardTitle>
+              <CardTitle className="text-body-2">직업진단</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-[14px] text-slate-600">
+            <CardContent className="space-y-3 text-label-1 text-slate-600">
               <p>아직 직업진단을 받지 않았어요. 몇 가지 질문으로 나에게 맞는 직업을 찾아드려요.</p>
               <Button className="w-full bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
                 <Link href="/assessment">무료 직업진단 시작</Link>
@@ -281,9 +281,9 @@ export default async function MyPage() {
         {jobData.recommended.length > 0 && (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
             <CardHeader>
-              <CardTitle className="text-base">맞춤 채용공고</CardTitle>
+              <CardTitle className="text-body-2">맞춤 채용공고</CardTitle>
             </CardHeader>
-            <CardContent className="grid gap-2 text-[14px] text-slate-600 sm:grid-cols-2">
+            <CardContent className="grid gap-2 text-label-1 text-slate-600 sm:grid-cols-2">
               {jobData.recommended.map((job) => (
                 <Link
                   key={job.id}
@@ -301,9 +301,9 @@ export default async function MyPage() {
         {jobData.bookmarked.length > 0 && (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="text-base">찜한 채용공고</CardTitle>
+              <CardTitle className="text-body-2">찜한 채용공고</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1.5 text-[14px] text-slate-600">
+            <CardContent className="space-y-1.5 text-label-1 text-slate-600">
               {jobData.bookmarked.map((job) => (
                 <Link
                   key={job.id}
@@ -321,9 +321,9 @@ export default async function MyPage() {
         {jobData.recentlyViewed.length > 0 && (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="text-base">최근 본 채용공고</CardTitle>
+              <CardTitle className="text-body-2">최근 본 채용공고</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1.5 text-[14px] text-slate-600">
+            <CardContent className="space-y-1.5 text-label-1 text-slate-600">
               {jobData.recentlyViewed.map((job) => (
                 <Link
                   key={job.id}
@@ -341,12 +341,12 @@ export default async function MyPage() {
         {jobData.applyHistory.length > 0 && (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
             <CardHeader>
-              <CardTitle className="flex items-center gap-1.5 text-base">
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <Briefcase className="size-4" /> 지원 페이지로 이동한 공고
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1.5 text-[14px] text-slate-600">
-              <p className="text-[12px] text-slate-400">
+            <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+              <p className="text-label-2 text-slate-400">
                 아래 공고는 지원 페이지로 이동한 이력입니다. 실제 지원 완료 여부는 각 사이트에서 확인해주세요.
               </p>
               {jobData.applyHistory.map(({ job, occurredAt }) => (
@@ -369,15 +369,15 @@ export default async function MyPage() {
         {/* D-2. 이력서/자기소개서 (스펙 51번) */}
         <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-1.5 text-base">
+            <CardTitle className="flex items-center gap-1.5 text-body-2">
               <FileText className="size-4" /> 이력서 · 자기소개서
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-[14px] text-slate-600">
+          <CardContent className="space-y-3 text-label-1 text-slate-600">
             {detail.resumeSummary.primaryResume ? (
               <div className="rounded-lg bg-slate-50 px-3 py-2.5">
                 <p className="font-medium text-slate-700">{detail.resumeSummary.primaryResume.title}</p>
-                <p className="mt-1 text-[13px] text-slate-400">
+                <p className="mt-1 text-label-1 text-slate-400">
                   완성도 {detail.resumeSummary.primaryResume.completeness}% · 최근수정{" "}
                   {detail.resumeSummary.primaryResume.updatedAt.slice(0, 10)}
                 </p>
@@ -386,7 +386,7 @@ export default async function MyPage() {
               <p>아직 작성한 이력서가 없어요. 보유하신 정보를 불러와 빠르게 작성해보세요.</p>
             )}
             {detail.resumeSummary.coverLetterCount > 0 && (
-              <p className="text-[13px] text-slate-400">
+              <p className="text-label-1 text-slate-400">
                 자기소개서 {detail.resumeSummary.coverLetterCount}건 · 최근작성{" "}
                 {detail.resumeSummary.lastCoverLetterUpdatedAt?.slice(0, 10) ?? "-"}
               </p>
@@ -407,11 +407,11 @@ export default async function MyPage() {
         {/* D-3. 취업 준비도 (스펙 37번) */}
         <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
           <CardHeader>
-            <CardTitle className="flex items-center gap-1.5 text-base">
+            <CardTitle className="flex items-center gap-1.5 text-body-2">
               <Target className="size-4" /> 취업 준비도
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 text-[14px] text-slate-600">
+          <CardContent className="space-y-3 text-label-1 text-slate-600">
             {detail.careerGapSummaries.length === 0 ? (
               <>
                 <p>아직 취업 준비도를 확인하지 않았어요. 실제 채용공고 기준으로 지금 준비 상태를 확인해보세요.</p>
@@ -430,7 +430,7 @@ export default async function MyPage() {
                       </p>
                       <span className="font-bold text-brand-blue-600">{summary.readinessScore}점</span>
                     </div>
-                    <p className="mt-1 text-[13px] text-slate-400">
+                    <p className="mt-1 text-label-1 text-slate-400">
                       {summary.topGapName ? `TOP 보완항목 · ${summary.topGapName}` : "부족 조건 없음"} · 최근분석{" "}
                       {summary.createdAt.slice(0, 10)}
                     </p>
@@ -453,11 +453,11 @@ export default async function MyPage() {
         {supportData.latestSessionId ? (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="flex items-center gap-1.5 text-base">
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <Gift className="size-4" /> 지원금 진단 결과
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-[14px] text-slate-600">
+            <CardContent className="space-y-3 text-label-1 text-slate-600">
               {supportData.latestCompletedAt && (
                 <p className="text-slate-400">검사일 · {supportData.latestCompletedAt.slice(0, 10)}</p>
               )}
@@ -472,11 +472,11 @@ export default async function MyPage() {
         ) : (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="flex items-center gap-1.5 text-base">
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <Gift className="size-4" /> 지원금 찾기
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-3 text-[14px] text-slate-600">
+            <CardContent className="space-y-3 text-label-1 text-slate-600">
               <p>아직 지원금 진단을 받지 않았어요. 몇 가지 조건만 입력하면 받을 수 있는 혜택을 찾아드려요.</p>
               <Button className="w-full bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
                 <Link href="/support">지원금 찾기 시작하기</Link>
@@ -488,9 +488,9 @@ export default async function MyPage() {
         {supportData.bookmarked.length > 0 && (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="text-base">찜한 지원제도</CardTitle>
+              <CardTitle className="text-body-2">찜한 지원제도</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1.5 text-[14px] text-slate-600">
+            <CardContent className="space-y-1.5 text-label-1 text-slate-600">
               {supportData.bookmarked.map((program) => (
                 <Link
                   key={program.id}
@@ -498,7 +498,7 @@ export default async function MyPage() {
                   className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
                 >
                   <span className="truncate font-medium text-slate-700">{program.title}</span>
-                  <Badge variant="outline" className="shrink-0 rounded-full text-[11px] text-slate-500">
+                  <Badge variant="outline" className="shrink-0 rounded-full text-label-2 text-slate-500">
                     {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
                   </Badge>
                 </Link>
@@ -510,9 +510,9 @@ export default async function MyPage() {
         {supportData.recentlyViewed.length > 0 && (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="text-base">최근 본 지원제도</CardTitle>
+              <CardTitle className="text-body-2">최근 본 지원제도</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1.5 text-[14px] text-slate-600">
+            <CardContent className="space-y-1.5 text-label-1 text-slate-600">
               {supportData.recentlyViewed.map((program) => (
                 <Link
                   key={program.id}
@@ -532,12 +532,12 @@ export default async function MyPage() {
         {supportData.applyHistory.length > 0 && (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
             <CardHeader>
-              <CardTitle className="flex items-center gap-1.5 text-base">
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <Gift className="size-4" /> 신청 페이지로 이동한 지원제도
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1.5 text-[14px] text-slate-600">
-              <p className="text-[12px] text-slate-400">
+            <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+              <p className="text-label-2 text-slate-400">
                 아래 제도는 신청 페이지로 이동한 이력입니다. 실제 신청 완료 여부는 운영기관에서 확인해주세요.
               </p>
               {supportData.applyHistory.map(({ program, occurredAt }) => (
@@ -561,11 +561,11 @@ export default async function MyPage() {
         {recommendedContents.length > 0 && (
           <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
             <CardHeader>
-              <CardTitle className="flex items-center gap-1.5 text-base">
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <GraduationCap className="size-4" /> 추천 교육·콘텐츠
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-1.5 text-[14px] text-slate-600">
+            <CardContent className="space-y-1.5 text-label-1 text-slate-600">
               {recommendedContents.slice(0, 5).map((content) => (
                 <div key={content.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                   <span className="truncate font-medium text-slate-700">{content.title}</span>
@@ -579,16 +579,16 @@ export default async function MyPage() {
         {/* G. 상담 */}
         <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
           <CardHeader>
-            <CardTitle className="flex items-center gap-1.5 text-base">
+            <CardTitle className="flex items-center gap-1.5 text-body-2">
               <MessageCircle className="size-4" /> 상담
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-1.5 text-[14px] text-slate-600">
+          <CardContent className="space-y-1.5 text-label-1 text-slate-600">
             {consultations.length > 0 ? (
               consultations.map((c) => (
                 <div key={c.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                   <span className="font-medium text-slate-700">{c.requestedTopic ?? "상담"}</span>
-                  <Badge variant="outline" className="rounded-md text-[11px]">
+                  <Badge variant="outline" className="rounded-md text-label-2">
                     {c.status}
                   </Badge>
                 </div>
