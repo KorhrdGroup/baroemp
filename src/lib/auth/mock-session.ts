@@ -13,11 +13,13 @@ export async function readMockSessionUser(): Promise<CurrentUser | null> {
   const store = await cookies();
   const email = store.get(MOCK_SESSION_COOKIE)?.value?.trim();
   if (!email) return null;
+  // 이메일이 admin으로 시작하면 관리자 화면 확인용으로 ADMIN 권한을 부여한다.
+  const isAdmin = email.toLowerCase().startsWith("admin");
   return {
-    id: "mock-user-0001",
+    id: isAdmin ? "mock-admin-0001" : "mock-user-0001",
     email,
     name: email.split("@")[0] || "테스트 사용자",
-    role: "USER",
+    role: isAdmin ? "ADMIN" : "USER",
     emailConfirmedAt: new Date().toISOString(),
   };
 }
