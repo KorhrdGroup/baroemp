@@ -47,52 +47,109 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
-  --color-brand-blue-50: var(--brand-blue-50);
-  --color-brand-blue-100: var(--brand-blue-100);
-  --color-brand-blue-500: var(--brand-blue-500);
-  --color-brand-blue-600: var(--brand-blue-600);
-  --color-brand-navy-900: var(--brand-navy-900);
+  /* HDS Atomic - 디자인 시스템 정식 이름 */
+  --color-atomic-mono-50: var(--atomic-mono-50);
+  --color-atomic-mono-100: var(--atomic-mono-100);
+  --color-atomic-mono-200: var(--atomic-mono-200);
+  --color-atomic-mono-300: var(--atomic-mono-300);
+  --color-atomic-mono-400: var(--atomic-mono-400);
+  --color-atomic-mono-500: var(--atomic-mono-500);
+  --color-atomic-mono-600: var(--atomic-mono-600);
+  --color-atomic-mono-700: var(--atomic-mono-700);
+  --color-atomic-mono-800: var(--atomic-mono-800);
+  --color-atomic-mono-900: var(--atomic-mono-900);
+  --color-atomic-blue-50: var(--atomic-blue-50);
+  --color-atomic-blue-100: var(--atomic-blue-100);
+  --color-atomic-blue-200: var(--atomic-blue-200);
+  --color-atomic-blue-300: var(--atomic-blue-300);
+  --color-atomic-blue-400: var(--atomic-blue-400);
+  --color-atomic-blue-500: var(--atomic-blue-500);
+  --color-atomic-blue-600: var(--atomic-blue-600);
+  --color-atomic-blue-700: var(--atomic-blue-700);
+  --color-atomic-blue-800: var(--atomic-blue-800);
+  --color-atomic-blue-900: var(--atomic-blue-900);
+
+  /* 기존 코드 호환: brand-blue-* -> HDS Blue */
+  --color-brand-blue-50: var(--atomic-blue-50);
+  --color-brand-blue-100: var(--atomic-blue-100);
+  --color-brand-blue-200: var(--atomic-blue-200);
+  --color-brand-blue-300: var(--atomic-blue-300);
+  --color-brand-blue-400: var(--atomic-blue-400);
+  --color-brand-blue-500: var(--atomic-blue-500);
+  --color-brand-blue-600: var(--atomic-blue-600);
+  --color-brand-blue-700: var(--atomic-blue-700);
+  --color-brand-blue-800: var(--atomic-blue-800);
+  --color-brand-blue-900: var(--atomic-blue-900);
+  --color-brand-navy-900: var(--atomic-blue-900);
+
+  /* 기존 코드 호환: slate-* -> HDS Mono */
+  --color-slate-50: var(--atomic-mono-50);
+  --color-slate-100: var(--atomic-mono-100);
+  --color-slate-200: var(--atomic-mono-200);
+  --color-slate-300: var(--atomic-mono-300);
+  --color-slate-400: var(--atomic-mono-400);
+  --color-slate-500: var(--atomic-mono-500);
+  --color-slate-600: var(--atomic-mono-600);
+  --color-slate-700: var(--atomic-mono-700);
+  --color-slate-800: var(--atomic-mono-800);
+  --color-slate-900: var(--atomic-mono-900);
 }
 
 :root {
   --background: oklch(1 0 0);
-  --foreground: oklch(0.21 0.02 264);
+  --foreground: var(--atomic-mono-900);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.21 0.02 264);
+  --card-foreground: var(--atomic-mono-900);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.21 0.02 264);
-  --primary: oklch(0.56 0.19 262);
-  --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.96 0.02 250);
-  --secondary-foreground: oklch(0.32 0.05 262);
-  --muted: oklch(0.97 0.01 250);
-  --muted-foreground: oklch(0.5 0.02 260);
-  --accent: oklch(0.94 0.03 250);
-  --accent-foreground: oklch(0.32 0.08 262);
+  --popover-foreground: var(--atomic-mono-900);
+  --primary: var(--atomic-blue-500);
+  --primary-foreground: #FFFFFF;
+  --secondary: var(--atomic-mono-100);
+  --secondary-foreground: var(--atomic-mono-800);
+  --muted: var(--atomic-mono-100);
+  --muted-foreground: var(--atomic-mono-500);
+  --accent: var(--atomic-blue-50);
+  --accent-foreground: var(--atomic-blue-700);
   --destructive: oklch(0.6 0.22 25);
-  --border: oklch(0.91 0.015 255);
-  --input: oklch(0.91 0.015 255);
-  --ring: oklch(0.62 0.15 262);
-  --chart-1: oklch(0.56 0.19 262);
+  --border: var(--atomic-mono-200);
+  --input: var(--atomic-mono-200);
+  --ring: var(--atomic-blue-500);
+  --chart-1: var(--atomic-blue-500);
   --chart-2: oklch(0.68 0.15 200);
   --chart-3: oklch(0.75 0.15 90);
   --chart-4: oklch(0.65 0.2 30);
   --chart-5: oklch(0.55 0.1 320);
   --radius: 0.85rem;
-  --sidebar: oklch(0.19 0.03 262);
-  --sidebar-foreground: oklch(0.93 0.01 255);
-  --sidebar-primary: oklch(0.56 0.19 262);
-  --sidebar-primary-foreground: oklch(0.99 0 0);
-  --sidebar-accent: oklch(0.26 0.04 262);
-  --sidebar-accent-foreground: oklch(0.96 0.01 255);
-  --sidebar-border: oklch(0.28 0.03 262);
-  --sidebar-ring: oklch(0.56 0.19 262);
+  --sidebar: var(--atomic-blue-900);
+  --sidebar-foreground: var(--atomic-mono-100);
+  --sidebar-primary: var(--atomic-blue-500);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: var(--atomic-blue-800);
+  --sidebar-accent-foreground: var(--atomic-mono-50);
+  --sidebar-border: var(--atomic-blue-800);
+  --sidebar-ring: var(--atomic-blue-500);
 
-  --brand-blue-50: oklch(0.97 0.015 250);
-  --brand-blue-100: oklch(0.94 0.03 252);
-  --brand-blue-500: oklch(0.56 0.19 262);
-  --brand-blue-600: oklch(0.49 0.19 262);
-  --brand-navy-900: oklch(0.19 0.03 262);
+  /* HDS Atomic 팔레트 (Figma: HDS / Atomic) */
+  --atomic-mono-50: #FAFAFA;
+  --atomic-mono-100: #F2F2F2;
+  --atomic-mono-200: #E4E4E4;
+  --atomic-mono-300: #D0D0D0;
+  --atomic-mono-400: #B2B2B2;
+  --atomic-mono-500: #919191;
+  --atomic-mono-600: #656565;
+  --atomic-mono-700: #3D3D3D;
+  --atomic-mono-800: #1D1D1D;
+  --atomic-mono-900: #010101;
+  --atomic-blue-50: #E5EDFF;
+  --atomic-blue-100: #B2CAFF;
+  --atomic-blue-200: #7FA8FF;
+  --atomic-blue-300: #4C85FF;
+  --atomic-blue-400: #2469FF;
+  --atomic-blue-500: #0051FF;
+  --atomic-blue-600: #0049E5;
+  --atomic-blue-700: #0039B2;
+  --atomic-blue-800: #002980;
+  --atomic-blue-900: #00184D;
 }
 
 .dark {
