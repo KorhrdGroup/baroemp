@@ -40,13 +40,14 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --radius-sm: calc(var(--radius) * 0.6);
-  --radius-md: calc(var(--radius) * 0.8);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) * 1.4);
-  --radius-2xl: calc(var(--radius) * 1.8);
-  --radius-3xl: calc(var(--radius) * 2.2);
-  --radius-4xl: calc(var(--radius) * 2.6);
+  /* radius 규칙: 일반 요소 10~16px, 소형 컨트롤 4~8px */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 16px;
+  --radius-4xl: 16px;
   /* HDS Atomic - 디자인 시스템 정식 이름 */
   --color-atomic-mono-50: var(--atomic-mono-50);
   --color-atomic-mono-100: var(--atomic-mono-100);
@@ -119,7 +120,7 @@
   --chart-3: oklch(0.75 0.15 90);
   --chart-4: oklch(0.65 0.2 30);
   --chart-5: oklch(0.55 0.1 320);
-  --radius: 0.85rem;
+  --radius: 10px;
   --sidebar: var(--atomic-blue-900);
   --sidebar-foreground: var(--atomic-mono-100);
   --sidebar-primary: var(--atomic-blue-500);
