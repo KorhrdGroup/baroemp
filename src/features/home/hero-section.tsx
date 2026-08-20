@@ -25,7 +25,7 @@ export function HeroSection() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button
               size="lg"
-              className="h-12 rounded-xl bg-brand-blue-400 px-6 text-body-2 font-semibold hover:bg-brand-blue-600"
+              className="h-12 rounded-lg bg-brand-blue-400 px-6 text-body-2 font-semibold hover:bg-brand-blue-600"
               asChild
             >
               <Link href="/assessment">
@@ -36,7 +36,7 @@ export function HeroSection() {
             <Button
               size="lg"
               variant="outline"
-              className="h-12 rounded-xl border-brand-blue-200 bg-white px-6 text-body-2 font-semibold text-brand-blue-700 hover:bg-brand-blue-50"
+              className="h-12 rounded-lg border-brand-blue-200 bg-white px-6 text-body-2 font-semibold text-brand-blue-700 hover:bg-brand-blue-50"
               asChild
             >
               <Link href="/jobs">취업 가능 일자리 보기</Link>

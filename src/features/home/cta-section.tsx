@@ -30,7 +30,7 @@ export function CtaSection() {
             평균 두 달 안에 새로운 시작을 함께한 회원님들의 이야기를 들어보세요.
           </p>
           <Button
-            className="mt-6 w-fit rounded-xl bg-white text-brand-navy-900 hover:bg-slate-100"
+            className="mt-6 w-fit rounded-lg bg-white text-brand-navy-900 hover:bg-slate-100"
             asChild
           >
             <Link href="/consulting">

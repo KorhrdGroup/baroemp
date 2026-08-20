@@ -177,7 +177,7 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
           <Button
             onClick={handleNext}
             disabled={submitting || (question.required && !canProceed)}
-            className="h-14 w-full rounded-xl bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-lg bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

@@ -103,13 +103,13 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="h-11 rounded-xl" asChild>
+          <Button variant="outline" className="h-11 rounded-lg" asChild>
             <Link href="/assessment">
               <RotateCcw className="size-4" />
               다시 진단하기
             </Link>
           </Button>
-          <Button className="h-11 rounded-xl bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+          <Button className="h-11 rounded-lg bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
             <Link href="/mypage">{isAnonymous ? "회원가입하고 저장하기" : "마이페이지로 이동"}</Link>
           </Button>
         </div>

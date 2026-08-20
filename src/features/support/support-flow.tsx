@@ -397,7 +397,7 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
           size="lg"
           onClick={onStart}
           disabled={loading}
-          className="h-14 w-full rounded-xl bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
+          className="h-14 w-full rounded-lg bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
         >
           {loading ? (
             <Loader2 className="size-5 animate-spin" />

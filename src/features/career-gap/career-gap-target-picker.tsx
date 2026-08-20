@@ -141,7 +141,7 @@ export function CareerGapTargetPicker({
       <Button
         onClick={handleSubmit}
         disabled={isPending || !occupationId}
-        className="h-12 w-full rounded-xl bg-brand-blue-400 text-body-2 font-semibold hover:bg-brand-blue-600"
+        className="h-12 w-full rounded-lg bg-brand-blue-400 text-body-2 font-semibold hover:bg-brand-blue-600"
       >
         {isPending ? (
           <>
