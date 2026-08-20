@@ -250,7 +250,7 @@ function StepBody({
                 type="button"
                 onClick={() => onChange({ trainingWillingness: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-2xl border text-body-1 font-bold transition-colors",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-bold transition-colors",
                   answers.trainingWillingness === n
                     ? "border-brand-blue-400 bg-brand-blue-400 text-white"
                     : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
@@ -369,8 +369,8 @@ const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지
 function SupportIntro({ onStart, loading }: { onStart: () => void; loading: boolean }) {
   return (
     // 위저드가 페이지 폭을 직접 관리하므로 인트로는 자체 컨테이너를 갖는다.
-    <div className="mx-auto my-10 max-w-2xl rounded-3xl border border-border bg-white p-8 sm:p-12">
-      <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-blue-50 text-brand-blue-600">
+    <div className="mx-auto my-10 max-w-2xl rounded-2xl border border-border bg-white p-8 sm:p-12">
+      <span className="flex size-14 items-center justify-center rounded-xl bg-brand-blue-50 text-brand-blue-600">
         <Coins className="size-7" />
       </span>
 
@@ -410,7 +410,7 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
         </Button>
       </div>
 
-      <div className="mt-10 rounded-2xl bg-brand-blue-50/60 p-6">
+      <div className="mt-10 rounded-xl bg-brand-blue-50/60 p-6">
         <p className="text-label-1 font-bold text-brand-blue-700">이 진단으로 확인할 수 있는 것</p>
         <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {RESULT_ITEMS.map((item) => (

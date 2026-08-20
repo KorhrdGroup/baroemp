@@ -71,7 +71,7 @@ export function CareerGapTargetPicker({
   return (
     <div className="space-y-6">
       {suggested.length > 0 && (
-        <div className="rounded-2xl border border-border bg-white p-5">
+        <div className="rounded-xl border border-border bg-white p-5">
           <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
             <Sparkles className="size-4 text-brand-blue-600" /> 추천 직업
           </p>
@@ -98,7 +98,7 @@ export function CareerGapTargetPicker({
         </div>
       )}
 
-      <div className="rounded-2xl border border-border bg-white p-5">
+      <div className="rounded-xl border border-border bg-white p-5">
         <p className="text-label-1 font-semibold text-slate-700">직접 선택</p>
         <div className="mt-3">
           <Select value={occupationId} onValueChange={selectOccupation}>

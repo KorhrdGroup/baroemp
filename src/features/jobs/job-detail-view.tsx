@@ -88,7 +88,7 @@ export function JobDetailView({
         {job.companyName}
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 rounded-2xl border border-border bg-white p-6 sm:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-white p-6 sm:grid-cols-2">
         <InfoRow
           icon={MapPin}
           label="근무지역"
@@ -127,7 +127,7 @@ export function JobDetailView({
       </div>
 
       {match ? (
-        <div className="mt-8 rounded-2xl border border-border bg-white p-6">
+        <div className="mt-8 rounded-xl border border-border bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고와 내 조건 비교</h2>
           <p className="mt-1 text-label-1 text-slate-400">최근 진단 결과를 기준으로 비교했어요.</p>
           <div className="mt-4 space-y-4">
@@ -171,7 +171,7 @@ export function JobDetailView({
         </div>
       ) : (
         !hasCareerSignal && (
-          <div className="mt-8 rounded-2xl border border-dashed border-border bg-brand-blue-50/40 p-6 text-center">
+          <div className="mt-8 rounded-xl border border-dashed border-border bg-brand-blue-50/40 p-6 text-center">
             <p className="text-label-1 text-slate-600">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
             <Link
               href="/assessment"
@@ -184,7 +184,7 @@ export function JobDetailView({
       )}
 
       {isAuthenticated && requirementComparison && requirementComparison.length > 0 && (
-        <div className="mt-8 rounded-2xl border border-border bg-white p-6">
+        <div className="mt-8 rounded-xl border border-border bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고 요구조건과 내 준비상태</h2>
           <p className="mt-1 text-label-1 text-slate-400">이 공고 원문에서 확인된 요구조건을 회원님의 Career DB와 비교했어요.</p>
           <div className="mt-4 space-y-2">
@@ -220,7 +220,7 @@ export function JobDetailView({
       )}
 
       {recommendedContents.length > 0 && (
-        <div className="mt-8 rounded-2xl border border-border bg-white p-6">
+        <div className="mt-8 rounded-xl border border-border bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고에 필요한 준비</h2>
           <p className="mt-1 text-label-1 text-slate-400">이 공고와 관련된 자격/교육 과정이에요.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">

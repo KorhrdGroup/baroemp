@@ -21,7 +21,7 @@ export function AuthCard({
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8">
+        <div className="rounded-xl border border-slate-200 bg-white p-6 sm:p-8">
           <div className="mb-6 text-center">
             <h1 className="text-title-3 font-bold text-slate-900">{title}</h1>
             {description && <p className="mt-2 text-label-1 text-slate-500">{description}</p>}

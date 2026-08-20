@@ -117,7 +117,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 type="button"
                 onClick={() => onChange({ type: "SCALE", value: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-2xl border text-body-1 font-bold transition-colors",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-bold transition-colors",
                   selected
                     ? "border-brand-blue-400 bg-brand-blue-400 text-white"
                     : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",

@@ -113,7 +113,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
   return (
     <div className="space-y-6">
       {/* 헤더 */}
-      <div className="rounded-3xl border border-border bg-gradient-to-br from-brand-blue-50 to-white p-6 sm:p-8">
+      <div className="rounded-2xl border border-border bg-gradient-to-br from-brand-blue-50 to-white p-6 sm:p-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">취업 준비도 확인</p>
         <h1 className="mt-1 text-title-2 font-extrabold text-slate-900 sm:text-headline-3">{targetLabel} 취업 준비도</h1>
 
@@ -141,7 +141,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
 
       {/* Section 5 하이라이트: 한 가지를 보완한다면 */}
       {result.topPriorityItem && (
-        <div className="rounded-2xl border border-brand-blue-200 bg-brand-blue-50/60 p-6">
+        <div className="rounded-xl border border-brand-blue-200 bg-brand-blue-50/60 p-6">
           <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
             <Target className="size-4" /> 한 가지를 보완한다면
           </p>
@@ -164,7 +164,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
 
       {/* Section 1: 이미 잘 준비된 항목 */}
       {result.wellPreparedItems.length > 0 && (
-        <div className="rounded-2xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-white p-6">
           <h2 className="flex items-center gap-1.5 text-body-1 font-bold text-slate-900">
             <CheckCircle2 className="size-5 text-emerald-500" /> 이미 잘 준비된 항목
           </h2>
@@ -181,7 +181,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
       )}
 
       {/* Section 2: 보완하면 좋은 항목 */}
-      <div className="rounded-2xl border border-border bg-white p-6">
+      <div className="rounded-xl border border-border bg-white p-6">
         <h2 className="flex items-center gap-1.5 text-body-1 font-bold text-slate-900">
           <AlertTriangle className="size-5 text-amber-500" /> 보완하면 좋은 항목
         </h2>
@@ -206,7 +206,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
 
       {/* 복수 조건 Simulation */}
       {result.multiConditionSimulations.length > 0 && (
-        <div className="rounded-2xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-white p-6">
           <h2 className="text-body-2 font-bold text-slate-900">여러 조건을 함께 준비하면</h2>
           <div className="mt-3 space-y-1.5">
             {result.multiConditionSimulations.map((sim) => (
@@ -226,7 +226,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
 
       {/* Section 3: 추가 준비 추천 */}
       {(result.recommendations.length > 0 || result.resumeGapNotes.length > 0 || result.coverLetterGapNotes.length > 0) && (
-        <div className="rounded-2xl border border-border bg-white p-6">
+        <div className="rounded-xl border border-border bg-white p-6">
           <h2 className="flex items-center gap-1.5 text-body-1 font-bold text-slate-900">
             <GraduationCap className="size-5 text-brand-blue-600" /> 추가 준비 추천
           </h2>
@@ -281,7 +281,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
       )}
 
       {/* Section 4: 지금 지원 가능한 채용공고 */}
-      <div className="rounded-2xl border border-border bg-white p-6">
+      <div className="rounded-xl border border-border bg-white p-6">
         <h2 className="flex items-center gap-1.5 text-body-1 font-bold text-slate-900">
           <Briefcase className="size-5 text-slate-500" /> 지금 지원 가능한 채용공고
         </h2>

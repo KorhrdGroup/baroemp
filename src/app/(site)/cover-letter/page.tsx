@@ -29,7 +29,7 @@ export default async function CoverLetterListPage() {
 
       <div className="mt-10 space-y-3">
         {coverLetters.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+          <div className="rounded-xl border border-dashed border-border bg-white p-10 text-center">
             <p className="text-label-1 text-slate-500">아직 작성한 자기소개서가 없어요.</p>
           </div>
         ) : (
@@ -37,7 +37,7 @@ export default async function CoverLetterListPage() {
             <Link
               key={cl.id}
               href={`/cover-letter/${cl.id}/edit`}
-              className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
+              className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
             >
               <div>
                 <p className="text-body-2 font-semibold text-slate-900">{cl.title}</p>

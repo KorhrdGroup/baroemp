@@ -32,7 +32,7 @@ export async function ProgressStepsSection() {
         />
 
         <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-          <div className="rounded-2xl bg-white p-6 ring-1 ring-border sm:p-8">
+          <div className="rounded-xl bg-white p-6 ring-1 ring-border sm:p-8">
             {user && (
               <div className="mb-8">
                 <div className="flex items-center justify-between text-label-1">
@@ -111,7 +111,7 @@ export async function ProgressStepsSection() {
             </div>
           </div>
 
-          <div className="flex flex-col rounded-2xl bg-white p-6 ring-1 ring-border">
+          <div className="flex flex-col rounded-xl bg-white p-6 ring-1 ring-border">
             <p className="text-label-1 font-semibold text-slate-500">오늘의 추천</p>
             {recommended ? (
               <>

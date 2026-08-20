@@ -39,7 +39,7 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
   return (
     <div
       className={cn(
-        "flex h-full flex-col rounded-2xl border border-border bg-white p-5",
+        "flex h-full flex-col rounded-xl border border-border bg-white p-5",
         className,
       )}
     >

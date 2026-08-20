@@ -46,7 +46,7 @@ export default async function ResumeListPage() {
       <div className="mt-10">
         <h2 className="text-body-1 font-bold text-slate-900">내 이력서 ({resumes.length})</h2>
         {resumes.length === 0 ? (
-          <div className="mt-4 rounded-2xl border border-dashed border-border bg-white p-10 text-center">
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-10 text-center">
             <FileText className="mx-auto size-8 text-slate-300" />
             <p className="mt-3 text-label-1 text-slate-500">아직 작성한 이력서가 없어요. 새 이력서를 만들어보세요.</p>
           </div>
@@ -56,7 +56,7 @@ export default async function ResumeListPage() {
               <Link
                 key={resume.id}
                 href={`/resume/${resume.id}/edit`}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export default async function ResumeListPage() {
       <div className="mt-10">
         <h2 className="text-body-1 font-bold text-slate-900">내 자기소개서 ({coverLetters.length})</h2>
         {coverLetters.length === 0 ? (
-          <div className="mt-4 rounded-2xl border border-dashed border-border bg-white p-8 text-center">
+          <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-8 text-center">
             <p className="text-label-1 text-slate-500">아직 작성한 자기소개서가 없어요.</p>
             <Link href="/cover-letter/new" className="mt-3 inline-block text-label-1 font-semibold text-brand-blue-600 hover:underline">
               자기소개서 작성하기 →
@@ -96,7 +96,7 @@ export default async function ResumeListPage() {
               <Link
                 key={cl.id}
                 href={`/cover-letter/${cl.id}/edit`}
-                className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
+                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
               >
                 <div>
                   <p className="text-body-2 font-semibold text-slate-900">{cl.title}</p>

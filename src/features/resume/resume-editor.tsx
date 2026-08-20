@@ -210,7 +210,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
   return (
     <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
       <div className="space-y-4 print:hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-4 ring-1 ring-border">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
           <div className="min-w-0 flex-1">
             <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
               이력서 이름
@@ -251,7 +251,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
         </Link>
 
         {reviewResult && (
-          <Card className="rounded-2xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
+          <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-body-2">
                 AI 점검 결과 <Badge className="bg-brand-blue-400">{reviewResult.score}점</Badge>
@@ -301,7 +301,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
 
         <div className={activeTab === "preview" ? "hidden lg:block" : "block"}>
           {showSection("BASIC_INFO") && (
-            <Card className="rounded-2xl border-0 ring-1 ring-border">
+            <Card className="rounded-xl border-0 ring-1 ring-border">
               <CardHeader>
                 <CardTitle className="text-body-2">기본정보</CardTitle>
               </CardHeader>
@@ -329,7 +329,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           )}
 
           {showSection("SUMMARY") && (
-            <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개</CardTitle>
                 <Button variant="outline" size="sm" onClick={handleGenerateSummary} disabled={isGeneratingSummary}>
@@ -362,7 +362,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           )}
 
           {showSection("EXPERIENCE") && (
-            <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">경력</CardTitle>
                 <Button
@@ -454,7 +454,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           )}
 
           {showSection("EDUCATION") && (
-            <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">학력</CardTitle>
                 <Button
@@ -500,7 +500,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           )}
 
           {showSection("QUALIFICATION") && (
-            <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">보유 자격</CardTitle>
                 <Button
@@ -536,7 +536,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           )}
 
           {showSection("SKILLS") && (
-            <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
               <CardHeader>
                 <CardTitle className="text-body-2">보유 스킬</CardTitle>
               </CardHeader>
@@ -580,7 +580,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           )}
 
           {showSection("TRAINING") && (
-            <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">교육/훈련</CardTitle>
                 <Button
@@ -612,7 +612,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           )}
 
           {(showSection("PROJECT") || showSection("ACTIVITY")) && (
-            <Card className="mt-4 rounded-2xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">기타 (수상/프로젝트/대외활동/봉사/외국어)</CardTitle>
                 <Button
@@ -669,7 +669,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
               <Printer className="size-4" /> PDF로 저장/인쇄
             </Button>
           </div>
-          <div className="max-h-[80vh] overflow-y-auto rounded-2xl bg-slate-100 p-4 ring-1 ring-border print:max-h-none print:overflow-visible print:bg-transparent print:p-0 print:ring-0">
+          <div className="max-h-[80vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border print:max-h-none print:overflow-visible print:bg-transparent print:p-0 print:ring-0">
             <ResumePreview detail={currentPreviewDetail()} />
           </div>
         </div>

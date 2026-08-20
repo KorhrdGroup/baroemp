@@ -50,7 +50,7 @@ export function ExperienceBankManager({ initialItems }: { initialItems: Experien
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-2xl border-0 ring-1 ring-border">
+      <Card className="rounded-xl border-0 ring-1 ring-border">
         <CardHeader>
           <CardTitle className="text-body-2">새 경험 추가하기</CardTitle>
         </CardHeader>
@@ -86,7 +86,7 @@ export function ExperienceBankManager({ initialItems }: { initialItems: Experien
       <div className="space-y-3">
         {items.length === 0 && <p className="text-label-1 text-slate-400">아직 저장된 경험이 없어요. 위에서 첫 경험을 추가해보세요.</p>}
         {items.map((item) => (
-          <Card key={item.id} className="rounded-2xl border-0 ring-1 ring-border">
+          <Card key={item.id} className="rounded-xl border-0 ring-1 ring-border">
             <CardContent className="flex items-start justify-between gap-3 pt-6">
               <div className="space-y-1 text-label-1 text-slate-600">
                 <p className="text-body-2 font-semibold text-slate-900">{item.title}</p>

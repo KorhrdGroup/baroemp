@@ -18,8 +18,8 @@ const INFO_ITEMS = [
 
 export function AssessmentIntro() {
   return (
-    <div className="rounded-3xl border border-border bg-white p-8 sm:p-12">
-      <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-blue-50 text-brand-blue-600">
+    <div className="rounded-2xl border border-border bg-white p-8 sm:p-12">
+      <span className="flex size-14 items-center justify-center rounded-xl bg-brand-blue-50 text-brand-blue-600">
         <Briefcase className="size-7" />
       </span>
 
@@ -45,7 +45,7 @@ export function AssessmentIntro() {
         <StartAssessmentButton />
       </div>
 
-      <div className="mt-10 rounded-2xl bg-brand-blue-50/60 p-6">
+      <div className="mt-10 rounded-xl bg-brand-blue-50/60 p-6">
         <p className="text-label-1 font-bold text-brand-blue-700">이 검사로 알 수 있는 것</p>
         <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {RESULT_ITEMS.map((item) => (

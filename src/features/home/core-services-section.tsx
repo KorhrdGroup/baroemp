@@ -13,9 +13,9 @@ export function CoreServicesSection() {
             <Link
               key={service.id}
               href={service.href}
-              className="group flex flex-col items-center gap-3 rounded-2xl border border-border bg-white px-3 py-6 text-center transition-colors hover:border-brand-blue-200"
+              className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-3 py-6 text-center transition-colors hover:border-brand-blue-200"
             >
-              <span className="flex size-12 items-center justify-center rounded-2xl bg-brand-blue-50 text-brand-blue-600 transition-colors group-hover:bg-brand-blue-400 group-hover:text-white">
+              <span className="flex size-12 items-center justify-center rounded-xl bg-brand-blue-50 text-brand-blue-600 transition-colors group-hover:bg-brand-blue-400 group-hover:text-white">
                 <Icon className="size-6" />
               </span>
               <div>

@@ -49,11 +49,11 @@ export function OccupationRecommendationCard({
     <details
       open={defaultOpen}
       className={cn(
-        "group rounded-2xl border bg-white",
+        "group rounded-xl border bg-white",
         rank === 1 ? "border-brand-blue-300 ring-2 ring-brand-blue-100" : "border-border",
       )}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-5 py-5 sm:px-7 sm:py-6">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-5 sm:px-7 sm:py-6">
         <div className="flex items-center gap-4">
           <span
             className={cn(

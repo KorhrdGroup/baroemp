@@ -54,7 +54,7 @@ export function CoverLetterTemplatePicker({
             type="button"
             onClick={() => setSelected(template.id)}
             className={cn(
-              "relative flex flex-col rounded-2xl border-2 p-5 text-left transition-colors",
+              "relative flex flex-col rounded-xl border-2 p-5 text-left transition-colors",
               selected === template.id ? "border-brand-blue-400 bg-brand-blue-50/50" : "border-border bg-white hover:border-brand-blue-200",
             )}
           >

@@ -96,7 +96,7 @@ export function SupportDetailView({
         {program.departmentName && <span className="text-slate-400">· {program.departmentName}</span>}
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 rounded-2xl border border-border bg-white p-6 sm:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-white p-6 sm:grid-cols-2">
         <InfoRow icon={Users} label="지원대상" value={targetSummary(program)} />
         <InfoRow
           icon={MapPin}
@@ -134,7 +134,7 @@ export function SupportDetailView({
       </div>
 
       {match ? (
-        <div className="mt-8 rounded-2xl border border-border bg-white p-6">
+        <div className="mt-8 rounded-xl border border-border bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">내 조건과 비교</h2>
           <p className="mt-1 text-label-1 text-slate-400">
             입력하신 조건을 기준으로 한 참고 정보이며, 최종 신청 가능 여부는 운영기관에서 확인해야 합니다.
@@ -180,7 +180,7 @@ export function SupportDetailView({
         </div>
       ) : (
         !hasMatchSignal && (
-          <div className="mt-8 rounded-2xl border border-dashed border-border bg-brand-blue-50/40 p-6 text-center">
+          <div className="mt-8 rounded-xl border border-dashed border-border bg-brand-blue-50/40 p-6 text-center">
             <p className="text-label-1 text-slate-600">지원금 진단을 받으면 이 제도와 내 조건을 비교해볼 수 있어요.</p>
             <Link
               href="/support"
@@ -193,7 +193,7 @@ export function SupportDetailView({
       )}
 
       {recommendedContents.length > 0 && (
-        <div className="mt-8 rounded-2xl border border-border bg-white p-6">
+        <div className="mt-8 rounded-xl border border-border bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">함께 준비할 수 있는 과정</h2>
           <p className="mt-1 text-label-1 text-slate-400">이 지원제도와 관련된 자격/교육 과정이에요.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">

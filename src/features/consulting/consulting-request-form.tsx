@@ -44,8 +44,8 @@ export function ConsultingRequestForm() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center rounded-2xl border border-border bg-white px-6 py-16 text-center">
-        <span className="flex size-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+      <div className="flex flex-col items-center rounded-xl border border-border bg-white px-6 py-16 text-center">
+        <span className="flex size-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
           <CheckCircle2 className="size-7" />
         </span>
         <h3 className="mt-5 text-title-3 font-bold text-slate-900">상담 신청이 접수되었습니다</h3>
@@ -71,7 +71,7 @@ export function ConsultingRequestForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-2xl border border-border bg-white p-6 sm:p-8"
+      className="space-y-5 rounded-xl border border-border bg-white p-6 sm:p-8"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">

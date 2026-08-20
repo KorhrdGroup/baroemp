@@ -19,7 +19,7 @@ const testimonials = [
 export function CtaSection() {
   return (
     <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-1 gap-6 rounded-3xl bg-brand-navy-900 p-8 sm:p-10 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 rounded-2xl bg-brand-navy-900 p-8 sm:p-10 lg:grid-cols-2">
         <div className="flex flex-col justify-center">
           <Logo variant="onDark" height={22} className="mb-5" />
           <p className="text-label-1 font-semibold text-brand-blue-300">중장년 취업 성공 스토리</p>
@@ -42,7 +42,7 @@ export function CtaSection() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {testimonials.map((t) => (
-            <div key={t.id} className="flex flex-col rounded-2xl bg-white/10 p-5">
+            <div key={t.id} className="flex flex-col rounded-xl bg-white/10 p-5">
               <div className="flex gap-0.5 text-amber-300">
                 {Array.from({ length: 5 }).map((_, i) => (
                   <Star key={i} className="size-3.5 fill-amber-300" />
