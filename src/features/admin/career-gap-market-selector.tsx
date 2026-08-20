@@ -26,7 +26,7 @@ export function CareerGapMarketSelector({
   return (
     <div className="flex flex-wrap items-end gap-3">
       <div className="w-56">
-        <p className="mb-1 text-[12px] text-slate-500">직업</p>
+        <p className="mb-1 text-label-2 text-slate-500">직업</p>
         <Select
           value={occupationId ?? ""}
           onValueChange={(value) => router.push(`/admin/career-gap?occupationId=${value}`)}
@@ -44,7 +44,7 @@ export function CareerGapMarketSelector({
         </Select>
       </div>
       <div className="w-56">
-        <p className="mb-1 text-[12px] text-slate-500">취업처 (선택)</p>
+        <p className="mb-1 text-label-2 text-slate-500">취업처 (선택)</p>
         <Select
           value={destinationId ?? "__all__"}
           disabled={!occupationId}

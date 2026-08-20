@@ -80,7 +80,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+    <div className="rounded-xl border border-border bg-white p-4">
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -94,7 +94,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="직업명, 회사명으로 검색"
-            className="h-auto border-0 p-0 text-sm shadow-none focus-visible:ring-0"
+            className="h-auto border-0 p-0 text-label-1 shadow-none focus-visible:ring-0"
           />
         </div>
 
@@ -157,7 +157,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           </SelectContent>
         </Select>
 
-        <Button type="submit" className="bg-brand-blue-500 hover:bg-brand-blue-600">
+        <Button type="submit" className="bg-brand-blue-400 hover:bg-brand-blue-600">
           검색
         </Button>
       </form>
@@ -167,7 +167,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           type="button"
           size="sm"
           variant={beginnerOnly ? "default" : "outline"}
-          className={beginnerOnly ? "bg-brand-blue-500 hover:bg-brand-blue-600" : ""}
+          className={beginnerOnly ? "bg-brand-blue-400 hover:bg-brand-blue-600" : ""}
           onClick={() => {
             const next = !beginnerOnly;
             setBeginnerOnly(next);
@@ -180,7 +180,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           type="button"
           size="sm"
           variant={closingSoon ? "default" : "outline"}
-          className={closingSoon ? "bg-brand-blue-500 hover:bg-brand-blue-600" : ""}
+          className={closingSoon ? "bg-brand-blue-400 hover:bg-brand-blue-600" : ""}
           onClick={() => {
             const next = !closingSoon;
             setClosingSoon(next);

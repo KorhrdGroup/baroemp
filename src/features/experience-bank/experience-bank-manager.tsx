@@ -50,32 +50,32 @@ export function ExperienceBankManager({ initialItems }: { initialItems: Experien
 
   return (
     <div className="space-y-6">
-      <Card className="rounded-2xl border-0 ring-1 ring-border">
+      <Card className="rounded-xl border-0 ring-1 ring-border">
         <CardHeader>
-          <CardTitle className="text-base">새 경험 추가하기</CardTitle>
+          <CardTitle className="text-body-2">새 경험 추가하기</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <Label className="text-[12px] text-slate-500">이 경험을 뭐라고 부르면 좋을까요? (예: 고객 민원 해결)</Label>
+            <Label className="text-label-2 text-slate-500">이 경험을 뭐라고 부르면 좋을까요? (예: 고객 민원 해결)</Label>
             <Input className="mt-1" value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} />
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">어떤 상황이었나요?</Label>
+            <Label className="text-label-2 text-slate-500">어떤 상황이었나요?</Label>
             <Textarea className="mt-1" rows={2} value={form.situation} onChange={(e) => setForm((f) => ({ ...f, situation: e.target.value }))} />
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">어떤 역할/과제를 맡았나요?</Label>
+            <Label className="text-label-2 text-slate-500">어떤 역할/과제를 맡았나요?</Label>
             <Textarea className="mt-1" rows={2} value={form.task} onChange={(e) => setForm((f) => ({ ...f, task: e.target.value }))} />
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">무엇을 했나요?</Label>
+            <Label className="text-label-2 text-slate-500">무엇을 했나요?</Label>
             <Textarea className="mt-1" rows={2} value={form.action} onChange={(e) => setForm((f) => ({ ...f, action: e.target.value }))} />
           </div>
           <div>
-            <Label className="text-[12px] text-slate-500">결과는 어땠나요? (숫자가 없어도 괜찮아요)</Label>
+            <Label className="text-label-2 text-slate-500">결과는 어땠나요? (숫자가 없어도 괜찮아요)</Label>
             <Textarea className="mt-1" rows={2} value={form.result} onChange={(e) => setForm((f) => ({ ...f, result: e.target.value }))} />
           </div>
-          {error && <p className="text-sm text-rose-500">{error}</p>}
+          {error && <p className="text-label-1 text-rose-500">{error}</p>}
           <Button onClick={handleAdd} disabled={isSaving}>
             {isSaving ? <Loader2 className="size-4 animate-spin" /> : <Plus className="size-4" />}
             경험 저장하기
@@ -84,12 +84,12 @@ export function ExperienceBankManager({ initialItems }: { initialItems: Experien
       </Card>
 
       <div className="space-y-3">
-        {items.length === 0 && <p className="text-sm text-slate-400">아직 저장된 경험이 없어요. 위에서 첫 경험을 추가해보세요.</p>}
+        {items.length === 0 && <p className="text-label-1 text-slate-400">아직 저장된 경험이 없어요. 위에서 첫 경험을 추가해보세요.</p>}
         {items.map((item) => (
-          <Card key={item.id} className="rounded-2xl border-0 ring-1 ring-border">
+          <Card key={item.id} className="rounded-xl border-0 ring-1 ring-border">
             <CardContent className="flex items-start justify-between gap-3 pt-6">
-              <div className="space-y-1 text-[13px] text-slate-600">
-                <p className="text-base font-semibold text-slate-900">{item.title}</p>
+              <div className="space-y-1 text-label-1 text-slate-600">
+                <p className="text-body-2 font-semibold text-slate-900">{item.title}</p>
                 {item.situation && <p>상황: {item.situation}</p>}
                 {item.task && <p>역할: {item.task}</p>}
                 {item.action && <p>행동: {item.action}</p>}

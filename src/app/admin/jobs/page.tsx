@@ -61,7 +61,7 @@ export default async function AdminJobsPage({
     >
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-slate-200">
-          <div className="text-[13px] text-slate-600">
+          <div className="text-label-1 text-slate-600">
             <p>
               현재 Provider · <span className="font-semibold text-slate-800">{syncOverview.providerName}</span>
               {syncOverview.isMock && <span className="ml-1.5 text-amber-600">(Mock Provider - WORK24_API_KEY 미설정)</span>}
@@ -80,7 +80,7 @@ export default async function AdminJobsPage({
           <JobSyncButton />
         </div>
 
-        <div className="flex flex-wrap gap-2 text-[12px]">
+        <div className="flex flex-wrap gap-2 text-label-2">
           <span className="text-slate-400">Provider:</span>
           <Link href={buildHref({ provider: "all" })} className={!sp.provider ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
             전체
@@ -126,24 +126,24 @@ export default async function AdminJobsPage({
             <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                  <TableHead className="text-[12px]">공고명</TableHead>
-                  <TableHead className="text-[12px]">회사</TableHead>
-                  <TableHead className="text-[12px]">Provider</TableHead>
-                  <TableHead className="text-[12px]">지역</TableHead>
-                  <TableHead className="text-[12px]">직종</TableHead>
-                  <TableHead className="text-[12px]">급여</TableHead>
-                  <TableHead className="text-[12px]">등록일</TableHead>
-                  <TableHead className="text-[12px]">마감일</TableHead>
-                  <TableHead className="text-[12px]">상태</TableHead>
-                  <TableHead className="text-[12px]">조회/찜/지원</TableHead>
-                  <TableHead className="text-[12px]">관리</TableHead>
+                  <TableHead className="text-label-2">공고명</TableHead>
+                  <TableHead className="text-label-2">회사</TableHead>
+                  <TableHead className="text-label-2">Provider</TableHead>
+                  <TableHead className="text-label-2">지역</TableHead>
+                  <TableHead className="text-label-2">직종</TableHead>
+                  <TableHead className="text-label-2">급여</TableHead>
+                  <TableHead className="text-label-2">등록일</TableHead>
+                  <TableHead className="text-label-2">마감일</TableHead>
+                  <TableHead className="text-label-2">상태</TableHead>
+                  <TableHead className="text-label-2">조회/찜/지원</TableHead>
+                  <TableHead className="text-label-2">관리</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((job) => (
-                  <TableRow key={job.id} className="text-[13px]">
+                  <TableRow key={job.id} className="text-label-1">
                     <TableCell className="max-w-[220px] truncate font-semibold">
-                      <Link href={`/jobs/${job.id}`} target="_blank" className="hover:text-brand-blue-600">
+                      <Link href={`/jobs/${job.id}`} target="_blank" className="">
                         {job.title}
                       </Link>
                     </TableCell>

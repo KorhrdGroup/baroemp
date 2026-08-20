@@ -14,7 +14,7 @@ export function SupportSyncButton() {
     <div className="flex flex-col items-end gap-1.5">
       <Button
         size="sm"
-        className="bg-brand-blue-500 hover:bg-brand-blue-600"
+        className="bg-brand-blue-400 hover:bg-brand-blue-600"
         disabled={pending}
         onClick={() => {
           startTransition(async () => {
@@ -27,7 +27,7 @@ export function SupportSyncButton() {
         {pending ? "동기화 중..." : "지원제도 동기화"}
       </Button>
       {result && (
-        <p className="text-right text-[12px] text-slate-500">
+        <p className="text-right text-label-2 text-slate-500">
           {result.isMock && <span className="mr-1 font-semibold text-amber-600">[Mock Provider]</span>}
           수집 {result.fetchedCount} · 신규 {result.newCount} · 업데이트 {result.updatedCount} · 비활성{" "}
           {result.deactivatedCount} · 실패 {result.errorCount}

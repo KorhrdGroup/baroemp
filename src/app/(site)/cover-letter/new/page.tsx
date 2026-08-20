@@ -27,9 +27,9 @@ export default async function CoverLetterNewPage({
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <p className="text-sm font-semibold text-brand-blue-600">Step 1</p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">어떤 자기소개서 양식을 사용하시겠어요?</h1>
-        <p className="mt-2 text-[15px] text-slate-500">
+        <p className="text-label-1 font-semibold text-brand-blue-600">Step 1</p>
+        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">어떤 자기소개서 양식을 사용하시겠어요?</h1>
+        <p className="mt-2 text-body-2 text-slate-500">
           {job ? `"${job.title}" 공고에 맞춰 자기소개서를 준비해요.` : "상황에 맞는 문항 구성을 선택해주세요."}
         </p>
       </div>

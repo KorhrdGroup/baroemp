@@ -16,9 +16,9 @@ export interface NavItem {
 export const mainNavItems: NavItem[] = [
   { label: "직업진단", href: "/assessment" },
   { label: "채용공고", href: "/jobs" },
-  { label: "취업컨설팅", href: "/consulting" },
   { label: "지원금찾기", href: "/support" },
-  { label: "정보센터", href: "/resume" }, // STEP 1: 이력서·정보 허브로 연결, 추후 /info 분리 가능
+  { label: "이력서 첨삭", href: "/resume" }, // 푸터에서는 "이력서·자소서 첨삭" (가로 여유가 있어 전체 명칭 사용)
+  { label: "취업컨설팅", href: "/consulting" },
 ];
 
 export const footerServiceLinks: NavItem[] = [

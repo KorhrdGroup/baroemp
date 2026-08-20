@@ -21,8 +21,8 @@ export function PotentialCustomersPanel({ summary }: { summary: PotentialCustome
   return (
     <div className="space-y-4 rounded-xl bg-white p-4 ring-1 ring-slate-200">
       <div>
-        <h2 className="text-[15px] font-bold text-slate-900">잠재고객 분석</h2>
-        <p className="mt-1 text-[13px] text-slate-500">
+        <h2 className="text-body-2 font-bold text-slate-900">잠재고객 분석</h2>
+        <p className="mt-1 text-label-1 text-slate-500">
           Content Recommendation Rules 기반 Matching Engine 결과 (USER ← CONTENT)
         </p>
       </div>
@@ -36,8 +36,8 @@ export function PotentialCustomersPanel({ summary }: { summary: PotentialCustome
           ["D 추천", summary.gradeD],
         ].map(([label, value]) => (
           <div key={String(label)} className="rounded-lg bg-slate-50 px-3 py-3">
-            <p className="text-[11px] text-slate-500">{label}</p>
-            <p className="mt-1 text-xl font-bold text-slate-900">{value}</p>
+            <p className="text-label-2 text-slate-500">{label}</p>
+            <p className="mt-1 text-title-3 font-bold text-slate-900">{value}</p>
           </div>
         ))}
       </div>
@@ -54,7 +54,7 @@ export function PotentialCustomersPanel({ summary }: { summary: PotentialCustome
           </TableHeader>
           <TableBody>
             {summary.customers.map((c) => (
-              <TableRow key={c.userId} className="text-[13px]">
+              <TableRow key={c.userId} className="text-label-1">
                 <TableCell className="font-semibold">
                   <a href={`/admin/users/${c.userId}`} className="text-brand-blue-600 hover:underline">
                     {c.name}

@@ -25,7 +25,7 @@ export default async function AdminContentsPage() {
       icon={BookOpen}
     >
       <div className="mb-3 flex justify-end">
-        <Button className="bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+        <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
           <Link href="/admin/contents/new">+ 신규 등록</Link>
         </Button>
       </div>
@@ -34,18 +34,18 @@ export default async function AdminContentsPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                <TableHead className="text-[12px]">제목</TableHead>
-                <TableHead className="text-[12px]">유형</TableHead>
-                <TableHead className="text-[12px]">유료</TableHead>
-                <TableHead className="text-[12px]">가격</TableHead>
-                <TableHead className="text-[12px]">태그</TableHead>
-                <TableHead className="text-[12px]">Rule</TableHead>
-                <TableHead className="text-[12px]">상태</TableHead>
+                <TableHead className="text-label-2">제목</TableHead>
+                <TableHead className="text-label-2">유형</TableHead>
+                <TableHead className="text-label-2">유료</TableHead>
+                <TableHead className="text-label-2">가격</TableHead>
+                <TableHead className="text-label-2">태그</TableHead>
+                <TableHead className="text-label-2">Rule</TableHead>
+                <TableHead className="text-label-2">상태</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {contents.map((content) => (
-                <TableRow key={content.id} className="text-[13px]">
+                <TableRow key={content.id} className="text-label-1">
                   <TableCell className="font-semibold">
                     <Link
                       href={`/admin/contents/${content.id}`}
@@ -55,7 +55,7 @@ export default async function AdminContentsPage() {
                     </Link>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="rounded-md text-[11px]">
+                    <Badge variant="outline" className="rounded-md text-label-2">
                       {content.type}
                     </Badge>
                   </TableCell>

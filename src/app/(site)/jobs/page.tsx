@@ -75,9 +75,9 @@ export default async function JobsPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <p className="text-sm font-semibold text-brand-blue-600">무료 서비스</p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">나에게 맞는 일자리를 찾아보세요</h1>
-        <p className="mt-2 text-[15px] text-slate-500">
+        <p className="text-label-1 font-semibold text-brand-blue-600">무료 서비스</p>
+        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나에게 맞는 일자리를 찾아보세요</h1>
+        <p className="mt-2 text-body-2 text-slate-500">
           실시간 채용정보를 조건에 맞게 확인하고, 관심 있는 공고에 바로 지원해보세요.
         </p>
       </div>
@@ -96,8 +96,8 @@ export default async function JobsPage({
       {recommendation && recommendation.jobs.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-5 text-brand-blue-500" />
-            <h2 className="text-lg font-bold text-slate-900">
+            <Sparkles className="size-5 text-brand-blue-600" />
+            <h2 className="text-body-1 font-bold text-slate-900">
               검사 결과 기반 &ldquo;{recommendation.occupationName}&rdquo; 맞춤 공고
             </h2>
           </div>
@@ -115,7 +115,7 @@ export default async function JobsPage({
       )}
 
       <div className="mt-8">
-        <p className="text-sm text-slate-500">
+        <p className="text-label-1 text-slate-500">
           총 <span className="font-semibold text-brand-blue-600">{result.total}건</span>의 채용공고
         </p>
 
@@ -146,19 +146,19 @@ export default async function JobsPage({
                 <Link
                   href={buildPageHref(Math.max(1, page - 1))}
                   aria-disabled={page <= 1}
-                  className={`rounded-lg border border-border px-4 py-2 text-sm font-medium ${
+                  className={`rounded-lg border border-border px-4 py-2 text-label-1 font-medium ${
                     page <= 1 ? "pointer-events-none text-slate-300" : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
                   이전
                 </Link>
-                <span className="text-sm text-slate-500">
+                <span className="text-label-1 text-slate-500">
                   {page} / {totalPages}
                 </span>
                 <Link
                   href={buildPageHref(Math.min(totalPages, page + 1))}
                   aria-disabled={page >= totalPages}
-                  className={`rounded-lg border border-border px-4 py-2 text-sm font-medium ${
+                  className={`rounded-lg border border-border px-4 py-2 text-label-1 font-medium ${
                     page >= totalPages ? "pointer-events-none text-slate-300" : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >

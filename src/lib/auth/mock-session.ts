@@ -1,6 +1,7 @@
 import "server-only";
 import { cookies } from "next/headers";
 import type { CurrentUser } from "./session";
+import { findMockMemberByLoginEmail } from "@/mocks/users.mock";
 
 /**
  * Mock Mode(NEXT_PUBLIC_SUPABASE_URL 미설정) 전용 가짜 로그인 세션.
@@ -15,10 +16,15 @@ export async function readMockSessionUser(): Promise<CurrentUser | null> {
   if (!email) return null;
   // 이메일이 admin으로 시작하면 관리자 화면 확인용으로 ADMIN 권한을 부여한다.
   const isAdmin = email.toLowerCase().startsWith("admin");
+  // 시드 회원 이메일(또는 user-1001@... 형태)로 로그인하면 그 회원으로 들어간다.
+  // 데이터가 채워진 상태의 화면을 확인하기 위한 용도다.
+  const seedMember = findMockMemberByLoginEmail(email);
+  const id = seedMember?.id ?? (isAdmin ? "mock-admin-0001" : "mock-user-0001");
+  const name = seedMember?.name ?? email.split("@")[0] ?? "테스트 사용자";
   return {
-    id: isAdmin ? "mock-admin-0001" : "mock-user-0001",
+    id,
     email,
-    name: email.split("@")[0] || "테스트 사용자",
+    name,
     role: isAdmin ? "ADMIN" : "USER",
     emailConfirmedAt: new Date().toISOString(),
   };

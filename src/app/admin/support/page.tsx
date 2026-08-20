@@ -72,7 +72,7 @@ export default async function AdminSupportPage({
     >
       <div className="space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-slate-200">
-          <div className="text-[13px] text-slate-600">
+          <div className="text-label-1 text-slate-600">
             <p>
               현재 Provider · <span className="font-semibold text-slate-800">{syncOverview.providerName}</span>
               {syncOverview.isMock && (
@@ -93,7 +93,7 @@ export default async function AdminSupportPage({
           <SupportSyncButton />
         </div>
 
-        <div className="flex flex-wrap gap-2 text-[12px]">
+        <div className="flex flex-wrap gap-2 text-label-2">
           <span className="text-slate-400">Provider:</span>
           <Link href={buildHref({ provider: "all" })} className={!sp.provider ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
             전체
@@ -164,23 +164,23 @@ export default async function AdminSupportPage({
             <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                  <TableHead className="text-[12px]">지원사업명</TableHead>
-                  <TableHead className="text-[12px]">운영기관</TableHead>
-                  <TableHead className="text-[12px]">Provider</TableHead>
-                  <TableHead className="text-[12px]">카테고리</TableHead>
-                  <TableHead className="text-[12px]">관련도</TableHead>
-                  <TableHead className="text-[12px]">지역</TableHead>
-                  <TableHead className="text-[12px]">신청기간</TableHead>
-                  <TableHead className="text-[12px]">상태</TableHead>
-                  <TableHead className="text-[12px]">조회/찜/신청</TableHead>
-                  <TableHead className="text-[12px]">관리</TableHead>
+                  <TableHead className="text-label-2">지원사업명</TableHead>
+                  <TableHead className="text-label-2">운영기관</TableHead>
+                  <TableHead className="text-label-2">Provider</TableHead>
+                  <TableHead className="text-label-2">카테고리</TableHead>
+                  <TableHead className="text-label-2">관련도</TableHead>
+                  <TableHead className="text-label-2">지역</TableHead>
+                  <TableHead className="text-label-2">신청기간</TableHead>
+                  <TableHead className="text-label-2">상태</TableHead>
+                  <TableHead className="text-label-2">조회/찜/신청</TableHead>
+                  <TableHead className="text-label-2">관리</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filtered.map((program) => (
-                  <TableRow key={program.id} className="text-[13px]">
+                  <TableRow key={program.id} className="text-label-1">
                     <TableCell className="max-w-[220px] truncate font-semibold">
-                      <Link href={`/support/${program.id}`} target="_blank" className="hover:text-brand-blue-600">
+                      <Link href={`/support/${program.id}`} target="_blank" className="">
                         {program.title}
                       </Link>
                     </TableCell>

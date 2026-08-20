@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { Logo } from "@/components/layout/logo";
 import { usePathname } from "next/navigation";
-import { Briefcase } from "lucide-react";
 import { adminNavItems } from "@/lib/admin-nav";
 import { cn } from "@/lib/utils";
 
@@ -12,12 +12,10 @@ export function AdminSidebar() {
   return (
     <aside className="hidden w-60 shrink-0 flex-col border-r border-slate-200 bg-white lg:flex">
       <div className="flex h-14 items-center gap-2 border-b border-slate-200 px-4">
-        <span className="flex size-8 items-center justify-center rounded-lg bg-brand-blue-500 text-white">
-          <Briefcase className="size-4" />
-        </span>
+        <Logo variant="mark" height={28} />
         <div>
-          <p className="text-sm font-bold text-slate-900">한평생 오피스</p>
-          <p className="text-[11px] text-slate-400">바로취업 Admin</p>
+          <p className="text-label-1 font-bold text-slate-900">한평생 오피스</p>
+          <p className="text-label-2 text-slate-400">바로취업 Admin</p>
         </div>
       </div>
 
@@ -34,7 +32,7 @@ export function AdminSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors",
+                "flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-label-1 font-medium transition-colors",
                 active
                   ? "bg-brand-blue-50 text-brand-blue-600"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",

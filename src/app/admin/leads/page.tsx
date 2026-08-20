@@ -16,13 +16,13 @@ export default function AdminLeadsPage() {
         <div className="grid gap-3 md:grid-cols-2">
           <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="border-b border-slate-100 px-4 py-3">
-              <CardTitle className="text-[14px]">점수 규칙</CardTitle>
+              <CardTitle className="text-label-1">점수 규칙</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 px-4 py-3">
               {LEAD_SCORING_RULES.map((rule) => (
                 <div
                   key={rule.key}
-                  className="flex items-center justify-between text-[13px]"
+                  className="flex items-center justify-between text-label-1"
                 >
                   <span className="text-slate-600">{rule.label}</span>
                   <span className="font-semibold text-brand-blue-600">+{rule.points}</span>
@@ -32,13 +32,13 @@ export default function AdminLeadsPage() {
           </Card>
           <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="border-b border-slate-100 px-4 py-3">
-              <CardTitle className="text-[14px]">등급 기준</CardTitle>
+              <CardTitle className="text-label-1">등급 기준</CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 px-4 py-3">
               {LEAD_GRADE_THRESHOLDS.map((item) => (
                 <div
                   key={item.grade}
-                  className="flex items-center justify-between text-[13px]"
+                  className="flex items-center justify-between text-label-1"
                 >
                   <span className="font-semibold text-slate-800">{item.grade}등급</span>
                   <span className="text-slate-500">{item.minScore}점 이상</span>

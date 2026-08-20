@@ -28,7 +28,7 @@ export function ForgotPasswordForm() {
         <FieldError message={state.fieldErrors?.email} />
       </div>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-500 hover:bg-brand-blue-600">
+      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
         {pending ? "전송 중..." : "재설정 메일 보내기"}
       </Button>
     </form>

@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock, Coins, Gift, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, QUALIFICATION_LABELS, REGION_LABELS } from "@/lib/labels";
@@ -55,37 +54,52 @@ type StepId =
 
 interface StepConfig {
   id: StepId;
+  group: GroupKey;
   title: string;
   description?: string;
   required: boolean;
 }
 
+type GroupKey = "basic" | "status" | "target" | "intent";
+
+/** 진행 표시의 주 단위. 9개 문항을 4개 대분류로 묶는다. */
+const GROUPS: { key: GroupKey; label: string }[] = [
+  { key: "basic", label: "기본 정보" },
+  { key: "status", label: "취업 현황" },
+  { key: "target", label: "희망 직종·자격" },
+  { key: "intent", label: "교육·지원 의향" },
+];
+
 const STEPS: StepConfig[] = [
-  { id: "ageGroup", title: "현재 연령대를 알려주세요", required: true },
-  { id: "region", title: "거주지역이 어디신가요?", required: true },
-  { id: "employmentStatus", title: "현재 취업상태를 선택해주세요", required: true },
-  { id: "desiredStartTiming", title: "취업 희망시기는 언제인가요?", required: true },
-  {
-    id: "trainingWillingness",
-    title: "직업훈련·교육 과정에 참여할 의향이 있으신가요?",
-    description: "1(전혀 없음) ~ 5(매우 높음)",
-    required: true,
-  },
+  { id: "ageGroup", group: "basic", title: "현재 연령대를 알려주세요", required: true },
+  { id: "region", group: "basic", title: "거주지역이 어디신가요?", required: true },
+  { id: "employmentStatus", group: "status", title: "현재 취업상태를 선택해주세요", required: true },
+  { id: "desiredStartTiming", group: "status", title: "취업 희망시기는 언제인가요?", required: true },
+  { id: "careerBreak", group: "status", title: "경력단절 기간이 있으신가요?", required: false },
   {
     id: "desiredJobCategories",
+    group: "target",
     title: "희망하는 직종이 있다면 선택해주세요",
     description: "복수 선택 가능해요. (선택 안 하셔도 괜찮아요)",
     required: false,
   },
   {
     id: "heldQualifications",
+    group: "target",
     title: "현재 보유하고 계신 자격이 있나요?",
     description: "복수 선택 가능해요. (선택 안 하셔도 괜찮아요)",
     required: false,
   },
-  { id: "careerBreak", title: "경력단절 기간이 있으신가요?", required: false },
+  {
+    id: "trainingWillingness",
+    group: "intent",
+    title: "직업훈련·교육 과정에 참여할 의향이 있으신가요?",
+    description: "1(전혀 없음) ~ 5(매우 높음)",
+    required: true,
+  },
   {
     id: "openToGovSupport",
+    group: "intent",
     title: "정부·지자체 지원제도를 적극적으로 활용할 의향이 있으신가요?",
     description: "참고용 정보로만 활용되며 매칭 점수에는 직접 반영되지 않아요.",
     required: false,
@@ -113,10 +127,12 @@ function isStepFilled(step: StepConfig, answers: SupportAssessmentAnswers): bool
 function ChipButton({
   selected,
   onClick,
+  indicator = "none",
   children,
 }: {
   selected: boolean;
   onClick: () => void;
+  indicator?: "none" | "radio" | "check";
   children: React.ReactNode;
 }) {
   return (
@@ -124,14 +140,34 @@ function ChipButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex min-h-14 items-center justify-between rounded-xl border px-5 py-4 text-left text-base font-medium transition-colors",
+        "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
+        indicator === "none" ? "px-4" : "px-11",
         selected
-          ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
+          ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
           : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
       )}
     >
+      {indicator === "radio" && (
+        <span
+          className={cn(
+            "absolute left-4 flex size-5 items-center justify-center rounded-full border-2 transition-colors",
+            selected ? "border-brand-blue-400" : "border-slate-300",
+          )}
+        >
+          {selected && <span className="size-2.5 rounded-full bg-brand-blue-400" />}
+        </span>
+      )}
+      {indicator === "check" && (
+        <span
+          className={cn(
+            "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2 transition-colors",
+            selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
+          )}
+        >
+          {selected && <Check className="size-3.5" />}
+        </span>
+      )}
       {children}
-      {selected && <Check className="size-5 shrink-0 text-brand-blue-600" />}
     </button>
   );
 }
@@ -165,9 +201,9 @@ function StepBody({
               type="button"
               onClick={() => onChange({ region: code })}
               className={cn(
-                "min-h-12 rounded-xl border px-3 py-3 text-[15px] font-medium transition-colors",
+                "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
                 answers.region === code
-                  ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
@@ -178,9 +214,9 @@ function StepBody({
       );
     case "employmentStatus":
       return (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {EMPLOYMENT_STATUS_OPTIONS.map(([code, label]) => (
-            <ChipButton
+            <ChipButton indicator="radio"
               key={code}
               selected={answers.employmentStatus === code}
               onClick={() => onChange({ employmentStatus: code })}
@@ -192,9 +228,9 @@ function StepBody({
       );
     case "desiredStartTiming":
       return (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {DESIRED_START_TIMING_OPTIONS.map(([code, label]) => (
-            <ChipButton
+            <ChipButton indicator="radio"
               key={code}
               selected={answers.desiredStartTiming === code}
               onClick={() => onChange({ desiredStartTiming: code })}
@@ -214,9 +250,9 @@ function StepBody({
                 type="button"
                 onClick={() => onChange({ trainingWillingness: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-2xl border text-lg font-bold transition-colors",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-bold transition-colors",
                   answers.trainingWillingness === n
-                    ? "border-brand-blue-500 bg-brand-blue-500 text-white"
+                    ? "border-brand-blue-400 bg-brand-blue-400 text-white"
                     : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
                 )}
               >
@@ -224,7 +260,7 @@ function StepBody({
               </button>
             ))}
           </div>
-          <div className="mt-2 flex justify-between text-[13px] text-slate-400">
+          <div className="mt-2 flex justify-between text-label-1 text-slate-400">
             <span>{TRAINING_WILLINGNESS_LABELS[1]}</span>
             <span>{TRAINING_WILLINGNESS_LABELS[5]}</span>
           </div>
@@ -233,11 +269,11 @@ function StepBody({
     case "desiredJobCategories": {
       const current = answers.desiredJobCategories ?? [];
       return (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {JOB_CATEGORY_OPTIONS.map((opt) => {
             const selected = current.includes(opt.code);
             return (
-              <ChipButton
+              <ChipButton indicator="check"
                 key={opt.code}
                 selected={selected}
                 onClick={() =>
@@ -256,11 +292,11 @@ function StepBody({
     case "heldQualifications": {
       const current = answers.heldQualifications ?? [];
       return (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           {QUALIFICATION_OPTIONS.map(([code, label]) => {
             const selected = current.includes(code);
             return (
-              <ChipButton
+              <ChipButton indicator="check"
                 key={code}
                 selected={selected}
                 onClick={() =>
@@ -278,10 +314,10 @@ function StepBody({
       return (
         <div className="flex flex-col gap-4">
           <div className="flex gap-3">
-            <ChipButton selected={answers.careerBreak === true} onClick={() => onChange({ careerBreak: true })}>
+            <ChipButton indicator="radio" selected={answers.careerBreak === true} onClick={() => onChange({ careerBreak: true })}>
               있어요
             </ChipButton>
-            <ChipButton
+            <ChipButton indicator="radio"
               selected={answers.careerBreak === false}
               onClick={() => onChange({ careerBreak: false, careerBreakMonths: undefined })}
             >
@@ -298,21 +334,21 @@ function StepBody({
                 onChange={(e) =>
                   onChange({ careerBreakMonths: e.target.value === "" ? undefined : Number(e.target.value) })
                 }
-                className="h-14 w-40 rounded-xl border border-border px-4 text-lg font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+                className="h-14 w-40 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
                 placeholder="0"
               />
-              <span className="text-base text-slate-500">개월 정도</span>
+              <span className="text-body-2 text-slate-500">개월 정도</span>
             </div>
           )}
         </div>
       );
     case "openToGovSupport":
       return (
-        <div className="flex gap-3">
-          <ChipButton selected={answers.openToGovSupport === true} onClick={() => onChange({ openToGovSupport: true })}>
+        <div className="flex flex-col gap-2">
+          <ChipButton indicator="radio" selected={answers.openToGovSupport === true} onClick={() => onChange({ openToGovSupport: true })}>
             네, 적극 활용하고 싶어요
           </ChipButton>
-          <ChipButton selected={answers.openToGovSupport === false} onClick={() => onChange({ openToGovSupport: false })}>
+          <ChipButton indicator="radio" selected={answers.openToGovSupport === false} onClick={() => onChange({ openToGovSupport: false })}>
             아니요, 참고만 할게요
           </ChipButton>
         </div>
@@ -332,24 +368,25 @@ const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지
 
 function SupportIntro({ onStart, loading }: { onStart: () => void; loading: boolean }) {
   return (
-    <div className="rounded-3xl border border-border bg-white p-8 shadow-sm sm:p-12">
-      <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-blue-50 text-brand-blue-600">
+    // 위저드가 페이지 폭을 직접 관리하므로 인트로는 자체 컨테이너를 갖는다.
+    <div className="mx-auto my-10 max-w-2xl rounded-2xl border border-border bg-white p-8 sm:p-12">
+      <span className="flex size-14 items-center justify-center rounded-xl bg-brand-blue-50 text-brand-blue-600">
         <Coins className="size-7" />
       </span>
 
-      <h1 className="mt-6 text-2xl font-extrabold leading-9 text-slate-900 sm:text-[2rem]">
+      <h1 className="mt-6 text-title-2 font-extrabold text-slate-900 sm:text-headline-3">
         놓치고 있는 취업·교육 혜택을 찾아보세요
       </h1>
-      <p className="mt-3 max-w-xl text-[15px] leading-8 text-slate-600 sm:text-base">
+      <p className="mt-3 max-w-xl text-body-2-reading text-slate-600">
         몇 가지 조건만 입력하면
         <br className="hidden sm:block" />
         현재 상황에 맞는 정부·지자체 지원제도를 찾아드립니다.
       </p>
 
-      <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-slate-500">
+      <div className="mt-6 flex flex-wrap gap-4 text-label-1 font-semibold text-slate-500">
         {INFO_ITEMS.map(({ icon: Icon, label }) => (
           <span key={label} className="flex items-center gap-1.5">
-            <Icon className="size-4 text-brand-blue-500" />
+            <Icon className="size-4 text-brand-blue-600" />
             {label}
           </span>
         ))}
@@ -360,7 +397,7 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
           size="lg"
           onClick={onStart}
           disabled={loading}
-          className="h-14 w-full rounded-xl bg-brand-blue-500 px-8 text-base font-bold hover:bg-brand-blue-600 sm:w-auto"
+          className="h-14 w-full rounded-lg bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
         >
           {loading ? (
             <Loader2 className="size-5 animate-spin" />
@@ -373,19 +410,19 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
         </Button>
       </div>
 
-      <div className="mt-10 rounded-2xl bg-brand-blue-50/60 p-6">
-        <p className="text-sm font-bold text-brand-blue-700">이 진단으로 확인할 수 있는 것</p>
+      <div className="mt-10 rounded-xl bg-brand-blue-50/60 p-6">
+        <p className="text-label-1 font-bold text-brand-blue-700">이 진단으로 확인할 수 있는 것</p>
         <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {RESULT_ITEMS.map((item) => (
-            <li key={item} className="flex items-center gap-2 text-[15px] text-slate-700">
-              <CheckCircle2 className="size-4 shrink-0 text-brand-blue-500" />
+            <li key={item} className="flex items-center gap-2 text-body-2 text-slate-700">
+              <CheckCircle2 className="size-4 shrink-0 text-brand-blue-600" />
               {item}
             </li>
           ))}
         </ul>
       </div>
 
-      <p className="mt-6 text-[13px] leading-6 text-slate-400">
+      <p className="mt-6 text-label-1 text-slate-400">
         주민등록번호, 상세 재산정보 등 민감정보는 수집하지 않습니다. 소득/재산 조건이 필요한 정책은 &quot;확인
         필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
       </p>
@@ -423,7 +460,17 @@ export function SupportFlow() {
   const step = STEPS[stepIndex];
   const isLast = stepIndex === STEPS.length - 1;
   const canProceed = isStepFilled(step, answers);
-  const progressPercent = Math.round((stepIndex / STEPS.length) * 100);
+
+  // 대분류를 진행의 주 단위로 삼는다. 분류명과 분류 내 위치를 함께 보여준다.
+  const groupIndex = GROUPS.findIndex((g) => g.key === step.group);
+  const groupSteps = STEPS.filter((x) => x.group === step.group);
+  const posInGroup = groupSteps.findIndex((x) => x.id === step.id);
+
+  function segmentFill(i: number) {
+    if (i < groupIndex) return 100;
+    if (i > groupIndex) return 0;
+    return groupSteps.length > 0 ? (posInGroup / groupSteps.length) * 100 : 0;
+  }
 
   function updateAnswer(patch: Partial<SupportAssessmentAnswers>) {
     setAnswers((prev) => ({ ...prev, ...patch }));
@@ -460,53 +507,66 @@ export function SupportFlow() {
   }
 
   return (
-    <div className="rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-10">
-      <Progress value={progressPercent} className="h-2" />
-      <div className="mt-4 flex items-center justify-between text-sm font-semibold text-brand-blue-600">
-        <span>지원금 진단</span>
-        <span className="text-slate-400">
-          {stepIndex + 1} / {STEPS.length}
-        </span>
+    <div className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
+      {/* 진행 바 - 대분류 4칸 */}
+      <div className="sticky top-16 z-30">
+        <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
+          {GROUPS.map((g, i) => (
+            <div key={g.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
+              <div
+                className="h-full rounded-full bg-brand-blue-400 transition-[width] duration-300"
+                style={{ width: `${segmentFill(i)}%` }}
+              />
+            </div>
+          ))}
+        </div>
+        <div className="flex items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
+          <button
+            type="button"
+            onClick={handlePrev}
+            disabled={stepIndex === 0 || submitting}
+            aria-label="이전 문항"
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+          >
+            <ArrowLeft className="size-5" />
+          </button>
+          <span className="flex-1 truncate px-2 text-center text-body-2 font-bold text-slate-900">
+            {GROUPS[groupIndex]?.label}
+          </span>
+          <span className="w-16 shrink-0 text-right text-label-1 font-medium text-slate-400">
+            {posInGroup + 1}/{groupSteps.length}
+          </span>
+        </div>
       </div>
 
-      <h2 className="mt-4 text-xl font-bold leading-8 text-slate-900 sm:text-2xl">
-        {step.title}
-        {!step.required && <span className="ml-2 text-sm font-normal text-slate-400">(선택)</span>}
-      </h2>
-      {step.description && <p className="mt-2 text-[15px] leading-7 text-slate-500">{step.description}</p>}
+      {/* 문항 */}
+      <div className="mx-auto mt-12 max-w-[24.5rem] px-4">
+        <h2 className="text-center text-title-2 font-bold text-slate-900">
+          {step.title}
+          {!step.required && <span className="ml-2 text-label-1 font-normal text-slate-400">(선택)</span>}
+        </h2>
+        {step.description && (
+          <p className="mt-3 text-center text-body-2-reading text-slate-500">{step.description}</p>
+        )}
 
-      <div className="mt-6">
-        <StepBody step={step} answers={answers} onChange={updateAnswer} />
+        <div className="mt-10">
+          <StepBody step={step} answers={answers} onChange={updateAnswer} />
+        </div>
+
+        {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
       </div>
 
-      {error && <p className="mt-4 text-sm font-medium text-red-500">{error}</p>}
-
-      <div className="mt-8 flex items-center justify-between gap-3">
-        <Button
-          variant="outline"
-          onClick={handlePrev}
-          disabled={stepIndex === 0 || submitting}
-          className="h-12 rounded-xl px-5"
-        >
-          <ArrowLeft className="size-4" />
-          이전
-        </Button>
-        <Button
-          onClick={() => void handleNext()}
-          disabled={submitting || (step.required && !canProceed)}
-          className="h-12 rounded-xl bg-brand-blue-500 px-6 text-base font-semibold hover:bg-brand-blue-600"
-        >
-          {submitting ? (
-            <Loader2 className="size-4 animate-spin" />
-          ) : isLast ? (
-            "결과 확인하기"
-          ) : (
-            <>
-              다음
-              <ArrowRight className="size-4" />
-            </>
-          )}
-        </Button>
+      {/* 하단 고정 CTA */}
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-atomic-mono-50 via-atomic-mono-50 to-transparent pt-6">
+        <div className="mx-auto max-w-[24.5rem] px-4 pb-5">
+          <Button
+            onClick={() => void handleNext()}
+            disabled={submitting || (step.required && !canProceed)}
+            className="h-14 w-full rounded-xl bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
+          >
+            {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
+          </Button>
+        </div>
       </div>
     </div>
   );

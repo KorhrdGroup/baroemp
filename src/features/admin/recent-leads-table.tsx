@@ -40,27 +40,27 @@ export function RecentLeadsTable({ leads, title = "최근 고관심 Lead" }: Rec
   return (
     <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-        <h2 className="text-[15px] font-bold text-slate-900">{title}</h2>
-        <span className="text-[12px] text-slate-400">{sorted.length}건</span>
+        <h2 className="text-body-2 font-bold text-slate-900">{title}</h2>
+        <span className="text-label-2 text-slate-400">{sorted.length}건</span>
       </div>
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-              <TableHead className="text-[12px] font-semibold text-slate-500">이름</TableHead>
-              <TableHead className="text-[12px] font-semibold text-slate-500">연령대</TableHead>
-              <TableHead className="text-[12px] font-semibold text-slate-500">지역</TableHead>
-              <TableHead className="text-[12px] font-semibold text-slate-500">관심직업</TableHead>
-              <TableHead className="text-[12px] font-semibold text-slate-500">취업희망시기</TableHead>
-              <TableHead className="text-[12px] font-semibold text-slate-500">최근행동</TableHead>
-              <TableHead className="text-[12px] font-semibold text-slate-500">Lead Score</TableHead>
-              <TableHead className="text-[12px] font-semibold text-slate-500">추천상품</TableHead>
-              <TableHead className="text-[12px] font-semibold text-slate-500">상태</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">이름</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">연령대</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">지역</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">관심직업</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">취업희망시기</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">최근행동</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">Lead Score</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">추천상품</TableHead>
+              <TableHead className="text-label-2 font-semibold text-slate-500">상태</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sorted.map((lead) => (
-              <TableRow key={lead.id} className="text-[13px]">
+              <TableRow key={lead.id} className="text-label-1">
                 <TableCell className="font-semibold text-slate-800">{lead.name}</TableCell>
                 <TableCell className="text-slate-600">{labelAgeGroup(lead.ageGroup)}</TableCell>
                 <TableCell className="text-slate-600">{labelRegion(lead.region)}</TableCell>
@@ -75,7 +75,7 @@ export function RecentLeadsTable({ leads, title = "최근 고관심 Lead" }: Rec
                   <div className="flex items-center gap-2">
                     <Badge
                       className={cn(
-                        "rounded-md border-0 px-2 py-0.5 text-[11px] font-bold ring-1",
+                        "rounded-md border-0 px-2 py-1 text-label-2 font-bold ring-1",
                         gradeClass(lead.score.grade),
                       )}
                     >
@@ -90,7 +90,7 @@ export function RecentLeadsTable({ leads, title = "최근 고관심 Lead" }: Rec
                 <TableCell>
                   <Badge
                     variant="outline"
-                    className="rounded-md text-[11px] font-medium text-slate-600"
+                    className="rounded-md text-label-2 font-medium text-slate-600"
                   >
                     {labelLeadStatus(lead.status)}
                   </Badge>

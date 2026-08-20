@@ -29,7 +29,7 @@ export default async function AdminAssessmentsPage() {
       icon={ClipboardList}
     >
       <div className="mb-3 flex justify-end">
-        <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-[12px] text-slate-500">
+        <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-3 py-1.5 text-label-2 text-slate-500">
           <Plus className="size-3.5" />
           검사 생성은 V1에서 Seed 기반으로 관리되며, 문항 추가/수정은 상세 페이지에서 확인합니다.
         </span>
@@ -39,19 +39,19 @@ export default async function AdminAssessmentsPage() {
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/80 hover:bg-slate-50/80">
-                <TableHead className="text-[12px]">검사명</TableHead>
-                <TableHead className="text-[12px]">상태</TableHead>
-                <TableHead className="text-[12px]">문항수</TableHead>
-                <TableHead className="text-[12px]">시작수</TableHead>
-                <TableHead className="text-[12px]">완료수</TableHead>
-                <TableHead className="text-[12px]">완료율</TableHead>
-                <TableHead className="text-[12px]">평균 Lead Score</TableHead>
-                <TableHead className="text-[12px]">생성일</TableHead>
+                <TableHead className="text-label-2">검사명</TableHead>
+                <TableHead className="text-label-2">상태</TableHead>
+                <TableHead className="text-label-2">문항수</TableHead>
+                <TableHead className="text-label-2">시작수</TableHead>
+                <TableHead className="text-label-2">완료수</TableHead>
+                <TableHead className="text-label-2">완료율</TableHead>
+                <TableHead className="text-label-2">평균 Lead Score</TableHead>
+                <TableHead className="text-label-2">생성일</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {rows.map(({ assessment, analytics }) => (
-                <TableRow key={assessment.id} className="text-[13px]">
+                <TableRow key={assessment.id} className="text-label-1">
                   <TableCell className="font-semibold">
                     <Link href={`/admin/assessments/${assessment.id}`} className="text-brand-blue-600 hover:underline">
                       {assessment.title}

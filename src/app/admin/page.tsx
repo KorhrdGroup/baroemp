@@ -11,8 +11,8 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-5">
       <div>
-        <h1 className="text-xl font-bold text-slate-900">대시보드</h1>
-        <p className="mt-1 text-[13px] text-slate-500">
+        <h1 className="text-title-3 font-bold text-slate-900">대시보드</h1>
+        <p className="mt-1 text-label-1 text-slate-500">
           Career DB 기반 회원·리드·활동 현황을 한눈에 확인합니다.
         </p>
       </div>

@@ -35,21 +35,21 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
       <SupportMatchViewTracker items={trackedItems} />
 
       <div className="mb-8">
-        <p className="text-sm font-semibold text-brand-blue-600">지원금 진단 결과</p>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900 sm:text-3xl">
+        <p className="text-label-1 font-semibold text-brand-blue-600">지원금 진단 결과</p>
+        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">
           현재 조건에서 확인해볼 만한 혜택을 찾았습니다.
         </h1>
         <div className="mt-4 flex flex-wrap gap-3">
           {SUMMARY_GRADES.map((grade) => (
             <span
               key={grade}
-              className="rounded-full bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-600"
+              className="rounded-full bg-slate-100 px-4 py-2 text-label-1 font-semibold text-slate-600"
             >
               {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]} {view.gradeCounts[grade]}개
             </span>
           ))}
         </div>
-        <p className="mt-4 text-[13px] leading-6 text-slate-400">
+        <p className="mt-4 text-label-1 text-slate-400">
           매칭 등급은 입력하신 정보를 기준으로 한 참고 정보이며, 최종 신청 가능 여부는 각 운영기관에서 확인해야
           합니다.
         </p>
@@ -61,7 +61,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
           title="조건에 맞는 지원제도를 찾지 못했어요"
           description="조건을 다시 입력하거나 잠시 후 다시 시도해주세요."
           action={
-            <Button className="bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+            <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
               <Link href="/support">다시 진단하기</Link>
             </Button>
           }
@@ -70,7 +70,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
         <div className="space-y-10">
           {view.categories.map((group) => (
             <section key={group.category}>
-              <h2 className="mb-4 text-lg font-bold text-slate-900">
+              <h2 className="mb-4 text-body-1 font-bold text-slate-900">
                 {group.label} <span className="text-slate-400">({group.items.length})</span>
               </h2>
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">

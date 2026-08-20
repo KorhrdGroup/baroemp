@@ -26,7 +26,7 @@ function formatPeriod(start?: string, end?: string, isCurrent?: boolean): string
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-2 border-b-2 border-slate-800 pb-1 text-[13px] font-bold tracking-wide text-slate-900">
+    <h2 className="mb-2 border-b-2 border-slate-800 pb-1 text-label-1 font-bold tracking-wide text-slate-900">
       {children}
     </h2>
   );
@@ -48,8 +48,8 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
           <div key={section} className="mb-5 border-b border-slate-300 pb-4">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-[20px] font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
-                <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-[12px] text-slate-600">
+                <p className="text-title-3 font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
+                <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-label-2 text-slate-600">
                   <div>
                     <dt className="inline text-slate-400">이메일 </dt>
                     <dd className="inline">{resume.email || "-"}</dd>
@@ -80,7 +80,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
         return (
           <div key={section} className="mb-5">
             <SectionTitle>핵심 경력 / 한 줄 소개</SectionTitle>
-            <p className="text-[13px] leading-6 text-slate-700">{resume.summary}</p>
+            <p className="text-label-1 text-slate-700">{resume.summary}</p>
           </div>
         );
       case "EXPERIENCE":
@@ -92,18 +92,18 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
               {experiences.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="text-[13px] font-semibold text-slate-900">
+                    <p className="text-label-1 font-semibold text-slate-900">
                       {exp.companyName}
                       {exp.position ? ` · ${exp.position}` : ""}
                       {exp.jobTitle ? ` (${exp.jobTitle})` : ""}
                     </p>
-                    <p className="text-[12px] text-slate-500">{formatPeriod(exp.startDate, exp.endDate, exp.isCurrent)}</p>
+                    <p className="text-label-2 text-slate-500">{formatPeriod(exp.startDate, exp.endDate, exp.isCurrent)}</p>
                   </div>
                   {exp.responsibilities && (
-                    <p className="mt-0.5 text-[12px] leading-5 text-slate-700">담당업무: {exp.responsibilities}</p>
+                    <p className="mt-0.5 text-label-2 text-slate-700">담당업무: {exp.responsibilities}</p>
                   )}
                   {exp.achievements && (
-                    <p className="mt-0.5 text-[12px] leading-5 text-slate-700">주요성과: {exp.achievements}</p>
+                    <p className="mt-0.5 text-label-2 text-slate-700">주요성과: {exp.achievements}</p>
                   )}
                 </div>
               ))}
@@ -117,7 +117,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
             <SectionTitle>학력</SectionTitle>
             <div className="space-y-1.5">
               {educations.map((edu) => (
-                <div key={edu.id} className="flex flex-wrap items-baseline justify-between gap-2 text-[12px]">
+                <div key={edu.id} className="flex flex-wrap items-baseline justify-between gap-2 text-label-2">
                   <p className="text-slate-800">
                     {edu.schoolName}
                     {edu.major ? ` · ${edu.major}` : ""}
@@ -136,7 +136,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
         return (
           <div key={section} className="mb-5">
             <SectionTitle>보유 자격</SectionTitle>
-            <div className="space-y-1 text-[12px] text-slate-800">
+            <div className="space-y-1 text-label-2 text-slate-800">
               {qualifications.map((q) => (
                 <div key={q.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
@@ -154,7 +154,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
         return (
           <div key={section} className="mb-5">
             <SectionTitle>교육/훈련</SectionTitle>
-            <div className="space-y-1 text-[12px] text-slate-800">
+            <div className="space-y-1 text-label-2 text-slate-800">
               {trainings.map((t) => (
                 <div key={t.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
@@ -172,7 +172,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
         return (
           <div key={section} className="mb-5">
             <SectionTitle>보유 스킬</SectionTitle>
-            <p className="text-[12px] text-slate-800">{skills.map((s) => s.name).join(" · ")}</p>
+            <p className="text-label-2 text-slate-800">{skills.map((s) => s.name).join(" · ")}</p>
           </div>
         );
       case "PROJECT":
@@ -180,7 +180,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
         return (
           <div key={section} className="mb-5">
             <SectionTitle>프로젝트</SectionTitle>
-            <div className="space-y-1.5 text-[12px] text-slate-800">
+            <div className="space-y-1.5 text-label-2 text-slate-800">
               {projects.map((p) => (
                 <div key={p.id}>
                   <p className="font-medium">
@@ -198,7 +198,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
         return (
           <div key={section} className="mb-5">
             <SectionTitle>대외활동 / 수상 / 외국어</SectionTitle>
-            <div className="space-y-1 text-[12px] text-slate-800">
+            <div className="space-y-1 text-label-2 text-slate-800">
               {[...activities, ...awards, ...languages].map((item) => (
                 <div key={item.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
@@ -220,7 +220,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
     <div id="resume-print-area" className="mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-0">
       {sectionOrder.map((section) => renderSection(section))}
       {resume.portfolioUrl && (
-        <p className="mt-4 text-[11px] text-slate-400">포트폴리오: {resume.portfolioUrl}</p>
+        <p className="mt-4 text-label-2 text-slate-400">포트폴리오: {resume.portfolioUrl}</p>
       )}
     </div>
   );

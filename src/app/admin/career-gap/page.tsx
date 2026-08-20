@@ -107,7 +107,7 @@ export default async function AdminCareerGapMarketPage({
         </Card>
 
         {!snapshot ? (
-          <p className="rounded-xl bg-white px-4 py-10 text-center text-[13px] text-slate-400 ring-1 ring-slate-200">
+          <p className="rounded-xl bg-white px-4 py-10 text-center text-label-1 text-slate-400 ring-1 ring-slate-200">
             분석할 직업을 선택하세요.
           </p>
         ) : (
@@ -115,11 +115,11 @@ export default async function AdminCareerGapMarketPage({
             <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
               <CardContent className="flex flex-wrap items-center justify-between gap-3 px-4 py-4">
                 <div>
-                  <p className="text-[15px] font-bold text-slate-800">
+                  <p className="text-body-2 font-bold text-slate-800">
                     {occupation?.name ?? "직업 미지정"}
                     {destination ? ` · ${destination.name}` : " · 전체"}
                   </p>
-                  <p className="mt-1 text-[13px] text-slate-500">
+                  <p className="mt-1 text-label-1 text-slate-500">
                     분석 대상 공고 {snapshot.sampleSize}건 · {snapshot.periodStart} ~ {snapshot.periodEnd} (최근{" "}
                     {snapshot.periodDays}일 + 활성 공고)
                   </p>
@@ -136,14 +136,14 @@ export default async function AdminCareerGapMarketPage({
             </Card>
 
             {snapshot.confidence === "LOW" && (
-              <p className="rounded-lg bg-amber-50 px-4 py-2.5 text-[13px] text-amber-700">
+              <p className="rounded-lg bg-amber-50 px-4 py-2.5 text-label-1 text-amber-700">
                 관련 공고가 아직 충분하지 않아(10건 미만) 아래 통계는 참고용입니다.
               </p>
             )}
 
             <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
               <CardHeader className="border-b border-slate-100 px-4 py-3">
-                <CardTitle className="text-[14px]">TOP Requirements (시장 요구조건 통계)</CardTitle>
+                <CardTitle className="text-label-1">TOP Requirements (시장 요구조건 통계)</CardTitle>
               </CardHeader>
               <CardContent className="px-0 py-0">
                 <Table>
@@ -169,7 +169,7 @@ export default async function AdminCareerGapMarketPage({
                         const requirement = requirementById.get(stat.requirementId);
                         const opportunity = opportunityByRequirementId.get(stat.requirementId);
                         return (
-                          <TableRow key={stat.requirementId} className="text-[13px]">
+                          <TableRow key={stat.requirementId} className="text-label-1">
                             <TableCell className="font-medium text-slate-700">{requirement?.name ?? stat.requirementId}</TableCell>
                             <TableCell className="text-slate-500">
                               {requirement ? categoryLabel(requirement.category) : "-"}
@@ -199,7 +199,7 @@ export default async function AdminCareerGapMarketPage({
               </CardContent>
             </Card>
 
-            <p className="text-[12px] text-slate-400">
+            <p className="text-label-2 text-slate-400">
               ※ Content Opportunity는 관리자 내부 콘텐츠 기획 참고용이며, 사용자에게 상품 추천으로 직접 노출되지 않습니다
               (스펙 41번).
             </p>

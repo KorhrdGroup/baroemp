@@ -33,12 +33,12 @@ export function LoginForm({ next }: { next: string }) {
       </div>
 
       <div className="flex justify-end">
-        <Link href="/forgot-password" className="text-xs text-slate-500 hover:text-brand-blue-600">
+        <Link href="/forgot-password" className="text-label-2 text-slate-500">
           비밀번호를 잊으셨나요?
         </Link>
       </div>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-500 hover:bg-brand-blue-600">
+      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
         {pending ? "로그인 중..." : "로그인"}
       </Button>
     </form>

@@ -44,17 +44,17 @@ export function ConsultingRequestForm() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center rounded-2xl border border-border bg-white px-6 py-16 text-center">
-        <span className="flex size-14 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
+      <div className="flex flex-col items-center rounded-xl border border-border bg-white px-6 py-16 text-center">
+        <span className="flex size-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
           <CheckCircle2 className="size-7" />
         </span>
-        <h3 className="mt-5 text-xl font-bold text-slate-900">상담 신청이 접수되었습니다</h3>
-        <p className="mt-2 max-w-md text-[15px] leading-7 text-slate-500">
+        <h3 className="mt-5 text-title-3 font-bold text-slate-900">상담 신청이 접수되었습니다</h3>
+        <p className="mt-2 max-w-md text-body-2-reading text-slate-500">
           담당 컨설턴트가 확인 후 연락드립니다. (STEP 1 Mock — 실제 저장/결제는 다음 STEP에서
           연결됩니다.)
         </p>
         <Button
-          className="mt-6 bg-brand-blue-500 hover:bg-brand-blue-600"
+          className="mt-6 bg-brand-blue-400 hover:bg-brand-blue-600"
           onClick={() => {
             setSubmitted(false);
             setName("");
@@ -71,7 +71,7 @@ export function ConsultingRequestForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-2xl border border-border bg-white p-6 shadow-sm sm:p-8"
+      className="space-y-5 rounded-xl border border-border bg-white p-6 sm:p-8"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
@@ -125,14 +125,14 @@ export function ConsultingRequestForm() {
         />
       </div>
 
-      <div className="rounded-xl bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
+      <div className="rounded-xl bg-amber-50 px-4 py-3 text-label-1 text-amber-800">
         1:1 취업컨설팅은 유료 서비스입니다. STEP 1에서는 결제 연동 없이 신청 흐름만 제공합니다.
       </div>
 
       <Button
         type="submit"
         size="lg"
-        className="h-12 w-full bg-brand-blue-500 text-base font-semibold hover:bg-brand-blue-600"
+        className="h-12 w-full bg-brand-blue-400 text-body-2 font-semibold hover:bg-brand-blue-600"
       >
         상담 신청하기
       </Button>

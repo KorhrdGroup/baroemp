@@ -63,7 +63,7 @@ export function SignupForm({ next }: { next: string }) {
       </div>
 
       <div className="space-y-3 border-t border-slate-100 pt-4">
-        <label className="flex items-start gap-2 text-sm text-slate-700">
+        <label className="flex items-start gap-2 text-label-1 text-slate-700">
           <Checkbox name="privacyConsent" required className="mt-0.5" />
           <span>
             <span className="font-medium">[필수]</span> 개인정보 수집·이용에 동의합니다.
@@ -71,7 +71,7 @@ export function SignupForm({ next }: { next: string }) {
         </label>
         <FieldError message={state.fieldErrors?.privacyConsent} />
 
-        <label className="flex items-start gap-2 text-sm text-slate-700">
+        <label className="flex items-start gap-2 text-label-1 text-slate-700">
           <Checkbox name="marketingConsent" className="mt-0.5" />
           <span>
             <span className="text-slate-500">[선택]</span> 마케팅 정보 수신에 동의합니다.
@@ -79,7 +79,7 @@ export function SignupForm({ next }: { next: string }) {
         </label>
       </div>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-500 hover:bg-brand-blue-600">
+      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
         {pending ? "가입 처리 중..." : "회원가입"}
       </Button>
     </form>

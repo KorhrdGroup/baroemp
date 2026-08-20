@@ -24,14 +24,14 @@ export function KpiCards({ items }: KpiCardsProps) {
             className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200"
           >
             <CardContent className="px-4 py-4">
-              <p className="text-[12px] font-medium text-slate-500">{kpi.label}</p>
-              <p className="mt-1.5 text-2xl font-bold tracking-tight text-slate-900">
+              <p className="text-label-2 font-medium text-slate-500">{kpi.label}</p>
+              <p className="mt-1.5 text-title-2 font-bold tracking-tight text-slate-900">
                 {kpi.value}
               </p>
               {kpi.changeLabel && (
                 <p
                   className={cn(
-                    "mt-2 flex items-center gap-1 text-[11px] font-medium",
+                    "mt-2 flex items-center gap-1 text-label-2 font-medium",
                     kpi.changeDirection === "up" && "text-emerald-600",
                     kpi.changeDirection === "down" && "text-red-500",
                     kpi.changeDirection === "flat" && "text-slate-400",

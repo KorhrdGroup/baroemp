@@ -32,7 +32,7 @@ export default async function AdminAnalyticsPage() {
       description="Activity Event · Lead Score · UTM 유입 기본 분석 (STEP 2)"
       icon={BarChart3}
     >
-      <h2 className="text-[15px] font-bold text-slate-800">
+      <h2 className="text-body-2 font-bold text-slate-800">
         Auth / Member-first 지표 (STEP 6, 실데이터)
       </h2>
       <div className="mt-3 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
@@ -46,10 +46,10 @@ export default async function AdminAnalyticsPage() {
         ).map(([label, value]) => (
           <Card key={label} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="px-4 pt-4 pb-0">
-              <CardTitle className="text-[12px] font-medium text-slate-500">{label}</CardTitle>
+              <CardTitle className="text-label-2 font-medium text-slate-500">{label}</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <p className="text-2xl font-bold text-slate-900">{value}</p>
+              <p className="text-title-2 font-bold text-slate-900">{value}</p>
             </CardContent>
           </Card>
         ))}
@@ -58,7 +58,7 @@ export default async function AdminAnalyticsPage() {
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
           <CardHeader className="border-b border-slate-100 px-4 py-3">
-            <CardTitle className="text-[14px]">
+            <CardTitle className="text-label-1">
               Member-first Funnel (방문→가입→직업진단→채용조회→지원금진단)
             </CardTitle>
           </CardHeader>
@@ -82,7 +82,7 @@ export default async function AdminAnalyticsPage() {
                     ["지원금진단 완료", authSnapshot.funnel.supportCompleted],
                   ] as const
                 ).map(([label, count]) => (
-                  <TableRow key={label} className="text-[13px]">
+                  <TableRow key={label} className="text-label-1">
                     <TableCell>{label}</TableCell>
                     <TableCell className="font-semibold">{count}명</TableCell>
                     <TableCell className="text-slate-500">
@@ -99,7 +99,7 @@ export default async function AdminAnalyticsPage() {
 
         <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
           <CardHeader className="border-b border-slate-100 px-4 py-3">
-            <CardTitle className="text-[14px]">utm_source별 실제 가입 회원 수 (user_acquisition)</CardTitle>
+            <CardTitle className="text-label-1">utm_source별 실제 가입 회원 수 (user_acquisition)</CardTitle>
           </CardHeader>
           <CardContent className="px-0 py-0">
             <Table>
@@ -118,7 +118,7 @@ export default async function AdminAnalyticsPage() {
                   </TableRow>
                 ) : (
                   authSnapshot.signupsByUtmSource.map((row) => (
-                    <TableRow key={row.key} className="text-[13px]">
+                    <TableRow key={row.key} className="text-label-1">
                       <TableCell>{row.key}</TableCell>
                       <TableCell className="font-semibold">{row.count}</TableCell>
                     </TableRow>
@@ -130,9 +130,9 @@ export default async function AdminAnalyticsPage() {
         </Card>
       </div>
 
-      <h2 className="mt-8 text-[15px] font-bold text-slate-800">
+      <h2 className="mt-8 text-body-2 font-bold text-slate-800">
         STEP 2 기본 지표
-        <span className="ml-2 text-[12px] font-normal text-slate-400">
+        <span className="ml-2 text-label-2 font-normal text-slate-400">
           (일부 카드는 STEP1 mock 데이터 기준 — 완료보고 참고)
         </span>
       </h2>
@@ -143,12 +143,12 @@ export default async function AdminAnalyticsPage() {
             className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200"
           >
             <CardHeader className="px-4 pt-4 pb-0">
-              <CardTitle className="text-[12px] font-medium text-slate-500">
+              <CardTitle className="text-label-2 font-medium text-slate-500">
                 {kpi.label}
               </CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <p className="text-2xl font-bold text-slate-900">{kpi.value}</p>
+              <p className="text-title-2 font-bold text-slate-900">{kpi.value}</p>
             </CardContent>
           </Card>
         ))}
@@ -157,7 +157,7 @@ export default async function AdminAnalyticsPage() {
       <div className="mt-4 grid gap-4 lg:grid-cols-3">
         <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
           <CardHeader className="border-b border-slate-100 px-4 py-3">
-            <CardTitle className="text-[14px]">utm_source별 회원 수</CardTitle>
+            <CardTitle className="text-label-1">utm_source별 회원 수</CardTitle>
           </CardHeader>
           <CardContent className="px-0 py-0">
             <Table>
@@ -169,7 +169,7 @@ export default async function AdminAnalyticsPage() {
               </TableHeader>
               <TableBody>
                 {snapshot.utmSourceCounts.map((row) => (
-                  <TableRow key={row.key} className="text-[13px]">
+                  <TableRow key={row.key} className="text-label-1">
                     <TableCell>{row.key}</TableCell>
                     <TableCell className="font-semibold">{row.count}</TableCell>
                   </TableRow>
@@ -181,7 +181,7 @@ export default async function AdminAnalyticsPage() {
 
         <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
           <CardHeader className="border-b border-slate-100 px-4 py-3">
-            <CardTitle className="text-[14px]">utm_campaign별 회원 수</CardTitle>
+            <CardTitle className="text-label-1">utm_campaign별 회원 수</CardTitle>
           </CardHeader>
           <CardContent className="px-0 py-0">
             <Table>
@@ -193,7 +193,7 @@ export default async function AdminAnalyticsPage() {
               </TableHeader>
               <TableBody>
                 {snapshot.utmCampaignCounts.map((row) => (
-                  <TableRow key={row.key} className="text-[13px]">
+                  <TableRow key={row.key} className="text-label-1">
                     <TableCell>{row.key}</TableCell>
                     <TableCell className="font-semibold">{row.count}</TableCell>
                   </TableRow>
@@ -205,7 +205,7 @@ export default async function AdminAnalyticsPage() {
 
         <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
           <CardHeader className="border-b border-slate-100 px-4 py-3">
-            <CardTitle className="text-[14px]">campaign별 평균 Lead Score</CardTitle>
+            <CardTitle className="text-label-1">campaign별 평균 Lead Score</CardTitle>
           </CardHeader>
           <CardContent className="px-0 py-0">
             <Table>
@@ -218,7 +218,7 @@ export default async function AdminAnalyticsPage() {
               </TableHeader>
               <TableBody>
                 {snapshot.utmCampaignAvgLeadScore.map((row) => (
-                  <TableRow key={row.key} className="text-[13px]">
+                  <TableRow key={row.key} className="text-label-1">
                     <TableCell>{row.key}</TableCell>
                     <TableCell className="font-semibold text-brand-blue-600">
                       {row.avgScore}
@@ -249,10 +249,10 @@ export default async function AdminAnalyticsPage() {
         ).map(([label, value]) => (
           <Card key={label} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="px-4 pt-4 pb-0">
-              <CardTitle className="text-[12px] font-medium text-slate-500">{label}</CardTitle>
+              <CardTitle className="text-label-2 font-medium text-slate-500">{label}</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <p className="text-2xl font-bold text-slate-900">{value}</p>
+              <p className="text-title-2 font-bold text-slate-900">{value}</p>
             </CardContent>
           </Card>
         ))}
@@ -269,7 +269,7 @@ export default async function AdminAnalyticsPage() {
         ).map(([title, rows]) => (
           <Card key={title} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="border-b border-slate-100 px-4 py-3">
-              <CardTitle className="text-[14px]">{title}</CardTitle>
+              <CardTitle className="text-label-1">{title}</CardTitle>
             </CardHeader>
             <CardContent className="px-0 py-0">
               <Table>
@@ -288,7 +288,7 @@ export default async function AdminAnalyticsPage() {
                     </TableRow>
                   ) : (
                     rows.map((row) => (
-                      <TableRow key={row.key} className="text-[13px]">
+                      <TableRow key={row.key} className="text-label-1">
                         <TableCell>{row.key}</TableCell>
                         <TableCell className="font-semibold">{row.count}</TableCell>
                       </TableRow>
@@ -301,7 +301,7 @@ export default async function AdminAnalyticsPage() {
         ))}
       </div>
 
-      <h2 className="mt-8 text-[15px] font-bold text-slate-800">지원금 지표 (STEP 5)</h2>
+      <h2 className="mt-8 text-body-2 font-bold text-slate-800">지원금 지표 (STEP 5)</h2>
       <div className="mt-3 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
         {(
           [
@@ -315,10 +315,10 @@ export default async function AdminAnalyticsPage() {
         ).map(([label, value]) => (
           <Card key={label} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="px-4 pt-4 pb-0">
-              <CardTitle className="text-[12px] font-medium text-slate-500">{label}</CardTitle>
+              <CardTitle className="text-label-2 font-medium text-slate-500">{label}</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <p className="text-2xl font-bold text-slate-900">{value}</p>
+              <p className="text-title-2 font-bold text-slate-900">{value}</p>
             </CardContent>
           </Card>
         ))}
@@ -333,10 +333,10 @@ export default async function AdminAnalyticsPage() {
         ).map(([label, value]) => (
           <Card key={label} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="px-4 pt-4 pb-0">
-              <CardTitle className="text-[12px] font-medium text-slate-500">{label}</CardTitle>
+              <CardTitle className="text-label-2 font-medium text-slate-500">{label}</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <p className="text-2xl font-bold text-slate-900">{value}</p>
+              <p className="text-title-2 font-bold text-slate-900">{value}</p>
             </CardContent>
           </Card>
         ))}
@@ -353,7 +353,7 @@ export default async function AdminAnalyticsPage() {
         ).map(([title, rows]) => (
           <Card key={title} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="border-b border-slate-100 px-4 py-3">
-              <CardTitle className="text-[14px]">{title}</CardTitle>
+              <CardTitle className="text-label-1">{title}</CardTitle>
             </CardHeader>
             <CardContent className="px-0 py-0">
               <Table>
@@ -372,7 +372,7 @@ export default async function AdminAnalyticsPage() {
                     </TableRow>
                   ) : (
                     rows.map((row) => (
-                      <TableRow key={row.key} className="text-[13px]">
+                      <TableRow key={row.key} className="text-label-1">
                         <TableCell>{row.key}</TableCell>
                         <TableCell className="font-semibold">{row.count}</TableCell>
                       </TableRow>
@@ -384,7 +384,7 @@ export default async function AdminAnalyticsPage() {
           </Card>
         ))}
       </div>
-      <h2 className="mt-8 text-[15px] font-bold text-slate-800">이력서·자기소개서 지표 (STEP 7)</h2>
+      <h2 className="mt-8 text-body-2 font-bold text-slate-800">이력서·자기소개서 지표 (STEP 7)</h2>
       <div className="mt-3 grid gap-3 md:grid-cols-3 xl:grid-cols-6">
         {(
           [
@@ -398,10 +398,10 @@ export default async function AdminAnalyticsPage() {
         ).map(([label, value]) => (
           <Card key={label} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="px-4 pt-4 pb-0">
-              <CardTitle className="text-[12px] font-medium text-slate-500">{label}</CardTitle>
+              <CardTitle className="text-label-2 font-medium text-slate-500">{label}</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <p className="text-2xl font-bold text-slate-900">{value}</p>
+              <p className="text-title-2 font-bold text-slate-900">{value}</p>
             </CardContent>
           </Card>
         ))}
@@ -416,7 +416,7 @@ export default async function AdminAnalyticsPage() {
         ).map(([title, rows]) => (
           <Card key={title} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="border-b border-slate-100 px-4 py-3">
-              <CardTitle className="text-[14px]">{title}</CardTitle>
+              <CardTitle className="text-label-1">{title}</CardTitle>
             </CardHeader>
             <CardContent className="px-0 py-0">
               <Table>
@@ -435,7 +435,7 @@ export default async function AdminAnalyticsPage() {
                     </TableRow>
                   ) : (
                     rows.map((row) => (
-                      <TableRow key={row.key} className="text-[13px]">
+                      <TableRow key={row.key} className="text-label-1">
                         <TableCell>{row.key}</TableCell>
                         <TableCell className="font-semibold">{row.count}</TableCell>
                       </TableRow>
@@ -448,9 +448,9 @@ export default async function AdminAnalyticsPage() {
         ))}
       </div>
 
-      <h2 className="mt-8 text-[15px] font-bold text-slate-800">
+      <h2 className="mt-8 text-body-2 font-bold text-slate-800">
         취업 준비도(Career Gap) 지표 (STEP 7.5)
-        <span className="ml-2 text-[12px] font-normal text-slate-400">
+        <span className="ml-2 text-label-2 font-normal text-slate-400">
           직업/취업처별 상세 시장분석은 취업 준비도 시장분석 메뉴에서 확인하세요.
         </span>
       </h2>
@@ -467,10 +467,10 @@ export default async function AdminAnalyticsPage() {
         ).map(([label, value]) => (
           <Card key={label} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
             <CardHeader className="px-4 pt-4 pb-0">
-              <CardTitle className="text-[12px] font-medium text-slate-500">{label}</CardTitle>
+              <CardTitle className="text-label-2 font-medium text-slate-500">{label}</CardTitle>
             </CardHeader>
             <CardContent className="px-4 pb-4">
-              <p className="text-2xl font-bold text-slate-900">{value}</p>
+              <p className="text-title-2 font-bold text-slate-900">{value}</p>
             </CardContent>
           </Card>
         ))}
@@ -479,7 +479,7 @@ export default async function AdminAnalyticsPage() {
       <div className="mt-4 grid gap-4 lg:grid-cols-2">
         <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
           <CardHeader className="border-b border-slate-100 px-4 py-3">
-            <CardTitle className="text-[14px]">직업/취업처별 분석 현황</CardTitle>
+            <CardTitle className="text-label-1">직업/취업처별 분석 현황</CardTitle>
           </CardHeader>
           <CardContent className="px-0 py-0">
             <Table>
@@ -499,7 +499,7 @@ export default async function AdminAnalyticsPage() {
                   </TableRow>
                 ) : (
                   careerGapSnapshot.byTarget.map((row) => (
-                    <TableRow key={row.key} className="text-[13px]">
+                    <TableRow key={row.key} className="text-label-1">
                       <TableCell>{row.label}</TableCell>
                       <TableCell className="font-semibold">{row.analysisCount}건</TableCell>
                       <TableCell className="font-semibold text-brand-blue-600">{row.averageReadinessScore}점</TableCell>
@@ -513,7 +513,7 @@ export default async function AdminAnalyticsPage() {
 
         <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
           <CardHeader className="border-b border-slate-100 px-4 py-3">
-            <CardTitle className="text-[14px]">가장 많이 부족한 조건 (TOP)</CardTitle>
+            <CardTitle className="text-label-1">가장 많이 부족한 조건 (TOP)</CardTitle>
           </CardHeader>
           <CardContent className="px-0 py-0">
             <Table>
@@ -532,7 +532,7 @@ export default async function AdminAnalyticsPage() {
                   </TableRow>
                 ) : (
                   careerGapSnapshot.topGapRequirements.map((row) => (
-                    <TableRow key={row.requirementId} className="text-[13px]">
+                    <TableRow key={row.requirementId} className="text-label-1">
                       <TableCell>{row.requirementName}</TableCell>
                       <TableCell className="font-semibold">{row.gapCount}건</TableCell>
                     </TableRow>

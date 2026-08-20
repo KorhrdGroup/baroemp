@@ -17,7 +17,7 @@ export function ResetPasswordForm() {
     return (
       <div className="space-y-4">
         <FormNotice message={state.message} />
-        <Button asChild className="w-full bg-brand-blue-500 hover:bg-brand-blue-600">
+        <Button asChild className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
           <Link href="/login">로그인하러 가기</Link>
         </Button>
       </div>
@@ -44,7 +44,7 @@ export function ResetPasswordForm() {
         <FieldError message={state.fieldErrors?.passwordConfirm} />
       </div>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-500 hover:bg-brand-blue-600">
+      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
         {pending ? "변경 중..." : "비밀번호 변경"}
       </Button>
     </form>
