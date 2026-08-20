@@ -25,3 +25,4 @@ export const mockAdminUsers: AdminUserListItem[] = [
   { id: "user-1019", name: "하윤서", email: "yunseo.ha@example.com", phone: "010-9999-0000", ageGroup: "40대", region: "서울", employmentStatus: "미취업", signupChannel: "google", joinedAt: "2026-08-02", leadGrade: "B", leadScore: 52 },
   { id: "user-1020", name: "조병관", email: "byungkwan.jo@example.com", phone: "010-1010-2020", ageGroup: "50대", region: "부산", employmentStatus: "경력단절", signupChannel: "homepage", joinedAt: "2026-08-03", leadGrade: "A", leadScore: 68 },
 ];
+

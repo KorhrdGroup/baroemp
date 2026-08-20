@@ -131,7 +131,13 @@ export const metadata: Metadata = {
  */
 export default async function MyPage() {
   const user = await requireUser("/mypage");
-  const detail = await getUserCrmDetail(user.id);
+  // 프로필 행이 아직 없어도(가입 직후, Mock 로그인 등) 인증 정보로 최소 프로필을 만들어 화면을 연다.
+  const detail = await getUserCrmDetail(user.id, {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role,
+  });
 
   if (!detail) {
     return (

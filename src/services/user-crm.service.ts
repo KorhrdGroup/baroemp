@@ -15,7 +15,7 @@ import { attachRecommendationRulesToAll } from "@/lib/content/with-rules";
 import { mockActivityEvents } from "@/mocks/activity-events.mock";
 import { mockContents } from "@/mocks/contents.mock";
 import { mockJobRoles } from "@/mocks/job-roles.mock";
-import type { ActivityEvent, RecommendedItem, UserCrmDetail, UserResumeSummary } from "@/types";
+import type { ActivityEvent, AppRole, Profile, RecommendedItem, UserCrmDetail, UserResumeSummary } from "@/types";
 import { listContents } from "./content.service";
 import { getUserJobBehaviorSummary } from "./job-behavior-summary.service";
 import { getUserSupportBehaviorSummary } from "./support-behavior-summary.service";
@@ -87,10 +87,39 @@ export async function listAdminUsers() {
   return items;
 }
 
-export async function getUserCrmDetail(userId: string): Promise<UserCrmDetail | null> {
+/**
+ * 프로필 레코드가 아직 없는 사용자를 위한 최소 프로필.
+ * 가입 직후처럼 profiles 행이 생기기 전이어도 마이페이지가 열려야 한다.
+ */
+function buildFallbackProfile(identity?: FallbackIdentity): Profile | null {
+  if (!identity) return null;
+  const now = new Date().toISOString();
+  return {
+    id: identity.id,
+    name: identity.name,
+    email: identity.email,
+    role: identity.role,
+    marketingConsent: false,
+    createdAt: now,
+    updatedAt: now,
+    lastActiveAt: now,
+  };
+}
+
+export interface FallbackIdentity {
+  id: string;
+  name?: string;
+  email?: string;
+  role: AppRole;
+}
+
+export async function getUserCrmDetail(
+  userId: string,
+  fallbackIdentity?: FallbackIdentity,
+): Promise<UserCrmDetail | null> {
   await ensureActivitySeed();
 
-  const profile = await getProfileRepository().findById(userId);
+  const profile = (await getProfileRepository().findById(userId)) ?? buildFallbackProfile(fallbackIdentity);
   if (!profile) return null;
 
   const careerProfile = (await findCareerProfileByUserId(userId)) ?? undefined;
