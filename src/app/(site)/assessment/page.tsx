@@ -6,9 +6,6 @@ export const metadata: Metadata = {
 };
 
 export default function AssessmentPage() {
-  return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
-      <AssessmentIntro />
-    </div>
-  );
+  // 히어로가 화면 폭을 꽉 채우므로 페이지에서 폭을 제한하지 않는다.
+  return <AssessmentIntro />;
 }
