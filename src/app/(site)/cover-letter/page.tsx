@@ -14,7 +14,7 @@ export default async function CoverLetterListPage() {
   const coverLetters = await listCoverLettersForUser(user.id);
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">자기소개서</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나만의 자기소개서를 작성해보세요.</h1>

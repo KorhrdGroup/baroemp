@@ -20,7 +20,7 @@ export default async function ResumeEditPage({ params }: { params: Promise<{ id:
   if (!detail) notFound();
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
       <ResumeEditor initialDetail={detail} />
     </div>
   );

@@ -62,7 +62,7 @@ export default async function CareerGapEntryPage({
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">취업 준비도 확인</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">어떤 직업을 준비하고 계세요?</h1>

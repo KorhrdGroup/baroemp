@@ -17,14 +17,14 @@ export default async function MyPageProfileEditPage() {
 
   if (!profile) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
         <p className="text-label-1 text-slate-500">프로필 정보를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.</p>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <Link href="/mypage" className="mb-4 flex items-center gap-1 text-label-1 text-slate-500">
         <ArrowLeft className="size-4" />
         마이페이지로 돌아가기

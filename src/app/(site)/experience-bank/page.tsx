@@ -12,7 +12,7 @@ export default async function ExperienceBankPage() {
   const items = await listExperienceBankForUser(user.id);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">경험뱅크</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나의 경험을 저장해두세요.</h1>
