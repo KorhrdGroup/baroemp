@@ -1,11 +1,12 @@
 import type { SupportProgram } from "@/types";
+import { computeCareerRelevance } from "@/lib/support/career-relevance";
 
 /**
  * 지원제도 Mock 데이터. MockSupportProvider(features/support/providers/mock-provider.ts)가
  * 이 배열을 NormalizedSupportProgram으로 변환해 Support Sync Service에 공급한다.
  * (jobs.mock.ts와 동일한 철학 — API Key 없이도 전체 Flow를 테스트할 수 있어야 한다.)
  */
-export const mockSupportPrograms: SupportProgram[] = [
+const rawSupportPrograms: SupportProgram[] = [
   {
     id: "support-001",
     title: "중장년 취업성공패키지",
@@ -215,3 +216,27 @@ export const mockSupportPrograms: SupportProgram[] = [
     updatedAt: "2026-07-01T00:00:00.000Z",
   },
 ];
+
+/**
+ * careerRelevanceScore는 하드코딩하지 않고 실제 분류기로 계산해 채운다.
+ * Supabase 모드에서 Sync(support-sync.service.ts)가 채우는 값과 같은 로직·같은 입력 필드를 쓰므로
+ * Mock과 실데이터가 어긋나지 않는다.
+ *
+ * 이 값이 비어 있으면 completeSupportAssessment()의 minCareerRelevanceScore 필터에
+ * 전부 걸려서 진단 결과가 항상 0건이 된다.
+ */
+export const mockSupportPrograms: SupportProgram[] = rawSupportPrograms.map((program) => {
+  const relevance = computeCareerRelevance({
+    title: program.title,
+    summary: program.summary,
+    targetDescription: program.targetDescription,
+    description: program.description,
+    eligibilityRaw: program.eligibilityRaw,
+    benefitDescription: program.benefitDescription,
+  });
+  return {
+    ...program,
+    careerRelevanceScore: relevance.score,
+    careerRelevanceReasons: relevance.reasons,
+  };
+});

@@ -12,11 +12,11 @@ export default async function ExperienceBankPage() {
   const items = await listExperienceBankForUser(user.id);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">경험뱅크</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나의 경험을 저장해두세요.</h1>
-        <p className="mt-2 text-body-2 text-slate-500">
+        <p className="mt-2 text-body-2-reading text-slate-500">
           한 번 저장한 경험은 여러 자기소개서 문항에서 다시 꺼내 쓸 수 있어요.
         </p>
       </div>

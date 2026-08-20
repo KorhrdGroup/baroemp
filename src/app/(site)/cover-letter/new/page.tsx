@@ -29,7 +29,7 @@ export default async function CoverLetterNewPage({
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">Step 1</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">어떤 자기소개서 양식을 사용하시겠어요?</h1>
-        <p className="mt-2 text-body-2 text-slate-500">
+        <p className="mt-2 text-body-2-reading text-slate-500">
           {job ? `"${job.title}" 공고에 맞춰 자기소개서를 준비해요.` : "상황에 맞는 문항 구성을 선택해주세요."}
         </p>
       </div>

@@ -126,11 +126,11 @@ export async function completeSupportAssessment(sessionId: string): Promise<Supp
   const answers = session.answers;
   const matchProfile = toSupportMatchProfile(answers);
 
-  const { items: programs } = await getSupportProgramRepository().search({
+  // search()는 pageSize를 100으로 clamp하므로 200을 넘겨도 매칭 대상이 조용히 잘린다.
+  // 여기서는 페이지네이션이 필요 없는 전체 조회이므로 findAll을 쓴다(mock/supabase 모두 같은 필터를 적용).
+  const programs = await getSupportProgramRepository().findAll({
     activeOnly: true,
     minCareerRelevanceScore: CAREER_RELEVANCE_THRESHOLD,
-    pageSize: 200,
-    page: 1,
   });
   const detailByProgramId = await evaluateSupportEligibilityBatch(programs, matchProfile);
 
