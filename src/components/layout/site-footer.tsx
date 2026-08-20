@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { Briefcase, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
 import { footerCompanyLinks, footerServiceLinks, siteConfig } from "@/lib/site-config";
+import { Logo } from "./logo";
 
 export function SiteFooter() {
   return (
@@ -8,12 +9,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="flex size-8 items-center justify-center rounded-lg bg-brand-blue-500 text-white">
-                <Briefcase className="size-4" />
-              </span>
-              <span className="text-body-2 font-bold text-brand-navy-900">{siteConfig.name}</span>
-            </div>
+            <Logo height={24} />
             <p className="mt-3 max-w-xs text-label-1 text-slate-500">
               중장년의 새로운 시작, 한평생 함께합니다. 직업진단부터 취업, 지원금까지 하나의
               플랫폼에서 이어집니다.

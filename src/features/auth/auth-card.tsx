@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Briefcase } from "lucide-react";
+import { Logo } from "@/components/layout/logo";
 
 export function AuthCard({
   title,
@@ -16,11 +16,8 @@ export function AuthCard({
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-50 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-brand-blue-500 text-white">
-              <Briefcase className="size-5" />
-            </span>
-            <span className="text-body-1 font-bold tracking-tight text-brand-navy-900">한평생 바로취업</span>
+          <Link href="/" aria-label="한평생 바로취업" className="flex items-center">
+            <Logo height={26} />
           </Link>
         </div>
 

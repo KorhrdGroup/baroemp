@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Menu, Search, Briefcase } from "lucide-react";
+import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,6 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { mainNavItems, siteConfig } from "@/lib/site-config";
+import { Logo } from "./logo";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/features/auth/auth-actions";
 import { isAdminRole } from "@/lib/auth/roles";
@@ -31,13 +32,8 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
     <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2">
-            <span className="flex size-9 items-center justify-center rounded-xl bg-brand-blue-500 text-white">
-              <Briefcase className="size-5" />
-            </span>
-            <span className="text-body-1 font-bold tracking-tight text-brand-navy-900">
-              {siteConfig.name}
-            </span>
+          <Link href="/" aria-label={siteConfig.name} className="flex items-center">
+            <Logo height={26} priority />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
