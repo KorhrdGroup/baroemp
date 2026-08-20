@@ -37,7 +37,9 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">지원금 진단 결과</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">
-          현재 조건에서 확인해볼 만한 혜택을 찾았습니다.
+          {view.totalCount === 0
+            ? "현재 조건에 맞는 지원제도를 찾지 못했습니다."
+            : "현재 조건에서 확인해볼 만한 혜택을 찾았습니다."}
         </h1>
         <div className="mt-4 flex flex-wrap gap-3">
           {SUMMARY_GRADES.map((grade) => (
