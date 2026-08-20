@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Menu, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,10 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const isAdmin = user ? isAdminRole(user.role) : false;
 
+  // 하위 경로(/jobs/job-001, /resume/new 등)에서도 해당 메뉴를 선택 상태로 둔다.
+  const pathname = usePathname();
+  const isCurrentNav = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-white/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -36,18 +41,42 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
             <Logo height={20} priority />
           </Link>
 
-          <nav className="hidden items-center gap-1 lg:flex">
-            {mainNavItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "rounded-lg px-3 py-2 text-body-2 font-medium text-slate-700 transition-colors hover:bg-brand-blue-50",
-                )}
-              >
-                {item.label}
-              </Link>
-            ))}
+          <nav className="hidden h-16 items-center gap-1 lg:flex">
+            {mainNavItems.map((item) => {
+              const current = isCurrentNav(item.href);
+              return (
+                // 인디케이터를 헤더 하단 테두리에 맞추려고 헤더 높이만큼 늘린 래퍼를 둔다.
+                // 링크 자체는 기존 라운드 호버 배경을 유지한다.
+                <div key={item.href} className="group relative flex h-full items-center">
+                  <Link
+                    href={item.href}
+                    aria-current={current ? "page" : undefined}
+                    className={cn(
+                      // 활성 시 semibold로 굵어져도 폭이 흔들리지 않도록 고정폭을 준다.
+                      // 26 = 가장 긴 라벨("이력서 첨삭")의 semibold 폭 73px + 좌우 여백.
+                      "w-26 rounded-lg px-3 py-2 text-center text-body-2",
+                      current ? "font-semibold text-brand-blue-600" : "font-medium text-slate-700",
+                    )}
+                  >
+                    {item.label}
+                  </Link>
+                  {/*
+                   * 고용24처럼 호버도 배경 박스가 아니라 하단 인디케이터로 표시한다.
+                   * 막대가 왼쪽에서 오른쪽으로 채워지도록 scaleX를 쓴다(width 애니메이션은 리플로우를 유발).
+                   * 키보드 이동만으로도 보이도록 focus-within을 함께 건다.
+                   */}
+                  <span
+                    aria-hidden
+                    className={cn(
+                      "absolute inset-x-0 bottom-0 h-0.5 origin-left transition-transform duration-200 ease-out",
+                      current
+                        ? "bg-brand-blue-600"
+                        : "bg-brand-blue-300 scale-x-0 group-hover:scale-x-100 group-focus-within:scale-x-100",
+                    )}
+                  />
+                </div>
+              );
+            })}
           </nav>
         </div>
 
@@ -99,16 +128,23 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                 <SheetTitle>{siteConfig.name}</SheetTitle>
               </SheetHeader>
               <nav className="mt-2 flex flex-col gap-1 px-4">
-                {mainNavItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setMobileOpen(false)}
-                    className="rounded-lg px-3 py-3 text-body-2 font-medium text-slate-700 hover:bg-brand-blue-50"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {mainNavItems.map((item) => {
+                  const current = isCurrentNav(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      aria-current={current ? "page" : undefined}
+                      className={cn(
+                        "rounded-lg px-3 py-3 text-body-2 hover:bg-brand-blue-50",
+                        current ? "font-semibold text-brand-blue-600" : "font-medium text-slate-700",
+                      )}
+                    >
+                      {item.label}
+                    </Link>
+                  );
+                })}
                 <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
                   {user ? (
                     <>
