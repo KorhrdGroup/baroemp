@@ -244,7 +244,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
                 }
                 className="rounded-xl border border-border p-4 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/40"
               >
-                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-label-2 font-medium text-slate-500">
+                <span className="rounded-full bg-slate-100 px-2 py-1 text-label-2 font-medium text-slate-500">
                   {RECOMMENDATION_KIND_LABELS[rec.kind] ?? rec.kind}
                 </span>
                 <p className="mt-2 text-body-2 font-semibold text-slate-800">{rec.title}</p>

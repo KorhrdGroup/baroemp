@@ -75,7 +75,7 @@ export function RecentLeadsTable({ leads, title = "최근 고관심 Lead" }: Rec
                   <div className="flex items-center gap-2">
                     <Badge
                       className={cn(
-                        "rounded-md border-0 px-2 py-0.5 text-label-2 font-bold ring-1",
+                        "rounded-md border-0 px-2 py-1 text-label-2 font-bold ring-1",
                         gradeClass(lead.score.grade),
                       )}
                     >

@@ -24,7 +24,7 @@ export function CoreServicesSection() {
               </div>
               <Badge
                 className={cn(
-                  "rounded-full border-0 px-2.5 py-0.5 text-label-2 font-semibold",
+                  "rounded-full border-0 px-2.5 py-1 text-label-2 font-semibold",
                   service.badge === "무료" && "bg-brand-blue-50 text-brand-blue-600",
                   service.badge === "유료" && "bg-amber-50 text-amber-600",
                   service.badge === "준비중" && "bg-slate-100 text-slate-500",
