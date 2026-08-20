@@ -55,10 +55,10 @@ export function CoverLetterTemplatePicker({
             onClick={() => setSelected(template.id)}
             className={cn(
               "relative flex flex-col rounded-2xl border-2 p-5 text-left transition-colors",
-              selected === template.id ? "border-brand-blue-500 bg-brand-blue-50/50" : "border-border bg-white hover:border-brand-blue-200",
+              selected === template.id ? "border-brand-blue-400 bg-brand-blue-50/50" : "border-border bg-white hover:border-brand-blue-200",
             )}
           >
-            {selected === template.id && <CheckCircle2 className="absolute right-4 top-4 size-5 text-brand-blue-500" />}
+            {selected === template.id && <CheckCircle2 className="absolute right-4 top-4 size-5 text-brand-blue-600" />}
             <p className="text-body-2 font-bold text-slate-900">{template.name}</p>
             <p className="mt-2 text-label-1 text-slate-500">{template.description}</p>
             <p className="mt-3 text-label-2 text-slate-400">문항 {template.defaultQuestions.length}개</p>

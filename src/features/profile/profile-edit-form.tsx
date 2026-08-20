@@ -43,7 +43,7 @@ function ChipToggle({
       className={cn(
         "rounded-full border px-3.5 py-1.5 text-label-1 font-medium transition-colors",
         selected
-          ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
+          ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
           : "border-border text-slate-600 hover:border-brand-blue-300",
       )}
     >
@@ -239,7 +239,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
         </label>
       </section>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-500 hover:bg-brand-blue-600 sm:w-auto">
+      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600 sm:w-auto">
         {pending ? "저장 중..." : "저장하기"}
       </Button>
     </form>

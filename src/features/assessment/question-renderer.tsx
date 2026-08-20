@@ -43,17 +43,17 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
               <span
                 className={cn(
                   "absolute left-4 flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                  selected ? "border-brand-blue-500" : "border-slate-300",
+                  selected ? "border-brand-blue-400" : "border-slate-300",
                 )}
               >
-                {selected && <span className="size-2.5 rounded-full bg-brand-blue-500" />}
+                {selected && <span className="size-2.5 rounded-full bg-brand-blue-400" />}
               </span>
               {option.optionText}
             </button>
@@ -80,14 +80,14 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
               <span
                 className={cn(
                   "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2",
-                  selected ? "border-brand-blue-500 bg-brand-blue-500 text-white" : "border-slate-300",
+                  selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
                 )}
               >
                 {selected && <Check className="size-3.5" />}
@@ -119,7 +119,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 className={cn(
                   "flex aspect-square min-h-14 flex-col items-center justify-center rounded-2xl border text-body-1 font-bold transition-colors",
                   selected
-                    ? "border-brand-blue-500 bg-brand-blue-500 text-white"
+                    ? "border-brand-blue-400 bg-brand-blue-400 text-white"
                     : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
                 )}
               >
@@ -182,7 +182,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >

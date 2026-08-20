@@ -254,7 +254,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           <Card className="rounded-2xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
             <CardHeader>
               <CardTitle className="flex items-center justify-between text-body-2">
-                AI 점검 결과 <Badge className="bg-brand-blue-500">{reviewResult.score}점</Badge>
+                AI 점검 결과 <Badge className="bg-brand-blue-400">{reviewResult.score}점</Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 text-label-1">

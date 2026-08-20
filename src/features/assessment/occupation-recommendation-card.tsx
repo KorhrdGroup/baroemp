@@ -58,7 +58,7 @@ export function OccupationRecommendationCard({
           <span
             className={cn(
               "flex size-10 shrink-0 items-center justify-center rounded-xl text-body-2 font-bold",
-              rank === 1 ? "bg-brand-blue-500 text-white" : "bg-slate-100 text-slate-500",
+              rank === 1 ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-500",
             )}
           >
             {rank}
@@ -124,7 +124,7 @@ export function OccupationRecommendationCard({
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
           <div>
             <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-              <Sparkles className="size-4 text-brand-blue-500" /> 왜 추천되었나요
+              <Sparkles className="size-4 text-brand-blue-600" /> 왜 추천되었나요
             </p>
             <ul className="mt-2 space-y-1.5 text-label-1 text-slate-600">
               {rec.reasons.map((reason) => (
@@ -202,7 +202,7 @@ export function OccupationRecommendationCard({
             userId={userId}
             anonymousId={anonymousId}
             href={rec.jobCategoryCode ? `/jobs?category=${rec.jobCategoryCode}` : "/jobs"}
-            className="rounded-lg bg-brand-blue-500 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+            className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
           >
             채용공고 보기
           </TrackedLink>

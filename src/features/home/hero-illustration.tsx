@@ -10,7 +10,7 @@ export function HeroIllustration() {
       <div className="absolute inset-6 rounded-3xl bg-gradient-to-br from-brand-blue-100 via-brand-blue-50 to-white" />
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative flex size-64 items-center justify-center rounded-full bg-white ring-1 ring-brand-blue-100 sm:size-72">
-          <span className="flex size-36 items-center justify-center rounded-3xl bg-brand-blue-500 text-white sm:size-40">
+          <span className="flex size-36 items-center justify-center rounded-3xl bg-brand-blue-400 text-white sm:size-40">
             <Briefcase className="size-16 sm:size-20" strokeWidth={1.6} />
           </span>
         </div>

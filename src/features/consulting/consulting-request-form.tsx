@@ -54,7 +54,7 @@ export function ConsultingRequestForm() {
           연결됩니다.)
         </p>
         <Button
-          className="mt-6 bg-brand-blue-500 hover:bg-brand-blue-600"
+          className="mt-6 bg-brand-blue-400 hover:bg-brand-blue-600"
           onClick={() => {
             setSubmitted(false);
             setName("");
@@ -132,7 +132,7 @@ export function ConsultingRequestForm() {
       <Button
         type="submit"
         size="lg"
-        className="h-12 w-full bg-brand-blue-500 text-body-2 font-semibold hover:bg-brand-blue-600"
+        className="h-12 w-full bg-brand-blue-400 text-body-2 font-semibold hover:bg-brand-blue-600"
       >
         상담 신청하기
       </Button>

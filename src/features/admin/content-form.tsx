@@ -165,7 +165,7 @@ export function ContentForm({ content }: ContentFormProps) {
         <Button
           type="submit"
           disabled={pending}
-          className="bg-brand-blue-500 hover:bg-brand-blue-600"
+          className="bg-brand-blue-400 hover:bg-brand-blue-600"
         >
           {pending ? "저장 중..." : content ? "수정 저장" : "신규 등록"}
         </Button>

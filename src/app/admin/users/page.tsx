@@ -142,7 +142,7 @@ export default async function AdminUsersPage({
           <option value="y">동의</option>
           <option value="n">미동의</option>
         </select>
-        <button type="submit" className="h-9 rounded-lg bg-brand-blue-500 px-4 text-label-1 font-medium text-white">
+        <button type="submit" className="h-9 rounded-lg bg-brand-blue-400 px-4 text-label-1 font-medium text-white">
           검색
         </button>
         {(sp.q || sp.grade || sp.employmentStatus || sp.region || sp.marketing) && (
@@ -160,7 +160,7 @@ export default async function AdminUsersPage({
             href={buildHref(sp, { supportSegment: key === "all" ? undefined : key, page: undefined })}
             className={cn(
               "rounded-full px-2.5 py-1",
-              segment === key ? "bg-brand-blue-500 font-semibold text-white" : "bg-slate-100 text-slate-500",
+              segment === key ? "bg-brand-blue-400 font-semibold text-white" : "bg-slate-100 text-slate-500",
             )}
           >
             {SEGMENT_LABEL[key]}

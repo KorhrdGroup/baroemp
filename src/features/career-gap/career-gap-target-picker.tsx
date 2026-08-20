@@ -73,7 +73,7 @@ export function CareerGapTargetPicker({
       {suggested.length > 0 && (
         <div className="rounded-2xl border border-border bg-white p-5">
           <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-            <Sparkles className="size-4 text-brand-blue-500" /> 추천 직업
+            <Sparkles className="size-4 text-brand-blue-600" /> 추천 직업
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {suggested.map((s) => (
@@ -84,7 +84,7 @@ export function CareerGapTargetPicker({
                 className={cn(
                   "rounded-full border px-4 py-2 text-label-1 font-medium transition-colors",
                   occupationId === s.occupationId
-                    ? "border-brand-blue-500 bg-brand-blue-500 text-white"
+                    ? "border-brand-blue-400 bg-brand-blue-400 text-white"
                     : "border-border bg-white text-slate-600 hover:border-brand-blue-300",
                 )}
               >
@@ -141,7 +141,7 @@ export function CareerGapTargetPicker({
       <Button
         onClick={handleSubmit}
         disabled={isPending || !occupationId}
-        className="h-12 w-full rounded-xl bg-brand-blue-500 text-body-2 font-semibold hover:bg-brand-blue-600"
+        className="h-12 w-full rounded-xl bg-brand-blue-400 text-body-2 font-semibold hover:bg-brand-blue-600"
       >
         {isPending ? (
           <>

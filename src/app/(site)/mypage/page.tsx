@@ -270,7 +270,7 @@ export default async function MyPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-label-1 text-slate-600">
               <p>아직 직업진단을 받지 않았어요. 몇 가지 질문으로 나에게 맞는 직업을 찾아드려요.</p>
-              <Button className="w-full bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+              <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                 <Link href="/assessment">무료 직업진단 시작</Link>
               </Button>
             </CardContent>
@@ -415,7 +415,7 @@ export default async function MyPage() {
             {detail.careerGapSummaries.length === 0 ? (
               <>
                 <p>아직 취업 준비도를 확인하지 않았어요. 실제 채용공고 기준으로 지금 준비 상태를 확인해보세요.</p>
-                <Button className="w-full bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+                <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                   <Link href="/career-gap">취업 준비도 확인하기</Link>
                 </Button>
               </>
@@ -478,7 +478,7 @@ export default async function MyPage() {
             </CardHeader>
             <CardContent className="space-y-3 text-label-1 text-slate-600">
               <p>아직 지원금 진단을 받지 않았어요. 몇 가지 조건만 입력하면 받을 수 있는 혜택을 찾아드려요.</p>
-              <Button className="w-full bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+              <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                 <Link href="/support">지원금 찾기 시작하기</Link>
               </Button>
             </CardContent>

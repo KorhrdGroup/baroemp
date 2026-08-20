@@ -26,7 +26,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </p>
           <Link
             href="/"
-            className="mt-6 inline-block rounded-md bg-slate-900 px-4 py-2 text-label-1 font-medium text-white hover:bg-slate-700"
+            className="mt-6 inline-block rounded-md bg-brand-blue-900 px-4 py-2 text-label-1 font-medium text-white hover:bg-slate-700"
           >
             홈으로 돌아가기
           </Link>

@@ -68,7 +68,7 @@ export function JobBookmarkButton({
       <Button
         type="button"
         variant={bookmarked ? "default" : "outline"}
-        className={cn(bookmarked && "bg-brand-blue-500 hover:bg-brand-blue-600")}
+        className={cn(bookmarked && "bg-brand-blue-400 hover:bg-brand-blue-600")}
         onClick={handleClick}
         disabled={pending}
       >
@@ -89,7 +89,7 @@ export function JobBookmarkButton({
         "flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors",
         bookmarked
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-600"
-          : "border-border bg-white text-slate-400 hover:text-brand-blue-500",
+          : "border-border bg-white text-slate-400 hover:text-brand-blue-600",
       )}
     >
       {bookmarked ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}

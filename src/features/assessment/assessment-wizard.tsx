@@ -127,7 +127,7 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
           {sections.map((s, i) => (
             <div key={s.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
               <div
-                className="h-full rounded-full bg-brand-blue-500 transition-[width] duration-300"
+                className="h-full rounded-full bg-brand-blue-400 transition-[width] duration-300"
                 style={{ width: `${segmentFill(i)}%` }}
               />
             </div>
@@ -177,7 +177,7 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
           <Button
             onClick={handleNext}
             disabled={submitting || (question.required && !canProceed)}
-            className="h-14 w-full rounded-xl bg-brand-blue-500 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-xl bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

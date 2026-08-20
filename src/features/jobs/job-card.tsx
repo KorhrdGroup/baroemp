@@ -47,7 +47,7 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-1.5">
             {typeof matchScore === "number" && (
-              <Badge className="rounded-full border-0 bg-brand-blue-500 text-label-2 font-semibold text-white">
+              <Badge className="rounded-full border-0 bg-brand-blue-400 text-label-2 font-semibold text-white">
                 매칭 {matchScore}점
               </Badge>
             )}
@@ -119,7 +119,7 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
         </span>
         <Link
           href={`/jobs/${job.id}`}
-          className="rounded-lg bg-slate-900 px-4 py-2 text-label-1 font-semibold text-white hover:bg-slate-700"
+          className="rounded-lg bg-brand-blue-900 px-4 py-2 text-label-1 font-semibold text-white hover:bg-slate-700"
         >
           상세보기
         </Link>

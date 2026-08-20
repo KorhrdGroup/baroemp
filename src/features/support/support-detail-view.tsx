@@ -24,7 +24,7 @@ import { SupportViewTracker } from "./support-view-tracker";
 
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   HIGH: "bg-emerald-500",
-  MEDIUM: "bg-brand-blue-500",
+  MEDIUM: "bg-brand-blue-400",
   CHECK_REQUIRED: "bg-amber-500",
   LOW: "bg-slate-400",
 };
@@ -184,7 +184,7 @@ export function SupportDetailView({
             <p className="text-label-1 text-slate-600">지원금 진단을 받으면 이 제도와 내 조건을 비교해볼 수 있어요.</p>
             <Link
               href="/support"
-              className="mt-3 inline-block rounded-lg bg-brand-blue-500 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+              className="mt-3 inline-block rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
             >
               지원금 찾기 진단하기
             </Link>
@@ -211,7 +211,7 @@ export function SupportDetailView({
         <SupportApplyButton
           supportProgramId={program.id}
           sourceUrl={program.sourceUrl ?? program.applyUrl}
-          className="h-12 flex-1 bg-brand-blue-500 hover:bg-brand-blue-600"
+          className="h-12 flex-1 bg-brand-blue-400 hover:bg-brand-blue-600"
         />
         <SupportBookmarkButton
           supportProgramId={program.id}

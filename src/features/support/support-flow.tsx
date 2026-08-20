@@ -143,7 +143,7 @@ function ChipButton({
         "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
         indicator === "none" ? "px-4" : "px-11",
         selected
-          ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
+          ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
           : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
       )}
     >
@@ -151,17 +151,17 @@ function ChipButton({
         <span
           className={cn(
             "absolute left-4 flex size-5 items-center justify-center rounded-full border-2 transition-colors",
-            selected ? "border-brand-blue-500" : "border-slate-300",
+            selected ? "border-brand-blue-400" : "border-slate-300",
           )}
         >
-          {selected && <span className="size-2.5 rounded-full bg-brand-blue-500" />}
+          {selected && <span className="size-2.5 rounded-full bg-brand-blue-400" />}
         </span>
       )}
       {indicator === "check" && (
         <span
           className={cn(
             "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2 transition-colors",
-            selected ? "border-brand-blue-500 bg-brand-blue-500 text-white" : "border-slate-300",
+            selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
           )}
         >
           {selected && <Check className="size-3.5" />}
@@ -203,7 +203,7 @@ function StepBody({
               className={cn(
                 "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
                 answers.region === code
-                  ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
@@ -252,7 +252,7 @@ function StepBody({
                 className={cn(
                   "flex aspect-square min-h-14 flex-col items-center justify-center rounded-2xl border text-body-1 font-bold transition-colors",
                   answers.trainingWillingness === n
-                    ? "border-brand-blue-500 bg-brand-blue-500 text-white"
+                    ? "border-brand-blue-400 bg-brand-blue-400 text-white"
                     : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
                 )}
               >
@@ -386,7 +386,7 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
       <div className="mt-6 flex flex-wrap gap-4 text-label-1 font-semibold text-slate-500">
         {INFO_ITEMS.map(({ icon: Icon, label }) => (
           <span key={label} className="flex items-center gap-1.5">
-            <Icon className="size-4 text-brand-blue-500" />
+            <Icon className="size-4 text-brand-blue-600" />
             {label}
           </span>
         ))}
@@ -397,7 +397,7 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
           size="lg"
           onClick={onStart}
           disabled={loading}
-          className="h-14 w-full rounded-xl bg-brand-blue-500 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
+          className="h-14 w-full rounded-xl bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
         >
           {loading ? (
             <Loader2 className="size-5 animate-spin" />
@@ -415,7 +415,7 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
         <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {RESULT_ITEMS.map((item) => (
             <li key={item} className="flex items-center gap-2 text-body-2 text-slate-700">
-              <CheckCircle2 className="size-4 shrink-0 text-brand-blue-500" />
+              <CheckCircle2 className="size-4 shrink-0 text-brand-blue-600" />
               {item}
             </li>
           ))}
@@ -514,7 +514,7 @@ export function SupportFlow() {
           {GROUPS.map((g, i) => (
             <div key={g.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
               <div
-                className="h-full rounded-full bg-brand-blue-500 transition-[width] duration-300"
+                className="h-full rounded-full bg-brand-blue-400 transition-[width] duration-300"
                 style={{ width: `${segmentFill(i)}%` }}
               />
             </div>
@@ -562,7 +562,7 @@ export function SupportFlow() {
           <Button
             onClick={() => void handleNext()}
             disabled={submitting || (step.required && !canProceed)}
-            className="h-14 w-full rounded-xl bg-brand-blue-500 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-xl bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

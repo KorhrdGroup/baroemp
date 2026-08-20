@@ -40,7 +40,7 @@ export async function ProgressStepsSection() {
                   <span className="font-bold text-brand-blue-600">{percent}%</span>
                 </div>
                 <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-atomic-mono-200">
-                  <div className="h-full rounded-full bg-brand-blue-500" style={{ width: `${percent}%` }} />
+                  <div className="h-full rounded-full bg-brand-blue-400" style={{ width: `${percent}%` }} />
                 </div>
               </div>
             )}
@@ -68,9 +68,9 @@ export async function ProgressStepsSection() {
                         className={
                           "relative z-10 mx-auto flex size-9 items-center justify-center rounded-full text-label-1 font-bold transition-colors sm:size-10 " +
                           (done
-                            ? "bg-brand-blue-500 text-white"
+                            ? "bg-brand-blue-400 text-white"
                             : isNext
-                              ? "bg-white text-brand-blue-600 ring-2 ring-brand-blue-500"
+                              ? "bg-white text-brand-blue-600 ring-2 ring-brand-blue-400"
                               : "bg-slate-100 text-slate-400 hover:bg-slate-200")
                         }
                       >
@@ -102,7 +102,7 @@ export async function ProgressStepsSection() {
                     ? `다음은 '${nextStep.title}' 단계예요. ${nextStep.description}`
                     : "모든 단계를 마쳤어요. 새로운 공고를 확인해보세요."}
               </p>
-              <Button className="shrink-0 bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+              <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                 <Link href={nextStep?.href ?? "/jobs"}>
                   {!user ? "진단부터 시작하기" : nextStep ? `${nextStep.title} 이어하기` : "채용공고 보기"}
                   <ArrowRight className="size-4" />

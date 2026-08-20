@@ -25,7 +25,7 @@ export function HeroSection() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button
               size="lg"
-              className="h-12 rounded-xl bg-brand-blue-500 px-6 text-body-2 font-semibold hover:bg-brand-blue-600"
+              className="h-12 rounded-xl bg-brand-blue-400 px-6 text-body-2 font-semibold hover:bg-brand-blue-600"
               asChild
             >
               <Link href="/assessment">

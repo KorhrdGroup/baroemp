@@ -25,7 +25,7 @@ export default async function AdminContentsPage() {
       icon={BookOpen}
     >
       <div className="mb-3 flex justify-end">
-        <Button className="bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+        <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
           <Link href="/admin/contents/new">+ 신규 등록</Link>
         </Button>
       </div>

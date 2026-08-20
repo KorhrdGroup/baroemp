@@ -140,7 +140,7 @@
   --card-foreground: var(--atomic-mono-900);
   --popover: oklch(1 0 0);
   --popover-foreground: var(--atomic-mono-900);
-  --primary: var(--atomic-blue-500);
+  --primary: var(--atomic-blue-400);
   --primary-foreground: #FFFFFF;
   --secondary: var(--atomic-mono-100);
   --secondary-foreground: var(--atomic-mono-800);
@@ -151,8 +151,8 @@
   --destructive: oklch(0.6 0.22 25);
   --border: var(--atomic-mono-200);
   --input: var(--atomic-mono-200);
-  --ring: var(--atomic-blue-500);
-  --chart-1: var(--atomic-blue-500);
+  --ring: var(--atomic-blue-400);
+  --chart-1: var(--atomic-blue-400);
   --chart-2: oklch(0.68 0.15 200);
   --chart-3: oklch(0.75 0.15 90);
   --chart-4: oklch(0.65 0.2 30);
@@ -160,17 +160,24 @@
   --radius: 10px;
   --sidebar: var(--atomic-blue-900);
   --sidebar-foreground: var(--atomic-mono-100);
-  --sidebar-primary: var(--atomic-blue-500);
+  --sidebar-primary: var(--atomic-blue-400);
   --sidebar-primary-foreground: #FFFFFF;
   --sidebar-accent: var(--atomic-blue-800);
   --sidebar-accent-foreground: var(--atomic-mono-50);
   --sidebar-border: var(--atomic-blue-800);
-  --sidebar-ring: var(--atomic-blue-500);
+  --sidebar-ring: var(--atomic-blue-400);
 
   --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     system-ui, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
 
-  /* HDS Atomic 팔레트 (Figma: HDS / Atomic) */
+  /*
+   * HDS Atomic 팔레트 (Figma: HDS / Atomic)
+   * 사용 규칙
+   * - 남색: blue-700 / 800 / 900
+   * - 파란색: blue-400 / 300 중심
+   * - blue-500(#0051FF)은 넓은 면적 금지. 좁은 강조에만.
+   * - 파란 글자는 blue-600. 400은 흰 배경 대비 4.63:1 로 여유가 적다.
+   */
   --atomic-mono-50: #FAFAFA;
   --atomic-mono-100: #F2F2F2;
   --atomic-mono-200: #E4E4E4;

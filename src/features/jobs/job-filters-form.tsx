@@ -157,7 +157,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           </SelectContent>
         </Select>
 
-        <Button type="submit" className="bg-brand-blue-500 hover:bg-brand-blue-600">
+        <Button type="submit" className="bg-brand-blue-400 hover:bg-brand-blue-600">
           검색
         </Button>
       </form>
@@ -167,7 +167,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           type="button"
           size="sm"
           variant={beginnerOnly ? "default" : "outline"}
-          className={beginnerOnly ? "bg-brand-blue-500 hover:bg-brand-blue-600" : ""}
+          className={beginnerOnly ? "bg-brand-blue-400 hover:bg-brand-blue-600" : ""}
           onClick={() => {
             const next = !beginnerOnly;
             setBeginnerOnly(next);
@@ -180,7 +180,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           type="button"
           size="sm"
           variant={closingSoon ? "default" : "outline"}
-          className={closingSoon ? "bg-brand-blue-500 hover:bg-brand-blue-600" : ""}
+          className={closingSoon ? "bg-brand-blue-400 hover:bg-brand-blue-600" : ""}
           onClick={() => {
             const next = !closingSoon;
             setClosingSoon(next);

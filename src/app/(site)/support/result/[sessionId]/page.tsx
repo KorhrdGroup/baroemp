@@ -61,7 +61,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
           title="조건에 맞는 지원제도를 찾지 못했어요"
           description="조건을 다시 입력하거나 잠시 후 다시 시도해주세요."
           action={
-            <Button className="bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+            <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
               <Link href="/support">다시 진단하기</Link>
             </Button>
           }

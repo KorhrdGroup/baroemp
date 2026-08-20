@@ -71,7 +71,7 @@ export function JobDetailView({
           <Badge className="rounded-full border-0 bg-emerald-50 text-label-2 font-semibold text-emerald-700">신입가능</Badge>
         )}
         {match && (
-          <Badge className="rounded-full border-0 bg-brand-blue-500 text-label-2 font-semibold text-white">
+          <Badge className="rounded-full border-0 bg-brand-blue-400 text-label-2 font-semibold text-white">
             매칭 {match.score}점 ({match.grade})
           </Badge>
         )}
@@ -175,7 +175,7 @@ export function JobDetailView({
             <p className="text-label-1 text-slate-600">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
             <Link
               href="/assessment"
-              className="mt-3 inline-block rounded-lg bg-brand-blue-500 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+              className="mt-3 inline-block rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
             >
               내게 맞는 직업 찾기
             </Link>
@@ -235,7 +235,7 @@ export function JobDetailView({
       )}
 
       <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row">
-        <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 bg-brand-blue-500 hover:bg-brand-blue-600" />
+        <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" />
         <JobBookmarkButton
           jobId={job.id}
           jobCategory={job.jobCategory}

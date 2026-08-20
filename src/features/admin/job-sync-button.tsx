@@ -14,7 +14,7 @@ export function JobSyncButton() {
     <div className="flex flex-col items-end gap-1.5">
       <Button
         size="sm"
-        className="bg-brand-blue-500 hover:bg-brand-blue-600"
+        className="bg-brand-blue-400 hover:bg-brand-blue-600"
         disabled={pending}
         onClick={() => {
           startTransition(async () => {

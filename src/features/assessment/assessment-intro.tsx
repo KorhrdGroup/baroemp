@@ -35,7 +35,7 @@ export function AssessmentIntro() {
       <div className="mt-6 flex flex-wrap gap-4 text-label-1 font-semibold text-slate-500">
         {INFO_ITEMS.map(({ icon: Icon, label }) => (
           <span key={label} className="flex items-center gap-1.5">
-            <Icon className="size-4 text-brand-blue-500" />
+            <Icon className="size-4 text-brand-blue-600" />
             {label}
           </span>
         ))}
@@ -50,7 +50,7 @@ export function AssessmentIntro() {
         <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
           {RESULT_ITEMS.map((item) => (
             <li key={item} className="flex items-center gap-2 text-body-2 text-slate-700">
-              <CheckCircle2 className="size-4 shrink-0 text-brand-blue-500" />
+              <CheckCircle2 className="size-4 shrink-0 text-brand-blue-600" />
               {item}
             </li>
           ))}

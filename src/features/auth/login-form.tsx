@@ -38,7 +38,7 @@ export function LoginForm({ next }: { next: string }) {
         </Link>
       </div>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-500 hover:bg-brand-blue-600">
+      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
         {pending ? "로그인 중..." : "로그인"}
       </Button>
     </form>

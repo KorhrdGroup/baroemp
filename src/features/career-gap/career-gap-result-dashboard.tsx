@@ -228,7 +228,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
       {(result.recommendations.length > 0 || result.resumeGapNotes.length > 0 || result.coverLetterGapNotes.length > 0) && (
         <div className="rounded-2xl border border-border bg-white p-6">
           <h2 className="flex items-center gap-1.5 text-body-1 font-bold text-slate-900">
-            <GraduationCap className="size-5 text-brand-blue-500" /> 추가 준비 추천
+            <GraduationCap className="size-5 text-brand-blue-600" /> 추가 준비 추천
           </h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {result.recommendations.map((rec) => (
@@ -324,7 +324,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
             다른 직업 다시 분석하기
           </Link>
         </Button>
-        <Button className="flex-1 bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+        <Button className="flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
           <Link href="/resume">이력서 보완하기</Link>
         </Button>
       </div>

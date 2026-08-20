@@ -96,7 +96,7 @@ export default async function JobsPage({
       {recommendation && recommendation.jobs.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-5 text-brand-blue-500" />
+            <Sparkles className="size-5 text-brand-blue-600" />
             <h2 className="text-body-1 font-bold text-slate-900">
               검사 결과 기반 &ldquo;{recommendation.occupationName}&rdquo; 맞춤 공고
             </h2>

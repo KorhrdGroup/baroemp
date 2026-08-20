@@ -61,7 +61,7 @@ export default async function ResumeListPage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="truncate text-body-2 font-semibold text-slate-900">{resume.title}</p>
-                    {resume.isPrimary && <Badge className="rounded-full bg-brand-blue-500 text-label-2">대표</Badge>}
+                    {resume.isPrimary && <Badge className="rounded-full bg-brand-blue-400 text-label-2">대표</Badge>}
                     <Badge variant="outline" className="rounded-full text-label-2">
                       {resume.status === "completed" ? "완성" : resume.status === "archived" ? "보관" : "작성중"}
                     </Badge>

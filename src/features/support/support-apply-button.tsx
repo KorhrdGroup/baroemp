@@ -26,7 +26,7 @@ export function SupportApplyButton({
     <Button
       type="button"
       size="lg"
-      className={className ?? "w-full bg-brand-blue-500 hover:bg-brand-blue-600"}
+      className={className ?? "w-full bg-brand-blue-400 hover:bg-brand-blue-600"}
       onClick={() => void handleClick()}
     >
       <ExternalLink className="size-4" />

@@ -99,7 +99,7 @@ export function AdminHeader({ admin }: { admin?: AdminHeaderUser }) {
             </button>
           </form>
         </div>
-        <Button size="sm" className="bg-brand-blue-500 hover:bg-brand-blue-600">
+        <Button size="sm" className="bg-brand-blue-400 hover:bg-brand-blue-600">
           + 상담 배정
         </Button>
       </div>

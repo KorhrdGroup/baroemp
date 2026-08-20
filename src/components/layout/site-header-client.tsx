@@ -33,7 +33,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" aria-label={siteConfig.name} className="flex items-center">
-            <Logo height={26} priority />
+            <Logo height={20} priority />
           </Link>
 
           <nav className="hidden items-center gap-1 lg:flex">
@@ -82,7 +82,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
               <Button variant="ghost" className="hidden text-slate-700 sm:inline-flex" asChild>
                 <Link href="/login">로그인</Link>
               </Button>
-              <Button className="hidden bg-brand-blue-500 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+              <Button className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
                 <Link href="/signup">회원가입</Link>
               </Button>
             </>
@@ -125,7 +125,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                         </Link>
                       </Button>
                       <form action={signOutAction}>
-                        <Button type="submit" className="w-full bg-brand-blue-500 hover:bg-brand-blue-600">
+                        <Button type="submit" className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
                           로그아웃
                         </Button>
                       </form>
@@ -137,7 +137,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                           로그인
                         </Link>
                       </Button>
-                      <Button className="bg-brand-blue-500 hover:bg-brand-blue-600" asChild>
+                      <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                         <Link href="/signup" onClick={() => setMobileOpen(false)}>
                           회원가입
                         </Link>
