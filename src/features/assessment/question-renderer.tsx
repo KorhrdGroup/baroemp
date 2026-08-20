@@ -30,23 +30,32 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
   if (question.answerType === "SINGLE") {
     const current = value.type === "SINGLE" ? value.optionId : undefined;
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {question.options?.map((option) => {
           const selected = current === option.id;
           return (
             <button
               key={option.id}
               type="button"
+              role="radio"
+              aria-checked={selected}
               onClick={() => onChange({ type: "SINGLE", optionId: option.id })}
               className={cn(
-                "flex min-h-14 items-center justify-between rounded-xl border px-5 py-4 text-left text-body-2 font-medium transition-colors",
+                "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
                 selected
                   ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
+              <span
+                className={cn(
+                  "absolute left-4 flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                  selected ? "border-brand-blue-500" : "border-slate-300",
+                )}
+              >
+                {selected && <span className="size-2.5 rounded-full bg-brand-blue-500" />}
+              </span>
               {option.optionText}
-              {selected && <Check className="size-5 text-brand-blue-600" />}
             </button>
           );
         })}
@@ -57,7 +66,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
   if (question.answerType === "MULTI" || question.answerType === "QUALIFICATION_MULTI") {
     const current = value.type === "MULTI" ? value.optionIds : [];
     return (
-      <div className="flex flex-col gap-3">
+      <div className="flex flex-col gap-2">
         {question.options?.map((option) => {
           const selected = current.includes(option.id);
           return (
@@ -69,25 +78,25 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 onChange({ type: "MULTI", optionIds: next });
               }}
               className={cn(
-                "flex min-h-14 items-center justify-between rounded-xl border px-5 py-4 text-left text-body-2 font-medium transition-colors",
+                "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
                 selected
                   ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
-              {option.optionText}
               <span
                 className={cn(
-                  "flex size-6 items-center justify-center rounded-md border-2",
+                  "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2",
                   selected ? "border-brand-blue-500 bg-brand-blue-500 text-white" : "border-slate-300",
                 )}
               >
-                {selected && <Check className="size-4" />}
+                {selected && <Check className="size-3.5" />}
               </span>
+              {option.optionText}
             </button>
           );
         })}
-        <p className="text-label-1 text-slate-400">해당하는 항목이 없다면 선택하지 않고 다음으로 넘어가셔도 됩니다.</p>
+        <p className="mt-2 text-center text-label-1 text-slate-400">해당하는 항목이 없다면 선택하지 않고 다음으로 넘어가셔도 됩니다.</p>
       </div>
     );
   }
@@ -131,7 +140,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
     const current = value.type === "NUMBER" ? value.value : undefined;
     const unit = (question.metadata?.unit as string | undefined) ?? "";
     return (
-      <div className="flex items-center gap-3">
+      <div className="flex items-center justify-center gap-3">
         <input
           type="number"
           min={0}
