@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/layout/logo";
 
 const testimonials = [
   {
@@ -20,6 +21,7 @@ export function CtaSection() {
     <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 gap-6 rounded-3xl bg-brand-navy-900 p-8 sm:p-10 lg:grid-cols-2">
         <div className="flex flex-col justify-center">
+          <Logo variant="onDark" height={22} className="mb-5" />
           <p className="text-label-1 font-semibold text-brand-blue-300">중장년 취업 성공 스토리</p>
           <h2 className="mt-3 text-title-2 font-bold text-white sm:text-headline-3">
             당신도 할 수 있습니다!
