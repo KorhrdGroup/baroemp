@@ -79,7 +79,7 @@ function ActiveToggleButton({ assessmentId, isActive }: { assessmentId: string; 
       size="sm"
       variant={isActive ? "outline" : "default"}
       disabled={pending}
-      className={isActive ? "h-8 rounded-lg text-label-2" : "h-8 rounded-lg bg-brand-blue-400 text-label-2 hover:bg-brand-blue-600"}
+      className={isActive ? "h-8 text-label-2" : "h-8 bg-brand-blue-400 text-label-2 hover:bg-brand-blue-600"}
       onClick={() => startTransition(async () => { await toggleAssessmentActiveAction(assessmentId); })}
     >
       {isActive ? "비활성화" : "활성화"}
