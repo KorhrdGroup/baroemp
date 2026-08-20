@@ -32,7 +32,7 @@ export function CtaSection() {
             asChild
           >
             <Link href="/consulting">
-              성공 사례 보기
+              나도 컨설팅 받기
               <ArrowRight className="size-4" />
             </Link>
           </Button>

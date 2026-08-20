@@ -14,6 +14,9 @@ export async function ProgressStepsSection() {
   const recommended = user ? (await getRecommendedJobsForUser(user.id, 1))[0] : undefined;
 
   const percent = Math.round((doneCount / progressSteps.length) * 100);
+  // 연결선은 첫 원 중심(10%)에서 마지막 원 중심(90%)까지 80% 폭을 차지한다.
+  const lineFill =
+    doneCount > 1 ? ((doneCount - 1) / (progressSteps.length - 1)) * 80 : 0;
 
   return (
     <section className="bg-brand-blue-50/50 py-14">
@@ -42,26 +45,28 @@ export async function ProgressStepsSection() {
               </div>
             )}
 
-            <ol className="grid grid-cols-5 gap-2">
-              {progressSteps.map((step, index) => {
+            <ol className="relative grid grid-cols-5 gap-2">
+              {/* 원 5개 뒤로 이어지는 연결선. 첫 원과 마지막 원의 중심을 잇는다. */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-[10%] right-[10%] top-[18px] h-px bg-border sm:top-5"
+              />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute left-[10%] top-[18px] h-px bg-brand-blue-400 transition-[width] duration-300 sm:top-5"
+                style={{ width: `${lineFill}%` }}
+              />
+              {progressSteps.map((step) => {
                 const done = status[step.id];
                 const isNext = step.id === nextStepId;
                 return (
                   <li key={step.id} className="flex flex-col items-center text-center">
                     <div className="relative flex w-full items-center">
-                      {index > 0 && (
-                        <span
-                          className={
-                            "absolute left-0 top-1/2 h-px w-full -translate-x-full " +
-                            (done ? "bg-brand-blue-300" : "bg-border")
-                          }
-                        />
-                      )}
                       <Link
                         href={step.href}
                         aria-label={`${step.title} 단계로 이동`}
                         className={
-                          "mx-auto flex size-9 items-center justify-center rounded-full text-label-1 font-bold transition-colors sm:size-10 " +
+                          "relative z-10 mx-auto flex size-9 items-center justify-center rounded-full text-label-1 font-bold transition-colors sm:size-10 " +
                           (done
                             ? "bg-brand-blue-500 text-white"
                             : isNext
