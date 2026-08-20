@@ -31,7 +31,7 @@ export default async function MyPageProfileEditPage() {
       </Link>
 
       <h1 className="text-title-2 font-bold text-slate-900">내 정보 수정</h1>
-      <p className="mt-2 text-body-2 text-slate-500">
+      <p className="mt-2 text-body-2-reading text-slate-500">
         입력한 정보는 맞춤 직업/채용/지원제도 추천에 활용됩니다.
       </p>
 

@@ -159,7 +159,7 @@ export default async function MyPage() {
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">마이페이지</h1>
-          <p className="mt-2 text-body-2 text-slate-500">
+          <p className="mt-2 text-body-2-reading text-slate-500">
             {profile.name ?? "회원"}님의 Career Profile과 활동 이력을 확인할 수 있는 공간입니다.
           </p>
         </div>

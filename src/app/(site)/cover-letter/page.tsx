@@ -18,7 +18,7 @@ export default async function CoverLetterListPage() {
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">자기소개서</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나만의 자기소개서를 작성해보세요.</h1>
-        <p className="mt-2 text-body-2 text-slate-500">문항을 자유롭게 추가/삭제/순서변경하고, AI 초안/첨삭을 받아보세요.</p>
+        <p className="mt-2 text-body-2-reading text-slate-500">문항을 자유롭게 추가/삭제/순서변경하고, AI 초안/첨삭을 받아보세요.</p>
       </div>
 
       <Link href="/cover-letter/new">
