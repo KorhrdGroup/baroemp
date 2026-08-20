@@ -49,7 +49,7 @@ export function OccupationRecommendationCard({
     <details
       open={defaultOpen}
       className={cn(
-        "group rounded-2xl border bg-white shadow-sm transition-shadow",
+        "group rounded-2xl border bg-white",
         rank === 1 ? "border-brand-blue-300 ring-2 ring-brand-blue-100" : "border-border",
       )}
     >

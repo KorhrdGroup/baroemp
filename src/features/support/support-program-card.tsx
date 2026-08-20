@@ -34,7 +34,7 @@ export function SupportProgramCard({
   return (
     <Link
       href={`/support/${program.id}`}
-      className="flex flex-col rounded-2xl border border-border bg-white p-5 shadow-sm transition-colors hover:border-brand-blue-300"
+      className="flex flex-col rounded-2xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300"
     >
       <div className="flex items-center justify-between gap-2">
         <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">

@@ -11,7 +11,7 @@ export function ProgressStepsSection() {
         <SectionHeading title="나의 취업 준비 현황 한눈에" align="center" />
 
         <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
-          <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-border sm:p-8">
+          <div className="rounded-2xl bg-white p-6 ring-1 ring-border sm:p-8">
             <ol className="grid grid-cols-5 gap-2">
               {progressSteps.map((step, index) => (
                 <li key={step.id} className="flex flex-col items-center text-center">
@@ -47,7 +47,7 @@ export function ProgressStepsSection() {
             </div>
           </div>
 
-          <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm ring-1 ring-border">
+          <div className="flex flex-col rounded-2xl bg-white p-6 ring-1 ring-border">
             <p className="text-label-1 font-semibold text-slate-500">오늘의 추천</p>
             <div className="mt-3 rounded-xl bg-brand-blue-50 p-4">
               <p className="text-label-1 font-semibold text-brand-blue-700">

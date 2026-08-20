@@ -167,7 +167,7 @@ export default async function MyPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         {/* A. 내 정보 */}
-        <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+        <Card className="rounded-2xl border-0 ring-1 ring-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5 text-body-2">
               <UserRound className="size-4" /> 내 정보
@@ -190,7 +190,7 @@ export default async function MyPage() {
         </Card>
 
         {/* B. 취업 프로필 */}
-        <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+        <Card className="rounded-2xl border-0 ring-1 ring-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5 text-body-2">
               <Briefcase className="size-4" /> 취업 프로필
@@ -234,7 +234,7 @@ export default async function MyPage() {
 
         {/* C. 직업진단 */}
         {latestResult ? (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="text-body-2">최근 직업진단 결과</CardTitle>
             </CardHeader>
@@ -264,7 +264,7 @@ export default async function MyPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="text-body-2">직업진단</CardTitle>
             </CardHeader>
@@ -279,7 +279,7 @@ export default async function MyPage() {
 
         {/* D. 채용공고 */}
         {jobData.recommended.length > 0 && (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
+          <Card className="rounded-2xl border-0 ring-1 ring-border md:col-span-2">
             <CardHeader>
               <CardTitle className="text-body-2">맞춤 채용공고</CardTitle>
             </CardHeader>
@@ -299,7 +299,7 @@ export default async function MyPage() {
         )}
 
         {jobData.bookmarked.length > 0 && (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="text-body-2">찜한 채용공고</CardTitle>
             </CardHeader>
@@ -319,7 +319,7 @@ export default async function MyPage() {
         )}
 
         {jobData.recentlyViewed.length > 0 && (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="text-body-2">최근 본 채용공고</CardTitle>
             </CardHeader>
@@ -339,7 +339,7 @@ export default async function MyPage() {
         )}
 
         {jobData.applyHistory.length > 0 && (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
+          <Card className="rounded-2xl border-0 ring-1 ring-border md:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <Briefcase className="size-4" /> 지원 페이지로 이동한 공고
@@ -367,7 +367,7 @@ export default async function MyPage() {
         )}
 
         {/* D-2. 이력서/자기소개서 (스펙 51번) */}
-        <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
+        <Card className="rounded-2xl border-0 ring-1 ring-border md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5 text-body-2">
               <FileText className="size-4" /> 이력서 · 자기소개서
@@ -405,7 +405,7 @@ export default async function MyPage() {
         </Card>
 
         {/* D-3. 취업 준비도 (스펙 37번) */}
-        <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
+        <Card className="rounded-2xl border-0 ring-1 ring-border md:col-span-2">
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5 text-body-2">
               <Target className="size-4" /> 취업 준비도
@@ -451,7 +451,7 @@ export default async function MyPage() {
 
         {/* E. 지원제도 */}
         {supportData.latestSessionId ? (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <Gift className="size-4" /> 지원금 진단 결과
@@ -470,7 +470,7 @@ export default async function MyPage() {
             </CardContent>
           </Card>
         ) : (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <Gift className="size-4" /> 지원금 찾기
@@ -486,7 +486,7 @@ export default async function MyPage() {
         )}
 
         {supportData.bookmarked.length > 0 && (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="text-body-2">찜한 지원제도</CardTitle>
             </CardHeader>
@@ -508,7 +508,7 @@ export default async function MyPage() {
         )}
 
         {supportData.recentlyViewed.length > 0 && (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="text-body-2">최근 본 지원제도</CardTitle>
             </CardHeader>
@@ -530,7 +530,7 @@ export default async function MyPage() {
         )}
 
         {supportData.applyHistory.length > 0 && (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border md:col-span-2">
+          <Card className="rounded-2xl border-0 ring-1 ring-border md:col-span-2">
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <Gift className="size-4" /> 신청 페이지로 이동한 지원제도
@@ -559,7 +559,7 @@ export default async function MyPage() {
 
         {/* F. 추천 교육/콘텐츠 */}
         {recommendedContents.length > 0 && (
-          <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+          <Card className="rounded-2xl border-0 ring-1 ring-border">
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <GraduationCap className="size-4" /> 추천 교육·콘텐츠
@@ -577,7 +577,7 @@ export default async function MyPage() {
         )}
 
         {/* G. 상담 */}
-        <Card className="rounded-2xl border-0 shadow-sm ring-1 ring-border">
+        <Card className="rounded-2xl border-0 ring-1 ring-border">
           <CardHeader>
             <CardTitle className="flex items-center gap-1.5 text-body-2">
               <MessageCircle className="size-4" /> 상담

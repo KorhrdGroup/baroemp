@@ -35,7 +35,7 @@ export default async function MyPageProfileEditPage() {
         입력한 정보는 맞춤 직업/채용/지원제도 추천에 활용됩니다.
       </p>
 
-      <div className="mt-8 rounded-3xl border border-border bg-white p-6 shadow-sm sm:p-8">
+      <div className="mt-8 rounded-3xl border border-border bg-white p-6 sm:p-8">
         <ProfileEditForm profile={profile} careerProfile={careerProfile} />
       </div>
     </div>

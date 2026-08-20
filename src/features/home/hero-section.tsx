@@ -43,7 +43,7 @@ export function HeroSection() {
             </Button>
           </div>
 
-          <div className="mt-6 flex max-w-md items-center gap-2 rounded-xl border border-border bg-white px-4 py-3 shadow-sm">
+          <div className="mt-6 flex max-w-md items-center gap-2 rounded-xl border border-border bg-white px-4 py-3">
             <Search className="size-5 shrink-0 text-slate-400" />
             <input
               type="text"

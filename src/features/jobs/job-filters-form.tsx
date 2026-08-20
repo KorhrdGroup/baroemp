@@ -80,7 +80,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
   };
 
   return (
-    <div className="rounded-2xl border border-border bg-white p-4 shadow-sm">
+    <div className="rounded-2xl border border-border bg-white p-4">
       <form
         onSubmit={(e) => {
           e.preventDefault();

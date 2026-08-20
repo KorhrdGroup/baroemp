@@ -369,7 +369,7 @@ const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지
 function SupportIntro({ onStart, loading }: { onStart: () => void; loading: boolean }) {
   return (
     // 위저드가 페이지 폭을 직접 관리하므로 인트로는 자체 컨테이너를 갖는다.
-    <div className="mx-auto my-10 max-w-2xl rounded-3xl border border-border bg-white p-8 shadow-sm sm:p-12">
+    <div className="mx-auto my-10 max-w-2xl rounded-3xl border border-border bg-white p-8 sm:p-12">
       <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-blue-50 text-brand-blue-600">
         <Coins className="size-7" />
       </span>

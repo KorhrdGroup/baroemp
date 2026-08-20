@@ -18,7 +18,7 @@ const INFO_ITEMS = [
 
 export function AssessmentIntro() {
   return (
-    <div className="rounded-3xl border border-border bg-white p-8 shadow-sm sm:p-12">
+    <div className="rounded-3xl border border-border bg-white p-8 sm:p-12">
       <span className="flex size-14 items-center justify-center rounded-2xl bg-brand-blue-50 text-brand-blue-600">
         <Briefcase className="size-7" />
       </span>
