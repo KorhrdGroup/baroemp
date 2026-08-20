@@ -10,13 +10,10 @@ import { getProgressSummary } from "./progress-status";
 export async function ProgressStepsSection() {
   const user = await getCurrentUser();
   const { status, doneCount, nextStepId } = await getProgressSummary(user?.id ?? null);
-  const nextStep = progressSteps.find((s) => s.id === nextStepId);
+  // 순서 개념이 아니라 "아직 남은 단계 하나"를 골라 안내하는 용도다.
+  const remainingStep = progressSteps.find((s) => s.id === nextStepId);
   const recommended = user ? (await getRecommendedJobsForUser(user.id, 1))[0] : undefined;
 
-  const percent = Math.round((doneCount / progressSteps.length) * 100);
-  // 연결선은 첫 원 중심(10%)에서 마지막 원 중심(90%)까지 80% 폭을 차지한다.
-  const lineFill =
-    doneCount > 1 ? ((doneCount - 1) / (progressSteps.length - 1)) * 80 : 0;
 
   return (
     <section className="bg-brand-blue-50/50 py-14">
@@ -33,32 +30,14 @@ export async function ProgressStepsSection() {
 
         <div className="mt-10 grid grid-cols-1 gap-6 lg:grid-cols-[2fr_1fr]">
           <div className="rounded-xl bg-white p-6 ring-1 ring-border sm:p-8">
-            {user && (
-              <div className="mb-8">
-                <div className="flex items-center justify-between text-label-1">
-                  <span className="font-semibold text-slate-700">진행률</span>
-                  <span className="font-bold text-brand-blue-600">{percent}%</span>
-                </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-atomic-mono-200">
-                  <div className="h-full rounded-full bg-brand-blue-400" style={{ width: `${percent}%` }} />
-                </div>
-              </div>
-            )}
-
             <ol className="relative grid grid-cols-5 gap-2">
-              {/* 원 5개 뒤로 이어지는 연결선. 첫 원과 마지막 원의 중심을 잇는다. */}
+              {/* 원들을 잇는 구조선. 단계는 순서와 무관하게 완료할 수 있으므로 채우지 않는다. */}
               <span
                 aria-hidden
                 className="pointer-events-none absolute left-[10%] right-[10%] top-[18px] h-px bg-border sm:top-5"
               />
-              <span
-                aria-hidden
-                className="pointer-events-none absolute left-[10%] top-[18px] h-px bg-brand-blue-400 transition-[width] duration-300 sm:top-5"
-                style={{ width: `${lineFill}%` }}
-              />
               {progressSteps.map((step) => {
                 const done = status[step.id];
-                const isNext = step.id === nextStepId;
                 return (
                   <li key={step.id} className="flex flex-col items-center text-center">
                     <div className="relative flex w-full items-center">
@@ -69,9 +48,7 @@ export async function ProgressStepsSection() {
                           "relative z-10 mx-auto flex size-9 items-center justify-center rounded-full text-label-1 font-bold transition-colors sm:size-10 " +
                           (done
                             ? "bg-brand-blue-400 text-white"
-                            : isNext
-                              ? "bg-white text-brand-blue-600 ring-2 ring-brand-blue-400"
-                              : "bg-slate-100 text-slate-400 hover:bg-slate-200")
+                            : "bg-slate-100 text-slate-400 hover:bg-brand-blue-50 hover:text-brand-blue-600")
                         }
                       >
                         {done ? <Check className="size-4 sm:size-5" /> : step.step}
@@ -80,14 +57,14 @@ export async function ProgressStepsSection() {
                     <p
                       className={
                         "mt-2 text-label-1 font-semibold sm:text-body-2 " +
-                        (done || isNext ? "text-slate-800" : "text-slate-400")
+                        (done ? "text-slate-800" : "text-slate-400")
                       }
                     >
                       {step.title}
                     </p>
                     <p className="mt-0.5 hidden text-label-2 text-slate-400 sm:block">{step.description}</p>
-                    {isNext && user && (
-                      <span className="mt-1 text-label-2 font-semibold text-brand-blue-600">진행할 차례</span>
+                    {done && (
+                      <span className="mt-1 text-label-2 font-semibold text-brand-blue-600">완료</span>
                     )}
                   </li>
                 );
@@ -98,13 +75,13 @@ export async function ProgressStepsSection() {
               <p className="text-label-1 text-slate-500">
                 {!user
                   ? "진단부터 취업 준비 상황을 한 번에 관리하고 싶으신가요?"
-                  : nextStep
-                    ? `다음은 '${nextStep.title}' 단계예요. ${nextStep.description}`
+                  : remainingStep
+                    ? `'${remainingStep.title}' 단계가 아직 남아 있어요. 원하는 단계부터 시작하셔도 됩니다.`
                     : "모든 단계를 마쳤어요. 새로운 공고를 확인해보세요."}
               </p>
               <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                <Link href={nextStep?.href ?? "/jobs"}>
-                  {!user ? "진단부터 시작하기" : nextStep ? `${nextStep.title} 이어하기` : "채용공고 보기"}
+                <Link href={remainingStep?.href ?? "/jobs"}>
+                  {!user ? "진단부터 시작하기" : remainingStep ? `${remainingStep.title} 하러 가기` : "채용공고 보기"}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
