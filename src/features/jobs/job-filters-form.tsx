@@ -88,7 +88,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
         }}
         className="flex flex-col gap-3 sm:flex-row sm:items-center"
       >
-        <div className="flex flex-1 items-center gap-2 rounded-xl border border-border px-3 py-2.5">
+        <div className="flex flex-1 items-center gap-2 rounded-md border border-border px-3 py-2.5">
           <Search className="size-4 shrink-0 text-slate-400" />
           <Input
             value={keyword}

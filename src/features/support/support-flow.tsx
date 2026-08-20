@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock, Coins, Gift, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, Check, Clock, Coins, FileText, Gift, Landmark, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, QUALIFICATION_LABELS, REGION_LABELS } from "@/lib/labels";
@@ -368,31 +369,21 @@ const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지
 
 function SupportIntro({ onStart, loading }: { onStart: () => void; loading: boolean }) {
   return (
-    // 위저드가 페이지 폭을 직접 관리하므로 인트로는 자체 컨테이너를 갖는다.
-    <div className="mx-auto my-10 max-w-2xl rounded-2xl border border-border bg-white p-8 sm:p-12">
-      <span className="flex size-14 items-center justify-center rounded-xl bg-brand-blue-50 text-brand-blue-600">
-        <Coins className="size-7" />
-      </span>
-
-      <h1 className="mt-6 text-title-2 font-extrabold text-slate-900 sm:text-headline-3">
-        놓치고 있는 취업·교육 혜택을 찾아보세요
-      </h1>
-      <p className="mt-3 max-w-xl text-body-2-reading text-slate-600">
-        몇 가지 조건만 입력하면
-        <br className="hidden sm:block" />
-        현재 상황에 맞는 정부·지자체 지원제도를 찾아드립니다.
-      </p>
-
-      <div className="mt-6 flex flex-wrap gap-4 text-label-1 font-semibold text-slate-500">
-        {INFO_ITEMS.map(({ icon: Icon, label }) => (
-          <span key={label} className="flex items-center gap-1.5">
-            <Icon className="size-4 text-brand-blue-600" />
-            {label}
-          </span>
-        ))}
-      </div>
-
-      <div className="mt-8">
+    <IntroHero
+      icon={Coins}
+      title="놓치고 있는 취업·교육 혜택을 찾아보세요"
+      description={
+        <>
+          몇 가지 조건만 입력하면{" "}
+          <br className="hidden sm:block" />
+          현재 상황에 맞는 정부·지자체 지원제도를 찾아드립니다.
+        </>
+      }
+      infoItems={INFO_ITEMS}
+      decorIcons={[Landmark, BadgeCheck, FileText]}
+      ctaHeadline="2~3분이면 진단이 끝납니다"
+      ctaDescription="지금 시작하면 받을 수 있는 지원제도를 바로 확인할 수 있어요."
+      cta={
         <Button
           size="lg"
           onClick={onStart}
@@ -408,25 +399,16 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
             </>
           )}
         </Button>
-      </div>
-
-      <div className="mt-10 rounded-xl bg-brand-blue-50/60 p-6">
-        <p className="text-label-1 font-bold text-brand-blue-700">이 진단으로 확인할 수 있는 것</p>
-        <ul className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-          {RESULT_ITEMS.map((item) => (
-            <li key={item} className="flex items-center gap-2 text-body-2 text-slate-700">
-              <CheckCircle2 className="size-4 shrink-0 text-brand-blue-600" />
-              {item}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <p className="mt-6 text-label-1 text-slate-400">
-        주민등록번호, 상세 재산정보 등 민감정보는 수집하지 않습니다. 소득/재산 조건이 필요한 정책은 &quot;확인
-        필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
-      </p>
-    </div>
+      }
+      highlightTitle="이 진단으로 확인할 수 있는 것"
+      highlights={RESULT_ITEMS}
+      note={
+        <>
+          주민등록번호, 상세 재산정보 등 민감정보는 수집하지 않습니다. 소득/재산 조건이 필요한 정책은 &quot;확인
+          필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
+        </>
+      }
+    />
   );
 }
 

@@ -5,8 +5,20 @@ import { HeroIllustration } from "./hero-illustration";
 
 export function HeroSection() {
   return (
-    <section className="relative overflow-hidden bg-brand-blue-50">
-      <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
+    <section className="relative overflow-hidden bg-gov-surface">
+      {/*
+       * 고용24 메인의 파스텔 그라데이션 톤.
+       * 분홍은 왼쪽 위 모서리에만 남기고 나머지는 파랑 계열이 끌고 간다.
+       * (분홍 구간을 넓게 잡으면 텍스트 영역 전체가 핑크로 읽힌다)
+       */}
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <div className="absolute inset-0 bg-[linear-gradient(115deg,var(--gov-blush)_0%,var(--gov-lavender)_16%,var(--gov-sky)_42%,var(--gov-blue)_70%,var(--gov-ice)_100%)]" />
+        <div className="absolute -right-32 -top-24 size-[38rem] rounded-full bg-gov-blue opacity-70 blur-3xl" />
+        <div className="absolute -bottom-40 left-1/4 size-[30rem] rounded-full bg-gov-sky opacity-80 blur-3xl" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
+      </div>
+
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
         <div>
           <p className="text-body-2 font-semibold text-brand-blue-600">
             중장년의 새로운 시작, 한평생 함께합니다
@@ -43,8 +55,9 @@ export function HeroSection() {
             </Button>
           </div>
 
-          <div className="mt-6 flex max-w-md items-center gap-2 rounded-xl border border-border bg-white px-4 py-3">
-            <Search className="size-5 shrink-0 text-slate-400" />
+          {/* 고용24처럼 검색창을 굵은 테두리로 강조한다. 색은 HDS 블루, radius는 컨트롤 규칙(8px)을 유지한다. */}
+          <div className="mt-6 flex max-w-md items-center gap-2 rounded-md border-2 border-brand-blue-400 bg-white px-4 py-3">
+            <Search className="size-5 shrink-0 text-brand-blue-600" />
             <input
               type="text"
               placeholder="관심 직종, 기업을 검색해보세요"

@@ -5,8 +5,8 @@ import { cn } from "@/lib/utils";
 
 export function CoreServicesSection() {
   return (
-    <section className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+    <section className="py-14">
+      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
         {coreServices.map((service) => {
           const Icon = service.icon;
           return (
@@ -15,8 +15,9 @@ export function CoreServicesSection() {
               href={service.href}
               className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-3 py-6 text-center transition-colors hover:border-brand-blue-200"
             >
-              <span className="flex size-12 items-center justify-center rounded-xl bg-brand-blue-50 text-brand-blue-600 transition-colors group-hover:bg-brand-blue-400 group-hover:text-white">
-                <Icon className="size-6" />
+              {/* 고용24 메인의 상징인 원형 아이콘 타일 */}
+              <span className="flex size-16 items-center justify-center rounded-full bg-brand-blue-400 text-white transition-colors group-hover:bg-brand-blue-600">
+                <Icon className="size-7" strokeWidth={1.8} />
               </span>
               <div>
                 <p className="text-body-2 font-semibold text-slate-900">{service.title}</p>

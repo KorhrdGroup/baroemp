@@ -107,9 +107,9 @@ export default async function AdminUsersPage({
           name="q"
           defaultValue={sp.q ?? ""}
           placeholder="이름 / 이메일 / 전화번호 검색"
-          className="h-9 w-56 rounded-lg border border-slate-200 px-3 text-label-1"
+          className="h-9 w-56 rounded-md border border-slate-200 px-3 text-label-1"
         />
-        <select name="grade" defaultValue={sp.grade ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-label-1">
+        <select name="grade" defaultValue={sp.grade ?? ""} className="h-9 rounded-md border border-slate-200 px-2 text-label-1">
           <option value="">Lead 전체</option>
           {(["A", "B", "C", "D"] as LeadGrade[]).map((g) => (
             <option key={g} value={g}>
@@ -120,7 +120,7 @@ export default async function AdminUsersPage({
         <select
           name="employmentStatus"
           defaultValue={sp.employmentStatus ?? ""}
-          className="h-9 rounded-lg border border-slate-200 px-2 text-label-1"
+          className="h-9 rounded-md border border-slate-200 px-2 text-label-1"
         >
           <option value="">취업상태 전체</option>
           {Object.entries(EMPLOYMENT_STATUS_LABELS).map(([code, label]) => (
@@ -129,7 +129,7 @@ export default async function AdminUsersPage({
             </option>
           ))}
         </select>
-        <select name="region" defaultValue={sp.region ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-label-1">
+        <select name="region" defaultValue={sp.region ?? ""} className="h-9 rounded-md border border-slate-200 px-2 text-label-1">
           <option value="">지역 전체</option>
           {Object.entries(REGION_LABELS).map(([code, label]) => (
             <option key={code} value={code}>
@@ -137,12 +137,12 @@ export default async function AdminUsersPage({
             </option>
           ))}
         </select>
-        <select name="marketing" defaultValue={sp.marketing ?? ""} className="h-9 rounded-lg border border-slate-200 px-2 text-label-1">
+        <select name="marketing" defaultValue={sp.marketing ?? ""} className="h-9 rounded-md border border-slate-200 px-2 text-label-1">
           <option value="">마케팅동의 전체</option>
           <option value="y">동의</option>
           <option value="n">미동의</option>
         </select>
-        <button type="submit" className="h-9 rounded-lg bg-brand-blue-400 px-4 text-label-1 font-medium text-white">
+        <button type="submit" className="h-9 rounded-md bg-brand-blue-400 px-4 text-label-1 font-medium text-white">
           검색
         </button>
         {(sp.q || sp.grade || sp.employmentStatus || sp.region || sp.marketing) && (

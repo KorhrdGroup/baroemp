@@ -119,7 +119,7 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
         </span>
         <Link
           href={`/jobs/${job.id}`}
-          className="rounded-lg bg-brand-blue-900 px-4 py-2 text-label-1 font-semibold text-white hover:bg-slate-700"
+          className="rounded-md bg-brand-blue-900 px-4 py-2 text-label-1 font-semibold text-white hover:bg-slate-700"
         >
           상세보기
         </Link>

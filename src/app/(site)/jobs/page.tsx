@@ -146,7 +146,7 @@ export default async function JobsPage({
                 <Link
                   href={buildPageHref(Math.max(1, page - 1))}
                   aria-disabled={page <= 1}
-                  className={`rounded-lg border border-border px-4 py-2 text-label-1 font-medium ${
+                  className={`rounded-md border border-border px-4 py-2 text-label-1 font-medium ${
                     page <= 1 ? "pointer-events-none text-slate-300" : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
@@ -158,7 +158,7 @@ export default async function JobsPage({
                 <Link
                   href={buildPageHref(Math.min(totalPages, page + 1))}
                   aria-disabled={page >= totalPages}
-                  className={`rounded-lg border border-border px-4 py-2 text-label-1 font-medium ${
+                  className={`rounded-md border border-border px-4 py-2 text-label-1 font-medium ${
                     page >= totalPages ? "pointer-events-none text-slate-300" : "text-slate-600 hover:bg-slate-50"
                   }`}
                 >
