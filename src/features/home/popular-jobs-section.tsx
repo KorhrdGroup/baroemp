@@ -27,7 +27,7 @@ export function PopularJobsSection() {
           <Link
             key={role.id}
             href={`/jobs?category=${role.jobCategory}`}
-            className="group flex flex-col rounded-2xl border border-border bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-brand-blue-200"
+            className="group flex flex-col rounded-2xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-200"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="flex flex-wrap gap-1.5">
