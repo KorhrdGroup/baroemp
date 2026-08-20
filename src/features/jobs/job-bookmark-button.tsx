@@ -89,7 +89,7 @@ export function JobBookmarkButton({
         "flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors",
         bookmarked
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-600"
-          : "border-border bg-white text-slate-400 hover:text-brand-blue-600",
+          : "border-border bg-white text-slate-400",
       )}
     >
       {bookmarked ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}

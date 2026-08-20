@@ -54,7 +54,7 @@ export function PopularJobsSection() {
               </div>
             </div>
 
-            <h3 className="mt-4 text-body-1 font-bold text-slate-900 group-hover:text-brand-blue-600">
+            <h3 className="mt-4 text-body-1 font-bold text-slate-900">
               {role.name}
             </h3>
             <p className="mt-1 text-label-1 text-slate-500">{role.shortDescription}</p>

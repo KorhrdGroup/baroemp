@@ -73,7 +73,7 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
             )}
           </div>
           <Link href={`/jobs/${job.id}`} className="mt-2 block">
-            <h3 className="line-clamp-2 text-body-1 font-bold text-slate-900 hover:text-brand-blue-600">{job.title}</h3>
+            <h3 className="line-clamp-2 text-body-1 font-bold text-slate-900">{job.title}</h3>
           </Link>
           <p className="mt-1 text-label-1 font-medium text-slate-500">{job.companyName}</p>
         </div>

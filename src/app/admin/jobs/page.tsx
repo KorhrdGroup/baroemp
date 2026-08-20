@@ -143,7 +143,7 @@ export default async function AdminJobsPage({
                 {filtered.map((job) => (
                   <TableRow key={job.id} className="text-label-1">
                     <TableCell className="max-w-[220px] truncate font-semibold">
-                      <Link href={`/jobs/${job.id}`} target="_blank" className="hover:text-brand-blue-600">
+                      <Link href={`/jobs/${job.id}`} target="_blank" className="">
                         {job.title}
                       </Link>
                     </TableCell>

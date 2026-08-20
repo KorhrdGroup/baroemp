@@ -90,7 +90,7 @@ export function AdminHeader({ admin }: { admin?: AdminHeaderUser }) {
         </Button>
         <div className="hidden items-center gap-2 border-l border-slate-200 pl-3 sm:flex">
           <span className="text-label-1 font-medium text-slate-700">{admin?.name || admin?.email || "관리자"}</span>
-          <Link href="/" className="text-label-2 text-slate-400 hover:text-brand-blue-600">
+          <Link href="/" className="text-label-2 text-slate-400">
             사이트
           </Link>
           <form action={signOutAction}>

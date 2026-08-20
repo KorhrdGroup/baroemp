@@ -33,7 +33,7 @@ export function LoginForm({ next }: { next: string }) {
       </div>
 
       <div className="flex justify-end">
-        <Link href="/forgot-password" className="text-label-2 text-slate-500 hover:text-brand-blue-600">
+        <Link href="/forgot-password" className="text-label-2 text-slate-500">
           비밀번호를 잊으셨나요?
         </Link>
       </div>

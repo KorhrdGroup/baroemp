@@ -42,7 +42,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "rounded-lg px-3 py-2 text-body-2 font-medium text-slate-700 transition-colors hover:bg-brand-blue-50 hover:text-brand-blue-600",
+                  "rounded-lg px-3 py-2 text-body-2 font-medium text-slate-700 transition-colors hover:bg-brand-blue-50",
                 )}
               >
                 {item.label}

@@ -146,7 +146,7 @@ export default async function AdminUsersPage({
           검색
         </button>
         {(sp.q || sp.grade || sp.employmentStatus || sp.region || sp.marketing) && (
-          <Link href="/admin/users" className="text-label-2 text-slate-400 hover:text-brand-blue-600">
+          <Link href="/admin/users" className="text-label-2 text-slate-400">
             초기화
           </Link>
         )}

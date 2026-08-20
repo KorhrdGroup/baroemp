@@ -25,7 +25,7 @@ export default async function MyPageProfileEditPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 lg:px-8">
-      <Link href="/mypage" className="mb-4 flex items-center gap-1 text-label-1 text-slate-500 hover:text-brand-blue-600">
+      <Link href="/mypage" className="mb-4 flex items-center gap-1 text-label-1 text-slate-500">
         <ArrowLeft className="size-4" />
         마이페이지로 돌아가기
       </Link>

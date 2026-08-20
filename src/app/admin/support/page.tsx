@@ -180,7 +180,7 @@ export default async function AdminSupportPage({
                 {filtered.map((program) => (
                   <TableRow key={program.id} className="text-label-1">
                     <TableCell className="max-w-[220px] truncate font-semibold">
-                      <Link href={`/support/${program.id}`} target="_blank" className="hover:text-brand-blue-600">
+                      <Link href={`/support/${program.id}`} target="_blank" className="">
                         {program.title}
                       </Link>
                     </TableCell>

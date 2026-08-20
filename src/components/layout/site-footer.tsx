@@ -21,7 +21,7 @@ export function SiteFooter() {
             <ul className="mt-3 space-y-2">
               {footerServiceLinks.map((item) => (
                 <li key={item.href + item.label}>
-                  <Link href={item.href} className="text-label-1 text-slate-500 hover:text-brand-blue-600">
+                  <Link href={item.href} className="text-label-1 text-slate-500">
                     {item.label}
                   </Link>
                 </li>
@@ -34,7 +34,7 @@ export function SiteFooter() {
             <ul className="mt-3 space-y-2">
               {footerCompanyLinks.map((item, i) => (
                 <li key={item.label + i}>
-                  <Link href={item.href} className="text-label-1 text-slate-500 hover:text-brand-blue-600">
+                  <Link href={item.href} className="text-label-1 text-slate-500">
                     {item.label}
                   </Link>
                 </li>
