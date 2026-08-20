@@ -26,3 +26,19 @@ export const mockAdminUsers: AdminUserListItem[] = [
   { id: "user-1020", name: "조병관", email: "byungkwan.jo@example.com", phone: "010-1010-2020", ageGroup: "50대", region: "부산", employmentStatus: "경력단절", signupChannel: "homepage", joinedAt: "2026-08-03", leadGrade: "A", leadScore: 68 },
 ];
 
+
+/**
+ * Mock Mode 로그인 이메일로 시드 회원을 찾는다.
+ * 두 가지 형태를 지원한다.
+ *  - 시드 회원의 실제 이메일: miyoung.kim@example.com
+ *  - 회원 id 를 로컬파트로: user-1001@test.com
+ * 못 찾으면 undefined 를 반환하고, 호출부가 기본 목 사용자로 처리한다.
+ */
+export function findMockMemberByLoginEmail(email: string): AdminUserListItem | undefined {
+  const lower = email.trim().toLowerCase();
+  if (!lower) return undefined;
+  const localPart = lower.split("@")[0];
+  return mockAdminUsers.find(
+    (u) => u.email.toLowerCase() === lower || u.id.toLowerCase() === localPart,
+  );
+}
