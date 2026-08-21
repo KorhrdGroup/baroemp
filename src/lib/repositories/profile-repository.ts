@@ -28,23 +28,19 @@ export interface ProfileRepository {
 }
 
 function createMockProfileRepository(): ProfileRepository {
-  // mockAdminUsers에는 동의 관련 컬럼이 없다. Mock Mode에서 온보딩 동의 변경을 확인할 수 있도록
-  // 시드 데이터를 건드리지 않고 덮어쓴 값만 따로 들고 있는다 (프로세스 메모리 한정).
-  const consentOverrides = new Map<string, { marketingConsent: boolean; marketingConsentAt?: string }>();
-
   return {
     async findById(userId: string) {
       const row = mockAdminUsers.find((u) => u.id === userId);
       if (!row) return null;
-      const consent = consentOverrides.get(userId);
       return {
         id: row.id,
         name: row.name,
         email: row.email,
         phone: row.phone,
         role: "USER",
-        marketingConsent: consent?.marketingConsent ?? true,
-        marketingConsentAt: consent?.marketingConsentAt ?? `${row.joinedAt}T00:00:00.000Z`,
+        // 시드 회원은 동의 컬럼이 없어 true로 본다. 가입/온보딩으로 만들어진 회원은 실제 값을 쓴다.
+        marketingConsent: row.marketingConsent ?? true,
+        marketingConsentAt: row.marketingConsent === false ? undefined : `${row.joinedAt}T00:00:00.000Z`,
         privacyConsentAt: `${row.joinedAt}T00:00:00.000Z`,
         regionSido: row.region,
         createdAt: `${row.joinedAt}T00:00:00.000Z`,
@@ -57,12 +53,7 @@ function createMockProfileRepository(): ProfileRepository {
       if (!row) return null;
       if (patch.name !== undefined) row.name = patch.name;
       if (patch.phone !== undefined) row.phone = patch.phone;
-      if (patch.marketingConsent !== undefined) {
-        consentOverrides.set(userId, {
-          marketingConsent: patch.marketingConsent,
-          marketingConsentAt: patch.marketingConsentAt,
-        });
-      }
+      if (patch.marketingConsent !== undefined) row.marketingConsent = patch.marketingConsent;
       return this.findById(userId);
     },
   };
