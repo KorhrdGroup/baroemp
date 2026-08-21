@@ -250,7 +250,11 @@ export function ResumeEditor({
         />
       </div>
 
-      <div className={cn("grid gap-6", showPreview && "lg:grid-cols-[1fr_1fr]")}>
+      {/*
+        접었을 때도 오른쪽 열을 좁게 남긴다. 토글이 늘 화면 오른쪽 같은 자리에 있어야
+        접고 펴는 기능이라는 게 읽힌다. 폼 헤더에 두면 접힘 여부에 따라 버튼이 이동한다.
+      */}
+      <div className={cn("grid gap-6", showPreview ? "lg:grid-cols-[1fr_1fr]" : "lg:grid-cols-[1fr_2.75rem]")}>
         <div className="space-y-4 print:hidden">
         {/* 편집기는 2단 그리드 안이라 바 폭이 좁다. min-w를 주지 않으면 제목 칸이 0으로 눌린다. */}
         <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
@@ -272,17 +276,6 @@ export function ResumeEditor({
             <Button variant="outline" size="sm" onClick={handleReview} disabled={isReviewing}>
               {isReviewing ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
               AI 이력서 점검
-            </Button>
-            {/* 미리보기 접기/펼치기. 모바일은 아래 탭으로 전환하므로 lg 이상에서만 노출한다. */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="hidden lg:inline-flex"
-              onClick={() => setShowPreview((v) => !v)}
-              aria-pressed={showPreview}
-            >
-              {showPreview ? <PanelRightClose className="size-4" /> : <PanelRightOpen className="size-4" />}
-              {showPreview ? "미리보기 접기" : "미리보기"}
             </Button>
           </div>
         </div>
@@ -704,31 +697,61 @@ export function ResumeEditor({
           저장은 폼을 다 채운 뒤에 하는 동작이라 아래에 둔다.
           폼이 길어 화면 밖으로 나가므로 sticky로 하단에 붙여 스크롤 중에도 닿게 한다.
         */}
-        <div className="sticky bottom-0 z-10 -mx-1 flex items-center justify-end gap-3 rounded-xl border border-border bg-white/95 px-4 py-3 backdrop-blur print:hidden">
-          {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
-          <Button onClick={() => void handleSave()} disabled={isSaving}>
+        {/* 화면을 벗어나는 액션이 없도록 삭제·목록으로도 이 바에 모은다. 저장은 남는 폭을 다 쓴다. */}
+        <div className="sticky bottom-0 z-10 -mx-1 flex items-center gap-2 rounded-xl border border-border bg-white/95 px-4 py-3 backdrop-blur print:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="shrink-0 text-rose-500"
+            onClick={() => void handleDelete(resume.id)}
+          >
+            <Trash2 className="size-4" /> 삭제
+          </Button>
+          <Button variant="outline" size="sm" className="shrink-0" asChild>
+            <Link href="/resume">목록으로</Link>
+          </Button>
+          {saveMessage && <span className="shrink-0 text-label-2 text-slate-400">{saveMessage}</span>}
+          <Button className="flex-1" onClick={() => void handleSave()} disabled={isSaving}>
             {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
             저장
           </Button>
         </div>
-
-        <div className="flex items-center justify-between print:hidden">
-          <Button variant="ghost" size="sm" className="text-rose-500" onClick={() => void handleDelete(resume.id)}>
-            <Trash2 className="size-4" /> 이력서 삭제
-          </Button>
-          <Link href="/resume" className="text-label-2 text-slate-400 hover:underline">
-            목록으로
-          </Link>
-        </div>
       </div>
+
+      {/* 접힌 상태의 세로 손잡이. 모바일은 아래 탭으로 전환하므로 lg 이상에서만 쓴다. */}
+      {!showPreview && (
+        <div className="hidden print:hidden lg:block">
+          <button
+            type="button"
+            onClick={() => setShowPreview(true)}
+            aria-expanded={false}
+            className="sticky top-4 flex w-11 flex-col items-center gap-2 rounded-xl border border-border bg-white py-4 text-slate-600 transition-colors hover:bg-muted"
+          >
+            <PanelRightOpen className="size-4" />
+            <span className="text-label-2 font-medium [writing-mode:vertical-rl]">미리보기</span>
+          </button>
+        </div>
+      )}
 
       <div className={cn(activeTab === "form" ? "hidden lg:block" : "block", !showPreview && "lg:hidden")}>
         <div className="sticky top-4 space-y-3">
-          <div className="flex items-center justify-between print:hidden">
+          <div className="flex items-center justify-between gap-2 print:hidden">
             <p className="text-label-1 font-semibold text-slate-500">미리보기</p>
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="size-4" /> PDF로 저장/인쇄
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Printer className="size-4" /> PDF로 저장/인쇄
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden lg:inline-flex"
+                onClick={() => setShowPreview(false)}
+                aria-expanded
+              >
+                <PanelRightClose className="size-4" />
+                접기
+              </Button>
+            </div>
           </div>
           <div className="max-h-[80vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border print:max-h-none print:overflow-visible print:bg-transparent print:p-0 print:ring-0">
             <ResumePreview detail={currentPreviewDetail()} />
