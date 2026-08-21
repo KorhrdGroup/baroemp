@@ -29,7 +29,7 @@ export default async function OnboardingProfilePage({
       <h1 className="mt-1 text-title-2 font-bold break-keep text-slate-900 sm:text-headline-3">
         어떤 일을 찾고 계신지 알려주세요
       </h1>
-      <p className="mt-3 text-body-2-reading text-slate-500">
+      <p className="mt-3 text-body-2-reading break-keep text-slate-500">
         입력하신 정보로 맞춤 채용공고와 받을 수 있는 지원금을 찾아드립니다. 지금 넘어가셔도 서비스는 그대로
         이용할 수 있고, 나중에 마이페이지에서 입력하실 수 있어요.
       </p>

@@ -183,7 +183,7 @@ export function OnboardingProfileForm({
           ))}
         </div>
 
-        <label className="flex items-center gap-2 text-body-2 text-slate-700">
+        <label className="flex items-center gap-2 text-body-2 break-keep text-slate-700">
           <Checkbox name="isOpenToTraining" defaultChecked={careerProfile?.isOpenToTraining ?? false} />
           직업훈련·교육 과정에 참여할 의향이 있어요
         </label>
@@ -213,7 +213,7 @@ export function OnboardingProfileForm({
             {needsMarketingConsent && (
               <>
                 <input type="hidden" name="marketingConsentAsked" value="1" />
-                <label className="flex items-start gap-2 text-label-1 text-slate-700">
+                <label className="flex items-start gap-2 text-label-1 break-keep text-slate-700">
                   <Checkbox name="marketingConsent" className="mt-0.5" />
                   <span>
                     맞춤 채용공고·지원금 정보를 알림톡으로 받는 데 동의합니다. (선택, 언제든 해지 가능)
