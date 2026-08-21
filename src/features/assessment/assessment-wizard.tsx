@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -42,9 +43,17 @@ interface AssessmentWizardProps {
   sections: AssessmentSection[];
   questions: AssessmentQuestion[];
   initialStep: number;
+  /** 취업 프로필에 이미 있어 묻지 않은 문항 수. 0이면 안내하지 않는다. */
+  skippedCount?: number;
 }
 
-export function AssessmentWizard({ sessionId, sections, questions, initialStep }: AssessmentWizardProps) {
+export function AssessmentWizard({
+  sessionId,
+  sections,
+  questions,
+  initialStep,
+  skippedCount = 0,
+}: AssessmentWizardProps) {
   const router = useRouter();
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.min(Math.max(initialStep, 0), questions.length - 1),
@@ -183,6 +192,16 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
         </h2>
         {question.description && (
           <p className="mt-3 text-center text-body-2-reading text-slate-500">{question.description}</p>
+        )}
+
+        {/* 왜 문항이 짧아졌는지 알려주고, 저장된 값이 틀렸으면 고칠 경로를 준다. */}
+        {skippedCount > 0 && currentIndex === 0 && (
+          <p className="mt-4 text-center text-label-1 text-slate-400">
+            이미 알려주신 정보 {skippedCount}개는 건너뛰었어요.{" "}
+            <Link href="/mypage/profile" className="font-medium text-brand-blue-600 underline underline-offset-2">
+              수정하기
+            </Link>
+          </p>
         )}
 
         <div className="mt-10">

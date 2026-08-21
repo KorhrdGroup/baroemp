@@ -36,11 +36,13 @@ export function buildAssessmentResult(input: BuildResultInput): AssessmentResult
   const dimensionScores = computeDimensionScores(input.questions, input.answers);
   const { profile: extractedProfile, answerTags } = extractProfileSignal(input.questions, input.answers);
 
+  // 프로필에 이미 있어 묻지 않은 문항(question-skipper)이 있으므로, 매칭에 쓰는 프로필은
+  // 기존 값을 바탕에 깔고 이번 답변으로 덮는다. 그러지 않으면 건너뛴 항목이 undefined가 되어
+  // 지역·급여 같은 조건이 매칭에서 통째로 빠진다.
   const mergedProfileForMatching = {
-    ...extractedProfile,
-    ageGroup: input.existingProfile?.ageGroup,
-    heldQualifications: extractedProfile.heldQualifications ?? input.existingProfile?.heldQualifications,
-  };
+    ...input.existingProfile,
+    ...Object.fromEntries(Object.entries(extractedProfile).filter(([, v]) => v !== undefined)),
+  } as typeof extractedProfile;
 
   const recommendations = matchOccupations(
     {
