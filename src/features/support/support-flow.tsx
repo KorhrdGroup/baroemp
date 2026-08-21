@@ -144,7 +144,7 @@ function ChipButton({
         "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
         indicator === "none" ? "px-4" : "px-11",
         selected
-          ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
+          ? "border-brand-blue-300 bg-brand-blue-50 text-brand-blue-700"
           : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
       )}
     >
@@ -204,7 +204,7 @@ function StepBody({
               className={cn(
                 "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
                 answers.region === code
-                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-300 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
