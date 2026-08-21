@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth/session";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Briefcase, Coins, GraduationCap, HeartHandshake, Landmark, MapPin } from "lucide-react";
@@ -28,6 +29,8 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 
 export default async function SupportResultPage({ params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
+  // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
+  await requireUser(`/support/result/${sessionId}`);
   const view = await getSupportResultView(sessionId);
   if (!view) notFound();
 

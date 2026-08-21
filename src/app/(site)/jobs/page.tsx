@@ -7,7 +7,7 @@ import { JobCard } from "@/features/jobs/job-card";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { searchJobs, getRecommendedJobsForAnonymous, type JobSearchParams } from "@/services/job-search.service";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import type { JobSortOrder, Region } from "@/types";
 
 export const metadata: Metadata = {
@@ -32,6 +32,12 @@ export default async function JobsPage({
   searchParams: Promise<JobsPageSearchParams>;
 }) {
   const sp = await searchParams;
+  // 로그인해야 이용할 수 있는 화면이다. 로그인 후 보던 조건 그대로 돌아오도록 쿼리까지 next에 싣는다.
+  const query = new URLSearchParams(
+    Object.entries(sp).filter(([, v]) => typeof v === "string" && v !== "") as [string, string][],
+  ).toString();
+  await requireUser(`/jobs${query ? `?${query}` : ""}`);
+
   const page = Math.max(1, Number(sp.page) || 1);
 
   const anonymousId = (await cookies()).get("baro_anonymous_id")?.value;

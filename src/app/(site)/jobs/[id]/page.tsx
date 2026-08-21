@@ -8,7 +8,7 @@ import { findContentForMissingQualifications } from "@/services/job-content-reco
 import { compareUserToJobRequirements } from "@/services/job-requirement-comparison.service";
 import { JobDetailView } from "@/features/jobs/job-detail-view";
 import { isJobBookmarkedAction } from "@/features/jobs/job-actions";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, requireUser } from "@/lib/auth/session";
 
 export async function generateMetadata({
   params,
@@ -22,6 +22,8 @@ export async function generateMetadata({
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
+  await requireUser(`/jobs/${id}`);
   const job = await getJobRepository().findById(id);
   if (!job) notFound();
 

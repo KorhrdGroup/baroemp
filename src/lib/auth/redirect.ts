@@ -4,6 +4,10 @@
  * 반드시 내부 라우트(`/`로 시작)만 허용한다.
  * `//evil.com`, `https://evil.com`, `/\evil.com` 같은 프로토콜 상대/외부 URL은 모두 차단한다.
  */
+const CONTROL_CHARS = /[\u0000-\u001f\u007f]/;
+/** 경로 우회(역슬래시)와 마크업/속성 이탈에 쓰이는 문자 */
+const UNSAFE_CHARS = /[\\<>"']/;
+
 export function sanitizeNextPath(next: string | null | undefined, fallback = "/mypage"): string {
   if (!next) return fallback;
 
@@ -17,9 +21,13 @@ export function sanitizeNextPath(next: string | null | undefined, fallback = "/m
   if (!value.startsWith("/")) return fallback;
   // "//evil.com" 또는 "/\evil.com" 같은 프로토콜 상대 URL 차단
   if (value.startsWith("//") || value.startsWith("/\\")) return fallback;
-  // 개행/제어문자를 이용한 헤더 인젝션 방지
-  if (/[\r\n\t]/.test(value)) return fallback;
-  if (!/^\/[a-zA-Z0-9\-_/?=&%.#]*$/.test(value)) return fallback;
+  /*
+   * 예전에는 ASCII 화이트리스트로 걸렀는데, next에 한글이 들어오면
+   * (예: /jobs?keyword=요양) 통째로 fallback으로 떨어져 로그인 후 엉뚱한 곳으로 갔다.
+   * 허용 문자를 열거하는 대신 위험한 문자만 막는다.
+   * 외부 도메인으로 나가는 건 위의 "/" 검사가 이미 차단한다.
+   */
+  if (CONTROL_CHARS.test(value) || UNSAFE_CHARS.test(value)) return fallback;
 
   return value;
 }
