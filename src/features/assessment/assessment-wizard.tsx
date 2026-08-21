@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { AssessmentQuestion, AssessmentSection } from "@/types";
 import {
@@ -49,6 +49,8 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.min(Math.max(initialStep, 0), questions.length - 1),
   );
+  // 되돌아온 뒤 다시 앞으로 갈 수 있게, 지금까지 가장 멀리 간 문항을 기억한다.
+  const [furthestIndex, setFurthestIndex] = useState(currentIndex);
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,7 +106,9 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
         router.push(`/assessment/result/${sessionId}`);
         return;
       }
-      setCurrentIndex((i) => Math.min(i + 1, questions.length - 1));
+      const next = Math.min(currentIndex + 1, questions.length - 1);
+      setCurrentIndex(next);
+      setFurthestIndex((f) => Math.max(f, next));
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
       setError("답변을 저장하는 중 문제가 발생했어요. 다시 시도해주세요.");
@@ -148,19 +152,28 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
           >
             <ArrowLeft className="size-5" />
           </button>
+          {/* 지금 어느 분류인지는 화면 상단에 고정으로 둔다. */}
+          <span className="flex-1 truncate text-center text-label-1 font-semibold text-brand-blue-600">
+            {section?.label}
+          </span>
+          {/* 이미 지나온 문항이면 하단 CTA를 쓰지 않고도 앞으로 되돌아갈 수 있게 한다. */}
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={currentIndex >= furthestIndex || submitting}
+            aria-label="다음 문항"
+            className="-mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+          >
+            <ArrowRight className="size-5" />
+          </button>
         </div>
       </div>
 
       {/* 문항 */}
       <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
-        {/* 어느 분류의 몇 번째 문항인지 - 질문 바로 위에 붙여 문항과 함께 읽히게 한다. */}
-        <p className="flex items-baseline justify-center gap-2">
-          {section?.label && (
-            <span className="text-label-1 font-semibold text-brand-blue-600">{section.label}</span>
-          )}
-          <span className="text-body-2 font-bold text-slate-900">
-            {posInSection + 1}/{sectionTotal}
-          </span>
+        {/* 분류 안에서 몇 번째 문항인지 - 질문과 함께 읽히는 정보라 질문 위에 둔다. */}
+        <p className="text-center text-body-2 font-bold text-slate-900">
+          {posInSection + 1}/{sectionTotal}
         </p>
         <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">
           {question.questionText}

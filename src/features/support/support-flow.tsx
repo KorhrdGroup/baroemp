@@ -417,6 +417,8 @@ export function SupportFlow() {
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");
   const [loadingPrefill, setLoadingPrefill] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  // 되돌아온 뒤 다시 앞으로 갈 수 있게, 지금까지 가장 멀리 간 문항을 기억한다.
+  const [furthestIndex, setFurthestIndex] = useState(0);
   const [answers, setAnswers] = useState<SupportAssessmentAnswers>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -465,7 +467,9 @@ export function SupportFlow() {
       return;
     }
     if (!isLast) {
-      setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+      const next = Math.min(stepIndex + 1, STEPS.length - 1);
+      setStepIndex(next);
+      setFurthestIndex((f) => Math.max(f, next));
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -517,19 +521,28 @@ export function SupportFlow() {
           >
             <ArrowLeft className="size-5" />
           </button>
+          {/* 지금 어느 분류인지는 화면 상단에 고정으로 둔다. */}
+          <span className="flex-1 truncate text-center text-label-1 font-semibold text-brand-blue-600">
+            {GROUPS[groupIndex]?.label}
+          </span>
+          {/* 이미 지나온 문항이면 하단 CTA를 쓰지 않고도 앞으로 되돌아갈 수 있게 한다. */}
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={stepIndex >= furthestIndex || submitting}
+            aria-label="다음 문항"
+            className="-mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+          >
+            <ArrowRight className="size-5" />
+          </button>
         </div>
       </div>
 
       {/* 문항 */}
       <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
-        {/* 어느 분류의 몇 번째 문항인지 - 질문 바로 위에 붙여 문항과 함께 읽히게 한다. */}
-        <p className="flex items-baseline justify-center gap-2">
-          {GROUPS[groupIndex]?.label && (
-            <span className="text-label-1 font-semibold text-brand-blue-600">{GROUPS[groupIndex].label}</span>
-          )}
-          <span className="text-body-2 font-bold text-slate-900">
-            {posInGroup + 1}/{groupSteps.length}
-          </span>
+        {/* 분류 안에서 몇 번째 문항인지 - 질문과 함께 읽히는 정보라 질문 위에 둔다. */}
+        <p className="text-center text-body-2 font-bold text-slate-900">
+          {posInGroup + 1}/{groupSteps.length}
         </p>
         <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">
           {step.title}
