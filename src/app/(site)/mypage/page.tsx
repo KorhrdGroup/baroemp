@@ -161,17 +161,27 @@ export default async function MyPage() {
     jobData.bookmarked.length > 0 ||
     jobData.recentlyViewed.length > 0 ||
     jobData.applyHistory.length > 0;
-  // 옆에 설 카드가 없으면 지원금 카드가 한 줄을 다 쓰게 한다.
-  const supportSideCards = supportData.bookmarked.length > 0 || supportData.recentlyViewed.length > 0;
   /*
-   * 반 칸짜리 카드가 홀수로 남으면 마지막 한 장 옆이 빈다. 짝이 없는 카드는 한 줄을 쓰게 한다.
-   * 채용공고: 찜한 / 최근 본 두 장이 짝이다.
-   * 지원제도: 지원금 카드가 항상 있으므로 찜한·최근 본까지 합쳐 3장이 되면 마지막이 남는다.
+   * 카드는 모두 반 칸을 기본으로 두 장씩 나란히 세운다. 데이터 유무로 카드가 나타났다
+   * 사라지므로 장수가 홀수가 되면 마지막 한 장 옆이 빈다. 그때만 그 카드가 한 줄을 쓴다.
+   * 어느 카드가 마지막인지는 렌더 순서와 같은 순서로 계산한다.
    */
-  const jobPairComplete = jobData.bookmarked.length > 0 && jobData.recentlyViewed.length > 0;
-  const supportOneColCount =
-    1 + (supportData.bookmarked.length > 0 ? 1 : 0) + (supportData.recentlyViewed.length > 0 ? 1 : 0);
-  const supportTailAlone = supportOneColCount === 3;
+  const lastKeyWhenOdd = (keys: (string | false)[]) => {
+    const shown = keys.filter(Boolean) as string[];
+    return shown.length % 2 === 1 ? shown[shown.length - 1] : null;
+  };
+  const jobFullKey = lastKeyWhenOdd([
+    jobData.recommended.length > 0 && "recommended",
+    jobData.bookmarked.length > 0 && "bookmarked",
+    jobData.recentlyViewed.length > 0 && "recentlyViewed",
+    jobData.applyHistory.length > 0 && "applyHistory",
+  ]);
+  const supportFullKey = lastKeyWhenOdd([
+    "assessment",
+    supportData.bookmarked.length > 0 && "bookmarked",
+    supportData.recentlyViewed.length > 0 && "recentlyViewed",
+    supportData.applyHistory.length > 0 && "applyHistory",
+  ]);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -412,11 +422,12 @@ export default async function MyPage() {
             <div className="grid gap-4 md:grid-cols-2">
               {/* D. 채용공고 */}
               {jobData.recommended.length > 0 && (
-                <Card className="rounded-xl border-0 ring-1 ring-border md:col-span-2">
+                <Card className={cn("rounded-xl border-0 ring-1 ring-border", jobFullKey === "recommended" && "md:col-span-2")}>
                   <CardHeader>
                     <CardTitle className="text-body-2">맞춤 채용공고</CardTitle>
                   </CardHeader>
-                  <CardContent className="grid gap-2 text-label-1 text-slate-600 sm:grid-cols-2">
+                  {/* 카드가 반 칸이 되어 2열로 나누면 공고 제목이 심하게 잘린다. 다른 목록 카드와 같이 한 열로 둔다. */}
+                  <CardContent className="space-y-1.5 text-label-1 text-slate-600">
                     {jobData.recommended.map((job) => (
                       <Link
                         key={job.id}
@@ -432,7 +443,7 @@ export default async function MyPage() {
               )}
 
               {jobData.bookmarked.length > 0 && (
-                <Card className={cn("rounded-xl border-0 ring-1 ring-border", !jobPairComplete && "md:col-span-2")}>
+                <Card className={cn("rounded-xl border-0 ring-1 ring-border", jobFullKey === "bookmarked" && "md:col-span-2")}>
                   <CardHeader>
                     <CardTitle className="text-body-2">찜한 채용공고</CardTitle>
                   </CardHeader>
@@ -452,7 +463,7 @@ export default async function MyPage() {
               )}
 
               {jobData.recentlyViewed.length > 0 && (
-                <Card className={cn("rounded-xl border-0 ring-1 ring-border", !jobPairComplete && "md:col-span-2")}>
+                <Card className={cn("rounded-xl border-0 ring-1 ring-border", jobFullKey === "recentlyViewed" && "md:col-span-2")}>
                   <CardHeader>
                     <CardTitle className="text-body-2">최근 본 채용공고</CardTitle>
                   </CardHeader>
@@ -472,7 +483,7 @@ export default async function MyPage() {
               )}
 
               {jobData.applyHistory.length > 0 && (
-                <Card className="rounded-xl border-0 ring-1 ring-border md:col-span-2">
+                <Card className={cn("rounded-xl border-0 ring-1 ring-border", jobFullKey === "applyHistory" && "md:col-span-2")}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-1.5 text-body-2">
                       <Briefcase className="size-4" /> 지원 페이지로 이동한 공고
@@ -507,7 +518,7 @@ export default async function MyPage() {
           <div className="grid gap-4 md:grid-cols-2">
             {/* E. 지원제도 */}
             {supportData.latestSessionId ? (
-              <Card className={cn("rounded-xl border-0 ring-1 ring-border", !supportSideCards && "md:col-span-2")}>
+              <Card className={cn("rounded-xl border-0 ring-1 ring-border", supportFullKey === "assessment" && "md:col-span-2")}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-1.5 text-body-2">
                     <Gift className="size-4" /> 지원금 진단 결과
@@ -526,7 +537,7 @@ export default async function MyPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className={cn("rounded-xl border-0 ring-1 ring-border", !supportSideCards && "md:col-span-2")}>
+              <Card className={cn("rounded-xl border-0 ring-1 ring-border", supportFullKey === "assessment" && "md:col-span-2")}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-1.5 text-body-2">
                     <Gift className="size-4" /> 지원금 찾기
@@ -542,7 +553,7 @@ export default async function MyPage() {
             )}
 
             {supportData.bookmarked.length > 0 && (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
+              <Card className={cn("rounded-xl border-0 ring-1 ring-border", supportFullKey === "bookmarked" && "md:col-span-2")}>
                 <CardHeader>
                   <CardTitle className="text-body-2">찜한 지원제도</CardTitle>
                 </CardHeader>
@@ -564,7 +575,7 @@ export default async function MyPage() {
             )}
 
             {supportData.recentlyViewed.length > 0 && (
-              <Card className={cn("rounded-xl border-0 ring-1 ring-border", supportTailAlone && "md:col-span-2")}>
+              <Card className={cn("rounded-xl border-0 ring-1 ring-border", supportFullKey === "recentlyViewed" && "md:col-span-2")}>
                 <CardHeader>
                   <CardTitle className="text-body-2">최근 본 지원제도</CardTitle>
                 </CardHeader>
@@ -586,7 +597,7 @@ export default async function MyPage() {
             )}
 
             {supportData.applyHistory.length > 0 && (
-              <Card className="rounded-xl border-0 ring-1 ring-border md:col-span-2">
+              <Card className={cn("rounded-xl border-0 ring-1 ring-border", supportFullKey === "applyHistory" && "md:col-span-2")}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-1.5 text-body-2">
                     <Gift className="size-4" /> 신청 페이지로 이동한 지원제도
