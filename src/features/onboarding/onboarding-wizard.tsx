@@ -178,8 +178,16 @@ export function OnboardingWizard({
   const groupSteps = steps.filter((s) => s.group === step.group);
   const posInGroup = groupSteps.findIndex((s) => s.id === step.id);
 
+  /*
+   * 진행 바는 프로필 입력 분류만 나타낸다. "알림 받기"는 한 단계뿐이라 칸을 주면
+   * 0에서 100으로 튀기만 하고 진행을 보여주지 못한다. 프로필 입력이 끝난 뒤의
+   * 선택 단계이므로, 그 단계에서는 앞 구간을 모두 채운 상태로 둔다.
+   */
+  const progressGroups = groups.filter((g) => g.key !== "contact");
+  const onContactStep = step.group === "contact";
+
   function segmentFill(i: number) {
-    if (i < groupIndex) return 100;
+    if (onContactStep || i < groupIndex) return 100;
     if (i > groupIndex) return 0;
     return groupSteps.length > 0 ? (posInGroup / groupSteps.length) * 100 : 0;
   }
@@ -242,7 +250,7 @@ export function OnboardingWizard({
     <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
       <div className="sticky top-16 z-30">
         <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
-          {groups.map((g, i) => (
+          {progressGroups.map((g, i) => (
             <div key={g.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
               <div
                 className="h-full rounded-full bg-brand-blue-400 transition-[width] duration-300"
@@ -300,10 +308,20 @@ export function OnboardingWizard({
             </p>
           </div>
         )}
-        <p className="text-center text-body-2 font-bold text-slate-900">
-          {posInGroup + 1}/{groupSteps.length}
-        </p>
-        <h2 className="mt-3 text-center text-title-2 font-bold break-keep text-slate-900">{step.title}</h2>
+        {/* 한 단계뿐인 분류에서 "1/1"은 알려주는 게 없다. */}
+        {groupSteps.length > 1 && (
+          <p className="text-center text-body-2 font-bold text-slate-900">
+            {posInGroup + 1}/{groupSteps.length}
+          </p>
+        )}
+        <h2
+          className={cn(
+            "text-center text-title-2 font-bold break-keep text-slate-900",
+            groupSteps.length > 1 && "mt-3",
+          )}
+        >
+          {step.title}
+        </h2>
         {step.description && (
           <p className="mt-3 text-center text-body-2-reading break-keep text-slate-500">{step.description}</p>
         )}
