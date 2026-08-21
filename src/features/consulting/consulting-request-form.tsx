@@ -126,7 +126,7 @@ export function ConsultingRequestForm() {
       </div>
 
       <div className="rounded-xl bg-slate-100 px-4 py-3 text-label-1 text-slate-700">
-        1:1 취업컨설팅은 유료 서비스입니다. STEP 1에서는 결제 연동 없이 신청 흐름만 제공합니다.
+        1:1 취업컨설팅은 유료 서비스입니다. 상담 시작 전 결제 안내를 드립니다.
       </div>
 
       <Button
