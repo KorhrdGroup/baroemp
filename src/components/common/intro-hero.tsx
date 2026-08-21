@@ -62,7 +62,7 @@ export function IntroHero({
             {infoItems.map(({ icon: InfoIcon, label }) => (
               <span
                 key={label}
-                className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-label-1 font-semibold text-slate-600 ring-1 ring-border"
+                className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-label-1 font-semibold text-slate-600"
               >
                 <InfoIcon className="size-4 text-brand-blue-600" />
                 {label}
