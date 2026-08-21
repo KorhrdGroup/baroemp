@@ -88,7 +88,7 @@ function GapItemRow({ item, analysisId }: { item: CareerGapItemView; analysisId:
             {item.projectedEligibleJobCount}건으로 늘어날 수 있어요.
           </p>
         )}
-        {item.resumeGapNote && <p className="rounded-lg bg-amber-50 px-3 py-2 text-amber-700">{item.resumeGapNote.message}</p>}
+        {item.resumeGapNote && <p className="rounded-lg bg-orange-50 px-3 py-2 text-orange-700">{item.resumeGapNote.message}</p>}
       </div>
     </details>
   );
@@ -131,7 +131,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
           · {CONFIDENCE_LABELS[result.confidence]}
         </p>
         {result.isMockData && (
-          <p className="mt-1 text-label-2 text-amber-600">※ 현재 개발환경 테스트 데이터를 기준으로 분석되었습니다.</p>
+          <p className="mt-1 text-label-2 text-orange-600">※ 현재 개발환경 테스트 데이터를 기준으로 분석되었습니다.</p>
         )}
         <p className="mt-3 text-label-2 text-slate-400">
           이 점수는 실제 취업 확률이 아니라, 현재 채용공고 요구조건 대비 회원님의 준비 수준을 나타내는 당사 내부
@@ -183,7 +183,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
       {/* Section 2: 보완하면 좋은 항목 */}
       <div className="rounded-xl border border-border bg-white p-6">
         <h2 className="flex items-center gap-1.5 text-body-1 font-bold text-slate-900">
-          <AlertTriangle className="size-5 text-amber-500" /> 보완하면 좋은 항목
+          <AlertTriangle className="size-5 text-orange-500" /> 보완하면 좋은 항목
         </h2>
         <p className="mt-1 text-label-1 text-slate-400">시장에서 자주 요구되는 순서로 정리했어요.</p>
         {result.improvementItems.length === 0 ? (
@@ -255,11 +255,11 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
 
           {result.resumeGapNotes.length > 0 && (
             <div className="mt-4 space-y-2">
-              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-amber-700">
+              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-700">
                 <FileText className="size-4" /> 이력서에서 확인해보세요
               </p>
               {result.resumeGapNotes.map((note) => (
-                <p key={note.requirementId} className="rounded-lg bg-amber-50 px-3 py-2 text-label-1 text-amber-700">
+                <p key={note.requirementId} className="rounded-lg bg-orange-50 px-3 py-2 text-label-1 text-orange-700">
                   {note.message}
                 </p>
               ))}
@@ -267,11 +267,11 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
           )}
           {result.coverLetterGapNotes.length > 0 && (
             <div className="mt-3 space-y-2">
-              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-amber-700">
+              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-700">
                 <Sparkles className="size-4" /> 자기소개서에서 확인해보세요
               </p>
               {result.coverLetterGapNotes.map((note) => (
-                <p key={note.requirementId} className="rounded-lg bg-amber-50 px-3 py-2 text-label-1 text-amber-700">
+                <p key={note.requirementId} className="rounded-lg bg-orange-50 px-3 py-2 text-label-1 text-orange-700">
                   {note.message}
                 </p>
               ))}

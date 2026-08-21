@@ -57,7 +57,7 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
               </Badge>
             )}
             {midlifeRecommended && (
-              <Badge className="rounded-full border-0 bg-amber-50 text-label-2 font-semibold text-amber-700">
+              <Badge className="rounded-full border-0 bg-brand-blue-50 text-label-2 font-semibold text-brand-blue-600">
                 중장년 추천
               </Badge>
             )}

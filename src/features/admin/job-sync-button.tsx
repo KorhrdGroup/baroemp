@@ -28,7 +28,7 @@ export function JobSyncButton() {
       </Button>
       {result && (
         <p className="text-right text-label-2 text-slate-500">
-          {result.isMock && <span className="mr-1 font-semibold text-amber-600">[Mock Provider]</span>}
+          {result.isMock && <span className="mr-1 font-semibold text-rose-600">[Mock Provider]</span>}
           신규 {result.newCount} · 업데이트 {result.updatedCount} · 비활성 {result.deactivatedCount} · 실패{" "}
           {result.errorCount}
         </p>

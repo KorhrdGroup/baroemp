@@ -270,7 +270,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
               )}
               {reviewResult.improvements.length > 0 && (
                 <div>
-                  <p className="font-semibold text-amber-700">보완할 부분</p>
+                  <p className="font-semibold text-orange-700">보완할 부분</p>
                   <ul className="ml-4 list-disc text-slate-600">
                     {reviewResult.improvements.map((s, i) => (
                       <li key={i}>{s.comment}</li>
@@ -280,7 +280,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
               )}
               {reviewResult.missingInformation.length > 0 && (
                 <div>
-                  <p className="font-semibold text-rose-700">누락된 정보</p>
+                  <p className="font-semibold text-orange-700">누락된 정보</p>
                   <ul className="ml-4 list-disc text-slate-600">
                     {reviewResult.missingInformation.map((s, i) => (
                       <li key={i}>{s}</li>

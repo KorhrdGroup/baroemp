@@ -306,7 +306,7 @@ export function UserCrmDetailView({ detail }: { detail: UserCrmDetail }) {
         </div>
 
         {detail.jobBehavior.topInterestOccupations[0] && detail.interestedJobs[0] && (
-          <p className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-label-2 text-amber-700">
+          <p className="mt-4 rounded-lg bg-rose-50 px-3 py-2 text-label-2 text-rose-700">
             검사 관심(Assessment) TOP &ldquo;{detail.interestedJobs[0].label}&rdquo; vs 실제 조회(Job Behavior) TOP &ldquo;
             {detail.jobBehavior.topInterestOccupations[0].label}&rdquo;
             {detail.interestedJobs[0].label === detail.jobBehavior.topInterestOccupations[0].label

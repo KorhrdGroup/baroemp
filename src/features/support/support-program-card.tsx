@@ -8,7 +8,7 @@ import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   HIGH: "border-emerald-200 bg-emerald-50 text-emerald-700",
   MEDIUM: "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700",
-  CHECK_REQUIRED: "border-amber-200 bg-amber-50 text-amber-700",
+  CHECK_REQUIRED: "border-orange-200 bg-orange-50 text-orange-700",
   LOW: "border-slate-200 bg-slate-50 text-slate-500",
 };
 

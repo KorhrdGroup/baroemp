@@ -26,8 +26,8 @@ import type { JobRequirementComparisonItem } from "@/services/job-requirement-co
 const REQUIREMENT_STATUS_STYLE: Record<string, { icon: LucideIcon; label: string; className: string }> = {
   SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700" },
   NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600" },
-  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-amber-700" },
-  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-amber-700" },
+  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600" },
+  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600" },
 };
 
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value?: string }) {
@@ -109,7 +109,7 @@ export function JobDetailView({
       {job.preferredQualifications.length > 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {job.preferredQualifications.map((code) => (
-            <span key={code} className="rounded-full bg-amber-50 px-3 py-1 text-label-1 font-medium text-amber-700">
+            <span key={code} className="rounded-full bg-brand-blue-50 px-3 py-1 text-label-1 font-medium text-brand-blue-600">
               {labelQualification(code)} 우대/필요
             </span>
           ))}
@@ -145,7 +145,7 @@ export function JobDetailView({
             )}
             {match.needsCheck.length > 0 && (
               <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-amber-700">
+                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
                   <HelpCircle className="size-4" /> 확인 필요
                 </p>
                 <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">

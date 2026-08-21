@@ -26,7 +26,7 @@ import { SupportLongText } from "./support-long-text";
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   HIGH: "bg-emerald-500",
   MEDIUM: "bg-brand-blue-400",
-  CHECK_REQUIRED: "bg-amber-500",
+  CHECK_REQUIRED: "bg-orange-500",
   LOW: "bg-slate-400",
 };
 
@@ -176,7 +176,7 @@ export function SupportDetailView({
             )}
             {match.checkRequiredConditions.length > 0 && (
               <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-amber-700">
+                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
                   <HelpCircle className="size-4" /> 확인 필요
                 </p>
                 <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
