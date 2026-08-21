@@ -34,10 +34,21 @@ export function HeroSection() {
             당신의 취업 여정을 함께하는 원스톱 취업 플랫폼
           </p>
 
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          {/*
+            모바일에서도 두 버튼을 한 줄에 둔다. 375px에서는 두 문구를 한 줄로 펴면
+            넘치므로 폭을 반씩 나눠 갖고 줄바꿈을 허용한다(어절 단위로만 끊기게 break-keep).
+            sm 이상은 원래대로 내용 폭.
+          */}
+          {/*
+            검색창이 버튼 줄과 같은 폭으로 보이게, 둘을 w-fit 상자에 함께 넣는다.
+            상자 폭이 가장 넓은 자식(버튼 줄)에 맞고 검색창은 블록이라 그 폭을 채운다.
+            모바일은 버튼이 flex-1로 폭을 나눠 가지므로 상자를 w-full로 둔다.
+          */}
+          <div className="mt-8 w-full sm:w-fit">
+          <div className="flex gap-3">
             <Button
               size="lg"
-              className="h-12 rounded-lg bg-brand-blue-400 px-6 text-body-2 font-semibold hover:bg-brand-blue-600"
+              className="h-auto min-h-12 flex-1 whitespace-normal break-keep rounded-lg bg-brand-blue-400 px-4 py-2.5 text-body-2 font-semibold hover:bg-brand-blue-600 sm:flex-none sm:px-6"
               asChild
             >
               <Link href="/assessment">
@@ -48,7 +59,7 @@ export function HeroSection() {
             <Button
               size="lg"
               variant="outline"
-              className="h-12 rounded-lg border-brand-blue-200 bg-white px-6 text-body-2 font-semibold text-brand-blue-700 hover:bg-brand-blue-50"
+              className="h-auto min-h-12 flex-1 whitespace-normal break-keep rounded-lg border-brand-blue-200 bg-white px-4 py-2.5 text-body-2 font-semibold text-brand-blue-700 hover:bg-brand-blue-50 sm:flex-none sm:px-6"
               asChild
             >
               <Link href="/jobs">취업 가능 일자리 보기</Link>
@@ -56,7 +67,7 @@ export function HeroSection() {
           </div>
 
           {/* 고용24처럼 검색창을 굵은 테두리로 강조한다. 색은 HDS 블루, radius는 컨트롤 규칙(8px)을 유지한다. */}
-          <div className="mt-6 flex max-w-md items-center gap-2 rounded-md border-2 border-brand-blue-400 bg-white px-4 py-3">
+          <div className="mt-6 flex items-center gap-2 rounded-md border-2 border-brand-blue-400 bg-white px-4 py-3">
             <Search className="size-5 shrink-0 text-brand-blue-600" />
             <input
               type="text"
@@ -64,6 +75,7 @@ export function HeroSection() {
               className="w-full text-label-1 text-slate-700 placeholder:text-slate-400 focus:outline-none"
               aria-label="관심 직종, 기업 검색"
             />
+          </div>
           </div>
         </div>
 

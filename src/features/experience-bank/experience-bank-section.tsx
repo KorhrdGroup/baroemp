@@ -110,7 +110,7 @@ export function ExperienceBankSection({ initialItems }: { initialItems: Experien
     <div id="experience-bank" className="mt-10 scroll-mt-24">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-body-1 font-bold text-slate-900">내 경험뱅크 ({items.length})</h2>
-        <Button variant="outline" onClick={openCreate}>
+        <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" onClick={openCreate}>
           <Plus className="size-4" /> 내 경험 추가하기
         </Button>
       </div>
