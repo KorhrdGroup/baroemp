@@ -23,7 +23,7 @@ import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-sea
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { getUserCrmDetail } from "@/services/user-crm.service";
-import { requireUser } from "@/lib/auth/session";
+import { requireUser, isAdminRole } from "@/lib/auth/session";
 import { formatPhone } from "@/lib/utils/phone";
 import { SUPPORT_CATEGORY_LABELS } from "@/types";
 import type { Job, SupportProgram } from "@/types";
@@ -227,7 +227,8 @@ export default async function MyPage() {
             <p>
               <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
             </p>
-            {lead && (
+            {/* Lead 등급·점수는 영업용 내부 지표다. 본인 화면이라도 일반 회원에게는 노출하지 않는다. */}
+            {lead && isAdminRole(user.role) && (
               <p className="pt-1">
                 <span className="text-slate-400">Lead</span> ·{" "}
                 <Badge className="rounded-md border-0 bg-brand-blue-50 text-label-2 text-brand-blue-700">

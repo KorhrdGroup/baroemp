@@ -256,7 +256,7 @@ export function OnboardingWizard({
           오른쪽은 진단과 달리 "나중에 하기"가 들어간다. 입력이 선택이라는 걸 어느 단계에서든
           알 수 있어야 해서 화면마다 노출한다.
         */}
-        <div className="mx-auto flex max-w-[24.5rem] items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
+        <div className="relative mx-auto flex max-w-[24.5rem] items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
           <button
             type="button"
             onClick={handlePrev}
@@ -266,14 +266,18 @@ export function OnboardingWizard({
           >
             <ArrowLeft className="size-5" />
           </button>
-          <span className="flex-1 truncate text-center text-label-1 font-semibold text-brand-blue-600">
+          {/*
+            좌우 버튼 폭이 달라(화살표 36px vs "나중에 하기") flex로 나눠서는 가운데가 맞지 않는다.
+            컨테이너 기준 절대 중앙에 놓고, 좌우 버튼과 겹치지 않게 폭만 제한한다.
+          */}
+          <span className="pointer-events-none absolute left-1/2 max-w-[45%] -translate-x-1/2 truncate text-label-1 font-semibold text-brand-blue-600">
             {groups[groupIndex]?.label}
           </span>
           <button
             type="button"
             onClick={handleSkip}
             disabled={submitting}
-            className="-mr-2 shrink-0 rounded-lg px-2 py-1.5 text-label-1 font-medium text-slate-500 transition-colors hover:bg-atomic-mono-200 disabled:opacity-40"
+            className="-mr-2 ml-auto shrink-0 rounded-lg px-2 py-1.5 text-label-1 font-medium text-slate-500 transition-colors hover:bg-atomic-mono-200 disabled:opacity-40"
           >
             나중에 하기
           </button>
