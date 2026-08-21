@@ -17,8 +17,6 @@ export interface IntroHeroProps {
   highlightTitle: string;
   highlights: string[];
   note: ReactNode;
-  /** 제목 좌우에 떠 있는 장식 타일. 정보가 아니라 분위기용이라 텍스트를 넣지 않는다. */
-  decorIcons: LucideIcon[];
 }
 
 export function IntroHero({
@@ -32,10 +30,7 @@ export function IntroHero({
   highlightTitle,
   highlights,
   note,
-  decorIcons,
 }: IntroHeroProps) {
-  const [decorLeft, decorRight, decorBottom] = decorIcons;
-
   return (
     <>
       {/* pb는 CTA 바가 겹쳐 올라올 자리다. 아래 카드의 -mt와 짝을 이룬다. */}
@@ -47,10 +42,6 @@ export function IntroHero({
         </div>
 
         <div className="relative mx-auto max-w-5xl px-4 pt-16 text-center sm:px-6 sm:pt-20 lg:px-8">
-          {decorLeft && <DecorTile icon={decorLeft} className="left-0 top-10 lg:left-4" />}
-          {decorRight && <DecorTile icon={decorRight} className="right-0 top-24 lg:right-6" />}
-          {decorBottom && <DecorTile icon={decorBottom} className="bottom-4 left-12 lg:left-24" />}
-
           <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-white text-brand-blue-600 ring-1 ring-brand-blue-100">
             <Icon className="size-7" />
           </span>
@@ -116,13 +107,3 @@ export function IntroHero({
   );
 }
 
-function DecorTile({ icon: Icon, className }: { icon: LucideIcon; className: string }) {
-  return (
-    <span
-      aria-hidden
-      className={`absolute hidden size-14 items-center justify-center rounded-2xl bg-white/50 text-brand-blue-300 lg:flex ${className}`}
-    >
-      <Icon className="size-6" strokeWidth={1.6} />
-    </span>
-  );
-}

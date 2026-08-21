@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, BadgeCheck, Check, Clock, Coins, FileText, Gift, Landmark, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock, Coins, Gift, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
@@ -382,7 +382,6 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
         </>
       }
       infoItems={INFO_ITEMS}
-      decorIcons={[Landmark, BadgeCheck, FileText]}
       ctaHeadline="2~3분이면 진단이 끝납니다"
       ctaDescription="지금 시작하면 받을 수 있는 지원제도를 바로 확인할 수 있어요."
       cta={
