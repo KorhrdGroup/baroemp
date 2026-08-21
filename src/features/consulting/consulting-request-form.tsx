@@ -71,7 +71,7 @@ export function ConsultingRequestForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-xl border border-border bg-white p-6 sm:p-8"
+      className="space-y-5 rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
