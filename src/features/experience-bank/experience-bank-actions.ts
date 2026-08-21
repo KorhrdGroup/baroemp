@@ -6,14 +6,8 @@ import { getExperienceBankRepository } from "@/lib/repositories";
 import {
   createExperienceBankItem,
   deleteExperienceBankItem,
-  listExperienceBankForUser,
   updateExperienceBankItem,
 } from "@/services/experience-bank.service";
-
-export async function listMyExperienceBankAction(): Promise<ExperienceBankItem[]> {
-  const user = await requireSessionUser();
-  return listExperienceBankForUser(user.id);
-}
 
 export async function createExperienceBankItemAction(input: ExperienceBankItemInput): Promise<ExperienceBankItem> {
   const user = await requireSessionUser();

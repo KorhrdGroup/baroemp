@@ -105,7 +105,9 @@ export function ExperienceBankSection({ initialItems }: { initialItems: Experien
   }
 
   return (
-    <div className="mt-10">
+    // 자기소개서 편집기/마이페이지에서 #experience-bank로 바로 넘어온다.
+    // sticky 헤더에 제목이 가리지 않도록 scroll-mt를 준다.
+    <div id="experience-bank" className="mt-10 scroll-mt-24">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-body-1 font-bold text-slate-900">내 경험뱅크 ({items.length})</h2>
         <Button variant="outline" onClick={openCreate}>

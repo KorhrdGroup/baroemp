@@ -31,7 +31,6 @@ export const PROTECTED_ROUTE_PREFIXES = [
   "/mypage",
   "/resume",
   "/cover-letter",
-  "/experience-bank",
 ] as const;
 
 export const ADMIN_ROUTE_PREFIX = "/admin";

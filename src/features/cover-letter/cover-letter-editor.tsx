@@ -168,7 +168,7 @@ export function CoverLetterEditor({
           <CardTitle className="text-label-1 font-semibold text-slate-500">
             {experienceBank.length > 0 ? "경험뱅크에서 문항별로 사용할 경험을 선택하세요" : "경험뱅크가 비어있어요"}
           </CardTitle>
-          <Link href="/experience-bank" className="text-label-1 font-medium text-brand-blue-600 hover:underline">
+          <Link href="/resume#experience-bank" className="text-label-1 font-medium text-brand-blue-600 hover:underline">
             경험뱅크 관리 →
           </Link>
         </CardHeader>

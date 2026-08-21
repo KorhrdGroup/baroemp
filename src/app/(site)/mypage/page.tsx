@@ -409,7 +409,7 @@ export default async function MyPage() {
               </Button>
               {/* 경험뱅크는 이력서·자소서 양쪽의 재료다. 기존 진입점이 /resume과 자소서 편집기뿐이었다. */}
               <Button variant="outline" asChild>
-                <Link href="/experience-bank">경험뱅크 관리</Link>
+                <Link href="/resume#experience-bank">경험뱅크 관리</Link>
               </Button>
             </div>
           </CardContent>
