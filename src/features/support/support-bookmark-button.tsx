@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, useSyncExternalStore, useTransition } from "react";
-import { Bookmark, BookmarkCheck } from "lucide-react";
+import { Bookmark } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
@@ -69,7 +69,7 @@ export function SupportBookmarkButton({
         onClick={handleClick}
         disabled={pending}
       >
-        {bookmarked ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
+        <Bookmark className={cn("size-4", bookmarked && "fill-current")} />
         {bookmarked ? "찜 완료" : "찜하기"}
       </Button>
     );
@@ -89,7 +89,7 @@ export function SupportBookmarkButton({
           : "border-border bg-white text-slate-400",
       )}
     >
-      {bookmarked ? <BookmarkCheck className="size-4" /> : <Bookmark className="size-4" />}
+      <Bookmark className={cn("size-4", bookmarked && "fill-current")} />
     </button>
   );
 }
