@@ -4,53 +4,57 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireSessionUser } from "@/lib/auth/session";
 import { logActivityEvent } from "@/lib/activity/event-logger";
-import { getProfileRepository } from "@/lib/repositories/profile-repository";
+import { getProfileRepository, type ProfileUpdateInput } from "@/lib/repositories/profile-repository";
 import { getCareerProfileRepository, findCareerProfileByUserId } from "@/lib/repositories";
 import { recalculateLeadScore } from "@/services/lead-score.service";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { normalizePhone, isValidKoreanPhone } from "@/lib/utils/phone";
 import type { DesiredStartTiming, EmploymentStatus, Region, WorkType } from "@/types";
 
-export interface OnboardingProfileFormState {
+export interface OnboardingProfileInput {
+  next: string;
+  employmentStatus?: string;
+  region?: string;
+  desiredStartTiming?: string;
+  desiredSalaryMin?: number;
+  desiredSalaryMax?: number;
+  desiredWorkTypes?: string[];
+  desiredJobCategories?: string[];
+  isOpenToTraining?: boolean;
+  phone?: string;
+  /** 연락처·동의를 물어본 경우에만 넘어온다. 안 물어본 사용자의 기존 동의를 끄지 않기 위함. */
+  marketingConsent?: boolean;
+}
+
+export interface OnboardingSaveResult {
   error?: string;
-  fieldErrors?: Record<string, string>;
+  phoneError?: string;
 }
 
 /**
  * 가입 직후 취업 프로필 온보딩 저장.
  *
- * /mypage/profile의 updateProfileAction과 필드는 겹치지만 성격이 다르다.
- * - 이름은 가입 때 이미 받았으므로 다시 묻지 않는다 (그쪽은 필수 검증 대상).
- * - 연락처·수신동의는 가입 때 비워둔 사람에게만 노출되므로, 값이 온 경우에만 갱신한다.
- * - 저장/건너뛰기 모두 next로 이동시켜 온보딩이 흐름을 끊지 않게 한다.
+ * 화면이 단계별 위저드라 단계마다 form을 제출하지 않는다. 마지막에 모아서 한 번 저장하므로
+ * FormData가 아니라 값 객체를 받는다. userId는 항상 서버 세션에서 도출한다.
+ *
+ * /mypage/profile의 updateProfileAction과 필드는 겹치지만 성격이 다르다. 이름은 가입 때 이미
+ * 받았으므로 다시 묻지 않고, 연락처·수신동의는 가입 때 비워둔 사람에게만 물어 값이 온 경우에만
+ * 갱신한다.
  */
-export async function completeOnboardingProfileAction(
-  _prev: OnboardingProfileFormState,
-  formData: FormData,
-): Promise<OnboardingProfileFormState> {
+export async function saveOnboardingProfileAction(
+  input: OnboardingProfileInput,
+): Promise<OnboardingSaveResult> {
   const user = await requireSessionUser();
-  const next = sanitizeNextPath(String(formData.get("next") ?? ""), "/mypage");
+  const next = sanitizeNextPath(input.next, "/mypage");
 
-  const phoneRaw = String(formData.get("phone") ?? "").trim();
+  const phoneRaw = input.phone?.trim() ?? "";
   if (phoneRaw && !isValidKoreanPhone(phoneRaw)) {
-    return { fieldErrors: { phone: "휴대전화번호 형식을 확인해주세요." } };
+    return { phoneError: "휴대전화번호 형식을 확인해주세요." };
   }
 
-  const region = String(formData.get("region") ?? "") || undefined;
-  const employmentStatus = String(formData.get("employmentStatus") ?? "") || undefined;
-  const desiredStartTiming = String(formData.get("desiredStartTiming") ?? "") || undefined;
-  const desiredSalaryMinRaw = String(formData.get("desiredSalaryMin") ?? "").trim();
-  const desiredSalaryMaxRaw = String(formData.get("desiredSalaryMax") ?? "").trim();
-  const desiredJobCategories = formData.getAll("desiredJobCategories").map(String).filter(Boolean);
-  const desiredWorkTypes = formData.getAll("desiredWorkTypes").map(String).filter(Boolean) as WorkType[];
-  const isOpenToTraining = formData.get("isOpenToTraining") === "on";
-  const marketingConsent = formData.get("marketingConsent") === "on";
-  // 동의 입력란 자체를 노출하지 않은 사용자(이미 동의한 사람)의 값을 끄지 않기 위한 구분자.
-  const marketingConsentAsked = formData.get("marketingConsentAsked") === "1";
-
-  const profilePatch: Parameters<ReturnType<typeof getProfileRepository>["update"]>[1] = {};
+  const profilePatch: ProfileUpdateInput = {};
   if (phoneRaw) profilePatch.phone = normalizePhone(phoneRaw);
-  if (marketingConsentAsked && marketingConsent) {
+  if (input.marketingConsent) {
     profilePatch.marketingConsent = true;
     profilePatch.marketingConsentAt = new Date().toISOString();
   }
@@ -59,14 +63,14 @@ export async function completeOnboardingProfileAction(
   }
 
   const careerPatch = {
-    region: region as Region | undefined,
-    employmentStatus: employmentStatus as EmploymentStatus | undefined,
-    desiredStartTiming: desiredStartTiming as DesiredStartTiming | undefined,
-    desiredSalaryMin: desiredSalaryMinRaw ? Number(desiredSalaryMinRaw) : undefined,
-    desiredSalaryMax: desiredSalaryMaxRaw ? Number(desiredSalaryMaxRaw) : undefined,
-    desiredJobCategories: desiredJobCategories.length > 0 ? desiredJobCategories : undefined,
-    desiredWorkTypes: desiredWorkTypes.length > 0 ? desiredWorkTypes : undefined,
-    isOpenToTraining,
+    region: (input.region || undefined) as Region | undefined,
+    employmentStatus: (input.employmentStatus || undefined) as EmploymentStatus | undefined,
+    desiredStartTiming: (input.desiredStartTiming || undefined) as DesiredStartTiming | undefined,
+    desiredSalaryMin: input.desiredSalaryMin,
+    desiredSalaryMax: input.desiredSalaryMax,
+    desiredJobCategories: input.desiredJobCategories?.length ? input.desiredJobCategories : undefined,
+    desiredWorkTypes: input.desiredWorkTypes?.length ? (input.desiredWorkTypes as WorkType[]) : undefined,
+    isOpenToTraining: input.isOpenToTraining ?? false,
   };
   const filledFields = Object.keys(careerPatch).filter(
     (k) => careerPatch[k as keyof typeof careerPatch] !== undefined,
@@ -92,9 +96,9 @@ export async function completeOnboardingProfileAction(
 }
 
 /** 건너뛰기. 나중에 다시 권할 수 있도록 건너뛴 사실만 남긴다. */
-export async function skipOnboardingProfileAction(formData: FormData): Promise<void> {
+export async function skipOnboardingProfileAction(nextPath: string): Promise<void> {
   const user = await requireSessionUser();
-  const next = sanitizeNextPath(String(formData.get("next") ?? ""), "/mypage");
+  const next = sanitizeNextPath(nextPath, "/mypage");
   await logActivityEvent({
     userId: user.id,
     eventType: "profile_updated",
