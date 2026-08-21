@@ -489,7 +489,8 @@ export function SupportFlow() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
+    // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다.
+    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
       {/* 진행 바 - 대분류 4칸 */}
       <div className="sticky top-16 z-30">
         <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
@@ -540,11 +541,11 @@ export function SupportFlow() {
 
       {/* 하단 고정 CTA */}
       <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-atomic-mono-50 via-atomic-mono-50 to-transparent pt-6">
-        <div className="mx-auto max-w-[24.5rem] px-4 pb-5">
+        <div className="mx-auto max-w-[24.5rem] px-4 pb-8">
           <Button
             onClick={() => void handleNext()}
             disabled={submitting || (step.required && !canProceed)}
-            className="h-14 w-full rounded-xl bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-lg bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

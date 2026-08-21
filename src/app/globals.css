@@ -277,6 +277,16 @@
      */
     scrollbar-gutter: stable;
   }
+
+  /*
+   * 진단·지원금 위저드는 한 문항에 집중시키는 화면이고 하단 CTA가 화면에 고정돼 있다.
+   * 푸터가 함께 나오면 스크롤 시 CTA가 푸터 위에 겹친다.
+   * 지원금 위저드는 /support 한 라우트 안에서 상태로 전환되므로 경로가 아니라
+   * 위저드가 렌더링됐는지(data-wizard)로 판단한다.
+   */
+  body:has([data-wizard="true"]) footer {
+    display: none;
+  }
 }
 
 /*

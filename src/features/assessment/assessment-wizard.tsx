@@ -120,7 +120,8 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
+    // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다.
+    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
       {/* 진행 바 - 전체 문항 기준 */}
       <div className="sticky top-16 z-30">
         <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
@@ -173,7 +174,7 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
 
       {/* 하단 고정 CTA */}
       <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-atomic-mono-50 via-atomic-mono-50 to-transparent pt-6">
-        <div className="mx-auto max-w-[24.5rem] px-4 pb-5">
+        <div className="mx-auto max-w-[24.5rem] px-4 pb-8">
           <Button
             onClick={handleNext}
             disabled={submitting || (question.required && !canProceed)}
