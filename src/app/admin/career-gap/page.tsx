@@ -126,7 +126,7 @@ export default async function AdminCareerGapMarketPage({
                 </div>
                 <div className="flex items-center gap-2">
                   {snapshot.isMockData && (
-                    <Badge className="rounded-md border-0 bg-amber-50 text-amber-700">테스트 데이터 (MockJobProvider)</Badge>
+                    <Badge className="rounded-md border-0 bg-rose-50 text-rose-700">테스트 데이터 (MockJobProvider)</Badge>
                   )}
                   <Badge className={`rounded-md border-0 ${CONFIDENCE_STYLE[snapshot.confidence]}`}>
                     {CONFIDENCE_LABELS[snapshot.confidence]}
@@ -136,7 +136,7 @@ export default async function AdminCareerGapMarketPage({
             </Card>
 
             {snapshot.confidence === "LOW" && (
-              <p className="rounded-lg bg-amber-50 px-4 py-2.5 text-label-1 text-amber-700">
+              <p className="rounded-lg bg-rose-50 px-4 py-2.5 text-label-1 text-rose-700">
                 관련 공고가 아직 충분하지 않아(10건 미만) 아래 통계는 참고용입니다.
               </p>
             )}

@@ -64,7 +64,7 @@ export default async function AdminJobsPage({
           <div className="text-label-1 text-slate-600">
             <p>
               현재 Provider · <span className="font-semibold text-slate-800">{syncOverview.providerName}</span>
-              {syncOverview.isMock && <span className="ml-1.5 text-amber-600">(Mock Provider - WORK24_API_KEY 미설정)</span>}
+              {syncOverview.isMock && <span className="ml-1.5 text-rose-600">(Mock Provider - WORK24_API_KEY 미설정)</span>}
             </p>
             {syncOverview.latestRun ? (
               <p className="mt-1 text-slate-500">

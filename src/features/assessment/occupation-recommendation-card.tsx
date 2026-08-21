@@ -135,7 +135,7 @@ export function OccupationRecommendationCard({
           {rec.risks.length > 0 && (
             <div>
               <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-                <AlertTriangle className="size-4 text-amber-500" /> 고려할 점
+                <AlertTriangle className="size-4 text-orange-500" /> 고려할 점
               </p>
               <ul className="mt-2 space-y-1.5 text-label-1 text-slate-600">
                 {rec.risks.map((risk) => (
@@ -161,7 +161,7 @@ export function OccupationRecommendationCard({
               {rec.missingConditions
                 .filter((c) => !rec.requiredQualifications.includes(c))
                 .map((c) => (
-                  <span key={c} className="rounded-full bg-amber-50 px-3 py-1 text-label-1 text-amber-700">
+                  <span key={c} className="rounded-full bg-orange-50 px-3 py-1 text-label-1 text-orange-700">
                     {c}
                   </span>
                 ))}

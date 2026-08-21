@@ -21,11 +21,12 @@ import type { SupportMatchDetail } from "@/services/support-eligibility.service"
 import { SupportApplyButton } from "./support-apply-button";
 import { SupportBookmarkButton } from "./support-bookmark-button";
 import { SupportViewTracker } from "./support-view-tracker";
+import { SupportLongText } from "./support-long-text";
 
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   HIGH: "bg-emerald-500",
   MEDIUM: "bg-brand-blue-400",
-  CHECK_REQUIRED: "bg-amber-500",
+  CHECK_REQUIRED: "bg-orange-500",
   LOW: "bg-slate-400",
 };
 
@@ -36,10 +37,24 @@ function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string
       <Icon className="mt-0.5 size-4 shrink-0 text-slate-400" />
       <div>
         <p className="text-slate-400">{label}</p>
-        <p className="font-medium text-slate-800">{value}</p>
+        {/* 실 API는 짧은 사실 필드에도 안내문 전체를 담아 보내는 경우가 있어 길이를 제한한다. */}
+        <p className="line-clamp-3 font-medium text-slate-800">{value}</p>
       </div>
     </div>
   );
+}
+
+/**
+ * 실 API는 "지원내용" 필드에 안내문 전체를 그대로 담아 보내기도 한다.
+ * 그러면 정보 그리드와 아래 "사업 상세"에 같은 글이 두 번 나오므로, 겹칠 때는 그리드에서 뺀다.
+ */
+function benefitSummary(program: SupportProgram): string | undefined {
+  const benefit = program.benefitDescription?.trim();
+  if (!benefit) return program.supportAmountText;
+  if (program.description && benefit === program.description.trim()) {
+    return program.supportAmountText;
+  }
+  return benefit;
 }
 
 function targetSummary(program: SupportProgram): string | undefined {
@@ -107,7 +122,7 @@ export function SupportDetailView({
               : labelRegion(program.regionScope as Region)
           }
         />
-        <InfoRow icon={Coins} label="지원내용" value={program.benefitDescription ?? program.supportAmountText} />
+        <InfoRow icon={Coins} label="지원내용" value={benefitSummary(program)} />
         <InfoRow icon={Calendar} label="신청기간" value={program.applicationPeriod ?? "상시"} />
         <InfoRow icon={FileText} label="신청방법" value={program.applicationMethod} />
         <InfoRow icon={Phone} label="문의처" value={program.contact} />
@@ -125,11 +140,18 @@ export function SupportDetailView({
 
       <div className="mt-8">
         <h2 className="text-body-1 font-bold text-slate-900">사업 상세</h2>
-        <p className="mt-3 whitespace-pre-line text-body-2-reading text-slate-600">{program.description}</p>
+        {program.description && (
+          <div className="mt-3">
+            <SupportLongText text={program.description} className="text-body-2-reading text-slate-600" />
+          </div>
+        )}
         {program.eligibilityRaw && (
-          <p className="mt-3 whitespace-pre-line text-label-1 text-slate-500">
-            지원대상 원문: {program.eligibilityRaw}
-          </p>
+          <div className="mt-3">
+            <SupportLongText
+              text={`지원대상 원문: ${program.eligibilityRaw}`}
+              className="text-label-1 text-slate-500"
+            />
+          </div>
         )}
       </div>
 
@@ -154,7 +176,7 @@ export function SupportDetailView({
             )}
             {match.checkRequiredConditions.length > 0 && (
               <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-amber-700">
+                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
                   <HelpCircle className="size-4" /> 확인 필요
                 </p>
                 <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">

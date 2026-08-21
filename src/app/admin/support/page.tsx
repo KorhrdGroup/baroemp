@@ -76,7 +76,7 @@ export default async function AdminSupportPage({
             <p>
               현재 Provider · <span className="font-semibold text-slate-800">{syncOverview.providerName}</span>
               {syncOverview.isMock && (
-                <span className="ml-1.5 text-amber-600">(Mock Provider - PUBLIC_SERVICE_API_KEY 미설정)</span>
+                <span className="ml-1.5 text-rose-600">(Mock Provider - PUBLIC_SERVICE_API_KEY 미설정)</span>
               )}
             </p>
             {syncOverview.latestRun ? (
