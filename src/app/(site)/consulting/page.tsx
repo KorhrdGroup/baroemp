@@ -24,7 +24,7 @@ export default function ConsultingPage() {
           className="pointer-events-none absolute -bottom-32 left-1/4 size-80 rounded-full bg-brand-blue-500/20 blur-3xl"
         />
 
-        <div className="relative mx-auto max-w-3xl px-4 pb-28 pt-14 sm:px-6 lg:px-8">
+        <div className="relative mx-auto max-w-3xl px-4 pb-28 pt-20 sm:px-6 lg:px-8">
           <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-200">
             <BadgeCheck className="size-4" />
             유료 서비스
@@ -37,7 +37,7 @@ export default function ConsultingPage() {
       </section>
 
       {/* 그라데이션 밴드 아래로 폼을 걸쳐 놓는다. 형제로 빼야 마진 상쇄를 피할 수 있다. */}
-      <div className="relative z-10 mx-auto -mt-20 max-w-3xl px-4 pb-16 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto -mt-20 max-w-3xl px-4 pb-12 sm:px-6 lg:px-8">
         <ConsultingRequestForm />
       </div>
     </div>
