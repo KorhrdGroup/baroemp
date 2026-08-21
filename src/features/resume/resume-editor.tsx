@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TemplateSelect } from "@/components/common/template-select";
+import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -79,7 +79,7 @@ export function ResumeEditor({
   templates = [],
 }: {
   initialDetail: ResumeDetail;
-  templates?: { id: string; name: string }[];
+  templates?: TemplateOption[];
 }) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
@@ -230,8 +230,21 @@ export function ResumeEditor({
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-      <div className="space-y-4 print:hidden">
+    // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
+    <div className="space-y-6">
+      <div className="print:hidden">
+        <TemplateCardPicker
+          label="이력서 양식"
+          templates={templates}
+          value={resume.templateId ?? undefined}
+          onChange={handleTemplateChange}
+          pending={isChangingTemplate}
+          gridClassName="sm:grid-cols-2 lg:grid-cols-4"
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
+        <div className="space-y-4 print:hidden">
         {/* 편집기는 2단 그리드 안이라 바 폭이 좁다. min-w를 주지 않으면 제목 칸이 0으로 눌린다. */}
         <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
           <div className="min-w-48 flex-1">
@@ -245,13 +258,6 @@ export function ResumeEditor({
               className="mt-1 h-9"
             />
           </div>
-          <TemplateSelect
-            label="이력서 양식"
-            templates={templates}
-            value={resume.templateId ?? undefined}
-            onChange={handleTemplateChange}
-            pending={isChangingTemplate}
-          />
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="rounded-full">
               완성도 {detail.resume.completeness}%
@@ -703,6 +709,7 @@ export function ResumeEditor({
             <ResumePreview detail={currentPreviewDetail()} />
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

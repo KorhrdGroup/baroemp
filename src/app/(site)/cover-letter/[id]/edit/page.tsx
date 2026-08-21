@@ -27,7 +27,12 @@ export default async function CoverLetterEditPage({ params }: { params: Promise<
 
   const templateOptions = [...templates]
     .sort((a, b) => a.orderIndex - b.orderIndex)
-    .map((t) => ({ id: t.id, name: t.name }));
+    .map((t) => ({
+      id: t.id,
+      name: t.name,
+      description: t.description,
+      hint: `문항 ${t.defaultQuestions.length}개`,
+    }));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">

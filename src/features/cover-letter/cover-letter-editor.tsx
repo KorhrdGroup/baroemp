@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TemplateSelect } from "@/components/common/template-select";
+import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem } from "@/types";
 import {
   changeCoverLetterTemplateAction,
@@ -42,7 +42,7 @@ export function CoverLetterEditor({
 }: {
   initialDetail: CoverLetterDetail;
   experienceBank: ExperienceBankItem[];
-  templates?: { id: string; name: string }[];
+  templates?: TemplateOption[];
 }) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
@@ -186,18 +186,20 @@ export function CoverLetterEditor({
 
   return (
     <div className="space-y-4">
+      <TemplateCardPicker
+        label="자기소개서 양식"
+        templates={templates}
+        value={detail.coverLetter.templateId ?? undefined}
+        onChange={handleTemplateChange}
+        pending={isChangingTemplate}
+        gridClassName="sm:grid-cols-3"
+      />
+
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-48 flex-1">
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9 max-w-xs" />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9" />
         </div>
-        <TemplateSelect
-          label="자기소개서 양식"
-          templates={templates}
-          value={detail.coverLetter.templateId ?? undefined}
-          onChange={handleTemplateChange}
-          pending={isChangingTemplate}
-        />
         <div className="flex items-center gap-2">
           {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
           <Button size="sm" onClick={() => void handleSave()} disabled={isSaving}>
