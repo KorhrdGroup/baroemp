@@ -5,6 +5,7 @@ import { requireUser } from "@/lib/auth/session";
 import { listResumesForUser } from "@/services/resume.service";
 import { listCoverLettersForUser } from "@/services/cover-letter.service";
 import { listExperienceBankForUser } from "@/services/experience-bank.service";
+import { ExperienceBankSection } from "@/features/experience-bank/experience-bank-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -139,48 +140,8 @@ export default async function ResumeListPage() {
         )}
       </div>
 
-      <div className="mt-10">
-        <SectionHeader
-          title="내 경험뱅크"
-          count={experiences.length}
-          action={
-            <Button variant="outline" asChild>
-              <Link href="/experience-bank">
-                <Plus className="size-4" /> 내 경험 추가하기
-              </Link>
-            </Button>
-          }
-        />
-        {experiences.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-8 text-center">
-            <p className="text-label-1 text-slate-500">
-              아직 저장한 경험이 없어요. 미리 정리해두면 자기소개서 문항마다 골라 쓸 수 있어요.
-            </p>
-            <Link href="/experience-bank" className="mt-3 inline-block text-label-1 font-semibold text-brand-blue-600 hover:underline">
-              경험 정리하러 가기 →
-            </Link>
-          </div>
-        ) : (
-          <div className="mt-4 space-y-3">
-            {experiences.map((item) => (
-              <Link
-                key={item.id}
-                href="/experience-bank"
-                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-body-2 font-semibold text-slate-900">{item.title}</p>
-                  <p className="mt-1 text-label-1 text-slate-400">
-                    {item.skills.length > 0 ? `${item.skills.slice(0, 3).join(" · ")} · ` : ""}
-                    최근수정 {new Date(item.updatedAt).toLocaleDateString("ko-KR")}
-                  </p>
-                </div>
-                <Pencil className="size-4 shrink-0 text-slate-400" />
-              </Link>
-            ))}
-          </div>
-        )}
-      </div>
+      {/* 추가/수정은 모달, 삭제는 목록에서 바로 처리하므로 클라이언트 컴포넌트가 섹션 전체를 그린다. */}
+      <ExperienceBankSection initialItems={experiences} />
     </div>
   );
 }
