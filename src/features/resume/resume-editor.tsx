@@ -698,7 +698,7 @@ export function ResumeEditor({
           폼이 길어 화면 밖으로 나가므로 sticky로 하단에 붙여 스크롤 중에도 닿게 한다.
         */}
         {/* 화면을 벗어나는 액션이 없도록 삭제·목록으로도 이 바에 모은다. 저장은 남는 폭을 다 쓴다. */}
-        <div className="sticky bottom-0 z-10 -mx-1 flex items-center gap-2 rounded-xl border border-border bg-white/95 px-4 py-3 backdrop-blur print:hidden">
+        <div className="sticky bottom-0 z-10 -mx-1 flex items-center gap-2 rounded-xl border border-border bg-white/95 px-4 py-3 shadow-[0_-6px_20px_-8px_rgba(15,23,42,0.18)] backdrop-blur print:hidden">
           <Button
             variant="ghost"
             size="sm"
@@ -707,14 +707,17 @@ export function ResumeEditor({
           >
             <Trash2 className="size-4" /> 삭제
           </Button>
-          <Button variant="outline" size="sm" className="shrink-0" asChild>
-            <Link href="/resume">목록으로</Link>
-          </Button>
           {saveMessage && <span className="shrink-0 text-label-2 text-slate-400">{saveMessage}</span>}
-          <Button className="flex-1" onClick={() => void handleSave()} disabled={isSaving}>
-            {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-            저장
-          </Button>
+          {/* 되돌아가기(목록)와 확정(저장)은 한 묶음으로 오른쪽에 둔다. 삭제는 성격이 달라 왼쪽에 떼어놓는다. */}
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/resume">목록으로</Link>
+            </Button>
+            <Button className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
+              {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+              저장
+            </Button>
+          </div>
         </div>
       </div>
 
