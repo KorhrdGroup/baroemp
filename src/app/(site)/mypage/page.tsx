@@ -268,7 +268,7 @@ export default async function MyPage() {
                 <CardHeader>
                   <CardTitle className="text-body-2">최근 직업진단 결과</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p className="text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</p>
                   <div className="space-y-1.5">
                     {latestResult.recommendations.slice(0, 3).map((rec, i) => (
@@ -298,9 +298,9 @@ export default async function MyPage() {
                 <CardHeader>
                   <CardTitle className="text-body-2">직업진단</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p>아직 직업진단을 받지 않았어요. 몇 가지 질문으로 나에게 맞는 직업을 찾아드려요.</p>
-                  <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                  <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                     <Link href="/assessment?start=1">무료 직업진단 시작</Link>
                   </Button>
                 </CardContent>
@@ -314,11 +314,11 @@ export default async function MyPage() {
                   <Target className="size-4" /> 취업 준비도
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-label-1 text-slate-600">
+              <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                 {detail.careerGapSummaries.length === 0 ? (
                   <>
                     <p>아직 취업 준비도를 확인하지 않았어요. 실제 채용공고 기준으로 지금 준비 상태를 확인해보세요.</p>
-                    <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                    <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                       <Link href="/career-gap">취업 준비도 확인하기</Link>
                     </Button>
                   </>
@@ -359,7 +359,7 @@ export default async function MyPage() {
                   <FileText className="size-4" /> 이력서 · 자기소개서
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 text-label-1 text-slate-600">
+              <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                 {detail.resumeSummary.primaryResume ? (
                   <div className="rounded-lg bg-slate-50 px-3 py-2.5">
                     <p className="font-medium text-slate-700">{detail.resumeSummary.primaryResume.title}</p>
@@ -504,11 +504,11 @@ export default async function MyPage() {
                     <Gift className="size-4" /> 지원금 진단 결과
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   {supportData.latestCompletedAt && (
                     <p className="text-slate-400">검사일 · {supportData.latestCompletedAt.slice(0, 10)}</p>
                   )}
-                  <Button variant="outline" className="w-full" asChild>
+                  <Button variant="outline" className="mt-auto w-full" asChild>
                     <Link href={`/support/result/${supportData.latestSessionId}`}>
                       <Gift className="size-4" />
                       지원금 결과 다시보기
@@ -523,9 +523,9 @@ export default async function MyPage() {
                     <Gift className="size-4" /> 지원금 찾기
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p>아직 지원금 진단을 받지 않았어요. 몇 가지 조건만 입력하면 받을 수 있는 혜택을 찾아드려요.</p>
-                  <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                  <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                     <Link href="/support?start=1">지원금 찾기 시작하기</Link>
                   </Button>
                 </CardContent>
