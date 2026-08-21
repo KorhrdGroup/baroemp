@@ -204,13 +204,6 @@ export function CoverLetterEditor({
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9" />
         </div>
-        <div className="flex items-center gap-2">
-          {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
-          <Button size="sm" onClick={() => void handleSave()} disabled={isSaving}>
-            {isSaving && <Loader2 className="size-4 animate-spin" />}
-            저장
-          </Button>
-        </div>
       </div>
 
       <Card className="rounded-xl border-0 ring-1 ring-border">
@@ -353,6 +346,15 @@ export function CoverLetterEditor({
       >
         <Plus className="size-4" /> 문항 추가
       </Button>
+
+      {/* 이력서 편집기와 동일: 저장은 다 쓰고 나서 하는 동작이라 하단에 sticky로 붙인다. */}
+      <div className="sticky bottom-0 z-10 -mx-1 flex items-center justify-end gap-3 rounded-xl border border-border bg-white/95 px-4 py-3 backdrop-blur">
+        {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
+        <Button onClick={() => void handleSave()} disabled={isSaving}>
+          {isSaving && <Loader2 className="size-4 animate-spin" />}
+          저장
+        </Button>
+      </div>
 
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" className="text-rose-500" onClick={handleDelete}>
