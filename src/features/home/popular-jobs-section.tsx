@@ -13,6 +13,7 @@ export function PopularJobsSection() {
           eyebrow="지금 많이 찾는"
           title="인기 직업"
           description="취업 수요가 높고 중장년에게 적합한 직업을 확인해보세요."
+          align="center"
           action={
             <Link
               href="/jobs"
