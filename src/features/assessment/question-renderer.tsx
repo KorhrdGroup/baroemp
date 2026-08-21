@@ -196,8 +196,9 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
 
   if (question.answerType === "SALARY_RANGE") {
     const current: { min?: number; max?: number } = value.type === "SALARY_RANGE" ? value : {};
+    // 폭을 채울 수 없는 입력 줄이라 가운데로 모은다.
     return (
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-3">
         <div className="flex items-center gap-2">
           <input
             type="number"

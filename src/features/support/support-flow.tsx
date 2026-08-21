@@ -314,7 +314,8 @@ function StepBody({
     case "careerBreak":
       return (
         <div className="flex flex-col gap-4">
-          <div className="flex gap-3">
+          {/* 2지선다도 다른 단계처럼 폭을 꽉 채워야 질문과 같은 중심선에 놓인다. */}
+          <div className="grid grid-cols-2 gap-3">
             <ChipButton indicator="radio" selected={answers.careerBreak === true} onClick={() => onChange({ careerBreak: true })}>
               있어요
             </ChipButton>
@@ -326,7 +327,8 @@ function StepBody({
             </ChipButton>
           </div>
           {answers.careerBreak && (
-            <div className="flex items-center gap-3">
+            /* 폭을 채울 수 없는 입력 줄이라 가운데로 모은다. */
+            <div className="flex items-center justify-center gap-3">
               <input
                 type="number"
                 min={0}
