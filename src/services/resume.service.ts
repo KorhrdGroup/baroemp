@@ -222,3 +222,22 @@ export async function deleteResume(resumeId: string): Promise<void> {
 export async function listResumeVersions(resumeId: string) {
   return getResumeVersionRepository().listByResume(resumeId);
 }
+
+/**
+ * 이력서 양식 변경.
+ * 이력서에서 템플릿은 "어떤 섹션을 노출할지"만 결정하고 입력된 내용은 그대로 남으므로,
+ * 작성 도중 언제든 바꿔도 데이터가 사라지지 않는다.
+ */
+export async function changeResumeTemplate(resumeId: string, templateId: string): Promise<ResumeDetail | null> {
+  const updated = await getResumeRepository().update(resumeId, { templateId });
+  if (!updated) return null;
+  const template = await getResumeTemplateRepository().findById(templateId);
+  await logActivityEvent({
+    userId: updated.userId,
+    eventType: "resume_template_selected",
+    entityType: "resume",
+    entityId: resumeId,
+    metadata: { templateCode: template?.code },
+  });
+  return getResumeDetail(resumeId);
+}

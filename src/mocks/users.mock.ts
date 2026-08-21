@@ -42,3 +42,41 @@ export function findMockMemberByLoginEmail(email: string): AdminUserListItem | u
     (u) => u.email.toLowerCase() === lower || u.id.toLowerCase() === localPart,
   );
 }
+
+export interface RegisterMockMemberInput {
+  name: string;
+  email: string;
+  phone?: string;
+  marketingConsent?: boolean;
+  joinedAt: string;
+}
+
+/**
+ * Mock Mode 회원가입.
+ *
+ * Supabase가 없으면 실제 가입을 할 수 없으므로, 가입 화면 이후 흐름(온보딩·마이페이지)을
+ * 확인할 수 있도록 시드 목록에 회원을 하나 더 얹는다. 프로세스 메모리에만 남으므로
+ * 서버를 다시 띄우면 사라진다.
+ *
+ * 시드 회원과 달리 CareerProfile은 만들지 않는다. 갓 가입한 상태를 그대로 재현해야
+ * 온보딩 화면이 빈 폼으로 열린다.
+ */
+export function registerMockMember(input: RegisterMockMemberInput): AdminUserListItem {
+  const seq = mockAdminUsers.length + 1;
+  const member: AdminUserListItem = {
+    id: `user-9${String(seq).padStart(3, "0")}`,
+    name: input.name,
+    email: input.email,
+    phone: input.phone ?? "",
+    ageGroup: "-",
+    region: "-",
+    employmentStatus: "-",
+    signupChannel: "homepage",
+    joinedAt: input.joinedAt,
+    leadGrade: "D",
+    leadScore: 0,
+    marketingConsent: input.marketingConsent ?? false,
+  };
+  mockAdminUsers.push(member);
+  return member;
+}

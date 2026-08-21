@@ -64,11 +64,6 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
     return { fieldErrors };
   }
 
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return { error: "회원가입 서비스를 사용할 수 없습니다. 잠시 후 다시 시도해주세요." };
-  }
-
   await logActivityEvent({
     anonymousId: await getAnonymousIdFromCookie(),
     eventType: "signup_started",
@@ -76,9 +71,40 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
     metadata: {},
   });
 
-  const origin = await getOrigin();
   const privacyConsentAt = new Date().toISOString();
   const phone = normalizePhone(phoneRaw);
+
+  // 가입 직후에는 취업 프로필 입력을 한 번 보여주고, 저장하거나 건너뛰면 원래 목적지로 보낸다.
+  // 이메일 인증이 필요한 경우에도 인증 링크가 이 경로로 돌아오도록 emailRedirectTo에 함께 넣는다.
+  const afterSignUp = `/onboarding/profile?next=${encodeURIComponent(next)}`;
+
+  const supabase = await createServerSupabaseClient();
+  if (!supabase) {
+    // Mock Mode: Supabase 미설정 시 실제 계정 없이 회원을 하나 만들고 가짜 세션으로 로그인시킨다.
+    // 가입 이후 화면(온보딩·마이페이지)을 확인하기 위한 용도이며, 서버를 다시 띄우면 사라진다.
+    const { findMockMemberByLoginEmail, registerMockMember } = await import("@/mocks/users.mock");
+    if (findMockMemberByLoginEmail(email)) {
+      return { fieldErrors: { email: "이미 가입된 이메일입니다." } };
+    }
+    const member = registerMockMember({
+      name,
+      email,
+      phone,
+      marketingConsent,
+      joinedAt: privacyConsentAt.slice(0, 10),
+    });
+    const { createMockSession } = await import("@/lib/auth/mock-session");
+    await createMockSession(email);
+    await logActivityEvent({
+      userId: member.id,
+      eventType: "signup_completed",
+      entityType: "career_profile",
+      metadata: { hasPhone: Boolean(phone), marketingConsent, mock: true },
+    });
+    redirect(afterSignUp);
+  }
+
+  const origin = await getOrigin();
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -90,7 +116,7 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
         marketing_consent: marketingConsent,
         privacy_consent_at: privacyConsentAt,
       },
-      emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(afterSignUp)}`,
     },
   });
 
@@ -130,7 +156,7 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
   const hasSession = Boolean(data.session);
   if (hasSession) {
     await afterAuthSuccess(user.id);
-    redirect(next);
+    redirect(afterSignUp);
   }
 
   return {

@@ -22,7 +22,8 @@ export function SectionHeading({
       className={cn(
         "flex flex-col gap-3",
         align === "center" && "items-center text-center",
-        action && "sm:flex-row sm:items-end sm:justify-between",
+        // 가운데 정렬일 때는 action을 옆에 두면 제목이 화면 중앙에서 밀린다. 아래에 놓는다.
+        action && align !== "center" && "sm:flex-row sm:items-end sm:justify-between",
         className,
       )}
     >

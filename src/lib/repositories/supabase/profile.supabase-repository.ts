@@ -37,6 +37,10 @@ export function createSupabaseProfileRepository(): ProfileRepository | null {
       const payload: Record<string, unknown> = {};
       if (patch.name !== undefined) payload.name = patch.name;
       if (patch.phone !== undefined) payload.phone = patch.phone;
+      if (patch.marketingConsent !== undefined) {
+        payload.marketing_consent = patch.marketingConsent;
+        payload.marketing_consent_at = patch.marketingConsentAt ?? null;
+      }
       if (Object.keys(payload).length === 0) return this.findById(userId);
 
       const result = await client.from("profiles").update(payload).eq("id", userId).select("*").maybeSingle();

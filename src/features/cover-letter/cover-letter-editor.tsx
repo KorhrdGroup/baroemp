@@ -11,8 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem } from "@/types";
 import {
+  changeCoverLetterTemplateAction,
   deleteCoverLetterAction,
   generateCoverLetterDraftAiAction,
   reviewCoverLetterSectionAiAction,
@@ -36,9 +38,14 @@ function stripKey<T extends { _key: string }>(item: T): Omit<T, "_key"> {
 export function CoverLetterEditor({
   initialDetail,
   experienceBank,
+  templates = [],
+  isNew = false,
 }: {
   initialDetail: CoverLetterDetail;
   experienceBank: ExperienceBankItem[];
+  templates?: TemplateOption[];
+  /** 방금 만든 자기소개서인지. 그렇다면 양식 선택기를 펼친 채로 연다. */
+  isNew?: boolean;
 }) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
@@ -51,6 +58,39 @@ export function CoverLetterEditor({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, { text: string; prompts: string[] }>>({});
+  const [isChangingTemplate, startTemplateChange] = useTransition();
+
+  /**
+   * 이력서와 달리 자기소개서는 양식이 문항 세트 자체를 정의한다.
+   * 같은 questionType의 답변은 서비스에서 새 문항으로 옮겨 담지만,
+   * 새 양식에 없는 문항의 답변은 사라지므로 먼저 확인을 받는다.
+   */
+  function handleTemplateChange(templateId: string) {
+    const coverLetter = detail.coverLetter;
+    if (templateId === coverLetter.templateId) return;
+
+    const written = sections.filter((s) => s.content?.trim());
+    if (written.length > 0) {
+      const ok = window.confirm(
+        "양식을 바꾸면 문항 구성이 새 양식으로 교체됩니다.\n" +
+          "같은 종류의 문항에 쓴 내용은 그대로 옮겨지지만, 새 양식에 없는 문항의 내용은 사라집니다.\n\n" +
+          "계속할까요?",
+      );
+      if (!ok) return;
+    }
+
+    startTemplateChange(async () => {
+      // 답변 이관은 서버에 저장된 내용을 기준으로 한다.
+      // 먼저 저장하지 않으면 화면에서 방금 쓴 내용이 그대로 사라진다.
+      if (written.length > 0) await handleSave();
+      const next = await changeCoverLetterTemplateAction(coverLetter.id, templateId);
+      if (!next) return;
+      setDetail(next);
+      setSections(next.sections.map((s) => ({ ...s, _key: nextKey() })));
+      setSuggestions({});
+      setSelectedExperiences({});
+    });
+  }
 
   function handleSave() {
     return new Promise<void>((resolve, reject) => {
@@ -149,17 +189,20 @@ export function CoverLetterEditor({
 
   return (
     <div className="space-y-4">
+      <TemplateCardPicker
+        label="자기소개서 양식"
+        templates={templates}
+        value={detail.coverLetter.templateId ?? undefined}
+        onChange={handleTemplateChange}
+        pending={isChangingTemplate}
+        gridClassName="sm:grid-cols-3"
+        defaultOpen={isNew}
+      />
+
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
-        <div className="min-w-0 flex-1">
+        <div className="min-w-48 flex-1">
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9 max-w-xs" />
-        </div>
-        <div className="flex items-center gap-2">
-          {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
-          <Button size="sm" onClick={() => void handleSave()} disabled={isSaving}>
-            {isSaving && <Loader2 className="size-4 animate-spin" />}
-            저장
-          </Button>
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9" />
         </div>
       </div>
 
@@ -168,7 +211,7 @@ export function CoverLetterEditor({
           <CardTitle className="text-label-1 font-semibold text-slate-500">
             {experienceBank.length > 0 ? "경험뱅크에서 문항별로 사용할 경험을 선택하세요" : "경험뱅크가 비어있어요"}
           </CardTitle>
-          <Link href="/experience-bank" className="text-label-1 font-medium text-brand-blue-600 hover:underline">
+          <Link href="/resume#experience-bank" className="text-label-1 font-medium text-brand-blue-600 hover:underline">
             경험뱅크 관리 →
           </Link>
         </CardHeader>
@@ -303,6 +346,15 @@ export function CoverLetterEditor({
       >
         <Plus className="size-4" /> 문항 추가
       </Button>
+
+      {/* 이력서 편집기와 동일: 저장은 다 쓰고 나서 하는 동작이라 하단에 sticky로 붙인다. */}
+      <div className="sticky bottom-0 z-10 -mx-1 flex items-center justify-end gap-3 rounded-xl border border-border bg-white/95 px-4 py-3 backdrop-blur">
+        {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
+        <Button onClick={() => void handleSave()} disabled={isSaving}>
+          {isSaving && <Loader2 className="size-4 animate-spin" />}
+          저장
+        </Button>
+      </div>
 
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" className="text-rose-500" onClick={handleDelete}>

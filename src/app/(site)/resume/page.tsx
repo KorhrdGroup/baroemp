@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileText, Pencil, Plus, Sparkles } from "lucide-react";
+import { FileText, Pencil, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { listResumesForUser } from "@/services/resume.service";
 import { listCoverLettersForUser } from "@/services/cover-letter.service";
+import { listExperienceBankForUser } from "@/services/experience-bank.service";
+import { ExperienceBankSection } from "@/features/experience-bank/experience-bank-section";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -11,12 +13,39 @@ export const metadata: Metadata = {
   title: "이력서 Builder | 한평생 바로취업",
 };
 
+/**
+ * 섹션 제목 + 우측 액션 버튼.
+ * 이력서/자기소개서/경험뱅크를 같은 위계로 두고, 각 섹션의 액션을 제목 옆에 붙인다.
+ */
+function SectionHeader({
+  title,
+  count,
+  action,
+}: {
+  title: string;
+  count: number;
+  action: React.ReactNode;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <h2 className="text-body-1 font-bold text-slate-900">
+        {title} ({count})
+      </h2>
+      {action}
+    </div>
+  );
+}
+
 export default async function ResumeListPage() {
   const user = await requireUser("/resume");
-  const [resumes, coverLetters] = await Promise.all([listResumesForUser(user.id), listCoverLettersForUser(user.id)]);
+  const [resumes, coverLetters, experiences] = await Promise.all([
+    listResumesForUser(user.id),
+    listCoverLettersForUser(user.id),
+    listExperienceBankForUser(user.id),
+  ]);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">이력서 · 자기소개서</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">취업에 바로 사용할 이력서를 만들어보세요.</h1>
@@ -25,30 +54,28 @@ export default async function ResumeListPage() {
         </p>
       </div>
 
-      <div className="flex flex-wrap gap-3">
-        <Link href="/resume/new">
-          <Button size="lg" className="h-12">
-            <Plus className="size-4" /> 새 이력서 만들기
-          </Button>
-        </Link>
-        <Link href="/cover-letter">
-          <Button size="lg" variant="outline" className="h-12">
-            <Sparkles className="size-4" /> 자기소개서 관리
-          </Button>
-        </Link>
-        <Link href="/experience-bank">
-          <Button size="lg" variant="outline" className="h-12">
-            경험뱅크 관리
-          </Button>
-        </Link>
-      </div>
-
-      <div className="mt-10">
-        <h2 className="text-body-1 font-bold text-slate-900">내 이력서 ({resumes.length})</h2>
+      <div>
+        <SectionHeader
+          title="내 이력서"
+          count={resumes.length}
+          action={
+            <Button asChild>
+              <Link href="/resume/new">
+                <Plus className="size-4" /> 새 이력서 만들기
+              </Link>
+            </Button>
+          }
+        />
         {resumes.length === 0 ? (
           <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-10 text-center">
             <FileText className="mx-auto size-8 text-slate-300" />
-            <p className="mt-3 text-label-1 text-slate-500">아직 작성한 이력서가 없어요. 새 이력서를 만들어보세요.</p>
+            <p className="mt-3 text-label-1 text-slate-500">아직 작성한 이력서가 없어요.</p>
+            <Link
+              href="/resume/new"
+              className="mt-3 inline-block text-label-1 font-semibold text-brand-blue-600 hover:underline"
+            >
+              이력서 작성하기 →
+            </Link>
           </div>
         ) : (
           <div className="mt-4 space-y-3">
@@ -82,7 +109,17 @@ export default async function ResumeListPage() {
       </div>
 
       <div className="mt-10">
-        <h2 className="text-body-1 font-bold text-slate-900">내 자기소개서 ({coverLetters.length})</h2>
+        <SectionHeader
+          title="내 자기소개서"
+          count={coverLetters.length}
+          action={
+            <Button variant="outline" asChild>
+              <Link href="/cover-letter/new">
+                <Plus className="size-4" /> 새 자기소개서 만들기
+              </Link>
+            </Button>
+          }
+        />
         {coverLetters.length === 0 ? (
           <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-8 text-center">
             <p className="text-label-1 text-slate-500">아직 작성한 자기소개서가 없어요.</p>
@@ -108,6 +145,9 @@ export default async function ResumeListPage() {
           </div>
         )}
       </div>
+
+      {/* 추가/수정은 모달, 삭제는 목록에서 바로 처리하므로 클라이언트 컴포넌트가 섹션 전체를 그린다. */}
+      <ExperienceBankSection initialItems={experiences} />
     </div>
   );
 }

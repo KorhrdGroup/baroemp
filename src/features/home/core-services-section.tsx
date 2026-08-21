@@ -5,8 +5,9 @@ import { cn } from "@/lib/utils";
 
 export function CoreServicesSection() {
   return (
-    <section className="py-14">
-      <div className="mx-auto grid max-w-5xl grid-cols-2 gap-4 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
+    <section className="pt-14">
+      {/* 홈의 다른 섹션과 같은 max-w-7xl. 이 섹션만 5xl이라 위 히어로와 좌우 라인이 어긋났다. */}
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-4 px-4 sm:px-6 lg:grid-cols-4 lg:px-8">
         {coreServices.map((service) => {
           const Icon = service.icon;
           return (

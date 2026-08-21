@@ -43,7 +43,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
@@ -80,7 +80,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
@@ -182,7 +182,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
@@ -196,8 +196,9 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
 
   if (question.answerType === "SALARY_RANGE") {
     const current: { min?: number; max?: number } = value.type === "SALARY_RANGE" ? value : {};
+    // 폭을 채울 수 없는 입력 줄이라 가운데로 모은다.
     return (
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center justify-center gap-3">
         <div className="flex items-center gap-2">
           <input
             type="number"

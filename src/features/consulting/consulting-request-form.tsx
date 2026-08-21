@@ -71,7 +71,7 @@ export function ConsultingRequestForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-xl border border-border bg-white p-6 sm:p-8"
+      className="space-y-5 rounded-2xl border border-border bg-white p-6 shadow-xl sm:p-8"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
@@ -125,14 +125,15 @@ export function ConsultingRequestForm() {
         />
       </div>
 
-      <div className="rounded-xl bg-slate-100 px-4 py-3 text-label-1 text-slate-700">
+      {/* 폼 안의 다른 컨트롤과 같은 8px. rounded-lg는 이 프로젝트에서 10px이라 어긋난다. */}
+      <div className="rounded-md bg-brand-blue-50 px-4 py-3 text-center text-label-1 text-brand-blue-700">
         1:1 취업컨설팅은 유료 서비스입니다. 상담 시작 전 결제 안내를 드립니다.
       </div>
 
       <Button
         type="submit"
         size="lg"
-        className="h-12 w-full bg-brand-blue-400 text-body-2 font-semibold hover:bg-brand-blue-600"
+        className="h-12 w-full bg-brand-blue-900 text-body-2 font-semibold hover:bg-brand-blue-800"
       >
         상담 신청하기
       </Button>

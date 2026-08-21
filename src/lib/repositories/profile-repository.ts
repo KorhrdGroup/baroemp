@@ -13,11 +13,17 @@ import { createSupabaseProfileRepository } from "./supabase/profile.supabase-rep
 export interface ProfileUpdateInput {
   name?: string;
   phone?: string;
+  /**
+   * 마케팅(알림톡) 수신동의. 가입 후 온보딩에서 사용자가 직접 켤 때만 전달한다.
+   * 동의는 사용자 의사표시이므로 서버가 임의로 끄지 않으며, 켤 때 marketingConsentAt을 함께 기록한다.
+   */
+  marketingConsent?: boolean;
+  marketingConsentAt?: string;
 }
 
 export interface ProfileRepository {
   findById(userId: string): Promise<Profile | null>;
-  /** /mypage/profile 수정 화면에서 사용 (이름/전화번호만 - 이메일/role/동의여부는 이 경로로 변경 불가). */
+  /** /mypage/profile 수정, 온보딩 동의 갱신에서 사용 (이메일/role은 이 경로로 변경 불가). */
   update(userId: string, patch: ProfileUpdateInput): Promise<Profile | null>;
 }
 
@@ -32,8 +38,9 @@ function createMockProfileRepository(): ProfileRepository {
         email: row.email,
         phone: row.phone,
         role: "USER",
-        marketingConsent: true,
-        marketingConsentAt: `${row.joinedAt}T00:00:00.000Z`,
+        // 시드 회원은 동의 컬럼이 없어 true로 본다. 가입/온보딩으로 만들어진 회원은 실제 값을 쓴다.
+        marketingConsent: row.marketingConsent ?? true,
+        marketingConsentAt: row.marketingConsent === false ? undefined : `${row.joinedAt}T00:00:00.000Z`,
         privacyConsentAt: `${row.joinedAt}T00:00:00.000Z`,
         regionSido: row.region,
         createdAt: `${row.joinedAt}T00:00:00.000Z`,
@@ -46,6 +53,7 @@ function createMockProfileRepository(): ProfileRepository {
       if (!row) return null;
       if (patch.name !== undefined) row.name = patch.name;
       if (patch.phone !== undefined) row.phone = patch.phone;
+      if (patch.marketingConsent !== undefined) row.marketingConsent = patch.marketingConsent;
       return this.findById(userId);
     },
   };

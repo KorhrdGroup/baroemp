@@ -3,13 +3,14 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, Plus, Printer, Sparkles, Target, Trash2 } from "lucide-react";
+import { Loader2, PanelRightClose, PanelRightOpen, Plus, Printer, Sparkles, Target, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -31,6 +32,7 @@ import type {
   ResumeTrainingInput,
 } from "@/types";
 import {
+  changeResumeTemplateAction,
   deleteResumeAction,
   generateCareerSummaryAiAction,
   reviewResumeAiAction,
@@ -39,6 +41,7 @@ import {
   trackResumeExportedAction,
 } from "./resume-actions";
 import { ResumePreview } from "./resume-preview";
+import { cn } from "@/lib/utils";
 
 let keySeq = 0;
 function nextKey(prefix: string) {
@@ -72,7 +75,16 @@ const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   LANGUAGE: "외국어",
 };
 
-export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail }) {
+export function ResumeEditor({
+  initialDetail,
+  templates = [],
+  isNew = false,
+}: {
+  initialDetail: ResumeDetail;
+  templates?: TemplateOption[];
+  /** 방금 만든 이력서인지. 그렇다면 양식 선택기를 펼친 채로 연다. */
+  isNew?: boolean;
+}) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const resume = detail.resume;
@@ -81,6 +93,20 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
     [detail.template],
   );
   const showSection = (code: string) => sections.size === 0 || sections.has(code);
+
+  const [isChangingTemplate, startTemplateChange] = useTransition();
+
+  /**
+   * 이력서에서 양식은 어떤 섹션을 노출할지만 결정하고 입력값은 그대로 남는다.
+   * 확인 없이 바로 바꿔도 잃는 데이터가 없다.
+   */
+  function handleTemplateChange(templateId: string) {
+    if (templateId === resume.templateId) return;
+    startTemplateChange(async () => {
+      const next = await changeResumeTemplateAction(resume.id, templateId);
+      if (next) setDetail(next);
+    });
+  }
 
   const [form, setForm] = useState({
     title: resume.title,
@@ -104,6 +130,8 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
   const [isSaving, startSave] = useTransition();
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("form");
+  // 미리보기는 기본으로 펼쳐 둔다. 넓은 화면에서만 접을 수 있다.
+  const [showPreview, setShowPreview] = useState(true);
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
   const [isReviewing, startReview] = useTransition();
@@ -208,10 +236,29 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-      <div className="space-y-4 print:hidden">
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
-          <div className="min-w-0 flex-1">
+    // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
+    <div className="space-y-6">
+      <div className="print:hidden">
+        <TemplateCardPicker
+          label="이력서 양식"
+          templates={templates}
+          value={resume.templateId ?? undefined}
+          onChange={handleTemplateChange}
+          pending={isChangingTemplate}
+          gridClassName="sm:grid-cols-2 lg:grid-cols-4"
+          defaultOpen={isNew}
+        />
+      </div>
+
+      {/*
+        접었을 때도 오른쪽 열을 좁게 남긴다. 토글이 늘 화면 오른쪽 같은 자리에 있어야
+        접고 펴는 기능이라는 게 읽힌다. 폼 헤더에 두면 접힘 여부에 따라 버튼이 이동한다.
+      */}
+      <div className={cn("grid gap-6", showPreview ? "lg:grid-cols-[1fr_1fr]" : "lg:grid-cols-[1fr_2.75rem]")}>
+        <div className="space-y-4 print:hidden">
+        {/* 편집기는 2단 그리드 안이라 바 폭이 좁다. min-w를 주지 않으면 제목 칸이 0으로 눌린다. */}
+        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
+          <div className="min-w-48 flex-1">
             <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
               이력서 이름
             </Label>
@@ -219,21 +266,16 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
               id="resume-title"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="mt-1 h-9 max-w-xs"
+              className="mt-1 h-9"
             />
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="rounded-full">
               완성도 {detail.resume.completeness}%
             </Badge>
-            {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
             <Button variant="outline" size="sm" onClick={handleReview} disabled={isReviewing}>
               {isReviewing ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
               AI 이력서 점검
-            </Button>
-            <Button size="sm" onClick={() => void handleSave()} disabled={isSaving}>
-              {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-              저장
             </Button>
           </div>
         </div>
@@ -244,7 +286,7 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
               ? `/career-gap?occupation=${resume.targetOccupationId}${resume.targetJobId ? `&job=${resume.targetJobId}` : ""}`
               : "/career-gap"
           }
-          className="flex h-11 items-center justify-center gap-2 rounded-xl border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
+          className="flex h-11 items-center justify-center gap-2 rounded-md border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
         >
           <Target className="size-4" />
           지원직무 대비 이력서 점검
@@ -651,28 +693,74 @@ export function ResumeEditor({ initialDetail }: { initialDetail: ResumeDetail })
           )}
         </div>
 
-        <div className="flex items-center justify-between print:hidden">
-          <Button variant="ghost" size="sm" className="text-rose-500" onClick={() => void handleDelete(resume.id)}>
-            <Trash2 className="size-4" /> 이력서 삭제
+        {/*
+          저장은 폼을 다 채운 뒤에 하는 동작이라 아래에 둔다.
+          폼이 길어 화면 밖으로 나가므로 sticky로 하단에 붙여 스크롤 중에도 닿게 한다.
+        */}
+        {/* 화면을 벗어나는 액션이 없도록 삭제·목록으로도 이 바에 모은다. 저장은 남는 폭을 다 쓴다. */}
+        <div className="sticky bottom-0 z-10 -mx-1 flex items-center gap-2 rounded-xl border border-border bg-white/95 px-4 py-3 shadow-[0_-6px_20px_-8px_rgba(15,23,42,0.18)] backdrop-blur print:hidden">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="shrink-0 text-rose-500"
+            onClick={() => void handleDelete(resume.id)}
+          >
+            <Trash2 className="size-4" /> 삭제
           </Button>
-          <Link href="/resume" className="text-label-2 text-slate-400 hover:underline">
-            목록으로
-          </Link>
+          {saveMessage && <span className="shrink-0 text-label-2 text-slate-400">{saveMessage}</span>}
+          {/* 되돌아가기(목록)와 확정(저장)은 한 묶음으로 오른쪽에 둔다. 삭제는 성격이 달라 왼쪽에 떼어놓는다. */}
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/resume">목록으로</Link>
+            </Button>
+            <Button className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
+              {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+              저장
+            </Button>
+          </div>
         </div>
       </div>
 
-      <div className={activeTab === "form" ? "hidden lg:block" : "block"}>
+      {/* 접힌 상태의 세로 손잡이. 모바일은 아래 탭으로 전환하므로 lg 이상에서만 쓴다. */}
+      {!showPreview && (
+        <div className="hidden print:hidden lg:block">
+          <button
+            type="button"
+            onClick={() => setShowPreview(true)}
+            aria-expanded={false}
+            className="sticky top-4 flex w-11 flex-col items-center gap-2 rounded-xl border border-border bg-white py-4 text-slate-600 transition-colors hover:bg-muted"
+          >
+            <PanelRightOpen className="size-4" />
+            <span className="text-label-2 font-medium [writing-mode:vertical-rl]">미리보기</span>
+          </button>
+        </div>
+      )}
+
+      <div className={cn(activeTab === "form" ? "hidden lg:block" : "block", !showPreview && "lg:hidden")}>
         <div className="sticky top-4 space-y-3">
-          <div className="flex items-center justify-between print:hidden">
+          <div className="flex items-center justify-between gap-2 print:hidden">
             <p className="text-label-1 font-semibold text-slate-500">미리보기</p>
-            <Button variant="outline" size="sm" onClick={handlePrint}>
-              <Printer className="size-4" /> PDF로 저장/인쇄
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="sm" onClick={handlePrint}>
+                <Printer className="size-4" /> PDF로 저장/인쇄
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="hidden lg:inline-flex"
+                onClick={() => setShowPreview(false)}
+                aria-expanded
+              >
+                <PanelRightClose className="size-4" />
+                접기
+              </Button>
+            </div>
           </div>
           <div className="max-h-[80vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border print:max-h-none print:overflow-visible print:bg-transparent print:p-0 print:ring-0">
             <ResumePreview detail={currentPreviewDetail()} />
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

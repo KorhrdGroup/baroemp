@@ -97,7 +97,8 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                   <Link href="/admin">관리자</Link>
                 </Button>
               )}
-              <Button variant="ghost" className="hidden text-slate-700 sm:inline-flex" asChild>
+              {/* 로그인 상태의 주 동작. 비로그인일 때 회원가입이 맡던 자리를 그대로 잇는다. */}
+              <Button className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
                 <Link href="/mypage">마이페이지</Link>
               </Button>
               <form action={signOutAction} className="hidden sm:inline-flex">

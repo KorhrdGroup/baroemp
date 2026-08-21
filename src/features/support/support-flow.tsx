@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, BadgeCheck, Check, Clock, Coins, FileText, Gift, Landmark, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock, Coins, Gift, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
@@ -144,7 +144,7 @@ function ChipButton({
         "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
         indicator === "none" ? "px-4" : "px-11",
         selected
-          ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
+          ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
           : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
       )}
     >
@@ -204,7 +204,7 @@ function StepBody({
               className={cn(
                 "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
                 answers.region === code
-                  ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
@@ -314,7 +314,8 @@ function StepBody({
     case "careerBreak":
       return (
         <div className="flex flex-col gap-4">
-          <div className="flex gap-3">
+          {/* 2지선다도 다른 단계처럼 폭을 꽉 채워야 질문과 같은 중심선에 놓인다. */}
+          <div className="grid grid-cols-2 gap-3">
             <ChipButton indicator="radio" selected={answers.careerBreak === true} onClick={() => onChange({ careerBreak: true })}>
               있어요
             </ChipButton>
@@ -326,7 +327,8 @@ function StepBody({
             </ChipButton>
           </div>
           {answers.careerBreak && (
-            <div className="flex items-center gap-3">
+            /* 폭을 채울 수 없는 입력 줄이라 가운데로 모은다. */
+            <div className="flex items-center justify-center gap-3">
               <input
                 type="number"
                 min={0}
@@ -380,7 +382,6 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
         </>
       }
       infoItems={INFO_ITEMS}
-      decorIcons={[Landmark, BadgeCheck, FileText]}
       ctaHeadline="2~3분이면 진단이 끝납니다"
       ctaDescription="지금 시작하면 받을 수 있는 지원제도를 바로 확인할 수 있어요."
       cta={
@@ -412,14 +413,25 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
   );
 }
 
-export function SupportFlow() {
+export function SupportFlow({ autoStart = false }: { autoStart?: boolean }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");
   const [loadingPrefill, setLoadingPrefill] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
+  // 되돌아온 뒤 다시 앞으로 갈 수 있게, 지금까지 가장 멀리 간 문항을 기억한다.
+  const [furthestIndex, setFurthestIndex] = useState(0);
   const [answers, setAnswers] = useState<SupportAssessmentAnswers>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // React StrictMode의 이중 실행으로 프리필이 두 번 돌지 않게 막는다.
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    // handleStart는 렌더마다 새로 만들어지지만 여기서는 최초 1회만 쓰면 된다.
+    void handleStart();
+  }, [autoStart]);
 
   async function handleStart() {
     setLoadingPrefill(true);
@@ -436,6 +448,15 @@ export function SupportFlow() {
   }
 
   if (phase === "intro") {
+    // ?start=1로 들어온 경우 소개 화면을 스치듯 보여주지 않고 바로 문항으로 넘어간다.
+    if (autoStart) {
+      return (
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col items-center justify-center px-4 text-center">
+          <Loader2 className="size-6 animate-spin text-brand-blue-400" />
+          <p className="mt-4 text-label-1 text-slate-500">지원금 찾기를 준비하고 있어요…</p>
+        </div>
+      );
+    }
     return <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} />;
   }
 
@@ -465,7 +486,9 @@ export function SupportFlow() {
       return;
     }
     if (!isLast) {
-      setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+      const next = Math.min(stepIndex + 1, STEPS.length - 1);
+      setStepIndex(next);
+      setFurthestIndex((f) => Math.max(f, next));
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
@@ -489,7 +512,8 @@ export function SupportFlow() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
+    // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다.
+    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
       {/* 진행 바 - 대분류 4칸 */}
       <div className="sticky top-16 z-30">
         <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
@@ -502,28 +526,44 @@ export function SupportFlow() {
             </div>
           ))}
         </div>
-        <div className="flex items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
+        {/*
+          문항 영역과 같은 폭·패딩을 써서 뒤로가기 화살표가 아래 선택지 박스와 왼쪽 라인을 맞춘다.
+          -ml-2는 아이콘 버튼의 안쪽 여백(36px 박스 안 20px 아이콘)을 상쇄해 아이콘 자체를 정렬시킨다.
+        */}
+        <div className="mx-auto flex max-w-[24.5rem] items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
           <button
             type="button"
             onClick={handlePrev}
             disabled={stepIndex === 0 || submitting}
             aria-label="이전 문항"
-            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowLeft className="size-5" />
           </button>
-          <span className="flex-1 truncate px-2 text-center text-body-2 font-bold text-slate-900">
+          {/* 지금 어느 분류인지는 화면 상단에 고정으로 둔다. */}
+          <span className="flex-1 truncate text-center text-label-1 font-semibold text-brand-blue-600">
             {GROUPS[groupIndex]?.label}
           </span>
-          <span className="w-16 shrink-0 text-right text-label-1 font-medium text-slate-400">
-            {posInGroup + 1}/{groupSteps.length}
-          </span>
+          {/* 이미 지나온 문항이면 하단 CTA를 쓰지 않고도 앞으로 되돌아갈 수 있게 한다. */}
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={stepIndex >= furthestIndex || submitting}
+            aria-label="다음 문항"
+            className="-mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+          >
+            <ArrowRight className="size-5" />
+          </button>
         </div>
       </div>
 
       {/* 문항 */}
-      <div className="mx-auto mt-12 max-w-[24.5rem] px-4">
-        <h2 className="text-center text-title-2 font-bold text-slate-900">
+      <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
+        {/* 분류 안에서 몇 번째 문항인지 - 질문과 함께 읽히는 정보라 질문 위에 둔다. */}
+        <p className="text-center text-body-2 font-bold text-slate-900">
+          {posInGroup + 1}/{groupSteps.length}
+        </p>
+        <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">
           {step.title}
           {!step.required && <span className="ml-2 text-label-1 font-normal text-slate-400">(선택)</span>}
         </h2>
@@ -540,11 +580,11 @@ export function SupportFlow() {
 
       {/* 하단 고정 CTA */}
       <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-atomic-mono-50 via-atomic-mono-50 to-transparent pt-6">
-        <div className="mx-auto max-w-[24.5rem] px-4 pb-5">
+        <div className="mx-auto max-w-[24.5rem] px-4 pb-8">
           <Button
             onClick={() => void handleNext()}
             disabled={submitting || (step.required && !canProceed)}
-            className="h-14 w-full rounded-xl bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-lg bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

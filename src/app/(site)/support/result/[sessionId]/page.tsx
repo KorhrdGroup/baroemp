@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Coins } from "lucide-react";
+import { Briefcase, Coins, GraduationCap, HeartHandshake, Landmark, MapPin } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/common/empty-state";
 import { SupportProgramCard } from "@/features/support/support-program-card";
@@ -15,6 +16,15 @@ export const metadata: Metadata = {
 };
 
 const SUMMARY_GRADES: SupportEligibilityGrade[] = ["HIGH", "MEDIUM", "CHECK_REQUIRED"];
+
+/** 결과가 카테고리별로 이어져 흰 카드가 계속 나열되므로, 아이콘으로 섹션의 시작을 알아보게 한다. */
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  employment: Briefcase,
+  training: GraduationCap,
+  living: HeartHandshake,
+  regional: MapPin,
+  other: Landmark,
+};
 
 export default async function SupportResultPage({ params }: { params: Promise<{ sessionId: string }> }) {
   const { sessionId } = await params;
@@ -31,7 +41,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     }));
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <SupportMatchViewTracker items={trackedItems} />
 
       <div className="mb-8">
@@ -69,12 +79,21 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
           }
         />
       ) : (
-        <div className="space-y-10">
-          {view.categories.map((group) => (
+        <div className="space-y-12">
+          {view.categories.map((group) => {
+            const Icon = CATEGORY_ICONS[group.category] ?? Landmark;
+            return (
             <section key={group.category}>
-              <h2 className="mb-4 text-body-1 font-bold text-slate-900">
-                {group.label} <span className="text-slate-400">({group.items.length})</span>
-              </h2>
+              {/* 아이콘 + 밑줄로 섹션의 시작을 분명히 한다. 제목만으로는 카드 사이에 묻힌다. */}
+              <div className="mb-5 flex items-center gap-2.5 border-b border-border pb-3">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-blue-50 text-brand-blue-600">
+                  <Icon className="size-4" />
+                </span>
+                <h2 className="text-body-1 font-bold text-slate-900">{group.label}</h2>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-label-2 font-semibold text-slate-500">
+                  {group.items.length}
+                </span>
+              </div>
               <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                 {group.items.map(({ program, matchResult }) => (
                   <SupportProgramCard
@@ -87,7 +106,8 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
                 ))}
               </div>
             </section>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

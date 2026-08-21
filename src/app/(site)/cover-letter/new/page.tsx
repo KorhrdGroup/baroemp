@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { getCoverLetterTemplateRepository, getJobRepository, getResumeRepository } from "@/lib/repositories";
-import { CoverLetterTemplatePicker } from "@/features/cover-letter/cover-letter-template-picker";
+import { CoverLetterAutoCreate } from "@/features/cover-letter/cover-letter-auto-create";
 
 export const metadata: Metadata = {
   title: "새 자기소개서 작성 | 한평생 바로취업",
@@ -20,26 +21,17 @@ export default async function CoverLetterNewPage({
     targetJobId ? getJobRepository().findById(targetJobId) : Promise.resolve(null),
     resumeId ? getResumeRepository().findById(resumeId) : Promise.resolve(null),
   ]);
-  const sorted = [...templates].sort((a, b) => a.orderIndex - b.orderIndex);
-  const validResumeId = resume && resume.userId === user.id ? resume.id : undefined;
-  const suggestedTitle = job ? `${job.title} 지원용 자기소개서` : title;
+  const defaultTemplate = [...templates].sort((a, b) => a.orderIndex - b.orderIndex)[0];
+  if (!defaultTemplate) redirect("/cover-letter");
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <p className="text-label-1 font-semibold text-brand-blue-600">Step 1</p>
-        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">어떤 자기소개서 양식을 사용하시겠어요?</h1>
-        <p className="mt-2 text-body-2-reading text-slate-500">
-          {job ? `"${job.title}" 공고에 맞춰 자기소개서를 준비해요.` : "상황에 맞는 문항 구성을 선택해주세요."}
-        </p>
-      </div>
-
-      <CoverLetterTemplatePicker
-        templates={sorted}
-        resumeId={validResumeId}
+      <CoverLetterAutoCreate
+        templateId={defaultTemplate.id}
+        title={job ? `${job.title} 지원용 자기소개서` : title}
+        resumeId={resume && resume.userId === user.id ? resume.id : undefined}
         targetJobId={targetJobId}
         targetOccupationId={targetOccupationId}
-        suggestedTitle={suggestedTitle}
       />
     </div>
   );

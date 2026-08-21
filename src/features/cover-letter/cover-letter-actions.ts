@@ -20,6 +20,7 @@ import {
   getCoverLetterDetail,
   listCoverLettersForUser,
   saveCoverLetterDetail,
+  changeCoverLetterTemplate,
 } from "@/services/cover-letter.service";
 import { generateCoverLetterDraftWithAI, reviewCoverLetterSectionWithAI } from "@/services/ai-resume.service";
 
@@ -87,4 +88,12 @@ export async function generateCoverLetterDraftAiAction(input: {
 }): Promise<AICoverLetterDraftResult> {
   await requireOwnCoverLetter(input.coverLetterId);
   return generateCoverLetterDraftWithAI(input);
+}
+
+export async function changeCoverLetterTemplateAction(
+  coverLetterId: string,
+  templateId: string,
+): Promise<CoverLetterDetail | null> {
+  await requireOwnCoverLetter(coverLetterId);
+  return changeCoverLetterTemplate(coverLetterId, templateId);
 }

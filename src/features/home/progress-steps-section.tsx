@@ -8,19 +8,26 @@ import { ProgressStepsCard } from "./progress-steps-card";
 
 export async function ProgressStepsSection() {
   const user = await getCurrentUser();
-  const { status, doneCount, nextStepId } = await getProgressSummary(user?.id ?? null);
+  const { status, nextStepId } = await getProgressSummary(user?.id ?? null);
+  const nextStep = progressSteps.find((s) => s.id === nextStepId);
   const recommended = user ? (await getRecommendedJobsForUser(user.id, 1))[0] : undefined;
 
 
   return (
     <section className="pb-24 pt-14">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        {/*
+          몇 단계를 마쳤는지는 아래 카드가 이미 보여준다. 여기서는 그 숫자를 반복하는 대신
+          "그래서 지금 뭘 하면 되는지"를 말한다.
+        */}
         <SectionHeading
-          title="나의 취업 준비 현황 한눈에"
+          title="한눈에 보는 취업 준비 현황"
           description={
-            user
-              ? `${progressSteps.length}단계 중 ${doneCount}단계를 마쳤어요.`
-              : "로그인하면 진행 중인 단계를 이어서 볼 수 있어요."
+            !user
+              ? "로그인하면 내가 어디까지 왔는지 이어서 볼 수 있어요."
+              : nextStep
+                ? `이제 ${nextStep.title} 단계를 진행할 차례예요.`
+                : "준비 단계를 모두 마치셨어요. 새로 올라온 공고를 확인해보세요."
           }
           align="center"
         />

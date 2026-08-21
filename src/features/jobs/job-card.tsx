@@ -52,12 +52,12 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
               </Badge>
             )}
             {job.isBeginnerFriendly && (
-              <Badge className="rounded-full border-0 bg-emerald-50 text-label-2 font-semibold text-emerald-700">
+              <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
                 신입가능
               </Badge>
             )}
             {midlifeRecommended && (
-              <Badge className="rounded-full border-0 bg-brand-blue-50 text-label-2 font-semibold text-brand-blue-600">
+              <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
                 중장년 추천
               </Badge>
             )}
@@ -66,6 +66,7 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
                 자격 관련
               </Badge>
             )}
+            {/* 마감임박만 색을 유지한다. 나머지 태그는 공고의 분류지만 이건 시간 경고다. */}
             {closingSoon && (
               <Badge className="rounded-full border-0 bg-rose-50 text-label-2 font-semibold text-rose-600">
                 마감임박
