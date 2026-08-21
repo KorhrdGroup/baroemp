@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ArrowLeft, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -285,8 +285,20 @@ export function OnboardingWizard({
       </div>
 
       <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
+        {/*
+          가입 버튼을 누르자마자 질문이 시작되므로, 첫 화면에서만 여기가 어디이고 왜 묻는지
+          알려준다. 한 줄 텍스트로 두면 곧바로 이어지는 문항에 묻혀 읽히지 않아 카드로 감싼다.
+        */}
         {stepIndex === 0 && (
-          <p className="mb-4 text-center text-label-1 font-semibold text-brand-blue-600">가입이 완료되었어요</p>
+          <div className="mb-7 rounded-xl border border-brand-blue-200 bg-white px-4 py-3.5 text-center">
+            <p className="flex items-center justify-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
+              <CheckCircle2 className="size-4 shrink-0" />
+              가입이 완료되었어요
+            </p>
+            <p className="mt-1.5 text-label-1 break-keep text-slate-500">
+              몇 가지만 알려주시면 맞춤 채용공고와 받을 수 있는 지원금을 찾아드려요. 지금 넘어가셔도 괜찮아요.
+            </p>
+          </div>
         )}
         <p className="text-center text-body-2 font-bold text-slate-900">
           {posInGroup + 1}/{groupSteps.length}
