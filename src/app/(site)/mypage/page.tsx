@@ -31,7 +31,6 @@ import type { Job, SupportProgram } from "@/types";
 
 interface MyPageJobData {
   bookmarked: Job[];
-  recentlyViewed: Job[];
   recommended: JobWithMatch[];
   applyHistory: { job: Job; occurredAt: string }[];
 }
@@ -45,31 +44,22 @@ async function loadMyPageJobData(userId: string): Promise<MyPageJobData> {
     ]);
 
     const jobRepo = getJobRepository();
-    const viewedIds = [
-      ...new Set(
-        events
-          .filter((e) => e.eventType === "job_detail_viewed" && e.entityId)
-          .map((e) => e.entityId!),
-      ),
-    ].slice(0, 4);
     const applyEvents = events.filter((e) => e.eventType === "job_apply_clicked" && e.entityId).slice(0, 4);
 
-    const [bookmarked, recentlyViewed, applyJobs] = await Promise.all([
+    const [bookmarked, applyJobs] = await Promise.all([
       Promise.all(bookmarkIds.slice(0, 6).map((id) => jobRepo.findById(id))),
-      Promise.all(viewedIds.map((id) => jobRepo.findById(id))),
       Promise.all(applyEvents.map((e) => jobRepo.findById(e.entityId!))),
     ]);
 
     return {
       bookmarked: bookmarked.filter((j): j is Job => Boolean(j)),
-      recentlyViewed: recentlyViewed.filter((j): j is Job => Boolean(j)),
       recommended: recommendedWithMatch,
       applyHistory: applyEvents
         .map((e, i) => ({ job: applyJobs[i], occurredAt: e.occurredAt }))
         .filter((x): x is { job: Job; occurredAt: string } => Boolean(x.job)),
     };
   } catch {
-    return { bookmarked: [], recentlyViewed: [], recommended: [], applyHistory: [] };
+    return { bookmarked: [], recommended: [], applyHistory: [] };
   }
 }
 
@@ -77,7 +67,6 @@ interface MyPageSupportData {
   latestSessionId?: string;
   latestCompletedAt?: string;
   bookmarked: SupportProgram[];
-  recentlyViewed: SupportProgram[];
   applyHistory: { program: SupportProgram; occurredAt: string }[];
 }
 
@@ -91,16 +80,10 @@ async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData>
     ]);
 
     const supportRepo = getSupportProgramRepository();
-    const viewedIds = [
-      ...new Set(
-        events.filter((e) => e.eventType === "support_viewed" && e.entityId).map((e) => e.entityId!),
-      ),
-    ].slice(0, 4);
     const applyEvents = events.filter((e) => e.eventType === "support_apply_clicked" && e.entityId).slice(0, 4);
 
-    const [bookmarked, recentlyViewed, applyPrograms] = await Promise.all([
+    const [bookmarked, applyPrograms] = await Promise.all([
       Promise.all(bookmarkIds.slice(0, 6).map((id) => supportRepo.findById(id))),
-      Promise.all(viewedIds.map((id) => supportRepo.findById(id))),
       Promise.all(applyEvents.map((e) => supportRepo.findById(e.entityId!))),
     ]);
 
@@ -110,13 +93,12 @@ async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData>
       latestSessionId: latestSession?.id,
       latestCompletedAt: latestSession?.completedAt,
       bookmarked: bookmarked.filter((p): p is SupportProgram => Boolean(p)),
-      recentlyViewed: recentlyViewed.filter((p): p is SupportProgram => Boolean(p)),
       applyHistory: applyEvents
         .map((e, i) => ({ program: applyPrograms[i], occurredAt: e.occurredAt }))
         .filter((x): x is { program: SupportProgram; occurredAt: string } => Boolean(x.program)),
     };
   } catch {
-    return { bookmarked: [], recentlyViewed: [], applyHistory: [] };
+    return { bookmarked: [], applyHistory: [] };
   }
 }
 
@@ -159,7 +141,6 @@ export default async function MyPage() {
   const hasJobActivity =
     jobData.recommended.length > 0 ||
     jobData.bookmarked.length > 0 ||
-    jobData.recentlyViewed.length > 0 ||
     jobData.applyHistory.length > 0;
   /*
    * 카드는 모두 반 칸을 기본으로 두 장씩 나란히 세운다. 데이터 유무로 카드가 나타났다
@@ -173,13 +154,11 @@ export default async function MyPage() {
   const jobFullKey = lastKeyWhenOdd([
     jobData.recommended.length > 0 && "recommended",
     jobData.bookmarked.length > 0 && "bookmarked",
-    jobData.recentlyViewed.length > 0 && "recentlyViewed",
     jobData.applyHistory.length > 0 && "applyHistory",
   ]);
   const supportFullKey = lastKeyWhenOdd([
     "assessment",
     supportData.bookmarked.length > 0 && "bookmarked",
-    supportData.recentlyViewed.length > 0 && "recentlyViewed",
     supportData.applyHistory.length > 0 && "applyHistory",
   ]);
 
@@ -462,26 +441,6 @@ export default async function MyPage() {
                 </Card>
               )}
 
-              {jobData.recentlyViewed.length > 0 && (
-                <Card className={cn("rounded-xl border-0 ring-1 ring-border", jobFullKey === "recentlyViewed" && "md:col-span-2")}>
-                  <CardHeader>
-                    <CardTitle className="text-body-2">최근 본 채용공고</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-1.5 text-label-1 text-slate-600">
-                    {jobData.recentlyViewed.map((job) => (
-                      <Link
-                        key={job.id}
-                        href={`/jobs/${job.id}`}
-                        className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
-                      >
-                        <span className="truncate font-medium text-slate-700">{job.title}</span>
-                        <span className="shrink-0 text-slate-400">{job.companyName}</span>
-                      </Link>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
-
               {jobData.applyHistory.length > 0 && (
                 <Card className={cn("rounded-xl border-0 ring-1 ring-border", jobFullKey === "applyHistory" && "md:col-span-2")}>
                   <CardHeader>
@@ -568,28 +527,6 @@ export default async function MyPage() {
                       <Badge variant="outline" className="shrink-0 rounded-full text-label-2 text-slate-500">
                         {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
                       </Badge>
-                    </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
-            {supportData.recentlyViewed.length > 0 && (
-              <Card className={cn("rounded-xl border-0 ring-1 ring-border", supportFullKey === "recentlyViewed" && "md:col-span-2")}>
-                <CardHeader>
-                  <CardTitle className="text-body-2">최근 본 지원제도</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1.5 text-label-1 text-slate-600">
-                  {supportData.recentlyViewed.map((program) => (
-                    <Link
-                      key={program.id}
-                      href={`/support/${program.id}`}
-                      className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
-                    >
-                      <span className="truncate font-medium text-slate-700">{program.title}</span>
-                      <span className="shrink-0 text-slate-400">
-                        {program.organizationName ?? program.organization}
-                      </span>
                     </Link>
                   ))}
                 </CardContent>
