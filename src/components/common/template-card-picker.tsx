@@ -25,6 +25,7 @@ export function TemplateCardPicker({
   onChange,
   pending,
   gridClassName = "sm:grid-cols-2",
+  defaultOpen = false,
 }: {
   label: string;
   templates: TemplateOption[];
@@ -32,8 +33,10 @@ export function TemplateCardPicker({
   onChange: (templateId: string) => void;
   pending?: boolean;
   gridClassName?: string;
+  /** 처음 만든 직후처럼 아직 양식을 고르지 않은 상태에서는 펼친 채로 시작한다. */
+  defaultOpen?: boolean;
 }) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
   if (templates.length === 0) return null;
 
   const current = templates.find((t) => t.id === value) ?? templates[0];

@@ -77,9 +77,12 @@ const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
 export function ResumeEditor({
   initialDetail,
   templates = [],
+  isNew = false,
 }: {
   initialDetail: ResumeDetail;
   templates?: TemplateOption[];
+  /** 방금 만든 이력서인지. 그렇다면 양식 선택기를 펼친 채로 연다. */
+  isNew?: boolean;
 }) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
@@ -240,6 +243,7 @@ export function ResumeEditor({
           onChange={handleTemplateChange}
           pending={isChangingTemplate}
           gridClassName="sm:grid-cols-2 lg:grid-cols-4"
+          defaultOpen={isNew}
         />
       </div>
 

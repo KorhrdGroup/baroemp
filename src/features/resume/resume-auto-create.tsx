@@ -37,7 +37,8 @@ export function ResumeAutoCreate({
     (async () => {
       try {
         const detail = await createResumeAction({ templateId, title, targetJobId, targetOccupationId });
-        router.replace(`/resume/${detail.resume.id}/edit`);
+        // 처음 만든 직후에는 양식 선택기를 펼친 상태로 열어 고를 수 있게 한다.
+        router.replace(`/resume/${detail.resume.id}/edit?new=1`);
       } catch (err) {
         setError(err instanceof Error ? err.message : "이력서 생성에 실패했습니다.");
       }

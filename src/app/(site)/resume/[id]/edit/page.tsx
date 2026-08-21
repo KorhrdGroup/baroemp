@@ -9,8 +9,15 @@ export const metadata: Metadata = {
   title: "이력서 편집 | 한평생 바로취업",
 };
 
-export default async function ResumeEditPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function ResumeEditPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  /** ?new=1 은 방금 만든 직후라는 표시. 양식 선택기를 펼쳐서 고르게 한다. */
+  searchParams: Promise<{ new?: string }>;
+}) {
+  const [{ id }, { new: isNewParam }] = await Promise.all([params, searchParams]);
   const user = await requireUser(`/resume/${id}/edit`);
 
   const resume = await getResumeRepository().findById(id);
@@ -29,7 +36,7 @@ export default async function ResumeEditPage({ params }: { params: Promise<{ id:
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <ResumeEditor initialDetail={detail} templates={templateOptions} />
+      <ResumeEditor initialDetail={detail} templates={templateOptions} isNew={isNewParam === "1"} />
     </div>
   );
 }

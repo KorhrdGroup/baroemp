@@ -43,7 +43,8 @@ export function CoverLetterAutoCreate({
           targetJobId,
           targetOccupationId,
         });
-        router.replace(`/cover-letter/${detail.coverLetter.id}/edit`);
+        // 처음 만든 직후에는 양식 선택기를 펼친 상태로 열어 고를 수 있게 한다.
+        router.replace(`/cover-letter/${detail.coverLetter.id}/edit?new=1`);
       } catch (err) {
         setError(err instanceof Error ? err.message : "자기소개서 생성에 실패했습니다.");
       }

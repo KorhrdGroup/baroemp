@@ -39,10 +39,13 @@ export function CoverLetterEditor({
   initialDetail,
   experienceBank,
   templates = [],
+  isNew = false,
 }: {
   initialDetail: CoverLetterDetail;
   experienceBank: ExperienceBankItem[];
   templates?: TemplateOption[];
+  /** 방금 만든 자기소개서인지. 그렇다면 양식 선택기를 펼친 채로 연다. */
+  isNew?: boolean;
 }) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
@@ -193,6 +196,7 @@ export function CoverLetterEditor({
         onChange={handleTemplateChange}
         pending={isChangingTemplate}
         gridClassName="sm:grid-cols-3"
+        defaultOpen={isNew}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">

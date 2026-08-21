@@ -10,8 +10,15 @@ export const metadata: Metadata = {
   title: "자기소개서 편집 | 한평생 바로취업",
 };
 
-export default async function CoverLetterEditPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
+export default async function CoverLetterEditPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  /** ?new=1 은 방금 만든 직후라는 표시. 양식 선택기를 펼쳐서 고르게 한다. */
+  searchParams: Promise<{ new?: string }>;
+}) {
+  const [{ id }, { new: isNewParam }] = await Promise.all([params, searchParams]);
   const user = await requireUser(`/cover-letter/${id}/edit`);
 
   const coverLetter = await getCoverLetterRepository().findById(id);
@@ -36,7 +43,12 @@ export default async function CoverLetterEditPage({ params }: { params: Promise<
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
-      <CoverLetterEditor initialDetail={detail} experienceBank={experienceBank} templates={templateOptions} />
+      <CoverLetterEditor
+        initialDetail={detail}
+        experienceBank={experienceBank}
+        templates={templateOptions}
+        isNew={isNewParam === "1"}
+      />
     </div>
   );
 }
