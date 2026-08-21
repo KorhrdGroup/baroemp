@@ -163,6 +163,15 @@ export default async function MyPage() {
     jobData.applyHistory.length > 0;
   // 옆에 설 카드가 없으면 지원금 카드가 한 줄을 다 쓰게 한다.
   const supportSideCards = supportData.bookmarked.length > 0 || supportData.recentlyViewed.length > 0;
+  /*
+   * 반 칸짜리 카드가 홀수로 남으면 마지막 한 장 옆이 빈다. 짝이 없는 카드는 한 줄을 쓰게 한다.
+   * 채용공고: 찜한 / 최근 본 두 장이 짝이다.
+   * 지원제도: 지원금 카드가 항상 있으므로 찜한·최근 본까지 합쳐 3장이 되면 마지막이 남는다.
+   */
+  const jobPairComplete = jobData.bookmarked.length > 0 && jobData.recentlyViewed.length > 0;
+  const supportOneColCount =
+    1 + (supportData.bookmarked.length > 0 ? 1 : 0) + (supportData.recentlyViewed.length > 0 ? 1 : 0);
+  const supportTailAlone = supportOneColCount === 3;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -423,7 +432,7 @@ export default async function MyPage() {
               )}
 
               {jobData.bookmarked.length > 0 && (
-                <Card className="rounded-xl border-0 ring-1 ring-border">
+                <Card className={cn("rounded-xl border-0 ring-1 ring-border", !jobPairComplete && "md:col-span-2")}>
                   <CardHeader>
                     <CardTitle className="text-body-2">찜한 채용공고</CardTitle>
                   </CardHeader>
@@ -443,7 +452,7 @@ export default async function MyPage() {
               )}
 
               {jobData.recentlyViewed.length > 0 && (
-                <Card className="rounded-xl border-0 ring-1 ring-border">
+                <Card className={cn("rounded-xl border-0 ring-1 ring-border", !jobPairComplete && "md:col-span-2")}>
                   <CardHeader>
                     <CardTitle className="text-body-2">최근 본 채용공고</CardTitle>
                   </CardHeader>
@@ -555,7 +564,7 @@ export default async function MyPage() {
             )}
 
             {supportData.recentlyViewed.length > 0 && (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
+              <Card className={cn("rounded-xl border-0 ring-1 ring-border", supportTailAlone && "md:col-span-2")}>
                 <CardHeader>
                   <CardTitle className="text-body-2">최근 본 지원제도</CardTitle>
                 </CardHeader>
