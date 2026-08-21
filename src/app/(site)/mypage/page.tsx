@@ -265,7 +265,7 @@ export default async function MyPage() {
                   </Link>
                 </Button>
                 <Button variant="outline" className="flex-1" asChild>
-                  <Link href="/assessment">다시 검사</Link>
+                  <Link href="/assessment?start=1">다시 검사</Link>
                 </Button>
               </div>
             </CardContent>
@@ -278,7 +278,7 @@ export default async function MyPage() {
             <CardContent className="space-y-3 text-label-1 text-slate-600">
               <p>아직 직업진단을 받지 않았어요. 몇 가지 질문으로 나에게 맞는 직업을 찾아드려요.</p>
               <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                <Link href="/assessment">무료 직업진단 시작</Link>
+                <Link href="/assessment?start=1">무료 직업진단 시작</Link>
               </Button>
             </CardContent>
           </Card>
@@ -491,7 +491,7 @@ export default async function MyPage() {
             <CardContent className="space-y-3 text-label-1 text-slate-600">
               <p>아직 지원금 진단을 받지 않았어요. 몇 가지 조건만 입력하면 받을 수 있는 혜택을 찾아드려요.</p>
               <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                <Link href="/support">지원금 찾기 시작하기</Link>
+                <Link href="/support?start=1">지원금 찾기 시작하기</Link>
               </Button>
             </CardContent>
           </Card>

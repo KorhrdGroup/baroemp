@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, BadgeCheck, Check, Clock, Coins, FileText, Gift, Landmark, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -414,7 +414,7 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
   );
 }
 
-export function SupportFlow() {
+export function SupportFlow({ autoStart = false }: { autoStart?: boolean }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");
   const [loadingPrefill, setLoadingPrefill] = useState(false);
@@ -424,6 +424,15 @@ export function SupportFlow() {
   const [answers, setAnswers] = useState<SupportAssessmentAnswers>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // React StrictMode의 이중 실행으로 프리필이 두 번 돌지 않게 막는다.
+  const autoStartedRef = useRef(false);
+  useEffect(() => {
+    if (!autoStart || autoStartedRef.current) return;
+    autoStartedRef.current = true;
+    // handleStart는 렌더마다 새로 만들어지지만 여기서는 최초 1회만 쓰면 된다.
+    void handleStart();
+  }, [autoStart]);
 
   async function handleStart() {
     setLoadingPrefill(true);
@@ -440,6 +449,15 @@ export function SupportFlow() {
   }
 
   if (phase === "intro") {
+    // ?start=1로 들어온 경우 소개 화면을 스치듯 보여주지 않고 바로 문항으로 넘어간다.
+    if (autoStart) {
+      return (
+        <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col items-center justify-center px-4 text-center">
+          <Loader2 className="size-6 animate-spin text-brand-blue-400" />
+          <p className="mt-4 text-label-1 text-slate-500">지원금 찾기를 준비하고 있어요…</p>
+        </div>
+      );
+    }
     return <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} />;
   }
 
