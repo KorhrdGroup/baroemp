@@ -29,7 +29,11 @@ export function PopularJobsSection() {
             <Link
               key={role.id}
               href={`/jobs?category=${role.jobCategory}`}
-              className="group flex flex-col rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-200"
+              /*
+                회청색 띠 위의 흰 카드라 회색 테두리 없이도 구분된다. 테두리 대신 옅은
+                블루 그림자로 띄우고, 테두리가 맡던 호버 반응은 그림자를 진하게 해서 대신한다.
+              */
+              className="group flex flex-col rounded-xl bg-white p-5 shadow-[0_4px_16px_-6px_rgba(36,105,255,0.18)] transition-shadow hover:shadow-[0_10px_28px_-10px_rgba(36,105,255,0.4)]"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-wrap gap-1.5">

@@ -73,7 +73,7 @@ export function HeroSection() {
           */}
           <form
             action="/jobs"
-            className="mt-6 flex items-center gap-2 rounded-md border-2 border-brand-blue-400 bg-white px-4 py-3"
+            className="mt-6 flex items-center gap-2 rounded-md border-2 border-brand-blue-200 bg-white px-4 py-3"
           >
             <button
               type="submit"
