@@ -10,14 +10,14 @@ export function HeroIllustration() {
   return (
     <div className="relative mx-auto aspect-[3/2] w-full max-w-2xl select-none">
       <Image
-        src="/images/hero-illustration.jpg"
+        src="/images/hero-illustration.png"
         alt="계단을 함께 오르며 취업에 성공하는 중장년 구직자들"
         fill
         priority
         sizes="(min-width: 1024px) 42rem, 100vw"
-        // 흰 배경 JPG라 그대로 얹으면 컬러 그라데이션 위에 흰 사각형으로 보인다.
-        // multiply로 흰색만 배경에 녹여 잘라낸 것처럼 만든다.
-        className="object-contain mix-blend-multiply"
+        // 배경이 투명한 PNG라 그대로 얹으면 된다.
+        // (흰 배경 JPG 시절 쓰던 mix-blend-multiply 는 불필요해져 제거)
+        className="object-contain"
       />
 
       <div className="absolute left-2 top-6 flex items-center gap-2 rounded-xl bg-white px-4 py-3 ring-1 ring-border sm:left-0 sm:top-10">
