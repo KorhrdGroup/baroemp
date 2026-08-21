@@ -68,7 +68,7 @@ export function JobDetailView({
 
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         {job.isBeginnerFriendly && (
-          <Badge className="rounded-full border-0 bg-emerald-50 text-label-2 font-semibold text-emerald-700">신입가능</Badge>
+          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">신입가능</Badge>
         )}
         {match && (
           <Badge className="rounded-full border-0 bg-brand-blue-400 text-label-2 font-semibold text-white">
