@@ -56,9 +56,13 @@ export function IntroHero({
           </h1>
           <p className="mx-auto mt-4 max-w-2xl break-keep text-body-1-reading text-slate-600">{description}</p>
 
-          <div className="mt-7 flex flex-wrap justify-center gap-x-5 gap-y-2 text-label-1 font-semibold text-slate-500">
+          {/* 그라데이션 배경 위에 글자만 떠 있으면 묻힌다. 흰 pill로 각 항목을 떼어놓는다. */}
+          <div className="mt-7 flex flex-wrap justify-center gap-2">
             {infoItems.map(({ icon: InfoIcon, label }) => (
-              <span key={label} className="flex items-center gap-1.5">
+              <span
+                key={label}
+                className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-label-1 font-semibold text-slate-600 ring-1 ring-border"
+              >
                 <InfoIcon className="size-4 text-brand-blue-600" />
                 {label}
               </span>

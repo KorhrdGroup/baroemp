@@ -1,20 +1,24 @@
-import { Briefcase, CheckCircle2, IdCard, KeyRound } from "lucide-react";
+import Image from "next/image";
+import { CheckCircle2, IdCard, KeyRound } from "lucide-react";
 
 /**
- * 첨부 레퍼런스 이미지의 "가방/ID카드/키링" 계열 일러스트를 CSS + lucide 아이콘으로 재구성한 영역.
- * 실제 이미지 파일에 의존하지 않아 깨진 이미지가 노출될 위험이 없다.
+ * 메인 히어로 그래픽.
+ * 일러스트 위에 서비스 단계를 나타내는 작은 카드 3개를 띄운다.
+ * 카드 위치는 일러스트가 아니라 이 박스 기준이라 이미지가 바뀌어도 그대로 쓸 수 있다.
  */
 export function HeroIllustration() {
   return (
-    <div className="relative mx-auto aspect-square w-full max-w-md select-none">
-      <div className="absolute inset-6 rounded-2xl bg-gradient-to-br from-gov-lavender via-gov-sky to-white" />
-      <div className="absolute inset-0 flex items-center justify-center">
-        <div className="relative flex size-64 items-center justify-center rounded-full bg-white ring-1 ring-brand-blue-100 sm:size-72">
-          <span className="flex size-36 items-center justify-center rounded-2xl bg-brand-blue-400 text-white sm:size-40">
-            <Briefcase className="size-16 sm:size-20" strokeWidth={1.6} />
-          </span>
-        </div>
-      </div>
+    <div className="relative mx-auto aspect-[3/2] w-full max-w-lg select-none">
+      <Image
+        src="/images/hero-illustration.jpg"
+        alt="계단을 함께 오르며 취업에 성공하는 중장년 구직자들"
+        fill
+        priority
+        sizes="(min-width: 1024px) 32rem, 100vw"
+        // 흰 배경 JPG라 그대로 얹으면 컬러 그라데이션 위에 흰 사각형으로 보인다.
+        // multiply로 흰색만 배경에 녹여 잘라낸 것처럼 만든다.
+        className="object-contain mix-blend-multiply"
+      />
 
       <div className="absolute left-2 top-6 flex items-center gap-2 rounded-xl bg-white px-4 py-3 ring-1 ring-border sm:left-0 sm:top-10">
         <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
