@@ -8,13 +8,13 @@ import { CheckCircle2, IdCard, KeyRound } from "lucide-react";
  */
 export function HeroIllustration() {
   return (
-    <div className="relative mx-auto aspect-[3/2] w-full max-w-lg select-none">
+    <div className="relative mx-auto aspect-[3/2] w-full max-w-2xl select-none">
       <Image
         src="/images/hero-illustration.jpg"
         alt="계단을 함께 오르며 취업에 성공하는 중장년 구직자들"
         fill
         priority
-        sizes="(min-width: 1024px) 32rem, 100vw"
+        sizes="(min-width: 1024px) 42rem, 100vw"
         // 흰 배경 JPG라 그대로 얹으면 컬러 그라데이션 위에 흰 사각형으로 보인다.
         // multiply로 흰색만 배경에 녹여 잘라낸 것처럼 만든다.
         className="object-contain mix-blend-multiply"
