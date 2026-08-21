@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth/session";
 import { notFound } from "next/navigation";
 import {
   getAssessmentResultBySession,
@@ -20,6 +21,8 @@ export default async function AssessmentResultPage({
   params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
+  // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
+  await requireUser(`/assessment/result/${sessionId}`);
   const found = await getAssessmentResultBySession(sessionId);
   if (!found) notFound();
   const { result } = found;

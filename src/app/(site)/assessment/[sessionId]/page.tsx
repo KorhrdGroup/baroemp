@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { requireUser } from "@/lib/auth/session";
 import { notFound, redirect } from "next/navigation";
 import { loadAssessment } from "@/features/assessment-engine/question-loader";
 import { selectQuestionsToAsk } from "@/features/assessment-engine/question-skipper";
@@ -15,6 +16,8 @@ export default async function AssessmentSessionPage({
   params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = await params;
+  // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
+  await requireUser(`/assessment/${sessionId}`);
   const session = await getAssessmentSessionRepository().findById(sessionId);
   if (!session) notFound();
 

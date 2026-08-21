@@ -8,7 +8,7 @@ import { getRelatedContentForSupportProgram } from "@/services/support-interest.
 import { SupportDetailView } from "@/features/support/support-detail-view";
 import { isSupportBookmarkedAction } from "@/features/support/support-actions";
 import { findCareerProfileByUserId } from "@/lib/repositories";
-import { getCurrentUser } from "@/lib/auth/session";
+import { getCurrentUser, requireUser } from "@/lib/auth/session";
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
@@ -20,6 +20,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
 
 export default async function SupportDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
+  await requireUser(`/support/${id}`);
   const program = await getSupportProgramRepository().findById(id);
   if (!program) notFound();
 
