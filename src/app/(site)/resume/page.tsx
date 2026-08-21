@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileText, Pencil, Plus, Sparkles } from "lucide-react";
+import { FileText, Pencil, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { listResumesForUser } from "@/services/resume.service";
 import { listCoverLettersForUser } from "@/services/cover-letter.service";
@@ -107,8 +107,8 @@ export default async function ResumeListPage() {
           count={coverLetters.length}
           action={
             <Button variant="outline" asChild>
-              <Link href="/cover-letter">
-                <Sparkles className="size-4" /> 자기소개서 관리
+              <Link href="/cover-letter/new">
+                <Plus className="size-4" /> 새 자기소개서 만들기
               </Link>
             </Button>
           }
@@ -145,7 +145,9 @@ export default async function ResumeListPage() {
           count={experiences.length}
           action={
             <Button variant="outline" asChild>
-              <Link href="/experience-bank">경험뱅크 관리</Link>
+              <Link href="/experience-bank">
+                <Plus className="size-4" /> 내 경험 추가하기
+              </Link>
             </Button>
           }
         />
