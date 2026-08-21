@@ -37,7 +37,7 @@ export default async function ResumeListPage() {
           </Button>
         </Link>
         <Link href="/experience-bank">
-          <Button size="lg" variant="ghost" className="h-12">
+          <Button size="lg" variant="outline" className="h-12">
             경험뱅크 관리
           </Button>
         </Link>

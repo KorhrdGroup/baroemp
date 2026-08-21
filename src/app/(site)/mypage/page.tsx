@@ -397,14 +397,19 @@ export default async function MyPage() {
                 {detail.resumeSummary.lastCoverLetterUpdatedAt?.slice(0, 10) ?? "-"}
               </p>
             )}
-            <div className="flex gap-2">
-              <Button variant="outline" className="flex-1" asChild>
+            {/* 버튼이 3개라 좁은 화면에서는 세로로 쌓는다. */}
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+              <Button variant="outline" asChild>
                 <Link href="/resume">
                   <Pencil className="size-4" />내 이력서 관리
                 </Link>
               </Button>
-              <Button variant="outline" className="flex-1" asChild>
+              <Button variant="outline" asChild>
                 <Link href="/cover-letter">자기소개서 작성</Link>
+              </Button>
+              {/* 경험뱅크는 이력서·자소서 양쪽의 재료다. 기존 진입점이 /resume과 자소서 편집기뿐이었다. */}
+              <Button variant="outline" asChild>
+                <Link href="/experience-bank">경험뱅크 관리</Link>
               </Button>
             </div>
           </CardContent>
