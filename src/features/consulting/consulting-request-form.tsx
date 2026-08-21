@@ -125,7 +125,7 @@ export function ConsultingRequestForm() {
         />
       </div>
 
-      <div className="rounded-xl bg-slate-100 px-4 py-3 text-label-1 text-slate-700">
+      <div className="rounded-xl bg-brand-blue-50 px-4 py-3 text-center text-label-1 text-brand-blue-700">
         1:1 취업컨설팅은 유료 서비스입니다. 상담 시작 전 결제 안내를 드립니다.
       </div>
 
