@@ -144,18 +144,21 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
           >
             <ArrowLeft className="size-5" />
           </button>
-          <span className="flex-1 truncate px-2 text-center text-body-2 font-bold text-slate-900">
-            {section?.label}
-          </span>
-          <span className="w-16 shrink-0 text-right text-label-1 font-medium text-slate-400">
+          {/* 진행 위치를 가운데에 둔다. 뒤로가기는 왼쪽 끝에 그대로 남는다. */}
+          <span className="flex-1 text-center text-body-2 font-bold text-slate-900">
             {posInSection + 1}/{sectionTotal}
           </span>
+          {/* 가운데 정렬을 맞추기 위한 뒤로가기 버튼과 같은 폭의 자리 */}
+          <span aria-hidden className="size-9 shrink-0" />
         </div>
       </div>
 
       {/* 문항 */}
       <div className="mx-auto mt-12 max-w-[24.5rem] px-4">
-        <h2 className="text-center text-title-2 font-bold text-slate-900">
+        {section?.label && (
+          <p className="text-center text-label-1 font-semibold text-brand-blue-600">{section.label}</p>
+        )}
+        <h2 className="mt-2 text-center text-title-2 font-bold text-slate-900">
           {question.questionText}
           {!question.required && (
             <span className="ml-2 text-label-1 font-normal text-slate-400">(선택)</span>
