@@ -108,10 +108,10 @@ export function ProgressStepsCard({
           {!selected
             ? null
             : !isLoggedIn
-              ? `${selected.title}부터 취업 준비 상황을 한 번에 관리하고 싶으신가요?`
+              ? selected.messages.guest
               : selectedDone
-                ? `'${selected.title}' 단계는 이미 완료했어요. 다시 확인해보셔도 됩니다.`
-                : `'${selected.title}' 단계가 아직 남아 있어요. 원하는 단계부터 시작하셔도 됩니다.`}
+                ? selected.messages.done
+                : selected.messages.todo}
         </p>
         <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
           <Link href={selected?.href ?? "/jobs"}>
