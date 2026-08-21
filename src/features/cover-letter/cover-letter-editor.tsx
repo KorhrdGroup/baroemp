@@ -11,8 +11,10 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
+import { TemplateSelect } from "@/components/common/template-select";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem } from "@/types";
 import {
+  changeCoverLetterTemplateAction,
   deleteCoverLetterAction,
   generateCoverLetterDraftAiAction,
   reviewCoverLetterSectionAiAction,
@@ -36,9 +38,11 @@ function stripKey<T extends { _key: string }>(item: T): Omit<T, "_key"> {
 export function CoverLetterEditor({
   initialDetail,
   experienceBank,
+  templates = [],
 }: {
   initialDetail: CoverLetterDetail;
   experienceBank: ExperienceBankItem[];
+  templates?: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
@@ -51,6 +55,39 @@ export function CoverLetterEditor({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, { text: string; prompts: string[] }>>({});
+  const [isChangingTemplate, startTemplateChange] = useTransition();
+
+  /**
+   * 이력서와 달리 자기소개서는 양식이 문항 세트 자체를 정의한다.
+   * 같은 questionType의 답변은 서비스에서 새 문항으로 옮겨 담지만,
+   * 새 양식에 없는 문항의 답변은 사라지므로 먼저 확인을 받는다.
+   */
+  function handleTemplateChange(templateId: string) {
+    const coverLetter = detail.coverLetter;
+    if (templateId === coverLetter.templateId) return;
+
+    const written = sections.filter((s) => s.content?.trim());
+    if (written.length > 0) {
+      const ok = window.confirm(
+        "양식을 바꾸면 문항 구성이 새 양식으로 교체됩니다.\n" +
+          "같은 종류의 문항에 쓴 내용은 그대로 옮겨지지만, 새 양식에 없는 문항의 내용은 사라집니다.\n\n" +
+          "계속할까요?",
+      );
+      if (!ok) return;
+    }
+
+    startTemplateChange(async () => {
+      // 답변 이관은 서버에 저장된 내용을 기준으로 한다.
+      // 먼저 저장하지 않으면 화면에서 방금 쓴 내용이 그대로 사라진다.
+      if (written.length > 0) await handleSave();
+      const next = await changeCoverLetterTemplateAction(coverLetter.id, templateId);
+      if (!next) return;
+      setDetail(next);
+      setSections(next.sections.map((s) => ({ ...s, _key: nextKey() })));
+      setSuggestions({});
+      setSelectedExperiences({});
+    });
+  }
 
   function handleSave() {
     return new Promise<void>((resolve, reject) => {
@@ -154,6 +191,13 @@ export function CoverLetterEditor({
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9 max-w-xs" />
         </div>
+        <TemplateSelect
+          label="자기소개서 양식"
+          templates={templates}
+          value={detail.coverLetter.templateId ?? undefined}
+          onChange={handleTemplateChange}
+          pending={isChangingTemplate}
+        />
         <div className="flex items-center gap-2">
           {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
           <Button size="sm" onClick={() => void handleSave()} disabled={isSaving}>

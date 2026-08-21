@@ -106,3 +106,50 @@ export async function saveCoverLetterDetail(input: CoverLetterDetailSaveInput): 
 export async function deleteCoverLetter(coverLetterId: string): Promise<void> {
   await getCoverLetterRepository().remove(coverLetterId);
 }
+
+/**
+ * 자기소개서 양식 변경.
+ * 자기소개서에서 템플릿은 문항 세트 자체를 정의하므로 교체하면 문항이 통째로 바뀐다.
+ * 이미 쓴 답변이 사라지지 않도록, 같은 questionType의 답변은 새 문항으로 옮겨 담는다.
+ * 새 양식에 없는 문항의 답변은 유지할 자리가 없어 사라지므로 호출부에서 반드시 확인을 받는다.
+ */
+export async function changeCoverLetterTemplate(
+  coverLetterId: string,
+  templateId: string,
+): Promise<CoverLetterDetail | null> {
+  const current = await getCoverLetterDetail(coverLetterId);
+  if (!current) return null;
+
+  const template = await getCoverLetterTemplateRepository().findById(templateId);
+  const defaultQuestions = template?.defaultQuestions ?? [];
+
+  // questionType이 같은 기존 답변을 새 문항에 옮겨 담는다.
+  const contentByType = new Map<string, string>();
+  for (const section of current.sections) {
+    if (section.content?.trim()) contentByType.set(section.questionType, section.content);
+  }
+
+  await getCoverLetterRepository().update(coverLetterId, { templateId });
+  await getCoverLetterSectionRepository().replaceSections(
+    coverLetterId,
+    defaultQuestions.map((q, i) => ({
+      questionType: q.questionType,
+      question: q.question,
+      content: contentByType.get(q.questionType) ?? "",
+      characterLimit: q.characterLimit,
+      orderIndex: i,
+    })),
+  );
+
+  await logActivityEvent({
+    userId: current.coverLetter.userId,
+    // 전용 이벤트 타입을 새로 만들지 않는다. ACTIVITY_EVENT_TYPES에 없는 값을 넣으면
+    // 분석 쿼리와 DB 제약에서 걸린다. 양식 변경은 metadata로 구분한다.
+    eventType: "cover_letter_updated",
+    entityType: "cover_letter",
+    entityId: coverLetterId,
+    metadata: { action: "template_changed", templateCode: template?.code },
+  });
+
+  return getCoverLetterDetail(coverLetterId);
+}

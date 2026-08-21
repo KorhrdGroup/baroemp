@@ -212,7 +212,7 @@ export function JobDetailView({
           </div>
           <Link
             href={careerGapOccupationId ? `/career-gap?occupation=${careerGapOccupationId}&job=${job.id}` : "/career-gap"}
-            className="mt-4 flex h-11 items-center justify-center gap-2 rounded-xl border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
+            className="mt-4 flex h-11 items-center justify-center gap-2 rounded-md border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
           >
             내 취업 준비도 전체보기
           </Link>
@@ -247,7 +247,7 @@ export function JobDetailView({
 
       <Link
         href={`/resume/new?job=${job.id}`}
-        className="mt-3 flex h-11 items-center justify-center gap-2 rounded-xl border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
+        className="mt-3 flex h-11 items-center justify-center gap-2 rounded-md border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
       >
         <FileText className="size-4" />이 공고에 맞는 이력서 만들기
       </Link>

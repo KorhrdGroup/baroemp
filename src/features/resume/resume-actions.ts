@@ -24,6 +24,7 @@ import {
   getResumeDetail,
   listResumesForUser,
   saveResumeDetail,
+  changeResumeTemplate,
 } from "@/services/resume.service";
 import {
   generateCareerSummaryWithAI,
@@ -115,4 +116,9 @@ export async function trackResumeExportedAction(resumeId: string, format: "pdf" 
     entityId: resumeId,
     metadata: { format },
   });
+}
+
+export async function changeResumeTemplateAction(resumeId: string, templateId: string): Promise<ResumeDetail | null> {
+  await requireOwnResume(resumeId);
+  return changeResumeTemplate(resumeId, templateId);
 }
