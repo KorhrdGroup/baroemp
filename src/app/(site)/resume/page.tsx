@@ -59,7 +59,7 @@ export default async function ResumeListPage() {
           title="내 이력서"
           count={resumes.length}
           action={
-            <Button asChild>
+            <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
               <Link href="/resume/new">
                 <Plus className="size-4" /> 새 이력서 만들기
               </Link>
@@ -113,7 +113,7 @@ export default async function ResumeListPage() {
           title="내 자기소개서"
           count={coverLetters.length}
           action={
-            <Button variant="outline" asChild>
+            <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
               <Link href="/cover-letter/new">
                 <Plus className="size-4" /> 새 자기소개서 만들기
               </Link>
