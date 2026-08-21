@@ -120,9 +120,14 @@ export function ExperienceBankSection({ initialItems }: { initialItems: Experien
           <p className="text-label-1 text-slate-500">
             아직 저장한 경험이 없어요. 미리 정리해두면 자기소개서 문항마다 골라 쓸 수 있어요.
           </p>
-          <Button variant="outline" className="mt-3" onClick={openCreate}>
-            <Plus className="size-4" /> 첫 경험 추가하기
-          </Button>
+          {/* 다른 섹션의 빈 상태 CTA와 같은 텍스트 링크 형태. 이동이 아니라 모달을 열어야 해서 button이다. */}
+          <button
+            type="button"
+            onClick={openCreate}
+            className="mt-3 inline-block cursor-pointer text-label-1 font-semibold text-brand-blue-600 hover:underline"
+          >
+            경험 추가하기 →
+          </button>
         </div>
       ) : (
         <div className="mt-4 space-y-3">

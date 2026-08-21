@@ -69,7 +69,13 @@ export default async function ResumeListPage() {
         {resumes.length === 0 ? (
           <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-10 text-center">
             <FileText className="mx-auto size-8 text-slate-300" />
-            <p className="mt-3 text-label-1 text-slate-500">아직 작성한 이력서가 없어요. 새 이력서를 만들어보세요.</p>
+            <p className="mt-3 text-label-1 text-slate-500">아직 작성한 이력서가 없어요.</p>
+            <Link
+              href="/resume/new"
+              className="mt-3 inline-block text-label-1 font-semibold text-brand-blue-600 hover:underline"
+            >
+              이력서 작성하기 →
+            </Link>
           </div>
         ) : (
           <div className="mt-4 space-y-3">
