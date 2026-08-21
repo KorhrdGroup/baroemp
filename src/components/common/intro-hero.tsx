@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { CheckCircle2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface IntroHeroProps {
   /** 히어로 상단 원형 배지 아이콘 */
@@ -61,7 +62,7 @@ export function IntroHero({
             {infoItems.map(({ icon: InfoIcon, label }) => (
               <span
                 key={label}
-                className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-label-1 font-semibold text-slate-600 ring-1 ring-border"
+                className="flex items-center gap-1.5 rounded-full bg-white px-3.5 py-1.5 text-label-1 font-semibold text-slate-600"
               >
                 <InfoIcon className="size-4 text-brand-blue-600" />
                 {label}
@@ -93,7 +94,17 @@ export function IntroHero({
           <h2 className="text-center text-title-2 font-extrabold text-slate-900 sm:text-headline-3">
             {highlightTitle}
           </h2>
-          <ul className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          {/*
+            항목이 3의 배수면 넓은 화면에서 3열로 놓아 줄 수를 줄인다.
+            아니면 2열을 유지한다. 3열로 두면 마지막 줄에 한 장만 남아 옆이 빈다
+            (지원금찾기는 항목이 4개다).
+          */}
+          <ul
+            className={cn(
+              "mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2",
+              highlights.length % 3 === 0 && "lg:grid-cols-3",
+            )}
+          >
             {highlights.map((item) => (
               <li
                 key={item}

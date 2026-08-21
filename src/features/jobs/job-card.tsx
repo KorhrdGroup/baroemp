@@ -43,8 +43,13 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
         className,
       )}
     >
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0">
+      {/*
+        급여와 찜 버튼을 한 열로 묶어 오른쪽에 두면, 급여 문구가 길 때 그 열이 통째로
+        아래 줄로 밀려 찜 버튼이 카드 한가운데에 놓였다. 찜 버튼만 오른쪽에 고정하고
+        급여는 아래 제 줄에서 왼쪽으로 읽히게 한다.
+      */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-1.5">
             {typeof matchScore === "number" && (
               <Badge className="rounded-full border-0 bg-brand-blue-400 text-label-2 font-semibold text-white">
@@ -78,16 +83,17 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
           </Link>
           <p className="mt-1 text-label-1 font-medium text-slate-500">{job.companyName}</p>
         </div>
-        <div className="flex shrink-0 flex-col items-end gap-2">
-          <p className="text-right text-body-2 font-bold text-brand-blue-600">{job.salaryText ?? "협의 가능"}</p>
-          <JobBookmarkButton
-            jobId={job.id}
-            jobCategory={job.jobCategory}
-            isAuthenticated={isAuthenticated}
-            initialBookmarked={isBookmarked}
-          />
-        </div>
+        <JobBookmarkButton
+          jobId={job.id}
+          jobCategory={job.jobCategory}
+          isAuthenticated={isAuthenticated}
+          initialBookmarked={isBookmarked}
+        />
       </div>
+
+      <p className="mt-2 text-body-2 font-bold break-keep text-brand-blue-600">
+        {job.salaryText ?? "협의 가능"}
+      </p>
 
       <div className="mt-4 flex flex-wrap items-center gap-4 text-label-1 text-slate-500">
         <span className="flex items-center gap-1">

@@ -20,7 +20,7 @@ export function HeroIllustration() {
         className="object-contain"
       />
 
-      <div className="absolute left-1 top-4 flex items-center gap-2 rounded-xl bg-white px-4 py-3 ring-1 ring-border sm:-left-3 sm:top-6">
+      <div className="absolute left-1 top-4 flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-[0_10px_28px_-10px_rgba(36,105,255,0.45)] sm:-left-3 sm:top-6">
         <span className="flex size-9 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
           <CheckCircle2 className="size-5" />
         </span>
@@ -30,7 +30,7 @@ export function HeroIllustration() {
         </div>
       </div>
 
-      <div className="absolute -right-1 top-20 flex items-center gap-2 rounded-xl bg-white px-4 py-3 ring-1 ring-border sm:-right-3 sm:top-24">
+      <div className="absolute -right-1 top-20 flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-[0_10px_28px_-10px_rgba(36,105,255,0.45)] sm:-right-3 sm:top-24">
         <span className="flex size-9 items-center justify-center rounded-xl bg-brand-blue-50 text-brand-blue-600">
           <IdCard className="size-5" />
         </span>
@@ -40,7 +40,7 @@ export function HeroIllustration() {
         </div>
       </div>
 
-      <div className="absolute bottom-4 left-3 flex items-center gap-2 rounded-xl bg-white px-4 py-3 ring-1 ring-border sm:bottom-2 sm:-left-3">
+      <div className="absolute bottom-4 left-3 flex items-center gap-2 rounded-xl bg-white px-4 py-3 shadow-[0_10px_28px_-10px_rgba(36,105,255,0.45)] sm:bottom-2 sm:-left-3">
         <span className="flex size-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
           <KeyRound className="size-5" />
         </span>

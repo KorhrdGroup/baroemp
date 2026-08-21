@@ -66,16 +66,30 @@ export function HeroSection() {
             </Button>
           </div>
 
-          {/* 고용24처럼 검색창을 굵은 테두리로 강조한다. 색은 HDS 블루, radius는 컨트롤 규칙(8px)을 유지한다. */}
-          <div className="mt-6 flex items-center gap-2 rounded-md border-2 border-brand-blue-400 bg-white px-4 py-3">
-            <Search className="size-5 shrink-0 text-brand-blue-600" />
+          {/*
+            고용24처럼 검색창을 굵은 테두리로 강조한다. 색은 HDS 블루, radius는 컨트롤 규칙(8px)을 유지한다.
+            /jobs가 keyword 파라미터로 검색하므로 GET form으로 그대로 넘긴다. 자바스크립트 없이도
+            엔터로 동작하고, 돋보기는 눌러서도 보낼 수 있게 submit 버튼으로 둔다.
+          */}
+          <form
+            action="/jobs"
+            className="mt-6 flex items-center gap-2 rounded-md border-2 border-brand-blue-400 bg-white px-4 py-3"
+          >
+            <button
+              type="submit"
+              aria-label="채용공고 검색"
+              className="flex shrink-0 items-center text-brand-blue-600"
+            >
+              <Search className="size-5" />
+            </button>
             <input
               type="text"
+              name="keyword"
               placeholder="관심 직종, 기업을 검색해보세요"
               className="w-full text-label-1 text-slate-700 placeholder:text-slate-400 focus:outline-none"
               aria-label="관심 직종, 기업 검색"
             />
-          </div>
+          </form>
           </div>
         </div>
 
