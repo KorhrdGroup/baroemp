@@ -80,6 +80,10 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
   const privacyConsentAt = new Date().toISOString();
   const phone = normalizePhone(phoneRaw);
 
+  // 가입 직후에는 취업 프로필 입력을 한 번 보여주고, 저장하거나 건너뛰면 원래 목적지로 보낸다.
+  // 이메일 인증이 필요한 경우에도 인증 링크가 이 경로로 돌아오도록 emailRedirectTo에 함께 넣는다.
+  const afterSignUp = `/onboarding/profile?next=${encodeURIComponent(next)}`;
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -90,7 +94,7 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
         marketing_consent: marketingConsent,
         privacy_consent_at: privacyConsentAt,
       },
-      emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(next)}`,
+      emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(afterSignUp)}`,
     },
   });
 
@@ -130,7 +134,7 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
   const hasSession = Boolean(data.session);
   if (hasSession) {
     await afterAuthSuccess(user.id);
-    redirect(next);
+    redirect(afterSignUp);
   }
 
   return {
