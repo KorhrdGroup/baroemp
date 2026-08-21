@@ -141,7 +141,7 @@ export default async function MyPage() {
 
   if (!detail) {
     return (
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
         <EmptyState icon={UserRound} title="프로필을 불러올 수 없습니다" description="잠시 후 다시 시도해주세요." />
       </div>
     );
@@ -155,7 +155,7 @@ export default async function MyPage() {
   ]);
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8 flex items-start justify-between gap-4">
         <div>
           <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">마이페이지</h1>
