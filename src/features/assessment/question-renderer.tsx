@@ -43,7 +43,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-300 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
@@ -80,7 +80,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-300 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >
@@ -182,7 +182,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
                 selected
-                  ? "border-brand-blue-300 bg-brand-blue-50 text-brand-blue-700"
+                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
                   : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
               )}
             >

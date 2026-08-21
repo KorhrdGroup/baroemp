@@ -134,33 +134,35 @@ export function AssessmentWizard({ sessionId, sections, questions, initialStep }
             </div>
           ))}
         </div>
-        {/* 뒤로가기 · 섹션명 · 진행표시를 한 덩어리로 묶어 가운데에 둔다. */}
-        <div className="flex items-center justify-center gap-2 bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
+        {/*
+          문항 영역과 같은 폭·패딩을 써서 뒤로가기 화살표가 아래 선택지 박스와 왼쪽 라인을 맞춘다.
+          -ml-2는 아이콘 버튼의 안쪽 여백(36px 박스 안 20px 아이콘)을 상쇄해 아이콘 자체를 정렬시킨다.
+        */}
+        <div className="mx-auto flex max-w-[24.5rem] items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
           <button
             type="button"
             onClick={handlePrev}
             disabled={currentIndex === 0 || submitting}
             aria-label="이전 문항"
-            className="flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowLeft className="size-5" />
           </button>
-          <p className="flex items-baseline gap-2">
-            {section?.label && (
-              <span className="text-label-1 font-semibold text-brand-blue-600">{section.label}</span>
-            )}
-            <span className="text-body-2 font-bold text-slate-900">
-              {posInSection + 1}/{sectionTotal}
-            </span>
-          </p>
-          {/* 덩어리가 정확히 가운데 오도록 뒤로가기 버튼과 같은 폭의 자리를 반대편에 둔다. */}
-          <span aria-hidden className="size-9 shrink-0" />
         </div>
       </div>
 
       {/* 문항 */}
-      <div className="mx-auto mt-12 max-w-[24.5rem] px-4">
-        <h2 className="text-center text-title-2 font-bold text-slate-900">
+      <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
+        {/* 어느 분류의 몇 번째 문항인지 - 질문 바로 위에 붙여 문항과 함께 읽히게 한다. */}
+        <p className="flex items-baseline justify-center gap-2">
+          {section?.label && (
+            <span className="text-label-1 font-semibold text-brand-blue-600">{section.label}</span>
+          )}
+          <span className="text-body-2 font-bold text-slate-900">
+            {posInSection + 1}/{sectionTotal}
+          </span>
+        </p>
+        <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">
           {question.questionText}
           {!question.required && (
             <span className="ml-2 text-label-1 font-normal text-slate-400">(선택)</span>
