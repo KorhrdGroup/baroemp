@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SectionHeading } from "@/components/common/section-heading";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getRecommendedJobsForUser } from "@/services/job-search.service";
@@ -55,12 +57,13 @@ export async function ProgressStepsSection() {
                     {recommended.match && ` · 적합도 ${recommended.match.score}점`}
                   </p>
                 </div>
-                <Link
-                  href={`/jobs/${recommended.id}`}
-                  className="mt-4 text-label-1 font-semibold text-brand-blue-600 hover:underline"
-                >
-                  자세히 보기
-                </Link>
+                {/* 패널 하단 액션. 텍스트 링크는 카드 안에서 눌 수 있는 곳으로 보이지 않아 고스트 버튼으로 둔다. */}
+                <Button variant="ghost" className="mt-4 w-full text-brand-blue-600 hover:bg-brand-blue-50" asChild>
+                  <Link href={`/jobs/${recommended.id}`}>
+                    자세히 보기
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
               </>
             ) : (
               <>
@@ -72,12 +75,12 @@ export async function ProgressStepsSection() {
                     직업진단을 마치면 조건에 맞는 공고를 골라서 보여드려요.
                   </p>
                 </div>
-                <Link
-                  href="/assessment"
-                  className="mt-4 text-label-1 font-semibold text-brand-blue-600 hover:underline"
-                >
-                  진단 시작하기
-                </Link>
+                <Button variant="ghost" className="mt-4 w-full text-brand-blue-600 hover:bg-brand-blue-50" asChild>
+                  <Link href={"/assessment"}>
+                    진단 시작하기
+                    <ArrowRight className="size-4" />
+                  </Link>
+                </Button>
               </>
             )}
           </div>
