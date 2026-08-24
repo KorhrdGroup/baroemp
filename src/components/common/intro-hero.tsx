@@ -52,7 +52,7 @@ export function IntroHero({
            * 독립고딕(400 단일 굵기)이 뜨면 가짜 볼드 없이 원래 굵기로 그려지고,
            * 로딩에 실패해 2순위 Pretendard로 떨어지면 실제 ExtraBold로 렌더링된다.
            */}
-          <h1 className="mx-auto mt-6 max-w-3xl break-keep font-dongnim text-headline-3 font-extrabold tracking-tight text-slate-800 [font-synthesis-weight:none] sm:text-headline-2">
+          <h1 className="mx-auto mt-6 max-w-3xl break-keep text-headline-3 font-extrabold tracking-tight text-slate-800 sm:text-headline-2">
             {title}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl break-keep text-body-1-reading text-slate-600">{description}</p>

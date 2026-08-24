@@ -25,7 +25,7 @@ export function CtaSection() {
           <Logo variant="onDark" height={22} className="mb-5" />
           <p className="text-label-1 font-semibold text-brand-blue-300">중장년 취업 성공 스토리</p>
           {/* 히어로 h1과 같은 독립고딕. 굵기는 400 하나뿐이라 히어로처럼 font-normal로 둔다. */}
-          <h2 className="mt-3 font-dongnim text-title-2 font-normal tracking-tight text-white sm:text-headline-3">
+          <h2 className="mt-3 text-title-2 font-extrabold tracking-tight text-white sm:text-headline-3">
             당신도 할 수 있습니다!
           </h2>
           <p className="mt-3 max-w-md text-body-2-reading text-slate-300">

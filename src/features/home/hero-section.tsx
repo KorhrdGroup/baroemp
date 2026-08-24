@@ -1,8 +1,10 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { HeroIllustration } from "./hero-illustration";
-import { HeroJobSearch } from "./hero-job-search";
+// 일러스트와 CTA 묶음은 삭제가 아니라 숨김 상태다.
+// 되살릴 때 아래 import 와 본문의 주석 블록을 함께 해제한다.
+// import Link from "next/link";
+// import { ArrowRight } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { HeroIllustration } from "./hero-illustration";
+// import { HeroJobSearch } from "./hero-job-search";
 
 export function HeroSection() {
   return (
@@ -19,36 +21,36 @@ export function HeroSection() {
         <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-b from-transparent to-white" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
-        <div>
-          <p className="text-body-2 font-semibold text-brand-blue-600">
-            중장년의 새로운 시작, 한평생 함께합니다
-          </p>
-          <h1 className="mt-4 font-paperlogy text-headline-3 font-black tracking-tight text-slate-900 sm:text-headline-1">
-            내게 맞는 일자리를 찾고
-            <br />
-            <span className="text-brand-blue-600">취업 성공까지 한 번에!</span>
-          </h1>
-          <p className="mt-5 max-w-xl text-body-2-reading text-slate-600">
-            직업진단부터 취업교육, 채용정보, 컨설팅, 지원금까지
-            <br className="hidden sm:block" />
-            당신의 취업 여정을 함께하는 원스톱 취업 플랫폼
-          </p>
+      {/*
+       * 오른쪽 일러스트를 내리면서 2단 그리드도 함께 걷었다.
+       * 남은 건 텍스트뿐이라 한 단으로 두고 가운데 정렬한다.
+       * (왼쪽 정렬로 두면 오른쪽 절반이 빈 채로 남는다)
+       */}
+      <div className="relative mx-auto max-w-7xl px-4 py-14 text-center sm:px-6 sm:py-20 lg:px-8 lg:py-24">
+        <p className="text-body-2 font-semibold text-brand-blue-600">
+          중장년의 새로운 시작, 한평생 함께합니다
+        </p>
+        <h1 className="mt-4 text-headline-3 font-extrabold tracking-tight text-slate-900 sm:text-headline-1">
+          내게 맞는 일자리를 찾고
+          <br />
+          <span className="text-brand-blue-600">취업 성공까지 한 번에!</span>
+        </h1>
+        <p className="mx-auto mt-5 max-w-xl text-body-2-reading text-slate-600">
+          직업진단부터 취업교육, 채용정보, 컨설팅, 지원금까지
+          <br className="hidden sm:block" />
+          당신의 취업 여정을 함께하는 원스톱 취업 플랫폼
+        </p>
 
-          {/*
-            모바일에서도 두 버튼을 한 줄에 둔다. 375px에서는 두 문구를 한 줄로 펴면
-            넘치므로 폭을 반씩 나눠 갖고 줄바꿈을 허용한다(어절 단위로만 끊기게 break-keep).
-            sm 이상은 원래대로 내용 폭.
-          */}
-          {/*
-            검색창이 버튼 줄과 같은 폭으로 보이게, 둘을 w-fit 상자에 함께 넣는다.
-            상자 폭이 가장 넓은 자식(버튼 줄)에 맞고 검색창은 블록이라 그 폭을 채운다.
-            모바일은 버튼이 flex-1로 폭을 나눠 가지므로 상자를 w-full로 둔다.
+        {/*
+          CTA 버튼 줄과 검색창은 숨김 상태다. 되살릴 때 위쪽 import 도 함께 해제한다.
 
-            버튼 사이 간격(gap-3)과 검색창까지의 간격(mt-3)을 맞춰 세 요소가
-            한 묶음으로 읽히게 한다. 생김새 값은 hero-job-search 쪽에 맞춰뒀다.
-          */}
-          <div className="mt-8 w-full sm:w-fit">
+          모바일에서도 두 버튼을 한 줄에 둔다. 375px에서는 두 문구를 한 줄로 펴면
+          넘치므로 폭을 반씩 나눠 갖고 줄바꿈을 허용한다(어절 단위로만 끊기게 break-keep).
+          검색창이 버튼 줄과 같은 폭으로 보이게, 둘을 w-fit 상자에 함께 넣는다.
+          버튼 사이 간격(gap-3)과 검색창까지의 간격(mt-3)을 맞춰 한 묶음으로 읽히게 했다.
+        */}
+        {/*
+        <div className="mx-auto mt-8 w-full sm:w-fit">
           <div className="flex gap-3">
             <Button
               size="lg"
@@ -71,11 +73,11 @@ export function HeroSection() {
           </div>
 
           <HeroJobSearch />
-          </div>
         </div>
-
-        <HeroIllustration />
+        */}
       </div>
+
+      {/* <HeroIllustration /> */}
     </section>
   );
 }
