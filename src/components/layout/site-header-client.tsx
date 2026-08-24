@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { isAuthPath } from "@/lib/auth/redirect";
 import { useState } from "react";
-import { Menu, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -31,6 +32,15 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
 
   // 하위 경로(/jobs/job-001, /resume/new 등)에서도 해당 메뉴를 선택 상태로 둔다.
   const pathname = usePathname();
+  /*
+   * 로그인 화면에서는 내비 밑줄의 focus-within 만 끈다.
+   * 보호 페이지 메뉴를 클릭해 로그인으로 튕기면 그 링크에 포커스가 남고,
+   * 마우스를 치워도 밑줄이 계속 켜진 채라 엉뚱한 메뉴가 선택된 것처럼 보인다.
+   * 호버 반응은 로그인 화면에서도 그대로 살려둔다.
+   */
+  const onAuthScreen = isAuthPath(pathname);
+  // 로그인 후 보던 화면으로 돌아오게 한다. 없으면 마이페이지로 떨어진다.
+  const loginHref = onAuthScreen ? "/login" : `/login?next=${encodeURIComponent(pathname)}`;
   const isCurrentNav = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
 
   return (
@@ -71,7 +81,9 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                       "absolute inset-x-0 bottom-0 h-0.5 origin-left transition-transform duration-200 ease-out",
                       current
                         ? "bg-brand-blue-600"
-                        : "bg-brand-blue-300 scale-x-0 group-hover:scale-x-100 group-focus-within:scale-x-100",
+                        : "bg-brand-blue-300 scale-x-0 group-hover:scale-x-100",
+                      // 호버는 인증 화면에서도 그대로 두고, 남은 포커스만 뺀다.
+                      !current && !onAuthScreen && "group-focus-within:scale-x-100",
                     )}
                   />
                 </div>
@@ -81,15 +93,6 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="검색"
-            className="hidden text-slate-600 sm:inline-flex"
-          >
-            <Search className="size-5" />
-          </Button>
-
           {user ? (
             <>
               {isAdmin && (
@@ -108,14 +111,10 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
               </form>
             </>
           ) : (
-            <>
-              <Button variant="ghost" className="hidden text-slate-700 sm:inline-flex" asChild>
-                <Link href="/login">로그인</Link>
-              </Button>
-              <Button className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
-                <Link href="/signup">회원가입</Link>
-              </Button>
-            </>
+            /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
+            <Button className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+              <Link href={loginHref}>로그인/회원가입</Link>
+            </Button>
           )}
 
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -170,12 +169,16 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                   ) : (
                     <>
                       <Button variant="outline" asChild>
-                        <Link href="/login" onClick={() => setMobileOpen(false)}>
+                        <Link href={loginHref} onClick={() => setMobileOpen(false)}>
                           로그인
                         </Link>
                       </Button>
+                      {/*
+                        회원가입도 로그인 화면으로 보낸다. 가입은 그 화면 하단 링크에서
+                        이어지므로 진입점을 하나로 모은다.
+                      */}
                       <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)}>
+                        <Link href={loginHref} onClick={() => setMobileOpen(false)}>
                           회원가입
                         </Link>
                       </Button>

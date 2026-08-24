@@ -45,7 +45,15 @@ export const ADMIN_ROUTE_PREFIX = "/admin";
 
 export const AUTH_ROUTE_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password"] as const;
 
+/**
+ * 보호 접두사에 속하지만 비로그인도 볼 수 있는 경로.
+ * 소개 화면까지 막으면 서비스가 무엇인지 확인할 방법이 없어 유입이 끊긴다.
+ * 실제 시작(세션 생성)은 각 페이지에서 여전히 로그인을 요구한다.
+ */
+const PUBLIC_LANDING_PATHS: readonly string[] = ["/assessment", "/support"];
+
 export function isProtectedPath(pathname: string): boolean {
+  if (PUBLIC_LANDING_PATHS.includes(pathname)) return false;
   return PROTECTED_ROUTE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 }
 

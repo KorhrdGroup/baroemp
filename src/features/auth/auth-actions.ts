@@ -4,7 +4,8 @@ import { redirect } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
-import { normalizePhone, isValidKoreanPhone } from "@/lib/utils/phone";
+import { validateSignup } from "./signup-validation";
+import { normalizePhone } from "@/lib/utils/phone";
 import { logActivityEvent } from "@/lib/activity/event-logger";
 import { ensureUserProfile, applyAcquisitionTouch } from "@/services/auth-identity.service";
 import { linkAnonymousCareraDataToUserSafe } from "./anonymous-merge";
@@ -50,15 +51,16 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
   const marketingConsent = formData.get("marketingConsent") === "on" || formData.get("marketingConsent") === "true";
   const next = sanitizeNextPath(String(formData.get("next") ?? ""), "/mypage");
 
-  const fieldErrors: Record<string, string> = {};
-  if (!name || name.length < 2) fieldErrors.name = "이름을 2자 이상 입력해주세요.";
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) fieldErrors.email = "올바른 이메일 형식이 아닙니다.";
-  if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
-    fieldErrors.password = "비밀번호는 영문/숫자를 포함해 8자 이상이어야 합니다.";
-  }
-  if (password !== passwordConfirm) fieldErrors.passwordConfirm = "비밀번호가 일치하지 않습니다.";
-  if (!privacyConsent) fieldErrors.privacyConsent = "개인정보 수집·이용에 동의해야 가입할 수 있습니다.";
-  if (phoneRaw && !isValidKoreanPhone(phoneRaw)) fieldErrors.phone = "휴대전화번호 형식을 확인해주세요.";
+  // 클라이언트 폼과 같은 규칙을 쓴다 (signup-validation).
+  // 화면에서 막혔는데 서버는 통과하거나 그 반대인 상황을 만들지 않기 위해서다.
+  const fieldErrors = validateSignup({
+    name,
+    email,
+    password,
+    passwordConfirm,
+    phone: phoneRaw,
+    privacyConsent,
+  });
 
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors };

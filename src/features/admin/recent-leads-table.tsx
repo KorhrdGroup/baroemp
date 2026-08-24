@@ -24,13 +24,13 @@ interface RecentLeadsTableProps {
 function gradeClass(grade: Lead["score"]["grade"]): string {
   switch (grade) {
     case "A":
-      return "bg-red-50 text-red-600 ring-red-100";
+      return "bg-red-50 text-red-600";
     case "B":
-      return "bg-amber-50 text-amber-700 ring-amber-100";
+      return "bg-amber-50 text-amber-700";
     case "C":
-      return "bg-brand-blue-50 text-brand-blue-600 ring-brand-blue-100";
+      return "bg-brand-blue-50 text-brand-blue-600";
     default:
-      return "bg-slate-100 text-slate-500 ring-slate-200";
+      return "bg-slate-100 text-slate-500";
   }
 }
 
@@ -38,7 +38,7 @@ export function RecentLeadsTable({ leads, title = "최근 고관심 Lead" }: Rec
   const sorted = [...leads].sort((a, b) => b.score.totalScore - a.score.totalScore);
 
   return (
-    <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
+    <div className="overflow-hidden rounded-xl bg-white ring-1">
       <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
         <h2 className="text-body-2 font-bold text-slate-900">{title}</h2>
         <span className="text-label-2 text-slate-400">{sorted.length}건</span>
@@ -75,7 +75,7 @@ export function RecentLeadsTable({ leads, title = "최근 고관심 Lead" }: Rec
                   <div className="flex items-center gap-2">
                     <Badge
                       className={cn(
-                        "rounded-md border-0 px-2 py-1 text-label-2 font-bold ring-1",
+                        "rounded-md border-0 px-2 py-1 text-label-2 font-bold",
                         gradeClass(lead.score.grade),
                       )}
                     >
