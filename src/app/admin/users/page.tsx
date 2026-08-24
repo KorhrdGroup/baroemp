@@ -204,8 +204,7 @@ export default async function AdminUsersPage({
                         <span>{user.email}</span>
                         {user.isTestAccount && (
                           <Badge
-                            variant="outline"
-                            className="rounded-md border-rose-300 text-label-2 text-rose-600"
+                            className="rounded-md border-0 bg-rose-50 text-label-2 text-rose-600"
                             title="0015_seed.sql / e2e·smoke 스크립트가 생성한 개발용 테스트 계정입니다. 운영 전 정리 대상 (@baro.local)."
                           >
                             테스트

@@ -6,10 +6,10 @@ import type { MatchReasonDetail, SupportEligibilityGrade, SupportProgram } from 
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
-  HIGH: "border-emerald-200 bg-emerald-50 text-emerald-700",
-  MEDIUM: "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700",
-  CHECK_REQUIRED: "border-orange-200 bg-orange-50 text-orange-700",
-  LOW: "border-slate-200 bg-slate-50 text-slate-500",
+  HIGH: "bg-emerald-50 text-emerald-700",
+  MEDIUM: "bg-brand-blue-50 text-brand-blue-700",
+  CHECK_REQUIRED: "bg-orange-50 text-orange-700",
+  LOW: "bg-slate-100 text-slate-500",
 };
 
 function regionLabel(program: SupportProgram): string {
@@ -41,7 +41,7 @@ export function SupportProgramCard({
           {program.organizationName ?? program.organization}
         </Badge>
         {grade && (
-          <span className={cn("shrink-0 rounded-full border px-2.5 py-1 text-label-2 font-bold", GRADE_BADGE_CLASS[grade])}>
+          <span className={cn("shrink-0 rounded-full px-2.5 py-1 text-label-2 font-bold", GRADE_BADGE_CLASS[grade])}>
             {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]}
             {typeof score === "number" && <span className="ml-1 font-normal opacity-70">{score}점</span>}
           </span>
