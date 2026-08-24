@@ -38,8 +38,16 @@ export function SignupForm({ next }: { next: string }) {
     setTouched((prev) => ({ ...prev, [key]: true }));
   }
 
-  /** 화면에 보여줄 오류. 서버가 돌려준 오류(중복 이메일 등)가 있으면 그쪽을 우선한다. */
+  /**
+   * 화면에 보여줄 오류.
+   * - 서버가 돌려준 오류(중복 이메일 등)를 우선한다.
+   * - 칸을 비우면 아직 입력 전으로 보고 표시하지 않는다. 잘못 적었다가 지웠을 때
+   *   빨간 상태로 남지 않게 하기 위해서다. 제출 버튼은 여전히 비활성이라
+   *   필수값이 빠진 채로 넘어가지는 않는다.
+   * - 동의 체크박스는 글자를 지우는 개념이 아니라서 이 규칙을 적용하지 않는다.
+   */
   function errorOf(key: keyof SignupValues) {
+    if (key !== "privacyConsent" && !String(values[key]).trim()) return undefined;
     return state.fieldErrors?.[key] ?? (touched[key] ? errors[key] : undefined);
   }
 
