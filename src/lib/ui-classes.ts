@@ -27,3 +27,14 @@ export const interactiveCardClass =
  */
 export const interactiveRowClass =
   "transition-colors duration-200 ease-in-out hover:bg-slate-100 active:bg-slate-200";
+
+/**
+ * 테두리 대신 그림자로 띄우는 카드.
+ *
+ * x·y 를 0 으로 두어 어느 방향으로도 치우치지 않게 하고, 음수 spread 로
+ * 번지는 범위를 좁힌다. 프로젝트에서 이미 쓰던 rgba(15,23,42,0.18) 계열을
+ * 그대로 따랐다.
+ *
+ * 테두리와 같이 쓰지 않는다. 둘 다 있으면 경계가 두 겹으로 보인다.
+ */
+export const cardShadowClass = "shadow-[0_0_16px_-8px_rgba(15,23,42,0.18)]";

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass } from "@/lib/ui-classes";
+import { cardShadowClass, interactiveCardClass } from "@/lib/ui-classes";
 import { ArrowRight, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { SectionHeading } from "@/components/common/section-heading";
@@ -32,7 +32,7 @@ export function PopularJobsSection() {
               key={role.id}
               href={`/jobs?category=${role.jobCategory}`}
               // 회청색 띠 위의 흰 카드라 테두리나 그림자 없이도 구분된다. 호버는 배경으로만 반응한다.
-              className={cn("group flex flex-col rounded-xl bg-white p-5", interactiveCardClass)}
+              className={cn("group flex flex-col rounded-xl bg-white p-5", cardShadowClass, interactiveCardClass)}
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex flex-wrap gap-1.5">
