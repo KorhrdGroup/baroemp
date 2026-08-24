@@ -170,8 +170,12 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                           로그인
                         </Link>
                       </Button>
+                      {/*
+                        회원가입도 로그인 화면으로 보낸다. 가입은 그 화면 하단 링크에서
+                        이어지므로 진입점을 하나로 모은다.
+                      */}
                       <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                        <Link href="/signup" onClick={() => setMobileOpen(false)}>
+                        <Link href="/login" onClick={() => setMobileOpen(false)}>
                           회원가입
                         </Link>
                       </Button>
