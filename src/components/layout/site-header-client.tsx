@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, Search } from "lucide-react";
+import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -81,15 +81,6 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="검색"
-            className="hidden text-slate-600 sm:inline-flex"
-          >
-            <Search className="size-5" />
-          </Button>
-
           {user ? (
             <>
               {isAdmin && (
