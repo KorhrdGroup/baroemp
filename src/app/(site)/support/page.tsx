@@ -14,7 +14,9 @@ export default async function SupportPage({
   const { start } = await searchParams;
 
   // ?start=1 은 곧바로 진단을 시작하는 경로라 로그인해야 한다.
-  if (start === "1") await requireUser("/support?start=1");
+  // 복귀 경로에서는 start 를 떼고 소개 화면으로 되돌린다. 로그인 직후 바로 문항이
+  // 뜨는 대신, 소개를 확인하고 사용자가 직접 시작 버튼을 누르게 한다.
+  if (start === "1") await requireUser("/support");
 
   // 소개 화면은 비로그인도 볼 수 있다. 시작하는 순간 로그인으로 보낸다.
   const user = await getCurrentUser();

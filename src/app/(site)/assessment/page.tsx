@@ -16,8 +16,12 @@ export default async function AssessmentPage({
 
   // ?start=1: 이미 무엇을 하려는지 아는 경로(마이페이지 등)에서 소개 화면을 건너뛴다.
   // 검사는 개인 정보를 입력받고 결과를 남기므로 이 경로는 로그인해야 한다.
+  //
+  // 복귀 경로에서는 start 를 떼고 소개 화면으로 되돌린다. 로그인 하나 끝냈다고
+  // 곧바로 문항이 뜨면 무엇을 시작한 건지 확인할 틈이 없다. 소개를 한 번 더 보고
+  // 사용자가 직접 시작 버튼을 누르게 한다.
   if (start === "1") {
-    await requireUser("/assessment?start=1");
+    await requireUser("/assessment");
     return <AssessmentAutoStart />;
   }
 
