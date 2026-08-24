@@ -7,11 +7,17 @@ import { Button } from "@/components/ui/button";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { startAssessmentSessionAction } from "./assessment-actions";
 
-export function StartAssessmentButton() {
+export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: boolean }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
   async function handleStart() {
+    // 소개 화면은 비로그인도 볼 수 있다. 진단은 결과를 계정에 남기므로
+    // 시작하는 시점에 로그인으로 보내고, 끝나면 곧바로 시작 지점으로 돌아온다.
+    if (!isLoggedIn) {
+      router.push(`/login?next=${encodeURIComponent("/assessment?start=1")}`);
+      return;
+    }
     setLoading(true);
     try {
       const anonymousId = getOrCreateAnonymousId();

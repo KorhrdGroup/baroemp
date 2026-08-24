@@ -413,7 +413,13 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
   );
 }
 
-export function SupportFlow({ autoStart = false }: { autoStart?: boolean }) {
+export function SupportFlow({
+  autoStart = false,
+  isLoggedIn = true,
+}: {
+  autoStart?: boolean;
+  isLoggedIn?: boolean;
+}) {
   const router = useRouter();
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");
   const [loadingPrefill, setLoadingPrefill] = useState(false);
@@ -434,6 +440,12 @@ export function SupportFlow({ autoStart = false }: { autoStart?: boolean }) {
   }, [autoStart]);
 
   async function handleStart() {
+    // 소개 화면은 비로그인도 볼 수 있다. 진단 결과를 계정에 남기므로
+    // 시작하는 시점에 로그인으로 보내고, 끝나면 곧바로 시작 지점으로 돌아온다.
+    if (!isLoggedIn) {
+      router.push(`/login?next=${encodeURIComponent("/support?start=1")}`);
+      return;
+    }
     setLoadingPrefill(true);
     try {
       const anonymousId = getOrCreateAnonymousId();

@@ -17,7 +17,7 @@ const INFO_ITEMS = [
   { icon: Sparkles, label: "결과 즉시 확인" },
 ];
 
-export function AssessmentIntro() {
+export function AssessmentIntro({ isLoggedIn = true }: { isLoggedIn?: boolean }) {
   return (
     <IntroHero
       icon={Briefcase}
@@ -32,7 +32,7 @@ export function AssessmentIntro() {
       infoItems={INFO_ITEMS}
       ctaHeadline="3~5분이면 진단이 끝납니다"
       ctaDescription="지금 시작하면 적합도와 준비도를 바로 확인할 수 있어요."
-      cta={<StartAssessmentButton />}
+      cta={<StartAssessmentButton isLoggedIn={isLoggedIn} />}
       highlightTitle="이 검사로 알 수 있는 것"
       highlights={RESULT_ITEMS}
       note={
