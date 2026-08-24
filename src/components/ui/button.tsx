@@ -10,10 +10,10 @@ import { cn } from "@/lib/utils"
  *   radius 32~40px 은 6px, 48px 이상은 8px
  *   호버   배경색만 한 단계 진해진다. 이동·그림자 없음.
  *          채운 버튼은 hover 한 단계·active 두 단계, 흰 버튼은 회색 5→10.
- *   전환   0.4s ease-in-out
+ *   전환   ease-in-out. KRDS 명시값은 0.4s 인데 호버가 굼떠서 0.2s 로 낮췄다.
  */
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-label-1 font-medium whitespace-nowrap transition-colors duration-400 ease-in-out outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group/button inline-flex shrink-0 items-center justify-center rounded-lg border border-transparent bg-clip-padding text-label-1 font-medium whitespace-nowrap transition-colors duration-200 ease-in-out outline-none select-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 dark:aria-invalid:border-destructive/50 dark:aria-invalid:ring-destructive/40 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
