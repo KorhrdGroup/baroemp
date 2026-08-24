@@ -24,7 +24,7 @@ const emptyValues: SignupValues = {
 export function SignupForm({ next }: { next: string }) {
   const [state, formAction, pending] = useActionState(signUpAction, initialState);
   const [values, setValues] = useState<SignupValues>(emptyValues);
-  // 아직 건드리지 않은 칸까지 빨갛게 만들지 않는다. 한 번 벗어난(blur) 칸만 표시한다.
+  // 오류는 칸을 벗어났을 때만 보여준다. 입력 중에는 표시하지 않는다.
   const [touched, setTouched] = useState<Partial<Record<keyof SignupValues, boolean>>>({});
 
   const errors = validateSignup(values);
@@ -32,6 +32,9 @@ export function SignupForm({ next }: { next: string }) {
 
   function set<K extends keyof SignupValues>(key: K, value: SignupValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }));
+    // 타이핑 중에는 오류를 숨긴다. "hgit@naveri" 처럼 아직 적는 중인 값까지
+    // 빨갛게 만들면 입력을 방해한다. 칸을 벗어날 때 다시 검사한다.
+    setTouched((prev) => ({ ...prev, [key]: false }));
   }
 
   function markTouched(key: keyof SignupValues) {
