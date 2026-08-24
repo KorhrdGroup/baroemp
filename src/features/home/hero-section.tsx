@@ -44,6 +44,9 @@ export function HeroSection() {
             검색창이 버튼 줄과 같은 폭으로 보이게, 둘을 w-fit 상자에 함께 넣는다.
             상자 폭이 가장 넓은 자식(버튼 줄)에 맞고 검색창은 블록이라 그 폭을 채운다.
             모바일은 버튼이 flex-1로 폭을 나눠 가지므로 상자를 w-full로 둔다.
+
+            버튼 사이 간격(gap-3)과 검색창까지의 간격(mt-3)을 맞춰 세 요소가
+            한 묶음으로 읽히게 한다. 생김새 값은 hero-job-search 쪽에 맞춰뒀다.
           */}
           <div className="mt-8 w-full sm:w-fit">
           <div className="flex gap-3">
