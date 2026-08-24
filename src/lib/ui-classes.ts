@@ -33,8 +33,18 @@ export const interactiveRowClass =
  *
  * x·y 를 0 으로 두어 어느 방향으로도 치우치지 않게 하고, 음수 spread 로
  * 번지는 범위를 좁힌다. 프로젝트에서 이미 쓰던 rgba(15,23,42,0.18) 계열을
- * 그대로 따랐다.
+ * 그대로 따르되 투명도만 0.10 으로 낮춰 은은하게 뒀다.
  *
- * 테두리와 같이 쓰지 않는다. 둘 다 있으면 경계가 두 겹으로 보인다.
+ * 테두리와 같이 쓸 때는 테두리를 아주 옅게 잡는다. 둘 다 진하면 경계가
+ * 두 겹으로 보인다.
  */
-export const cardShadowClass = "shadow-[0_0_16px_-8px_rgba(15,23,42,0.18)]";
+export const cardShadowClass = "shadow-[0_0_16px_-8px_rgba(15,23,42,0.10)]";
+
+/**
+ * 테두리로 경계를 잡는 카드.
+ *
+ * 쉴 때도 2px 을 유지하고 색만 바꾼다. 1px -> 2px 로 두께를 키우면 호버할
+ * 때마다 안쪽 내용이 1px 씩 밀려 카드가 들썩인다.
+ * 쉴 때는 눈에 거의 걸리지 않는 회색, 호버하면 남색으로 또렷해진다.
+ */
+export const outlinedCardClass = "border-2 border-slate-100 hover:border-brand-blue-900";

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { cardShadowClass, interactiveCardClass } from "@/lib/ui-classes";
+import { cardShadowClass, interactiveCardClass, outlinedCardClass } from "@/lib/ui-classes";
 import { Badge } from "@/components/ui/badge";
 import { coreServices } from "./core-services.data";
 import { cn } from "@/lib/utils";
@@ -22,6 +22,7 @@ export function CoreServicesSection() {
               href={service.href}
               className={cn(
                 "group flex flex-col items-center gap-3 rounded-xl bg-white px-3 py-6 text-center",
+                outlinedCardClass,
                 cardShadowClass,
                 interactiveCardClass,
               )}
