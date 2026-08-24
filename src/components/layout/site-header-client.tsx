@@ -108,14 +108,10 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
               </form>
             </>
           ) : (
-            <>
-              <Button variant="ghost" className="hidden text-slate-700 sm:inline-flex" asChild>
-                <Link href="/login">로그인</Link>
-              </Button>
-              <Button className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
-                <Link href="/signup">회원가입</Link>
-              </Button>
-            </>
+            /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
+            <Button className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+              <Link href="/login">로그인/회원가입</Link>
+            </Button>
           )}
 
           <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
