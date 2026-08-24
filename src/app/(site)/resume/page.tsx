@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { cn } from "@/lib/utils";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import { FileText, Pencil, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
@@ -83,7 +85,7 @@ export default async function ResumeListPage() {
               <Link
                 key={resume.id}
                 href={`/resume/${resume.id}/edit`}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
+                className={cn("flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-5", interactiveCardClass)}
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -133,7 +135,7 @@ export default async function ResumeListPage() {
               <Link
                 key={cl.id}
                 href={`/cover-letter/${cl.id}/edit`}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
+                className={cn("flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5", interactiveCardClass)}
               >
                 <div>
                   <p className="text-body-2 font-semibold text-slate-900">{cl.title}</p>

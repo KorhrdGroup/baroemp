@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { cn } from "@/lib/utils";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import { Pencil, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
@@ -37,7 +39,7 @@ export default async function CoverLetterListPage() {
             <Link
               key={cl.id}
               href={`/cover-letter/${cl.id}/edit`}
-              className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/30"
+              className={cn("flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5", interactiveCardClass)}
             >
               <div>
                 <p className="text-body-2 font-semibold text-slate-900">{cl.title}</p>

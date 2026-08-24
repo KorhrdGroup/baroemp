@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { CheckCircle2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { cardBorderClass, cardShadowClass } from "@/lib/ui-classes";
 
 export interface IntroHeroProps {
   /** 히어로 상단 원형 배지 아이콘 */
@@ -52,7 +53,7 @@ export function IntroHero({
            * 독립고딕(400 단일 굵기)이 뜨면 가짜 볼드 없이 원래 굵기로 그려지고,
            * 로딩에 실패해 2순위 Pretendard로 떨어지면 실제 ExtraBold로 렌더링된다.
            */}
-          <h1 className="mx-auto mt-6 max-w-3xl break-keep font-dongnim text-headline-3 font-extrabold tracking-tight text-slate-800 [font-synthesis-weight:none] sm:text-headline-2">
+          <h1 className="mx-auto mt-6 max-w-3xl break-keep text-headline-3 font-extrabold tracking-tight text-slate-800 sm:text-headline-2">
             {title}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl break-keep text-body-1-reading text-slate-600">{description}</p>
@@ -80,7 +81,11 @@ export function IntroHero({
        * 버튼이 아래로 내려가 182px가 되므로 값을 나눠 잡는다. CTA 문구 줄 수가 바뀌면 재조정이 필요하다.
        */}
       <div className="relative z-10 mx-auto -mt-23 max-w-4xl px-4 sm:-mt-14 sm:px-6 lg:px-8">
-        <div className="flex flex-col gap-4 rounded-2xl bg-white p-6 ring-1 ring-border sm:flex-row sm:items-center sm:justify-between sm:p-7">
+        <div className={cn(
+            "flex flex-col gap-4 rounded-2xl bg-white p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7",
+            cardBorderClass,
+            cardShadowClass,
+          )}>
           <div className="text-left">
             <p className="text-body-2 font-bold text-slate-900">{ctaHeadline}</p>
             <p className="mt-1 text-label-1 text-slate-500">{ctaDescription}</p>
