@@ -1,17 +1,56 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 import { signUpAction, type SignUpFormState } from "./auth-actions";
 import { FieldError, FormError, FormNotice } from "./auth-card";
+import { validateSignup, type SignupValues } from "./signup-validation";
 
 const initialState: SignUpFormState = {};
 
+const emptyValues: SignupValues = {
+  name: "",
+  email: "",
+  password: "",
+  passwordConfirm: "",
+  phone: "",
+  privacyConsent: false,
+};
+
 export function SignupForm({ next }: { next: string }) {
   const [state, formAction, pending] = useActionState(signUpAction, initialState);
+  const [values, setValues] = useState<SignupValues>(emptyValues);
+  // 아직 건드리지 않은 칸까지 빨갛게 만들지 않는다. 한 번 벗어난(blur) 칸만 표시한다.
+  const [touched, setTouched] = useState<Partial<Record<keyof SignupValues, boolean>>>({});
+
+  const errors = validateSignup(values);
+  const canSubmit = Object.keys(errors).length === 0 && !pending;
+
+  function set<K extends keyof SignupValues>(key: K, value: SignupValues[K]) {
+    setValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function markTouched(key: keyof SignupValues) {
+    setTouched((prev) => ({ ...prev, [key]: true }));
+  }
+
+  /** 화면에 보여줄 오류. 서버가 돌려준 오류(중복 이메일 등)가 있으면 그쪽을 우선한다. */
+  function errorOf(key: keyof SignupValues) {
+    return state.fieldErrors?.[key] ?? (touched[key] ? errors[key] : undefined);
+  }
+
+  function fieldProps(key: keyof SignupValues) {
+    const invalid = Boolean(errorOf(key));
+    return {
+      "aria-invalid": invalid,
+      className: cn(invalid && "border-red-400 focus-visible:border-red-400 focus-visible:ring-red-100"),
+      onBlur: () => markTouched(key),
+    };
+  }
 
   if (state.message) {
     return <FormNotice message={state.message} />;
@@ -26,50 +65,110 @@ export function SignupForm({ next }: { next: string }) {
         <Label htmlFor="name" className="mb-1.5">
           이름 <span className="text-red-500">*</span>
         </Label>
-        <Input id="name" name="name" type="text" autoComplete="name" required placeholder="홍길동" />
-        <FieldError message={state.fieldErrors?.name} />
+        <Input
+          id="name"
+          name="name"
+          type="text"
+          autoComplete="name"
+          required
+          placeholder="홍길동"
+          value={values.name}
+          onChange={(e) => set("name", e.target.value)}
+          {...fieldProps("name")}
+        />
+        <FieldError message={errorOf("name")} />
       </div>
 
       <div>
         <Label htmlFor="email" className="mb-1.5">
           이메일 <span className="text-red-500">*</span>
         </Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" />
-        <FieldError message={state.fieldErrors?.email} />
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          placeholder="you@example.com"
+          value={values.email}
+          onChange={(e) => set("email", e.target.value)}
+          {...fieldProps("email")}
+        />
+        <FieldError message={errorOf("email")} />
       </div>
 
       <div>
         <Label htmlFor="password" className="mb-1.5">
           비밀번호 <span className="text-red-500">*</span>
         </Label>
-        <Input id="password" name="password" type="password" autoComplete="new-password" required />
-        <FieldError message={state.fieldErrors?.password} />
+        <Input
+          id="password"
+          name="password"
+          type="password"
+          autoComplete="new-password"
+          required
+          value={values.password}
+          onChange={(e) => set("password", e.target.value)}
+          {...fieldProps("password")}
+        />
+        {errorOf("password") ? (
+          <FieldError message={errorOf("password")} />
+        ) : (
+          <p className="mt-1.5 text-label-2 text-slate-400">영문과 숫자를 포함해 8자 이상</p>
+        )}
       </div>
 
       <div>
         <Label htmlFor="passwordConfirm" className="mb-1.5">
           비밀번호 확인 <span className="text-red-500">*</span>
         </Label>
-        <Input id="passwordConfirm" name="passwordConfirm" type="password" autoComplete="new-password" required />
-        <FieldError message={state.fieldErrors?.passwordConfirm} />
+        <Input
+          id="passwordConfirm"
+          name="passwordConfirm"
+          type="password"
+          autoComplete="new-password"
+          required
+          value={values.passwordConfirm}
+          onChange={(e) => set("passwordConfirm", e.target.value)}
+          {...fieldProps("passwordConfirm")}
+        />
+        <FieldError message={errorOf("passwordConfirm")} />
       </div>
 
       <div>
         <Label htmlFor="phone" className="mb-1.5">
           휴대전화번호 <span className="text-slate-400">(선택)</span>
         </Label>
-        <Input id="phone" name="phone" type="tel" autoComplete="tel" placeholder="010-1234-5678" />
-        <FieldError message={state.fieldErrors?.phone} />
+        <Input
+          id="phone"
+          name="phone"
+          type="tel"
+          autoComplete="tel"
+          placeholder="010-1234-5678"
+          value={values.phone}
+          onChange={(e) => set("phone", e.target.value)}
+          {...fieldProps("phone")}
+        />
+        <FieldError message={errorOf("phone")} />
       </div>
 
       <div className="space-y-3 border-t border-slate-100 pt-4">
         <label className="flex items-start gap-2 text-label-1 text-slate-700">
-          <Checkbox name="privacyConsent" required className="mt-0.5" />
+          <Checkbox
+            name="privacyConsent"
+            required
+            className="mt-0.5"
+            checked={values.privacyConsent}
+            onCheckedChange={(checked) => {
+              set("privacyConsent", checked === true);
+              markTouched("privacyConsent");
+            }}
+          />
           <span>
             <span className="font-medium">[필수]</span> 개인정보 수집·이용에 동의합니다.
           </span>
         </label>
-        <FieldError message={state.fieldErrors?.privacyConsent} />
+        <FieldError message={errorOf("privacyConsent")} />
 
         <label className="flex items-start gap-2 text-label-1 text-slate-700">
           <Checkbox name="marketingConsent" className="mt-0.5" />
@@ -79,7 +178,11 @@ export function SignupForm({ next }: { next: string }) {
         </label>
       </div>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
+      <Button
+        type="submit"
+        disabled={!canSubmit}
+        className="w-full bg-brand-blue-400 hover:bg-brand-blue-600"
+      >
         {pending ? "가입 처리 중..." : "회원가입"}
       </Button>
     </form>
