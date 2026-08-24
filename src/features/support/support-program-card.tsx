@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { REGION_LABELS } from "@/lib/labels";
@@ -34,7 +35,7 @@ export function SupportProgramCard({
   return (
     <Link
       href={`/support/${program.id}`}
-      className="flex flex-col rounded-xl border border-border bg-white p-5 transition-colors hover:border-brand-blue-300"
+      className={cn("flex flex-col rounded-xl border border-border bg-white p-5", interactiveCardClass)}
     >
       <div className="flex items-center justify-between gap-2">
         <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">

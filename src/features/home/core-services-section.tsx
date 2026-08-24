@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import { Badge } from "@/components/ui/badge";
 import { coreServices } from "./core-services.data";
 import { cn } from "@/lib/utils";
@@ -19,7 +20,10 @@ export function CoreServicesSection() {
             <Link
               key={service.id}
               href={service.href}
-              className="group flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-3 py-6 text-center transition-colors hover:border-brand-blue-200"
+              className={cn(
+                "group flex flex-col items-center gap-3 rounded-xl border border-border bg-white px-3 py-6 text-center",
+                interactiveCardClass,
+              )}
             >
               {/* 고용24 메인의 상징인 원형 아이콘 타일 */}
               <span className="flex size-16 items-center justify-center rounded-full bg-brand-blue-400 text-white transition-colors group-hover:bg-brand-blue-600">

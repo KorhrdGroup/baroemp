@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { cn } from "@/lib/utils";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -242,7 +244,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
                     contentId: rec.contentId,
                   })
                 }
-                className="rounded-xl border border-border p-4 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/40"
+                className={cn("rounded-xl border border-border p-4", interactiveCardClass)}
               >
                 <span className="rounded-full bg-slate-100 px-2 py-1 text-label-2 font-medium text-slate-500">
                   {RECOMMENDATION_KIND_LABELS[rec.kind] ?? rec.kind}
@@ -297,7 +299,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
                 key={job.jobId}
                 href={`/jobs/${job.jobId}`}
                 onClick={() => void trackCareerGapJobClickedAction({ analysisId: result.analysisId, jobId: job.jobId })}
-                className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
+                className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveCardClass)}
               >
                 <span className="truncate text-label-1 font-medium text-slate-700">
                   {job.title} · {job.companyName}

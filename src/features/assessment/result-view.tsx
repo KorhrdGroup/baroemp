@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import { RotateCcw, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { REGION_LABELS } from "@/lib/labels";
@@ -83,7 +85,7 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
                       ? "/consulting"
                       : "/resume"
                 }
-                className="rounded-xl border border-border p-4 transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/40"
+                className={cn("rounded-xl border border-border p-4", interactiveCardClass)}
               >
                 <p className="text-body-2 font-semibold text-slate-800">{content.title}</p>
                 <p className="mt-1 text-label-1 text-slate-500">{content.summary ?? content.shortDescription}</p>

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import {
   Briefcase,
@@ -411,7 +412,7 @@ export default async function MyPage() {
                       <Link
                         key={job.id}
                         href={`/jobs/${job.id}`}
-                        className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
+                        className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveCardClass)}
                       >
                         <span className="truncate font-medium text-slate-700">{job.title}</span>
                         {job.match && <span className="shrink-0 font-bold text-brand-blue-600">{job.match.score}점</span>}
@@ -431,7 +432,7 @@ export default async function MyPage() {
                       <Link
                         key={job.id}
                         href={`/jobs/${job.id}`}
-                        className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
+                        className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveCardClass)}
                       >
                         <span className="truncate font-medium text-slate-700">{job.title}</span>
                         <span className="shrink-0 text-slate-400">{job.companyName}</span>
@@ -456,7 +457,7 @@ export default async function MyPage() {
                       <Link
                         key={`${job.id}-${occurredAt}`}
                         href={`/jobs/${job.id}`}
-                        className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
+                        className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveCardClass)}
                       >
                         <span className="flex items-center gap-1.5 truncate font-medium text-slate-700">
                           <ExternalLink className="size-3.5 shrink-0" />
@@ -521,7 +522,7 @@ export default async function MyPage() {
                     <Link
                       key={program.id}
                       href={`/support/${program.id}`}
-                      className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
+                      className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveCardClass)}
                     >
                       <span className="truncate font-medium text-slate-700">{program.title}</span>
                       <Badge variant="outline" className="shrink-0 rounded-full text-label-2 text-slate-500">
@@ -548,7 +549,7 @@ export default async function MyPage() {
                     <Link
                       key={`${program.id}-${occurredAt}`}
                       href={`/support/${program.id}`}
-                      className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 hover:bg-brand-blue-50"
+                      className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveCardClass)}
                     >
                       <span className="flex items-center gap-1.5 truncate font-medium text-slate-700">
                         <ExternalLink className="size-3.5 shrink-0" />

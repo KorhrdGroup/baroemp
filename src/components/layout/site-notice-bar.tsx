@@ -11,6 +11,10 @@ import { ShieldCheck } from "lucide-react";
  * 운영하는 민간 서비스라 정부 누리집을 자처하면 사실과 다르다.
  * 형식만 빌리고, 문구는 운영 주체를 있는 그대로 밝히는 쪽으로 적었다.
  *
+ * "무료"는 전체가 아니라 무료인 서비스를 짚어서 쓴다. 1:1 취업컨설팅은
+ * 유료라서(consulting-request-form 참고) 사이트 전체를 무료라고 하면 사실과 다르다.
+ * 유료/무료 구성이 바뀌면 이 문구도 같이 손봐야 한다.
+ *
  * 메인에서만 띄운다. 안쪽 화면까지 따라다니면 매번 같은 안내를 읽히게 되고
  * 헤더가 그만큼 아래로 밀린다.
  */
@@ -23,8 +27,8 @@ export function SiteNoticeBar() {
       <div className="mx-auto flex max-w-7xl items-center gap-1.5 px-4 py-1.5 sm:px-6 lg:px-8">
         <ShieldCheck aria-hidden className="size-3.5 shrink-0 text-slate-400" />
         <p className="text-label-2 break-keep text-slate-500">
-          이 누리집은 <span className="font-medium text-slate-600">(주)한평생바로취업</span>이 운영하는
-          중장년 취업지원 서비스입니다.
+          <span className="font-medium text-slate-600">(주)한평생바로취업</span>이 운영하는 중장년 취업지원
+          서비스입니다. 직업진단·채용정보·지원금 찾기·이력서 첨삭은 무료입니다.
         </p>
       </div>
     </div>
