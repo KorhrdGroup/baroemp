@@ -45,6 +45,7 @@ export const cardShadowClass = "shadow-[0_0_16px_-8px_rgba(15,23,42,0.10)]";
  *
  * 쉴 때도 2px 을 유지하고 색만 바꾼다. 1px -> 2px 로 두께를 키우면 호버할
  * 때마다 안쪽 내용이 1px 씩 밀려 카드가 들썩인다.
- * 쉴 때는 눈에 거의 걸리지 않는 회색, 호버하면 남색으로 또렷해진다.
+ * 쉴 때는 눈에 거의 걸리지 않는 회색, 호버하면 옅은 파랑으로 또렷해진다.
+ * 파랑은 팔레트 규칙대로 blue-300 을 쓴다(남색은 700~900, 파랑은 400/300).
  */
-export const outlinedCardClass = "border-2 border-slate-100 hover:border-brand-blue-900";
+export const outlinedCardClass = "border-2 border-slate-100 hover:border-brand-blue-300";
