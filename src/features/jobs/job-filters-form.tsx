@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -88,7 +89,8 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
         }}
         className="flex flex-col gap-3 sm:flex-row sm:items-center"
       >
-        <div className="flex flex-1 items-center gap-2 rounded-md border border-border px-3 py-2.5">
+        {/* 안쪽 Input 의 테두리를 지우고 이 상자가 입력 필드 역할을 한다. KRDS 입력 규격(48px, radius 8, 좌우 16). */}
+        <div className="flex h-12 flex-1 items-center gap-2 rounded-lg border border-border px-4">
           <Search className="size-4 shrink-0 text-slate-400" />
           <Input
             value={keyword}
@@ -167,7 +169,10 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           type="button"
           size="sm"
           variant={beginnerOnly ? "default" : "outline"}
-          className={beginnerOnly ? "bg-brand-blue-400 hover:bg-brand-blue-600" : ""}
+          className={cn(
+            "rounded-full",
+            beginnerOnly && "bg-brand-blue-400 hover:bg-brand-blue-600",
+          )}
           onClick={() => {
             const next = !beginnerOnly;
             setBeginnerOnly(next);
@@ -180,7 +185,10 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           type="button"
           size="sm"
           variant={closingSoon ? "default" : "outline"}
-          className={closingSoon ? "bg-brand-blue-400 hover:bg-brand-blue-600" : ""}
+          className={cn(
+            "rounded-full",
+            closingSoon && "bg-brand-blue-400 hover:bg-brand-blue-600",
+          )}
           onClick={() => {
             const next = !closingSoon;
             setClosingSoon(next);
