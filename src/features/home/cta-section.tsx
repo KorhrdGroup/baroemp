@@ -51,7 +51,13 @@ export function CtaSection() {
                 ))}
               </div>
               <p className="mt-3 text-label-1 text-slate-100">&ldquo;{t.quote}&rdquo;</p>
-              <p className="mt-3 text-label-2 font-semibold text-slate-400">{t.author}</p>
+              {/*
+                작성자는 카드 오른쪽 아래에 붙인다. mt-auto 가 남는 세로 공간을 밀어내서
+                후기 길이가 서로 달라도 두 카드의 작성자 줄이 같은 높이에 놓인다.
+              */}
+              <p className="mt-auto pt-3 text-right text-label-2 font-semibold text-slate-400">
+                {t.author}
+              </p>
             </div>
           ))}
         </div>

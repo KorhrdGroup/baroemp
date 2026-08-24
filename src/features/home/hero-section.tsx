@@ -30,7 +30,12 @@ export function HeroSection() {
         <p className="text-body-2 font-semibold text-brand-blue-600">
           중장년의 새로운 시작, 한평생 함께합니다
         </p>
-        <h1 className="mt-4 text-headline-3 font-extrabold tracking-tight text-slate-900 sm:text-headline-1">
+        {/*
+          leading 은 이 제목에만 예외로 둔다. 타이포 토큰의 기본 행간은 1.2 라
+          두 줄짜리 배너 제목에서는 위아래가 붙어 보인다.
+          굵기도 배너에서만 900 을 쓴다. 다른 제목은 800 이 기준이다.
+        */}
+        <h1 className="mt-4 text-headline-3 font-black leading-[1.35] tracking-tight text-slate-900 sm:text-headline-1">
           내게 맞는 일자리를 찾고
           <br />
           <span className="text-brand-blue-600">취업 성공까지 한 번에!</span>

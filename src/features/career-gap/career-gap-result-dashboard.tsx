@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass } from "@/lib/ui-classes";
+import { interactiveCardClass, interactiveRowClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import {
   AlertTriangle,
@@ -299,7 +299,7 @@ export function CareerGapResultDashboard({ result }: { result: CareerGapResultVi
                 key={job.jobId}
                 href={`/jobs/${job.jobId}`}
                 onClick={() => void trackCareerGapJobClickedAction({ analysisId: result.analysisId, jobId: job.jobId })}
-                className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveCardClass)}
+                className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveRowClass)}
               >
                 <span className="truncate text-label-1 font-medium text-slate-700">
                   {job.title} · {job.companyName}
