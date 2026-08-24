@@ -192,7 +192,7 @@ export function SignupForm({ next }: { next: string }) {
       <Button
         type="submit"
         disabled={!canSubmit}
-        className="w-full bg-brand-blue-400 hover:bg-brand-blue-600"
+        className="h-12 w-full bg-brand-blue-400 hover:bg-brand-blue-600"
       >
         {pending ? "가입 처리 중..." : "회원가입"}
       </Button>

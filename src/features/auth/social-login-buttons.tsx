@@ -34,10 +34,10 @@ export function SocialLoginButtons() {
         <span className="h-px flex-1 bg-border" />
       </div>
 
-      <div className="mt-4 grid grid-cols-1 gap-2">
+      <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
-          className="flex h-11 items-center justify-center gap-2 rounded-md bg-[#03C75A] text-label-1 font-semibold text-white transition-colors hover:bg-[#02B351]"
+          className="flex h-12 items-center justify-center gap-2 rounded-md bg-[#03C75A] text-label-1 font-semibold text-white transition-colors hover:bg-[#02B351]"
         >
           <NaverIcon />
           네이버 로그인/회원가입
@@ -45,7 +45,7 @@ export function SocialLoginButtons() {
 
         <button
           type="button"
-          className="flex h-11 items-center justify-center gap-2 rounded-md bg-[#FEE500] text-label-1 font-semibold text-[#191600] transition-colors hover:bg-[#F2DA00]"
+          className="flex h-12 items-center justify-center gap-2 rounded-md bg-[#FEE500] text-label-1 font-semibold text-[#191600] transition-colors hover:bg-[#F2DA00]"
         >
           <KakaoIcon />
           카카오 로그인/회원가입
