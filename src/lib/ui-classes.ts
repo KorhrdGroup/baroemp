@@ -41,11 +41,24 @@ export const interactiveRowClass =
 export const cardShadowClass = "shadow-[0_0_16px_-8px_rgba(15,23,42,0.10)]";
 
 /**
- * 테두리로 경계를 잡는 카드.
+ * 카드 테두리의 평상시 모양.
+ *
+ * 눈에 거의 걸리지 않는 회색으로 경계만 잡는다. 두께를 2px 로 잡아두는 건
+ * 호버에서 색만 바꾸기 위해서다(outlinedCardClass 참고). 호버가 없는 카드도
+ * 같은 두께를 써야 화면끼리 테두리가 달라 보이지 않는다.
+ */
+export const cardBorderClass = "border-2 border-slate-100";
+
+/**
+ * 눌러서 이동하는 카드의 테두리.
  *
  * 쉴 때도 2px 을 유지하고 색만 바꾼다. 1px -> 2px 로 두께를 키우면 호버할
  * 때마다 안쪽 내용이 1px 씩 밀려 카드가 들썩인다.
- * 쉴 때는 눈에 거의 걸리지 않는 회색, 호버하면 옅은 파랑으로 또렷해진다.
- * 파랑은 팔레트 규칙대로 blue-300 을 쓴다(남색은 700~900, 파랑은 400/300).
+ * 호버하면 옅은 파랑으로 또렷해진다. 팔레트 규칙대로 blue-300 을 쓴다
+ * (남색은 700~900, 파랑은 400/300).
+ *
+ * 눌러도 아무 일 없는 카드에는 쓰지 않는다. 안에 든 버튼만 누를 수 있는데
+ * 카드 전체가 반응하면 어디를 눌러야 하는지 헷갈린다. 그런 카드는
+ * cardBorderClass 만 쓴다.
  */
-export const outlinedCardClass = "border-2 border-slate-100 hover:border-brand-blue-300";
+export const outlinedCardClass = `${cardBorderClass} hover:border-brand-blue-300`;
