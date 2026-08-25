@@ -15,14 +15,19 @@ import { getAssessmentResponseAnalytics } from "@/services/assessment-response-a
 import { getAssessmentRepository } from "@/lib/repositories";
 
 const SECTION_LABELS: Record<string, string> = {
-  basic: "A. 기본 취업조건",
-  career: "B. 경력/역량",
-  personality: "C. 직업 성향",
-  condition: "D. 근무조건",
-  readiness: "E. 준비/교육 의향",
+  basic: "기본 취업조건",
+  career: "경력/역량",
+  personality: "직업 성향",
+  condition: "근무조건",
+  readiness: "준비/교육 의향",
 };
 
-export default async function AdminAssessmentsPage() {
+export default async function AdminAssessmentsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ section?: string }>;
+}) {
+  const { section: sectionParam } = await searchParams;
   const assessments = await getAssessmentRepository().findAll();
   // "내게 맞는 직업 찾기"(활성 검사)만 노출한다. 비활성 legacy 검사는 관리 화면에서 숨긴다.
   const assessment = assessments.find((a) => a.isActive) ?? assessments[0];
@@ -48,7 +53,11 @@ export default async function AdminAssessmentsPage() {
     ["문항 수", `${assessment.questions.length}문항`],
   ] as const;
 
-  let lastSection = "";
+  const sections = assessment.sections?.length
+    ? assessment.sections.map((s) => s.key)
+    : [...new Set(assessment.questions.map((q) => q.section))];
+  const activeSection = sections.includes(sectionParam ?? "") ? (sectionParam as string) : sections[0];
+  const visibleQuestions = responses.questions.filter((q) => q.section === activeSection);
 
   return (
     <AdminPageShell
@@ -76,6 +85,23 @@ export default async function AdminAssessmentsPage() {
         </span>
       </h2>
 
+      {/* 섹션 탭 */}
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        {sections.map((key) => (
+          <a
+            key={key}
+            href={`/admin/assessments?section=${key}`}
+            className={
+              key === activeSection
+                ? "rounded-full bg-brand-blue-500 px-4 py-1.5 text-label-1 font-semibold text-white"
+                : "rounded-full bg-white px-4 py-1.5 text-label-1 font-medium text-slate-600 ring-1 ring-slate-200 hover:bg-brand-blue-50 hover:text-brand-blue-600"
+            }
+          >
+            {SECTION_LABELS[key] ?? key}
+          </a>
+        ))}
+      </div>
+
       {responses.answeredSessions === 0 ? (
         <Card className="mt-3 rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
           <CardContent className="px-4 py-8 text-center text-label-1 text-slate-400">
@@ -84,15 +110,10 @@ export default async function AdminAssessmentsPage() {
         </Card>
       ) : (
         <div className="mt-3 space-y-4">
-          {responses.questions.map((q) => {
-            const sectionHeading = q.section !== lastSection ? (SECTION_LABELS[q.section] ?? q.section) : null;
-            lastSection = q.section;
+          {visibleQuestions.map((q) => {
             const maxTotal = Math.max(1, ...q.rows.map((r) => r.total));
             return (
               <div key={q.questionId}>
-                {sectionHeading && (
-                  <p className="mt-6 mb-2 text-label-1 font-bold text-brand-blue-600">{sectionHeading}</p>
-                )}
                 <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
                   <CardHeader className="border-b border-slate-100 px-4 py-3">
                     <CardTitle className="text-label-1">
