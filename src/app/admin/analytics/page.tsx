@@ -15,16 +15,19 @@ import { getSupportAnalyticsSnapshot } from "@/services/support-analytics.servic
 import { getAuthAnalyticsSnapshot } from "@/services/auth-analytics.service";
 import { getResumeAnalyticsSnapshot } from "@/services/resume-analytics.service";
 import { getCareerGapAnalyticsSnapshot } from "@/services/career-gap-analytics.service";
+import { getSegmentAnalyticsSnapshot } from "@/services/segment-analytics.service";
 
 export default async function AdminAnalyticsPage() {
-  const [snapshot, jobSnapshot, supportSnapshot, authSnapshot, resumeSnapshot, careerGapSnapshot] = await Promise.all([
-    getAnalyticsSnapshot(),
-    getJobAnalyticsSnapshot(),
-    getSupportAnalyticsSnapshot(),
-    getAuthAnalyticsSnapshot(),
-    getResumeAnalyticsSnapshot(),
-    getCareerGapAnalyticsSnapshot(),
-  ]);
+  const [snapshot, jobSnapshot, supportSnapshot, authSnapshot, resumeSnapshot, careerGapSnapshot, segmentSnapshot] =
+    await Promise.all([
+      getAnalyticsSnapshot(),
+      getJobAnalyticsSnapshot(),
+      getSupportAnalyticsSnapshot(),
+      getAuthAnalyticsSnapshot(),
+      getResumeAnalyticsSnapshot(),
+      getCareerGapAnalyticsSnapshot(),
+      getSegmentAnalyticsSnapshot(),
+    ]);
 
   return (
     <AdminPageShell
@@ -542,6 +545,94 @@ export default async function AdminAnalyticsPage() {
             </Table>
           </CardContent>
         </Card>
+      </div>
+
+      <h2 className="mt-8 text-body-2 font-bold text-slate-800">
+        세그먼트 분석 — 어떤 유형의 사람이 무엇을 눌렀는지 (실데이터)
+      </h2>
+
+      <div className="mt-3 grid gap-4 lg:grid-cols-2">
+        {(
+          [
+            ["연령대별 행동 요약", segmentSnapshot.ageGroupActivity],
+            ["취업상태별 행동 요약", segmentSnapshot.employmentStatusActivity],
+          ] as const
+        ).map(([title, rows]) => (
+          <Card key={title} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
+            <CardHeader className="border-b border-slate-100 px-4 py-3">
+              <CardTitle className="text-label-1">{title}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-0 py-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>구분</TableHead>
+                    <TableHead>활동자</TableHead>
+                    <TableHead>진단완료</TableHead>
+                    <TableHead>공고조회</TableHead>
+                    <TableHead>지원클릭</TableHead>
+                    <TableHead>지원금조회</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rows.length === 0 ? (
+                    <TableRow>
+                      <TableCell colSpan={6} className="text-center text-slate-400">
+                        데이터 없음
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    rows.map((row) => (
+                      <TableRow key={row.segment} className="text-label-1">
+                        <TableCell className="font-medium">{row.segment}</TableCell>
+                        <TableCell>{row.memberCount}명</TableCell>
+                        <TableCell>{row.assessmentCompleted}건</TableCell>
+                        <TableCell>{row.jobViews}건</TableCell>
+                        <TableCell>{row.jobApplyClicks}건</TableCell>
+                        <TableCell>{row.supportViews}건</TableCell>
+                      </TableRow>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        {(
+          [
+            ["연령대별 많이 본 직종 (채용공고)", segmentSnapshot.topJobCategoriesByAgeGroup],
+            ["연령대별 많이 본 지원금", segmentSnapshot.topSupportProgramsByAgeGroup],
+            ["연령대별 진단결과 클릭 직업", segmentSnapshot.topClickedOccupationsByAgeGroup],
+          ] as const
+        ).map(([title, groups]) => (
+          <Card key={title} className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
+            <CardHeader className="border-b border-slate-100 px-4 py-3">
+              <CardTitle className="text-label-1">{title}</CardTitle>
+            </CardHeader>
+            <CardContent className="px-4 py-3">
+              {groups.length === 0 ? (
+                <p className="py-4 text-center text-label-1 text-slate-400">데이터 없음</p>
+              ) : (
+                groups.map((group) => (
+                  <div key={group.segment} className="border-b border-slate-100 py-2 last:border-b-0">
+                    <p className="text-label-1 font-semibold text-slate-700">{group.segment}</p>
+                    <ul className="mt-1 space-y-0.5">
+                      {group.items.map((item) => (
+                        <li key={item.key} className="flex justify-between text-label-2 text-slate-600">
+                          <span className="truncate pr-2">{item.key}</span>
+                          <span className="shrink-0 font-semibold">{item.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))
+              )}
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </AdminPageShell>
   );
