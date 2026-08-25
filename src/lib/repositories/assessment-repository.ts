@@ -160,6 +160,8 @@ export function getAssessmentSessionRepository(): AssessmentSessionRepository {
 export interface AssessmentAnswerRepository {
   upsert(input: AssessmentAnswerInput): Promise<AssessmentAnswerRecord>;
   findBySession(sessionId: string): Promise<AssessmentAnswerRecord[]>;
+  /** 관리자 응답 분포 집계용 - 여러 세션의 답변을 한 번에 조회한다. */
+  findBySessionIds(sessionIds: string[]): Promise<AssessmentAnswerRecord[]>;
 }
 
 function createMockAssessmentAnswerRepository(): AssessmentAnswerRepository {
@@ -186,6 +188,10 @@ function createMockAssessmentAnswerRepository(): AssessmentAnswerRepository {
     },
     async findBySession(sessionId) {
       return answerStore.filter((a) => a.sessionId === sessionId);
+    },
+    async findBySessionIds(sessionIds) {
+      const idSet = new Set(sessionIds);
+      return answerStore.filter((a) => idSet.has(a.sessionId));
     },
   };
 }
