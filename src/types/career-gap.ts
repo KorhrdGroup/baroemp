@@ -157,3 +157,29 @@ export interface CareerGapTargetOption {
   destinationId?: string;
   destinationName?: string;
 }
+
+/** 첨삭 결과 화면 시장 비교 카드 상태. NEEDS_TARGET은 희망직무 미설정 CTA, UNAVAILABLE은 카드 미표시. */
+export type ResumeMarketComparisonState = "READY" | "NEEDS_TARGET" | "UNAVAILABLE";
+
+/** 시장 비교 카드의 requirement 1건 (전부 결정론 엔진 산출값 - 스펙 49번). */
+export interface ResumeMarketComparisonItem {
+  requirementId: string;
+  requirementName: string;
+  /** 요구+우대 공고 비율(%). market_required_rate + market_preferred_rate, 100 상한. */
+  marketRate: number;
+  /** 표본 부족(confidence LOW 또는 isDataSufficient=false) 시 false — %수치 대신 정성 문구 표시 */
+  showRate: boolean;
+  currentEligibleJobCount: number;
+  /** Counterfactual: 이 조건 충족 가정 시 매칭 공고 수 (스펙 17번) */
+  projectedEligibleJobCount?: number;
+  recommendedContent?: { contentId: string; title: string };
+}
+
+/** 첨삭 결과 화면(이력서/자소서 공용) 시장 비교 카드 뷰모델. */
+export interface ResumeMarketComparisonView {
+  state: ResumeMarketComparisonState;
+  analysisId?: string;
+  occupationName?: string;
+  marketSampleSize?: number;
+  items: ResumeMarketComparisonItem[];
+}
