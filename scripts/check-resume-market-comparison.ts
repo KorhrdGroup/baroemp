@@ -5,7 +5,7 @@
  * 실행: DATA_SOURCE_MODE=mock npx tsx scripts/check-resume-market-comparison.ts
  */
 import { getOccupationRepository } from "@/lib/repositories";
-import { mockAdminUsers } from "@/mocks/users.mock";
+import { listAdminUsersPaged } from "@/services/admin-user-list.service";
 import { getMarketComparisonForTarget } from "@/services/resume-market-comparison.service";
 
 function assert(cond: unknown, message: string): asserts cond {
@@ -22,8 +22,9 @@ async function main() {
     process.exit(1);
   }
 
-  assert(mockAdminUsers.length > 0, "mock 사용자 존재");
-  const userId = mockAdminUsers[0].id;
+  const adminUsers = await listAdminUsersPaged({ pageSize: 1 });
+  assert(adminUsers.items.length > 0, "mock 사용자 존재");
+  const userId = adminUsers.items[0].id;
 
   const occupations = await getOccupationRepository().findAll();
   const occupation = occupations.find((o) => o.status === "published") ?? occupations[0];

@@ -67,6 +67,7 @@ export async function getCoverLetterMarketComparison(coverLetterId: string): Pro
 
   return getMarketComparisonForTarget({
     userId: coverLetter.userId,
+    targetOccupationId: coverLetter.targetOccupationId,
     targetJobId: coverLetter.targetJobId,
   });
 }
