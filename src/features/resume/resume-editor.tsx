@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, PanelRightClose, PanelRightOpen, Plus, Printer, Sparkles, Target, Trash2 } from "lucide-react";
@@ -139,6 +139,7 @@ export function ResumeEditor({
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const [isReviewing, startReview] = useTransition();
+  const marketComparisonRequestRef = useRef(0);
   const [summarySuggestion, setSummarySuggestion] = useState<string | null>(null);
   const [isGeneratingSummary, startGenerateSummary] = useTransition();
   const [rewriteTarget, setRewriteTarget] = useState<{ key: string; field: "responsibilities" | "achievements"; text: string } | null>(null);
@@ -199,10 +200,18 @@ export function ResumeEditor({
         await handleSave();
         const result = await reviewResumeAiAction(resume.id);
         setReviewResult(result);
+        setMarketComparison(null);
         // AI 첨삭과 독립 - 실패해도 첨삭 결과 표시에는 영향 없음 (설계 3절)
+        const requestId = ++marketComparisonRequestRef.current;
         void getResumeMarketComparisonAction(resume.id)
-          .then(setMarketComparison)
-          .catch(() => setMarketComparison(null));
+          .then((data) => {
+            if (marketComparisonRequestRef.current !== requestId) return;
+            setMarketComparison(data);
+          })
+          .catch(() => {
+            if (marketComparisonRequestRef.current !== requestId) return;
+            setMarketComparison(null);
+          });
       } catch {
         setSaveMessage("AI 점검 중 오류가 발생했습니다.");
       }
