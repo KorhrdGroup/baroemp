@@ -125,15 +125,6 @@ export function SupportHighlightsSection() {
           title="지금 신청 가능한 지원금"
           description="중장년 취업을 위해 정부·지자체에서 운영 중인 주요 지원 제도입니다."
           align="center"
-          action={
-            <Link
-              href="/support"
-              className="flex items-center gap-1 text-label-1 font-semibold text-brand-blue-600 hover:underline"
-            >
-              전체 지원금 보기
-              <ArrowRight className="size-4" />
-            </Link>
-          }
         />
       </div>
 
@@ -143,6 +134,16 @@ export function SupportHighlightsSection() {
             <SupportCard key={`${item.id}-${i}`} item={item} />
           ))}
         </div>
+      </div>
+
+      <div className="mt-10 flex justify-center">
+        <Link
+          href="/support"
+          className="inline-flex items-center gap-1.5 rounded-full border border-brand-blue-600 px-6 py-2.5 text-body-2 font-semibold text-brand-blue-600 transition-colors duration-200 hover:bg-brand-blue-600 hover:text-white"
+        >
+          지원 제도 알아보기
+          <ArrowRight className="size-4" />
+        </Link>
       </div>
     </section>
   );

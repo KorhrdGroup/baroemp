@@ -15,19 +15,10 @@ export function PopularJobsSection() {
           title="지금 많이 찾는 인기 직업"
           description="취업 수요가 높고 중장년에게 적합한 직업을 확인해보세요."
           align="center"
-          action={
-            <Link
-              href="/jobs"
-              className="flex items-center gap-1 text-label-1 font-semibold text-brand-blue-600 hover:underline"
-            >
-              전체 직업 보기
-              <ArrowRight className="size-4" />
-            </Link>
-          }
         />
 
         <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {mockJobRoles.map((role) => (
+          {mockJobRoles.slice(0, 6).map((role) => (
             <Link
               key={role.id}
               href={`/jobs?category=${role.jobCategory}`}
@@ -77,6 +68,16 @@ export function PopularJobsSection() {
               </div>
             </Link>
           ))}
+        </div>
+
+        <div className="mt-10 flex justify-center">
+          <Link
+            href="/jobs"
+            className="inline-flex items-center gap-1.5 rounded-full border border-brand-blue-600 px-6 py-2.5 text-body-2 font-semibold text-brand-blue-600 transition-colors duration-200 hover:bg-brand-blue-600 hover:text-white"
+          >
+            내게 맞는 직업 찾기
+            <ArrowRight className="size-4" />
+          </Link>
         </div>
       </div>
     </section>
