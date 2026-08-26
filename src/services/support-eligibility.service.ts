@@ -214,7 +214,8 @@ function evaluateBaseFields(program: SupportProgram, profile: SupportMatchProfil
         reasons.push({ ruleKey: "training_willingness", label: "직업훈련 참여 의향 있음", score: 15 });
         matched.push("직업훈련 참여 의향");
       } else {
-        missing.push("직업훈련 참여 의향");
+        // 의향이 낮은 건 자격 미달이 아니라 본인 선택이므로, 미노출(LOW) 대신 "확인 필요"로 남긴다.
+        checkRequired.push("직업훈련 참여 의향(낮게 응답)");
       }
     } else {
       checkRequired.push("직업훈련 참여 의향");
@@ -266,7 +267,8 @@ function resolveGrade(
 ): SupportEligibilityGrade {
   if (hasFailedRequiredRule) return "LOW";
   if (checkRequiredCount > 0 && score >= 40) return "CHECK_REQUIRED";
-  if (score >= 65) return "HIGH";
+  // 점수 체계상 일반 제도의 상한이 45~75라 65 컷은 사실상 도달 불가였다 (페르소나 4종 전부 HIGH 0건).
+  if (score >= 50) return "HIGH";
   if (score >= 35) return "MEDIUM";
   if (checkRequiredCount > 0) return "CHECK_REQUIRED";
   return "LOW";
