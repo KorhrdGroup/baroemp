@@ -49,6 +49,8 @@ export interface NormalizedSupportProgram {
   description?: string;
 
   category?: SupportCategory;
+  /** gov24 사용자구분 기반 수혜 주체 (personal/business/both) */
+  audience?: "personal" | "business" | "both";
   supportType?: "cash" | "training_voucher" | "insurance" | "tax_benefit" | "other";
 
   targetDescription?: string;

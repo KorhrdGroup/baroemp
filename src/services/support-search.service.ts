@@ -94,6 +94,8 @@ export interface SupportResultView {
   gradeCounts: Record<SupportEligibilityGrade, number>;
   totalCount: number;
   categories: SupportResultCategoryGroup[];
+  /** 나를 채용한 회사가 활용할 수 있는 고용지원 (기업 대상 제도, 참고 안내) */
+  employerPrograms: SupportProgram[];
 }
 
 /**
@@ -107,11 +109,16 @@ export async function getSupportResultView(sessionId: string): Promise<SupportRe
 
   const sourceId = session.userId ?? session.anonymousId ?? "";
   if (!sourceId) {
-    return { sessionId, gradeCounts: { HIGH: 0, MEDIUM: 0, CHECK_REQUIRED: 0, LOW: 0 }, totalCount: 0, categories: [] };
+    return { sessionId, gradeCounts: { HIGH: 0, MEDIUM: 0, CHECK_REQUIRED: 0, LOW: 0 }, totalCount: 0, categories: [], employerPrograms: [] };
   }
 
   const matchResults = await getMatchResultRepository().findAll({ sourceId, targetType: "support_program" });
-  const allPrograms = await getSupportProgramRepository().findAll();
+  // 전체 테이블(1만+건)은 PostgREST 기본 1,000행 상한에 걸리므로,
+  // 매칭 계산(completeSupportAssessment)과 동일한 "취업 관련" 필터로 조회해 매칭된 제도를 전부 커버한다.
+  const allPrograms = await getSupportProgramRepository().findAll({
+    activeOnly: true,
+    minCareerRelevanceScore: CAREER_RELEVANCE_THRESHOLD,
+  });
   const programById = new Map(allPrograms.map((p) => [p.id, p]));
 
   const gradeCounts: Record<SupportEligibilityGrade, number> = { HIGH: 0, MEDIUM: 0, CHECK_REQUIRED: 0, LOW: 0 };
@@ -120,6 +127,8 @@ export async function getSupportResultView(sessionId: string): Promise<SupportRe
   for (const matchResult of matchResults) {
     const program = programById.get(matchResult.targetId);
     if (!program) continue;
+    // 과거 세션 호환: 기업 전용 제도가 매칭에 저장돼 있어도 개인 결과에는 노출하지 않는다.
+    if ((program.audience ?? "personal") === "business") continue;
     const grade = (matchResult.grade as SupportEligibilityGrade) ?? "CHECK_REQUIRED";
     gradeCounts[grade] = (gradeCounts[grade] ?? 0) + 1;
 
@@ -136,5 +145,12 @@ export async function getSupportResultView(sessionId: string): Promise<SupportRe
     }))
     .sort((a, b) => b.items.length - a.items.length);
 
-  return { sessionId, gradeCounts, totalCount: matchResults.length, categories };
+  // "나를 채용한 회사가 받을 수 있는 고용지원" - 기업 대상 취업 관련 제도 상위 5건 (참고 안내용)
+  const employerPrograms = allPrograms
+    .filter((p) => p.isActive !== false && (p.audience === "business" || p.audience === "both"))
+    .filter((p) => (p.careerRelevanceScore ?? 0) >= 30)
+    .sort((a, b) => (b.careerRelevanceScore ?? 0) - (a.careerRelevanceScore ?? 0))
+    .slice(0, 5);
+
+  return { sessionId, gradeCounts, totalCount: matchResults.length, categories, employerPrograms };
 }

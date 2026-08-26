@@ -35,12 +35,21 @@ const EMPLOYMENT_STATUS_OPTIONS: [EmploymentStatus, string][] = [
 const DESIRED_START_TIMING_OPTIONS = Object.entries(DESIRED_START_TIMING_LABELS) as [DesiredStartTiming, string][];
 
 const JOB_CATEGORY_OPTIONS: { code: string; label: string }[] = [
-  { code: "care_worker", label: "요양보호사·돌봄" },
-  { code: "social_worker", label: "사회복지사" },
-  { code: "office_admin", label: "사무·행정직" },
-  { code: "facility_cleaning", label: "시설관리·미화" },
+  { code: "care_worker", label: "요양보호·돌봄" },
+  { code: "social_worker", label: "사회복지" },
   { code: "hospital_companion", label: "병원동행·간병" },
-  { code: "logistics_driver", label: "배송·운전직" },
+  { code: "education", label: "교육·보육·강사" },
+  { code: "counselor", label: "상담 (심리·직업)" },
+  { code: "office_admin", label: "사무·행정" },
+  { code: "customer_service", label: "고객센터·콜센터" },
+  { code: "retail_sales", label: "매장판매·서비스" },
+  { code: "cook", label: "조리·급식" },
+  { code: "beauty", label: "미용·뷰티" },
+  { code: "security", label: "경비·보안" },
+  { code: "facility_cleaning", label: "시설관리·미화" },
+  { code: "logistics_driver", label: "배송·운전" },
+  { code: "production", label: "생산·제조" },
+  { code: "it", label: "IT·컴퓨터" },
   { code: "other", label: "기타 / 잘 모르겠어요" },
 ];
 
@@ -402,7 +411,7 @@ function StepBody({
     case "desiredJobCategories": {
       const current = answers.desiredJobCategories ?? [];
       return (
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {JOB_CATEGORY_OPTIONS.map((opt) => {
             const selected = current.includes(opt.code);
             return (
@@ -425,7 +434,7 @@ function StepBody({
     case "heldQualifications": {
       const current = answers.heldQualifications ?? [];
       return (
-        <div className="flex flex-col gap-2">
+        <div className="grid grid-cols-2 gap-2">
           {QUALIFICATION_OPTIONS.map(([code, label]) => {
             const selected = current.includes(code);
             return (

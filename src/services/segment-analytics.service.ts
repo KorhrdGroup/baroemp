@@ -36,6 +36,8 @@ export interface SegmentAnalyticsSnapshot {
   employmentStatusActivity: SegmentActivityRow[];
   /** 연령대별 - 채용공고에서 많이 본 직종 TOP */
   topJobCategoriesByAgeGroup: SegmentTopList[];
+  /** 취업상태별 - 채용공고에서 많이 본 직종 TOP */
+  topJobCategoriesByEmploymentStatus: SegmentTopList[];
   /** 연령대별 - 많이 본 지원금 TOP */
   topSupportProgramsByAgeGroup: SegmentTopList[];
   /** 연령대별 - 직업진단 결과에서 많이 클릭한 직업 TOP */
@@ -128,6 +130,9 @@ export async function getSegmentAnalyticsSnapshot(): Promise<SegmentAnalyticsSna
     ageGroupActivity: buildActivityRows(ageSegment),
     employmentStatusActivity: buildActivityRows(statusSegment),
     topJobCategoriesByAgeGroup: buildSegmentTop(jobViewEvents, ageSegment, (e) =>
+      typeof e.metadata?.jobCategory === "string" ? e.metadata.jobCategory : "",
+    ),
+    topJobCategoriesByEmploymentStatus: buildSegmentTop(jobViewEvents, statusSegment, (e) =>
       typeof e.metadata?.jobCategory === "string" ? e.metadata.jobCategory : "",
     ),
     topSupportProgramsByAgeGroup: buildSegmentTop(supportViewEvents, ageSegment, (e) =>

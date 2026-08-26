@@ -19,6 +19,7 @@ export function normalizedSupportToSupportInput(
     summary: program.summary ?? program.title,
     description: program.description ?? program.summary ?? program.title,
     category: program.category ?? "other",
+    audience: program.audience ?? "personal",
     supportType: program.supportType ?? "other",
     targetDescription: program.targetDescription,
     targetAgeGroups: program.targetAgeGroups ?? [],
