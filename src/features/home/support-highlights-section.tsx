@@ -68,7 +68,7 @@ function SupportCard({ item }: { item: (typeof highlights)[number] }) {
   return (
     <div
       className={cn(
-        "flex w-72 shrink-0 flex-col rounded-xl bg-white p-6",
+        "flex w-80 shrink-0 flex-col rounded-xl bg-white p-6",
         cardBorderClass,
         cardShadowClass,
       )}
