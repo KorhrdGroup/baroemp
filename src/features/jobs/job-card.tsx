@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { labelRegion, labelWorkType } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import { JobBookmarkButton } from "./job-bookmark-button";
+import { computeJobReadiness, READINESS_BADGE_CLASS } from "./job-readiness";
 import type { Job } from "@/types";
 
 const CLOSING_SOON_DAYS = 7;
@@ -29,12 +30,23 @@ export interface JobCardProps {
   className?: string;
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
+  /** 로그인 회원의 보유 자격증명. 전달되면 카드에 취업준비성 배지를 표시한다. */
+  heldQualifications?: string[];
 }
 
-export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthenticated, isBookmarked }: JobCardProps) {
+export function JobCard({
+  job,
+  matchScore,
+  matchReasonLabel,
+  className,
+  isAuthenticated,
+  isBookmarked,
+  heldQualifications,
+}: JobCardProps) {
   const closingSoon = isClosingSoon(job);
   const midlifeRecommended = isMidlifeRecommended(job);
-  const requiresQualification = job.preferredQualifications.length > 0;
+  const readiness = heldQualifications ? computeJobReadiness(job, heldQualifications) : null;
+  const qualificationChips = job.preferredQualifications.slice(0, 3);
 
   return (
     <div
@@ -66,9 +78,9 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
                 중장년 추천
               </Badge>
             )}
-            {requiresQualification && (
-              <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-                자격 관련
+            {readiness && (
+              <Badge className={cn("rounded-full border-0 text-label-2 font-semibold", READINESS_BADGE_CLASS[readiness.level])}>
+                취업준비성 {readiness.label}
               </Badge>
             )}
             {/* 마감임박만 색을 유지한다. 나머지 태그는 공고의 분류지만 이건 시간 경고다. */}
@@ -111,6 +123,36 @@ export function JobCard({ job, matchScore, matchReasonLabel, className, isAuthen
           </span>
         )}
       </div>
+
+      {qualificationChips.length > 0 && (
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {qualificationChips.map((qual) => {
+            const held = (heldQualifications ?? []).some((h) => h && (qual.includes(h) || h.includes(qual)));
+            return (
+              <span
+                key={qual}
+                className={cn(
+                  "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-label-2",
+                  held
+                    ? "border border-emerald-300 font-semibold text-emerald-700"
+                    : "border border-border text-slate-500",
+                )}
+              >
+                <span className={cn("rounded px-1 text-[10px] font-bold", held ? "bg-emerald-50" : "bg-slate-100 text-slate-500")}>
+                  {held ? "보유" : "자격"}
+                </span>
+                {qual}
+              </span>
+            );
+          })}
+          {job.preferredQualifications.length > 3 && (
+            <span className="text-label-2 text-slate-400">+{job.preferredQualifications.length - 3}</span>
+          )}
+          {readiness && readiness.level !== "very_high" && (
+            <span className="text-label-2 text-slate-400">· {readiness.reason}</span>
+          )}
+        </div>
+      )}
 
       {matchReasonLabel && (
         <p className="mt-3 rounded-lg bg-brand-blue-50/70 px-3 py-2 text-label-1 text-brand-blue-700">
