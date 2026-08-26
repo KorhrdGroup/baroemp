@@ -60,7 +60,8 @@ export async function syncSupportProgramsFromProvider(options: SyncSupportProgra
 
   const programRepo = getSupportProgramRepository();
   const ruleRepo = getSupportProgramRuleRepository();
-  const maxPages = options.maxPages ?? Number(process.env.SUPPORT_SYNC_MAX_PAGES ?? 10);
+  // gov24 전체 데이터(약 11,000건)를 커버하도록 기본 120페이지(12,000건)로 수집한다.
+  const maxPages = options.maxPages ?? Number(process.env.SUPPORT_SYNC_MAX_PAGES ?? 120);
   // Public API는 perPage=100까지 허용됨을 실측 확인(완료보고 참고) - 호출 수를 줄이기 위해 기본값을 크게 잡는다.
   const defaultPageSize = isMock ? 20 : 100;
   const pageSize = Math.min(100, Math.max(1, options.pageSize ?? defaultPageSize));

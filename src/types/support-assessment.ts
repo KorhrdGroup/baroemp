@@ -24,6 +24,14 @@ export interface SupportAssessmentAnswers {
   careerBreakMonths?: number;
   /** 정부지원 활용 의향 (참고용 - 매칭 점수에는 직접 반영하지 않음) */
   openToGovSupport?: boolean;
+  /** 출생연도 (만 나이 기반 정밀 매칭용, ageGroup은 여기서 파생) */
+  birthYear?: number;
+  /** 최근 3년 내 고용보험 가입 이력 - 실업급여/국민취업지원 유형을 가르는 핵심 변수 */
+  employmentInsuranceHistory?: "yes" | "no" | "unknown";
+  /** 가구 소득 수준 (참고용 구간, 소득 조건 제도는 "확인 필요"로 안내) */
+  incomeBand?: "low" | "middle" | "high" | "unknown";
+  /** 가구 특성 (한부모/장애/기초수급 등 우선지원 대상 확인용, 선택) */
+  householdTraits?: string[];
 }
 
 export type SupportAssessmentSessionStatus = "in_progress" | "completed";
