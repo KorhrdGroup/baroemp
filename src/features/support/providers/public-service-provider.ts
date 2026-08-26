@@ -40,6 +40,16 @@ import type {
 
 const DEFAULT_BASE_URL = "https://api.odcloud.kr/api/gov24/v3";
 
+/** gov24 사용자구분("개인", "법인/시설/단체", "개인||소상공인" 등) → 수혜 주체 분류 */
+function parseAudience(userType?: string): "personal" | "business" | "both" {
+  if (!userType) return "personal";
+  const personal = /개인|가구/.test(userType);
+  const business = /소상공인|법인/.test(userType);
+  if (personal && business) return "both";
+  if (business) return "business";
+  return "personal";
+}
+
 interface ServiceListRow {
   서비스ID: string;
   서비스명: string;
@@ -196,6 +206,7 @@ function adaptListRow(row: ServiceListRow): NormalizedSupportProgram {
     eligibilityRaw,
     ...conditionSignals,
     regionScope: guessRegionScope(row),
+    audience: parseAudience(toTrimmedString(row.사용자구분)),
     benefitDescription: toTrimmedString(row.지원내용),
     applicationPeriod: toTrimmedString(row.신청기한),
     applicationMethod: toTrimmedString(row.신청방법),

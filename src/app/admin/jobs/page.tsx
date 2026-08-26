@@ -14,6 +14,67 @@ import { JobSyncButton } from "@/features/admin/job-sync-button";
 import { JobActiveToggleButton } from "@/features/admin/job-active-toggle-button";
 import { labelRegion } from "@/lib/labels";
 import { listAdminJobsWithStats, getJobSyncOverview } from "@/services/admin-job.service";
+import { getSegmentAnalyticsSnapshot } from "@/services/segment-analytics.service";
+import type { SegmentActivityRow, SegmentTopList } from "@/services/segment-analytics.service";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+function SegmentCard({ title, rows }: { title: string; rows: SegmentActivityRow[] }) {
+  return (
+    <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
+      <CardHeader className="border-b border-slate-100 px-4 py-3">
+        <CardTitle className="text-label-1">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="px-4 py-3">
+        {rows.filter((r) => r.jobViews + r.jobApplyClicks > 0).length === 0 ? (
+          <p className="py-3 text-center text-label-2 text-slate-400">아직 데이터가 없습니다</p>
+        ) : (
+          <ul className="space-y-1.5">
+            {rows
+              .filter((r) => r.jobViews + r.jobApplyClicks > 0)
+              .map((r) => (
+                <li key={r.segment} className="flex justify-between text-label-1">
+                  <span className="font-medium text-slate-700">{r.segment}</span>
+                  <span className="text-slate-500">
+                    조회 <b className="text-slate-900">{r.jobViews}</b> · 지원{" "}
+                    <b className="text-slate-900">{r.jobApplyClicks}</b>
+                  </span>
+                </li>
+              ))}
+          </ul>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function SegmentTopCard({ title, groups }: { title: string; groups: SegmentTopList[] }) {
+  return (
+    <Card className="rounded-xl border-0 bg-white py-0 shadow-none ring-1 ring-slate-200">
+      <CardHeader className="border-b border-slate-100 px-4 py-3">
+        <CardTitle className="text-label-1">{title}</CardTitle>
+      </CardHeader>
+      <CardContent className="px-4 py-3">
+        {groups.length === 0 ? (
+          <p className="py-3 text-center text-label-2 text-slate-400">아직 데이터가 없습니다</p>
+        ) : (
+          groups.map((g) => (
+            <div key={g.segment} className="border-b border-slate-100 py-1.5 last:border-b-0">
+              <p className="text-label-1 font-semibold text-brand-blue-600">{g.segment}</p>
+              <ul className="mt-0.5 space-y-0.5">
+                {g.items.map((item) => (
+                  <li key={item.key} className="flex justify-between text-label-2 text-slate-600">
+                    <span className="truncate pr-2">{item.key}</span>
+                    <span className="shrink-0 font-semibold">{item.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 interface AdminJobsSearchParams {
   provider?: string;
@@ -28,7 +89,11 @@ export default async function AdminJobsPage({
   searchParams: Promise<AdminJobsSearchParams>;
 }) {
   const sp = await searchParams;
-  const [jobs, syncOverview] = await Promise.all([listAdminJobsWithStats(), getJobSyncOverview()]);
+  const [jobs, syncOverview, segment] = await Promise.all([
+    listAdminJobsWithStats(),
+    getJobSyncOverview(),
+    getSegmentAnalyticsSnapshot(),
+  ]);
 
   const filtered = jobs.filter((job) => {
     if (sp.provider && sp.provider !== "all" && (job.externalSource ?? "direct") !== sp.provider) return false;
@@ -78,6 +143,13 @@ export default async function AdminJobsPage({
             )}
           </div>
           <JobSyncButton />
+        </div>
+
+        {/* 누가 어떤 공고를 보는지 — 세그먼트 클릭 분석 */}
+        <div className="grid gap-4 lg:grid-cols-3">
+          <SegmentCard title="연령대별 활동 (조회/지원)" rows={segment.ageGroupActivity} />
+          <SegmentTopCard title="연령대별 많이 본 직종" groups={segment.topJobCategoriesByAgeGroup} />
+          <SegmentTopCard title="취업상태별 많이 본 직종" groups={segment.topJobCategoriesByEmploymentStatus} />
         </div>
 
         <div className="flex flex-wrap gap-2 text-label-2">

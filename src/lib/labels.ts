@@ -74,9 +74,23 @@ export const PREFERENTIAL_CODE_LABELS: Record<string, string> = {
 
 /** Job.preferredQualifications / Content.recommendationRules에서 공유하는 자격 코드 라벨. */
 export const QUALIFICATION_LABELS: Record<string, string> = {
-  "cert-care-worker": "요양보호사 자격증",
+  "cert-care-worker": "요양보호사",
   "cert-social-worker-2": "사회복지사 2급",
   "cert-driver-1": "1종 보통 운전면허",
+  "cert-childcare-2": "보육교사 2급",
+  "cert-lifelong-edu-2": "평생교육사 2급",
+  "cert-youth-worker-2": "청소년지도사 2급",
+  "cert-counselor": "심리상담사",
+  "cert-career-counselor-2": "직업상담사 2급",
+  "cert-computer": "컴퓨터활용능력",
+  "cert-security-manager": "경비지도사",
+  "cert-cook": "조리사 (한식 등)",
+  "cert-beautician": "미용사 면허",
+  "cert-forklift": "지게차운전기능사",
+  "cert-hospital-companion": "병원동행매니저",
+  "cert-afterschool-care": "방과후돌봄교실지도사",
+  "cert-silver-cognitive": "실버인지활동지도사",
+  "cert-other": "기타 자격 있음",
 };
 
 export function labelQualification(code: string): string {
