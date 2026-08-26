@@ -47,7 +47,9 @@ export type OccupationDimension =
   | "stress_response"
   | "teamwork"
   | "schedule_flexibility"
-  | "education_willingness";
+  | "education_willingness"
+  | "teaching_orientation"
+  | "aesthetic_skill";
 
 export const OCCUPATION_DIMENSIONS: { key: OccupationDimension; label: string }[] = [
   { key: "people_interaction", label: "대인업무 적합도" },
@@ -60,6 +62,8 @@ export const OCCUPATION_DIMENSIONS: { key: OccupationDimension; label: string }[
   { key: "teamwork", label: "협업 지향성" },
   { key: "schedule_flexibility", label: "근무시간 유연성" },
   { key: "education_willingness", label: "교육/자격 준비 의향" },
+  { key: "teaching_orientation", label: "가르침·지도 성향" },
+  { key: "aesthetic_skill", label: "손기술·미적 감각" },
 ];
 
 /**
