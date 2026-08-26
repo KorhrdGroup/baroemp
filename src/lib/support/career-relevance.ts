@@ -116,7 +116,8 @@ export function computeCareerRelevance(input: CareerRelevanceInput): CareerRelev
  * 이 점수 이상만 "바로취업에 적합한 지원제도"로 사용자에게 노출한다(검색/진단 매칭 풀).
  * 관리자 화면(/admin/support)에는 이 필터를 적용하지 않아 원본 데이터를 그대로 볼 수 있다.
  */
-export const CAREER_RELEVANCE_THRESHOLD = 30;
+// 30에서 하향: 20~29 구간에 취업 연관 제도가 191건 있어 후보 풀을 322→513건으로 확대 (2026-08 튜닝).
+export const CAREER_RELEVANCE_THRESHOLD = 20;
 
 const TRAINING_KEYWORDS = ["훈련", "교육", "자격", "배움카드", "역량개발", "능력개발"];
 const REGIONAL_LIVING_KEYWORDS = ["생활안정", "생계", "주거", "임대"];
