@@ -48,6 +48,10 @@ export async function getSupportAssessmentPrefill(
 export function toSupportMatchProfile(answers: SupportAssessmentAnswers): SupportMatchProfile {
   return {
     ageGroup: answers.ageGroup,
+    birthYear: answers.birthYear,
+    employmentInsuranceHistory: answers.employmentInsuranceHistory,
+    incomeBand: answers.incomeBand,
+    householdTraits: answers.householdTraits,
     region: answers.region,
     employmentStatus: answers.employmentStatus,
     desiredStartTiming: answers.desiredStartTiming,

@@ -16,6 +16,8 @@ import { getSupportProgramRuleRepository } from "@/lib/repositories";
  */
 export interface SupportMatchProfile {
   ageGroup?: AgeGroup;
+  /** 출생연도. 있으면 연령대 중간값 대신 만 나이로 정확히 매칭한다. */
+  birthYear?: number;
   region?: Region;
   employmentStatus?: EmploymentStatus;
   desiredStartTiming?: DesiredStartTiming;
@@ -25,6 +27,12 @@ export interface SupportMatchProfile {
   desiredJobCategories?: string[];
   careerBreak?: boolean;
   careerBreakMonths?: number;
+  /** 최근 3년 내 고용보험 가입 이력 */
+  employmentInsuranceHistory?: "yes" | "no" | "unknown";
+  /** 가구 소득 수준 (참고 구간) */
+  incomeBand?: "low" | "middle" | "high" | "unknown";
+  /** 가구 특성 (한부모/장애/기초수급 등) */
+  householdTraits?: string[];
 }
 
 export interface SupportMatchDetail {
@@ -47,8 +55,10 @@ const AGE_GROUP_MIDPOINT: Record<AgeGroup, number> = {
   "70plus": 75,
 };
 
-function deriveAge(ageGroup?: AgeGroup): number | undefined {
-  return ageGroup ? AGE_GROUP_MIDPOINT[ageGroup] : undefined;
+function deriveAge(profile: Pick<SupportMatchProfile, "ageGroup" | "birthYear">): number | undefined {
+  // 출생연도가 있으면 만 나이로 정확히, 없으면 연령대 중간값으로 근사한다.
+  if (profile.birthYear) return new Date().getFullYear() - profile.birthYear;
+  return profile.ageGroup ? AGE_GROUP_MIDPOINT[profile.ageGroup] : undefined;
 }
 
 function evaluateOperator(operator: SupportProgramRule["operator"], ruleValue: unknown, actual: unknown): boolean {
@@ -95,7 +105,13 @@ function fieldLabel(field: string): string {
 function resolveActualValue(field: string, profile: SupportMatchProfile): unknown {
   switch (field) {
     case "age":
-      return deriveAge(profile.ageGroup);
+      return deriveAge(profile);
+    case "employment_insurance":
+      return profile.employmentInsuranceHistory;
+    case "income_band":
+      return profile.incomeBand;
+    case "household_condition":
+      return profile.householdTraits;
     case "region":
       return profile.region;
     case "employment_status":
@@ -139,7 +155,7 @@ function evaluateBaseFields(program: SupportProgram, profile: SupportMatchProfil
   const missing: string[] = [];
   const checkRequired: string[] = [];
 
-  const age = deriveAge(profile.ageGroup);
+  const age = deriveAge(profile);
 
   // 연령
   if (program.targetAgeMin !== undefined || program.targetAgeMax !== undefined) {
