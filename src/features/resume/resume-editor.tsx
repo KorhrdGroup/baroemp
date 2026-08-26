@@ -27,6 +27,7 @@ import type {
   ResumeExperienceInput,
   ResumeItemInput,
   ResumeItemSectionType,
+  ResumeMarketComparisonView,
   ResumeQualificationInput,
   ResumeSkillInput,
   ResumeTrainingInput,
@@ -35,12 +36,14 @@ import {
   changeResumeTemplateAction,
   deleteResumeAction,
   generateCareerSummaryAiAction,
+  getResumeMarketComparisonAction,
   reviewResumeAiAction,
   rewriteResumeSectionAiAction,
   saveResumeAction,
   trackResumeExportedAction,
 } from "./resume-actions";
 import { ResumePreview } from "./resume-preview";
+import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
 
 let keySeq = 0;
@@ -134,6 +137,7 @@ export function ResumeEditor({
   const [showPreview, setShowPreview] = useState(true);
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
+  const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const [isReviewing, startReview] = useTransition();
   const [summarySuggestion, setSummarySuggestion] = useState<string | null>(null);
   const [isGeneratingSummary, startGenerateSummary] = useTransition();
@@ -195,6 +199,10 @@ export function ResumeEditor({
         await handleSave();
         const result = await reviewResumeAiAction(resume.id);
         setReviewResult(result);
+        // AI 첨삭과 독립 - 실패해도 첨삭 결과 표시에는 영향 없음 (설계 3절)
+        void getResumeMarketComparisonAction(resume.id)
+          .then(setMarketComparison)
+          .catch(() => setMarketComparison(null));
       } catch {
         setSaveMessage("AI 점검 중 오류가 발생했습니다.");
       }
@@ -332,6 +340,14 @@ export function ResumeEditor({
               )}
             </CardContent>
           </Card>
+        )}
+
+        {reviewResult && marketComparison && (
+          <MarketComparisonCard
+            key={marketComparison.analysisId ?? "no-analysis"}
+            view={marketComparison}
+            source="resume_review"
+          />
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="lg:hidden">
