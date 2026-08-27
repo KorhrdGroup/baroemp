@@ -21,9 +21,7 @@ export function HeroSection() {
        */}
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:py-24">
         <div className="text-center lg:text-left">
-          <p className="text-body-2 font-semibold text-brand-blue-600">
-            중장년의 새로운 시작, 한평생 함께합니다
-          </p>
+          <p className="text-body-2 font-semibold text-brand-blue-600">중장년 취업지원 서비스</p>
           {/*
             leading 은 이 제목에만 예외로 둔다. 타이포 토큰의 기본 행간은 1.2 라
             두 줄짜리 배너 제목에서는 위아래가 붙어 보인다.

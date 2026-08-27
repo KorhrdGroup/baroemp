@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { cardShadowClass, interactiveCardClass, outlinedCardClass } from "@/lib/ui-classes";
+import { cardBorderClass, cardShadowClass } from "@/lib/ui-classes";
 import { Badge } from "@/components/ui/badge";
 import { coreServices } from "./core-services.data";
 import { cn } from "@/lib/utils";
@@ -18,19 +18,13 @@ export function CoreServicesSection() {
         {coreServices.map((service) => {
           const Icon = service.icon;
           return (
-            <Link
+            <div
               key={service.id}
-              href={service.href}
-              className={cn(
-                "group flex flex-col gap-4 rounded-xl bg-white p-5",
-                outlinedCardClass,
-                cardShadowClass,
-                interactiveCardClass,
-              )}
+              className={cn("flex flex-col gap-4 rounded-xl bg-white p-5", cardBorderClass, cardShadowClass)}
             >
               {/* 아이콘을 왼쪽에 두고 이름·설명을 오른쪽에 쌓는다. */}
               <div className="flex items-start gap-3">
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-blue-400 text-white transition-colors group-hover:bg-brand-blue-600">
+                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-blue-400 text-white">
                   <Icon className="size-6" strokeWidth={1.8} />
                 </span>
                 <div className="min-w-0">
@@ -53,15 +47,17 @@ export function CoreServicesSection() {
               </div>
 
               {/*
-                카드 전체가 Link라 안쪽은 버튼이 아니라 버튼처럼 보이는 span이다.
-                (a 안에 a/button 을 중첩하면 마크업이 깨진다)
+                이동은 이 줄에서만 일어난다. 카드 전체를 링크로 두면 어디를 눌러야 하는지 흐려진다.
                 mt-auto 로 카드 높이가 달라도 바로가기 줄은 아래에 맞춰 정렬한다.
               */}
-              <span className="mt-auto flex h-10 items-center justify-center gap-1 rounded-lg border border-border text-label-1 font-semibold text-brand-blue-700 transition-colors group-hover:border-brand-blue-300 group-hover:bg-brand-blue-50">
+              <Link
+                href={service.href}
+                className="mt-auto flex h-10 items-center justify-center gap-1 rounded-lg border border-border text-label-1 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
+              >
                 바로가기
                 <ChevronRight className="size-4" />
-              </span>
-            </Link>
+              </Link>
+            </div>
           );
         })}
       </div>
