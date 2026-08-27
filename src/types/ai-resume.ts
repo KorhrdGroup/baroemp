@@ -59,11 +59,15 @@ export interface AIResumeReviewInput {
   skills: string[];
   targetJobTitle?: string;
   targetJobDescription?: string;
+  /** 선택한 AI 에이전트(ResumeTemplate.code). Provider가 첨삭 기준·톤을 바꾸는 데 쓴다. */
+  agentStyle?: string;
 }
 
 export interface AISectionRewriteInput {
   sectionLabel: string;
   originalText: string;
+  /** 선택한 AI 에이전트(ResumeTemplate.code). */
+  agentStyle?: string;
 }
 
 export interface AICareerSummaryInput {
@@ -72,6 +76,8 @@ export interface AICareerSummaryInput {
   skills: string[];
   desiredJobTitle?: string;
   careerYears?: number;
+  /** 선택한 AI 에이전트(ResumeTemplate.code). */
+  agentStyle?: string;
 }
 
 export interface AICoverLetterDraftInput {

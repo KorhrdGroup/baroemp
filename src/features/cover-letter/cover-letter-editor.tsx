@@ -3,7 +3,7 @@
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
+import { AiButton } from "@/components/common/ai-button";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
 import {
@@ -263,25 +264,21 @@ export function CoverLetterEditor({
                   {section.content?.length ?? 0}
                   {section.characterLimit ? ` / ${section.characterLimit}자` : "자"}
                 </span>
-                <div className="flex gap-3">
-                  <button
-                    type="button"
-                    className="flex items-center gap-1 font-medium text-brand-blue-600 hover:underline disabled:opacity-50"
+                <div className="flex gap-2">
+                  <AiButton
+                    size="xs"
                     onClick={() => handleGenerateDraft(section)}
-                    disabled={busyKey === section._key}
+                    loading={busyKey === section._key}
                   >
-                    {busyKey === section._key ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
                     AI 초안 생성
-                  </button>
-                  <button
-                    type="button"
-                    className="flex items-center gap-1 font-medium text-brand-blue-600 hover:underline disabled:opacity-50"
+                  </AiButton>
+                  <AiButton
+                    size="xs"
                     onClick={() => handleReviewSection(section)}
-                    disabled={busyKey === `review-${section._key}`}
+                    loading={busyKey === `review-${section._key}`}
                   >
-                    {busyKey === `review-${section._key}` ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
                     AI 점검
-                  </button>
+                  </AiButton>
                 </div>
               </div>
 

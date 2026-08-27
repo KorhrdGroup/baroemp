@@ -38,6 +38,7 @@ export async function reviewResumeWithAI(resumeId: string): Promise<AIResumeRevi
     skills: detail.skills.map((s) => s.name),
     targetJobTitle: job?.title ?? detail.resume.desiredJobTitle,
     targetJobDescription: job?.description,
+    agentStyle: detail.template?.code,
   });
 
   await logActivityEvent({
@@ -62,6 +63,7 @@ export async function rewriteResumeSectionWithAI(params: {
   const result = await getAIResumeProvider().rewriteResumeSection({
     sectionLabel: params.sectionLabel,
     originalText: params.originalText,
+    agentStyle: detail.template?.code,
   });
 
   await logActivityEvent({
@@ -84,6 +86,7 @@ export async function generateCareerSummaryWithAI(resumeId: string): Promise<AIC
     qualifications: detail.qualifications.map((q) => q.name),
     skills: detail.skills.map((s) => s.name),
     desiredJobTitle: detail.resume.desiredJobTitle,
+    agentStyle: detail.template?.code,
   });
 }
 

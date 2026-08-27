@@ -28,6 +28,22 @@ function trimText(text: string | undefined): string {
   return (text ?? "").trim();
 }
 
+/**
+ * 에이전트(ResumeTemplate.code)별 첨삭 관점. 실제 LLM Provider로 교체할 때는
+ * 이 관점을 System Prompt에 넣어 에이전트마다 점검 기준·톤이 달라지게 한다.
+ */
+const AGENT_REVIEW_FOCUS: Record<string, string> = {
+  EXPERIENCED: "경력직 기준: 담당업무보다 성과(무엇이 좋아졌는지)가 먼저 읽히도록 문장 순서를 조정해보세요.",
+  MIDLIFE: "중장년 재취업 기준: 오래 근무한 이력과 꾸준함이 드러나는 문장을 앞쪽에 배치해보세요.",
+  CARE_WELFARE: "돌봄 직무 기준: 요양보호사·사회복지사 등 자격과 현장 경험이 상단에서 바로 보이게 배치해보세요.",
+};
+
+const AGENT_SUMMARY_TONE: Record<string, string> = {
+  EXPERIENCED: "성과로 기여할 준비가 된 경력직 지원자",
+  MIDLIFE: "축적된 경력으로 꾸준히 오래 일할 준비가 된 지원자",
+  CARE_WELFARE: "현장에서 신뢰받는 돌봄 직무 지원자",
+};
+
 export function createMockAIResumeProvider(): AIResumeProvider {
   return {
     async reviewResume(input: AIResumeReviewInput): Promise<AIResumeReviewResult> {
@@ -92,6 +108,11 @@ export function createMockAIResumeProvider(): AIResumeProvider {
           severity: "info",
           comment: "활용 가능한 스킬(엑셀, 상담, 운전 등)을 추가하면 직무 적합성을 더 잘 보여줄 수 있습니다.",
         });
+      }
+
+      const agentFocus = input.agentStyle ? AGENT_REVIEW_FOCUS[input.agentStyle] : undefined;
+      if (agentFocus) {
+        improvements.push({ section: "SUMMARY", severity: "suggestion", comment: agentFocus });
       }
 
       let jobFitComment: string | undefined;
@@ -162,7 +183,10 @@ export function createMockAIResumeProvider(): AIResumeProvider {
         basedOn.push("보유 자격");
       }
 
-      const target = input.desiredJobTitle ? `${input.desiredJobTitle}을 준비하는 지원자` : "새로운 도전을 준비하는 지원자";
+      const agentTone = input.agentStyle ? AGENT_SUMMARY_TONE[input.agentStyle] : undefined;
+      const target = input.desiredJobTitle
+        ? `${input.desiredJobTitle}${agentTone ? `에서 ${agentTone}` : "을 준비하는 지원자"}`
+        : (agentTone ?? "새로운 도전을 준비하는 지원자");
 
       const summary = parts.length > 0 ? `${parts.join(", ")}. ${target}입니다.` : `${target}입니다.`;
 

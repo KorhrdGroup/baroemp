@@ -3,14 +3,15 @@
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, PanelRightClose, PanelRightOpen, Plus, Printer, Sparkles, Target, Trash2 } from "lucide-react";
+import { Loader2, PanelRightClose, PanelRightOpen, Plus, Printer, Target, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
+import { ResumeAgentPicker, type ResumeAgentOption } from "./resume-agent-picker";
+import { AiButton } from "@/components/common/ai-button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -81,12 +82,9 @@ const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
 export function ResumeEditor({
   initialDetail,
   templates = [],
-  isNew = false,
 }: {
   initialDetail: ResumeDetail;
-  templates?: TemplateOption[];
-  /** 방금 만든 이력서인지. 그렇다면 양식 선택기를 펼친 채로 연다. */
-  isNew?: boolean;
+  templates?: ResumeAgentOption[];
 }) {
   const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
@@ -100,7 +98,7 @@ export function ResumeEditor({
   const [isChangingTemplate, startTemplateChange] = useTransition();
 
   /**
-   * 이력서에서 양식은 어떤 섹션을 노출할지만 결정하고 입력값은 그대로 남는다.
+   * 에이전트(=템플릿)는 노출 섹션과 AI 점검·생성 기준만 결정하고 입력값은 그대로 남는다.
    * 확인 없이 바로 바꿔도 잃는 데이터가 없다.
    */
   function handleTemplateChange(templateId: string) {
@@ -256,14 +254,11 @@ export function ResumeEditor({
     // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
     <div className="space-y-6">
       <div className="print:hidden">
-        <TemplateCardPicker
-          label="이력서 양식"
-          templates={templates}
+        <ResumeAgentPicker
+          agents={templates}
           value={resume.templateId ?? undefined}
           onChange={handleTemplateChange}
           pending={isChangingTemplate}
-          gridClassName="sm:grid-cols-2 lg:grid-cols-4"
-          defaultOpen={isNew}
         />
       </div>
 
@@ -290,10 +285,9 @@ export function ResumeEditor({
             <Badge variant="outline" className="rounded-full">
               완성도 {detail.resume.completeness}%
             </Badge>
-            <Button variant="outline" size="sm" onClick={handleReview} disabled={isReviewing}>
-              {isReviewing ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-              AI 이력서 점검
-            </Button>
+            <AiButton onClick={handleReview} loading={isReviewing}>
+              AI 점검
+            </AiButton>
           </div>
         </div>
 
@@ -399,10 +393,9 @@ export function ResumeEditor({
             <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개</CardTitle>
-                <Button variant="outline" size="sm" onClick={handleGenerateSummary} disabled={isGeneratingSummary}>
-                  {isGeneratingSummary ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-                  AI로 생성
-                </Button>
+                <AiButton onClick={handleGenerateSummary} loading={isGeneratingSummary}>
+                  AI 생성
+                </AiButton>
               </CardHeader>
               <CardContent>
                 <Textarea
@@ -482,7 +475,14 @@ export function ResumeEditor({
                         onChange={(e) => updateAt(setExperiences, exp._key, { responsibilities: e.target.value })}
                         rows={2}
                       />
-                      <RewriteButton onClick={() => openRewrite(exp._key, "responsibilities", exp.responsibilities ?? "")} disabled={isRewriting} />
+                      <AiButton
+                        size="xs"
+                        className="mt-1"
+                        onClick={() => openRewrite(exp._key, "responsibilities", exp.responsibilities ?? "")}
+                        loading={isRewriting}
+                      >
+                        AI 다듬기
+                      </AiButton>
                     </Field>
                     <Field label="기억나는 성과가 있나요? (숫자가 없어도 괜찮습니다)">
                       <Textarea
@@ -490,7 +490,14 @@ export function ResumeEditor({
                         onChange={(e) => updateAt(setExperiences, exp._key, { achievements: e.target.value })}
                         rows={2}
                       />
-                      <RewriteButton onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")} disabled={isRewriting} />
+                      <AiButton
+                        size="xs"
+                        className="mt-1"
+                        onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")}
+                        loading={isRewriting}
+                      >
+                        AI 다듬기
+                      </AiButton>
                     </Field>
                     {rewriteTarget?.key === exp._key && (
                       <div className="rounded-lg bg-white p-3 text-label-1 ring-1 ring-brand-blue-200">
@@ -803,20 +810,6 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <Label className="text-label-2 text-slate-500">{label}</Label>
       {children}
     </div>
-  );
-}
-
-function RewriteButton({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="mt-1 flex items-center gap-1 text-label-2 font-medium text-brand-blue-600 hover:underline disabled:opacity-50"
-    >
-      {disabled ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
-      AI로 다듬기
-    </button>
   );
 }
 
