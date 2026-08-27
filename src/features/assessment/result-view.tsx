@@ -68,8 +68,8 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
 
       {contentRecs.length > 0 && (
         <div className="rounded-xl bg-white p-6 sm:p-8">
-          <h2 className="text-body-1 font-bold text-slate-900">이 결과를 바탕으로 도움이 될 콘텐츠</h2>
-          <p className="mt-1 text-label-1 text-slate-400">회원님의 Career Profile을 기반으로 추천된 콘텐츠입니다.</p>
+          <h2 className="text-body-1 font-bold text-slate-900">도움이 되는 자격 취득 과정</h2>
+          <p className="mt-1 text-label-1 text-slate-400">검사 결과와 회원님의 조건을 기준으로 추천된 자격 과정입니다.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {contentRecs.map((content) => (
               <TrackedLink

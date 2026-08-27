@@ -239,7 +239,17 @@ export async function loadAssessmentForSession(session: AssessmentSession): Prom
 
 /** 결과 화면에서 사용하는 일반 콘텐츠 추천 (특정 직업에 종속되지 않은 Top 콘텐츠). */
 export async function getContentRecommendationsForResult(result: AssessmentResult, limit = 5): Promise<CareerContent[]> {
-  const contents = await listContents({ status: "published" });
+  const published = await listContents({ status: "published" });
+  /*
+   * 검사 결과 화면에서는 자격 취득 과정만 추천한다.
+   *
+   * 콘텐츠 상세 화면이 없어서 카드를 누르면 타입에 따라 /support, /consulting, /resume 중
+   * 한 곳으로만 떨어진다. 검사·컨설팅·이력서 같은 항목은 결과 화면에 이미 제 자리의 버튼이
+   * 있으므로 여기서 또 권할 이유가 없고, 강의·교육 과정은 갈 안내 화면이 없다.
+   * 남는 건 "부족한 조건을 자격으로 메운다"는 이 화면의 흐름과 맞는 자격 과정뿐이다.
+   */
+  const CERTIFICATE_TYPES = new Set(["LICENSE", "PRIVATE_CERTIFICATE"]);
+  const contents = published.filter((c) => CERTIFICATE_TYPES.has(c.type));
   const pseudoProfile: CareerProfile = {
     id: "assessment-result-temp",
     userId: result.userId ?? result.anonymousId ?? "anonymous",
