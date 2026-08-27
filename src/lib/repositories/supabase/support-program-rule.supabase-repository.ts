@@ -36,13 +36,19 @@ export function createSupabaseSupportProgramRuleRepository(): SupportProgramRule
     },
     async findByProgramIds(supportProgramIds) {
       if (supportProgramIds.length === 0) return [];
-      const result = await client
-        .from("support_program_rules")
-        .select("*")
-        .in("support_program_id", supportProgramIds)
-        .eq("status", "active");
-      const rows = unwrapList("SupportProgramRuleRepository.findByProgramIds", result);
-      return rows.map((row) => mapRow(row as Record<string, unknown>));
+      const BATCH = 50;
+      const allRows: SupportProgramRule[] = [];
+      for (let i = 0; i < supportProgramIds.length; i += BATCH) {
+        const batch = supportProgramIds.slice(i, i + BATCH);
+        const result = await client
+          .from("support_program_rules")
+          .select("*")
+          .in("support_program_id", batch)
+          .eq("status", "active");
+        const rows = unwrapList("SupportProgramRuleRepository.findByProgramIds", result);
+        allRows.push(...rows.map((row) => mapRow(row as Record<string, unknown>)));
+      }
+      return allRows;
     },
     async replaceForProgram(supportProgramId, rules) {
       const { error: deleteError } = await client
