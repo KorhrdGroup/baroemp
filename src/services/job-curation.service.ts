@@ -73,8 +73,14 @@ async function getCommonTab(kind: "new" | "closing_soon"): Promise<{ state: "REA
   }
 
   const repo = getJobRepository();
-  const result = await repo.search({ activeOnly: true, page: 1, pageSize: 200, sort: "latest" });
   const now = Date.now();
+
+  let result;
+  if (kind === "new") {
+    result = await repo.search({ activeOnly: true, page: 1, pageSize: 200, sort: "latest" });
+  } else {
+    result = await repo.search({ activeOnly: true, closingWithinDays: CLOSING_WITHIN_DAYS, sort: "deadline", page: 1, pageSize: TAB_LIMIT });
+  }
 
   let jobs: Job[];
   if (kind === "new") {
@@ -83,14 +89,7 @@ async function getCommonTab(kind: "new" | "closing_soon"): Promise<{ state: "REA
       .filter((j) => j.postedAt && new Date(j.postedAt).getTime() >= cutoff)
       .sort((a, b) => ((a.postedAt ?? "") < (b.postedAt ?? "") ? 1 : -1));
   } else {
-    const max = now + CLOSING_WITHIN_DAYS * 24 * 60 * 60 * 1000;
-    jobs = result.items
-      .filter((j) => {
-        if (!j.applyDeadline) return false;
-        const t = new Date(j.applyDeadline).getTime();
-        return t >= now && t <= max;
-      })
-      .sort((a, b) => ((a.applyDeadline ?? "") > (b.applyDeadline ?? "") ? 1 : -1));
+    jobs = result.items;
   }
 
   const items = jobs.slice(0, TAB_LIMIT).map((job) => ({ job }));
@@ -112,13 +111,19 @@ async function getReadyToApplyTab(userId: string) {
   if (!profile) return { state: "NEEDS_PROFILE" as const, items: [] };
 
   const top = scoreCandidates(profile, await getCandidateJobsForUser(userId)).slice(0, READY_CHECK_LIMIT);
+
+  // 상위 50건에 대해 모든 비교를 병렬 실행
+  const comparisons = await Promise.all(
+    top.map((item) => compareUserToJobRequirements(userId, item.job))
+  );
+
+  // 결과에서 blocked 아닌 것을 순서대로 골라 TAB_LIMIT개 추출
   const items: JobCurationItem[] = [];
-  for (const item of top) {
-    const comparison = await compareUserToJobRequirements(userId, item.job);
-    const blocked = comparison.some((c) => c.jobLevel === "REQUIRED" && c.userStatus === "NOT_SATISFIED");
-    if (!blocked) items.push(item);
-    if (items.length >= TAB_LIMIT) break;
+  for (let i = 0; i < top.length && items.length < TAB_LIMIT; i++) {
+    const blocked = comparisons[i].some((c) => c.jobLevel === "REQUIRED" && c.userStatus === "NOT_SATISFIED");
+    if (!blocked) items.push(top[i]);
   }
+
   return { state: items.length > 0 ? ("READY" as const) : ("EMPTY" as const), items };
 }
 
