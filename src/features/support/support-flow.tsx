@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Clock, Coins, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
@@ -92,19 +93,19 @@ const GROUPS: { key: GroupKey; label: string }[] = [
 
 const STEPS: StepConfig[] = [
   { id: "birthYear", group: "basic", title: "출생연도를 알려주세요", description: "연령 조건이 있는 제도를 정확히 찾아드리기 위해 필요해요.", required: true },
-  { id: "region", group: "basic", title: "거주지역이 어디신가요?", required: true },
+  { id: "region", group: "basic", title: "거주지역이 어디인가요?", required: true },
   {
     id: "householdTraits",
     group: "basic",
-    title: "해당되는 항목이 있다면 선택해주세요",
-    description: "우선지원 대상 제도를 안내하는 데만 사용돼요. (선택사항)",
-    required: false,
+    title: "해당되는 항목이 있나요?",
+    description: "우선지원 대상 제도를 안내하는 데만 사용돼요. 여러 개를 고를 수 있어요.",
+    required: true,
   },
-  { id: "employmentStatus", group: "status", title: "현재 취업상태를 선택해주세요", required: true },
+  { id: "employmentStatus", group: "status", title: "현재 취업 상태는 어떤가요?", required: true },
   {
     id: "employmentInsuranceHistory",
     group: "status",
-    title: "최근 3년 안에 직장(고용보험 가입)을 다닌 적이 있으신가요?",
+    title: "최근 3년 안에 고용보험에 가입된 적이 있나요?",
     description: "실업급여·국민취업지원제도 등 받을 수 있는 제도 유형이 달라져요.",
     required: true,
   },
@@ -115,21 +116,21 @@ const STEPS: StepConfig[] = [
     description: "정확하지 않아도 괜찮아요. 소득 조건이 있는 제도는 \"확인 필요\"로 안내해 드려요.",
     required: true,
   },
-  { id: "desiredStartTiming", group: "status", title: "취업 희망시기는 언제인가요?", required: true },
-  { id: "careerBreak", group: "status", title: "경력단절 기간이 있으신가요?", required: true },
+  { id: "desiredStartTiming", group: "status", title: "취업 희망 시기는 언제인가요?", required: true },
+  { id: "careerBreak", group: "status", title: "경력단절 기간이 있나요?", required: true },
   {
     id: "trainingWillingness",
     group: "intent",
-    title: "직업훈련·교육 과정에 참여할 의향이 있으신가요?",
-    description: "1(전혀 없음) ~ 5(매우 높음)",
+    title: "직업훈련·교육에 참여할 의향이 있나요?",
+    description: "훈련 지원 제도를 안내하는 데 활용돼요.",
     required: true,
   },
   {
     id: "openToGovSupport",
     group: "intent",
-    title: "정부·지자체 지원제도를 적극적으로 활용할 의향이 있으신가요?",
+    title: "정부·지자체 지원제도를 활용할 의향이 있나요?",
     description: "참고용 정보로만 활용되며 매칭 점수에는 직접 반영되지 않아요.",
-    required: false,
+    required: true,
   },
 ];
 
@@ -140,6 +141,11 @@ function isStepFilled(step: StepConfig, answers: SupportAssessmentAnswers): bool
       return Boolean(answers.birthYear);
     case "region":
       return Boolean(answers.region);
+    case "householdTraits":
+      // 해당 항목이 없는 사람은 "해당사항 없어요"(["none"])로 답한다.
+      return (answers.householdTraits?.length ?? 0) > 0;
+    case "openToGovSupport":
+      return answers.openToGovSupport !== undefined;
     case "employmentStatus":
       return Boolean(answers.employmentStatus);
     case "employmentInsuranceHistory":
@@ -161,23 +167,27 @@ function ChipButton({
   selected,
   onClick,
   indicator = "none",
+  disabled = false,
   children,
 }: {
   selected: boolean;
   onClick: () => void;
   indicator?: "none" | "radio" | "check";
+  disabled?: boolean;
   children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
       className={cn(
         "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
         indicator === "none" ? "px-4" : "px-11",
         selected
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
           : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+        disabled && "pointer-events-none opacity-40",
       )}
     >
       {indicator === "radio" && (
@@ -220,21 +230,24 @@ function StepBody({
       const years = Array.from({ length: thisYear - 18 - 1945 + 1 }, (_, i) => thisYear - 18 - i);
       return (
         <div className="flex flex-col items-center gap-3">
-          <select
-            value={answers.birthYear ?? ""}
-            onChange={(e) => {
-              const birthYear = e.target.value === "" ? undefined : Number(e.target.value);
-              onChange({ birthYear, ageGroup: birthYear ? birthYearToAgeGroup(birthYear, thisYear) : undefined });
+          <Select
+            value={answers.birthYear ? String(answers.birthYear) : undefined}
+            onValueChange={(v) => {
+              const birthYear = Number(v);
+              onChange({ birthYear, ageGroup: birthYearToAgeGroup(birthYear, thisYear) });
             }}
-            className="h-14 w-56 rounded-xl border border-border bg-white px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
           >
-            <option value="">연도 선택</option>
-            {years.map((y) => (
-              <option key={y} value={y}>
-                {y}년생
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="h-14 w-56 rounded-xl border-border bg-white px-4 text-body-1 font-semibold text-slate-800">
+              <SelectValue placeholder="연도 선택" />
+            </SelectTrigger>
+            <SelectContent>
+              {years.map((y) => (
+                <SelectItem key={y} value={String(y)}>
+                  {y}년생
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {answers.birthYear && (
             <p className="text-label-1 text-slate-500">
               만 {new Date().getFullYear() - answers.birthYear}세 기준으로 연령 조건을 확인해 드려요.
@@ -288,6 +301,7 @@ function StepBody({
       );
     case "householdTraits": {
       const current = answers.householdTraits ?? [];
+      const noneSelected = current.length === 1 && current[0] === "none";
       const toggle = (code: string) =>
         onChange({
           householdTraits: current.includes(code) ? current.filter((c) => c !== code) : [...current.filter((c) => c !== "none"), code],
@@ -302,17 +316,35 @@ function StepBody({
               ["veteran", "국가유공자·보훈 대상이에요"],
             ] as const
           ).map(([code, label]) => (
-            <ChipButton indicator="check" key={code} selected={current.includes(code)} onClick={() => toggle(code)}>
+            <ChipButton
+              indicator="check"
+              key={code}
+              disabled={noneSelected}
+              selected={current.includes(code)}
+              onClick={() => toggle(code)}
+            >
               {label}
             </ChipButton>
           ))}
-          <ChipButton
-            indicator="radio"
-            selected={current.length === 1 && current[0] === "none"}
-            onClick={() => onChange({ householdTraits: ["none"] })}
+          {/* 위 항목들과 성격이 다른 배타 선택지라 박스 밖으로 분리하되, 라디오 표시는 남긴다. */}
+          <button
+            type="button"
+            onClick={() => onChange({ householdTraits: noneSelected ? [] : ["none"] })}
+            className={cn(
+              "mt-2 flex items-center justify-center gap-2 self-center rounded-lg px-3 py-2 text-body-2 font-medium transition-colors",
+              noneSelected ? "text-brand-blue-700" : "text-slate-500 hover:text-slate-700",
+            )}
           >
+            <span
+              className={cn(
+                "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                noneSelected ? "border-brand-blue-400" : "border-slate-300",
+              )}
+            >
+              {noneSelected && <span className="size-2.5 rounded-full bg-brand-blue-400" />}
+            </span>
             해당사항 없어요
-          </ChipButton>
+          </button>
         </div>
       );
     }
@@ -679,10 +711,7 @@ export function SupportFlow({
         <p className="text-center text-body-2 font-bold text-slate-900">
           {posInGroup + 1}/{groupSteps.length}
         </p>
-        <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">
-          {step.title}
-          {!step.required && <span className="ml-1 text-body-2 font-medium text-slate-400">(선택)</span>}
-        </h2>
+        <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">{step.title}</h2>
         {step.description && (
           <p className="mt-3 text-center text-body-2-reading text-slate-500">{step.description}</p>
         )}

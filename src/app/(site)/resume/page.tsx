@@ -8,6 +8,7 @@ import { listResumesForUser } from "@/services/resume.service";
 import { listCoverLettersForUser } from "@/services/cover-letter.service";
 import { listExperienceBankForUser } from "@/services/experience-bank.service";
 import { ExperienceBankSection } from "@/features/experience-bank/experience-bank-section";
+import { ResumeDeleteButton } from "@/features/resume/resume-delete-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -103,6 +104,7 @@ export default async function ResumeListPage() {
                 <div className="flex items-center gap-2">
                   <span className="text-label-1 font-bold text-brand-blue-600">완성도 {resume.completeness}%</span>
                   <Pencil className="size-4 text-slate-400" />
+                  <ResumeDeleteButton resumeId={resume.id} />
                 </div>
               </Link>
             ))}

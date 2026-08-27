@@ -13,7 +13,6 @@ import {
   XCircle,
   type LucideIcon,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { labelEmploymentStatus, labelRegion } from "@/lib/labels";
 import { SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
@@ -92,107 +91,95 @@ export function SupportDetailView({
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
 }) {
+  const orgName = program.organizationName ?? program.organization;
+  const logo = ORG_LOGO[orgName];
+
   return (
+    <div className="min-h-screen bg-slate-50">
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <SupportViewTracker supportProgramId={program.id} matchScore={match?.score} eligibilityGrade={match?.grade} />
 
-      <div className="mb-4 -ml-2">
+      <div className="mb-6 -ml-2">
         <BackButton fallbackHref="/support" label="목록으로 돌아가기" />
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-          {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
-        </Badge>
-        {match && (
-          <span className={cn("rounded-full px-3 py-1.5 text-label-1 font-bold", GRADE_BADGE_CLASS[match.grade])}>
-            {SUPPORT_ELIGIBILITY_GRADE_LABELS[match.grade]}
-            <span className="ml-1 font-medium opacity-70">{match.score}점</span>
+      {/* ── 헤더: 배지 + 제목 + 기관 ── */}
+      <header>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="rounded-full bg-slate-100 px-3 py-1.5 text-label-1 font-semibold text-slate-600">
+            {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
           </span>
-        )}
-        {program.externalSource && program.externalSource !== "mock" && (
-          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-            출처 · {program.externalSource}
-          </Badge>
-        )}
-      </div>
-
-      <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">{program.title}</h1>
-      {(() => {
-        const orgName = program.organizationName ?? program.organization;
-        const logo = ORG_LOGO[orgName];
-        return (
-          <div className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
-            {logo ? (
-              <Image src={logo.src} alt={orgName} width={logo.w} height={logo.h} className="h-6 w-auto object-contain" />
-            ) : (
-              <>
-                <Building2 className="size-4" />
-                {orgName}
-              </>
-            )}
-            {program.departmentName && <span className="text-slate-400">· {program.departmentName}</span>}
-          </div>
-        );
-      })()}
-
-      <div className="mt-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-white p-6 sm:grid-cols-2">
-        <InfoRow icon={Users} label="지원대상" value={targetSummary(program)} />
-        <InfoRow
-          icon={MapPin}
-          label="지역"
-          value={
-            program.regionScope === "national" || !program.regionScope
-              ? "전국"
-              : labelRegion(program.regionScope as Region)
-          }
-        />
-        <InfoRow icon={Coins} label="지원내용" value={benefitSummary(program)} />
-        <InfoRow icon={Calendar} label="신청기간" value={program.applicationPeriod ?? "상시"} />
-        <InfoRow icon={FileText} label="신청방법" value={program.applicationMethod} />
-        <InfoRow icon={Phone} label="문의처" value={program.contact} />
-      </div>
-
-      {program.requiredDocuments && program.requiredDocuments.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {program.requiredDocuments.map((doc) => (
-            <span key={doc} className="rounded-full bg-slate-100 px-3 py-1 text-label-1 font-medium text-slate-600">
-              {doc}
+          {match && (
+            <span className={cn("rounded-full px-3 py-1.5 text-label-1 font-bold", GRADE_BADGE_CLASS[match.grade])}>
+              {SUPPORT_ELIGIBILITY_GRADE_LABELS[match.grade]}
+              <span className="ml-1 font-medium opacity-70">{match.score}점</span>
             </span>
-          ))}
+          )}
         </div>
-      )}
 
-      <div className="mt-8">
-        <h2 className="text-body-1 font-bold text-slate-900">사업 상세</h2>
-        {program.description && (
-          <div className="mt-3">
-            <SupportLongText text={program.description} className="text-body-2-reading text-slate-600" />
-          </div>
-        )}
-        {program.eligibilityRaw && (
-          <div className="mt-3">
-            <SupportLongText
-              text={`지원대상 원문: ${program.eligibilityRaw}`}
-              className="text-label-1 text-slate-500"
-            />
+        <h1 className="mt-3 text-title-2 font-bold text-slate-900 sm:text-headline-3">{program.title}</h1>
+
+        <div className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
+          {logo ? (
+            <Image src={logo.src} alt={orgName} width={logo.w} height={logo.h} className="h-6 w-auto object-contain" />
+          ) : (
+            <>
+              <Building2 className="size-4" />
+              {orgName}
+            </>
+          )}
+          {program.departmentName && <span className="text-slate-400">· {program.departmentName}</span>}
+        </div>
+      </header>
+
+      {/* ── 주요 정보 카드 ── */}
+      <div className="mt-8 rounded-xl bg-white">
+        <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
+          <InfoRow icon={Users} label="지원대상" value={targetSummary(program)} />
+          <InfoRow
+            icon={MapPin}
+            label="지역"
+            value={
+              program.regionScope === "national" || !program.regionScope
+                ? "전국"
+                : labelRegion(program.regionScope as Region)
+            }
+          />
+          <InfoRow icon={Coins} label="지원내용" value={benefitSummary(program)} />
+          <InfoRow icon={Calendar} label="신청기간" value={program.applicationPeriod ?? "상시"} />
+          <InfoRow icon={FileText} label="신청방법" value={program.applicationMethod} />
+          <InfoRow icon={Phone} label="문의처" value={program.contact} />
+        </div>
+
+        {program.requiredDocuments && program.requiredDocuments.length > 0 && (
+          <div className="border-t border-slate-100 px-6 py-4">
+            <p className="mb-2 text-label-2 font-semibold text-slate-400">필요서류</p>
+            <div className="flex flex-wrap gap-2">
+              {program.requiredDocuments.map((doc) => (
+                <span key={doc} className="rounded-full bg-slate-100 px-3 py-1 text-label-1 font-medium text-slate-600">
+                  {doc}
+                </span>
+              ))}
+            </div>
           </div>
         )}
       </div>
 
+      {/* ── 내 조건과 비교 ── */}
       {match ? (
-        <div className="mt-8 rounded-xl border border-border bg-white p-6">
+        <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">내 조건과 비교</h2>
           <p className="mt-1 text-label-1 text-slate-400">
-            입력하신 조건을 기준으로 한 참고 정보이며, 최종 신청 가능 여부는 운영기관에서 확인해야 합니다.
+            입력하신 조건 기준의 참고 정보이며, 최종 신청 가능 여부는 운영기관에서 확인해야 합니다.
           </p>
-          <div className="mt-4 space-y-4">
+
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
             {match.matchedConditions.length > 0 && (
-              <div>
+              <div className="rounded-lg bg-emerald-50/60 p-4">
                 <p className="flex items-center gap-1.5 text-label-1 font-semibold text-emerald-700">
                   <CheckCircle2 className="size-4" /> 충족
                 </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
+                <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
                   {match.matchedConditions.map((f) => (
                     <li key={f}>· {f}</li>
                   ))}
@@ -200,11 +187,11 @@ export function SupportDetailView({
               </div>
             )}
             {match.checkRequiredConditions.length > 0 && (
-              <div>
+              <div className="rounded-lg bg-orange-50/60 p-4">
                 <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
                   <HelpCircle className="size-4" /> 확인 필요
                 </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
+                <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
                   {match.checkRequiredConditions.map((f) => (
                     <li key={f}>· {f}</li>
                   ))}
@@ -212,11 +199,11 @@ export function SupportDetailView({
               </div>
             )}
             {match.missingConditions.length > 0 && (
-              <div>
+              <div className="rounded-lg bg-rose-50/60 p-4">
                 <p className="flex items-center gap-1.5 text-label-1 font-semibold text-rose-600">
                   <XCircle className="size-4" /> 부족
                 </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
+                <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
                   {match.missingConditions.map((f) => (
                     <li key={f}>· {f}</li>
                   ))}
@@ -227,7 +214,7 @@ export function SupportDetailView({
         </div>
       ) : (
         !hasMatchSignal && (
-          <div className="mt-8 rounded-xl border border-dashed border-border bg-brand-blue-50/40 p-6 text-center">
+          <div className="mt-6 rounded-xl bg-brand-blue-50/40 p-6 text-center">
             <p className="text-label-1 text-slate-600">지원금 진단을 받으면 이 제도와 내 조건을 비교해볼 수 있어요.</p>
             <Link
               href="/support"
@@ -239,13 +226,32 @@ export function SupportDetailView({
         )
       )}
 
+      {/* ── 사업 상세 ── */}
+      {(program.description || program.eligibilityRaw) && (
+        <div className="mt-6 rounded-xl bg-white p-6">
+          <h2 className="text-body-1 font-bold text-slate-900">사업 상세</h2>
+          {program.description && (
+            <div className="mt-3">
+              <SupportLongText text={program.description} className="text-body-2-reading text-slate-600" />
+            </div>
+          )}
+          {program.eligibilityRaw && (
+            <div className="mt-4 rounded-lg bg-slate-50 p-4">
+              <p className="mb-1 text-label-2 font-semibold text-slate-400">지원대상 원문</p>
+              <SupportLongText text={program.eligibilityRaw} className="text-label-1 text-slate-500" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 함께 준비할 수 있는 과정 ── */}
       {recommendedContents.length > 0 && (
-        <div className="mt-8 rounded-xl border border-border bg-white p-6">
+        <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">함께 준비할 수 있는 과정</h2>
           <p className="mt-1 text-label-1 text-slate-400">이 지원제도와 관련된 자격/교육 과정이에요.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {recommendedContents.map((content) => (
-              <div key={content.id} className="rounded-xl border border-border p-4">
+              <div key={content.id} className="rounded-xl bg-slate-50 p-4">
                 <p className="text-body-2 font-semibold text-slate-800">{content.title}</p>
                 <p className="mt-1 text-label-1 text-slate-500">{content.summary ?? content.shortDescription}</p>
               </div>
@@ -254,7 +260,18 @@ export function SupportDetailView({
         </div>
       )}
 
-      <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row">
+      {(program.sourceUrl ?? program.applyUrl) && (
+        <p className="mt-10 text-center text-label-2 text-slate-400">
+          이 정보는 {orgName}에서 제공한 내용입니다. 신청 시 공식 페이지로 이동합니다.
+        </p>
+      )}
+
+      <div className="h-24" />
+    </div>
+
+    {/* ── 하단 고정 CTA ── */}
+    <div className="fixed inset-x-0 bottom-0 z-40 bg-white/95 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
+      <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <SupportApplyButton
           supportProgramId={program.id}
           sourceUrl={program.sourceUrl ?? program.applyUrl}
@@ -267,13 +284,7 @@ export function SupportDetailView({
           initialBookmarked={isBookmarked}
         />
       </div>
-
-      {(program.sourceUrl ?? program.applyUrl) && (
-        <p className="mt-3 text-center text-label-2 text-slate-400">
-          이 정보는 {program.organizationName ?? program.organization}에서 제공한 내용입니다. 신청 시 공식 페이지로
-          이동합니다.
-        </p>
-      )}
+    </div>
     </div>
   );
 }

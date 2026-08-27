@@ -64,7 +64,7 @@ export function ResumeAgentPicker({
   const currentView = agentView(current);
 
   return (
-    <div className="rounded-xl bg-white px-4 py-3 ring-1 ring-border">
+    <div className="rounded-xl bg-white px-4 py-3">
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-1 flex shrink-0 items-center gap-1.5 text-label-1 font-semibold text-slate-500">
           <Bot className="size-4 text-brand-blue-600" />

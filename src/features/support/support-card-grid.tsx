@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Briefcase, ChevronDown, GraduationCap, HeartHandshake, Landmark, MapPin } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { ArrowUp, Briefcase, ChevronDown, ChevronUp, GraduationCap, HeartHandshake, Landmark, MapPin } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SupportProgramCard } from "./support-program-card";
@@ -48,12 +48,18 @@ function CollapsibleSection({
   items: ResultItem[];
 }) {
   const [expanded, setExpanded] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
   const Icon = CATEGORY_ICONS[category] ?? Landmark;
   const hasMore = items.length > COLLAPSE_COUNT;
   const visible = expanded ? items : items.slice(0, COLLAPSE_COUNT);
 
+  const handleCollapse = () => {
+    setExpanded(false);
+    sectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
   return (
-    <section>
+    <section ref={sectionRef} className="scroll-mt-20">
       <div className="mb-5 flex items-center gap-2.5">
         <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
           <Icon className="size-4" />
@@ -62,6 +68,16 @@ function CollapsibleSection({
         <span className="rounded-full bg-slate-100 px-2 py-0.5 text-label-2 font-semibold text-slate-500">
           {items.length}
         </span>
+        {expanded && hasMore && (
+          <button
+            type="button"
+            onClick={handleCollapse}
+            className="ml-auto flex cursor-pointer items-center gap-1 rounded-lg px-3 py-1.5 text-label-1 font-semibold text-slate-500"
+          >
+            접기
+            <ChevronUp className="size-4" />
+          </button>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         {visible.map(({ program, matchResult }) => (
@@ -77,14 +93,37 @@ function CollapsibleSection({
       {hasMore && (
         <button
           type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-white py-3 text-label-1 font-semibold text-slate-500 transition-colors hover:bg-slate-50"
+          onClick={() => (expanded ? handleCollapse() : setExpanded(true))}
+          className="mt-3 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-white py-3 text-label-1 font-semibold text-slate-500"
         >
           {expanded ? "접기" : `${items.length - COLLAPSE_COUNT}개 더보기`}
           <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
         </button>
       )}
     </section>
+  );
+}
+
+function ScrollToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setVisible(window.scrollY > 600);
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  if (!visible) return null;
+
+  return (
+    <button
+      type="button"
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      className="fixed bottom-6 right-6 z-40 flex size-12 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_2px_12px_rgba(0,0,0,0.12)] transition-colors hover:bg-slate-50"
+      aria-label="맨 위로"
+    >
+      <ArrowUp className="size-5" />
+    </button>
   );
 }
 
@@ -139,6 +178,8 @@ export function SupportResultSections({
           />
         ))}
       </div>
+
+      <ScrollToTopButton />
     </>
   );
 }
