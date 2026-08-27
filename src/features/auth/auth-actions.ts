@@ -3,6 +3,7 @@
 import { redirect } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { validateSignup } from "./signup-validation";
 import { normalizePhone } from "@/lib/utils/phone";
@@ -15,6 +16,19 @@ export interface AuthFormState {
   error?: string;
   fieldErrors?: Record<string, string>;
   message?: string;
+}
+
+/**
+ * 이메일 미입력 회원의 내부 식별용 합성 이메일.
+ * 실제 메일 발송 대상이 아니며, 전화번호 로그인 시 이 주소로 매핑된다.
+ */
+function syntheticEmailFromPhone(phoneDigits: string): string {
+  return `p${phoneDigits}@member.baroemp.app`;
+}
+
+function extractPhoneDigits(input: string): string | null {
+  const digits = input.replace(/[^0-9]/g, "");
+  return /^01[016789][0-9]{7,8}$/.test(digits) ? digits : null;
 }
 
 async function getOrigin(): Promise<string> {
@@ -106,38 +120,50 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
     redirect(afterSignUp);
   }
 
-  const origin = await getOrigin();
+  // 이메일 인증 없이 즉시 가입시킨다. 이메일 미입력 시 전화번호 기반 합성 이메일로 계정을 식별한다.
+  const admin = createAdminSupabaseClient();
+  if (!admin) {
+    return { error: "회원가입 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요." };
+  }
+  const accountEmail = email || syntheticEmailFromPhone(phone!);
 
-  const { data, error } = await supabase.auth.signUp({
-    email,
+  const { data: created, error } = await admin.auth.admin.createUser({
+    email: accountEmail,
     password,
-    options: {
-      data: {
-        name,
-        phone,
-        marketing_consent: marketingConsent,
-        privacy_consent_at: privacyConsentAt,
-      },
-      emailRedirectTo: `${origin}/auth/confirm?next=${encodeURIComponent(afterSignUp)}`,
+    email_confirm: true,
+    user_metadata: {
+      name,
+      phone,
+      marketing_consent: marketingConsent,
+      privacy_consent_at: privacyConsentAt,
     },
   });
 
   if (error) {
-    if (error.message.toLowerCase().includes("already registered") || error.status === 422) {
-      return { fieldErrors: { email: "이미 가입된 이메일입니다." } };
+    const msg = error.message.toLowerCase();
+    if (msg.includes("already") || error.status === 422) {
+      return email
+        ? { fieldErrors: { email: "이미 가입된 이메일입니다." } }
+        : { fieldErrors: { phone: "이미 가입된 휴대전화번호입니다." } };
     }
     return { error: "회원가입 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요." };
   }
 
-  const user = data.user;
+  const user = created.user;
   if (!user) {
     return { error: "회원가입 처리 중 문제가 발생했습니다. 잠시 후 다시 시도해주세요." };
+  }
+
+  // 세션 쿠키 발급 (방금 만든 계정으로 즉시 로그인)
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email: accountEmail, password });
+  if (signInError) {
+    return { error: "가입은 완료되었지만 자동 로그인에 실패했습니다. 로그인 화면에서 다시 시도해주세요." };
   }
 
   // 트리거(0033 migration)가 profiles 등을 생성하지만, 실패 대비 idempotent 검증을 수행한다.
   await ensureUserProfile({
     userId: user.id,
-    email,
+    email: email || undefined,
     name,
     phone,
     marketingConsent,
@@ -155,25 +181,35 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
     metadata: { hasPhone: Boolean(phone), marketingConsent },
   });
 
-  const hasSession = Boolean(data.session);
-  if (hasSession) {
-    await afterAuthSuccess(user.id);
-    redirect(afterSignUp);
-  }
-
-  return {
-    message: "인증메일을 발송했습니다. 이메일 인증 후 서비스를 이용할 수 있습니다.",
-    emailConfirmationRequired: true,
-  };
+  await afterAuthSuccess(user.id);
+  redirect(afterSignUp);
 }
 
 export async function signInAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
+  const identifier = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
   const next = sanitizeNextPath(String(formData.get("next") ?? ""), "/mypage");
 
-  if (!email || !password) {
-    return { error: "이메일과 비밀번호를 입력해주세요." };
+  if (!identifier || !password) {
+    return { error: "이메일(또는 휴대전화번호)과 비밀번호를 입력해주세요." };
+  }
+
+  // 휴대전화번호로 로그인: 이메일 없이 가입한 회원은 합성 이메일로, 이메일 회원은 프로필에서 이메일을 찾는다.
+  let email = identifier;
+  const phoneDigits = extractPhoneDigits(identifier);
+  if (phoneDigits) {
+    email = syntheticEmailFromPhone(phoneDigits);
+    const admin = createAdminSupabaseClient();
+    if (admin) {
+      const { data: profileRow } = await admin
+        .from("profiles")
+        .select("email")
+        .eq("phone", phoneDigits)
+        .not("email", "is", null)
+        .limit(1)
+        .maybeSingle();
+      if (profileRow?.email) email = String(profileRow.email);
+    }
   }
 
   const supabase = await createServerSupabaseClient();
