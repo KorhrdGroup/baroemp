@@ -19,7 +19,7 @@ export function HeroSection() {
        * 왼쪽은 문구와 검색, 오른쪽은 일러스트.
        * lg 미만에서는 일러스트를 아래로 내리고 문구를 가운데 정렬한다.
        */}
-      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:py-24">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-20 pt-8 sm:px-6 sm:pb-28 sm:pt-12 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:pb-32 lg:pt-14">
         <div className="text-center lg:text-left">
           <p className="text-body-2 font-semibold text-brand-blue-600">중장년 취업지원 서비스</p>
           {/*
