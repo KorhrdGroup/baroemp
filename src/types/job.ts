@@ -164,3 +164,27 @@ export interface JobRoleSummary {
   averageSalaryText: string;
   tags: Tag[];
 }
+
+/** 채용공고 큐레이션 섹션의 탭 종류 (설계: docs/superpowers/specs/2026-08-27-job-curation-section-design.md). */
+export type JobCurationTab = "new" | "closing_soon" | "matched" | "ready_to_apply" | "unlockable";
+
+/**
+ * 큐레이션 탭 상태.
+ * READY: 정상 결과 있음, NEEDS_PROFILE: 커리어 프로필 미입력, NEEDS_ANALYSIS: 자격 분석 미실행, EMPTY: 조건 만족 공고 없음.
+ */
+export type JobCurationState = "READY" | "NEEDS_PROFILE" | "NEEDS_ANALYSIS" | "EMPTY";
+
+/** 큐레이션 탭에 노출되는 개별 공고 항목. matchScore/matchGrade는 개인화 탭에서만, unlockRequirementName은 자격 탭에서만 채워진다. */
+export interface JobCurationItem {
+  job: Job;
+  matchScore?: number;
+  matchGrade?: string;
+  unlockRequirementName?: string;
+}
+
+/** getJobCuration의 반환 타입. */
+export interface JobCurationResult {
+  tab: JobCurationTab;
+  state: JobCurationState;
+  items: JobCurationItem[];
+}
