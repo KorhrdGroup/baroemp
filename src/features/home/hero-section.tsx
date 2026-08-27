@@ -10,8 +10,8 @@ export function HeroSection() {
        * 색을 여러 갈래로 섞으면 위에 얹히는 흰 검색창·일러스트가 배경에 묻힌다.
        */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
-        <div className="absolute inset-0 bg-[linear-gradient(160deg,var(--gov-ice)_0%,var(--gov-sky)_55%,var(--gov-blue)_100%)]" />
-        <div className="absolute -right-32 -top-24 size-[38rem] rounded-full bg-white opacity-40 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(160deg,#FFFFFF_0%,var(--gov-ice)_38%,var(--gov-sky)_100%)]" />
+        <div className="absolute -right-32 -top-24 size-[38rem] rounded-full bg-white opacity-60 blur-3xl" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white" />
       </div>
 
