@@ -200,24 +200,24 @@ export function SocialButtons({ next }: { next?: string }) {
   const q = next ? `?next=${encodeURIComponent(next)}` : "";
   return (
     // OAuth 시작은 서버 라우트로 이동하는 전체 페이지 네비게이션이라 <a>가 맞다.
-    <div className="mt-4 grid grid-cols-2 gap-2">
+    <div className="mt-4 flex flex-col gap-2">
       <a
         href={`/auth/login/naver${q}`}
-        className="flex h-14 items-center justify-center gap-2 rounded-lg bg-[#03C75A] text-[15px] font-bold text-white transition-colors hover:bg-[#02B351]"
+        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[#03C75A] text-[15px] font-bold text-white transition-colors hover:bg-[#02B351]"
       >
         <svg viewBox="0 0 20 20" aria-hidden="true" className="size-3.5" fill="currentColor">
           <path d="M13.5 10.7 6.2 0H0v20h6.5V9.3L13.8 20H20V0h-6.5z" />
         </svg>
-        네이버 로그인
+        네이버 로그인/회원가입
       </a>
       <a
         href={`/auth/login/kakao${q}`}
-        className="flex h-14 items-center justify-center gap-2 rounded-lg bg-[#FEE500] text-[15px] font-bold text-[#191600] transition-colors hover:bg-[#F2DA00]"
+        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[#FEE500] text-[15px] font-bold text-[#191600] transition-colors hover:bg-[#F2DA00]"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
           <path d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7-.2.7-.7 2.6-.8 3-.1.5.2.5.4.4.2-.1 2.7-1.8 3.8-2.6.6.1 1.2.1 1.9.1 5.5 0 10-3.6 10-8s-4.5-8-10-8z" />
         </svg>
-        카카오 로그인
+        카카오 로그인/회원가입
       </a>
     </div>
   );
