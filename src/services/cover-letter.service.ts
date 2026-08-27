@@ -34,7 +34,8 @@ export async function createCoverLetterFromTemplate(params: {
 
   const coverLetter = await getCoverLetterRepository().create({
     userId: params.userId,
-    title: params.title?.trim() || `${template?.name ?? "새"} 자기소개서`,
+    // 제목은 사용자가 직접 입력한다. 공고 등에서 넘어온 제목만 미리 채우고, 그 외에는 비워 둔다.
+    title: params.title?.trim() ?? "",
     templateId: params.templateId,
     resumeId: params.resumeId,
     targetJobId: params.targetJobId,

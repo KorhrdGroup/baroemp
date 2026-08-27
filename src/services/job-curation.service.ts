@@ -1,8 +1,7 @@
-import { findCareerProfileByUserId, getCareerRequirementRepository, getJobRepository } from "@/lib/repositories";
+import { findCareerProfileByUserId, getJobRepository } from "@/lib/repositories";
 import type { CareerProfile, Job, JobCurationItem, JobCurationResult, JobCurationTab, JobSearchFilter } from "@/types";
 import { evaluateJobFit } from "./job-match.service";
 import { compareUserToJobsRequirements } from "./job-requirement-comparison.service";
-import { buildHypotheticalProfile, getCareerGapResult, listCareerGapSummariesForUser } from "./career-gap-engine.service";
 
 const TAB_LIMIT = 8;
 const CANDIDATE_LIMIT = 500;
@@ -131,36 +130,38 @@ async function getReadyToApplyTab(userId: string) {
   return { state: items.length > 0 ? ("READY" as const) : ("EMPTY" as const), items };
 }
 
+/**
+ * "자격 따면 열리는 공고".
+ * 별도의 준비도 분석을 요구하지 않고, 이력서·보유자격·스킬·경험뱅크에서 계산한 요건 충족 상태
+ * (computeUserRequirementStatuses)와 공고 원문 요건만으로 판정한다.
+ * 필수 요건 중 미충족이 "딱 하나"인 공고를 모아, 그 하나로 가장 많은 공고가 열리는 조건을 고른다.
+ */
 async function getUnlockableTab(userId: string) {
   const profile = await findCareerProfileByUserId(userId);
   if (!profile || ((profile.desiredJobCategories ?? []).length === 0 && !profile.region)) {
     return { state: "NEEDS_PROFILE" as const, items: [] };
   }
 
-  const summaries = await listCareerGapSummariesForUser(userId, 1);
-  const latest = summaries[0];
-  if (!latest) return { state: "NEEDS_ANALYSIS" as const, items: [] };
-  const result = await getCareerGapResult(latest.id);
-  const target = result?.topPriorityItem;
-  if (!result || !target) return { state: "NEEDS_ANALYSIS" as const, items: [] };
+  const top = scoreCandidates(profile, await getCandidateJobsForUser(userId)).slice(0, READY_CHECK_LIMIT);
+  const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
 
-  const requirement = await getCareerRequirementRepository().findById(target.requirementId);
-  if (!requirement) return { state: "NEEDS_ANALYSIS" as const, items: [] };
-  const hypothetical = buildHypotheticalProfile(profile, requirement);
-
-  const candidates = await getCandidateJobsForUser(userId);
-  const items: JobCurationItem[] = [];
-  for (const job of candidates) {
-    const before = evaluateJobFit(profile, job);
-    const after = evaluateJobFit(hypothetical, job);
-    if (!after) continue;
-    const beforeGrade = before?.grade ?? "D";
-    if ((after.grade === "A" || after.grade === "B") && beforeGrade !== "A" && beforeGrade !== "B") {
-      items.push({ job, matchScore: after.score, matchGrade: after.grade, unlockRequirementName: target.requirementName });
-      if (items.length >= TAB_LIMIT) break;
-    }
+  // 조건별로 "이 하나만 채우면 지원 가능해지는" 공고를 모은다.
+  const byRequirement = new Map<string, { name: string; items: JobCurationItem[] }>();
+  for (const item of top) {
+    const blockers = (comparisons.get(item.job.id) ?? []).filter(
+      (c) => c.jobLevel === "REQUIRED" && c.userStatus === "NOT_SATISFIED",
+    );
+    if (blockers.length !== 1) continue;
+    const blocker = blockers[0];
+    const entry = byRequirement.get(blocker.requirementId) ?? { name: blocker.requirementName, items: [] };
+    entry.items.push({ ...item, unlockRequirementName: blocker.requirementName });
+    byRequirement.set(blocker.requirementId, entry);
   }
-  return { state: items.length > 0 ? ("READY" as const) : ("EMPTY" as const), items };
+
+  // 가장 많은 공고를 열어주는 조건 하나만 보여준다.
+  const best = [...byRequirement.values()].sort((a, b) => b.items.length - a.items.length)[0];
+  if (!best) return { state: "EMPTY" as const, items: [] };
+  return { state: "READY" as const, items: best.items.slice(0, TAB_LIMIT) };
 }
 
 function scoreCandidates(profile: CareerProfile, jobs: Job[]): JobCurationItem[] {

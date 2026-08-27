@@ -52,7 +52,6 @@ export function JobDetailView({
   isAuthenticated,
   isBookmarked,
   requirementComparison,
-  careerGapOccupationId,
 }: {
   job: Job;
   match: JobMatchDetail | null;
@@ -61,7 +60,6 @@ export function JobDetailView({
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
   requirementComparison?: JobRequirementComparisonItem[];
-  careerGapOccupationId?: string;
 }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
@@ -215,12 +213,6 @@ export function JobDetailView({
               );
             })}
           </div>
-          <Link
-            href={careerGapOccupationId ? `/career-gap?occupation=${careerGapOccupationId}&job=${job.id}` : "/career-gap"}
-            className="mt-4 flex h-11 items-center justify-center gap-2 rounded-md border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
-          >
-            내 취업 준비도 전체보기
-          </Link>
         </div>
       )}
 

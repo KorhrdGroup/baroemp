@@ -170,9 +170,9 @@ export type JobCurationTab = "new" | "closing_soon" | "matched" | "ready_to_appl
 
 /**
  * 큐레이션 탭 상태.
- * READY: 정상 결과 있음, NEEDS_PROFILE: 커리어 프로필 미입력, NEEDS_ANALYSIS: 자격 분석 미실행, EMPTY: 조건 만족 공고 없음.
+ * READY: 정상 결과 있음, NEEDS_PROFILE: 커리어 프로필 미입력, EMPTY: 조건 만족 공고 없음.
  */
-export type JobCurationState = "READY" | "NEEDS_PROFILE" | "NEEDS_ANALYSIS" | "EMPTY";
+export type JobCurationState = "READY" | "NEEDS_PROFILE" | "EMPTY";
 
 /** 큐레이션 탭에 노출되는 개별 공고 항목. matchScore/matchGrade는 개인화 탭에서만, unlockRequirementName은 자격 탭에서만 채워진다. */
 export interface JobCurationItem {
