@@ -9,7 +9,7 @@ export function HeroIllustration() {
     <div className="relative mx-auto aspect-[3/2] w-full max-w-2xl select-none">
       <Image
         src="/images/hero-illustration.png"
-        alt="계단을 함께 오르며 취업에 성공하는 중장년 구직자들"
+        alt="채용정보 검색 화면이 열린 노트북과 이력서, 서류가 놓인 책상"
         fill
         priority
         sizes="(min-width: 1024px) 42rem, 100vw"

@@ -2,16 +2,11 @@ import Link from "next/link";
 
 /**
  * 히어로 검색창 아래 인기 검색어 줄.
- * 자유 검색어가 아니라 실제로 이동할 화면을 짧은 말로 걸어둔다.
- * (검색 결과가 비는 키워드를 노출하면 첫 클릭이 빈 화면으로 끝난다)
+ * 바로 위 검색창과 같은 곳(/jobs 키워드 검색)으로 보내야 "검색어"로 읽힌다.
+ * 실제 등록 직종(mockJobRoles) 기준의 말만 걸어 첫 클릭이 빈 결과로 끝나지 않게 한다.
  */
-const KEYWORDS = [
-  { label: "일자리", href: "/jobs" },
-  { label: "직업진단", href: "/assessment" },
-  { label: "지원금", href: "/support" },
-  { label: "이력서", href: "/resume" },
-  { label: "취업컨설팅", href: "/consulting" },
-];
+// 한 줄에 들어가는 개수만 둔다. 줄이 넘어가면 검색창 아래 여백이 두 배로 벌어진다.
+const KEYWORDS = ["요양보호사", "사회복지사", "사무·행정", "병원동행"];
 
 export function HeroPopularKeywords() {
   return (
@@ -19,11 +14,11 @@ export function HeroPopularKeywords() {
       <span className="mr-1 shrink-0 text-label-1 font-semibold text-brand-blue-700">인기검색어</span>
       {KEYWORDS.map((keyword) => (
         <Link
-          key={keyword.href}
-          href={keyword.href}
+          key={keyword}
+          href={`/jobs?keyword=${encodeURIComponent(keyword)}`}
           className="rounded-full bg-white/80 px-3 py-1.5 text-label-1 text-slate-600 transition-colors hover:bg-white hover:text-brand-blue-700"
         >
-          {keyword.label}
+          {keyword}
         </Link>
       ))}
     </div>
