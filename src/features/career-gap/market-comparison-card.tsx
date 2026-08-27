@@ -39,10 +39,20 @@ export function MarketComparisonCard({ view, source }: MarketComparisonCardProps
   if (view.state === "UNAVAILABLE") return null;
 
   if (view.state === "NEEDS_TARGET") {
+    if (source === "resume_review") {
+      return (
+        <Card className="rounded-xl border-0 ring-1 ring-slate-200 bg-slate-50">
+          <CardContent className="py-4 text-label-1 text-slate-600">
+            <p>이 화면의 기본정보에서 희망직무를 입력하고 저장한 뒤 다시 AI 점검을 실행하면 채용시장 비교를 보여드려요.</p>
+          </CardContent>
+        </Card>
+      );
+    }
+
     return (
       <Card className="rounded-xl border-0 ring-1 ring-slate-200 bg-slate-50">
         <CardContent className="flex items-center justify-between gap-3 py-4 text-label-1 text-slate-600">
-          <p>희망직무를 설정하면 실제 채용시장과 비교해 무엇이 더 필요한지 알려드려요.</p>
+          <p>자소서에 지원 공고를 연결하거나 커리어 진단에서 직무를 설정해 주세요.</p>
           <Link
             href="/career-gap"
             className="flex shrink-0 items-center gap-1 font-semibold text-brand-blue-700 hover:underline"
