@@ -239,7 +239,13 @@ export async function loadAssessmentForSession(session: AssessmentSession): Prom
 
 /** 결과 화면에서 사용하는 일반 콘텐츠 추천 (특정 직업에 종속되지 않은 Top 콘텐츠). */
 export async function getContentRecommendationsForResult(result: AssessmentResult, limit = 5): Promise<CareerContent[]> {
-  const contents = await listContents({ status: "published" });
+  const published = await listContents({ status: "published" });
+  /*
+   * 검사 결과 화면에서 다시 검사를 추천하지 않는다.
+   * 방금 끝낸 것을 "도움이 될 콘텐츠"로 다시 권하면 다음에 뭘 해야 할지 알려주지 못한다.
+   * (다시 하려는 사람을 위한 "다시 진단하기" 버튼은 하단에 따로 있다)
+   */
+  const contents = published.filter((c) => c.type !== "ASSESSMENT");
   const pseudoProfile: CareerProfile = {
     id: "assessment-result-temp",
     userId: result.userId ?? result.anonymousId ?? "anonymous",
