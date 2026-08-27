@@ -2,16 +2,16 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { Loader2, PanelRightClose, PanelRightOpen, Plus, Printer, Sparkles, Target, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, Loader2, Pencil, Plus, Printer, Target, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ResumeAgentPicker, type ResumeAgentOption } from "./resume-agent-picker";
+import { AiButton } from "@/components/common/ai-button";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -34,7 +34,6 @@ import type {
 } from "@/types";
 import {
   changeResumeTemplateAction,
-  deleteResumeAction,
   generateCareerSummaryAiAction,
   getResumeMarketComparisonAction,
   reviewResumeAiAction,
@@ -70,6 +69,35 @@ function stripKey<T extends { _key: string }>(item: T): Omit<T, "_key"> {
   return rest as Omit<T, "_key">;
 }
 
+/** 입사/퇴사/입학/졸업은 연월까지만 받는다. DB date(YYYY-MM-DD) 값도 month input에 맞게 자른다. */
+function toMonth(value?: string): string {
+  return value ? value.slice(0, 7) : "";
+}
+
+/** month input의 연월(YYYY-MM) 값은 1일로 보정해 DB date 컬럼에 저장한다. */
+function toDbDate(value?: string): string | undefined {
+  if (!value) return undefined;
+  return value.length === 7 ? `${value}-01` : value;
+}
+
+/** 요약 카드에서 기간을 "2020.03 - 2024.11" 형태로 보여준다. */
+function periodLabel(start?: string, end?: string, isCurrent?: boolean): string {
+  const dot = (v?: string) => (v ? v.slice(0, 7).replace("-", ".") : "");
+  const s = dot(start);
+  const e = isCurrent ? "재직중" : dot(end);
+  return [s, e].filter(Boolean).join(" - ");
+}
+
+/**
+ * 학교구분. 고등학교는 입학년월·전공 없이 졸업 정보만 받는다.
+ * 검정고시는 별도 구분이 아니라 고등학교 행의 체크박스로 표현하고, 저장은 educationType="검정고시"로 한다.
+ */
+const EDUCATION_TYPES = ["고등학교", "전문대학(2·3년)", "대학교(4년)", "대학원(석사)", "대학원(박사)"] as const;
+const GED_TYPE = "검정고시";
+const GED_SCHOOL_NAME = "대입자격검정고시";
+const SIMPLE_EDUCATION_TYPES = new Set<string>(["고등학교", GED_TYPE]);
+const GRADUATION_STATUSES = ["졸업", "졸업예정", "재학중", "휴학", "중퇴", "수료"] as const;
+
 const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   AWARD: "수상",
   PROJECT: "프로젝트",
@@ -81,14 +109,10 @@ const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
 export function ResumeEditor({
   initialDetail,
   templates = [],
-  isNew = false,
 }: {
   initialDetail: ResumeDetail;
-  templates?: TemplateOption[];
-  /** 방금 만든 이력서인지. 그렇다면 양식 선택기를 펼친 채로 연다. */
-  isNew?: boolean;
+  templates?: ResumeAgentOption[];
 }) {
-  const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const resume = detail.resume;
   const sections = useMemo(
@@ -100,7 +124,7 @@ export function ResumeEditor({
   const [isChangingTemplate, startTemplateChange] = useTransition();
 
   /**
-   * 이력서에서 양식은 어떤 섹션을 노출할지만 결정하고 입력값은 그대로 남는다.
+   * 에이전트(=템플릿)는 노출 섹션과 AI 점검·생성 기준만 결정하고 입력값은 그대로 남는다.
    * 확인 없이 바로 바꿔도 잃는 데이터가 없다.
    */
   function handleTemplateChange(templateId: string) {
@@ -130,11 +154,25 @@ export function ResumeEditor({
   const [items, setItems] = useState<EditableItem[]>(withKeys(initialDetail.items, "item"));
   const [skillDraft, setSkillDraft] = useState("");
 
+  /**
+   * 경력/학력 항목의 편집 상태. 작성이 끝난 항목은 폼 대신 정리된 요약 카드로 보여주고,
+   * 연필을 눌렀거나 방금 추가한 항목만 폼을 펼친다.
+   */
+  const [editingEntries, setEditingEntries] = useState<Set<string>>(new Set());
+  const isEntryEditing = (key: string) => editingEntries.has(key);
+  function setEntryEditing(key: string, on: boolean) {
+    setEditingEntries((prev) => {
+      const next = new Set(prev);
+      if (on) next.add(key);
+      else next.delete(key);
+      return next;
+    });
+  }
+
   const [isSaving, startSave] = useTransition();
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState("form");
-  // 미리보기는 기본으로 펼쳐 둔다. 넓은 화면에서만 접을 수 있다.
-  const [showPreview, setShowPreview] = useState(true);
+  // 미리보기는 입력 폭을 좁히지 않도록 팝업으로 띄운다.
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
@@ -144,6 +182,8 @@ export function ResumeEditor({
   const [isGeneratingSummary, startGenerateSummary] = useTransition();
   const [rewriteTarget, setRewriteTarget] = useState<{ key: string; field: "responsibilities" | "achievements"; text: string } | null>(null);
   const [isRewriting, startRewrite] = useTransition();
+  /** 지금 다듬는 중인 칸. 스피너는 누른 버튼에만 보여주고 나머지는 비활성화만 한다. */
+  const [rewritePending, setRewritePending] = useState<{ key: string; field: string } | null>(null);
 
   function currentPreviewDetail(): ResumeDetail {
     return {
@@ -170,8 +210,16 @@ export function ResumeEditor({
         try {
           const saved = await saveResumeAction({
             resume: { id: resume.id, ...form },
-            educations: educations.map(stripKey),
-            experiences: experiences.map(stripKey),
+            educations: educations.map((e) => ({
+              ...stripKey(e),
+              admissionDate: toDbDate(e.admissionDate),
+              graduationDate: toDbDate(e.graduationDate),
+            })),
+            experiences: experiences.map((e) => ({
+              ...stripKey(e),
+              startDate: toDbDate(e.startDate),
+              endDate: toDbDate(e.endDate),
+            })),
             qualifications: qualifications.map(stripKey),
             trainings: trainings.map(stripKey),
             skills: skills.map(stripKey),
@@ -231,6 +279,10 @@ export function ResumeEditor({
   }
 
   function openRewrite(key: string, field: "responsibilities" | "achievements", text: string) {
+    // 다른 칸의 버튼을 disabled로 흐리게 만들면 같이 로딩되는 것처럼 보인다.
+    // 겉모습은 그대로 두고 요청 중복만 조용히 막는다.
+    if (isRewriting) return;
+    setRewritePending({ key, field });
     startRewrite(async () => {
       try {
         await handleSave();
@@ -243,6 +295,8 @@ export function ResumeEditor({
         setRewriteTarget({ key, field, text: result.rewrittenText });
       } catch {
         setSaveMessage("AI 다듬기 중 오류가 발생했습니다.");
+      } finally {
+        setRewritePending(null);
       }
     });
   }
@@ -252,48 +306,44 @@ export function ResumeEditor({
     window.print();
   }
 
+  /** 팝업 오버레이가 인쇄물에 끼지 않도록 닫힘 애니메이션이 끝난 뒤 인쇄한다. */
+  function handlePopupPrint() {
+    setPreviewOpen(false);
+    setTimeout(() => handlePrint(), 200);
+  }
+
   return (
     // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
     <div className="space-y-6">
       <div className="print:hidden">
-        <TemplateCardPicker
-          label="이력서 양식"
-          templates={templates}
+        <ResumeAgentPicker
+          agents={templates}
           value={resume.templateId ?? undefined}
           onChange={handleTemplateChange}
           pending={isChangingTemplate}
-          gridClassName="sm:grid-cols-2 lg:grid-cols-4"
-          defaultOpen={isNew}
         />
       </div>
 
-      {/*
-        접었을 때도 오른쪽 열을 좁게 남긴다. 토글이 늘 화면 오른쪽 같은 자리에 있어야
-        접고 펴는 기능이라는 게 읽힌다. 폼 헤더에 두면 접힘 여부에 따라 버튼이 이동한다.
-      */}
-      <div className={cn("grid gap-6", showPreview ? "lg:grid-cols-[1fr_1fr]" : "lg:grid-cols-[1fr_2.75rem]")}>
-        <div className="space-y-4 print:hidden">
-        {/* 편집기는 2단 그리드 안이라 바 폭이 좁다. min-w를 주지 않으면 제목 칸이 0으로 눌린다. */}
-        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
+      <div className="space-y-4 print:hidden">
+        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
           <div className="min-w-48 flex-1">
             <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
               이력서 이름
             </Label>
-            <Input
+            <CompactInput
               id="resume-title"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="mt-1 h-9"
+              className="mt-1"
             />
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline" className="rounded-full">
               완성도 {detail.resume.completeness}%
             </Badge>
-            <Button variant="outline" size="sm" onClick={handleReview} disabled={isReviewing}>
-              {isReviewing ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-              AI 이력서 점검
-            </Button>
+            <AiButton onClick={handleReview} loading={isReviewing}>
+              AI 점검
+            </AiButton>
           </div>
         </div>
 
@@ -359,50 +409,42 @@ export function ResumeEditor({
           />
         )}
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="lg:hidden">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="form">입력</TabsTrigger>
-            <TabsTrigger value="preview">미리보기</TabsTrigger>
-          </TabsList>
-        </Tabs>
-
-        <div className={activeTab === "preview" ? "hidden lg:block" : "block"}>
+        <div>
           {showSection("BASIC_INFO") && (
-            <Card className="rounded-xl border-0 ring-1 ring-border">
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-body-2">기본정보</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
                 <Field label="이름">
-                  <Input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+                  <CompactInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
                 </Field>
                 <Field label="이메일">
-                  <Input value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                  <CompactInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
                 </Field>
                 <Field label="전화번호">
-                  <Input value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
+                  <CompactInput value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
                 </Field>
                 <Field label="주소/거주지역">
-                  <Input value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
+                  <CompactInput value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
                 </Field>
                 <Field label="희망직무">
-                  <Input value={form.desiredJobTitle} onChange={(e) => setForm((f) => ({ ...f, desiredJobTitle: e.target.value }))} />
+                  <CompactInput value={form.desiredJobTitle} onChange={(e) => setForm((f) => ({ ...f, desiredJobTitle: e.target.value }))} />
                 </Field>
                 <Field label="희망근무지역">
-                  <Input value={form.desiredRegion} onChange={(e) => setForm((f) => ({ ...f, desiredRegion: e.target.value }))} />
+                  <CompactInput value={form.desiredRegion} onChange={(e) => setForm((f) => ({ ...f, desiredRegion: e.target.value }))} />
                 </Field>
               </CardContent>
             </Card>
           )}
 
           {showSection("SUMMARY") && (
-            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개</CardTitle>
-                <Button variant="outline" size="sm" onClick={handleGenerateSummary} disabled={isGeneratingSummary}>
-                  {isGeneratingSummary ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
-                  AI로 생성
-                </Button>
+                <AiButton onClick={handleGenerateSummary} loading={isGeneratingSummary}>
+                  AI 생성
+                </AiButton>
               </CardHeader>
               <CardContent>
                 <Textarea
@@ -429,13 +471,17 @@ export function ResumeEditor({
           )}
 
           {showSection("EXPERIENCE") && (
-            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setExperiences((prev) => [...prev, { _key: nextKey("exp"), companyName: "", isCurrent: false, orderIndex: prev.length }])}
+                  onClick={() => {
+                    const key = nextKey("exp");
+                    setExperiences((prev) => [...prev, { _key: key, companyName: "", isCurrent: false, orderIndex: prev.length }]);
+                    setEntryEditing(key, true);
+                  }}
                 >
                   <Plus className="size-4" /> 경력 추가
                 </Button>
@@ -443,30 +489,36 @@ export function ResumeEditor({
               <CardContent className="space-y-4">
                 {experiences.length === 0 && <p className="text-label-1 text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>}
                 {experiences.map((exp, idx) => (
-                  <div key={exp._key} className="space-y-2 rounded-xl bg-slate-50 p-4">
+                  isEntryEditing(exp._key) ? (
+                  <div key={exp._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
                     <div className="flex items-center justify-between">
                       <p className="text-label-2 font-semibold text-slate-400">경력 {idx + 1}</p>
-                      <Button variant="ghost" size="sm" onClick={() => setExperiences((prev) => prev.filter((e) => e._key !== exp._key))}>
-                        <Trash2 className="size-4 text-slate-400" />
-                      </Button>
+                      <div className="flex items-center gap-1">
+                        <Button variant="outline" size="sm" onClick={() => setEntryEditing(exp._key, false)}>
+                          완료
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setExperiences((prev) => prev.filter((e) => e._key !== exp._key))}>
+                          <Trash2 className="size-4 text-slate-400" />
+                        </Button>
+                      </div>
                     </div>
                     <div className="grid gap-2 sm:grid-cols-2">
                       <Field label="회사명">
-                        <Input
+                        <CompactInput
                           value={exp.companyName}
                           onChange={(e) => updateAt(setExperiences, exp._key, { companyName: e.target.value })}
                         />
                       </Field>
                       <Field label="직책/직급">
-                        <Input value={exp.position ?? ""} onChange={(e) => updateAt(setExperiences, exp._key, { position: e.target.value })} />
+                        <CompactInput value={exp.position ?? ""} onChange={(e) => updateAt(setExperiences, exp._key, { position: e.target.value })} />
                       </Field>
-                      <Field label="입사일">
-                        <Input type="date" value={exp.startDate ?? ""} onChange={(e) => updateAt(setExperiences, exp._key, { startDate: e.target.value })} />
+                      <Field label="입사년월">
+                        <CompactInput type="month" value={toMonth(exp.startDate)} onChange={(e) => updateAt(setExperiences, exp._key, { startDate: e.target.value })} />
                       </Field>
-                      <Field label="퇴사일">
-                        <Input
-                          type="date"
-                          value={exp.endDate ?? ""}
+                      <Field label="퇴사년월">
+                        <CompactInput
+                          type="month"
+                          value={toMonth(exp.endDate)}
                           disabled={exp.isCurrent}
                           onChange={(e) => updateAt(setExperiences, exp._key, { endDate: e.target.value })}
                         />
@@ -478,19 +530,35 @@ export function ResumeEditor({
                     </label>
                     <Field label="어떤 일을 하셨나요? (예: 고객상담, 거래처 관리, 문서작성)">
                       <Textarea
+                        className="bg-white"
                         value={exp.responsibilities ?? ""}
                         onChange={(e) => updateAt(setExperiences, exp._key, { responsibilities: e.target.value })}
                         rows={2}
                       />
-                      <RewriteButton onClick={() => openRewrite(exp._key, "responsibilities", exp.responsibilities ?? "")} disabled={isRewriting} />
+                      <AiButton
+                        size="xs"
+                        className="mt-1"
+                        onClick={() => openRewrite(exp._key, "responsibilities", exp.responsibilities ?? "")}
+                        loading={rewritePending?.key === exp._key && rewritePending.field === "responsibilities"}
+                      >
+                        AI 다듬기
+                      </AiButton>
                     </Field>
                     <Field label="기억나는 성과가 있나요? (숫자가 없어도 괜찮습니다)">
                       <Textarea
+                        className="bg-white"
                         value={exp.achievements ?? ""}
                         onChange={(e) => updateAt(setExperiences, exp._key, { achievements: e.target.value })}
                         rows={2}
                       />
-                      <RewriteButton onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")} disabled={isRewriting} />
+                      <AiButton
+                        size="xs"
+                        className="mt-1"
+                        onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")}
+                        loading={rewritePending?.key === exp._key && rewritePending.field === "achievements"}
+                      >
+                        AI 다듬기
+                      </AiButton>
                     </Field>
                     {rewriteTarget?.key === exp._key && (
                       <div className="rounded-lg bg-white p-3 text-label-1 ring-1 ring-brand-blue-200">
@@ -512,68 +580,186 @@ export function ResumeEditor({
                       </div>
                     )}
                     <Field label="퇴사 이유 (선택)">
-                      <Input value={exp.reasonForLeaving ?? ""} onChange={(e) => updateAt(setExperiences, exp._key, { reasonForLeaving: e.target.value })} />
+                      <CompactInput value={exp.reasonForLeaving ?? ""} onChange={(e) => updateAt(setExperiences, exp._key, { reasonForLeaving: e.target.value })} />
                     </Field>
                   </div>
+                  ) : (
+                  // 작성이 끝난 경력은 요약 카드로 보여준다. 연필을 눌러야 폼이 다시 열린다.
+                  <EntrySummaryCard
+                    key={exp._key}
+                    title={`${exp.companyName || "회사명 미입력"}${exp.position ? ` · ${exp.position}` : ""}`}
+                    meta={periodLabel(exp.startDate, exp.endDate, exp.isCurrent) || undefined}
+                    body={exp.responsibilities || undefined}
+                    editLabel={`경력 ${idx + 1} 수정`}
+                    onEdit={() => setEntryEditing(exp._key, true)}
+                  />
+                  )
                 ))}
               </CardContent>
             </Card>
           )}
 
           {showSection("EDUCATION") && (
-            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">학력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setEducations((prev) => [...prev, { _key: nextKey("edu"), schoolName: "", orderIndex: prev.length }])}
+                  onClick={() => {
+                    const key = nextKey("edu");
+                    setEducations((prev) => [...prev, { _key: key, schoolName: "", orderIndex: prev.length }]);
+                    setEntryEditing(key, true);
+                  }}
                 >
                   <Plus className="size-4" /> 학력 추가
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
                 {educations.length === 0 && <p className="text-label-1 text-slate-400">최종학력 위주로 간단히 입력하셔도 됩니다.</p>}
-                {educations.map((edu, idx) => (
-                  <div key={edu._key} className="space-y-2 rounded-xl bg-slate-50 p-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-label-2 font-semibold text-slate-400">학력 {idx + 1}</p>
-                      <Button variant="ghost" size="sm" onClick={() => setEducations((prev) => prev.filter((e) => e._key !== edu._key))}>
-                        <Trash2 className="size-4 text-slate-400" />
-                      </Button>
+                {educations.map((edu, idx) => {
+                  // 고등학교/검정고시는 입학년월·전공 입력 없이 졸업 정보만 받는다.
+                  const isGed = edu.educationType === GED_TYPE;
+                  const isSimpleEducation = SIMPLE_EDUCATION_TYPES.has(edu.educationType ?? "");
+                  // 대학 이상을 고른 경우에만 편입 체크를 보여준다. 전용 컬럼이 없어 description에 "편입"으로 저장한다.
+                  const isCollege = Boolean(edu.educationType) && !isSimpleEducation;
+                  const isTransfer = edu.description === "편입";
+                  if (!isEntryEditing(edu._key)) {
+                    // 작성이 끝난 학력은 요약 카드로 보여준다. 연필을 눌러야 폼이 다시 열린다.
+                    const meta = [
+                      periodLabel(edu.admissionDate, edu.graduationDate),
+                      isGed ? "합격" : edu.graduationStatus,
+                      isTransfer ? "편입" : undefined,
+                    ]
+                      .filter(Boolean)
+                      .join(" · ");
+                    return (
+                      <EntrySummaryCard
+                        key={edu._key}
+                        title={isGed ? GED_SCHOOL_NAME : edu.schoolName || "학교명 미입력"}
+                        subtitle={!isSimpleEducation ? edu.major || undefined : undefined}
+                        meta={meta || undefined}
+                        editLabel={`학력 ${idx + 1} 수정`}
+                        onEdit={() => setEntryEditing(edu._key, true)}
+                      />
+                    );
+                  }
+                  return (
+                    <div key={edu._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
+                      <div className="flex items-center justify-between">
+                        <p className="text-label-2 font-semibold text-slate-400">학력 {idx + 1}</p>
+                        <div className="flex items-center gap-1">
+                          <Button variant="outline" size="sm" onClick={() => setEntryEditing(edu._key, false)}>
+                            완료
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => setEducations((prev) => prev.filter((e) => e._key !== edu._key))}>
+                            <Trash2 className="size-4 text-slate-400" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div className="grid gap-2 sm:grid-cols-6">
+                        <Field label="학교구분" className="sm:col-span-2">
+                          <Select
+                            value={isGed ? "고등학교" : (edu.educationType ?? "")}
+                            onValueChange={(v) => updateAt(setEducations, edu._key, { educationType: v })}
+                          >
+                            <CompactSelectTrigger>
+                              <SelectValue placeholder="선택" />
+                            </CompactSelectTrigger>
+                            <SelectContent>
+                              {EDUCATION_TYPES.map((t) => (
+                                <SelectItem key={t} value={t}>
+                                  {t}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                        <Field label="학교명" className="sm:col-span-4">
+                          <CompactInput
+                            value={isGed ? GED_SCHOOL_NAME : edu.schoolName}
+                            disabled={isGed}
+                            onChange={(e) => updateAt(setEducations, edu._key, { schoolName: e.target.value })}
+                          />
+                        </Field>
+                        {!isSimpleEducation && (
+                          <Field label="입학년월" className="sm:col-span-2">
+                            <CompactInput type="month" value={toMonth(edu.admissionDate)} onChange={(e) => updateAt(setEducations, edu._key, { admissionDate: e.target.value })} />
+                          </Field>
+                        )}
+                        <Field label={isGed ? "합격년월" : "졸업년월"} className="sm:col-span-2">
+                          <CompactInput type="month" value={toMonth(edu.graduationDate)} onChange={(e) => updateAt(setEducations, edu._key, { graduationDate: e.target.value })} />
+                        </Field>
+                        {!isGed && (
+                          <Field label="졸업상태" className="sm:col-span-2">
+                            <Select
+                              value={edu.graduationStatus ?? ""}
+                              onValueChange={(v) => updateAt(setEducations, edu._key, { graduationStatus: v })}
+                            >
+                              <CompactSelectTrigger>
+                                <SelectValue placeholder="선택" />
+                              </CompactSelectTrigger>
+                              <SelectContent>
+                                {GRADUATION_STATUSES.map((s) => (
+                                  <SelectItem key={s} value={s}>
+                                    {s}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </Field>
+                        )}
+                        {isSimpleEducation && (
+                          <label className="flex items-center gap-2 self-end pb-2 text-label-1 text-slate-600 sm:col-span-2">
+                            <Checkbox
+                              checked={isGed}
+                              onCheckedChange={(v) =>
+                                updateAt(
+                                  setEducations,
+                                  edu._key,
+                                  Boolean(v)
+                                    ? { educationType: GED_TYPE, schoolName: GED_SCHOOL_NAME, graduationStatus: "합격" }
+                                    : { educationType: "고등학교", schoolName: "", graduationStatus: undefined },
+                                )
+                              }
+                            />
+                            대입검정고시
+                          </label>
+                        )}
+                        {!isSimpleEducation && (
+                          <Field label="전공명" className="sm:col-span-4">
+                            <CompactInput value={edu.major ?? ""} onChange={(e) => updateAt(setEducations, edu._key, { major: e.target.value })} />
+                          </Field>
+                        )}
+                        {isCollege && (
+                          <label className="flex items-center gap-2 self-end pb-2 text-label-1 text-slate-600 sm:col-span-2">
+                            <Checkbox
+                              checked={isTransfer}
+                              onCheckedChange={(v) => updateAt(setEducations, edu._key, { description: v ? "편입" : undefined })}
+                            />
+                            편입
+                          </label>
+                        )}
+                      </div>
                     </div>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <Field label="학교명">
-                        <Input value={edu.schoolName} onChange={(e) => updateAt(setEducations, edu._key, { schoolName: e.target.value })} />
-                      </Field>
-                      <Field label="전공">
-                        <Input value={edu.major ?? ""} onChange={(e) => updateAt(setEducations, edu._key, { major: e.target.value })} />
-                      </Field>
-                      <Field label="졸업상태">
-                        <Input
-                          placeholder="졸업/재학/중퇴 등"
-                          value={edu.graduationStatus ?? ""}
-                          onChange={(e) => updateAt(setEducations, edu._key, { graduationStatus: e.target.value })}
-                        />
-                      </Field>
-                      <Field label="졸업일">
-                        <Input type="date" value={edu.graduationDate ?? ""} onChange={(e) => updateAt(setEducations, edu._key, { graduationDate: e.target.value })} />
-                      </Field>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </CardContent>
             </Card>
           )}
 
           {showSection("QUALIFICATION") && (
-            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">보유 자격</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setQualifications((prev) => [...prev, { _key: nextKey("qual"), name: "", orderIndex: prev.length }])}
+                  onClick={() => {
+                    const key = nextKey("qual");
+                    setQualifications((prev) => [...prev, { _key: key, name: "", orderIndex: prev.length }]);
+                    setEntryEditing(key, true);
+                  }}
                 >
                   <Plus className="size-4" /> 자격 추가
                 </Button>
@@ -581,35 +767,49 @@ export function ResumeEditor({
               <CardContent className="space-y-3">
                 {qualifications.length === 0 && <p className="text-label-1 text-slate-400">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
                 {qualifications.map((q, idx) => (
-                  <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-4 sm:grid-cols-4">
+                  isEntryEditing(q._key) ? (
+                  <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-4">
                     <Field label={`자격명 ${idx + 1}`}>
-                      <Input value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
+                      <CompactInput value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
                     </Field>
                     <Field label="발급기관">
-                      <Input value={q.issuer ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { issuer: e.target.value })} />
+                      <CompactInput value={q.issuer ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { issuer: e.target.value })} />
                     </Field>
                     <Field label="취득일">
-                      <Input type="date" value={q.acquiredAt ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { acquiredAt: e.target.value })} />
+                      <CompactInput type="date" value={q.acquiredAt ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { acquiredAt: e.target.value })} />
                     </Field>
-                    <div className="flex items-end justify-end">
+                    <div className="flex items-end justify-end gap-1">
+                      <Button variant="outline" size="sm" onClick={() => setEntryEditing(q._key, false)}>
+                        완료
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={() => setQualifications((prev) => prev.filter((x) => x._key !== q._key))}>
                         <Trash2 className="size-4 text-slate-400" />
                       </Button>
                     </div>
                   </div>
+                  ) : (
+                  <EntrySummaryCard
+                    key={q._key}
+                    title={q.name || "자격명 미입력"}
+                    subtitle={q.issuer || undefined}
+                    meta={q.acquiredAt ? q.acquiredAt.replaceAll("-", ".") : undefined}
+                    editLabel={`자격 ${idx + 1} 수정`}
+                    onEdit={() => setEntryEditing(q._key, true)}
+                  />
+                  )
                 ))}
               </CardContent>
             </Card>
           )}
 
           {showSection("SKILLS") && (
-            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-body-2">보유 스킬</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
-                  <Input
+                  <CompactInput
                     placeholder="예: 엑셀, 상담, 운전"
                     value={skillDraft}
                     onChange={(e) => setSkillDraft(e.target.value)}
@@ -623,6 +823,7 @@ export function ResumeEditor({
                   />
                   <Button
                     variant="outline"
+                    size="sm"
                     onClick={() => {
                       if (!skillDraft.trim()) return;
                       setSkills((prev) => [...prev, { _key: nextKey("skill"), name: skillDraft.trim(), orderIndex: prev.length }]);
@@ -647,57 +848,79 @@ export function ResumeEditor({
           )}
 
           {showSection("TRAINING") && (
-            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">교육/훈련</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setTrainings((prev) => [...prev, { _key: nextKey("train"), courseName: "", orderIndex: prev.length }])}
+                  onClick={() => {
+                    const key = nextKey("train");
+                    setTrainings((prev) => [...prev, { _key: key, courseName: "", orderIndex: prev.length }]);
+                    setEntryEditing(key, true);
+                  }}
                 >
                   <Plus className="size-4" /> 교육 추가
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
                 {trainings.map((t, idx) => (
-                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-4 sm:grid-cols-3">
+                  isEntryEditing(t._key) ? (
+                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-3">
                     <Field label={`과정명 ${idx + 1}`}>
-                      <Input value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
+                      <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
                     </Field>
                     <Field label="교육기관">
-                      <Input value={t.institution ?? ""} onChange={(e) => updateAt(setTrainings, t._key, { institution: e.target.value })} />
+                      <CompactInput value={t.institution ?? ""} onChange={(e) => updateAt(setTrainings, t._key, { institution: e.target.value })} />
                     </Field>
-                    <div className="flex items-end justify-end">
+                    <div className="flex items-end justify-end gap-1">
+                      <Button variant="outline" size="sm" onClick={() => setEntryEditing(t._key, false)}>
+                        완료
+                      </Button>
                       <Button variant="ghost" size="sm" onClick={() => setTrainings((prev) => prev.filter((x) => x._key !== t._key))}>
                         <Trash2 className="size-4 text-slate-400" />
                       </Button>
                     </div>
                   </div>
+                  ) : (
+                  <EntrySummaryCard
+                    key={t._key}
+                    title={t.courseName || "과정명 미입력"}
+                    subtitle={t.institution || undefined}
+                    editLabel={`교육 ${idx + 1} 수정`}
+                    onEdit={() => setEntryEditing(t._key, true)}
+                  />
+                  )
                 ))}
               </CardContent>
             </Card>
           )}
 
           {(showSection("PROJECT") || showSection("ACTIVITY")) && (
-            <Card className="mt-4 rounded-xl border-0 ring-1 ring-border">
+            <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">기타 (수상/프로젝트/대외활동/봉사/외국어)</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setItems((prev) => [...prev, { _key: nextKey("item"), sectionType: "PROJECT", title: "", orderIndex: prev.length }])}
+                  onClick={() => {
+                    const key = nextKey("item");
+                    setItems((prev) => [...prev, { _key: key, sectionType: "PROJECT", title: "", orderIndex: prev.length }]);
+                    setEntryEditing(key, true);
+                  }}
                 >
                   <Plus className="size-4" /> 항목 추가
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
                 {items.length === 0 && <p className="text-label-1 text-slate-400">모든 사용자에게 필수는 아닙니다. 있으면 추가해주세요.</p>}
-                {items.map((item) => (
-                  <div key={item._key} className="grid gap-2 rounded-xl bg-slate-50 p-4 sm:grid-cols-4">
+                {items.map((item, idx) => (
+                  isEntryEditing(item._key) ? (
+                  <div key={item._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-4">
                     <Select value={item.sectionType} onValueChange={(v) => updateAt(setItems, item._key, { sectionType: v as ResumeItemSectionType })}>
-                      <SelectTrigger className="h-9">
+                      <CompactSelectTrigger className="w-fit">
                         <SelectValue />
-                      </SelectTrigger>
+                      </CompactSelectTrigger>
                       <SelectContent>
                         {Object.entries(ITEM_SECTION_LABELS).map(([value, label]) => (
                           <SelectItem key={value} value={value}>
@@ -706,39 +929,62 @@ export function ResumeEditor({
                         ))}
                       </SelectContent>
                     </Select>
-                    <Input placeholder="제목" value={item.title} onChange={(e) => updateAt(setItems, item._key, { title: e.target.value })} />
-                    <Input placeholder="설명 (선택)" value={item.description ?? ""} onChange={(e) => updateAt(setItems, item._key, { description: e.target.value })} />
-                    <Button variant="ghost" size="sm" onClick={() => setItems((prev) => prev.filter((x) => x._key !== item._key))}>
-                      <Trash2 className="size-4 text-slate-400" />
-                    </Button>
+                    <CompactInput placeholder="제목" value={item.title} onChange={(e) => updateAt(setItems, item._key, { title: e.target.value })} />
+                    <CompactInput placeholder="설명 (선택)" value={item.description ?? ""} onChange={(e) => updateAt(setItems, item._key, { description: e.target.value })} />
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="outline" size="sm" onClick={() => setEntryEditing(item._key, false)}>
+                        완료
+                      </Button>
+                      <Button variant="ghost" size="sm" onClick={() => setItems((prev) => prev.filter((x) => x._key !== item._key))}>
+                        <Trash2 className="size-4 text-slate-400" />
+                      </Button>
+                    </div>
                   </div>
+                  ) : (
+                  <EntrySummaryCard
+                    key={item._key}
+                    title={item.title || "제목 미입력"}
+                    subtitle={item.description || undefined}
+                    meta={ITEM_SECTION_LABELS[item.sectionType]}
+                    editLabel={`기타 항목 ${idx + 1} 수정`}
+                    onEdit={() => setEntryEditing(item._key, true)}
+                  />
+                  )
                 ))}
               </CardContent>
             </Card>
           )}
         </div>
+      </div>
 
-        {/*
-          저장은 폼을 다 채운 뒤에 하는 동작이라 아래에 둔다.
-          폼이 길어 화면 밖으로 나가므로 sticky로 하단에 붙여 스크롤 중에도 닿게 한다.
-        */}
-        {/* 화면을 벗어나는 액션이 없도록 삭제·목록으로도 이 바에 모은다. 저장은 남는 폭을 다 쓴다. */}
-        <div className="sticky bottom-0 z-10 -mx-1 flex items-center gap-2 rounded-xl border border-border bg-white/95 px-4 py-3 shadow-[0_0_16px_-8px_rgba(15,23,42,0.18)] backdrop-blur print:hidden">
-          <Button
-            variant="ghost"
-            size="sm"
-            className="shrink-0 text-rose-500"
-            onClick={() => void handleDelete(resume.id)}
-          >
-            <Trash2 className="size-4" /> 삭제
+      {/* 화면에서는 미리보기를 팝업으로 띄우고, 인쇄(PDF 저장)할 때만 문서 흐름에 노출한다. */}
+      <div className="hidden print:block">
+        <ResumePreview detail={currentPreviewDetail()} />
+      </div>
+
+      {/*
+        저장은 폼을 다 채운 뒤에 하는 동작이라 아래에 둔다. 폼이 길어 화면 밖으로 나가므로
+        화면 하단에 전체 폭으로 고정한다(컨테이너 밖까지 꽉 차야 하므로 sticky 대신 fixed).
+        버튼 정렬은 안쪽 컨테이너로 본문 폭에 맞춘다.
+      */}
+      {/*
+        위계별 그룹핑: 왼쪽은 문서를 벗어나는 동작(목록으로)이라 ghost로 눌러두고,
+        오른쪽은 문서에 대한 동작(미리보기 → 저장)만 모아 확정 동작인 저장 하나만 채운다.
+        삭제는 편집 화면이 아니라 이력서 목록에서 처리한다.
+      */}
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
+        <div className="mx-auto flex max-w-6xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
+          <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
+            <Link href="/resume">
+              <ArrowLeft className="size-4" /> 목록으로
+            </Link>
           </Button>
-          {saveMessage && <span className="shrink-0 text-label-2 text-slate-400">{saveMessage}</span>}
-          {/* 되돌아가기(목록)와 확정(저장)은 한 묶음으로 오른쪽에 둔다. 삭제는 성격이 달라 왼쪽에 떼어놓는다. */}
           <div className="ml-auto flex shrink-0 items-center gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/resume">목록으로</Link>
+            {saveMessage && <span className="shrink-0 text-label-2 text-slate-400">{saveMessage}</span>}
+            <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
+              <Eye className="size-4" /> 미리보기
             </Button>
-            <Button className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
+            <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
               저장
             </Button>
@@ -746,77 +992,87 @@ export function ResumeEditor({
         </div>
       </div>
 
-      {/* 접힌 상태의 세로 손잡이. 모바일은 아래 탭으로 전환하므로 lg 이상에서만 쓴다. */}
-      {!showPreview && (
-        <div className="hidden print:hidden lg:block">
-          <button
-            type="button"
-            onClick={() => setShowPreview(true)}
-            aria-expanded={false}
-            className="sticky top-4 flex w-11 flex-col items-center gap-2 rounded-xl border border-border bg-white py-4 text-slate-600 transition-colors hover:bg-muted"
-          >
-            <PanelRightOpen className="size-4" />
-            <span className="text-label-2 font-medium [writing-mode:vertical-rl]">미리보기</span>
-          </button>
-        </div>
-      )}
-
-      <div className={cn(activeTab === "form" ? "hidden lg:block" : "block", !showPreview && "lg:hidden")}>
-        <div className="sticky top-4 space-y-3">
-          <div className="flex items-center justify-between gap-2 print:hidden">
-            <p className="text-label-1 font-semibold text-slate-500">미리보기</p>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" onClick={handlePrint}>
-                <Printer className="size-4" /> PDF로 저장/인쇄
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="hidden lg:inline-flex"
-                onClick={() => setShowPreview(false)}
-                aria-expanded
-              >
-                <PanelRightClose className="size-4" />
-                접기
-              </Button>
-            </div>
-          </div>
-          <div className="max-h-[80vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border print:max-h-none print:overflow-visible print:bg-transparent print:p-0 print:ring-0">
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="print:hidden sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>미리보기</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border">
             <ResumePreview detail={currentPreviewDetail()} />
           </div>
-        </div>
-      </div>
-      </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handlePopupPrint}>
+              <Printer className="size-4" /> PDF로 저장/인쇄
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
-
-  async function handleDelete(resumeId: string) {
-    if (!window.confirm("이 이력서를 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.")) return;
-    await deleteResumeAction(resumeId);
-    router.push("/resume");
-  }
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
   return (
-    <div className="space-y-1">
+    <div className={cn("space-y-1", className)}>
       <Label className="text-label-2 text-slate-500">{label}</Label>
       {children}
     </div>
   );
 }
 
-function RewriteButton({ onClick, disabled }: { onClick: () => void; disabled: boolean }) {
+/** 편집 폼은 짧은 값 입력칸이 많아 기본(h-12)보다 낮은 높이로 밀도를 높인다. 회색 항목 박스 위에서도 입력칸은 흰색을 유지한다. */
+function CompactInput({ className, ...props }: React.ComponentProps<typeof Input>) {
+  return <Input {...props} className={cn("h-10 bg-white", className)} />;
+}
+
+/**
+ * CompactInput(h-10)과 높이를 맞춘 셀렉트 트리거.
+ * SelectTrigger의 기본 높이는 data-[size=default]:h-12라 plain 클래스로는 덮어써지지 않는다.
+ */
+function CompactSelectTrigger({ className, ...props }: React.ComponentProps<typeof SelectTrigger>) {
+  return <SelectTrigger {...props} className={cn("w-full bg-white data-[size=default]:h-10", className)} />;
+}
+
+/** 작성이 끝난 항목을 보여주는 공용 요약 카드. 연필을 누르면 편집 폼으로 전환된다. */
+function EntrySummaryCard({
+  title,
+  subtitle,
+  meta,
+  body,
+  editLabel,
+  onEdit,
+}: {
+  title: string;
+  /** 제목 바로 아래 보조 정보 (전공, 발급기관 등) */
+  subtitle?: string;
+  /** 기간·상태처럼 흐리게 보여줄 정보 */
+  meta?: string;
+  /** 담당업무처럼 2줄로 잘라 보여줄 본문 */
+  body?: string;
+  editLabel: string;
+  onEdit: () => void;
+}) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      className="mt-1 flex items-center gap-1 text-label-2 font-medium text-brand-blue-600 hover:underline disabled:opacity-50"
-    >
-      {disabled ? <Loader2 className="size-3 animate-spin" /> : <Sparkles className="size-3" />}
-      AI로 다듬기
-    </button>
+    <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
+      <div className="min-w-0 flex-1">
+        {/* 짧은 정보는 세로로 쌓지 않고 한 줄에 나열한다. 기간·상태는 오른쪽 끝으로 보낸다. */}
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <p className="text-label-1 font-bold text-slate-900">{title}</p>
+          {subtitle && <p className="text-label-2 text-slate-600">{subtitle}</p>}
+          {meta && <p className="ml-auto text-label-2 text-slate-400">{meta}</p>}
+        </div>
+        {body && <p className="mt-1 line-clamp-2 text-label-2 leading-relaxed text-slate-600">{body}</p>}
+      </div>
+      <Button
+        variant="outline"
+        size="icon-xs"
+        onClick={onEdit}
+        aria-label={editLabel}
+        className="rounded-full text-slate-500"
+      >
+        <Pencil />
+      </Button>
+    </div>
   );
 }
 

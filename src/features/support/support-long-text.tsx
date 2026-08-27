@@ -15,7 +15,7 @@ export function SupportLongText({ text, className }: { text: string; className?:
 
   return (
     <div>
-      <p className={cn("whitespace-pre-line", className, collapsible && !expanded && "line-clamp-6")}>
+      <p className={cn("whitespace-pre-line text-justify", className, collapsible && !expanded && "line-clamp-6")}>
         {text}
       </p>
       {collapsible && (

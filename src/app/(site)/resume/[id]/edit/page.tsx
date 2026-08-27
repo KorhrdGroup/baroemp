@@ -11,13 +11,10 @@ export const metadata: Metadata = {
 
 export default async function ResumeEditPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  /** ?new=1 은 방금 만든 직후라는 표시. 양식 선택기를 펼쳐서 고르게 한다. */
-  searchParams: Promise<{ new?: string }>;
 }) {
-  const [{ id }, { new: isNewParam }] = await Promise.all([params, searchParams]);
+  const { id } = await params;
   const user = await requireUser(`/resume/${id}/edit`);
 
   const resume = await getResumeRepository().findById(id);
@@ -32,11 +29,15 @@ export default async function ResumeEditPage({
 
   const templateOptions = [...templates]
     .sort((a, b) => a.orderIndex - b.orderIndex)
-    .map((t) => ({ id: t.id, name: t.name, description: t.description }));
+    .map((t) => ({ id: t.id, code: t.code, name: t.name, description: t.description }));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-      <ResumeEditor initialDetail={detail} templates={templateOptions} isNew={isNewParam === "1"} />
+    // 입력칸이 흰색으로 도드라지도록 편집 화면만 회색 바탕을 깐다.
+    <div className="bg-slate-100 print:bg-transparent">
+      {/* 하단 고정 액션 바(fixed)에 마지막 카드가 가려지지 않도록 아래 여백을 크게 둔다. */}
+      <div className="mx-auto max-w-6xl px-4 pb-28 pt-10 sm:px-6 lg:px-8">
+        <ResumeEditor initialDetail={detail} templates={templateOptions} />
+      </div>
     </div>
   );
 }

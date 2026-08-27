@@ -17,10 +17,15 @@ const DEFAULT_SECTION_ORDER: ResumeSectionCode[] = [
   "ACTIVITY",
 ];
 
+/** 입사/퇴사/입학/졸업은 연월까지만 받으므로 기간도 YYYY.MM으로 보여준다. */
+function formatMonth(value?: string): string {
+  return value ? value.slice(0, 7).replace("-", ".") : "";
+}
+
 function formatPeriod(start?: string, end?: string, isCurrent?: boolean): string {
   if (!start && !end) return "";
-  const s = start ?? "";
-  const e = isCurrent ? "재직중" : end ?? "";
+  const s = formatMonth(start);
+  const e = isCurrent ? "재직중" : formatMonth(end);
   return [s, e].filter(Boolean).join(" ~ ");
 }
 
@@ -119,9 +124,12 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
               {educations.map((edu) => (
                 <div key={edu.id} className="flex flex-wrap items-baseline justify-between gap-2 text-label-2">
                   <p className="text-slate-800">
-                    {edu.schoolName}
+                    {/* 검정고시처럼 학교명이 없는 학력은 학교구분으로 표시한다. */}
+                    {edu.schoolName || edu.educationType || ""}
                     {edu.major ? ` · ${edu.major}` : ""}
                     {edu.degree ? ` (${edu.degree})` : ""}
+                    {/* 편입 등 부가 표기 (편집 화면의 편입 체크가 description="편입"으로 저장된다) */}
+                    {edu.description ? ` · ${edu.description}` : ""}
                   </p>
                   <p className="text-slate-500">
                     {formatPeriod(edu.admissionDate, edu.graduationDate)} {edu.graduationStatus ?? ""}

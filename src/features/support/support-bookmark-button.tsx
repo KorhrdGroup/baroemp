@@ -64,13 +64,12 @@ export function SupportBookmarkButton({
     return (
       <Button
         type="button"
-        variant={bookmarked ? "default" : "outline"}
-        className={cn(bookmarked && "bg-brand-blue-400 hover:bg-brand-blue-600")}
+        variant="outline"
         onClick={handleClick}
         disabled={pending}
       >
-        <Bookmark className={cn("size-4", bookmarked && "fill-current")} />
         {bookmarked ? "찜 완료" : "찜하기"}
+        <Bookmark className={cn("size-4", bookmarked ? "fill-brand-blue-500 text-brand-blue-500" : "text-slate-400")} />
       </Button>
     );
   }

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { interactiveCardClass } from "@/lib/ui-classes";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { REGION_LABELS } from "@/lib/labels";
@@ -43,8 +42,7 @@ export function SupportProgramCard({
     <Link
       href={`/support/${program.id}`}
       className={cn(
-        "flex flex-col overflow-hidden rounded-xl border border-border bg-white",
-        interactiveCardClass,
+        "group flex flex-col overflow-hidden rounded-xl bg-white",
       )}
     >
       <div className="flex items-center justify-between gap-2 px-5 pt-5">
@@ -67,7 +65,7 @@ export function SupportProgramCard({
         )}
       </div>
 
-      <h3 className="mt-3 px-5 text-body-1 font-bold text-slate-900">{program.title}</h3>
+      <h3 className="mt-3 px-5 text-body-1 font-bold text-slate-900 group-hover:underline">{program.title}</h3>
       <p className="mt-2 px-5 line-clamp-2 text-label-1 text-slate-600">
         {program.benefitDescription ?? program.summary}
       </p>
