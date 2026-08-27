@@ -1,5 +1,7 @@
 "use client";
 
+import { unstable_rethrow } from "next/navigation";
+
 import { useState } from "react";
 import { ArrowLeft, Check, CheckCircle2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -229,8 +231,10 @@ export function OnboardingWizard({
       // 성공하면 서버에서 redirect하므로 여기로 돌아오지 않는다.
       setError(result?.phoneError ?? result?.error ?? null);
       setSubmitting(false);
-    } catch {
-      // redirect()가 던지는 예외는 Next가 처리한다. 여기 오는 건 실제 실패다.
+    } catch (err) {
+      // 성공 시 서버가 redirect()로 던지는 신호까지 여기서 잡으면
+      // 화면 이동은 되면서 "오류" 문구만 남는다. 내부 신호는 먼저 되던진다.
+      unstable_rethrow(err);
       setError("저장하는 중 문제가 발생했어요. 다시 시도해주세요.");
       setSubmitting(false);
     }
@@ -240,7 +244,8 @@ export function OnboardingWizard({
     setSubmitting(true);
     try {
       await skipOnboardingProfileAction(next);
-    } catch {
+    } catch (err) {
+      unstable_rethrow(err);
       setSubmitting(false);
     }
   }
