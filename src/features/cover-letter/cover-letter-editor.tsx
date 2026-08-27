@@ -2,8 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ArrowDown, ArrowUp, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +16,6 @@ import { MarketComparisonCard } from "@/features/career-gap/market-comparison-ca
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
 import {
   changeCoverLetterTemplateAction,
-  deleteCoverLetterAction,
   generateCoverLetterDraftAiAction,
   getCoverLetterMarketComparisonAction,
   reviewCoverLetterSectionAiAction,
@@ -50,7 +48,6 @@ export function CoverLetterEditor({
   /** 방금 만든 자기소개서인지. 그렇다면 양식 선택기를 펼친 채로 연다. */
   isNew?: boolean;
 }) {
-  const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const [title, setTitle] = useState(initialDetail.coverLetter.title);
   const [sections, setSections] = useState<EditableSection[]>(
@@ -192,11 +189,6 @@ export function CoverLetterEditor({
     }
   }
 
-  async function handleDelete() {
-    if (!window.confirm("이 자기소개서를 삭제하시겠습니까?")) return;
-    await deleteCoverLetterAction(detail.coverLetter.id);
-    router.push("/resume");
-  }
 
   return (
     <div className="space-y-4">
@@ -367,24 +359,26 @@ export function CoverLetterEditor({
         <Plus className="size-4" /> 문항 추가
       </Button>
 
-      {/* 이력서 편집기와 동일: 저장은 다 쓰고 나서 하는 동작이라 하단에 sticky로 붙인다. */}
-      <div className="sticky bottom-0 z-10 -mx-1 flex items-center justify-end gap-3 rounded-xl border border-border bg-white/95 px-4 py-3 backdrop-blur">
-        {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
-        <Button onClick={() => void handleSave()} disabled={isSaving}>
-          {isSaving && <Loader2 className="size-4 animate-spin" />}
-          저장
-        </Button>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <Button variant="ghost" size="sm" className="text-rose-500" onClick={handleDelete}>
-          <Trash2 className="size-4" /> 자기소개서 삭제
-        </Button>
-        <div className="flex items-center gap-3">
-          {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
-          <Link href="/resume" className="text-label-2 text-slate-400 hover:underline">
-            목록으로
-          </Link>
+      {/*
+        이력서 편집기와 동일한 구조. 왼쪽은 문서를 벗어나는 동작(목록으로)이라 ghost로 눌러두고,
+        오른쪽은 확정 동작인 저장만 채운다. 화면 전체 폭에 고정해야 해서 sticky가 아니라 fixed다.
+        삭제는 편집 화면이 아니라 자기소개서 목록에서 처리한다.
+      */}
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur">
+        <div className="mx-auto flex max-w-3xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
+          <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
+            <Link href="/resume">
+              <ArrowLeft className="size-4" /> 목록으로
+            </Link>
+          </Button>
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
+            {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
+            <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
+              {isSaving && <Loader2 className="size-4 animate-spin" />}
+              저장
+            </Button>
+          </div>
         </div>
       </div>
     </div>

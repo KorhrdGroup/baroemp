@@ -9,6 +9,7 @@ import { listCoverLettersForUser } from "@/services/cover-letter.service";
 import { listExperienceBankForUser } from "@/services/experience-bank.service";
 import { ExperienceBankSection } from "@/features/experience-bank/experience-bank-section";
 import { ResumeDeleteButton } from "@/features/resume/resume-delete-button";
+import { CoverLetterDeleteButton } from "@/features/cover-letter/cover-letter-delete-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -156,7 +157,10 @@ export default async function ResumeListPage() {
                   </p>
                   <p className="mt-1 text-label-1 text-slate-400">최근수정 {new Date(cl.updatedAt).toLocaleDateString("ko-KR")}</p>
                 </div>
-                <Pencil className="size-4 text-slate-400" />
+                <div className="flex shrink-0 items-center gap-2">
+                  <Pencil className="size-4 text-slate-400" />
+                  <CoverLetterDeleteButton coverLetterId={cl.id} />
+                </div>
               </Link>
             ))}
           </div>
