@@ -4,6 +4,7 @@
 import * as React from "react";
 import Link from "next/link";
 import { Logo } from "@/components/layout/logo";
+import { cn } from "@/lib/utils";
 import { sendPhoneCodeAction, verifyPhoneCodeAction } from "./phone-verification-actions";
 import type { PhoneVerificationPurpose } from "@/types";
 
@@ -81,20 +82,23 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
       <input
         ref={ref}
         {...props}
-        className={[
+        className={cn(
           "h-14 w-full min-w-0 rounded-[14px] px-[18px] text-[16px] text-[#1c1a17] outline-none",
           "placeholder:text-slate-400 transition-shadow",
           invalid
             ? "border-[1.5px] border-[#e5484d] bg-white"
             : "border-0 bg-slate-100 focus:ring-2 focus:ring-[#1f5eff]/35",
           className,
-        ].join(" ")}
+        )}
       />
     );
   }
 );
 
-/** 입력 + 우측 버튼(인증/중복확인). 모바일에서도 한 줄 유지 */
+/**
+ * 입력 + 보조 동작 버튼(인증/중복확인).
+ * 버튼을 입력창 밖에 두면 큰 상자가 하나 더 생겨 시선을 뺏으므로, 입력창 안쪽 오른쪽에 작은 pill로 넣는다.
+ */
 export function InputWithAction({
   action,
   onAction,
@@ -105,16 +109,37 @@ export function InputWithAction({
   inputProps: InputProps;
 }) {
   return (
-    <div className="flex gap-2">
-      <Input {...inputProps} />
-      <button
-        type="button"
-        onClick={onAction}
-        className="h-14 flex-none whitespace-nowrap rounded-[14px] border-[1.5px] border-brand-blue-400 bg-white px-4 text-[14px] font-bold text-brand-blue-600 transition-colors hover:bg-brand-blue-400 hover:text-white"
-      >
+    <div className="relative">
+      <Input {...inputProps} className={cn("pr-[92px]", inputProps.className)} />
+      <FieldActionButton onClick={onAction} disabled={inputProps.disabled}>
         {action}
-      </button>
+      </FieldActionButton>
     </div>
+  );
+}
+
+/** 입력창 안쪽 오른쪽에 겹쳐 놓는 작은 보조 버튼. */
+export function FieldActionButton({
+  children,
+  tone = "default",
+  className,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement> & { tone?: "default" | "ok" }) {
+  return (
+    <button
+      type="button"
+      {...props}
+      className={cn(
+        "absolute right-2 top-1/2 h-10 -translate-y-1/2 whitespace-nowrap rounded-[10px] px-3.5",
+        "text-[13.5px] font-semibold transition-colors disabled:opacity-40",
+        tone === "ok"
+          ? "bg-emerald-50 text-emerald-600"
+          : "bg-slate-200 text-slate-700 hover:bg-brand-blue-400 hover:text-white",
+        className,
+      )}
+    >
+      {children}
+    </button>
   );
 }
 
@@ -340,7 +365,7 @@ export function PhoneVerificationField({
 
       <div>
         <Label htmlFor={`${idPrefix}-code`}>인증번호</Label>
-        <div className="flex gap-2">
+        <div className="relative">
           <Input
             id={`${idPrefix}-code`}
             inputMode="numeric"
@@ -349,20 +374,15 @@ export function PhoneVerificationField({
             value={code}
             disabled={!sent || verified}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+            className="pr-[92px]"
           />
-          <button
-            type="button"
+          <FieldActionButton
             onClick={handleVerify}
             disabled={!sent || verified || code.length !== 6 || busy}
-            className={[
-              "h-14 w-[78px] flex-none rounded-[14px] text-[14px] font-bold transition-colors disabled:opacity-50",
-              verified
-                ? "bg-[#eaf3ec] text-[#0f9d58]"
-                : "border-[1.5px] border-[#1c1a17] bg-white text-[#1c1a17] hover:bg-[#1c1a17] hover:text-white",
-            ].join(" ")}
+            tone={verified ? "ok" : "default"}
           >
             {verified ? "완료" : "확인"}
-          </button>
+          </FieldActionButton>
         </div>
         {verified ? <HelpText tone="ok">인증이 완료되었습니다</HelpText> : null}
         {!verified && sent ? <HelpText>남은 시간 {mmss}</HelpText> : null}
