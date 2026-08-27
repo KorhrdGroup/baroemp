@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import type {
   AICoverLetterDraftResult,
   AIResumeReviewResult,
@@ -70,6 +72,8 @@ export async function saveCoverLetterAction(input: CoverLetterSaveActionInput): 
 export async function deleteCoverLetterAction(coverLetterId: string): Promise<void> {
   await requireOwnCoverLetter(coverLetterId);
   await deleteCoverLetter(coverLetterId);
+  // 목록은 서버 컴포넌트라 캐시를 비워야 삭제 결과가 화면에 반영된다.
+  revalidatePath("/resume");
 }
 
 export async function reviewCoverLetterSectionAiAction(input: {

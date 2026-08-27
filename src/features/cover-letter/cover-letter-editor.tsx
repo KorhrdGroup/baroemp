@@ -210,14 +210,19 @@ export function CoverLetterEditor({
         defaultOpen={isNew}
       />
 
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4 ring-1 ring-border">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4">
         <div className="min-w-48 flex-1">
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mt-1 h-9" />
+          <Input
+            placeholder="제목을 입력해주세요"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="mt-1 h-9"
+          />
         </div>
       </div>
 
-      <Card className="rounded-xl border-0 ring-1 ring-border">
+      <Card className="rounded-xl border-0 ring-0">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-label-1 font-semibold text-slate-500">
             {experienceBank.length > 0 ? "경험뱅크에서 문항별로 사용할 경험을 선택하세요" : "경험뱅크가 비어있어요"}
@@ -230,7 +235,7 @@ export function CoverLetterEditor({
 
       <div className="space-y-4">
         {sections.map((section, idx) => (
-          <Card key={section._key} className="rounded-xl border-0 ring-1 ring-border">
+          <Card key={section._key} className="rounded-xl border-0 ring-0">
             <CardHeader className="flex flex-row items-start justify-between gap-3">
               <div className="flex-1">
                 <p className="text-label-2 font-semibold text-slate-400">문항 {idx + 1}</p>

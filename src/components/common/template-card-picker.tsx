@@ -42,7 +42,7 @@ export function TemplateCardPicker({
   const current = templates.find((t) => t.id === value) ?? templates[0];
 
   return (
-    <div className="rounded-xl bg-white p-4 ring-1 ring-border">
+    <div className="rounded-xl bg-white p-4">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-label-2 text-slate-400">{label}</p>

@@ -42,13 +42,16 @@ export default async function CoverLetterEditPage({
     }));
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    // 입력칸이 흰색으로 도드라지도록 편집 화면만 회색 바탕을 깐다.
+    <div className="bg-slate-100">
+      <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <CoverLetterEditor
         initialDetail={detail}
         experienceBank={experienceBank}
         templates={templateOptions}
         isNew={isNewParam === "1"}
       />
+      </div>
     </div>
   );
 }
