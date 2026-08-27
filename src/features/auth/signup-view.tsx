@@ -169,7 +169,7 @@ export function SignupView({ next }: { next: string }) {
         />
         {state.fieldErrors?.phone ? <HelpText tone="error">{state.fieldErrors.phone}</HelpText> : null}
 
-        <div className="flex flex-col gap-[11px] rounded-[10px] bg-slate-100 px-[18px] py-4">
+        <div className="flex flex-col gap-[11px] rounded-xl bg-slate-100 px-[18px] py-4">
           <Checkbox
             strong
             checked={agreeRequired && agreeMarketing}

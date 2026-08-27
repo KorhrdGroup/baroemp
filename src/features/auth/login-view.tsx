@@ -57,7 +57,7 @@ export function LoginView({ next }: { next: string }) {
           />
         </div>
 
-        <div className="mt-6">
+        <div className="mt-4">
           <PrimaryButton type="submit" disabled={!canSubmit}>
             {pending ? "로그인 중..." : "로그인"}
           </PrimaryButton>
