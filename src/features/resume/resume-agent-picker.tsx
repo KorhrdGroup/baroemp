@@ -1,7 +1,7 @@
 "use client";
 
-import { Bot, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Bot } from "lucide-react";
+import { PillPicker } from "@/components/common/pill-picker";
 
 export interface ResumeAgentOption {
   id: string;
@@ -35,18 +35,6 @@ const AGENT_PRESETS: Record<string, { name: string; tagline: string }> = {
   },
 };
 
-function agentView(option: ResumeAgentOption) {
-  const preset = option.code ? AGENT_PRESETS[option.code] : undefined;
-  return {
-    name: preset?.name ?? option.name,
-    tagline: preset?.tagline ?? option.description,
-  };
-}
-
-/**
- * 항상 노출되는 가벼운 pill 선택 바. 카드를 펼쳐 고르는 대신 버튼 한 번으로 바꾼다.
- * 상세 설명은 선택된 에이전트의 한 줄만 아래에 보여준다.
- */
 export function ResumeAgentPicker({
   agents,
   value,
@@ -58,43 +46,23 @@ export function ResumeAgentPicker({
   onChange: (templateId: string) => void;
   pending?: boolean;
 }) {
-  if (agents.length === 0) return null;
-
-  const current = agents.find((a) => a.id === value) ?? agents[0];
-  const currentView = agentView(current);
+  const options = agents.map((agent) => {
+    const preset = agent.code ? AGENT_PRESETS[agent.code] : undefined;
+    return {
+      id: agent.id,
+      name: preset?.name ?? agent.name,
+      description: preset?.tagline ?? agent.description,
+    };
+  });
 
   return (
-    <div className="rounded-xl bg-white px-4 py-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 flex shrink-0 items-center gap-1.5 text-label-1 font-semibold text-slate-500">
-          <Bot className="size-4 text-brand-blue-600" />
-          AI 에이전트
-        </span>
-        {agents.map((agent) => {
-          const selected = agent.id === current.id;
-          return (
-            <button
-              key={agent.id}
-              type="button"
-              disabled={pending}
-              onClick={() => onChange(agent.id)}
-              aria-pressed={selected}
-              className={cn(
-                "cursor-pointer rounded-full border px-3 py-1.5 text-label-1 font-medium transition-colors disabled:opacity-50",
-                selected
-                  ? "border-transparent bg-brand-blue-600 text-white"
-                  : "border-border bg-white text-slate-600 hover:border-brand-blue-200 hover:text-brand-blue-700",
-              )}
-            >
-              {agentView(agent).name}
-            </button>
-          );
-        })}
-        {pending && <Loader2 className="size-4 animate-spin text-slate-400" />}
-      </div>
-      {currentView.tagline && (
-        <p className="mt-1.5 text-label-2 text-slate-400">{currentView.tagline}</p>
-      )}
-    </div>
+    <PillPicker
+      label="AI 에이전트"
+      icon={<Bot className="size-4 text-brand-blue-600" />}
+      options={options}
+      value={value}
+      onChange={onChange}
+      pending={pending}
+    />
   );
 }

@@ -24,6 +24,7 @@ export function JobBookmarkButton({
   variant = "icon",
   isAuthenticated = false,
   initialBookmarked = false,
+  className,
 }: {
   jobId: string;
   /** 향후 통계/추천 확장을 위해 호출부에서 넘겨줄 수 있게 열어둔 필드 (현재는 사용하지 않음). */
@@ -31,6 +32,8 @@ export function JobBookmarkButton({
   variant?: "icon" | "full";
   isAuthenticated?: boolean;
   initialBookmarked?: boolean;
+  /** 카드가 통째로 Link일 때 버튼을 겹쳐 놓기 위한 위치 지정용. */
+  className?: string;
 }) {
   const [dbBookmarked, setDbBookmarked] = useState(initialBookmarked);
   const [pending, startTransition] = useTransition();
@@ -90,6 +93,7 @@ export function JobBookmarkButton({
         bookmarked
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-600"
           : "border-border bg-white text-slate-400",
+        className,
       )}
     >
       <Bookmark className={cn("size-4", bookmarked && "fill-current")} />

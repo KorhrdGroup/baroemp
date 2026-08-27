@@ -62,3 +62,14 @@ export const cardBorderClass = "border-2 border-slate-100";
  * cardBorderClass 만 쓴다.
  */
 export const outlinedCardClass = `${cardBorderClass} hover:border-brand-blue-300`;
+
+/**
+ * 목록 위에 놓이는 필터·탭 pill.
+ *
+ * 파랑은 팔레트 규칙대로 400/300 단계만 쓴다(남색은 700~900). 500은 팔레트에 없는 단계라
+ * 같은 화면 안에서도 버튼마다 파랑 톤이 달라 보이는 원인이었다.
+ * 꺼진 상태의 테두리는 다른 카드와 같은 border-border 를 쓴다.
+ */
+export const filterPillClass = "shrink-0 rounded-full border px-4 py-2 text-label-1 transition-colors";
+export const filterPillOnClass = "border-brand-blue-300 bg-brand-blue-50 font-semibold text-brand-blue-600";
+export const filterPillOffClass = "border-border bg-white font-medium text-slate-600 hover:bg-slate-50";

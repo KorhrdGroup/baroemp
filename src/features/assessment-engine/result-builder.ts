@@ -65,7 +65,7 @@ export function buildAssessmentResult(input: BuildResultInput): AssessmentResult
 
   const top = recommendations[0];
   const summary = top
-    ? `${top.occupationName} 등 ${recommendations.length}개 직업이 회원님의 성향·조건과 잘 맞아요. 적합도 ${top.totalScore}점, 현재 준비도 ${top.readinessScore}점이에요.`
+    ? `${top.occupationName} 등 ${recommendations.length}개 직업이 회원님의 성향·조건과 잘 맞아요. 적합도 ${top.totalScore}점이에요.`
     : "입력하신 답변으로는 추천할 직업을 찾지 못했어요. 조건을 조금 더 넓혀서 다시 시도해보세요.";
 
   return {

@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Eye, Loader2, Pencil, Plus, Printer, Target, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, Loader2, Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -332,6 +332,7 @@ export function ResumeEditor({
             </Label>
             <CompactInput
               id="resume-title"
+              placeholder="제목을 입력해주세요"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className="mt-1"
@@ -346,18 +347,6 @@ export function ResumeEditor({
             </AiButton>
           </div>
         </div>
-
-        <Link
-          href={
-            resume.targetOccupationId
-              ? `/career-gap?occupation=${resume.targetOccupationId}${resume.targetJobId ? `&job=${resume.targetJobId}` : ""}`
-              : "/career-gap"
-          }
-          className="flex h-11 items-center justify-center gap-2 rounded-md border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
-        >
-          <Target className="size-4" />
-          지원직무 대비 이력서 점검
-        </Link>
 
         {reviewResult && (
           <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
@@ -973,7 +962,7 @@ export function ResumeEditor({
         삭제는 편집 화면이 아니라 이력서 목록에서 처리한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
-        <div className="mx-auto flex max-w-6xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
           <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로

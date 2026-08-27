@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ChevronDown, FileText, GraduationCap, ListChecks, MapPin, Sparkles } from "lucide-react";
+import { AlertTriangle, ChevronDown, FileText, ListChecks, MapPin, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Occupation, OccupationRecommendation } from "@/types";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,17 @@ const GRADE_STYLE: Record<OccupationRecommendation["grade"], string> = {
   "잘 맞아요": "bg-brand-blue-50 text-brand-blue-700 ring-brand-blue-200",
   "도전해볼 만해요": "bg-amber-50 text-amber-700 ring-amber-200",
   "준비가 더 필요해요": "bg-slate-100 text-slate-600 ring-slate-200",
+};
+
+/**
+ * 적합도 숫자도 등급 배지와 같은 계열로 물들인다.
+ * 숫자만 늘 파랑이면 "준비가 더 필요해요"인 직업에서도 점수가 강조되어 신호가 어긋난다.
+ */
+const GRADE_SCORE_STYLE: Record<OccupationRecommendation["grade"], string> = {
+  "매우 잘 맞아요": "text-emerald-700",
+  "잘 맞아요": "text-brand-blue-600",
+  "도전해볼 만해요": "text-amber-700",
+  "준비가 더 필요해요": "text-slate-500",
 };
 
 const SUBSCORES: { key: keyof OccupationRecommendation; label: string }[] = [
@@ -49,8 +60,8 @@ export function OccupationRecommendationCard({
     <details
       open={defaultOpen}
       className={cn(
-        "group rounded-xl border bg-white",
-        rank === 1 ? "border-brand-blue-300 ring-2 ring-brand-blue-100" : "border-border",
+        // 순위는 왼쪽 번호 배지가 이미 짚어주므로 카드에는 테두리를 두지 않는다.
+        "group rounded-xl bg-white",
       )}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-5 sm:px-7 sm:py-6">
@@ -73,7 +84,7 @@ export function OccupationRecommendationCard({
             {rec.grade}
           </span>
           <div className="text-right">
-            <p className="text-title-2 font-extrabold text-brand-blue-600">{rec.totalScore}</p>
+            <p className={cn("text-title-2 font-extrabold", GRADE_SCORE_STYLE[rec.grade])}>{rec.totalScore}</p>
             <p className="text-label-2 text-slate-400">적합도</p>
           </div>
           <ChevronDown className="size-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
@@ -90,34 +101,15 @@ export function OccupationRecommendationCard({
         )}
 
         {/* 세부 적합도 */}
-        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {/* 네 지표를 각각 회색 상자에 담는다. 배경 없이 나열하면 어디까지가 한 지표인지 흐리다. */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {SUBSCORES.map(({ key, label }) => (
-            <div key={label}>
+            <div key={label} className="rounded-xl bg-slate-50 p-4">
               <p className="text-label-2 text-slate-400">{label}</p>
-              <p className="mt-0.5 text-body-1 font-bold text-slate-800">{rec[key] as number}</p>
-              <Progress value={rec[key] as number} className="mt-1 h-1.5" />
+              <p className="mt-1 text-title-3 font-bold text-slate-900">{rec[key] as number}</p>
+              <Progress value={rec[key] as number} className="mt-2 h-1.5" />
             </div>
           ))}
-        </div>
-
-        {/* 현재 준비도 */}
-        <div className="mt-6 rounded-xl bg-brand-blue-50/60 p-4">
-          <div className="flex items-center justify-between">
-            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
-              <GraduationCap className="size-4" /> 현재 준비도
-            </p>
-            <p className="text-body-1 font-bold text-brand-blue-700">{rec.readinessScore}점</p>
-          </div>
-          <Progress value={rec.readinessScore} className="mt-2 h-2" />
-          {rec.readinessProjection.length > 0 && (
-            <ul className="mt-3 space-y-1 text-label-1 text-brand-blue-800">
-              {rec.readinessProjection.map((p) => (
-                <li key={p.contentId}>
-                  {p.contentTitle} 완료 시 예상 준비도 <strong>{p.projectedScore}점</strong>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
 
         {/* 왜 추천되었는지 / 고려할 점 */}
@@ -183,7 +175,7 @@ export function OccupationRecommendationCard({
         </div>
 
         {/* 관련 채용공고 */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-border px-4 py-4">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-4">
           <div className="text-label-1 text-slate-600">
             <p className="flex items-center gap-1.5">
               <MapPin className="size-4 text-slate-400" />
@@ -201,22 +193,21 @@ export function OccupationRecommendationCard({
             targetId={rec.occupationId}
             userId={userId}
             anonymousId={anonymousId}
-            href={rec.jobCategoryCode ? `/jobs?category=${rec.jobCategoryCode}` : "/jobs"}
+            /*
+             * 직종 코드가 아니라 직업 이름으로 검색해 넘긴다.
+             * 코드로 넘기면 검색창이 빈 채로 드롭다운만 바뀌어 무엇으로 좁혀졌는지 알기 어렵고,
+             * 사용자가 검색어를 고쳐 넓히거나 좁힐 수도 없다.
+             * 이름 검색은 제목·본문까지 훑어 코드가 다른 관련 공고도 함께 걸린다.
+             */
+            href={`/jobs?keyword=${encodeURIComponent(rec.occupationName)}`}
             className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
           >
             채용공고 보기
           </TrackedLink>
         </div>
 
-        {/* 이력서 준비 / 취업 준비도 연결 (스펙 34/43번: 강제하지 않는 선택적 CTA) */}
+        {/* 이력서 준비 연결 (스펙 34번: 강제하지 않는 선택적 CTA) */}
         <div className="mt-3 flex flex-wrap justify-end gap-4">
-          <Link
-            href={`/career-gap?occupation=${rec.occupationId}`}
-            className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-600 hover:underline"
-          >
-            <GraduationCap className="size-4" />
-            이 직업 취업 준비도 분석
-          </Link>
           <Link
             href={`/resume/new?occupation=${rec.occupationId}&title=${encodeURIComponent(rec.occupationName)}`}
             className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-600 hover:underline"

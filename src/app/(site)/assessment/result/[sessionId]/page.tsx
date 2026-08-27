@@ -49,13 +49,15 @@ export default async function AssessmentResultPage({
     await Promise.all(
       result.recommendations.map(async (rec) => [
         rec.occupationId,
-        await countJobsForOccupation(rec.jobCategoryCode, profileSignal),
+        await countJobsForOccupation(rec.occupationName, profileSignal),
       ] as const),
     ),
   );
 
   return (
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    // 지원금 결과 화면과 같은 뼈대: 회색 바탕 위에 흰 카드를 쌓는다.
+    <div className="min-h-screen bg-slate-50">
+    <div className="mx-auto max-w-3xl px-4 pb-28 pt-10 sm:px-6 lg:px-8">
       <ResultView
         sessionId={sessionId}
         result={result}
@@ -63,6 +65,7 @@ export default async function AssessmentResultPage({
         contentRecs={contentRecs}
         jobCounts={jobCounts}
       />
+    </div>
     </div>
   );
 }

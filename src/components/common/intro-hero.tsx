@@ -36,24 +36,24 @@ export function IntroHero({
   return (
     <>
       {/* pb는 CTA 바가 겹쳐 올라올 자리다. 아래 카드의 -mt와 짝을 이룬다. */}
-      <section className="relative bg-brand-blue-50 pb-37 sm:pb-28">
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-          <span className="absolute -left-24 -top-16 size-[26rem] rounded-full bg-brand-blue-100 opacity-70 blur-3xl" />
-          <span className="absolute -right-24 top-4 size-[22rem] rounded-full bg-white opacity-80 blur-3xl" />
-          <span className="absolute bottom-0 left-1/2 size-[20rem] -translate-x-1/2 rounded-full bg-brand-blue-100/60 blur-3xl" />
+      <section className="relative overflow-hidden bg-gov-surface pb-37 sm:pb-28">
+        {/* 홈 히어로와 같은 밝은 파랑 한 갈래. 색을 여러 갈래로 섞으면 위에 얹히는 흰 요소가 묻힌다. */}
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="absolute inset-0 bg-[linear-gradient(160deg,#FFFFFF_0%,var(--gov-ice)_38%,var(--gov-sky)_100%)]" />
+          <span className="absolute -right-24 -top-16 size-[26rem] rounded-full bg-white opacity-60 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto max-w-5xl px-4 pt-16 text-center sm:px-6 sm:pt-20 lg:px-8">
+        <div className="relative mx-auto max-w-5xl px-4 pt-10 text-center sm:px-6 sm:pt-14 lg:px-8">
           <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-white text-brand-blue-600 ring-1 ring-brand-blue-100">
             <Icon className="size-7" />
           </span>
 
           {/*
-           * 굵기를 800으로 두되 font-synthesis-weight:none 을 건다.
-           * 독립고딕(400 단일 굵기)이 뜨면 가짜 볼드 없이 원래 굵기로 그려지고,
-           * 로딩에 실패해 2순위 Pretendard로 떨어지면 실제 ExtraBold로 렌더링된다.
+           * 배너 제목은 홈 히어로와 같은 규칙을 쓴다.
+           * 굵기 900은 배너에서만 쓰는 예외이고(다른 제목은 800), 두 줄로 놓이는 경우가 많아
+           * 타이포 토큰의 기본 행간(1.2) 대신 1.35를 준다.
            */}
-          <h1 className="mx-auto mt-6 max-w-3xl break-keep text-headline-3 font-extrabold tracking-tight text-slate-800 sm:text-headline-2">
+          <h1 className="mx-auto mt-6 max-w-3xl break-keep text-headline-3 font-black leading-[1.35] tracking-tight text-slate-900 sm:text-headline-2">
             {title}
           </h1>
           <p className="mx-auto mt-4 max-w-2xl break-keep text-body-1-reading text-slate-600">{description}</p>

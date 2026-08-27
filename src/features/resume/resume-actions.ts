@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import type {
   AICareerSummaryResult,
   AIResumeReviewResult,
@@ -83,6 +85,8 @@ export async function saveResumeAction(input: ResumeSaveActionInput): Promise<Re
 export async function deleteResumeAction(resumeId: string): Promise<void> {
   await requireOwnResume(resumeId);
   await deleteResume(resumeId);
+  // 목록은 서버 컴포넌트라 캐시를 비워야 삭제 결과가 화면에 반영된다.
+  revalidatePath("/resume");
 }
 
 export async function reviewResumeAiAction(resumeId: string): Promise<AIResumeReviewResult> {

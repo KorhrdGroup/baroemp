@@ -7,10 +7,7 @@ import {
   ExternalLink,
   FileText,
   Gift,
-  GraduationCap,
-  MessageCircle,
   Pencil,
-  Target,
   UserRound,
 } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
@@ -131,7 +128,7 @@ export default async function MyPage() {
     );
   }
 
-  const { profile, careerProfile, lead, assessmentResults, consultations, recommendedContents } = detail;
+  const { profile, careerProfile, lead, assessmentResults } = detail;
   const latestResult = assessmentResults[0];
   const [jobData, supportData] = await Promise.all([
     loadMyPageJobData(user.id),
@@ -306,53 +303,8 @@ export default async function MyPage() {
               </Card>
             )}
 
-            {/* D-3. 취업 준비도 (스펙 37번) */}
-            <Card className="rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
-                  <Target className="size-4" /> 취업 준비도
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                {detail.careerGapSummaries.length === 0 ? (
-                  <>
-                    <p>아직 취업 준비도를 확인하지 않았어요. 실제 채용공고 기준으로 지금 준비 상태를 확인해보세요.</p>
-                    <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                      <Link href="/career-gap">취업 준비도 확인하기</Link>
-                    </Button>
-                  </>
-                ) : (
-                  <div className="space-y-3">
-                    {detail.careerGapSummaries.map((summary) => (
-                      <div key={summary.id} className="rounded-lg bg-slate-50 px-3 py-2.5">
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium text-slate-700">
-                            {summary.occupationName ?? "직업 미지정"}
-                            {summary.destinationName ? ` · ${summary.destinationName}` : ""}
-                          </p>
-                          <span className="font-bold text-brand-blue-600">{summary.readinessScore}점</span>
-                        </div>
-                        <p className="mt-1 text-label-1 text-slate-400">
-                          {summary.topGapName ? `TOP 보완항목 · ${summary.topGapName}` : "부족 조건 없음"} · 최근분석{" "}
-                          {summary.createdAt.slice(0, 10)}
-                        </p>
-                        <div className="mt-2 flex gap-2">
-                          <Button variant="outline" size="sm" className="flex-1" asChild>
-                            <Link href={`/career-gap/${summary.id}`}>결과 다시보기</Link>
-                          </Button>
-                          <Button variant="outline" size="sm" className="flex-1" asChild>
-                            <Link href="/career-gap">다시 분석</Link>
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
             {/* D-2. 이력서/자기소개서 (스펙 51번) */}
-            <Card className="rounded-xl border-0 ring-1 ring-border md:col-span-2">
+            <Card className="rounded-xl border-0 ring-1 ring-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-1.5 text-body-2">
                   <FileText className="size-4" /> 이력서 · 자기소개서
@@ -557,53 +509,6 @@ export default async function MyPage() {
                       </span>
                       <span className="shrink-0 text-slate-400">{occurredAt.slice(0, 10)}</span>
                     </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </section>
-
-        <section>
-          <h2 className="mb-4 text-body-1 font-bold text-slate-900">상담 · 교육</h2>
-          <div className="grid gap-4 md:grid-cols-2">
-            {/* G. 상담 */}
-            <Card className={cn("rounded-xl border-0 ring-1 ring-border", recommendedContents.length === 0 && "md:col-span-2")}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
-                  <MessageCircle className="size-4" /> 상담
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-1.5 text-label-1 text-slate-600">
-                {consultations.length > 0 ? (
-                  consultations.map((c) => (
-                    <div key={c.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-                      <span className="font-medium text-slate-700">{c.requestedTopic ?? "상담"}</span>
-                      <Badge variant="outline" className="rounded-md text-label-2">
-                        {c.status}
-                      </Badge>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400">아직 신청한 상담이 없습니다.</p>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* F. 추천 교육/콘텐츠 */}
-            {recommendedContents.length > 0 && (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-1.5 text-body-2">
-                    <GraduationCap className="size-4" /> 추천 교육·콘텐츠
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1.5 text-label-1 text-slate-600">
-                  {recommendedContents.slice(0, 5).map((content) => (
-                    <div key={content.id} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-                      <span className="truncate font-medium text-slate-700">{content.title}</span>
-                      <span className="shrink-0 font-bold text-brand-blue-600">{content.score}점</span>
-                    </div>
                   ))}
                 </CardContent>
               </Card>

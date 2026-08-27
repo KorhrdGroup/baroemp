@@ -120,13 +120,17 @@ export async function getRecommendedJobsForAnonymous(
 
 /**
  * Assessment 결과 화면에서 "현재 관련 채용공고 N건 / 회원님의 조건과 높은 일치 M건" 표시에 사용한다.
+ *
+ * 세는 기준은 결과 화면의 "채용공고 보기" 링크와 같아야 한다.
+ * 링크는 직업 이름으로 검색해 넘기므로 여기서도 이름으로 센다.
+ * (직종 코드로 세면 표시된 건수와 눌러서 도착한 목록의 건수가 어긋난다)
  */
 export async function countJobsForOccupation(
-  jobCategoryCode: string | undefined,
+  occupationName: string | undefined,
   profile?: CareerProfile,
 ): Promise<{ total: number; highMatchCount: number }> {
-  if (!jobCategoryCode) return { total: 0, highMatchCount: 0 };
-  const jobs = await getJobRepository().findAll({ jobCategory: jobCategoryCode, activeOnly: true } as JobSearchFilter);
+  if (!occupationName) return { total: 0, highMatchCount: 0 };
+  const jobs = await getJobRepository().findAll({ keyword: occupationName, activeOnly: true } as JobSearchFilter);
   if (!profile) return { total: jobs.length, highMatchCount: 0 };
   const highMatchCount = jobs.filter((job) => (evaluateJobFit(profile, job)?.score ?? 0) >= 70).length;
   return { total: jobs.length, highMatchCount };

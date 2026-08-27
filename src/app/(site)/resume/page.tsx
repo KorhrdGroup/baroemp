@@ -9,6 +9,7 @@ import { listCoverLettersForUser } from "@/services/cover-letter.service";
 import { listExperienceBankForUser } from "@/services/experience-bank.service";
 import { ExperienceBankSection } from "@/features/experience-bank/experience-bank-section";
 import { ResumeDeleteButton } from "@/features/resume/resume-delete-button";
+import { CoverLetterDeleteButton } from "@/features/cover-letter/cover-letter-delete-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -23,17 +24,23 @@ export const metadata: Metadata = {
 function SectionHeader({
   title,
   count,
+  description,
   action,
 }: {
   title: string;
   count: number;
+  /** 섹션끼리의 관계를 설명해야 할 때만 쓴다. */
+  description?: string;
   action: React.ReactNode;
 }) {
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
-      <h2 className="text-body-1 font-bold text-slate-900">
-        {title} ({count})
-      </h2>
+      <div className="min-w-0">
+        <h2 className="text-body-1 font-bold text-slate-900">
+          {title} ({count})
+        </h2>
+        {description && <p className="mt-1 text-label-1 text-slate-500">{description}</p>}
+      </div>
       {action}
     </div>
   );
@@ -90,7 +97,9 @@ export default async function ResumeListPage() {
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className="truncate text-body-2 font-semibold text-slate-900">{resume.title}</p>
+                    <p className={cn("truncate text-body-2 font-semibold", resume.title ? "text-slate-900" : "text-slate-400")}>
+                      {resume.title || "제목 없는 이력서"}
+                    </p>
                     {resume.isPrimary && <Badge className="rounded-full bg-brand-blue-400 text-label-2">대표</Badge>}
                     <Badge variant="outline" className="rounded-full text-label-2">
                       {resume.status === "completed" ? "완성" : resume.status === "archived" ? "보관" : "작성중"}
@@ -116,6 +125,7 @@ export default async function ResumeListPage() {
         <SectionHeader
           title="내 자기소개서"
           count={coverLetters.length}
+          description="아래 경험뱅크에 정리해둔 경험을 문항마다 골라 넣어 작성할 수 있어요."
           action={
             <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
               <Link href="/cover-letter/new">
@@ -126,7 +136,9 @@ export default async function ResumeListPage() {
         />
         {coverLetters.length === 0 ? (
           <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-8 text-center">
-            <p className="text-label-1 text-slate-500">아직 작성한 자기소개서가 없어요.</p>
+            <p className="text-label-1 text-slate-500">
+              아직 작성한 자기소개서가 없어요. 경험뱅크를 먼저 채워두면 문항 작성이 훨씬 빨라요.
+            </p>
             <Link href="/cover-letter/new" className="mt-3 inline-block text-label-1 font-semibold text-brand-blue-600 hover:underline">
               자기소개서 작성하기 →
             </Link>
@@ -140,18 +152,27 @@ export default async function ResumeListPage() {
                 className={cn("flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5", interactiveCardClass)}
               >
                 <div>
-                  <p className="text-body-2 font-semibold text-slate-900">{cl.title}</p>
+                  <p className={cn("truncate text-body-2 font-semibold", cl.title ? "text-slate-900" : "text-slate-400")}>
+                    {cl.title || "제목 없는 자기소개서"}
+                  </p>
                   <p className="mt-1 text-label-1 text-slate-400">최근수정 {new Date(cl.updatedAt).toLocaleDateString("ko-KR")}</p>
                 </div>
-                <Pencil className="size-4 text-slate-400" />
+                <div className="flex shrink-0 items-center gap-2">
+                  <Pencil className="size-4 text-slate-400" />
+                  <CoverLetterDeleteButton coverLetterId={cl.id} />
+                </div>
               </Link>
             ))}
           </div>
         )}
-      </div>
 
-      {/* 추가/수정은 모달, 삭제는 목록에서 바로 처리하므로 클라이언트 컴포넌트가 섹션 전체를 그린다. */}
-      <ExperienceBankSection initialItems={experiences} />
+        {/*
+          경험뱅크는 자기소개서를 쓰기 위한 재료다. 별도 섹션으로 떼어놓으면 관계가 안 읽혀서
+          자기소개서 묶음 안에 들여 넣는다. 추가/수정은 모달, 삭제는 목록에서 바로 처리하므로
+          클라이언트 컴포넌트가 이 블록 전체를 그린다.
+        */}
+        <ExperienceBankSection initialItems={experiences} nested />
+      </div>
     </div>
   );
 }

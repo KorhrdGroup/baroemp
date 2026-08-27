@@ -82,7 +82,8 @@ export async function createResumeFromTemplate(params: {
   const resume = await getResumeRepository().create({
     userId,
     templateId,
-    title: params.title?.trim() || `${template?.name ?? "새"} 이력서`,
+    // 제목은 사용자가 직접 입력한다. 공고에서 시작한 경우만 미리 채우고, 그 외에는 비워 둔다.
+    title: params.title?.trim() ?? "",
     targetJobId,
     targetOccupationId: targetOccupationId ?? prefill.targetOccupationId,
     desiredJobTitle: prefill.desiredJobTitle,
