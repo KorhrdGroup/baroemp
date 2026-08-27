@@ -15,6 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import type { ExperienceBankItem } from "@/types";
+import { cn } from "@/lib/utils";
 import {
   createExperienceBankItemAction,
   deleteExperienceBankItemAction,
@@ -47,7 +48,14 @@ function toForm(item: ExperienceBankItem): FormState {
  * 추가/수정은 모달에서 처리하고 삭제도 목록에서 바로 할 수 있게 해,
  * 경험 하나 고치려고 /experience-bank로 한 뎁스 더 들어가지 않아도 되게 한다.
  */
-export function ExperienceBankSection({ initialItems }: { initialItems: ExperienceBankItem[] }) {
+export function ExperienceBankSection({
+  initialItems,
+  nested = false,
+}: {
+  initialItems: ExperienceBankItem[];
+  /** 자기소개서 섹션 안에 재료로 들여 넣을 때. 제목을 낮추고 묶음 배경을 깐다. */
+  nested?: boolean;
+}) {
   const [items, setItems] = useState(initialItems);
   const [open, setOpen] = useState(false);
   /** null이면 새로 추가, 값이 있으면 그 항목 수정 */
@@ -107,10 +115,26 @@ export function ExperienceBankSection({ initialItems }: { initialItems: Experien
   return (
     // 자기소개서 편집기/마이페이지에서 #experience-bank로 바로 넘어온다.
     // sticky 헤더에 제목이 가리지 않도록 scroll-mt를 준다.
-    <div id="experience-bank" className="mt-10 scroll-mt-24">
+    <div
+      id="experience-bank"
+      className={cn("scroll-mt-24", nested ? "mt-4 rounded-xl bg-slate-50 p-5" : "mt-10")}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="text-body-1 font-bold text-slate-900">내 경험뱅크 ({items.length})</h2>
-        <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" onClick={openCreate}>
+        <div className="min-w-0">
+          <h2 className={cn("font-bold text-slate-900", nested ? "text-label-1" : "text-body-1")}>
+            내 경험뱅크 ({items.length})
+          </h2>
+          {nested && (
+            <p className="mt-0.5 text-label-2 text-slate-500">
+              여기 저장해둔 경험은 자기소개서 문항을 쓸 때 그대로 불러와 쓸 수 있어요.
+            </p>
+          )}
+        </div>
+        <Button
+          size={nested ? "sm" : "default"}
+          className="bg-brand-blue-400 hover:bg-brand-blue-600"
+          onClick={openCreate}
+        >
           <Plus className="size-4" /> 내 경험 추가하기
         </Button>
       </div>
