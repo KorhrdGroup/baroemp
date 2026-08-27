@@ -131,10 +131,11 @@ export function FieldActionButton({
       {...props}
       className={cn(
         "absolute right-2 top-1/2 h-10 -translate-y-1/2 whitespace-nowrap rounded-[10px] px-3.5",
-        "text-[13.5px] font-semibold transition-colors disabled:opacity-40",
+        "text-[13.5px] font-semibold transition-colors",
+        // 눌러야 진행되는 버튼이라 평소에도 활성 상태로 보이게 채워 둔다 (회색이면 비활성으로 읽힌다).
         tone === "ok"
           ? "bg-emerald-50 text-emerald-600"
-          : "bg-slate-200 text-slate-700 hover:bg-brand-blue-400 hover:text-white",
+          : "bg-brand-blue-400 text-white hover:bg-brand-blue-600 disabled:bg-slate-200 disabled:text-slate-400",
         className,
       )}
     >
