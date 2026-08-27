@@ -44,14 +44,14 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
   const trackedTabs = useRef(new Set<JobCurationTab>(["new"]));
 
   useEffect(() => {
-    void trackCurationTabViewedAction({ tab: "new" });
+    void trackCurationTabViewedAction({ tab: "new" }).catch(() => {});
   }, []);
 
   function handleTab(tab: JobCurationTab) {
     setActiveTab(tab);
     if (!trackedTabs.current.has(tab)) {
       trackedTabs.current.add(tab);
-      void trackCurationTabViewedAction({ tab });
+      void trackCurationTabViewedAction({ tab }).catch(() => {});
     }
     if (!results[tab] && loadingTab !== tab) {
       setLoadingTab(tab);
@@ -102,7 +102,11 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
               <div
                 key={item.job.id}
                 className="w-72 shrink-0"
-                onClickCapture={() => void trackCurationJobClickedAction({ tab: activeTab, jobId: item.job.id })}
+                onClickCapture={(e) => {
+                  const t = e.target as HTMLElement;
+                  if (t.closest("button")) return;
+                  void trackCurationJobClickedAction({ tab: activeTab, jobId: item.job.id }).catch(() => {});
+                }}
               >
                 {item.unlockRequirementName && (
                   <p className="mb-1 text-label-2 font-semibold text-brand-blue-600">
