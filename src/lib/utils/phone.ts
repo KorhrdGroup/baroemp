@@ -33,3 +33,16 @@ export function phoneMatchCandidates(input: string | undefined | null): string[]
   const formatted = formatPhone(digits);
   return formatted === digits ? [digits] : [digits, formatted];
 }
+
+/**
+ * 입력 중인 휴대전화번호에 하이픈을 자동으로 넣는다 (010-1234-5678).
+ *
+ * 완성된 번호만 포맷하는 formatPhone과 달리, 타이핑 도중의 부분 입력도 그때그때 끊어 준다.
+ * 저장·조회는 항상 normalizePhone으로 숫자만 남기므로 화면 표기만 바뀐다.
+ */
+export function formatPhoneInput(input: string): string {
+  const digits = input.replace(/[^0-9]/g, "").slice(0, 11);
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 7) return `${digits.slice(0, 3)}-${digits.slice(3)}`;
+  return `${digits.slice(0, 3)}-${digits.slice(3, 7)}-${digits.slice(7)}`;
+}

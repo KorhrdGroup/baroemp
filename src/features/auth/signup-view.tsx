@@ -12,6 +12,7 @@ import {
   InputWithAction,
   Label,
   PageTitle,
+  PasswordInput,
   PhoneVerificationField,
   PrimaryButton,
 } from "./handoff-ui";
@@ -20,6 +21,16 @@ import { checkEmailAvailableAction } from "./find-account-actions";
 import { validateSignup, type SignupValues } from "./signup-validation";
 
 const initialState: SignUpFormState = {};
+
+/**
+ * 약관 본문을 별도 팝업 창으로 띄운다.
+ * 가입 폼을 벗어나면 입력하던 값이 날아가므로 같은 탭에서 이동시키지 않는다.
+ * 팝업이 차단된 브라우저에서는 새 탭으로 대신 연다.
+ */
+function openTermsPopup(path: string) {
+  const popup = window.open(path, "baro-terms", "width=560,height=760,scrollbars=yes,resizable=yes");
+  if (!popup) window.open(path, "_blank", "noopener");
+}
 
 export function SignupView({ next }: { next: string }) {
   const [state, formAction, pending] = useActionState(signUpAction, initialState);
@@ -119,11 +130,11 @@ export function SignupView({ next }: { next: string }) {
 
         <div>
           <Label htmlFor="su-pw">비밀번호</Label>
-          <Input
+          <PasswordInput
             id="su-pw"
             name="password"
-            type="password"
             autoComplete="new-password"
+            placeholder="비밀번호 입력"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
           />
@@ -132,11 +143,11 @@ export function SignupView({ next }: { next: string }) {
 
         <div>
           <Label htmlFor="su-pw2">비밀번호 확인</Label>
-          <Input
+          <PasswordInput
             id="su-pw2"
             name="passwordConfirm"
-            type="password"
             autoComplete="new-password"
+            placeholder="비밀번호 재입력"
             invalid={pw2.length > 0 && !pwMatch}
             value={pw2}
             onChange={(e) => setPw2(e.target.value)}
@@ -174,9 +185,13 @@ export function SignupView({ next }: { next: string }) {
             checked={agreeRequired}
             onChange={setAgreeRequired}
             right={
-              <a href="/privacy" className="text-[12px] text-slate-500 no-underline">
+              <button
+                type="button"
+                onClick={() => openTermsPopup("/privacy")}
+                className="text-[12px] text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline"
+              >
                 보기
-              </a>
+              </button>
             }
           >
             [필수] 개인정보 수집·이용 동의

@@ -3,8 +3,10 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { cn } from "@/lib/utils";
+import { formatPhoneInput } from "@/lib/utils/phone";
 import { sendPhoneCodeAction, verifyPhoneCodeAction } from "./phone-verification-actions";
 import type { PhoneVerificationPurpose } from "@/types";
 
@@ -87,13 +89,31 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
           "placeholder:text-slate-400 transition-shadow",
           invalid
             ? "border-[1.5px] border-[#e5484d] bg-white"
-            : "border-0 bg-slate-100 focus:ring-2 focus:ring-[#1f5eff]/35",
+            : "border-[1.5px] border-slate-200 bg-white focus:border-brand-blue-400 focus:ring-2 focus:ring-[#1f5eff]/20",
           className,
         )}
       />
     );
   }
 );
+
+/** 비밀번호 입력. 눈 아이콘으로 입력값을 잠시 확인할 수 있다(오타 확인용). */
+export function PasswordInput({ className, ...props }: InputProps) {
+  const [visible, setVisible] = React.useState(false);
+  return (
+    <div className="relative">
+      <Input {...props} type={visible ? "text" : "password"} className={cn("pr-12", className)} />
+      <button
+        type="button"
+        onClick={() => setVisible((v) => !v)}
+        aria-label={visible ? "비밀번호 숨기기" : "비밀번호 표시"}
+        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600"
+      >
+        {visible ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}
+      </button>
+    </div>
+  );
+}
 
 /**
  * 입력 + 보조 동작 버튼(인증/중복확인).
@@ -355,7 +375,7 @@ export function PhoneVerificationField({
             value: phone,
             disabled: busy || verified,
             onChange: (e) => {
-              onPhoneChange(e.target.value);
+              onPhoneChange(formatPhoneInput(e.target.value));
               setVerified(false);
               setSent(false);
               onVerified(null);

@@ -10,6 +10,7 @@ import {
   Input,
   Label,
   PageTitle,
+  PasswordInput,
   PhoneVerificationField,
   PrimaryButton,
 } from "./handoff-ui";
@@ -95,10 +96,10 @@ export function FindPasswordView() {
 
         <div>
           <Label htmlFor="fp-pw">새 비밀번호</Label>
-          <Input
+          <PasswordInput
             id="fp-pw"
-            type="password"
             autoComplete="new-password"
+            placeholder="새 비밀번호 입력"
             disabled={!verified}
             value={pw}
             onChange={(e) => setPw(e.target.value)}
@@ -108,10 +109,10 @@ export function FindPasswordView() {
 
         <div>
           <Label htmlFor="fp-pw2">새 비밀번호 확인</Label>
-          <Input
+          <PasswordInput
             id="fp-pw2"
-            type="password"
             autoComplete="new-password"
+            placeholder="새 비밀번호 재입력"
             disabled={!verified}
             invalid={pw2.length > 0 && !pwMatch}
             value={pw2}
@@ -135,7 +136,6 @@ export function FindPasswordView() {
         items={[
           { label: "로그인", href: "/login", strong: true },
           { label: "아이디 찾기", href: "/find-id" },
-          { label: "이메일로 재설정", href: "/forgot-password" },
         ]}
       />
     </AuthShell>

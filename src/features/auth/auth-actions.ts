@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSmsProvider } from "@/lib/sms";
@@ -30,13 +30,6 @@ function syntheticEmailFromPhone(phoneDigits: string): string {
 function extractPhoneDigits(input: string): string | null {
   const digits = input.replace(/[^0-9]/g, "");
   return /^01[016789][0-9]{7,8}$/.test(digits) ? digits : null;
-}
-
-async function getOrigin(): Promise<string> {
-  const h = await headers();
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  const host = h.get("host") ?? "localhost:3000";
-  return `${proto}://${host}`;
 }
 
 async function getAnonymousIdFromCookie(): Promise<string | undefined> {
@@ -275,59 +268,4 @@ export async function signOutAction(): Promise<void> {
     await supabase.auth.signOut();
   }
   redirect("/");
-}
-
-export async function requestPasswordResetAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { fieldErrors: { email: "올바른 이메일 형식이 아닙니다." } };
-  }
-
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return { error: "비밀번호 재설정 서비스를 사용할 수 없습니다." };
-  }
-
-  const origin = await getOrigin();
-  // 존재하지 않는 이메일이라도 동일한 안내를 보여준다 (이메일 존재 여부 노출 방지).
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/confirm?type=recovery&next=${encodeURIComponent("/reset-password")}`,
-  });
-
-  await logActivityEvent({
-    eventType: "password_reset_requested",
-    entityType: "career_profile",
-    metadata: {},
-  });
-
-  return { message: "비밀번호 재설정 메일을 발송했습니다. 메일함을 확인해주세요." };
-}
-
-export async function updatePasswordAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const password = String(formData.get("password") ?? "");
-  const passwordConfirm = String(formData.get("passwordConfirm") ?? "");
-
-  if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
-    return { fieldErrors: { password: "비밀번호는 영문/숫자를 포함해 8자 이상이어야 합니다." } };
-  }
-  if (password !== passwordConfirm) {
-    return { fieldErrors: { passwordConfirm: "비밀번호가 일치하지 않습니다." } };
-  }
-
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return { error: "비밀번호 변경 서비스를 사용할 수 없습니다." };
-  }
-
-  const { data: sessionData } = await supabase.auth.getUser();
-  if (!sessionData.user) {
-    return { error: "인증 링크가 만료되었습니다. 비밀번호 재설정을 다시 요청해주세요." };
-  }
-
-  const { error } = await supabase.auth.updateUser({ password });
-  if (error) {
-    return { error: "비밀번호 변경 중 문제가 발생했습니다. 다시 시도해주세요." };
-  }
-
-  return { message: "비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요." };
 }

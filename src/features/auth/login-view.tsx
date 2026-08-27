@@ -10,6 +10,7 @@ import {
   Input,
   Label,
   PageTitle,
+  PasswordInput,
   PrimaryButton,
   SocialButtons,
 } from "./handoff-ui";
@@ -48,11 +49,11 @@ export function LoginView({ next }: { next: string }) {
 
         <div className="mt-4">
           <Label htmlFor="login-pw">비밀번호</Label>
-          <Input
+          <PasswordInput
             id="login-pw"
             name="password"
-            type="password"
             autoComplete="current-password"
+            placeholder="비밀번호 입력"
             value={pw}
             onChange={(e) => setPw(e.target.value)}
           />
