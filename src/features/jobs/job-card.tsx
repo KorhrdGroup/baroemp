@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Briefcase, Clock, MapPin } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { labelRegion, labelWorkType } from "@/lib/labels";
 import { cn } from "@/lib/utils";
@@ -34,6 +33,11 @@ export interface JobCardProps {
   heldQualifications?: string[];
 }
 
+/**
+ * 채용공고 목록 카드.
+ * 지원금 결과 카드와 같은 뼈대를 쓴다 - 상단 기관/등급, 제목, 핵심 수치,
+ * 그리고 맨 아래 파이프로 끊은 메타 줄. 두 목록이 같은 리듬으로 읽히게 하려는 것이다.
+ */
 export function JobCard({
   job,
   matchScore,
@@ -46,26 +50,38 @@ export function JobCard({
   const closingSoon = isClosingSoon(job);
   const midlifeRecommended = isMidlifeRecommended(job);
   const readiness = heldQualifications ? computeJobReadiness(job, heldQualifications) : null;
-  const qualificationChips = job.preferredQualifications.slice(0, 3);
+  const location = job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ");
 
   return (
-    <div
-      className={cn(
-        "flex h-full flex-col rounded-xl border border-border bg-white p-5",
-        className,
-      )}
-    >
-      {/*
-        급여와 찜 버튼을 한 열로 묶어 오른쪽에 두면, 급여 문구가 길 때 그 열이 통째로
-        아래 줄로 밀려 찜 버튼이 카드 한가운데에 놓였다. 찜 버튼만 오른쪽에 고정하고
-        급여는 아래 제 줄에서 왼쪽으로 읽히게 한다.
-      */}
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0 flex-1">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {typeof matchScore === "number" && (
-              <Badge className="rounded-full border-0 bg-brand-blue-400 text-label-2 font-semibold text-white">
-                매칭 {matchScore}점
+    // 찜 버튼은 카드 Link 안에 넣을 수 없어(버튼 중첩) 형제로 두고 위에 겹친다.
+    <div className={cn("relative h-full", className)}>
+      <Link
+        href={`/jobs/${job.id}`}
+        className="group flex h-full flex-col rounded-xl border border-border bg-white p-5"
+      >
+        {/* 지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리. */}
+        <div className="flex items-center justify-between gap-2 pr-10">
+          <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
+          {typeof matchScore === "number" && (
+            <span className="shrink-0 rounded-full bg-brand-blue-50 px-3 py-1.5 text-label-1 font-bold text-brand-blue-700">
+              매칭 {matchScore}점
+            </span>
+          )}
+        </div>
+
+        <h3 className="mt-3 line-clamp-2 text-body-1 font-bold text-slate-900 group-hover:underline">
+          {job.title}
+        </h3>
+
+        <p className="mt-2 break-keep text-body-2 font-bold text-brand-blue-600">
+          {job.salaryText ?? "협의 가능"}
+        </p>
+
+        {(readiness || job.isBeginnerFriendly || midlifeRecommended || closingSoon) && (
+          <div className="mt-3 flex flex-wrap items-center gap-1.5">
+            {readiness && (
+              <Badge className={cn("rounded-full border-0 text-label-2 font-semibold", READINESS_BADGE_CLASS[readiness.level])}>
+                취업준비성 {readiness.label}
               </Badge>
             )}
             {job.isBeginnerFriendly && (
@@ -78,11 +94,6 @@ export function JobCard({
                 중장년 추천
               </Badge>
             )}
-            {readiness && (
-              <Badge className={cn("rounded-full border-0 text-label-2 font-semibold", READINESS_BADGE_CLASS[readiness.level])}>
-                취업준비성 {readiness.label}
-              </Badge>
-            )}
             {/* 마감임박만 색을 유지한다. 나머지 태그는 공고의 분류지만 이건 시간 경고다. */}
             {closingSoon && (
               <Badge className="rounded-full border-0 bg-rose-50 text-label-2 font-semibold text-rose-600">
@@ -90,89 +101,35 @@ export function JobCard({
               </Badge>
             )}
           </div>
-          <Link href={`/jobs/${job.id}`} className="mt-2 block">
-            <h3 className="line-clamp-2 text-body-1 font-bold text-slate-900">{job.title}</h3>
-          </Link>
-          <p className="mt-1 text-label-1 font-medium text-slate-500">{job.companyName}</p>
-        </div>
-        <JobBookmarkButton
-          jobId={job.id}
-          jobCategory={job.jobCategory}
-          isAuthenticated={isAuthenticated}
-          initialBookmarked={isBookmarked}
-        />
-      </div>
-
-      <p className="mt-2 text-body-2 font-bold break-keep text-brand-blue-600">
-        {job.salaryText ?? "협의 가능"}
-      </p>
-
-      <div className="mt-4 flex flex-wrap items-center gap-4 text-label-1 text-slate-500">
-        <span className="flex items-center gap-1">
-          <MapPin className="size-4" />
-          {job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
-        </span>
-        <span className="flex items-center gap-1">
-          <Briefcase className="size-4" />
-          {labelWorkType(job.workType)}
-        </span>
-        {job.applyDeadline && (
-          <span className="flex items-center gap-1">
-            <Clock className="size-4" />
-            {closingSoon ? "마감임박" : `~${job.applyDeadline.slice(0, 10)}`}
-          </span>
         )}
-      </div>
 
-      {qualificationChips.length > 0 && (
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {qualificationChips.map((qual) => {
-            const held = (heldQualifications ?? []).some((h) => h && (qual.includes(h) || h.includes(qual)));
-            return (
-              <span
-                key={qual}
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-label-2",
-                  held
-                    ? "border border-emerald-300 font-semibold text-emerald-700"
-                    : "border border-border text-slate-500",
-                )}
-              >
-                <span className={cn("rounded px-1 text-[10px] font-bold", held ? "bg-emerald-50" : "bg-slate-100 text-slate-500")}>
-                  {held ? "보유" : "자격"}
-                </span>
-                {qual}
-              </span>
-            );
-          })}
-          {job.preferredQualifications.length > 3 && (
-            <span className="text-label-2 text-slate-400">+{job.preferredQualifications.length - 3}</span>
+        {/* 지원금 카드와 같은 파이프 구분 메타 줄. 아이콘 없이 텍스트만 둬서 줄이 조용하다. */}
+        <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-4 text-label-2 text-slate-500">
+          {matchReasonLabel && (
+            <>
+              <span className="text-brand-blue-700">✓ {matchReasonLabel}</span>
+              <span aria-hidden>|</span>
+            </>
           )}
-          {readiness && readiness.level !== "very_high" && (
-            <span className="text-label-2 text-slate-400">· {readiness.reason}</span>
+          {location && (
+            <>
+              <span>{location}</span>
+              <span aria-hidden>|</span>
+            </>
           )}
+          <span>{labelWorkType(job.workType)}</span>
+          <span aria-hidden>|</span>
+          <span>{job.applyDeadline ? `~${job.applyDeadline.slice(0, 10)}` : "상시채용"}</span>
         </div>
-      )}
+      </Link>
 
-      {matchReasonLabel && (
-        <p className="mt-3 rounded-lg bg-brand-blue-50/70 px-3 py-2 text-label-1 text-brand-blue-700">
-          {matchReasonLabel}
-        </p>
-      )}
-
-      <p className="mt-3 line-clamp-2 flex-1 text-label-1 text-slate-600">{job.description}</p>
-
-      <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-        <span className="text-label-2 text-slate-400">
-          {job.externalSource ? `출처 · ${job.externalSource === "work24" ? "고용24" : job.externalSource}` : "직접등록"}
-        </span>
-        <Link
-          href={`/jobs/${job.id}`}
-          className="rounded-md bg-brand-blue-900 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-800 active:bg-brand-blue-700"
-        >
-          상세보기
-        </Link>
-      </div>
+      <JobBookmarkButton
+        jobId={job.id}
+        jobCategory={job.jobCategory}
+        isAuthenticated={isAuthenticated}
+        initialBookmarked={isBookmarked}
+        className="absolute right-4 top-4"
+      />
     </div>
   );
 }
