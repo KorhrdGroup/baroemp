@@ -53,8 +53,8 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-10 border-t border-border pt-6 text-label-2 text-slate-400">
-          <p>(주)한평생바로취업 · 대표 홍길동 · 사업자등록번호 123-45-67890</p>
-          <p>서울특별시 강남구 테헤란로 123, 4층</p>
+          <p>한평생그룹 · 대표 양병웅 · 사업자등록번호 227-88-03196 · 통신판매업 2024-서울도봉-0983</p>
+          <p>서울특별시 도봉구 마들로13길 61, 씨드큐브 창동 B동 9층 905, 906호 · korhrdpartners@naver.com</p>
           <p className="mt-2">&copy; {new Date().getFullYear()} Hanpyeongsaeng Baro Job. All rights reserved.</p>
         </div>
       </div>
