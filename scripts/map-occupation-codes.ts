@@ -31,8 +31,11 @@ async function main() {
 
   const jobs = await getJobRepository().findAll({ activeOnly: true });
   const codeToSample = new Map<string, string>();
+  const codeToCount = new Map<string, number>();
   for (const job of jobs) {
-    if (job.jobCategory && job.externalId && !codeToSample.has(job.jobCategory)) {
+    if (!job.jobCategory) continue;
+    codeToCount.set(job.jobCategory, (codeToCount.get(job.jobCategory) ?? 0) + 1);
+    if (job.externalId && !codeToSample.has(job.jobCategory)) {
       codeToSample.set(job.jobCategory, job.externalId);
     }
   }
@@ -56,12 +59,14 @@ async function main() {
 
   for (const occ of occupations) {
     const occName = normalize(occ.name);
+    // 이름이 겹치는 후보 중 "활성 공고가 가장 많은" 코드를 고른다.
+    // (최단명 기준은 550100 같은 상위코드를 골라, 공고가 몰린 세부코드(550102 등)를 놓친다)
     const candidates = entries
       .filter(([, jobsNm]) => {
         const n = normalize(jobsNm);
         return n.includes(occName) || occName.includes(n);
       })
-      .sort((a, b) => normalize(a[1]).length - normalize(b[1]).length);
+      .sort((a, b) => (codeToCount.get(b[0]) ?? 0) - (codeToCount.get(a[0]) ?? 0));
 
     if (candidates.length === 0) {
       unmatched.push(occ.name);
@@ -70,7 +75,9 @@ async function main() {
     const [code, jobsNm] = candidates[0];
     matched += 1;
     const already = occ.jobCategoryCode === code;
-    console.log(`  ${already ? "=" : "✓"} ${occ.name} ← ${jobsNm} [${code}]${candidates.length > 1 ? ` (후보 ${candidates.length}개 중 최단명 선택)` : ""}`);
+    console.log(
+      `  ${already ? "=" : "✓"} ${occ.name} ← ${jobsNm} [${code}] 공고 ${codeToCount.get(code) ?? 0}건${candidates.length > 1 ? ` (후보 ${candidates.length}개 중 최다공고 선택)` : ""}`,
+    );
     if (apply && !already) {
       await getOccupationRepository().update(occ.id, { jobCategoryCode: code });
     }
