@@ -49,8 +49,9 @@ export function OccupationRecommendationCard({
     <details
       open={defaultOpen}
       className={cn(
-        "group rounded-xl border bg-white",
-        rank === 1 ? "border-brand-blue-300 ring-2 ring-brand-blue-100" : "border-border",
+        "group rounded-xl bg-white",
+        // 1순위만 테두리로 짚어준다. 나머지는 회색 바탕과 흰 면의 대비로 이미 구분된다.
+        rank === 1 && "ring-2 ring-brand-blue-200",
       )}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-5 sm:px-7 sm:py-6">
@@ -183,7 +184,7 @@ export function OccupationRecommendationCard({
         </div>
 
         {/* 관련 채용공고 */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-border px-4 py-4">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-4">
           <div className="text-label-1 text-slate-600">
             <p className="flex items-center gap-1.5">
               <MapPin className="size-4 text-slate-400" />
