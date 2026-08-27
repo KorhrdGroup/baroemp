@@ -2,7 +2,7 @@
 
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { logActivityEvent } from "@/lib/activity/event-logger";
-import { normalizePhone } from "@/lib/utils/phone";
+import { normalizePhone, phoneMatchCandidates } from "@/lib/utils/phone";
 import { consumePhoneVerification } from "@/services/phone-verification.service";
 
 /** 이메일 아이디 마스킹은 서버에서만 수행한다 (원본 이메일을 클라이언트로 내려보내지 않는다). */
@@ -35,7 +35,7 @@ export async function findIdAction(input: {
   const { data } = await admin
     .from("profiles")
     .select("email, created_at")
-    .eq("phone", phone)
+    .in("phone", phoneMatchCandidates(phone))
     .eq("name", name)
     .not("email", "is", null)
     .order("created_at", { ascending: true })
@@ -85,7 +85,7 @@ export async function resetPasswordWithPhoneAction(input: {
     .from("profiles")
     .select("id")
     .eq("email", email)
-    .eq("phone", phone)
+    .in("phone", phoneMatchCandidates(phone))
     .limit(1)
     .maybeSingle();
 

@@ -1,4 +1,4 @@
-/** 디자이너 핸드오프(handoff/auth/ui.tsx) 이식. 인증 화면 전용 웜 톤 컴포넌트. */
+/** 디자이너 핸드오프(handoff/auth/ui.tsx) 이식. 배경·버튼·플레이스홀더는 기존 사이트 톤(slate/brand-blue)으로 맞췄다. */
 "use client";
 
 import * as React from "react";
@@ -7,8 +7,7 @@ import { Logo } from "@/components/layout/logo";
 import { sendPhoneCodeAction, verifyPhoneCodeAction } from "./phone-verification-actions";
 import type { PhoneVerificationPurpose } from "@/types";
 
-/* 공통 UI — 시안 1b 톤 (웜 소프트 카드)
-   Tailwind 기준. 모바일: 카드가 화면 폭에 맞춰 늘어나고 좌우 여백만 유지 */
+/* 인증 화면 공통 UI. 모바일: 카드가 화면 폭에 맞춰 늘어나고 좌우 여백만 유지 */
 
 export function AuthShell({
   children,
@@ -47,7 +46,7 @@ export function PageTitle({
         {title}
       </h1>
       {desc ? (
-        <p className="mt-2.5 mb-0 text-[14px] sm:text-[14.5px] leading-[1.6] text-[#8b857c]">
+        <p className="mt-2.5 mb-0 text-[14px] sm:text-[14.5px] leading-[1.6] text-slate-500">
           {desc}
         </p>
       ) : null}
@@ -84,10 +83,10 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {...props}
         className={[
           "h-14 w-full min-w-0 rounded-[14px] px-[18px] text-[16px] text-[#1c1a17] outline-none",
-          "placeholder:text-[#b3ac9f] transition-shadow",
+          "placeholder:text-slate-400 transition-shadow",
           invalid
             ? "border-[1.5px] border-[#e5484d] bg-white"
-            : "border-0 bg-[#f5f3ef] focus:ring-2 focus:ring-[#1f5eff]/35",
+            : "border-0 bg-slate-100 focus:ring-2 focus:ring-[#1f5eff]/35",
           className,
         ].join(" ")}
       />
@@ -131,7 +130,7 @@ export function HelpText({
       ? "text-[#0f9d58]"
       : tone === "error"
       ? "text-[#e5484d]"
-      : "text-[#8b857c]";
+      : "text-slate-500";
   return (
     <p className={`mt-[9px] mb-0 text-[12.5px] ${color}`}>{children}</p>
   );
@@ -154,15 +153,26 @@ export function PrimaryButton({
 export function SocialButtons({ next }: { next?: string }) {
   const q = next ? `?next=${encodeURIComponent(next)}` : "";
   return (
-    <div className="mt-3 flex flex-col gap-2.5">
-      {/* OAuth 시작은 서버 라우트로 이동하는 전체 페이지 네비게이션이라 <a>가 맞다. */}
-      <a href={`/auth/login/kakao${q}`} className="flex h-14 w-full items-center justify-center gap-[9px] rounded-[14px] bg-[#fee500] text-[15px] font-bold text-[#191600] transition hover:brightness-95">
-        <span className="h-5 w-5 rounded-full bg-[#191600]" aria-hidden />
-        카카오 로그인
+    // OAuth 시작은 서버 라우트로 이동하는 전체 페이지 네비게이션이라 <a>가 맞다.
+    // eslint-disable-next-line @next/next/no-html-link-for-pages
+    <div className="mt-4 grid grid-cols-2 gap-2">
+      <a
+        href={`/auth/login/naver${q}`}
+        className="flex h-14 items-center justify-center gap-2 rounded-[14px] bg-[#03C75A] text-[15px] font-bold text-white transition-colors hover:bg-[#02B351]"
+      >
+        <svg viewBox="0 0 20 20" aria-hidden="true" className="size-3.5" fill="currentColor">
+          <path d="M13.5 10.7 6.2 0H0v20h6.5V9.3L13.8 20H20V0h-6.5z" />
+        </svg>
+        네이버 로그인
       </a>
-      <a href={`/auth/login/naver${q}`} className="flex h-14 w-full items-center justify-center gap-[9px] rounded-[14px] bg-[#03c75a] text-[15px] font-bold text-white transition hover:brightness-95">
-        <span className="h-5 w-5 rounded-full bg-white" aria-hidden />
-        네이버로 로그인
+      <a
+        href={`/auth/login/kakao${q}`}
+        className="flex h-14 items-center justify-center gap-2 rounded-[14px] bg-[#FEE500] text-[15px] font-bold text-[#191600] transition-colors hover:bg-[#F2DA00]"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
+          <path d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7-.2.7-.7 2.6-.8 3-.1.5.2.5.4.4.2-.1 2.7-1.8 3.8-2.6.6.1 1.2.1 1.9.1 5.5 0 10-3.6 10-8s-4.5-8-10-8z" />
+        </svg>
+        카카오 로그인
       </a>
     </div>
   );
@@ -195,7 +205,7 @@ export function Checkbox({
           "flex h-[22px] w-[22px] flex-none items-center justify-center rounded-[7px] text-[12px] leading-none",
           checked
             ? "bg-[#1f5eff] text-white"
-            : "border-[1.5px] border-[#d5cfc3] text-transparent",
+            : "border-[1.5px] border-slate-300 text-transparent",
         ].join(" ")}
       >
         ✓
@@ -223,13 +233,13 @@ export function BottomLinks({
     <div className="mt-6 flex flex-wrap items-center justify-center gap-x-[14px] gap-y-1.5 text-[13px]">
       {items.map((it, i) => (
         <React.Fragment key={it.href + it.label}>
-          {i > 0 ? <span className="text-[#dcd7cd]">·</span> : null}
+          {i > 0 ? <span className="text-slate-300">·</span> : null}
           <Link
             href={it.href}
             className={
               it.strong
                 ? "font-bold text-[#1c1a17] no-underline"
-                : "text-[#8b857c] no-underline hover:text-[#1c1a17]"
+                : "text-slate-500 no-underline hover:text-[#1c1a17]"
             }
           >
             {it.label}
@@ -241,7 +251,7 @@ export function BottomLinks({
 }
 
 export function Divider() {
-  return <div className="my-[22px] h-px bg-[#eee9df]" />;
+  return <div className="my-[22px] h-px bg-slate-200" />;
 }
 
 /**

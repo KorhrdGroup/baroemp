@@ -7,7 +7,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getSmsProvider } from "@/lib/sms";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { validateSignup } from "./signup-validation";
-import { normalizePhone } from "@/lib/utils/phone";
+import { normalizePhone, phoneMatchCandidates } from "@/lib/utils/phone";
 import { logActivityEvent } from "@/lib/activity/event-logger";
 import { ensureUserProfile, applyAcquisitionTouch } from "@/services/auth-identity.service";
 import { linkAnonymousCareraDataToUserSafe } from "./anonymous-merge";
@@ -221,7 +221,7 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
       const { data: profileRow } = await admin
         .from("profiles")
         .select("email")
-        .eq("phone", phoneDigits)
+        .in("phone", phoneMatchCandidates(phoneDigits))
         .not("email", "is", null)
         .limit(1)
         .maybeSingle();

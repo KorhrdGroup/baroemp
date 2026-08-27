@@ -158,7 +158,7 @@ export function SignupView({ next }: { next: string }) {
         />
         {state.fieldErrors?.phone ? <HelpText tone="error">{state.fieldErrors.phone}</HelpText> : null}
 
-        <div className="flex flex-col gap-[11px] rounded-[14px] bg-[#f5f3ef] px-[18px] py-4">
+        <div className="flex flex-col gap-[11px] rounded-[14px] bg-slate-100 px-[18px] py-4">
           <Checkbox
             strong
             checked={agreeRequired && agreeMarketing}
@@ -169,12 +169,12 @@ export function SignupView({ next }: { next: string }) {
           >
             약관 전체 동의
           </Checkbox>
-          <div className="h-px bg-[#e7e2d8]" />
+          <div className="h-px bg-slate-200" />
           <Checkbox
             checked={agreeRequired}
             onChange={setAgreeRequired}
             right={
-              <a href="/privacy" className="text-[12px] text-[#8b857c] no-underline">
+              <a href="/privacy" className="text-[12px] text-slate-500 no-underline">
                 보기
               </a>
             }

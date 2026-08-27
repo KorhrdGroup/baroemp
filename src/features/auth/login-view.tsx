@@ -28,19 +28,20 @@ export function LoginView({ next }: { next: string }) {
   return (
     <AuthShell>
       <BrandMark />
-      <PageTitle title="로그인" desc="이메일 또는 휴대전화번호로 로그인하세요." />
+      <PageTitle title="로그인" desc="이메일 아이디로 로그인하세요." />
 
       <form action={formAction}>
         <input type="hidden" name="next" value={next} />
         {state.error ? <HelpText tone="error">{state.error}</HelpText> : null}
 
-        <Label htmlFor="login-id">아이디 (이메일 또는 휴대전화번호)</Label>
+        <Label htmlFor="login-id">아이디 (이메일)</Label>
         <Input
           id="login-id"
           name="email"
-          type="text"
+          type="email"
+          inputMode="email"
           autoComplete="username"
-          placeholder="you@example.com 또는 010-0000-0000"
+          placeholder="you@example.com"
           value={id}
           onChange={(e) => setId(e.target.value)}
         />

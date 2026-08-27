@@ -56,7 +56,7 @@ export function FindPasswordView() {
       <AuthShell>
         <BrandMark />
         <PageTitle title="비밀번호 변경 완료" desc="새 비밀번호로 로그인해주세요." />
-        <div className="rounded-[14px] bg-[#f5f3ef] px-5 py-[18px] text-[14px] text-[#1c1a17]">
+        <div className="rounded-[14px] bg-slate-100 px-5 py-[18px] text-[14px] text-[#1c1a17]">
           비밀번호가 변경되었습니다.
         </div>
         <BottomLinks items={[{ label: "로그인", href: "/login", strong: true }]} />
