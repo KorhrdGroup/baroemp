@@ -54,6 +54,7 @@ export async function resolveSupportMatchProfile(
     trainingWillingness: profile.isOpenToTraining ? 4 : undefined,
     heldQualifications: profile.heldQualifications,
     desiredJobCategories: profile.desiredJobCategories,
+    currentJobCategory: profile.desiredJobCategories?.[0],
     careerBreak: (profile.careerBreakMonths ?? 0) > 0,
     careerBreakMonths: profile.careerBreakMonths,
   };

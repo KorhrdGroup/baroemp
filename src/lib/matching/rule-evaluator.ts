@@ -99,7 +99,7 @@ export function evaluateRecommendationRuleRow(
       const values = asArray(rule.value).map(String);
       const cats = profile.desiredJobCategories ?? [];
       matched = values.some((v) => cats.includes(v));
-      label = "희망 직종 조건";
+      label = "직종 조건";
       break;
     }
     default: {

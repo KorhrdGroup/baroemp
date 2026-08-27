@@ -37,7 +37,7 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
       disabled={loading}
       className="h-14 w-full rounded-lg bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
     >
-      {loading ? <Loader2 className="size-5 animate-spin" /> : <>무료 직업진단 시작하기 <ArrowRight className="size-5" /></>}
+      {loading ? <Loader2 className="size-5 animate-spin" /> : <>직업진단 시작하기 <ArrowRight className="size-5" /></>}
     </Button>
   );
 }

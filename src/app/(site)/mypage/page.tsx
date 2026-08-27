@@ -300,7 +300,7 @@ export default async function MyPage() {
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p>아직 직업진단을 받지 않았어요. 몇 가지 질문으로 나에게 맞는 직업을 찾아드려요.</p>
                   <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                    <Link href="/assessment?start=1">무료 직업진단 시작</Link>
+                    <Link href="/assessment?start=1">직업진단 시작</Link>
                   </Button>
                 </CardContent>
               </Card>

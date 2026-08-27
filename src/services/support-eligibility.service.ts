@@ -25,6 +25,7 @@ export interface SupportMatchProfile {
   trainingWillingness?: number;
   heldQualifications?: string[];
   desiredJobCategories?: string[];
+  currentJobCategory?: string;
   careerBreak?: boolean;
   careerBreakMonths?: number;
   /** 최근 3년 내 고용보험 가입 이력 */
@@ -121,7 +122,7 @@ function resolveActualValue(field: string, profile: SupportMatchProfile): unknow
     case "training_willingness":
       return profile.trainingWillingness;
     case "desired_job_category":
-      return profile.desiredJobCategories;
+      return profile.currentJobCategory ? [profile.currentJobCategory] : profile.desiredJobCategories;
     default:
       return undefined;
   }
@@ -222,12 +223,13 @@ function evaluateBaseFields(program: SupportProgram, profile: SupportMatchProfil
     }
   }
 
-  // 희망직종 연관성
-  if (program.relatedJobCategories && program.relatedJobCategories.length > 0 && profile.desiredJobCategories) {
-    const overlap = profile.desiredJobCategories.some((c) => program.relatedJobCategories!.includes(c));
+  // 종사 직종 연관성
+  if (program.relatedJobCategories && program.relatedJobCategories.length > 0) {
+    const cats = profile.currentJobCategory ? [profile.currentJobCategory] : (profile.desiredJobCategories ?? []);
+    const overlap = cats.some((c) => program.relatedJobCategories!.includes(c));
     if (overlap) {
-      reasons.push({ ruleKey: "job_category", label: "희망직종 연관 지원제도", score: 10 });
-      matched.push("희망직종 연관성");
+      reasons.push({ ruleKey: "job_category", label: "종사직종 연관 지원제도", score: 10 });
+      matched.push("종사직종 연관성");
     }
   }
 

@@ -38,8 +38,7 @@ export async function getSupportAssessmentPrefill(
     employmentStatus: profile.employmentStatus,
     desiredStartTiming: profile.desiredStartTiming,
     trainingWillingness: profile.isOpenToTraining === undefined ? undefined : profile.isOpenToTraining ? 4 : 2,
-    heldQualifications: profile.heldQualifications,
-    desiredJobCategories: profile.desiredJobCategories,
+    currentJobCategory: profile.desiredJobCategories?.[0],
     careerBreak: (profile.careerBreakMonths ?? 0) > 0,
     careerBreakMonths: profile.careerBreakMonths,
   };
@@ -56,8 +55,7 @@ export function toSupportMatchProfile(answers: SupportAssessmentAnswers): Suppor
     employmentStatus: answers.employmentStatus,
     desiredStartTiming: answers.desiredStartTiming,
     trainingWillingness: answers.trainingWillingness,
-    heldQualifications: answers.heldQualifications,
-    desiredJobCategories: answers.desiredJobCategories,
+    currentJobCategory: answers.currentJobCategory,
     careerBreak: answers.careerBreak,
     careerBreakMonths: answers.careerBreakMonths,
   };
@@ -108,8 +106,7 @@ function mapCareerProfileUpdateFromAnswers(answers: SupportAssessmentAnswers): C
   if (answers.region) update.region = answers.region;
   if (answers.ageGroup) update.ageGroup = answers.ageGroup;
   if (answers.careerBreakMonths !== undefined) update.careerBreakMonths = answers.careerBreakMonths;
-  if (answers.heldQualifications?.length) update.heldQualifications = answers.heldQualifications;
-  if (answers.desiredJobCategories?.length) update.desiredJobCategories = answers.desiredJobCategories;
+  if (answers.currentJobCategory) update.desiredJobCategories = [answers.currentJobCategory];
   return update;
 }
 

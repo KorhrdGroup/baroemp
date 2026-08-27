@@ -86,7 +86,7 @@ export default async function JobsPage({
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <p className="text-label-1 font-semibold text-brand-blue-600">무료 서비스</p>
+        <p className="text-label-1 font-semibold text-brand-blue-600">채용공고</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나에게 맞는 일자리를 찾아보세요</h1>
         <p className="mt-2 text-body-2-reading text-slate-500">
           실시간 채용정보를 조건에 맞게 확인하고, 관심 있는 공고에 바로 지원해보세요.

@@ -16,10 +16,8 @@ export interface SupportAssessmentAnswers {
   desiredStartTiming?: DesiredStartTiming;
   /** 직업훈련 참여 의향 (1~5 스케일) */
   trainingWillingness?: number;
-  /** 보유 자격 코드 배열 (Job.preferredQualifications와 동일한 코드 체계) */
-  heldQualifications?: string[];
-  /** 희망직종 코드 배열 (jobCategory) */
-  desiredJobCategories?: string[];
+  /** 현재 종사 직종 코드 (재직 중일 때만 수집) */
+  currentJobCategory?: string;
   careerBreak?: boolean;
   careerBreakMonths?: number;
   /** 정부지원 활용 의향 (참고용 - 매칭 점수에는 직접 반영하지 않음) */

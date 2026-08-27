@@ -1,4 +1,4 @@
-import { Briefcase, Clock, Gift, Sparkles } from "lucide-react";
+import { Briefcase, Clock, Sparkles } from "lucide-react";
 import { IntroHero } from "@/components/common/intro-hero";
 import { StartAssessmentButton } from "./start-assessment-button";
 
@@ -13,7 +13,6 @@ const RESULT_ITEMS = [
 
 const INFO_ITEMS = [
   { icon: Clock, label: "약 3~5분" },
-  { icon: Gift, label: "무료" },
   { icon: Sparkles, label: "결과 즉시 확인" },
 ];
 

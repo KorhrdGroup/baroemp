@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { Briefcase, Coins, GraduationCap, HeartHandshake, Landmark, MapPin } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { EmptyState } from "@/components/common/empty-state";
 import { SupportProgramCard } from "@/features/support/support-program-card";
 import { SupportMatchViewTracker } from "@/features/support/support-match-view-tracker";
@@ -17,6 +18,13 @@ export const metadata: Metadata = {
 };
 
 const SUMMARY_GRADES: SupportEligibilityGrade[] = ["HIGH", "MEDIUM", "CHECK_REQUIRED"];
+
+const SUMMARY_PILL_CLASS: Record<SupportEligibilityGrade, string> = {
+  HIGH: "bg-emerald-50 text-emerald-700",
+  MEDIUM: "bg-brand-blue-50 text-brand-blue-700",
+  CHECK_REQUIRED: "bg-orange-50 text-orange-700",
+  LOW: "bg-slate-100 text-slate-500",
+};
 
 /** 결과가 카테고리별로 이어져 흰 카드가 계속 나열되므로, 아이콘으로 섹션의 시작을 알아보게 한다. */
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -46,7 +54,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     }));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 py-10 pb-20 sm:px-6 lg:px-8">
       <SupportMatchViewTracker items={trackedItems} />
 
       <div className="mb-8">
@@ -58,20 +66,19 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
               ? `${displayName}에게 해당 가능성이 높은 지원제도 ${likelyCount}개를 찾았습니다.`
               : `${displayName}, 조건 확인이 필요한 지원제도 ${view.totalCount}개를 찾았습니다.`}
         </h1>
-        <div className="mt-4 flex flex-wrap gap-3">
+        <p className="mt-2 text-label-1 text-slate-400">
+          입력하신 조건 기준의 참고 정보로, 최종 신청 가능 여부 확인은 각 운영기관에서 확인해야 합니다.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-3">
           {SUMMARY_GRADES.map((grade) => (
             <span
               key={grade}
-              className="rounded-full bg-slate-100 px-4 py-2 text-label-1 font-semibold text-slate-600"
+              className={cn("rounded-full px-4 py-2 text-label-1 font-semibold", SUMMARY_PILL_CLASS[grade])}
             >
               {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]} {view.gradeCounts[grade]}개
             </span>
           ))}
         </div>
-        <p className="mt-4 text-label-1 text-slate-400">
-          매칭 등급은 입력하신 정보를 기준으로 한 참고 정보이며, 최종 신청 가능 여부는 각 운영기관에서 확인해야
-          합니다.
-        </p>
       </div>
 
       {view.totalCount === 0 ? (
@@ -91,9 +98,8 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
             const Icon = CATEGORY_ICONS[group.category] ?? Landmark;
             return (
             <section key={group.category}>
-              {/* 아이콘 + 밑줄로 섹션의 시작을 분명히 한다. 제목만으로는 카드 사이에 묻힌다. */}
-              <div className="mb-5 flex items-center gap-2.5 border-b border-border pb-3">
-                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-blue-50 text-brand-blue-600">
+              <div className="mb-5 flex items-center gap-2.5">
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
                   <Icon className="size-4" />
                 </span>
                 <h2 className="text-body-1 font-bold text-slate-900">{group.label}</h2>

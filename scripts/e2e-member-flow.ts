@@ -180,8 +180,7 @@ async function main() {
       employmentStatus: "career_break",
       desiredStartTiming: "within_3_months",
       trainingWillingness: 5,
-      heldQualifications: [],
-      desiredJobCategories: ["care_worker"],
+      currentJobCategory: "care_worker",
       careerBreak: true,
       careerBreakMonths: 12,
     });

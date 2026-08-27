@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import {
   Building2,
@@ -24,11 +25,17 @@ import { SupportViewTracker } from "./support-view-tracker";
 import { SupportLongText } from "./support-long-text";
 import { BackButton } from "@/components/common/back-button";
 
+const ORG_LOGO: Record<string, { src: string; w: number; h: number }> = {
+  고용노동부: { src: "/ministry-logo/고용노동부.svg", w: 100, h: 24 },
+  여성가족부: { src: "/ministry-logo/여성가족부-black.svg", w: 100, h: 24 },
+  "서울시 일자리희망센터": { src: "/ministry-logo/서울특별시_CI_좌우조합_서울특별시.png", w: 100, h: 24 },
+};
+
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
-  HIGH: "bg-emerald-500",
-  MEDIUM: "bg-brand-blue-400",
-  CHECK_REQUIRED: "bg-orange-500",
-  LOW: "bg-slate-400",
+  HIGH: "bg-emerald-50 text-emerald-700",
+  MEDIUM: "bg-brand-blue-50 text-brand-blue-700",
+  CHECK_REQUIRED: "bg-orange-50 text-orange-700",
+  LOW: "bg-slate-100 text-slate-500",
 };
 
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value?: string }) {
@@ -98,9 +105,10 @@ export function SupportDetailView({
           {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
         </Badge>
         {match && (
-          <Badge className={cn("rounded-full border-0 text-label-2 font-semibold text-white", GRADE_BADGE_CLASS[match.grade])}>
-            {SUPPORT_ELIGIBILITY_GRADE_LABELS[match.grade]} ({match.score}점)
-          </Badge>
+          <span className={cn("rounded-full px-3 py-1.5 text-label-1 font-bold", GRADE_BADGE_CLASS[match.grade])}>
+            {SUPPORT_ELIGIBILITY_GRADE_LABELS[match.grade]}
+            <span className="ml-1 font-medium opacity-70">{match.score}점</span>
+          </span>
         )}
         {program.externalSource && program.externalSource !== "mock" && (
           <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
@@ -110,11 +118,23 @@ export function SupportDetailView({
       </div>
 
       <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">{program.title}</h1>
-      <p className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
-        <Building2 className="size-4" />
-        {program.organizationName ?? program.organization}
-        {program.departmentName && <span className="text-slate-400">· {program.departmentName}</span>}
-      </p>
+      {(() => {
+        const orgName = program.organizationName ?? program.organization;
+        const logo = ORG_LOGO[orgName];
+        return (
+          <div className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
+            {logo ? (
+              <Image src={logo.src} alt={orgName} width={logo.w} height={logo.h} className="h-6 w-auto object-contain" />
+            ) : (
+              <>
+                <Building2 className="size-4" />
+                {orgName}
+              </>
+            )}
+            {program.departmentName && <span className="text-slate-400">· {program.departmentName}</span>}
+          </div>
+        );
+      })()}
 
       <div className="mt-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-white p-6 sm:grid-cols-2">
         <InfoRow icon={Users} label="지원대상" value={targetSummary(program)} />

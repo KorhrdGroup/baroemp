@@ -102,8 +102,6 @@ async function main() {
       employmentStatus: "unemployed",
       desiredStartTiming: "immediately",
       trainingWillingness: 4,
-      heldQualifications: [],
-      desiredJobCategories: [],
       careerBreak: false,
     });
     const completion = await completeSupportAssessment(session.id);
