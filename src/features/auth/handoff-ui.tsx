@@ -3,6 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import { Logo } from "@/components/layout/logo";
 import { sendPhoneCodeAction, verifyPhoneCodeAction } from "./phone-verification-actions";
 import type { PhoneVerificationPurpose } from "@/types";
 
@@ -16,8 +17,8 @@ export function AuthShell({
 }) {
   return (
     <div className="flex min-h-[calc(100vh-4rem)] w-full justify-center bg-slate-50 px-4 py-8 sm:px-6 sm:py-14">
-      <div className="w-full max-w-[400px]">
-        <div className="rounded-[20px] sm:rounded-[24px] bg-white px-6 py-8 sm:px-10 sm:py-11 shadow-[0_18px_44px_rgba(60,50,35,0.10)]">
+      <div className="w-full max-w-[460px]">
+        <div className="rounded-[20px] sm:rounded-[24px] bg-white px-6 py-8 sm:px-12 sm:py-12 shadow-[0_18px_44px_rgba(60,50,35,0.10)]">
           {children}
         </div>
       </div>
@@ -27,11 +28,8 @@ export function AuthShell({
 
 export function BrandMark() {
   return (
-    <div className="mb-7 sm:mb-8 flex items-center gap-[9px]">
-      <span className="h-6 w-6 rounded-full bg-[#1f5eff]" aria-hidden />
-      <span className="text-[15.5px] font-bold tracking-[-0.02em] text-[#1c1a17]">
-        한평생 바로취업
-      </span>
+    <div className="mb-7 flex items-center sm:mb-8">
+      <Logo height={26} priority />
     </div>
   );
 }
@@ -113,7 +111,7 @@ export function InputWithAction({
       <button
         type="button"
         onClick={onAction}
-        className="h-14 flex-none whitespace-nowrap rounded-[14px] border-[1.5px] border-[#1c1a17] bg-white px-4 text-[14px] font-bold text-[#1c1a17] transition-colors hover:bg-[#1c1a17] hover:text-white"
+        className="h-14 flex-none whitespace-nowrap rounded-[14px] border-[1.5px] border-brand-blue-400 bg-white px-4 text-[14px] font-bold text-brand-blue-600 transition-colors hover:bg-brand-blue-400 hover:text-white"
       >
         {action}
       </button>
@@ -146,7 +144,7 @@ export function PrimaryButton({
   return (
     <button
       {...props}
-      className="h-[58px] w-full rounded-[14px] bg-[#1c1a17] text-[16px] font-bold text-white transition-colors hover:bg-black disabled:bg-[#cfc9bd] disabled:text-white"
+      className="h-[58px] w-full rounded-[14px] bg-brand-blue-400 text-[16px] font-bold text-white transition-colors hover:bg-brand-blue-600 disabled:bg-slate-300 disabled:text-white"
     >
       {children}
     </button>
