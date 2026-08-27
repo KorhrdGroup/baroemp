@@ -4,10 +4,17 @@ import { getJobRepository, getJobSyncRunRepository } from "@/lib/repositories";
 import type { JobSyncRunStatus, JobSyncSummary } from "@/types";
 
 export interface SyncJobsOptions {
+  /** 이번 실행에서 순회를 시작할 페이지 (청크 체인용, 기본 1). */
+  startPage?: number;
   /** 1회 Sync에서 순회할 최대 페이지 수 (전국 공고를 한 번에 무리하게 수집하지 않기 위한 안전장치). */
   maxPages?: number;
   /** Work24 display 파라미터 (최대 100). */
   pageSize?: number;
+  /**
+   * deactivateStale 기준 시각. 여러 청크로 나눠 도는 전량 사이클에서는 사이클 시작 시각을
+   * 모든 청크에 전달해, 마지막 청크(reachedEnd)에서만 "사이클 전체에서 안 보인" 공고를 비활성화한다.
+   */
+  staleBefore?: string;
   triggeredBy?: string;
 }
 
@@ -38,7 +45,9 @@ export async function syncJobsFromProvider(options: SyncJobsOptions = {}): Promi
   });
 
   const jobRepo = getJobRepository();
+  const startPage = Math.max(1, options.startPage ?? 1);
   const maxPages = options.maxPages ?? Number(process.env.JOB_SYNC_MAX_PAGES ?? 20);
+  const lastPage = startPage + maxPages - 1;
   const pageSize = Math.min(100, Math.max(1, options.pageSize ?? Number(process.env.WORK24_DISPLAY_SIZE ?? 50)));
 
   let fetchedCount = 0;
@@ -52,39 +61,50 @@ export async function syncJobsFromProvider(options: SyncJobsOptions = {}): Promi
   // 가져온 부분 동기화에서는 false로 남는다.
   let reachedEnd = false;
 
+  // 전량(6만+건) 동기화를 서버리스 크론의 실행시간 한도 안에 끝내기 위해
+  // 페이지 fetch는 소규모 병렬, 저장은 페이지 단위 배치 upsert로 처리한다.
+  const fetchConcurrency = Math.max(1, Number(process.env.JOB_SYNC_FETCH_CONCURRENCY ?? 5));
+
   try {
-    for (let page = 1; page <= maxPages; page++) {
-      const result = await provider.searchJobs({ page, pageSize });
-      if (result.jobs.length === 0) {
-        reachedEnd = true;
-        break;
-      }
-      fetchedCount += result.jobs.length;
+    outer: for (let windowStart = startPage; windowStart <= lastPage; windowStart += fetchConcurrency) {
+      const pages: number[] = [];
+      for (let p = windowStart; p <= Math.min(lastPage, windowStart + fetchConcurrency - 1); p++) pages.push(p);
+      const results = await Promise.all(pages.map((p) => provider.searchJobs({ page: p, pageSize })));
 
-      for (const normalized of result.jobs) {
-        try {
-          const jobInput = normalizedJobToJobInput(normalized);
-          const { isNew } = await jobRepo.upsertExternal(jobInput);
-          if (isNew) newCount++;
-          else updatedCount++;
-        } catch (err) {
-          // 개별 공고 매핑/저장 실패는 전체 Sync를 중단시키지 않고 계속 진행한다.
-          if (process.env.NODE_ENV !== "production") {
-            console.error("[JobSyncService] upsertExternal 실패:", err instanceof Error ? err.message : err);
+      const windowInputs = results.map((result) => {
+        const inputs = [];
+        for (const normalized of result.jobs) {
+          try {
+            inputs.push(normalizedJobToJobInput(normalized));
+          } catch (err) {
+            if (process.env.NODE_ENV !== "production") {
+              console.error("[JobSyncService] 매핑 실패:", err instanceof Error ? err.message : err);
+            }
+            errorCount++;
           }
-          errorCount++;
         }
+        return inputs;
+      });
+
+      const batches = await Promise.all(windowInputs.map((inputs) => jobRepo.upsertExternalMany(inputs)));
+      for (let i = 0; i < results.length; i++) {
+        fetchedCount += results[i].jobs.length;
+        newCount += batches[i].newCount;
+        updatedCount += batches[i].updatedCount;
+        errorCount += batches[i].errorCount;
       }
 
-      if (!result.hasMore) {
+      if (results.some((r) => r.jobs.length === 0 || !r.hasMore)) {
         reachedEnd = true;
-        break;
+        break outer;
       }
     }
 
     // 전량을 다 훑은 실행에서만 미수집 공고를 비활성화한다.
     // 부분 동기화(페이지 제한)에서 이걸 실행하면 "이번에 안 가져온" 정상 공고가 전부 꺼진다.
-    const deactivatedCount = reachedEnd ? await jobRepo.deactivateStale(providerName, fetchStartedAt) : 0;
+    const deactivatedCount = reachedEnd
+      ? await jobRepo.deactivateStale(providerName, options.staleBefore ?? fetchStartedAt)
+      : 0;
     const completedAt = new Date().toISOString();
     const status: JobSyncRunStatus = errorCount > 0 ? "partial" : "success";
 
@@ -108,6 +128,7 @@ export async function syncJobsFromProvider(options: SyncJobsOptions = {}): Promi
       deactivatedCount,
       errorCount,
       isMock,
+      reachedEnd,
       startedAt,
       completedAt,
     };
@@ -135,6 +156,7 @@ export async function syncJobsFromProvider(options: SyncJobsOptions = {}): Promi
       deactivatedCount: 0,
       errorCount: errorCount + 1,
       isMock,
+      reachedEnd,
       startedAt,
       completedAt,
       errorMessage,
