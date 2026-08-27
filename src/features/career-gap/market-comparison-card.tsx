@@ -52,12 +52,12 @@ export function MarketComparisonCard({ view, source }: MarketComparisonCardProps
     return (
       <Card className="rounded-xl border-0 ring-1 ring-slate-200 bg-slate-50">
         <CardContent className="flex items-center justify-between gap-3 py-4 text-label-1 text-slate-600">
-          <p>자소서에 지원 공고를 연결하거나 커리어 진단에서 직무를 설정해 주세요.</p>
+          <p>자소서에 지원 공고를 연결하거나 마이페이지에서 희망직무를 설정해 주세요.</p>
           <Link
-            href="/career-gap"
+            href="/mypage/profile"
             className="flex shrink-0 items-center gap-1 font-semibold text-brand-blue-700 hover:underline"
           >
-            직무 설정하기 <ChevronRight className="size-4" />
+            희망직무 설정하기 <ChevronRight className="size-4" />
           </Link>
         </CardContent>
       </Card>

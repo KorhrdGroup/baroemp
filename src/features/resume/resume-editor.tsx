@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Eye, Loader2, Pencil, Plus, Printer, Target, Trash2 } from "lucide-react";
+import { ArrowLeft, Eye, Loader2, Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -347,18 +347,6 @@ export function ResumeEditor({
             </AiButton>
           </div>
         </div>
-
-        <Link
-          href={
-            resume.targetOccupationId
-              ? `/career-gap?occupation=${resume.targetOccupationId}${resume.targetJobId ? `&job=${resume.targetJobId}` : ""}`
-              : "/career-gap"
-          }
-          className="flex h-11 items-center justify-center gap-2 rounded-md border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
-        >
-          <Target className="size-4" />
-          지원직무 대비 이력서 점검
-        </Link>
 
         {reviewResult && (
           <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">

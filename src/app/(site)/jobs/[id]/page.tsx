@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { getJobRepository, getOccupationRepository } from "@/lib/repositories";
+import { getJobRepository } from "@/lib/repositories";
 import { getAnonymousCareerSignal } from "@/services/job-search.service";
 import { evaluateJobFit } from "@/services/job-match.service";
 import { findContentForMissingQualifications } from "@/services/job-content-recommendation.service";
@@ -28,14 +28,12 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
   if (!job) notFound();
 
   const anonymousId = (await cookies()).get("baro_anonymous_id")?.value;
-  const [profileSignal, currentUser, occupations] = await Promise.all([
+  const [profileSignal, currentUser] = await Promise.all([
     getAnonymousCareerSignal(anonymousId),
     getCurrentUser(),
-    getOccupationRepository().findAll(),
   ]);
   const match = evaluateJobFit(profileSignal, job);
   const isBookmarked = currentUser ? await isJobBookmarkedAction(job.id) : false;
-  const matchingOccupation = occupations.find((o) => o.jobCategoryCode === job.jobCategory);
   const requirementComparison = currentUser ? await compareUserToJobRequirements(currentUser.id, job) : [];
 
   const heldQualifications = new Set(profileSignal?.heldQualifications ?? []);
@@ -51,7 +49,6 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       isAuthenticated={Boolean(currentUser)}
       isBookmarked={isBookmarked}
       requirementComparison={requirementComparison}
-      careerGapOccupationId={matchingOccupation?.id}
     />
   );
 }

@@ -20,7 +20,6 @@ const TABS: { key: JobCurationTab; label: string }[] = [
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
   NEEDS_PROFILE: "희망직무를 설정하면 맞춤 공고를 보여드려요.",
-  NEEDS_ANALYSIS: "이력서 AI 점검 또는 커리어 진단을 먼저 해보세요.",
 };
 
 /** 마감임박 탭 전용: JobCard는 "마감임박"/"~날짜" 문구만 보여주고 D-day 캡션은 없으므로 여기서 계산해 덧붙인다. */

@@ -208,15 +208,8 @@ export function OccupationRecommendationCard({
           </TrackedLink>
         </div>
 
-        {/* 이력서 준비 / 취업 준비도 연결 (스펙 34/43번: 강제하지 않는 선택적 CTA) */}
+        {/* 이력서 준비 연결 (스펙 34번: 강제하지 않는 선택적 CTA) */}
         <div className="mt-3 flex flex-wrap justify-end gap-4">
-          <Link
-            href={`/career-gap?occupation=${rec.occupationId}`}
-            className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-600 hover:underline"
-          >
-            <GraduationCap className="size-4" />
-            이 직업 취업 준비도 분석
-          </Link>
           <Link
             href={`/resume/new?occupation=${rec.occupationId}&title=${encodeURIComponent(rec.occupationName)}`}
             className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-600 hover:underline"
