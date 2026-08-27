@@ -85,7 +85,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         {...props}
         className={cn(
-          "h-14 w-full min-w-0 rounded-[14px] px-[18px] text-[16px] text-[#1c1a17] outline-none",
+          "h-14 w-full min-w-0 rounded-[10px] px-[18px] text-[16px] text-[#1c1a17] outline-none",
           "placeholder:text-slate-400 transition-shadow",
           invalid
             ? "border-[1.5px] border-[#e5484d] bg-white"
@@ -189,7 +189,7 @@ export function PrimaryButton({
   return (
     <button
       {...props}
-      className="h-[58px] w-full rounded-[14px] bg-brand-blue-400 text-[16px] font-bold text-white transition-colors hover:bg-brand-blue-600 disabled:bg-slate-300 disabled:text-white"
+      className="h-[58px] w-full rounded-[10px] bg-brand-blue-400 text-[16px] font-bold text-white transition-colors hover:bg-brand-blue-600 disabled:bg-slate-300 disabled:text-white"
     >
       {children}
     </button>
@@ -200,10 +200,10 @@ export function SocialButtons({ next }: { next?: string }) {
   const q = next ? `?next=${encodeURIComponent(next)}` : "";
   return (
     // OAuth 시작은 서버 라우트로 이동하는 전체 페이지 네비게이션이라 <a>가 맞다.
-    <div className="mt-4 grid grid-cols-2 gap-2">
+    <div className="mt-2 grid grid-cols-2 gap-2">
       <a
         href={`/auth/login/naver${q}`}
-        className="flex h-14 items-center justify-center gap-2 rounded-[14px] bg-[#03C75A] text-[15px] font-bold text-white transition-colors hover:bg-[#02B351]"
+        className="flex h-14 items-center justify-center gap-2 rounded-[10px] bg-[#03C75A] text-[15px] font-bold text-white transition-colors hover:bg-[#02B351]"
       >
         <svg viewBox="0 0 20 20" aria-hidden="true" className="size-3.5" fill="currentColor">
           <path d="M13.5 10.7 6.2 0H0v20h6.5V9.3L13.8 20H20V0h-6.5z" />
@@ -212,7 +212,7 @@ export function SocialButtons({ next }: { next?: string }) {
       </a>
       <a
         href={`/auth/login/kakao${q}`}
-        className="flex h-14 items-center justify-center gap-2 rounded-[14px] bg-[#FEE500] text-[15px] font-bold text-[#191600] transition-colors hover:bg-[#F2DA00]"
+        className="flex h-14 items-center justify-center gap-2 rounded-[10px] bg-[#FEE500] text-[15px] font-bold text-[#191600] transition-colors hover:bg-[#F2DA00]"
       >
         <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
           <path d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7-.2.7-.7 2.6-.8 3-.1.5.2.5.4.4.2-.1 2.7-1.8 3.8-2.6.6.1 1.2.1 1.9.1 5.5 0 10-3.6 10-8s-4.5-8-10-8z" />

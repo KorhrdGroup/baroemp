@@ -72,7 +72,7 @@ export function FindIdView() {
       </form>
 
       {result ? (
-        <div className="mt-[22px] rounded-[14px] bg-slate-100 px-5 py-[18px]">
+        <div className="mt-[22px] rounded-[10px] bg-slate-100 px-5 py-[18px]">
           <div className="mb-2 text-[12.5px] text-slate-500">확인된 아이디</div>
           <div className="text-[16.5px] font-bold tracking-[-0.01em] text-[#1c1a17]">{result.maskedEmail}</div>
           <div className="mt-1.5 text-[12.5px] text-slate-500">{result.joinedAt} 가입</div>
