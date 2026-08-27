@@ -48,10 +48,17 @@ export function createSupabaseAssessmentResultRepository(): AssessmentResultRepo
       return row ? mapRow(row as Record<string, unknown>) : null;
     },
     async findBySessionId(sessionId) {
+      /*
+       * 세션당 결과는 하나지만, 과거에 중복 저장된 데이터가 남아 있을 수 있다.
+       * single 로 읽으면 그런 세션에서 결과 화면이 통째로 열리지 않으므로
+       * 최신 한 건만 집어 온다.
+       */
       const result = await client
         .from("assessment_results")
         .select("*")
         .eq("session_id", sessionId)
+        .order("completed_at", { ascending: false })
+        .limit(1)
         .maybeSingle();
       const row = unwrapMaybe("AssessmentResultRepository.findBySessionId", result);
       return row ? mapRow(row as Record<string, unknown>) : null;
