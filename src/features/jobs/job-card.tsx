@@ -81,7 +81,7 @@ export function JobCard({
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             {readiness && (
               <Badge className={cn("rounded-full border-0 text-label-2 font-semibold", READINESS_BADGE_CLASS[readiness.level])}>
-                취업준비성 {readiness.label}
+                {readiness.label}
               </Badge>
             )}
             {job.isBeginnerFriendly && (
