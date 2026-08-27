@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2, PanelRightClose, PanelRightOpen, Plus, Printer, Sparkles, Target, Trash2 } from "lucide-react";
@@ -27,6 +27,7 @@ import type {
   ResumeExperienceInput,
   ResumeItemInput,
   ResumeItemSectionType,
+  ResumeMarketComparisonView,
   ResumeQualificationInput,
   ResumeSkillInput,
   ResumeTrainingInput,
@@ -35,12 +36,14 @@ import {
   changeResumeTemplateAction,
   deleteResumeAction,
   generateCareerSummaryAiAction,
+  getResumeMarketComparisonAction,
   reviewResumeAiAction,
   rewriteResumeSectionAiAction,
   saveResumeAction,
   trackResumeExportedAction,
 } from "./resume-actions";
 import { ResumePreview } from "./resume-preview";
+import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
 
 let keySeq = 0;
@@ -134,7 +137,9 @@ export function ResumeEditor({
   const [showPreview, setShowPreview] = useState(true);
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
+  const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const [isReviewing, startReview] = useTransition();
+  const marketComparisonRequestRef = useRef(0);
   const [summarySuggestion, setSummarySuggestion] = useState<string | null>(null);
   const [isGeneratingSummary, startGenerateSummary] = useTransition();
   const [rewriteTarget, setRewriteTarget] = useState<{ key: string; field: "responsibilities" | "achievements"; text: string } | null>(null);
@@ -195,6 +200,18 @@ export function ResumeEditor({
         await handleSave();
         const result = await reviewResumeAiAction(resume.id);
         setReviewResult(result);
+        setMarketComparison(null);
+        // AI 첨삭과 독립 - 실패해도 첨삭 결과 표시에는 영향 없음 (설계 3절)
+        const requestId = ++marketComparisonRequestRef.current;
+        void getResumeMarketComparisonAction(resume.id)
+          .then((data) => {
+            if (marketComparisonRequestRef.current !== requestId) return;
+            setMarketComparison(data);
+          })
+          .catch(() => {
+            if (marketComparisonRequestRef.current !== requestId) return;
+            setMarketComparison(null);
+          });
       } catch {
         setSaveMessage("AI 점검 중 오류가 발생했습니다.");
       }
@@ -332,6 +349,14 @@ export function ResumeEditor({
               )}
             </CardContent>
           </Card>
+        )}
+
+        {reviewResult && marketComparison && (
+          <MarketComparisonCard
+            key={marketComparison.analysisId ?? "no-analysis"}
+            view={marketComparison}
+            source="resume_review"
+          />
         )}
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="lg:hidden">

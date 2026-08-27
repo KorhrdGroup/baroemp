@@ -50,6 +50,7 @@ export async function trackCareerGapItemViewedAction(input: {
   analysisId: string;
   requirementId: string;
   marketRate: number;
+  source?: "resume_review" | "cover_letter_review";
 }): Promise<void> {
   const user = await requireSessionUser();
   await logActivityEvent({
@@ -57,7 +58,7 @@ export async function trackCareerGapItemViewedAction(input: {
     eventType: "career_gap_item_viewed",
     entityType: "career_gap_analysis",
     entityId: input.analysisId,
-    metadata: { requirementId: input.requirementId, marketRate: input.marketRate },
+    metadata: { requirementId: input.requirementId, marketRate: input.marketRate, source: input.source },
   });
 }
 
@@ -80,6 +81,7 @@ export async function trackCareerGapRecommendationClickedAction(input: {
   analysisId: string;
   requirementId: string;
   contentId?: string;
+  source?: "resume_review" | "cover_letter_review";
 }): Promise<void> {
   const user = await requireSessionUser();
   await logActivityEvent({
@@ -87,7 +89,7 @@ export async function trackCareerGapRecommendationClickedAction(input: {
     eventType: input.contentId ? "career_gap_content_clicked" : "career_gap_recommendation_clicked",
     entityType: "career_gap_analysis",
     entityId: input.analysisId,
-    metadata: { requirementId: input.requirementId, contentId: input.contentId },
+    metadata: { requirementId: input.requirementId, contentId: input.contentId, source: input.source },
   });
 }
 

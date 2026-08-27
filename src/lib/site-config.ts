@@ -30,8 +30,6 @@ export const footerServiceLinks: NavItem[] = [
 ];
 
 export const footerCompanyLinks: NavItem[] = [
-  { label: "회사소개", href: "/" },
-  { label: "이용약관", href: "/" },
-  { label: "개인정보처리방침", href: "/" },
-  { label: "제휴문의", href: "/" },
+  { label: "이용약관", href: "/terms" },
+  { label: "개인정보처리방침", href: "/privacy" },
 ];
