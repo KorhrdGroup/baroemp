@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { Briefcase, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { JobCard } from "@/features/jobs/job-card";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { JobCurationSection } from "@/features/jobs/job-curation-section";
+import { Pagination } from "@/components/common/pagination";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { searchJobs, getRecommendedJobsForAnonymous, type JobSearchParams } from "@/services/job-search.service";
 import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
+import { getOccupationRepository } from "@/lib/repositories";
 import { getUserQualificationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
 
@@ -66,6 +67,14 @@ export default async function JobsPage({
     getJobCuration(user.id, "new"),
   ]);
   const isAuthenticated = Boolean(currentUser);
+
+  /*
+   * 직업진단 결과에서 넘어오는 직종 코드는 검색바의 직종 목록에 없다.
+   * 이름을 찾아 넘겨야 필터가 걸린 것을 버튼에서 알아볼 수 있다.
+   */
+  const jobCategoryLabel = sp.category
+    ? (await getOccupationRepository().findAll()).find((o) => o.jobCategoryCode === sp.category)?.name
+    : undefined;
   // 취업준비성 배지용 보유 자격증 (이력서/검사에서 등록된 user_qualifications 기준)
   const heldQualifications = currentUser
     ? (await getUserQualificationRepository().findByUserId(currentUser.id)).map((q) => q.name)
@@ -105,8 +114,13 @@ export default async function JobsPage({
           closingSoon: sp.closingSoon === "1",
           sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
         }}
-      />
-
+        jobCategoryLabel={jobCategoryLabel}
+        summary={
+          <p className="text-label-1 text-slate-500">
+            총 <span className="font-semibold text-brand-blue-600">{result.total}건</span>
+          </p>
+        }
+      >
       {recommendation && recommendation.jobs.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2">
@@ -136,12 +150,9 @@ export default async function JobsPage({
           bookmarkedIds={bookmarkedIds}
         />
       </div>
+      </JobFiltersForm>
 
-      <div className="mt-8">
-        <p className="text-label-1 text-slate-500">
-          총 <span className="font-semibold text-brand-blue-600">{result.total}건</span>의 채용공고
-        </p>
-
+      <div className="mt-4">
         {result.items.length === 0 ? (
           <EmptyState
             icon={Briefcase}
@@ -165,31 +176,7 @@ export default async function JobsPage({
               ))}
             </div>
 
-            {totalPages > 1 && (
-              <div className="mt-8 flex items-center justify-center gap-2">
-                <Link
-                  href={buildPageHref(Math.max(1, page - 1))}
-                  aria-disabled={page <= 1}
-                  className={`rounded-md border border-border px-4 py-2 text-label-1 font-medium ${
-                    page <= 1 ? "pointer-events-none text-slate-300" : "text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  이전
-                </Link>
-                <span className="text-label-1 text-slate-500">
-                  {page} / {totalPages}
-                </span>
-                <Link
-                  href={buildPageHref(Math.min(totalPages, page + 1))}
-                  aria-disabled={page >= totalPages}
-                  className={`rounded-md border border-border px-4 py-2 text-label-1 font-medium ${
-                    page >= totalPages ? "pointer-events-none text-slate-300" : "text-slate-600 hover:bg-slate-50"
-                  }`}
-                >
-                  다음
-                </Link>
-              </div>
-            )}
+            <Pagination page={page} totalPages={totalPages} buildHref={buildPageHref} className="mt-8" />
           </>
         )}
       </div>

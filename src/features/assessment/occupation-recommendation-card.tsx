@@ -49,8 +49,9 @@ export function OccupationRecommendationCard({
     <details
       open={defaultOpen}
       className={cn(
-        "group rounded-xl border bg-white",
-        rank === 1 ? "border-brand-blue-300 ring-2 ring-brand-blue-100" : "border-border",
+        "group rounded-xl bg-white",
+        // 1순위만 테두리로 짚어준다. 나머지는 회색 바탕과 흰 면의 대비로 이미 구분된다.
+        rank === 1 && "ring-2 ring-brand-blue-200",
       )}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-5 sm:px-7 sm:py-6">
@@ -90,12 +91,13 @@ export function OccupationRecommendationCard({
         )}
 
         {/* 세부 적합도 */}
-        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {/* 네 지표를 각각 회색 상자에 담는다. 배경 없이 나열하면 어디까지가 한 지표인지 흐리다. */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {SUBSCORES.map(({ key, label }) => (
-            <div key={label}>
+            <div key={label} className="rounded-xl bg-slate-50 p-4">
               <p className="text-label-2 text-slate-400">{label}</p>
-              <p className="mt-0.5 text-body-1 font-bold text-slate-800">{rec[key] as number}</p>
-              <Progress value={rec[key] as number} className="mt-1 h-1.5" />
+              <p className="mt-1 text-title-3 font-bold text-slate-900">{rec[key] as number}</p>
+              <Progress value={rec[key] as number} className="mt-2 h-1.5" />
             </div>
           ))}
         </div>
@@ -183,7 +185,7 @@ export function OccupationRecommendationCard({
         </div>
 
         {/* 관련 채용공고 */}
-        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-dashed border-border px-4 py-4">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-4">
           <div className="text-label-1 text-slate-600">
             <p className="flex items-center gap-1.5">
               <MapPin className="size-4 text-slate-400" />
@@ -201,7 +203,13 @@ export function OccupationRecommendationCard({
             targetId={rec.occupationId}
             userId={userId}
             anonymousId={anonymousId}
-            href={rec.jobCategoryCode ? `/jobs?category=${rec.jobCategoryCode}` : "/jobs"}
+            /*
+             * 직종 코드가 아니라 직업 이름으로 검색해 넘긴다.
+             * 코드로 넘기면 검색창이 빈 채로 드롭다운만 바뀌어 무엇으로 좁혀졌는지 알기 어렵고,
+             * 사용자가 검색어를 고쳐 넓히거나 좁힐 수도 없다.
+             * 이름 검색은 제목·본문까지 훑어 코드가 다른 관련 공고도 함께 걸린다.
+             */
+            href={`/jobs?keyword=${encodeURIComponent(rec.occupationName)}`}
             className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
           >
             채용공고 보기

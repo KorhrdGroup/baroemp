@@ -62,6 +62,8 @@ export function JobDetailView({
   requirementComparison?: JobRequirementComparisonItem[];
 }) {
   return (
+    // 지원금 상세와 같은 뼈대: 회색 바탕 위에 흰 카드를 쌓고, 지원 동작은 하단에 고정한다.
+    <div className="min-h-screen bg-slate-50">
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <JobViewTracker jobId={job.id} matchScore={match?.score} />
 
@@ -91,7 +93,7 @@ export function JobDetailView({
         {job.companyName}
       </p>
 
-      <div className="mt-6 grid grid-cols-1 gap-4 rounded-xl border border-border bg-white p-6 sm:grid-cols-2">
+      <div className="mt-8 grid grid-cols-1 gap-4 rounded-xl bg-white p-6 sm:grid-cols-2">
         <InfoRow
           icon={MapPin}
           label="근무지역"
@@ -110,16 +112,19 @@ export function JobDetailView({
       </div>
 
       {job.preferredQualifications.length > 0 && (
-        <div className="mt-4 flex flex-wrap gap-2">
-          {job.preferredQualifications.map((code) => (
-            <span key={code} className="rounded-full bg-brand-blue-50 px-3 py-1 text-label-1 font-medium text-brand-blue-600">
-              {labelQualification(code)} 우대/필요
-            </span>
-          ))}
+        <div className="mt-6 rounded-xl bg-white p-6">
+          <h2 className="text-body-1 font-bold text-slate-900">우대·필요 자격</h2>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {job.preferredQualifications.map((code) => (
+              <span key={code} className="rounded-full bg-brand-blue-50 px-3 py-1 text-label-1 font-medium text-brand-blue-600">
+                {labelQualification(code)}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
-      <div className="mt-8">
+      <div className="mt-6 rounded-xl bg-white p-6">
         <h2 className="text-body-1 font-bold text-slate-900">상세 설명</h2>
         <p className="mt-3 whitespace-pre-line text-body-2-reading text-slate-600">{job.description}</p>
         {job.qualificationRequirements && (
@@ -130,7 +135,7 @@ export function JobDetailView({
       </div>
 
       {match ? (
-        <div className="mt-8 rounded-xl border border-border bg-white p-6">
+        <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고와 내 조건 비교</h2>
           <p className="mt-1 text-label-1 text-slate-400">최근 진단 결과를 기준으로 비교했어요.</p>
           <div className="mt-4 space-y-4">
@@ -174,7 +179,7 @@ export function JobDetailView({
         </div>
       ) : (
         !hasCareerSignal && (
-          <div className="mt-8 rounded-xl border border-dashed border-border bg-brand-blue-50/40 p-6 text-center">
+          <div className="mt-6 rounded-xl bg-brand-blue-50/40 p-6 text-center">
             <p className="text-label-1 text-slate-600">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
             <Link
               href="/assessment"
@@ -187,7 +192,7 @@ export function JobDetailView({
       )}
 
       {isAuthenticated && requirementComparison && requirementComparison.length > 0 && (
-        <div className="mt-8 rounded-xl border border-border bg-white p-6">
+        <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고 요구조건과 내 준비상태</h2>
           <p className="mt-1 text-label-1 text-slate-400">이 공고 원문에서 확인된 요구조건을 회원님의 Career DB와 비교했어요.</p>
           <div className="mt-4 space-y-2">
@@ -217,7 +222,7 @@ export function JobDetailView({
       )}
 
       {recommendedContents.length > 0 && (
-        <div className="mt-8 rounded-xl border border-border bg-white p-6">
+        <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고에 필요한 준비</h2>
           <p className="mt-1 text-label-1 text-slate-400">이 공고와 관련된 자격/교육 과정이에요.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
@@ -231,7 +236,26 @@ export function JobDetailView({
         </div>
       )}
 
-      <div className="mt-8 flex flex-col gap-3 border-t border-border pt-6 sm:flex-row">
+      <Link
+        href={`/resume/new?job=${job.id}`}
+        className="mt-6 flex h-12 items-center justify-center gap-2 rounded-xl bg-white text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-50"
+      >
+        <FileText className="size-4" />이 공고에 맞는 이력서 만들기
+      </Link>
+
+      {job.sourceUrl && (
+        <p className="mt-6 text-center text-label-2 text-slate-400">
+          이 공고는 {job.externalSource === "work24" ? "고용24" : "외부"}에서 제공한 정보입니다. 지원 시 원본 페이지로 이동합니다.
+        </p>
+      )}
+
+      {/* 하단 고정 CTA가 마지막 내용을 가리지 않도록 비워둔다. */}
+      <div className="h-24" />
+    </div>
+
+    {/* ── 하단 고정 CTA ── */}
+    <div className="fixed inset-x-0 bottom-0 z-40 bg-white/95 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
+      <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
         <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" />
         <JobBookmarkButton
           jobId={job.id}
@@ -241,19 +265,7 @@ export function JobDetailView({
           initialBookmarked={isBookmarked}
         />
       </div>
-
-      <Link
-        href={`/resume/new?job=${job.id}`}
-        className="mt-3 flex h-11 items-center justify-center gap-2 rounded-md border border-brand-blue-200 bg-brand-blue-50/60 text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-100"
-      >
-        <FileText className="size-4" />이 공고에 맞는 이력서 만들기
-      </Link>
-
-      {job.sourceUrl && (
-        <p className="mt-3 text-center text-label-2 text-slate-400">
-          이 공고는 {job.externalSource === "work24" ? "고용24" : "외부"}에서 제공한 정보입니다. 지원 시 원본 페이지로 이동합니다.
-        </p>
-      )}
+    </div>
     </div>
   );
 }
