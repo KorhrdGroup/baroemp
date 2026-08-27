@@ -68,6 +68,8 @@ export const KNOWN_ACTIVITY_EVENT_TYPES = [
   "career_gap_content_clicked",
   "career_gap_job_clicked",
   "career_gap_simulation_viewed",
+  "curation_tab_viewed",
+  "curation_job_clicked",
 ] as const;
 
 export type KnownActivityEventType = (typeof KNOWN_ACTIVITY_EVENT_TYPES)[number];

@@ -1,5 +1,6 @@
 import { findCareerProfileByUserId, getAssessmentResultRepository, getJobRepository } from "@/lib/repositories";
 import { evaluateJobFit, type JobMatchDetail } from "./job-match.service";
+import { getCandidateJobsForUser } from "./job-curation.service";
 import type { CareerProfile, Job, JobSearchFilter, JobSearchResult } from "@/types";
 
 export interface JobWithMatch extends Job {
@@ -57,7 +58,7 @@ export async function getRecommendedJobsForUser(userId: string | undefined, limi
   const profile = await findCareerProfileByUserId(userId);
   if (!profile) return [];
 
-  const jobs = await getJobRepository().findAll({ activeOnly: true } as JobSearchFilter);
+  const jobs = await getCandidateJobsForUser(userId);
   const scored = jobs
     .map((job) => ({ job, match: evaluateJobFit(profile, job) }))
     .filter((x): x is { job: Job; match: JobMatchDetail } => Boolean(x.match) && x.match!.score > 0)

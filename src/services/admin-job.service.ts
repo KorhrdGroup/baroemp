@@ -15,10 +15,13 @@ export interface AdminJobRow extends Job {
  * 대량 이벤트를 고려해 최근 N건까지만 집계한다(STEP4 V1 범위, 대시보드형 근사치).
  */
 export async function listAdminJobsWithStats(): Promise<AdminJobRow[]> {
-  const [jobs, events] = await Promise.all([
-    getJobRepository().findAll({ activeOnly: false }),
+  // 전량 수집(6만+건) 이후 전체 findAll은 statement timeout을 유발한다.
+  // 관리자 목록은 최신 500건까지만 보여준다 (V1 대시보드형 근사치 - 상세 조회는 검색으로).
+  const [searchResult, events] = await Promise.all([
+    getJobRepository().search({ activeOnly: false, sort: "latest", page: 1, pageSize: 500 }),
     activityEventLogger.getRecentEvents(3000),
   ]);
+  const jobs = searchResult.items;
 
   const jobEvents = events.filter((e) => e.entityType === "job" && e.entityId);
   const viewCounts = new Map<string, number>();

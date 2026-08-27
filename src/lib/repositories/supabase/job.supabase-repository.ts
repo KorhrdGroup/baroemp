@@ -200,7 +200,8 @@ export function createSupabaseJobRepository(): JobRepository | null {
     },
     async search(filter) {
       const page = Math.max(1, filter.page ?? 1);
-      const pageSize = Math.min(100, Math.max(1, filter.pageSize ?? 20));
+      // 큐레이션 후보군(250)·관리자 목록(500) 같은 서버 내부 대량 조회를 허용하기 위해 상한 500.
+      const pageSize = Math.min(500, Math.max(1, filter.pageSize ?? 20));
       const start = (page - 1) * pageSize;
 
       let query = client.from("jobs").select("*", { count: "exact" });
