@@ -29,7 +29,8 @@ const CATEGORY_ICONS: Record<string, LucideIcon> = {
 
 export type ResultItem = {
   program: SupportProgram;
-  matchResult: { grade: string; score: number; reasons: MatchReasonDetail[] };
+  // MatchResult(서비스 타입)의 grade가 optional이라 구조적으로 호환되도록 맞춘다.
+  matchResult: { grade?: string; score: number; reasons: MatchReasonDetail[] };
 };
 
 export type ResultCategory = {
@@ -68,7 +69,7 @@ function CollapsibleSection({
           <SupportProgramCard
             key={program.id}
             program={program}
-            grade={matchResult.grade as SupportEligibilityGrade}
+            grade={(matchResult.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade}
             score={matchResult.score}
             reasons={matchResult.reasons}
           />
