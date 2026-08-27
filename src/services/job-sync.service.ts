@@ -48,10 +48,17 @@ export async function syncJobsFromProvider(options: SyncJobsOptions = {}): Promi
   let errorCount = 0;
   const fetchStartedAt = new Date().toISOString();
 
+  // Provider의 공고 목록 끝까지 도달했는지 여부. 페이지 제한(maxPages)에 걸려 일부만
+  // 가져온 부분 동기화에서는 false로 남는다.
+  let reachedEnd = false;
+
   try {
     for (let page = 1; page <= maxPages; page++) {
       const result = await provider.searchJobs({ page, pageSize });
-      if (result.jobs.length === 0) break;
+      if (result.jobs.length === 0) {
+        reachedEnd = true;
+        break;
+      }
       fetchedCount += result.jobs.length;
 
       for (const normalized of result.jobs) {
@@ -69,10 +76,15 @@ export async function syncJobsFromProvider(options: SyncJobsOptions = {}): Promi
         }
       }
 
-      if (!result.hasMore) break;
+      if (!result.hasMore) {
+        reachedEnd = true;
+        break;
+      }
     }
 
-    const deactivatedCount = await jobRepo.deactivateStale(providerName, fetchStartedAt);
+    // 전량을 다 훑은 실행에서만 미수집 공고를 비활성화한다.
+    // 부분 동기화(페이지 제한)에서 이걸 실행하면 "이번에 안 가져온" 정상 공고가 전부 꺼진다.
+    const deactivatedCount = reachedEnd ? await jobRepo.deactivateStale(providerName, fetchStartedAt) : 0;
     const completedAt = new Date().toISOString();
     const status: JobSyncRunStatus = errorCount > 0 ? "partial" : "success";
 
