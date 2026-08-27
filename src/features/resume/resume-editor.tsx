@@ -974,7 +974,7 @@ export function ResumeEditor({
         삭제는 편집 화면이 아니라 이력서 목록에서 처리한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
-        <div className="mx-auto flex max-w-6xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
           <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로

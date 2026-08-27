@@ -2,15 +2,15 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, FileText, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
+import { PillPicker } from "@/components/common/pill-picker";
 import { AiButton } from "@/components/common/ai-button";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
@@ -36,17 +36,22 @@ function stripKey<T extends { _key: string }>(item: T): Omit<T, "_key"> {
   return rest as Omit<T, "_key">;
 }
 
+export interface CoverLetterTemplateOption {
+  id: string;
+  name: string;
+  description?: string;
+  /** "문항 5개" 같은 부가 정보 */
+  hint?: string;
+}
+
 export function CoverLetterEditor({
   initialDetail,
   experienceBank,
   templates = [],
-  isNew = false,
 }: {
   initialDetail: CoverLetterDetail;
   experienceBank: ExperienceBankItem[];
-  templates?: TemplateOption[];
-  /** 방금 만든 자기소개서인지. 그렇다면 양식 선택기를 펼친 채로 연다. */
-  isNew?: boolean;
+  templates?: CoverLetterTemplateOption[];
 }) {
   const [detail, setDetail] = useState(initialDetail);
   const [title, setTitle] = useState(initialDetail.coverLetter.title);
@@ -192,14 +197,17 @@ export function CoverLetterEditor({
 
   return (
     <div className="space-y-4">
-      <TemplateCardPicker
+      <PillPicker
         label="자기소개서 양식"
-        templates={templates}
+        icon={<FileText className="size-4 text-brand-blue-600" />}
+        options={templates.map((t) => ({
+          id: t.id,
+          name: t.name,
+          description: [t.description, t.hint].filter(Boolean).join(" · ") || undefined,
+        }))}
         value={detail.coverLetter.templateId ?? undefined}
         onChange={handleTemplateChange}
         pending={isChangingTemplate}
-        gridClassName="sm:grid-cols-3"
-        defaultOpen={isNew}
       />
 
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4">
@@ -209,21 +217,19 @@ export function CoverLetterEditor({
             placeholder="제목을 입력해주세요"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 h-9"
+            className="mt-1 h-10 bg-white"
           />
         </div>
       </div>
 
-      <Card className="rounded-xl border-0 ring-0">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-label-1 font-semibold text-slate-500">
-            {experienceBank.length > 0 ? "경험뱅크에서 문항별로 사용할 경험을 선택하세요" : "경험뱅크가 비어있어요"}
-          </CardTitle>
-          <Link href="/resume#experience-bank" className="text-label-1 font-medium text-brand-blue-600 hover:underline">
-            경험뱅크 관리 →
-          </Link>
-        </CardHeader>
-      </Card>
+      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4">
+        <p className="text-label-1 text-slate-500">
+          {experienceBank.length > 0 ? "경험뱅크에서 문항별로 사용할 경험을 선택하세요" : "경험뱅크가 비어있어요"}
+        </p>
+        <Link href="/resume#experience-bank" className="text-label-1 font-medium text-brand-blue-600 hover:underline">
+          경험뱅크 관리 →
+        </Link>
+      </div>
 
       <div className="space-y-4">
         {sections.map((section, idx) => (
@@ -234,23 +240,24 @@ export function CoverLetterEditor({
                 <Input
                   value={section.question}
                   onChange={(e) => updateSection(section._key, { question: e.target.value })}
-                  className="mt-1 h-9 border-0 px-0 text-body-2 font-bold shadow-none focus-visible:ring-0"
+                  className="mt-1 h-10 border-0 bg-transparent px-0 text-body-2 font-bold shadow-none focus-visible:ring-0"
                 />
               </div>
               <div className="flex items-center gap-1">
-                <Button variant="ghost" size="sm" onClick={() => moveSection(section._key, -1)} disabled={idx === 0}>
+                <Button variant="ghost" size="icon-sm" aria-label="위로 이동" onClick={() => moveSection(section._key, -1)} disabled={idx === 0}>
                   <ArrowUp className="size-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => moveSection(section._key, 1)} disabled={idx === sections.length - 1}>
+                <Button variant="ghost" size="icon-sm" aria-label="아래로 이동" onClick={() => moveSection(section._key, 1)} disabled={idx === sections.length - 1}>
                   <ArrowDown className="size-4" />
                 </Button>
-                <Button variant="ghost" size="sm" onClick={() => setSections((prev) => prev.filter((s) => s._key !== section._key))}>
+                <Button variant="ghost" size="icon-sm" aria-label="문항 삭제" onClick={() => setSections((prev) => prev.filter((s) => s._key !== section._key))}>
                   <Trash2 className="size-4 text-slate-400" />
                 </Button>
               </div>
             </CardHeader>
             <CardContent className="space-y-3">
               <Textarea
+                className="bg-white"
                 value={section.content ?? ""}
                 onChange={(e) => updateSection(section._key, { content: e.target.value })}
                 rows={6}
@@ -349,6 +356,7 @@ export function CoverLetterEditor({
 
       <Button
         variant="outline"
+        size="sm"
         onClick={() =>
           setSections((prev) => [
             ...prev,
@@ -365,7 +373,7 @@ export function CoverLetterEditor({
         삭제는 편집 화면이 아니라 자기소개서 목록에서 처리한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
           <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
