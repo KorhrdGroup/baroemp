@@ -6,7 +6,8 @@ import { getCurrentUser, requireSessionUser } from "@/lib/auth/session";
 import { getJobBookmarkRepository, getJobRepository } from "@/lib/repositories";
 import { recalculateLeadScore } from "@/services/lead-score.service";
 import { recordJobInterestSignal } from "@/services/job-interest.service";
-import type { Job, JobSearchFilter } from "@/types";
+import { getJobCuration } from "@/services/job-curation.service";
+import type { Job, JobSearchFilter, JobCurationTab, JobCurationResult } from "@/types";
 
 /** 활동 로그용 userId/anonymousId를 결정한다. 클라이언트가 넘긴 userId는 신뢰하지 않고 항상 세션을 우선한다. */
 async function resolveActorIds(anonymousId?: string): Promise<{ userId?: string; anonymousId?: string }> {
@@ -248,4 +249,33 @@ export async function getUserJobBookmarkIdsAction(): Promise<string[]> {
   if (!user) return [];
   const bookmarks = await getJobBookmarkRepository().findAllByUser(user.id);
   return bookmarks.map((b) => b.jobId);
+}
+
+/** 채용공고 큐레이션 섹션 - 탭별 큐레이션 데이터 조회 */
+export async function getJobCurationAction(tab: JobCurationTab): Promise<JobCurationResult> {
+  const user = await requireSessionUser();
+  return getJobCuration(user.id, tab);
+}
+
+/** 채용공고 큐레이션 섹션 - 탭 조회 트래킹 */
+export async function trackCurationTabViewedAction(input: { tab: JobCurationTab }): Promise<void> {
+  const user = await requireSessionUser();
+  await logActivityEvent({
+    userId: user.id,
+    eventType: "curation_tab_viewed",
+    entityType: "job",
+    metadata: { tab: input.tab },
+  });
+}
+
+/** 채용공고 큐레이션 섹션 - 카드 클릭 트래킹 */
+export async function trackCurationJobClickedAction(input: { tab: JobCurationTab; jobId: string }): Promise<void> {
+  const user = await requireSessionUser();
+  await logActivityEvent({
+    userId: user.id,
+    eventType: "curation_job_clicked",
+    entityType: "job",
+    entityId: input.jobId,
+    metadata: { tab: input.tab },
+  });
 }
