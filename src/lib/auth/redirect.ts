@@ -43,7 +43,7 @@ export const PROTECTED_ROUTE_PREFIXES = [
 
 export const ADMIN_ROUTE_PREFIX = "/admin";
 
-export const AUTH_ROUTE_PATHS = ["/login", "/signup", "/forgot-password", "/reset-password"] as const;
+export const AUTH_ROUTE_PATHS = ["/login", "/signup", "/find-id", "/find-password"] as const;
 
 /**
  * 보호 접두사에 속하지만 비로그인도 볼 수 있는 경로.

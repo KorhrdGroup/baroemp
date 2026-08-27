@@ -11,7 +11,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
  *   {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type={{ .Type }}&next=/mypage
  *
  * type=signup|email → 이메일 인증 완료 후 세션 생성, next로 이동.
- * type=recovery → 비밀번호 재설정 세션 생성 후 /reset-password로 이동해 새 비밀번호 입력.
+ * 비밀번호 재설정은 휴대폰 인증(/find-password)으로 일원화했으므로 recovery 링크는 사용하지 않는다.
  *
  * PKCE 방식(?code=...)으로 오는 경우도 함께 처리한다 (Supabase 프로젝트 Auth Flow 설정에 따라 다름).
  */
@@ -20,7 +20,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   const tokenHash = searchParams.get("token_hash");
   const type = searchParams.get("type") as EmailOtpType | null;
   const code = searchParams.get("code");
-  const next = sanitizeNextPath(searchParams.get("next"), type === "recovery" ? "/reset-password" : "/mypage");
+  const next = sanitizeNextPath(searchParams.get("next"), "/mypage");
 
   const supabase = await createServerSupabaseClient();
   if (!supabase) {
