@@ -35,16 +35,17 @@ export function CoreServicesSection() {
                 <p className="text-body-1 font-semibold text-slate-900">{service.title}</p>
                 <p className="mt-1 text-label-1 text-slate-500">{service.description}</p>
               </div>
-              <Badge
-                className={cn(
-                  "rounded-full border-0 px-2.5 py-1 text-label-1 font-semibold",
-                  service.badge === "무료" && "bg-brand-blue-50 text-brand-blue-600",
-                  service.badge === "유료" && "bg-slate-200 text-slate-700",
-                  service.badge === "준비중" && "bg-slate-100 text-slate-500",
-                )}
-              >
-                {service.badge}
-              </Badge>
+              {service.badge && (
+                <Badge
+                  className={cn(
+                    "rounded-full border-0 px-2.5 py-1 text-label-1 font-semibold",
+                    service.badge === "유료" && "bg-slate-200 text-slate-700",
+                    service.badge === "준비중" && "bg-slate-100 text-slate-500",
+                  )}
+                >
+                  {service.badge}
+                </Badge>
+              )}
             </Link>
           );
         })}

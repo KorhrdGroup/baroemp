@@ -28,7 +28,7 @@ export default async function LoginPage({
   return (
     <AuthCard
       title="로그인"
-      description="로그인 후 무료로 이용할 수 있습니다."
+      description="로그인 후 모든 서비스를 이용할 수 있습니다."
       footer={
         <>
           아직 계정이 없으신가요?{" "}

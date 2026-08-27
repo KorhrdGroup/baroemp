@@ -27,7 +27,7 @@ export default async function SignupPage({
   return (
     <AuthCard
       title="회원가입"
-      description="가입 후 무료로 직업진단, 채용공고, 지원제도를 이용할 수 있습니다."
+      description="가입 후 직업진단, 채용공고, 지원제도를 이용할 수 있습니다."
       footer={
         <>
           이미 계정이 있으신가요?{" "}

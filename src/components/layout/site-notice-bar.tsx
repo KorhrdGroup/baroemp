@@ -28,7 +28,7 @@ export function SiteNoticeBar() {
       <div className="mx-auto flex max-w-7xl items-center gap-1.5 px-4 py-1.5 sm:px-6 lg:px-8">
         <ShieldCheck aria-hidden className="size-3.5 shrink-0 text-slate-400" />
         <p className="text-label-2 break-keep text-slate-500">
-          <span className="font-medium text-slate-600">(주)한평생바로취업</span>이 운영하는 무료 중장년
+          <span className="font-medium text-slate-600">(주)한평생바로취업</span>이 운영하는 중장년
           취업지원 서비스입니다.
         </p>
       </div>

@@ -5,7 +5,7 @@ export interface CoreServiceItem {
   id: string;
   title: string;
   description: string;
-  badge: "무료" | "유료" | "준비중";
+  badge?: "유료" | "준비중";
   href: string;
   icon: LucideIcon;
 }
@@ -19,7 +19,6 @@ export const coreServices: CoreServiceItem[] = [
     id: "assessment",
     title: "내게 맞는 직업 찾기",
     description: "빅데이터 기반 직업진단",
-    badge: "무료",
     href: "/assessment",
     icon: FileSearch,
   },
@@ -27,7 +26,6 @@ export const coreServices: CoreServiceItem[] = [
     id: "jobs",
     title: "전국 채용공고",
     description: "실시간 채용정보 확인",
-    badge: "무료",
     href: "/jobs",
     icon: Briefcase,
   },
@@ -35,7 +33,6 @@ export const coreServices: CoreServiceItem[] = [
     id: "support",
     title: "지원금 찾기",
     description: "받을 수 있는 취업·훈련 지원 확인",
-    badge: "무료",
     href: "/support",
     icon: Coins,
   },
@@ -43,7 +40,6 @@ export const coreServices: CoreServiceItem[] = [
     id: "resume",
     title: "이력서·자소서 첨삭",
     description: "AI 기반 맞춤 첨삭",
-    badge: "무료",
     href: "/resume",
     icon: FileEdit,
   },

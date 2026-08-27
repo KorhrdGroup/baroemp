@@ -2,12 +2,12 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, ArrowRight, Check, Clock, Coins, Gift, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Clock, Coins, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
-import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, QUALIFICATION_LABELS, REGION_LABELS } from "@/lib/labels";
+import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, REGION_LABELS } from "@/lib/labels";
 import { getSupportAssessmentPrefillAction, submitSupportAssessmentAction } from "./support-actions";
 import type { AgeGroup, DesiredStartTiming, EmploymentStatus, Region, SupportAssessmentAnswers } from "@/types";
 
@@ -29,10 +29,8 @@ const JOB_CATEGORY_OPTIONS: { code: string; label: string }[] = [
   { code: "facility_cleaning", label: "시설관리·미화" },
   { code: "hospital_companion", label: "병원동행·간병" },
   { code: "logistics_driver", label: "배송·운전직" },
-  { code: "other", label: "기타 / 잘 모르겠어요" },
+  { code: "other", label: "기타" },
 ];
-
-const QUALIFICATION_OPTIONS = Object.entries(QUALIFICATION_LABELS) as [string, string][];
 
 const TRAINING_WILLINGNESS_LABELS: Record<number, string> = {
   1: "전혀 없음",
@@ -48,8 +46,6 @@ type StepId =
   | "employmentStatus"
   | "desiredStartTiming"
   | "trainingWillingness"
-  | "desiredJobCategories"
-  | "heldQualifications"
   | "careerBreak"
   | "openToGovSupport";
 
@@ -61,13 +57,11 @@ interface StepConfig {
   required: boolean;
 }
 
-type GroupKey = "basic" | "status" | "target" | "intent";
+type GroupKey = "basic" | "status" | "intent";
 
-/** 진행 표시의 주 단위. 9개 문항을 4개 대분류로 묶는다. */
 const GROUPS: { key: GroupKey; label: string }[] = [
   { key: "basic", label: "기본 정보" },
   { key: "status", label: "취업 현황" },
-  { key: "target", label: "희망 직종·자격" },
   { key: "intent", label: "교육·지원 의향" },
 ];
 
@@ -76,21 +70,7 @@ const STEPS: StepConfig[] = [
   { id: "region", group: "basic", title: "거주지역이 어디신가요?", required: true },
   { id: "employmentStatus", group: "status", title: "현재 취업상태를 선택해주세요", required: true },
   { id: "desiredStartTiming", group: "status", title: "취업 희망시기는 언제인가요?", required: true },
-  { id: "careerBreak", group: "status", title: "경력단절 기간이 있으신가요?", required: false },
-  {
-    id: "desiredJobCategories",
-    group: "target",
-    title: "희망하는 직종이 있다면 선택해주세요",
-    description: "복수 선택 가능해요. (선택 안 하셔도 괜찮아요)",
-    required: false,
-  },
-  {
-    id: "heldQualifications",
-    group: "target",
-    title: "현재 보유하고 계신 자격이 있나요?",
-    description: "복수 선택 가능해요. (선택 안 하셔도 괜찮아요)",
-    required: false,
-  },
+  { id: "careerBreak", group: "status", title: "경력단절 기간이 있으신가요?", required: true },
   {
     id: "trainingWillingness",
     group: "intent",
@@ -118,6 +98,8 @@ function isStepFilled(step: StepConfig, answers: SupportAssessmentAnswers): bool
       return Boolean(answers.employmentStatus);
     case "desiredStartTiming":
       return Boolean(answers.desiredStartTiming);
+    case "careerBreak":
+      return answers.careerBreak !== undefined;
     case "trainingWillingness":
       return typeof answers.trainingWillingness === "number";
     default:
@@ -217,13 +199,38 @@ function StepBody({
       return (
         <div className="flex flex-col gap-2">
           {EMPLOYMENT_STATUS_OPTIONS.map(([code, label]) => (
-            <ChipButton indicator="radio"
-              key={code}
-              selected={answers.employmentStatus === code}
-              onClick={() => onChange({ employmentStatus: code })}
-            >
-              {label}
-            </ChipButton>
+            <div key={code} className="flex flex-col">
+              <ChipButton indicator="radio"
+                selected={answers.employmentStatus === code}
+                onClick={() => onChange({ employmentStatus: code, ...(code !== "employed" && { currentJobCategory: undefined }) })}
+              >
+                {label}
+              </ChipButton>
+              {code === "employed" && answers.employmentStatus === "employed" && (
+                <div className="mt-1.5">
+                  <div className="rounded-xl bg-slate-50/60 px-2.5 pb-2.5 pt-3">
+                    <p className="mb-3 text-center text-body-2 font-medium text-slate-500">어떤 직종에서 일하고 계신가요? <span className="text-slate-400">(선택)</span></p>
+                    <div className="grid grid-cols-2 gap-1.5">
+                      {JOB_CATEGORY_OPTIONS.map((opt) => (
+                        <button
+                          key={opt.code}
+                          type="button"
+                          onClick={() => onChange({ currentJobCategory: opt.code })}
+                          className={cn(
+                            "rounded-lg border px-3 py-2 text-label-1 font-medium transition-colors",
+                            answers.currentJobCategory === opt.code
+                              ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-600"
+                              : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                          )}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           ))}
         </div>
       );
@@ -267,50 +274,6 @@ function StepBody({
           </div>
         </div>
       );
-    case "desiredJobCategories": {
-      const current = answers.desiredJobCategories ?? [];
-      return (
-        <div className="flex flex-col gap-2">
-          {JOB_CATEGORY_OPTIONS.map((opt) => {
-            const selected = current.includes(opt.code);
-            return (
-              <ChipButton indicator="check"
-                key={opt.code}
-                selected={selected}
-                onClick={() =>
-                  onChange({
-                    desiredJobCategories: selected ? current.filter((c) => c !== opt.code) : [...current, opt.code],
-                  })
-                }
-              >
-                {opt.label}
-              </ChipButton>
-            );
-          })}
-        </div>
-      );
-    }
-    case "heldQualifications": {
-      const current = answers.heldQualifications ?? [];
-      return (
-        <div className="flex flex-col gap-2">
-          {QUALIFICATION_OPTIONS.map(([code, label]) => {
-            const selected = current.includes(code);
-            return (
-              <ChipButton indicator="check"
-                key={code}
-                selected={selected}
-                onClick={() =>
-                  onChange({ heldQualifications: selected ? current.filter((c) => c !== code) : [...current, code] })
-                }
-              >
-                {label}
-              </ChipButton>
-            );
-          })}
-        </div>
-      );
-    }
     case "careerBreak":
       return (
         <div className="flex flex-col gap-4">
@@ -363,7 +326,6 @@ function StepBody({
 
 const INFO_ITEMS = [
   { icon: Clock, label: "약 2~3분" },
-  { icon: Gift, label: "무료" },
   { icon: Sparkles, label: "결과 즉시 확인" },
 ];
 
@@ -395,7 +357,7 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
             <Loader2 className="size-5 animate-spin" />
           ) : (
             <>
-              무료로 지원금 찾기
+              지원금 찾기
               <ArrowRight className="size-5" />
             </>
           )}
@@ -478,7 +440,6 @@ export function SupportFlow({
   const isLast = stepIndex === STEPS.length - 1;
   const canProceed = isStepFilled(step, answers);
 
-  // 대분류를 진행의 주 단위로 삼는다. 분류명과 분류 내 위치를 함께 보여준다.
   const groupIndex = GROUPS.findIndex((g) => g.key === step.group);
   const groupSteps = STEPS.filter((x) => x.group === step.group);
   const posInGroup = groupSteps.findIndex((x) => x.id === step.id);
@@ -486,7 +447,7 @@ export function SupportFlow({
   function segmentFill(i: number) {
     if (i < groupIndex) return 100;
     if (i > groupIndex) return 0;
-    return groupSteps.length > 0 ? (posInGroup / groupSteps.length) * 100 : 0;
+    return ((posInGroup + 1) / groupSteps.length) * 100;
   }
 
   function updateAnswer(patch: Partial<SupportAssessmentAnswers>) {
@@ -528,7 +489,7 @@ export function SupportFlow({
   return (
     // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다.
     <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
-      {/* 진행 바 - 대분류 4칸 */}
+      {/* 진행 바 - 대분류 3칸 */}
       <div className="sticky top-16 z-30">
         <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
           {GROUPS.map((g, i) => (
@@ -562,7 +523,7 @@ export function SupportFlow({
           <button
             type="button"
             onClick={handleNext}
-            disabled={stepIndex >= furthestIndex || submitting}
+            disabled={(stepIndex >= furthestIndex && !canProceed) || isLast || submitting}
             aria-label="다음 문항"
             className="-mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
           >
@@ -579,7 +540,7 @@ export function SupportFlow({
         </p>
         <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">
           {step.title}
-          {!step.required && <span className="ml-2 text-label-1 font-normal text-slate-400">(선택)</span>}
+          {!step.required && <span className="ml-1 text-body-2 font-medium text-slate-400">(선택)</span>}
         </h2>
         {step.description && (
           <p className="mt-3 text-center text-body-2-reading text-slate-500">{step.description}</p>
