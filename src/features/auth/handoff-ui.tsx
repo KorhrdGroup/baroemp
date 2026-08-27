@@ -154,7 +154,6 @@ export function SocialButtons({ next }: { next?: string }) {
   const q = next ? `?next=${encodeURIComponent(next)}` : "";
   return (
     // OAuth 시작은 서버 라우트로 이동하는 전체 페이지 네비게이션이라 <a>가 맞다.
-    // eslint-disable-next-line @next/next/no-html-link-for-pages
     <div className="mt-4 grid grid-cols-2 gap-2">
       <a
         href={`/auth/login/naver${q}`}
