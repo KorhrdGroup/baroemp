@@ -20,13 +20,6 @@ const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   LOW: "bg-slate-100 text-slate-500",
 };
 
-const GRADE_ACCENT_CLASS: Record<SupportEligibilityGrade, string> = {
-  HIGH: "bg-emerald-400",
-  MEDIUM: "bg-brand-blue-400",
-  CHECK_REQUIRED: "bg-orange-400",
-  LOW: "bg-slate-300",
-};
-
 function regionLabel(program: SupportProgram): string {
   if (!program.regionScope) return "전국";
   if (program.regionScope === "national") return "전국";
@@ -54,7 +47,6 @@ export function SupportProgramCard({
         interactiveCardClass,
       )}
     >
-      {grade && <div className={cn("h-1", GRADE_ACCENT_CLASS[grade])} />}
       <div className="flex items-center justify-between gap-2 px-5 pt-5">
         {(() => {
           const orgName = program.organizationName ?? program.organization;
