@@ -30,14 +30,14 @@ export function HeroSection() {
             굵기도 배너에서만 900 을 쓴다. 다른 제목은 800 이 기준이다.
           */}
           <h1 className="mt-4 text-headline-3 font-black leading-[1.35] tracking-tight text-slate-900 sm:text-headline-2">
-            내게 맞는 일자리를 찾고
+            나에게 필요한 취업 서비스를
             <br />
-            <span className="text-brand-blue-600">취업 성공까지 한 번에!</span>
+            <span className="text-brand-blue-600">한곳에서 확인하세요</span>
           </h1>
           <p className="mx-auto mt-5 max-w-xl text-body-2-reading text-slate-600 lg:mx-0">
-            직업진단부터 취업교육, 채용정보, 컨설팅, 지원금까지
+            직업진단부터 채용정보, 교육·지원금 정보까지
             <br className="hidden sm:block" />
-            당신의 취업 여정을 함께하는 원스톱 취업 플랫폼
+            중장년의 취업 준비에 필요한 서비스를 제공합니다.
           </p>
 
           <HeroJobSearch />
