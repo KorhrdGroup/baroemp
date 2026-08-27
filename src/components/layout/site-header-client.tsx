@@ -123,7 +123,8 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                 <Menu className="size-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
+            {/* 모바일 메뉴는 헤더 바로 아래로 펼쳐지는 형태(위→아래)다. 내용이 길어지면 내부에서 스크롤한다. */}
+            <SheetContent side="top" className="max-h-[85vh] overflow-y-auto pb-6">
               <SheetHeader>
                 <SheetTitle>{siteConfig.name}</SheetTitle>
               </SheetHeader>
