@@ -10,26 +10,19 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // Typekit 스크립트가 하이드레이션 전에 <html>에 wf-loading 클래스를 붙인다
-    <html
-      lang="ko"
-      className="h-full antialiased"
-      suppressHydrationWarning
-    >
+    <html lang="ko" className="h-full antialiased">
       <body className="min-h-full flex flex-col bg-white text-foreground">
         <link
           rel="preconnect"
           href="https://cdn.jsdelivr.net"
           crossOrigin="anonymous"
         />
-        {/* Pretendard - HDS 본문 서체. 한글 글자수가 많아 동적 서브셋본 사용 */}
+        {/* Pretendard - 본문·제목 공통 서체. 한글 글자수가 많아 동적 서브셋본 사용 */}
         <link
           rel="stylesheet"
           href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
           precedence="default"
         />
-        {/* Adobe Fonts(Typekit) 독립고딕 킷 - rixdongnimgothic-pro */}
-        
         <TooltipProvider delayDuration={150}>{children}</TooltipProvider>
       </body>
     </html>
