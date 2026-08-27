@@ -241,11 +241,16 @@ export async function loadAssessmentForSession(session: AssessmentSession): Prom
 export async function getContentRecommendationsForResult(result: AssessmentResult, limit = 5): Promise<CareerContent[]> {
   const published = await listContents({ status: "published" });
   /*
-   * 검사 결과 화면에서 다시 검사를 추천하지 않는다.
-   * 방금 끝낸 것을 "도움이 될 콘텐츠"로 다시 권하면 다음에 뭘 해야 할지 알려주지 못한다.
-   * (다시 하려는 사람을 위한 "다시 진단하기" 버튼은 하단에 따로 있다)
+   * 갈 곳이 마땅치 않은 콘텐츠는 추천하지 않는다.
+   *
+   * 콘텐츠 상세 화면이 없어서 카드를 누르면 타입에 따라 /support, /consulting, /resume 중
+   * 한 곳으로만 떨어진다. 그래서
+   * - ASSESSMENT: 방금 끝낸 검사를 다시 권하게 된다(다시 하려면 하단 "다시 진단하기"가 있다)
+   * - JOB_TRAINING: 과정 안내 화면이 없어 이력서 화면으로 떨어진다
+   * 두 타입은 눌러도 기대와 다른 곳으로 가므로 목록에서 뺀다.
    */
-  const contents = published.filter((c) => c.type !== "ASSESSMENT");
+  const NO_DESTINATION_TYPES = new Set(["ASSESSMENT", "JOB_TRAINING"]);
+  const contents = published.filter((c) => !NO_DESTINATION_TYPES.has(c.type));
   const pseudoProfile: CareerProfile = {
     id: "assessment-result-temp",
     userId: result.userId ?? result.anonymousId ?? "anonymous",
