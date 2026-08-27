@@ -33,7 +33,21 @@ type Panel = "region" | "job" | "sort" | null;
  * 알약형 검색바 + 지역/직종 드롭다운 패널 + 빠른 토글 칩 + 정렬.
  * 제출 시 서버 컴포넌트(/jobs)가 다시 렌더링되도록 쿼리스트링 기반 네비게이션을 사용한다.
  */
-export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
+export function JobFiltersForm({
+  initial,
+  children,
+  summary,
+}: {
+  initial: JobFiltersValue;
+  /** 결과 건수처럼 토글 줄 왼쪽에 함께 놓을 요약 문구. */
+  summary?: React.ReactNode;
+  /**
+   * 검색바와 빠른 토글 줄 사이에 들어갈 내용(큐레이션 섹션 등).
+   * 토글·정렬은 아래 목록에 적용되는 조건이라 목록 바로 위에 있어야 읽히는데,
+   * 상태가 이 컴포넌트 안에 있어 DOM을 쪼갤 수 없다. 그래서 사이를 children으로 연다.
+   */
+  children?: React.ReactNode;
+}) {
   const router = useRouter();
   const [panel, setPanel] = useState<Panel>(null);
   const [keyword, setKeyword] = useState(initial.keyword ?? "");
@@ -290,9 +304,13 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
         )}
       </div>
 
-      {/* 빠른 토글 칩 + 정렬 */}
-      <div className="mt-4 flex items-center justify-between">
-        <div className="flex gap-2">
+      {children}
+
+      {/* 결과 건수 + 빠른 토글 칩 + 정렬. 모두 바로 아래 목록에 걸리는 조건이라 한 줄에 모은다. */}
+      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          {summary}
+          <div className="flex gap-2">
           <button
             type="button"
             onClick={() => {
@@ -323,6 +341,7 @@ export function JobFiltersForm({ initial }: { initial: JobFiltersValue }) {
           >
             마감임박만
           </button>
+          </div>
         </div>
         <button
           type="button"

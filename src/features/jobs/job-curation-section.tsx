@@ -94,7 +94,7 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
       )}
 
       {current && current.items.length > 0 && (
-        <div className="flex gap-4 overflow-x-auto pb-2">
+        <div className="scrollbar-on-hover flex gap-4 overflow-x-auto pb-2">
           {current.items.map((item) => {
             const dday = activeTab === "closing_soon" ? formatDday(item.job.applyDeadline) : null;
             return (
