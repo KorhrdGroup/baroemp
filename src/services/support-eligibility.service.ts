@@ -16,6 +16,8 @@ import { getSupportProgramRuleRepository } from "@/lib/repositories";
  */
 export interface SupportMatchProfile {
   ageGroup?: AgeGroup;
+  /** 출생연도. 있으면 연령대 중간값 대신 만 나이로 정확히 매칭한다. */
+  birthYear?: number;
   region?: Region;
   employmentStatus?: EmploymentStatus;
   desiredStartTiming?: DesiredStartTiming;
@@ -26,6 +28,12 @@ export interface SupportMatchProfile {
   currentJobCategory?: string;
   careerBreak?: boolean;
   careerBreakMonths?: number;
+  /** 최근 3년 내 고용보험 가입 이력 */
+  employmentInsuranceHistory?: "yes" | "no" | "unknown";
+  /** 가구 소득 수준 (참고 구간) */
+  incomeBand?: "low" | "middle" | "high" | "unknown";
+  /** 가구 특성 (한부모/장애/기초수급 등) */
+  householdTraits?: string[];
 }
 
 export interface SupportMatchDetail {
@@ -48,8 +56,10 @@ const AGE_GROUP_MIDPOINT: Record<AgeGroup, number> = {
   "70plus": 75,
 };
 
-function deriveAge(ageGroup?: AgeGroup): number | undefined {
-  return ageGroup ? AGE_GROUP_MIDPOINT[ageGroup] : undefined;
+function deriveAge(profile: Pick<SupportMatchProfile, "ageGroup" | "birthYear">): number | undefined {
+  // 출생연도가 있으면 만 나이로 정확히, 없으면 연령대 중간값으로 근사한다.
+  if (profile.birthYear) return new Date().getFullYear() - profile.birthYear;
+  return profile.ageGroup ? AGE_GROUP_MIDPOINT[profile.ageGroup] : undefined;
 }
 
 function evaluateOperator(operator: SupportProgramRule["operator"], ruleValue: unknown, actual: unknown): boolean {
@@ -96,7 +106,13 @@ function fieldLabel(field: string): string {
 function resolveActualValue(field: string, profile: SupportMatchProfile): unknown {
   switch (field) {
     case "age":
-      return deriveAge(profile.ageGroup);
+      return deriveAge(profile);
+    case "employment_insurance":
+      return profile.employmentInsuranceHistory;
+    case "income_band":
+      return profile.incomeBand;
+    case "household_condition":
+      return profile.householdTraits;
     case "region":
       return profile.region;
     case "employment_status":
@@ -140,7 +156,7 @@ function evaluateBaseFields(program: SupportProgram, profile: SupportMatchProfil
   const missing: string[] = [];
   const checkRequired: string[] = [];
 
-  const age = deriveAge(profile.ageGroup);
+  const age = deriveAge(profile);
 
   // 연령
   if (program.targetAgeMin !== undefined || program.targetAgeMax !== undefined) {
@@ -199,7 +215,8 @@ function evaluateBaseFields(program: SupportProgram, profile: SupportMatchProfil
         reasons.push({ ruleKey: "training_willingness", label: "직업훈련 참여 의향 있음", score: 15 });
         matched.push("직업훈련 참여 의향");
       } else {
-        missing.push("직업훈련 참여 의향");
+        // 의향이 낮은 건 자격 미달이 아니라 본인 선택이므로, 미노출(LOW) 대신 "확인 필요"로 남긴다.
+        checkRequired.push("직업훈련 참여 의향(낮게 응답)");
       }
     } else {
       checkRequired.push("직업훈련 참여 의향");
@@ -252,7 +269,8 @@ function resolveGrade(
 ): SupportEligibilityGrade {
   if (hasFailedRequiredRule) return "LOW";
   if (checkRequiredCount > 0 && score >= 40) return "CHECK_REQUIRED";
-  if (score >= 65) return "HIGH";
+  // 점수 체계상 일반 제도의 상한이 45~75라 65 컷은 사실상 도달 불가였다 (페르소나 4종 전부 HIGH 0건).
+  if (score >= 50) return "HIGH";
   if (score >= 35) return "MEDIUM";
   if (checkRequiredCount > 0) return "CHECK_REQUIRED";
   return "LOW";

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowUp, Loader2, Plus, Sparkles, Trash2 } from "lucide-react";
@@ -12,11 +12,13 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { TemplateCardPicker, type TemplateOption } from "@/components/common/template-card-picker";
-import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem } from "@/types";
+import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
+import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
 import {
   changeCoverLetterTemplateAction,
   deleteCoverLetterAction,
   generateCoverLetterDraftAiAction,
+  getCoverLetterMarketComparisonAction,
   reviewCoverLetterSectionAiAction,
   saveCoverLetterAction,
 } from "./cover-letter-actions";
@@ -59,6 +61,8 @@ export function CoverLetterEditor({
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, { text: string; prompts: string[] }>>({});
   const [isChangingTemplate, startTemplateChange] = useTransition();
+  const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
+  const marketComparisonRequestedRef = useRef(false);
 
   /**
    * 이력서와 달리 자기소개서는 양식이 문항 세트 자체를 정의한다.
@@ -174,6 +178,12 @@ export function CoverLetterEditor({
           prompts: [...result.strengths.map((s) => `[잘함] ${s}`), ...result.improvements.map((i) => `[보완] ${i.comment}`)],
         },
       }));
+      if (!marketComparisonRequestedRef.current) {
+        marketComparisonRequestedRef.current = true;
+        void getCoverLetterMarketComparisonAction(detail.coverLetter.id)
+          .then(setMarketComparison)
+          .catch(() => setMarketComparison(null));
+      }
     } catch {
       setSaveMessage("AI 점검 중 오류가 발생했습니다.");
     } finally {
@@ -334,6 +344,14 @@ export function CoverLetterEditor({
           </Card>
         ))}
       </div>
+
+      {marketComparison && (
+        <MarketComparisonCard
+          key={marketComparison.analysisId ?? "no-analysis"}
+          view={marketComparison}
+          source="cover_letter_review"
+        />
+      )}
 
       <Button
         variant="outline"

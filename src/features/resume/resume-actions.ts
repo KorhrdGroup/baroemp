@@ -9,6 +9,7 @@ import type {
   ResumeDetail,
   ResumeDetailSaveInput,
   ResumeTemplate,
+  ResumeMarketComparisonView,
 } from "@/types";
 
 /** 클라이언트는 소유자(userId)를 알 필요/권한이 없으므로, 서버에서 검증된 값으로 채워 넣는다. */
@@ -32,6 +33,7 @@ import {
   rewriteResumeSectionWithAI,
   tailorResumeToJobWithAI,
 } from "@/services/ai-resume.service";
+import { getResumeMarketComparison } from "@/services/resume-market-comparison.service";
 
 /**
  * 이 Resume가 현재 로그인 사용자 소유인지 검증한다.
@@ -86,6 +88,11 @@ export async function deleteResumeAction(resumeId: string): Promise<void> {
 export async function reviewResumeAiAction(resumeId: string): Promise<AIResumeReviewResult> {
   await requireOwnResume(resumeId);
   return reviewResumeWithAI(resumeId);
+}
+
+export async function getResumeMarketComparisonAction(resumeId: string): Promise<ResumeMarketComparisonView> {
+  await requireOwnResume(resumeId);
+  return getResumeMarketComparison(resumeId);
 }
 
 export async function rewriteResumeSectionAiAction(input: {

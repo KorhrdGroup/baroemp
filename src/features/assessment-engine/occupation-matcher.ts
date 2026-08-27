@@ -18,6 +18,8 @@ const DIMENSION_REASON_TEMPLATES: Record<string, string> = {
   teamwork: "협업이 필요한 업무 환경에 잘 맞습니다.",
   schedule_flexibility: "근무시간에 대한 유연성이 높습니다.",
   education_willingness: "자격 취득·교육 의향이 높아 진입 가능성이 있습니다.",
+  teaching_orientation: "아이·청소년을 가르치고 지도하는 일에 잘 맞습니다.",
+  aesthetic_skill: "손재주와 미적 감각을 살리는 업무에 강점이 있습니다.",
 };
 
 const DIMENSION_LABELS: Record<string, string> = {
@@ -31,6 +33,8 @@ const DIMENSION_LABELS: Record<string, string> = {
   teamwork: "협업 지향성",
   schedule_flexibility: "근무시간 유연성",
   education_willingness: "교육 준비 의향",
+  teaching_orientation: "가르침·지도 성향",
+  aesthetic_skill: "손기술·미적 감각",
 };
 
 function clamp(value: number, min = 0, max = 100): number {

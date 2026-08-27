@@ -8,6 +8,7 @@ import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { searchJobs, getRecommendedJobsForAnonymous, type JobSearchParams } from "@/services/job-search.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
+import { getUserQualificationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
 
 export const metadata: Metadata = {
@@ -62,6 +63,10 @@ export default async function JobsPage({
     getUserJobBookmarkIdsAction(),
   ]);
   const isAuthenticated = Boolean(currentUser);
+  // 취업준비성 배지용 보유 자격증 (이력서/검사에서 등록된 user_qualifications 기준)
+  const heldQualifications = currentUser
+    ? (await getUserQualificationRepository().findByUserId(currentUser.id)).map((q) => q.name)
+    : undefined;
   const bookmarkedSet = new Set(bookmarkedIds);
 
   const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
@@ -114,6 +119,7 @@ export default async function JobsPage({
                 job={job}
                 isAuthenticated={isAuthenticated}
                 isBookmarked={bookmarkedSet.has(job.id)}
+                heldQualifications={heldQualifications}
               />
             ))}
           </div>
@@ -143,6 +149,7 @@ export default async function JobsPage({
                   matchReasonLabel={job.match?.reasons[0]?.label}
                   isAuthenticated={isAuthenticated}
                   isBookmarked={bookmarkedSet.has(job.id)}
+                  heldQualifications={heldQualifications}
                 />
               ))}
             </div>

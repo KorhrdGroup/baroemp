@@ -50,6 +50,7 @@ function mapRow(row: Record<string, unknown>): SupportProgram {
     externalSource: (row.external_source as string | null) ?? undefined,
     externalId: (row.external_id as string | null) ?? undefined,
     rawPayload: (row.raw_payload as Record<string, unknown> | null) ?? undefined,
+    audience: (row.audience as "personal" | "business" | "both" | null) ?? "personal",
     fetchedAt: (row.fetched_at as string | null) ?? undefined,
     careerRelevanceScore: row.career_relevance_score !== null && row.career_relevance_score !== undefined ? Number(row.career_relevance_score) : 0,
     careerRelevanceReasons: (row.career_relevance_reasons as string[]) ?? [],
@@ -101,6 +102,7 @@ function toRow(input: Partial<SupportProgramInput>): Record<string, unknown> {
   if (input.externalSource !== undefined) row.external_source = input.externalSource;
   if (input.externalId !== undefined) row.external_id = input.externalId;
   if (input.rawPayload !== undefined) row.raw_payload = input.rawPayload;
+  if (input.audience !== undefined) row.audience = input.audience;
   if (input.fetchedAt !== undefined) row.fetched_at = input.fetchedAt;
   if (input.careerRelevanceScore !== undefined) row.career_relevance_score = input.careerRelevanceScore;
   if (input.careerRelevanceReasons !== undefined) row.career_relevance_reasons = input.careerRelevanceReasons;

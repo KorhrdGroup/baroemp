@@ -22,6 +22,7 @@ import { JobViewTracker } from "./job-view-tracker";
 import type { CareerContent, Job } from "@/types";
 import type { JobMatchDetail } from "@/services/job-match.service";
 import type { JobRequirementComparisonItem } from "@/services/job-requirement-comparison.service";
+import { BackButton } from "@/components/common/back-button";
 
 const REQUIREMENT_STATUS_STYLE: Record<string, { icon: LucideIcon; label: string; className: string }> = {
   SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700" },
@@ -65,6 +66,10 @@ export function JobDetailView({
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <JobViewTracker jobId={job.id} matchScore={match?.score} />
+
+      <div className="mb-4 -ml-2">
+        <BackButton fallbackHref="/jobs" label="목록으로 돌아가기" />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         {job.isBeginnerFriendly && (

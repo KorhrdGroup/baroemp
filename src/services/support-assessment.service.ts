@@ -47,6 +47,10 @@ export async function getSupportAssessmentPrefill(
 export function toSupportMatchProfile(answers: SupportAssessmentAnswers): SupportMatchProfile {
   return {
     ageGroup: answers.ageGroup,
+    birthYear: answers.birthYear,
+    employmentInsuranceHistory: answers.employmentInsuranceHistory,
+    incomeBand: answers.incomeBand,
+    householdTraits: answers.householdTraits,
     region: answers.region,
     employmentStatus: answers.employmentStatus,
     desiredStartTiming: answers.desiredStartTiming,
@@ -125,10 +129,12 @@ export async function completeSupportAssessment(sessionId: string): Promise<Supp
 
   // search()는 pageSize를 100으로 clamp하므로 200을 넘겨도 매칭 대상이 조용히 잘린다.
   // 여기서는 페이지네이션이 필요 없는 전체 조회이므로 findAll을 쓴다(mock/supabase 모두 같은 필터를 적용).
-  const programs = await getSupportProgramRepository().findAll({
+  const allPrograms = await getSupportProgramRepository().findAll({
     activeOnly: true,
     minCareerRelevanceScore: CAREER_RELEVANCE_THRESHOLD,
   });
+  // 개인 진단이므로 기업(고용주) 전용 제도는 제외한다. 기업 지원은 결과 화면의 별도 섹션에서 안내한다.
+  const programs = allPrograms.filter((p) => (p.audience ?? "personal") !== "business");
   const detailByProgramId = await evaluateSupportEligibilityBatch(programs, matchProfile);
 
   const matches = programs

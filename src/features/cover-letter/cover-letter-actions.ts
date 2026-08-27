@@ -7,6 +7,7 @@ import type {
   CoverLetterDetail,
   CoverLetterDetailSaveInput,
   CoverLetterTemplate,
+  ResumeMarketComparisonView,
 } from "@/types";
 
 export type CoverLetterSaveActionInput = Omit<CoverLetterDetailSaveInput, "coverLetter"> & {
@@ -23,6 +24,7 @@ import {
   changeCoverLetterTemplate,
 } from "@/services/cover-letter.service";
 import { generateCoverLetterDraftWithAI, reviewCoverLetterSectionWithAI } from "@/services/ai-resume.service";
+import { getCoverLetterMarketComparison } from "@/services/resume-market-comparison.service";
 
 async function requireOwnCoverLetter(coverLetterId: string): Promise<CoverLetter> {
   const user = await requireSessionUser();
@@ -77,6 +79,11 @@ export async function reviewCoverLetterSectionAiAction(input: {
 }): Promise<AIResumeReviewResult> {
   await requireOwnCoverLetter(input.coverLetterId);
   return reviewCoverLetterSectionWithAI(input);
+}
+
+export async function getCoverLetterMarketComparisonAction(coverLetterId: string): Promise<ResumeMarketComparisonView> {
+  await requireOwnCoverLetter(coverLetterId);
+  return getCoverLetterMarketComparison(coverLetterId);
 }
 
 export async function generateCoverLetterDraftAiAction(input: {

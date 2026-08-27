@@ -55,5 +55,17 @@ export function createSupabaseAssessmentAnswerRepository(): AssessmentAnswerRepo
       const rows = unwrapList("AssessmentAnswerRepository.findBySession", result);
       return rows.map((row) => mapRow(row as Record<string, unknown>));
     },
+    async findBySessionIds(sessionIds) {
+      if (sessionIds.length === 0) return [];
+      const all: AssessmentAnswerRecord[] = [];
+      // PostgREST in() 절 길이 제한을 피하기 위해 200개씩 나눠 조회한다.
+      for (let i = 0; i < sessionIds.length; i += 200) {
+        const chunk = sessionIds.slice(i, i + 200);
+        const result = await client.from("assessment_answers").select("*").in("session_id", chunk);
+        const rows = unwrapList("AssessmentAnswerRepository.findBySessionIds", result);
+        all.push(...rows.map((row) => mapRow(row as Record<string, unknown>)));
+      }
+      return all;
+    },
   };
 }

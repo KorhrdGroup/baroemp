@@ -21,8 +21,12 @@ export type SupportCategory =
  * STEP 5에서 "행정안전부 공공서비스(혜택) 정보 OPEN API" 등 외부 Provider 연동을 위해
  * 필드를 대폭 확장했다. 외부 API에 없는 값은 전부 optional로 둔다.
  */
+export type SupportAudience = "personal" | "business" | "both";
+
 export interface SupportProgram {
   id: string;
+  /** 수혜 주체: personal=개인·가구, business=소상공인·법인(고용주), both=둘 다 */
+  audience?: SupportAudience;
   title: string;
   /** 하위호환 필드 - organizationName과 동일한 값을 저장한다 (기존 STEP2 UI 호환용). */
   organization: string;

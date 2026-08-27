@@ -23,6 +23,7 @@ import { SupportApplyButton } from "./support-apply-button";
 import { SupportBookmarkButton } from "./support-bookmark-button";
 import { SupportViewTracker } from "./support-view-tracker";
 import { SupportLongText } from "./support-long-text";
+import { BackButton } from "@/components/common/back-button";
 
 const ORG_LOGO: Record<string, { src: string; w: number; h: number }> = {
   고용노동부: { src: "/ministry-logo/고용노동부.svg", w: 100, h: 24 },
@@ -94,6 +95,10 @@ export function SupportDetailView({
   return (
     <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
       <SupportViewTracker supportProgramId={program.id} matchScore={match?.score} eligibilityGrade={match?.grade} />
+
+      <div className="mb-4 -ml-2">
+        <BackButton fallbackHref="/support" label="목록으로 돌아가기" />
+      </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">

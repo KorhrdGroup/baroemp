@@ -38,6 +38,8 @@ export interface JobSyncSummary {
   deactivatedCount: number;
   errorCount: number;
   isMock: boolean;
+  /** Provider 목록 끝까지 순회했는지 여부 - false면 페이지 제한에 걸린 부분 동기화 (청크 체인의 계속 신호). */
+  reachedEnd: boolean;
   startedAt: ISODateString;
   completedAt: ISODateString;
   errorMessage?: string;

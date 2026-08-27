@@ -16,6 +16,13 @@ export interface JobRepository extends CrudRepository<Job, JobInput, JobSearchFi
   search(filter: JobSearchFilter): Promise<JobSearchResult>;
   findByExternalId(externalSource: string, externalId: string): Promise<Job | null>;
   upsertExternal(input: JobInput & { externalSource: string; externalId: string }): Promise<{ job: Job; isNew: boolean }>;
+  /**
+   * 여러 공고를 한 번에 upsert한다 (전량 동기화 6만+건을 서버리스 시간 한도 안에 처리하기 위한 배치 경로).
+   * 배치 실패 시 구현체가 건별 upsert로 폴백해 한 건의 오류가 페이지 전체를 잃게 하지 않는다.
+   */
+  upsertExternalMany(
+    inputs: (JobInput & { externalSource: string; externalId: string })[],
+  ): Promise<{ newCount: number; updatedCount: number; errorCount: number }>;
   /** externalSource 기준으로, fetchedAt이 이 시각보다 이전인(=이번 sync에서 다시 보이지 않은) 공고를 비활성화한다. */
   deactivateStale(externalSource: string, fetchedBefore: string): Promise<number>;
 }
@@ -156,6 +163,16 @@ function createMockJobRepository(): JobRepository {
       const created = buildJobEntity(input, `job-ext-${Date.now()}-${seq}`);
       items = [created, ...items];
       return { job: created, isNew: true };
+    },
+    async upsertExternalMany(inputs) {
+      let newCount = 0;
+      let updatedCount = 0;
+      for (const input of inputs) {
+        const { isNew } = await this.upsertExternal(input);
+        if (isNew) newCount += 1;
+        else updatedCount += 1;
+      }
+      return { newCount, updatedCount, errorCount: 0 };
     },
     async deactivateStale(externalSource, fetchedBefore) {
       let count = 0;

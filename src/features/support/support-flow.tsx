@@ -12,6 +12,18 @@ import { getSupportAssessmentPrefillAction, submitSupportAssessmentAction } from
 import type { AgeGroup, DesiredStartTiming, EmploymentStatus, Region, SupportAssessmentAnswers } from "@/types";
 
 const AGE_GROUP_OPTIONS = Object.entries(AGE_GROUP_LABELS) as [AgeGroup, string][];
+void AGE_GROUP_OPTIONS; // birthYear 단계로 대체됨 - 라벨 상수는 다른 화면에서 계속 사용
+
+/** 출생연도 → 연령대 파생. 매칭 로직은 birthYear(만 나이)를 우선 사용하고 ageGroup은 분석/호환용이다. */
+function birthYearToAgeGroup(birthYear: number, thisYear: number): AgeGroup {
+  const age = thisYear - birthYear;
+  if (age < 30) return "20s";
+  if (age < 40) return "30s";
+  if (age < 50) return "40s";
+  if (age < 60) return "50s";
+  if (age < 70) return "60s";
+  return "70plus";
+}
 const REGION_OPTIONS = Object.entries(REGION_LABELS) as [Region, string][];
 const EMPLOYMENT_STATUS_OPTIONS: [EmploymentStatus, string][] = [
   ["employed", EMPLOYMENT_STATUS_LABELS.employed],
@@ -23,13 +35,22 @@ const EMPLOYMENT_STATUS_OPTIONS: [EmploymentStatus, string][] = [
 const DESIRED_START_TIMING_OPTIONS = Object.entries(DESIRED_START_TIMING_LABELS) as [DesiredStartTiming, string][];
 
 const JOB_CATEGORY_OPTIONS: { code: string; label: string }[] = [
-  { code: "care_worker", label: "요양보호사·돌봄" },
-  { code: "social_worker", label: "사회복지사" },
-  { code: "office_admin", label: "사무·행정직" },
-  { code: "facility_cleaning", label: "시설관리·미화" },
+  { code: "care_worker", label: "요양보호·돌봄" },
+  { code: "social_worker", label: "사회복지" },
   { code: "hospital_companion", label: "병원동행·간병" },
-  { code: "logistics_driver", label: "배송·운전직" },
-  { code: "other", label: "기타" },
+  { code: "education", label: "교육·보육·강사" },
+  { code: "counselor", label: "상담 (심리·직업)" },
+  { code: "office_admin", label: "사무·행정" },
+  { code: "customer_service", label: "고객센터·콜센터" },
+  { code: "retail_sales", label: "매장판매·서비스" },
+  { code: "cook", label: "조리·급식" },
+  { code: "beauty", label: "미용·뷰티" },
+  { code: "security", label: "경비·보안" },
+  { code: "facility_cleaning", label: "시설관리·미화" },
+  { code: "logistics_driver", label: "배송·운전" },
+  { code: "production", label: "생산·제조" },
+  { code: "it", label: "IT·컴퓨터" },
+  { code: "other", label: "기타 / 잘 모르겠어요" },
 ];
 
 const TRAINING_WILLINGNESS_LABELS: Record<number, string> = {
@@ -42,6 +63,10 @@ const TRAINING_WILLINGNESS_LABELS: Record<number, string> = {
 
 type StepId =
   | "ageGroup"
+  | "birthYear"
+  | "householdTraits"
+  | "employmentInsuranceHistory"
+  | "incomeBand"
   | "region"
   | "employmentStatus"
   | "desiredStartTiming"
@@ -66,9 +91,30 @@ const GROUPS: { key: GroupKey; label: string }[] = [
 ];
 
 const STEPS: StepConfig[] = [
-  { id: "ageGroup", group: "basic", title: "현재 연령대를 알려주세요", required: true },
+  { id: "birthYear", group: "basic", title: "출생연도를 알려주세요", description: "연령 조건이 있는 제도를 정확히 찾아드리기 위해 필요해요.", required: true },
   { id: "region", group: "basic", title: "거주지역이 어디신가요?", required: true },
+  {
+    id: "householdTraits",
+    group: "basic",
+    title: "해당되는 항목이 있다면 선택해주세요",
+    description: "우선지원 대상 제도를 안내하는 데만 사용돼요. (선택사항)",
+    required: false,
+  },
   { id: "employmentStatus", group: "status", title: "현재 취업상태를 선택해주세요", required: true },
+  {
+    id: "employmentInsuranceHistory",
+    group: "status",
+    title: "최근 3년 안에 직장(고용보험 가입)을 다닌 적이 있으신가요?",
+    description: "실업급여·국민취업지원제도 등 받을 수 있는 제도 유형이 달라져요.",
+    required: true,
+  },
+  {
+    id: "incomeBand",
+    group: "status",
+    title: "가구 소득 수준을 대략 선택해주세요",
+    description: "정확하지 않아도 괜찮아요. 소득 조건이 있는 제도는 \"확인 필요\"로 안내해 드려요.",
+    required: true,
+  },
   { id: "desiredStartTiming", group: "status", title: "취업 희망시기는 언제인가요?", required: true },
   { id: "careerBreak", group: "status", title: "경력단절 기간이 있으신가요?", required: true },
   {
@@ -90,12 +136,16 @@ const STEPS: StepConfig[] = [
 function isStepFilled(step: StepConfig, answers: SupportAssessmentAnswers): boolean {
   if (!step.required) return true;
   switch (step.id) {
-    case "ageGroup":
-      return Boolean(answers.ageGroup);
+    case "birthYear":
+      return Boolean(answers.birthYear);
     case "region":
       return Boolean(answers.region);
     case "employmentStatus":
       return Boolean(answers.employmentStatus);
+    case "employmentInsuranceHistory":
+      return Boolean(answers.employmentInsuranceHistory);
+    case "incomeBand":
+      return Boolean(answers.incomeBand);
     case "desiredStartTiming":
       return Boolean(answers.desiredStartTiming);
     case "careerBreak":
@@ -165,16 +215,107 @@ function StepBody({
   onChange: (patch: Partial<SupportAssessmentAnswers>) => void;
 }) {
   switch (step.id) {
-    case "ageGroup":
+    case "birthYear": {
+      const thisYear = new Date().getFullYear();
+      const years = Array.from({ length: thisYear - 18 - 1945 + 1 }, (_, i) => thisYear - 18 - i);
       return (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-          {AGE_GROUP_OPTIONS.map(([code, label]) => (
-            <ChipButton key={code} selected={answers.ageGroup === code} onClick={() => onChange({ ageGroup: code })}>
+        <div className="flex flex-col items-center gap-3">
+          <select
+            value={answers.birthYear ?? ""}
+            onChange={(e) => {
+              const birthYear = e.target.value === "" ? undefined : Number(e.target.value);
+              onChange({ birthYear, ageGroup: birthYear ? birthYearToAgeGroup(birthYear, thisYear) : undefined });
+            }}
+            className="h-14 w-56 rounded-xl border border-border bg-white px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+          >
+            <option value="">연도 선택</option>
+            {years.map((y) => (
+              <option key={y} value={y}>
+                {y}년생
+              </option>
+            ))}
+          </select>
+          {answers.birthYear && (
+            <p className="text-label-1 text-slate-500">
+              만 {new Date().getFullYear() - answers.birthYear}세 기준으로 연령 조건을 확인해 드려요.
+            </p>
+          )}
+        </div>
+      );
+    }
+    case "employmentInsuranceHistory":
+      return (
+        <div className="flex flex-col gap-2">
+          {(
+            [
+              ["yes", "네, 다닌 적 있어요"],
+              ["no", "아니요, 없어요"],
+              ["unknown", "잘 모르겠어요"],
+            ] as const
+          ).map(([code, label]) => (
+            <ChipButton
+              indicator="radio"
+              key={code}
+              selected={answers.employmentInsuranceHistory === code}
+              onClick={() => onChange({ employmentInsuranceHistory: code })}
+            >
               {label}
             </ChipButton>
           ))}
         </div>
       );
+    case "incomeBand":
+      return (
+        <div className="flex flex-col gap-2">
+          {(
+            [
+              ["low", "낮은 편이에요"],
+              ["middle", "보통이에요"],
+              ["high", "높은 편이에요"],
+              ["unknown", "잘 모르겠어요"],
+            ] as const
+          ).map(([code, label]) => (
+            <ChipButton
+              indicator="radio"
+              key={code}
+              selected={answers.incomeBand === code}
+              onClick={() => onChange({ incomeBand: code })}
+            >
+              {label}
+            </ChipButton>
+          ))}
+        </div>
+      );
+    case "householdTraits": {
+      const current = answers.householdTraits ?? [];
+      const toggle = (code: string) =>
+        onChange({
+          householdTraits: current.includes(code) ? current.filter((c) => c !== code) : [...current.filter((c) => c !== "none"), code],
+        });
+      return (
+        <div className="flex flex-col gap-2">
+          {(
+            [
+              ["single_parent", "한부모 가정이에요"],
+              ["disability", "본인 또는 가족에게 장애가 있어요"],
+              ["basic_livelihood", "기초생활수급·차상위 가구예요"],
+              ["veteran", "국가유공자·보훈 대상이에요"],
+            ] as const
+          ).map(([code, label]) => (
+            <ChipButton indicator="check" key={code} selected={current.includes(code)} onClick={() => toggle(code)}>
+              {label}
+            </ChipButton>
+          ))}
+          <ChipButton
+            indicator="radio"
+            selected={current.length === 1 && current[0] === "none"}
+            onClick={() => onChange({ householdTraits: ["none"] })}
+          >
+            해당사항 없어요
+          </ChipButton>
+        </div>
+      );
+    }
     case "region":
       return (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">

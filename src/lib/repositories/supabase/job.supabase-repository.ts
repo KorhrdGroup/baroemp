@@ -154,11 +154,19 @@ export function createSupabaseJobRepository(): JobRepository | null {
 
   return {
     async findAll(filter) {
-      let query = client.from("jobs").select("*").order("created_at", { ascending: false });
-      if (filter) query = applySearchFilters(query, { ...filter, activeOnly: filter.activeOnly ?? false });
-      const result = await query;
-      const rows = unwrapList("JobRepository.findAll", result);
-      return rows.map((row) => mapRow(row as Record<string, unknown>));
+      // PostgREST는 요청당 최대 1000행만 반환하므로, 전량 수집(6만+건) 이후에는
+      // range 페이지네이션으로 전부 모아야 시장 통계/매칭이 부분 데이터로 계산되지 않는다.
+      const PAGE = 1000;
+      const all: Record<string, unknown>[] = [];
+      for (let offset = 0; ; offset += PAGE) {
+        let query = client.from("jobs").select("*").order("created_at", { ascending: false });
+        if (filter) query = applySearchFilters(query, { ...filter, activeOnly: filter.activeOnly ?? false });
+        const result = await query.range(offset, offset + PAGE - 1);
+        const rows = unwrapList("JobRepository.findAll", result);
+        all.push(...(rows as Record<string, unknown>[]));
+        if (rows.length < PAGE) break;
+      }
+      return all.map((row) => mapRow(row));
     },
     async findById(id) {
       const result = await client.from("jobs").select("*").eq("id", id).maybeSingle();
@@ -265,6 +273,52 @@ export function createSupabaseJobRepository(): JobRepository | null {
         .single();
       if (error || !data) throwDataSourceError("JobRepository.upsertExternal.insert", error ?? new Error("no data returned"));
       return { job: mapRow(data as Record<string, unknown>), isNew: true };
+    },
+    async upsertExternalMany(inputs) {
+      if (inputs.length === 0) return { newCount: 0, updatedCount: 0, errorCount: 0 };
+
+      const externalSource = inputs[0].externalSource;
+      const externalIds = inputs.map((i) => i.externalId);
+      const existingResult = await client
+        .from("jobs")
+        .select("external_id")
+        .eq("external_source", externalSource)
+        .in("external_id", externalIds);
+      const existingIds = new Set(
+        (unwrapList("JobRepository.upsertExternalMany.find", existingResult) as { external_id: string }[]).map(
+          (r) => r.external_id,
+        ),
+      );
+
+      const now = new Date().toISOString();
+      // created_at은 DB default(now())에 맡긴다 - payload에 넣으면 upsert 갱신 시 기존 값이 덮인다.
+      const rows = inputs.map((input) => ({
+        ...toRow(input),
+        title: input.title,
+        company_name: input.companyName,
+        updated_at: now,
+      }));
+
+      const { error } = await client.from("jobs").upsert(rows, { onConflict: "external_source,external_id" });
+      if (!error) {
+        const newCount = inputs.filter((i) => !existingIds.has(i.externalId)).length;
+        return { newCount, updatedCount: inputs.length - newCount, errorCount: 0 };
+      }
+
+      // 배치 실패 시 건별 폴백 - 한 건의 매핑 오류가 페이지 전체를 잃게 하지 않는다.
+      let newCount = 0;
+      let updatedCount = 0;
+      let errorCount = 0;
+      for (const input of inputs) {
+        try {
+          const { isNew } = await this.upsertExternal(input);
+          if (isNew) newCount += 1;
+          else updatedCount += 1;
+        } catch {
+          errorCount += 1;
+        }
+      }
+      return { newCount, updatedCount, errorCount };
     },
     async deactivateStale(externalSource, fetchedBefore) {
       const { data, error } = await client
