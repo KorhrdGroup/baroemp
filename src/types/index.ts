@@ -28,3 +28,4 @@ export * from "./career-requirement";
 export * from "./job-requirement";
 export * from "./market-requirement";
 export * from "./career-gap";
+export * from "./phone-verification";

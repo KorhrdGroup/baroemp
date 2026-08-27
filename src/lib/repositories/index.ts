@@ -33,3 +33,4 @@ export * from "./job-requirement-repository";
 export * from "./market-snapshot-repository";
 export * from "./career-gap-repository";
 export * from "./user-destination-interest-repository";
+export * from "./phone-verification-repository";
