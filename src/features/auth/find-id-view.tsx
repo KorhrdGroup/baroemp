@@ -4,7 +4,6 @@ import * as React from "react";
 import {
   AuthShell,
   BottomLinks,
-  BrandMark,
   HelpText,
   Input,
   Label,
@@ -41,7 +40,6 @@ export function FindIdView() {
 
   return (
     <AuthShell>
-      <BrandMark />
       <PageTitle title="아이디 찾기" desc="가입 시 등록한 휴대전화번호로 확인합니다." />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">

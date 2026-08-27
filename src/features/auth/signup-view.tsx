@@ -5,7 +5,6 @@ import { useActionState } from "react";
 import {
   AuthShell,
   BottomLinks,
-  BrandMark,
   Checkbox,
   HelpText,
   Input,
@@ -82,7 +81,6 @@ export function SignupView({ next }: { next: string }) {
 
   return (
     <AuthShell>
-      <BrandMark />
       <PageTitle title="회원가입" desc="가입 후 직업진단, 채용공고, 지원제도를 이용할 수 있습니다." />
 
       <form action={formAction} className="flex flex-col gap-4">

@@ -4,7 +4,6 @@ import * as React from "react";
 import {
   AuthShell,
   BottomLinks,
-  BrandMark,
   Divider,
   HelpText,
   Input,
@@ -55,9 +54,8 @@ export function FindPasswordView() {
   if (done) {
     return (
       <AuthShell>
-        <BrandMark />
         <PageTitle title="비밀번호 변경 완료" desc="새 비밀번호로 로그인해주세요." />
-        <div className="rounded-xl bg-slate-100 px-5 py-[18px] text-[14px] text-[#1c1a17]">
+        <div className="rounded-xl border border-slate-200 bg-white px-5 py-[18px] text-[14px] text-[#1c1a17]">
           비밀번호가 변경되었습니다.
         </div>
         <BottomLinks items={[{ label: "로그인", href: "/login", strong: true }]} />
@@ -67,7 +65,6 @@ export function FindPasswordView() {
 
   return (
     <AuthShell>
-      <BrandMark />
       <PageTitle title="비밀번호 찾기" desc="아이디와 휴대전화 인증 후 새 비밀번호를 설정합니다." />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
