@@ -1,7 +1,7 @@
 import { findCareerProfileByUserId, getCareerRequirementRepository, getJobRepository } from "@/lib/repositories";
 import type { CareerProfile, Job, JobCurationItem, JobCurationResult, JobCurationTab, JobSearchFilter } from "@/types";
 import { evaluateJobFit } from "./job-match.service";
-import { compareUserToJobRequirements } from "./job-requirement-comparison.service";
+import { compareUserToJobsRequirements } from "./job-requirement-comparison.service";
 import { buildHypotheticalProfile, getCareerGapResult, listCareerGapSummariesForUser } from "./career-gap-engine.service";
 
 const TAB_LIMIT = 8;
@@ -32,6 +32,8 @@ export async function getJobCuration(userId: string, tab: JobCurationTab): Promi
         return { tab, ...(await getReadyToApplyTab(userId)) };
       case "unlockable":
         return { tab, ...(await getUnlockableTab(userId)) };
+      default:
+        return { tab, state: "EMPTY", items: [] };
     }
   } catch (error) {
     console.error(`[job-curation] ${tab} 탭 계산 실패`, error);
@@ -49,7 +51,7 @@ export async function getCandidateJobsForUser(userId: string, limit = CANDIDATE_
 
   const repo = getJobRepository();
   const filters: JobSearchFilter[] = [];
-  for (const category of profile.desiredJobCategories ?? []) {
+  for (const category of (profile.desiredJobCategories ?? []).slice(0, 5)) {
     filters.push({ jobCategory: category, activeOnly: true, page: 1, pageSize: 250 });
   }
   if (profile.region) {
@@ -108,20 +110,22 @@ async function getMatchedTab(userId: string) {
 
 async function getReadyToApplyTab(userId: string) {
   const profile = await findCareerProfileByUserId(userId);
-  if (!profile) return { state: "NEEDS_PROFILE" as const, items: [] };
+  if (!profile || ((profile.desiredJobCategories ?? []).length === 0 && !profile.region)) {
+    return { state: "NEEDS_PROFILE" as const, items: [] };
+  }
 
   const top = scoreCandidates(profile, await getCandidateJobsForUser(userId)).slice(0, READY_CHECK_LIMIT);
 
-  // 상위 50건에 대해 모든 비교를 병렬 실행
-  const comparisons = await Promise.all(
-    top.map((item) => compareUserToJobRequirements(userId, item.job))
-  );
+  // requirements/사용자 상태맵을 1회만 로드하고 공고별로는 순수 함수만 반복하는 배치 경로 사용
+  const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
 
   // 결과에서 blocked 아닌 것을 순서대로 골라 TAB_LIMIT개 추출
   const items: JobCurationItem[] = [];
-  for (let i = 0; i < top.length && items.length < TAB_LIMIT; i++) {
-    const blocked = comparisons[i].some((c) => c.jobLevel === "REQUIRED" && c.userStatus === "NOT_SATISFIED");
-    if (!blocked) items.push(top[i]);
+  for (const item of top) {
+    if (items.length >= TAB_LIMIT) break;
+    const comparison = comparisons.get(item.job.id) ?? [];
+    const blocked = comparison.some((c) => c.jobLevel === "REQUIRED" && c.userStatus === "NOT_SATISFIED");
+    if (!blocked) items.push(item);
   }
 
   return { state: items.length > 0 ? ("READY" as const) : ("EMPTY" as const), items };
@@ -129,7 +133,9 @@ async function getReadyToApplyTab(userId: string) {
 
 async function getUnlockableTab(userId: string) {
   const profile = await findCareerProfileByUserId(userId);
-  if (!profile) return { state: "NEEDS_PROFILE" as const, items: [] };
+  if (!profile || ((profile.desiredJobCategories ?? []).length === 0 && !profile.region)) {
+    return { state: "NEEDS_PROFILE" as const, items: [] };
+  }
 
   const summaries = await listCareerGapSummariesForUser(userId, 1);
   const latest = summaries[0];

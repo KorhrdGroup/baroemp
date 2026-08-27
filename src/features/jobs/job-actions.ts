@@ -251,14 +251,25 @@ export async function getUserJobBookmarkIdsAction(): Promise<string[]> {
   return bookmarks.map((b) => b.jobId);
 }
 
+/** 큐레이션 탭 allowlist. 서버 액션에 임의 문자열이 들어오는 것을 차단한다. */
+const VALID_CURATION_TABS: readonly JobCurationTab[] = ["new", "closing_soon", "matched", "ready_to_apply", "unlockable"];
+
+function assertValidCurationTab(tab: JobCurationTab): void {
+  if (!VALID_CURATION_TABS.includes(tab)) {
+    throw new Error(`유효하지 않은 큐레이션 탭입니다: ${tab}`);
+  }
+}
+
 /** 채용공고 큐레이션 섹션 - 탭별 큐레이션 데이터 조회 */
 export async function getJobCurationAction(tab: JobCurationTab): Promise<JobCurationResult> {
+  assertValidCurationTab(tab);
   const user = await requireSessionUser();
   return getJobCuration(user.id, tab);
 }
 
 /** 채용공고 큐레이션 섹션 - 탭 조회 트래킹 */
 export async function trackCurationTabViewedAction(input: { tab: JobCurationTab }): Promise<void> {
+  assertValidCurationTab(input.tab);
   const user = await requireSessionUser();
   await logActivityEvent({
     userId: user.id,
@@ -270,6 +281,7 @@ export async function trackCurationTabViewedAction(input: { tab: JobCurationTab 
 
 /** 채용공고 큐레이션 섹션 - 카드 클릭 트래킹 */
 export async function trackCurationJobClickedAction(input: { tab: JobCurationTab; jobId: string }): Promise<void> {
+  assertValidCurationTab(input.tab);
   const user = await requireSessionUser();
   await logActivityEvent({
     userId: user.id,
