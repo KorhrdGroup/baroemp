@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ChevronDown, FileText, GraduationCap, ListChecks, MapPin, Sparkles } from "lucide-react";
+import { AlertTriangle, ChevronDown, FileText, ListChecks, MapPin, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Occupation, OccupationRecommendation } from "@/types";
 import { cn } from "@/lib/utils";
@@ -10,6 +10,17 @@ const GRADE_STYLE: Record<OccupationRecommendation["grade"], string> = {
   "잘 맞아요": "bg-brand-blue-50 text-brand-blue-700 ring-brand-blue-200",
   "도전해볼 만해요": "bg-amber-50 text-amber-700 ring-amber-200",
   "준비가 더 필요해요": "bg-slate-100 text-slate-600 ring-slate-200",
+};
+
+/**
+ * 적합도 숫자도 등급 배지와 같은 계열로 물들인다.
+ * 숫자만 늘 파랑이면 "준비가 더 필요해요"인 직업에서도 점수가 강조되어 신호가 어긋난다.
+ */
+const GRADE_SCORE_STYLE: Record<OccupationRecommendation["grade"], string> = {
+  "매우 잘 맞아요": "text-emerald-700",
+  "잘 맞아요": "text-brand-blue-600",
+  "도전해볼 만해요": "text-amber-700",
+  "준비가 더 필요해요": "text-slate-500",
 };
 
 const SUBSCORES: { key: keyof OccupationRecommendation; label: string }[] = [
@@ -73,7 +84,7 @@ export function OccupationRecommendationCard({
             {rec.grade}
           </span>
           <div className="text-right">
-            <p className="text-title-2 font-extrabold text-brand-blue-600">{rec.totalScore}</p>
+            <p className={cn("text-title-2 font-extrabold", GRADE_SCORE_STYLE[rec.grade])}>{rec.totalScore}</p>
             <p className="text-label-2 text-slate-400">적합도</p>
           </div>
           <ChevronDown className="size-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
@@ -99,26 +110,6 @@ export function OccupationRecommendationCard({
               <Progress value={rec[key] as number} className="mt-2 h-1.5" />
             </div>
           ))}
-        </div>
-
-        {/* 현재 준비도 */}
-        <div className="mt-6 rounded-xl bg-brand-blue-50/60 p-4">
-          <div className="flex items-center justify-between">
-            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
-              <GraduationCap className="size-4" /> 현재 준비도
-            </p>
-            <p className="text-body-1 font-bold text-brand-blue-700">{rec.readinessScore}점</p>
-          </div>
-          <Progress value={rec.readinessScore} className="mt-2 h-2" />
-          {rec.readinessProjection.length > 0 && (
-            <ul className="mt-3 space-y-1 text-label-1 text-brand-blue-800">
-              {rec.readinessProjection.map((p) => (
-                <li key={p.contentId}>
-                  {p.contentTitle} 완료 시 예상 준비도 <strong>{p.projectedScore}점</strong>
-                </li>
-              ))}
-            </ul>
-          )}
         </div>
 
         {/* 왜 추천되었는지 / 고려할 점 */}
