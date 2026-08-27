@@ -133,7 +133,8 @@ function createMockJobRepository(): JobRepository {
     },
     async search(filter) {
       const page = Math.max(1, filter.page ?? 1);
-      const pageSize = Math.min(100, Math.max(1, filter.pageSize ?? 20));
+      // 큐레이션 후보군(250)·관리자 목록(500) 같은 서버 내부 대량 조회를 허용하기 위해 상한 500.
+      const pageSize = Math.min(500, Math.max(1, filter.pageSize ?? 20));
       const filtered = sortJobs(
         items.filter((item) => matchesFilter(item, filter)),
         filter.sort,

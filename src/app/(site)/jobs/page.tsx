@@ -5,8 +5,10 @@ import { Briefcase, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { JobCard } from "@/features/jobs/job-card";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
+import { JobCurationSection } from "@/features/jobs/job-curation-section";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { searchJobs, getRecommendedJobsForAnonymous, type JobSearchParams } from "@/services/job-search.service";
+import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { getUserQualificationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
@@ -37,7 +39,7 @@ export default async function JobsPage({
   const query = new URLSearchParams(
     Object.entries(sp).filter(([, v]) => typeof v === "string" && v !== "") as [string, string][],
   ).toString();
-  await requireUser(`/jobs${query ? `?${query}` : ""}`);
+  const user = await requireUser(`/jobs${query ? `?${query}` : ""}`);
 
   const page = Math.max(1, Number(sp.page) || 1);
 
@@ -56,11 +58,12 @@ export default async function JobsPage({
     anonymousId,
   };
 
-  const [result, recommendation, currentUser, bookmarkedIds] = await Promise.all([
+  const [result, recommendation, currentUser, bookmarkedIds, initialCuration] = await Promise.all([
     searchJobs(filter),
     getRecommendedJobsForAnonymous(anonymousId),
     getCurrentUser(),
     getUserJobBookmarkIdsAction(),
+    getJobCuration(user.id, "new"),
   ]);
   const isAuthenticated = Boolean(currentUser);
   // 취업준비성 배지용 보유 자격증 (이력서/검사에서 등록된 user_qualifications 기준)
@@ -125,6 +128,14 @@ export default async function JobsPage({
           </div>
         </div>
       )}
+
+      <div className="mt-8">
+        <JobCurationSection
+          initialNew={initialCuration}
+          heldQualifications={heldQualifications ?? []}
+          bookmarkedIds={bookmarkedIds}
+        />
+      </div>
 
       <div className="mt-8">
         <p className="text-label-1 text-slate-500">

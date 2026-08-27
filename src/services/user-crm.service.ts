@@ -5,7 +5,6 @@ import {
   findCareerProfileByUserId,
   getAssessmentResultRepository,
   getConsultationRepository,
-  getJobRepository,
   getLeadRepository,
   getProfileRepository,
   getSupportProgramRepository,
@@ -17,6 +16,7 @@ import { mockContents } from "@/mocks/contents.mock";
 import { mockJobRoles } from "@/mocks/job-roles.mock";
 import type { ActivityEvent, AppRole, Profile, RecommendedItem, UserCrmDetail, UserResumeSummary } from "@/types";
 import { listContents } from "./content.service";
+import { getCandidateJobsForUser } from "./job-curation.service";
 import { getUserJobBehaviorSummary } from "./job-behavior-summary.service";
 import { getUserSupportBehaviorSummary } from "./support-behavior-summary.service";
 import { listAdminUsersPaged } from "./admin-user-list.service";
@@ -127,7 +127,8 @@ export async function getUserCrmDetail(
   const lead = leads.find((l) => l.userId === userId);
 
   const contents = attachRecommendationRulesToAll(await listContents({ status: "published" }));
-  const jobs = await getJobRepository().findAll({ keyword: undefined });
+  // 전체 jobs findAll(6만+건)은 statement timeout을 유발한다 - 매칭에 쓸 후보군 500건만 가져온다.
+  const jobs = careerProfile ? await getCandidateJobsForUser(userId) : [];
   const supports = await getSupportProgramRepository().findAll();
   const consultations = await getConsultationRepository().findAll({ userId });
   const assessmentResults = (await getAssessmentResultRepository().findAll({ userId })).sort((a, b) =>

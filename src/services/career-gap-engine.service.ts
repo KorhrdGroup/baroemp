@@ -164,8 +164,9 @@ function statusBaseScore(status: UserRequirementStatus): number {
  * Counterfactual Simulation을 위해 "이 Requirement를 충족했다고 가정"한 프로필을 만든다 (스펙 17번).
  * evaluateJobFit이 실제로 참조하는 필드(canDrive/heldQualifications/interestTags)만 패치하며,
  * 새로운 매칭 로직을 만들지 않고 기존 Job Match Engine을 그대로 재사용한다.
+ * job-curation 자격 탭에서 재사용한다.
  */
-function buildHypotheticalProfile(profile: CareerProfile, requirement: CareerGapRequirement): CareerProfile {
+export function buildHypotheticalProfile(profile: CareerProfile, requirement: CareerGapRequirement): CareerProfile {
   if (requirement.matchingType === "DRIVING_FLAG") {
     return { ...profile, canDrive: true };
   }
