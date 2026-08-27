@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { getSmsProvider } from "@/lib/sms";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { validateSignup } from "./signup-validation";
 import { normalizePhone } from "@/lib/utils/phone";
@@ -78,6 +79,22 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
 
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors };
+  }
+
+  // 화면에서 휴대폰 인증을 마쳤는지 서버에서 다시 확인한다 (클라이언트 우회 방지).
+  // SMS 미설정 개발 환경에서는 인증 없이 가입을 막지 않기 위해 provider 유무로 판단한다.
+  const phoneVerificationId = String(formData.get("phoneVerificationId") ?? "");
+  const smsEnabled = getSmsProvider() !== null && process.env.NODE_ENV === "production";
+  if (smsEnabled) {
+    const { consumePhoneVerification } = await import("@/services/phone-verification.service");
+    const verified = await consumePhoneVerification({
+      verificationId: phoneVerificationId,
+      phone: phoneRaw,
+      purpose: "signup",
+    });
+    if (!verified) {
+      return { fieldErrors: { phone: "휴대폰 인증을 완료해주세요." } };
+    }
   }
 
   await logActivityEvent({
