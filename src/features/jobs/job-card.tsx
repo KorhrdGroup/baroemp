@@ -8,6 +8,13 @@ import type { Job } from "@/types";
 
 const CLOSING_SOON_DAYS = 7;
 
+/**
+ * 매칭 점수는 이 값 이상일 때만 배지로 보여준다(evaluateJobFit 의 C등급 경계).
+ * 프로필이 덜 채워졌거나 직종이 다르면 대부분 0~10점이 나오는데,
+ * "매칭 0점"을 카드마다 붙이면 알려주는 것 없이 지원을 단념시키기만 한다.
+ */
+const MATCH_SCORE_VISIBLE_MIN = 35;
+
 function isClosingSoon(job: Job): boolean {
   if (!job.applyDeadline) return false;
   const daysLeft = (new Date(job.applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
@@ -62,7 +69,7 @@ export function JobCard({
         {/* 지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리. */}
         <div className="flex items-center justify-between gap-2 pr-10">
           <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
-          {typeof matchScore === "number" && (
+          {typeof matchScore === "number" && matchScore >= MATCH_SCORE_VISIBLE_MIN && (
             <span className="shrink-0 rounded-full bg-brand-blue-50 px-3 py-1.5 text-label-1 font-bold text-brand-blue-700">
               매칭 {matchScore}점
             </span>

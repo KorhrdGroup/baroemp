@@ -38,10 +38,17 @@ export function JobFiltersForm({
   initial,
   children,
   summary,
+  jobCategoryLabel,
 }: {
   initial: JobFiltersValue;
   /** 결과 건수처럼 토글 줄 왼쪽에 함께 놓을 요약 문구. */
   summary?: React.ReactNode;
+  /**
+   * 직종 선택기 목록(mockJobRoles)에 없는 코드로 들어온 경우의 이름.
+   * 직업진단 결과에서 넘어오는 코드는 이 목록에 없어서, 없으면 필터가 걸렸는데도
+   * 버튼에 "직종"만 떠 무엇으로 좁혀졌는지 알 수 없었다.
+   */
+  jobCategoryLabel?: string;
   /**
    * 검색바와 빠른 토글 줄 사이에 들어갈 내용(큐레이션 섹션 등).
    * 토글·정렬은 아래 목록에 적용되는 조건이라 목록 바로 위에 있어야 읽히는데,
@@ -62,6 +69,9 @@ export function JobFiltersForm({
   const regionActive = region !== "all";
   const jobActive = jobCategory !== "all";
   const roleOptions = mockJobRoles.filter((r) => r.name.includes(jobQuery.trim()));
+  // 선택된 직종 이름: 목록에서 찾고, 없으면 서버가 넘겨준 이름을 쓴다.
+  const selectedJobLabel =
+    mockJobRoles.find((r) => r.jobCategory === jobCategory)?.name ?? jobCategoryLabel ?? "선택한 직종";
 
   const buildParams = (overrides: Partial<JobFiltersValue> = {}) => {
     const next: JobFiltersValue = {
@@ -152,7 +162,7 @@ export function JobFiltersForm({
               jobActive ? "font-semibold text-brand-blue-600" : "font-medium text-slate-700",
             )}
           >
-            {jobActive ? (mockJobRoles.find((r) => r.jobCategory === jobCategory)?.name ?? "직종") : "직종 전체"}
+            {jobActive ? selectedJobLabel : "직종 전체"}
             <ChevronDown className={cn("size-3.5 transition-transform", panel === "job" && "rotate-180")} />
           </button>
 
@@ -170,7 +180,7 @@ export function JobFiltersForm({
           {(
             [
               ["region", regionActive ? REGION_LABELS[region as keyof typeof REGION_LABELS] : "지역 전체"],
-              ["job", jobActive ? (mockJobRoles.find((r) => r.jobCategory === jobCategory)?.name ?? "직종") : "직종 전체"],
+              ["job", jobActive ? selectedJobLabel : "직종 전체"],
             ] as const
           ).map(([key, label]) => (
             <button

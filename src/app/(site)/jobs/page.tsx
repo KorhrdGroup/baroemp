@@ -10,6 +10,7 @@ import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { searchJobs, getRecommendedJobsForAnonymous, type JobSearchParams } from "@/services/job-search.service";
 import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
+import { getOccupationRepository } from "@/lib/repositories";
 import { getUserQualificationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
 
@@ -66,6 +67,14 @@ export default async function JobsPage({
     getJobCuration(user.id, "new"),
   ]);
   const isAuthenticated = Boolean(currentUser);
+
+  /*
+   * 직업진단 결과에서 넘어오는 직종 코드는 검색바의 직종 목록에 없다.
+   * 이름을 찾아 넘겨야 필터가 걸린 것을 버튼에서 알아볼 수 있다.
+   */
+  const jobCategoryLabel = sp.category
+    ? (await getOccupationRepository().findAll()).find((o) => o.jobCategoryCode === sp.category)?.name
+    : undefined;
   // 취업준비성 배지용 보유 자격증 (이력서/검사에서 등록된 user_qualifications 기준)
   const heldQualifications = currentUser
     ? (await getUserQualificationRepository().findByUserId(currentUser.id)).map((q) => q.name)
@@ -105,6 +114,7 @@ export default async function JobsPage({
           closingSoon: sp.closingSoon === "1",
           sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
         }}
+        jobCategoryLabel={jobCategoryLabel}
         summary={
           <p className="text-label-1 text-slate-500">
             총 <span className="font-semibold text-brand-blue-600">{result.total}건</span>
