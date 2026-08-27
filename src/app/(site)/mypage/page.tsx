@@ -304,7 +304,7 @@ export default async function MyPage() {
             )}
 
             {/* D-2. 이력서/자기소개서 (스펙 51번) */}
-            <Card className="rounded-xl border-0 ring-1 ring-border md:col-span-2">
+            <Card className="rounded-xl border-0 ring-1 ring-border">
               <CardHeader>
                 <CardTitle className="flex items-center gap-1.5 text-body-2">
                   <FileText className="size-4" /> 이력서 · 자기소개서
