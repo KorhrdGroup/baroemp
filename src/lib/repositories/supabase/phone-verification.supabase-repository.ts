@@ -74,22 +74,12 @@ export function createSupabasePhoneVerificationRepository(): PhoneVerificationRe
       return result.count ?? 0;
     },
     async incrementAttempt(id) {
-      const result = await client
-        .from("phone_verifications")
-        .select("attempt_count")
-        .eq("id", id)
-        .maybeSingle();
-      const row = unwrapMaybe("PhoneVerificationRepository.incrementAttempt", result);
-      const nextCount = Number((row as Record<string, unknown> | null)?.attempt_count ?? 0) + 1;
-
-      const updateResult = await client
-        .from("phone_verifications")
-        .update({ attempt_count: nextCount })
-        .eq("id", id)
-        .select("attempt_count")
-        .maybeSingle();
-      const updatedRow = unwrapMaybe("PhoneVerificationRepository.incrementAttempt", updateResult);
-      return Number((updatedRow as Record<string, unknown> | null)?.attempt_count ?? nextCount);
+      const { data, error } = await client.rpc("increment_phone_verification_attempt", { p_id: id });
+      if (error) {
+        throwDataSourceError("PhoneVerificationRepository.incrementAttempt", error);
+      }
+      // 행이 없으면(null) 검증이 실패하도록 큰 수를 반환한다.
+      return data === null || data === undefined ? Number.MAX_SAFE_INTEGER : Number(data);
     },
     async markVerified(id) {
       const result = await client

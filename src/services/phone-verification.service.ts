@@ -13,9 +13,13 @@ function hashCode(code: string, phone: string): string {
   return createHash("sha256").update(`${code}:${phone}`).digest("hex");
 }
 
-/** 개발/테스트에서만 쓰는 최근 발급 코드 조회 (검증 스크립트용). 운영 코드 경로에서는 호출하지 않는다. */
+/**
+ * 개발/테스트에서만 쓰는 최근 발급 코드 조회 (검증 스크립트용). 운영 코드 경로에서는 호출하지 않는다.
+ * 운영(NODE_ENV === "production")에서는 항상 undefined를 반환한다.
+ */
 const lastIssuedCodes = new Map<string, string>();
 export function __testOnlyPeekCode(phone: string, purpose: PhoneVerificationPurpose): string | undefined {
+  if (process.env.NODE_ENV === "production") return undefined;
   return lastIssuedCodes.get(`${normalizePhone(phone)}:${purpose}`);
 }
 
@@ -40,18 +44,21 @@ export async function sendPhoneVerificationCode(input: {
   }
 
   const code = String(randomInt(0, 1_000_000)).padStart(6, "0");
-  await repo.create({
+  const record = await repo.create({
     phone,
     purpose: input.purpose,
     codeHash: hashCode(code, phone),
     expiresAt: new Date(Date.now() + CODE_TTL_MS).toISOString(),
   });
-  lastIssuedCodes.set(`${phone}:${input.purpose}`, code);
+  if (process.env.NODE_ENV !== "production") {
+    lastIssuedCodes.set(`${phone}:${input.purpose}`, code);
+  }
 
   try {
     await provider.sendVerificationCode(phone, code);
   } catch (error) {
     console.error("[phone-verification] SMS 발송 실패", error);
+    await repo.expire(record.id);
     return { ok: false, error: "인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요." };
   }
 
