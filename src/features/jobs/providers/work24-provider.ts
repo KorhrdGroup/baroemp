@@ -29,6 +29,41 @@ function toNum(value: unknown): number | undefined {
   return Number.isFinite(num) ? num : undefined;
 }
 
+/** 워크넷 직종코드는 6자리 고정 - 숫자로 파싱되며 잘린 앞자리 0을 복원한다. */
+function toJobsCode(value: unknown): string | undefined {
+  const str = toStr(value);
+  if (!str) return undefined;
+  return /^\d+$/.test(str) ? str.padStart(6, "0") : str;
+}
+
+/**
+ * Work24 원문 날짜를 ISO(YYYY-MM-DD[THH:mm:ss])로 정규화한다.
+ * 원문 형태가 제각각이라("26-10-18", "채용시까지  26-10-18", "2026-08-20 14:22:33",
+ * "20260820142233") 그대로 DB timestamp 컬럼에 넣으면 실패한다.
+ * 날짜를 찾지 못하면(예: "채용시까지" 단독 = 상시채용) undefined를 반환한다.
+ */
+function toIsoDate(value: unknown): string | undefined {
+  const str = toStr(value);
+  if (!str) return undefined;
+
+  const dashed = str.match(/(\d{2,4})-(\d{1,2})-(\d{1,2})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (dashed) {
+    const year = dashed[1].length === 2 ? `20${dashed[1]}` : dashed[1];
+    const date = `${year}-${dashed[2].padStart(2, "0")}-${dashed[3].padStart(2, "0")}`;
+    if (dashed[4]) return `${date}T${dashed[4].padStart(2, "0")}:${dashed[5]}:${dashed[6] ?? "00"}`;
+    return date;
+  }
+
+  const compact = str.match(/\b(\d{4})(\d{2})(\d{2})(?:(\d{2})(\d{2})(\d{2}))?\b/);
+  if (compact) {
+    const date = `${compact[1]}-${compact[2]}-${compact[3]}`;
+    if (compact[4]) return `${date}T${compact[4]}:${compact[5]}:${compact[6]}`;
+    return date;
+  }
+
+  return undefined;
+}
+
 /** Work24 "career" 응답은 코드가 아니라 자유 텍스트/설명인 경우가 많아 키워드로 유추한다. */
 function guessCareerRequirement(careerText?: string): NormalizedJob["careerRequirement"] {
   if (!careerText) return undefined;
@@ -85,7 +120,8 @@ export function adaptWork24Entry(entry: Record<string, unknown>, fetchedAt: stri
     industryName: toStr(entry.indTpNm),
     title: toStr(entry.title) ?? "",
     description: toStr(entry.title),
-    occupationCode: toStr(entry.jobsCd),
+    // XML 파서(parseTagValue)가 "029202"를 숫자 29202로 바꿔 앞자리 0이 사라지므로 6자리로 복원한다.
+    occupationCode: toJobsCode(entry.jobsCd),
     occupationName: undefined,
     regionSido,
     regionSigungu,
@@ -104,9 +140,9 @@ export function adaptWork24Entry(entry: Record<string, unknown>, fetchedAt: stri
     workDays: toStr(entry.holidayTpNm),
     preferentialCodes,
     recommendedAgeGroups: guessRecommendedAgeGroups(preferentialCodes),
-    applyDeadline: toStr(entry.closeDt),
-    postedAt: toStr(entry.regDt),
-    sourceUpdatedAt: toStr(entry.smodifyDtm),
+    applyDeadline: toIsoDate(entry.closeDt),
+    postedAt: toIsoDate(entry.regDt),
+    sourceUpdatedAt: toIsoDate(entry.smodifyDtm),
     sourceUrl: toStr(entry.wantedInfoUrl),
     mobileSourceUrl: toStr(entry.wantedMobileInfoUrl),
     isActive: true,
