@@ -91,12 +91,13 @@ export function OccupationRecommendationCard({
         )}
 
         {/* 세부 적합도 */}
-        <div className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {/* 네 지표를 각각 회색 상자에 담는다. 배경 없이 나열하면 어디까지가 한 지표인지 흐리다. */}
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {SUBSCORES.map(({ key, label }) => (
-            <div key={label}>
+            <div key={label} className="rounded-xl bg-slate-50 p-4">
               <p className="text-label-2 text-slate-400">{label}</p>
-              <p className="mt-0.5 text-body-1 font-bold text-slate-800">{rec[key] as number}</p>
-              <Progress value={rec[key] as number} className="mt-1 h-1.5" />
+              <p className="mt-1 text-title-3 font-bold text-slate-900">{rec[key] as number}</p>
+              <Progress value={rec[key] as number} className="mt-2 h-1.5" />
             </div>
           ))}
         </div>
