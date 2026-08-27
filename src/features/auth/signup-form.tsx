@@ -92,14 +92,13 @@ export function SignupForm({ next }: { next: string }) {
 
       <div>
         <Label htmlFor="email" className="mb-1.5">
-          이메일 <span className="text-red-500">*</span>
+          이메일 <span className="text-slate-400">(선택)</span>
         </Label>
         <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
-          required
           placeholder="you@example.com"
           value={values.email}
           onChange={(e) => set("email", e.target.value)}
@@ -148,13 +147,14 @@ export function SignupForm({ next }: { next: string }) {
 
       <div>
         <Label htmlFor="phone" className="mb-1.5">
-          휴대전화번호 <span className="text-slate-400">(선택)</span>
+          휴대전화번호 <span className="text-red-500">*</span>
         </Label>
         <Input
           id="phone"
           name="phone"
           type="tel"
           autoComplete="tel"
+          required
           placeholder="010-1234-5678"
           value={values.phone}
           onChange={(e) => set("phone", e.target.value)}

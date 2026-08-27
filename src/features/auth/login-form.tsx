@@ -20,9 +20,9 @@ export function LoginForm({ next }: { next: string }) {
 
       <div>
         <Label htmlFor="email" className="mb-1.5">
-          이메일
+          이메일 또는 휴대전화번호
         </Label>
-        <Input id="email" name="email" type="email" autoComplete="email" required placeholder="you@example.com" />
+        <Input id="email" name="email" type="text" autoComplete="username" required placeholder="you@example.com 또는 010-0000-0000" />
       </div>
 
       <div>
