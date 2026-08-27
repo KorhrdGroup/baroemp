@@ -332,6 +332,7 @@ export function ResumeEditor({
             </Label>
             <CompactInput
               id="resume-title"
+              placeholder="제목을 입력해주세요"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className="mt-1"
