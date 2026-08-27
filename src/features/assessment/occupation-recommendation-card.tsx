@@ -49,9 +49,8 @@ export function OccupationRecommendationCard({
     <details
       open={defaultOpen}
       className={cn(
+        // 순위는 왼쪽 번호 배지가 이미 짚어주므로 카드에는 테두리를 두지 않는다.
         "group rounded-xl bg-white",
-        // 1순위만 테두리로 짚어준다. 나머지는 회색 바탕과 흰 면의 대비로 이미 구분된다.
-        rank === 1 && "ring-2 ring-brand-blue-200",
       )}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-5 sm:px-7 sm:py-6">
