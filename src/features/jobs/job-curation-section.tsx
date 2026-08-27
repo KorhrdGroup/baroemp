@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { JobCurationResult, JobCurationTab } from "@/types";
+import { cn } from "@/lib/utils";
+import { filterPillClass, filterPillOffClass, filterPillOnClass } from "@/lib/ui-classes";
 import { JobCard } from "./job-card";
 import {
   getJobCurationAction,
@@ -40,11 +42,32 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
   const [activeTab, setActiveTab] = useState<JobCurationTab>("new");
   const [results, setResults] = useState<Partial<Record<JobCurationTab, JobCurationResult>>>({ new: initialNew });
   const [loadingTab, setLoadingTab] = useState<JobCurationTab | null>(null);
+
+  /*
+   * 가로 목록 좌우 끝을 흰색으로 흐린다. 카드가 뚝 잘려 보이는 대신 이어지는 느낌을 준다.
+   * 갈 곳이 있는 쪽만 켜야 한다. 양쪽을 늘 켜두면 더 볼 게 없는데도 잘린 것처럼 보인다.
+   */
+  const rowRef = useRef<HTMLDivElement>(null);
+  const [fade, setFade] = useState({ start: false, end: false });
+
+  function syncFade() {
+    const el = rowRef.current;
+    if (!el) return;
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    setFade({ start: el.scrollLeft > 1, end: el.scrollLeft < maxScroll - 1 });
+  }
   const trackedTabs = useRef(new Set<JobCurationTab>(["new"]));
 
   useEffect(() => {
     void trackCurationTabViewedAction({ tab: "new" }).catch(() => {});
   }, []);
+
+  // 탭이 바뀌면 목록이 통째로 갈리므로 스크롤 위치 기준을 다시 잡는다.
+  const currentItemCount = results[activeTab]?.items.length ?? 0;
+  useEffect(() => {
+    rowRef.current?.scrollTo({ left: 0 });
+    syncFade();
+  }, [activeTab, currentItemCount]);
 
   function handleTab(tab: JobCurationTab) {
     setActiveTab(tab);
@@ -72,11 +95,7 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
             key={t.key}
             type="button"
             onClick={() => handleTab(t.key)}
-            className={`shrink-0 rounded-full border px-3.5 py-1.5 text-label-1 font-semibold transition-colors ${
-              activeTab === t.key
-                ? "border-brand-blue-500 bg-brand-blue-50 text-brand-blue-700"
-                : "border-slate-200 bg-white text-slate-500 hover:border-slate-300"
-            }`}
+            className={cn(filterPillClass, activeTab === t.key ? filterPillOnClass : filterPillOffClass)}
           >
             {t.label}
           </button>
@@ -94,7 +113,23 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
       )}
 
       {current && current.items.length > 0 && (
-        <div className="scrollbar-on-hover flex gap-4 overflow-x-auto pb-2">
+        <div className="relative">
+        {/* 페이드는 스크롤을 가리면 안 되므로 클릭·스크롤을 통과시킨다. */}
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-white to-transparent transition-opacity",
+            fade.start ? "opacity-100" : "opacity-0",
+          )}
+        />
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-white to-transparent transition-opacity",
+            fade.end ? "opacity-100" : "opacity-0",
+          )}
+        />
+        <div ref={rowRef} onScroll={syncFade} className="scrollbar-on-hover flex gap-4 overflow-x-auto pb-2">
           {current.items.map((item) => {
             const dday = activeTab === "closing_soon" ? formatDday(item.job.applyDeadline) : null;
             return (
@@ -125,6 +160,7 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
               </div>
             );
           })}
+        </div>
         </div>
       )}
     </section>

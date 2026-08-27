@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown, RotateCcw, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { filterPillClass, filterPillOffClass, filterPillOnClass } from "@/lib/ui-classes";
 import { REGION_LABELS } from "@/lib/labels";
 import { mockJobRoles } from "@/mocks/job-roles.mock";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
@@ -157,7 +158,7 @@ export function JobFiltersForm({
 
           <button
             type="submit"
-            className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-full bg-brand-blue-500 px-6 text-body-2 font-semibold text-white transition-colors hover:bg-brand-blue-600 sm:h-[52px] sm:px-7"
+            className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-full bg-brand-blue-400 px-6 text-body-2 font-semibold text-white transition-colors hover:bg-brand-blue-600 sm:h-[52px] sm:px-7"
           >
             <Search className="size-4" strokeWidth={2.2} />
             검색
@@ -219,7 +220,7 @@ export function JobFiltersForm({
               <button
                 type="button"
                 onClick={() => void submit({ region: region === "all" ? undefined : region })}
-                className="rounded-full bg-brand-blue-500 px-5 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+                className="rounded-full bg-brand-blue-400 px-5 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
               >
                 적용
               </button>
@@ -273,7 +274,7 @@ export function JobFiltersForm({
               <button
                 type="button"
                 onClick={() => void submit({ jobCategory: jobCategory === "all" ? undefined : jobCategory })}
-                className="rounded-full bg-brand-blue-500 px-5 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+                className="rounded-full bg-brand-blue-400 px-5 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
               >
                 적용
               </button>
@@ -281,48 +282,24 @@ export function JobFiltersForm({
           </div>
         )}
 
-        {/* 정렬 패널 */}
-        {panel === "sort" && (
-          <div className="absolute right-0 top-[calc(100%+56px)] z-50 w-40 rounded-xl border border-border bg-white p-1.5 shadow-[0_12px_32px_rgba(15,40,90,0.12)]">
-            {SORT_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => {
-                  setSort(opt.value);
-                  void submit({ sort: opt.value });
-                }}
-                className={cn(
-                  "block w-full rounded-lg px-3 py-2 text-left text-label-1",
-                  sort === opt.value ? "bg-brand-blue-50 font-semibold text-brand-blue-600" : "text-slate-600 hover:bg-slate-50",
-                )}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
-        )}
       </div>
 
       {children}
 
-      {/* 결과 건수 + 빠른 토글 칩 + 정렬. 모두 바로 아래 목록에 걸리는 조건이라 한 줄에 모은다. */}
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          {summary}
-          <div className="flex gap-2">
+      {/*
+        결과 건수·빠른 토글·정렬을 모두 왼쪽에 붙여 한 묶음으로 읽히게 한다.
+        정렬만 오른쪽 끝에 텍스트로 떨어져 있으면 같은 목록을 다루는 조건인데 따로 놀았다.
+      */}
+      <div className="mt-8 flex flex-wrap items-center gap-3">
+        {summary}
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => {
               setBeginnerOnly(!beginnerOnly);
               void submit({ isBeginnerFriendly: !beginnerOnly || undefined });
             }}
-            className={cn(
-              "rounded-full border px-4 py-2 text-label-1 transition-colors",
-              beginnerOnly
-                ? "border-brand-blue-300 bg-brand-blue-50 font-semibold text-brand-blue-600"
-                : "border-border bg-white font-medium text-slate-600 hover:bg-slate-50",
-            )}
+            className={cn(filterPillClass, beginnerOnly ? filterPillOnClass : filterPillOffClass)}
           >
             신입가능만
           </button>
@@ -332,25 +309,46 @@ export function JobFiltersForm({
               setClosingSoon(!closingSoon);
               void submit({ closingSoon: !closingSoon || undefined });
             }}
-            className={cn(
-              "rounded-full border px-4 py-2 text-label-1 transition-colors",
-              closingSoon
-                ? "border-brand-blue-300 bg-brand-blue-50 font-semibold text-brand-blue-600"
-                : "border-border bg-white font-medium text-slate-600 hover:bg-slate-50",
-            )}
+            className={cn(filterPillClass, closingSoon ? filterPillOnClass : filterPillOffClass)}
           >
             마감임박만
           </button>
+
+          {/* 패널은 버튼 바로 아래에 붙어야 해서 이 버튼을 기준으로 위치를 잡는다. */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setPanel(panel === "sort" ? null : "sort")}
+              className={cn(filterPillClass, filterPillOffClass, "flex items-center gap-1.5")}
+            >
+              {SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "추천순"}
+              <ChevronDown className={cn("size-3.5 transition-transform", panel === "sort" && "rotate-180")} />
+            </button>
+
+            {panel === "sort" && (
+              <div className="absolute left-0 top-[calc(100%+8px)] z-50 w-40 rounded-xl border border-border bg-white p-1.5 shadow-[0_12px_32px_rgba(15,40,90,0.12)]">
+                {SORT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => {
+                      setSort(opt.value);
+                      void submit({ sort: opt.value });
+                    }}
+                    className={cn(
+                      "block w-full rounded-lg px-3 py-2 text-left text-label-1",
+                      sort === opt.value
+                        ? "bg-brand-blue-50 font-semibold text-brand-blue-600"
+                        : "text-slate-600 hover:bg-slate-50",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
-        <button
-          type="button"
-          onClick={() => setPanel(panel === "sort" ? null : "sort")}
-          className="flex items-center gap-1.5 text-label-1 text-slate-500 hover:text-slate-800"
-        >
-          {SORT_OPTIONS.find((o) => o.value === sort)?.label ?? "추천순"}
-          <ChevronDown className={cn("size-3.5 transition-transform", panel === "sort" && "rotate-180")} />
-        </button>
       </div>
     </div>
   );
