@@ -154,11 +154,19 @@ export function createSupabaseJobRepository(): JobRepository | null {
 
   return {
     async findAll(filter) {
-      let query = client.from("jobs").select("*").order("created_at", { ascending: false });
-      if (filter) query = applySearchFilters(query, { ...filter, activeOnly: filter.activeOnly ?? false });
-      const result = await query;
-      const rows = unwrapList("JobRepository.findAll", result);
-      return rows.map((row) => mapRow(row as Record<string, unknown>));
+      // PostgREST는 요청당 최대 1000행만 반환하므로, 전량 수집(6만+건) 이후에는
+      // range 페이지네이션으로 전부 모아야 시장 통계/매칭이 부분 데이터로 계산되지 않는다.
+      const PAGE = 1000;
+      const all: Record<string, unknown>[] = [];
+      for (let offset = 0; ; offset += PAGE) {
+        let query = client.from("jobs").select("*").order("created_at", { ascending: false });
+        if (filter) query = applySearchFilters(query, { ...filter, activeOnly: filter.activeOnly ?? false });
+        const result = await query.range(offset, offset + PAGE - 1);
+        const rows = unwrapList("JobRepository.findAll", result);
+        all.push(...(rows as Record<string, unknown>[]));
+        if (rows.length < PAGE) break;
+      }
+      return all.map((row) => mapRow(row));
     },
     async findById(id) {
       const result = await client.from("jobs").select("*").eq("id", id).maybeSingle();

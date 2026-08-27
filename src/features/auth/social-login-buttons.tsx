@@ -1,12 +1,7 @@
 /**
  * SNS 로그인 진입 버튼.
- *
- * ⚠️ 아직 UI 만 있고 OAuth 는 연결돼 있지 않다.
- * 누르면 아무 일도 일어나지 않으므로, 배포 전에 각 provider 연동을 붙이거나
- * 이 컴포넌트를 화면에서 내려야 한다.
- *
- * 연동 시 붙일 자리: 각 버튼의 onClick (예: supabase.auth.signInWithOAuth).
- * 카카오/네이버는 Supabase 기준 provider 가 다르므로 확인이 필요하다.
+ * /auth/login/{provider} 라우트가 state 발급 후 provider 인증 페이지로 보낸다.
+ * (자체 OAuth 구현 - src/lib/auth/social-oauth.ts)
  */
 
 function NaverIcon() {
@@ -35,21 +30,21 @@ export function SocialLoginButtons() {
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <button
-          type="button"
+        <a
+          href="/auth/login/naver"
           className="flex h-12 items-center justify-center gap-2 rounded-md bg-[#03C75A] text-label-1 font-semibold text-white transition-colors hover:bg-[#02B351]"
         >
           <NaverIcon />
           네이버 로그인/회원가입
-        </button>
+        </a>
 
-        <button
-          type="button"
+        <a
+          href="/auth/login/kakao"
           className="flex h-12 items-center justify-center gap-2 rounded-md bg-[#FEE500] text-label-1 font-semibold text-[#191600] transition-colors hover:bg-[#F2DA00]"
         >
           <KakaoIcon />
           카카오 로그인/회원가입
-        </button>
+        </a>
       </div>
     </div>
   );
