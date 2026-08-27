@@ -201,7 +201,13 @@ export function OccupationRecommendationCard({
             targetId={rec.occupationId}
             userId={userId}
             anonymousId={anonymousId}
-            href={rec.jobCategoryCode ? `/jobs?category=${rec.jobCategoryCode}` : "/jobs"}
+            /*
+             * 직종 코드가 아니라 직업 이름으로 검색해 넘긴다.
+             * 코드로 넘기면 검색창이 빈 채로 드롭다운만 바뀌어 무엇으로 좁혀졌는지 알기 어렵고,
+             * 사용자가 검색어를 고쳐 넓히거나 좁힐 수도 없다.
+             * 이름 검색은 제목·본문까지 훑어 코드가 다른 관련 공고도 함께 걸린다.
+             */
+            href={`/jobs?keyword=${encodeURIComponent(rec.occupationName)}`}
             className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
           >
             채용공고 보기

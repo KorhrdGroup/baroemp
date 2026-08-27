@@ -49,7 +49,7 @@ export default async function AssessmentResultPage({
     await Promise.all(
       result.recommendations.map(async (rec) => [
         rec.occupationId,
-        await countJobsForOccupation(rec.jobCategoryCode, profileSignal),
+        await countJobsForOccupation(rec.occupationName, profileSignal),
       ] as const),
     ),
   );
