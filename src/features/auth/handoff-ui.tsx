@@ -20,7 +20,7 @@ export function AuthShell({
   return (
     <div className="flex min-h-[calc(100vh-4rem)] w-full justify-center bg-slate-50 px-4 py-8 sm:px-6 sm:py-14">
       <div className="w-full max-w-[460px]">
-        <div className="rounded-[20px] sm:rounded-[24px] bg-white px-6 py-8 sm:px-12 sm:py-12 shadow-[0_18px_44px_rgba(60,50,35,0.10)]">
+        <div className="rounded-[20px] bg-white px-6 py-8 sm:rounded-[24px] sm:px-12 sm:py-12">
           {children}
         </div>
       </div>

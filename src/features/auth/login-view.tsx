@@ -4,7 +4,6 @@ import * as React from "react";
 import { useActionState } from "react";
 import {
   AuthShell,
-  BrandMark,
   BottomLinks,
   HelpText,
   Input,
@@ -28,7 +27,6 @@ export function LoginView({ next }: { next: string }) {
 
   return (
     <AuthShell>
-      <BrandMark />
       <PageTitle title="로그인" desc="이메일 아이디로 로그인하세요." />
 
       <form action={formAction}>
