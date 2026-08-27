@@ -1,10 +1,8 @@
-import Link from "next/link";
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { getCurrentUser } from "@/lib/auth/session";
-import { AuthCard } from "@/features/auth/auth-card";
-import { SignupForm } from "@/features/auth/signup-form";
+import { SignupView } from "@/features/auth/signup-view";
 
 export const metadata: Metadata = { title: "회원가입 | 한평생 바로취업" };
 
@@ -22,22 +20,5 @@ export default async function SignupPage({
   const user = await getCurrentUser();
   if (user) redirect(next);
 
-  const loginHref = `/login?next=${encodeURIComponent(next)}`;
-
-  return (
-    <AuthCard
-      title="회원가입"
-      description="가입 후 직업진단, 채용공고, 지원제도를 이용할 수 있습니다."
-      footer={
-        <>
-          이미 계정이 있으신가요?{" "}
-          <Link href={loginHref} className="font-medium text-brand-blue-600 hover:underline">
-            로그인
-          </Link>
-        </>
-      }
-    >
-      <SignupForm next={next} />
-    </AuthCard>
-  );
+  return <SignupView next={next} />;
 }

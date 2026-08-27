@@ -1,12 +1,13 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { getSmsProvider } from "@/lib/sms";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { validateSignup } from "./signup-validation";
-import { normalizePhone } from "@/lib/utils/phone";
+import { normalizePhone, phoneMatchCandidates } from "@/lib/utils/phone";
 import { logActivityEvent } from "@/lib/activity/event-logger";
 import { ensureUserProfile, applyAcquisitionTouch } from "@/services/auth-identity.service";
 import { linkAnonymousCareraDataToUserSafe } from "./anonymous-merge";
@@ -29,13 +30,6 @@ function syntheticEmailFromPhone(phoneDigits: string): string {
 function extractPhoneDigits(input: string): string | null {
   const digits = input.replace(/[^0-9]/g, "");
   return /^01[016789][0-9]{7,8}$/.test(digits) ? digits : null;
-}
-
-async function getOrigin(): Promise<string> {
-  const h = await headers();
-  const proto = h.get("x-forwarded-proto") ?? "http";
-  const host = h.get("host") ?? "localhost:3000";
-  return `${proto}://${host}`;
 }
 
 async function getAnonymousIdFromCookie(): Promise<string | undefined> {
@@ -78,6 +72,22 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
 
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors };
+  }
+
+  // 화면에서 휴대폰 인증을 마쳤는지 서버에서 다시 확인한다 (클라이언트 우회 방지).
+  // SMS 미설정 개발 환경에서는 인증 없이 가입을 막지 않기 위해 provider 유무로 판단한다.
+  const phoneVerificationId = String(formData.get("phoneVerificationId") ?? "");
+  const smsEnabled = getSmsProvider() !== null && process.env.NODE_ENV === "production";
+  if (smsEnabled) {
+    const { consumePhoneVerification } = await import("@/services/phone-verification.service");
+    const verified = await consumePhoneVerification({
+      verificationId: phoneVerificationId,
+      phone: phoneRaw,
+      purpose: "signup",
+    });
+    if (!verified) {
+      return { fieldErrors: { phone: "휴대폰 인증을 완료해주세요." } };
+    }
   }
 
   await logActivityEvent({
@@ -204,7 +214,7 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
       const { data: profileRow } = await admin
         .from("profiles")
         .select("email")
-        .eq("phone", phoneDigits)
+        .in("phone", phoneMatchCandidates(phoneDigits))
         .not("email", "is", null)
         .limit(1)
         .maybeSingle();
@@ -258,59 +268,4 @@ export async function signOutAction(): Promise<void> {
     await supabase.auth.signOut();
   }
   redirect("/");
-}
-
-export async function requestPasswordResetAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const email = String(formData.get("email") ?? "").trim().toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return { fieldErrors: { email: "올바른 이메일 형식이 아닙니다." } };
-  }
-
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return { error: "비밀번호 재설정 서비스를 사용할 수 없습니다." };
-  }
-
-  const origin = await getOrigin();
-  // 존재하지 않는 이메일이라도 동일한 안내를 보여준다 (이메일 존재 여부 노출 방지).
-  await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/confirm?type=recovery&next=${encodeURIComponent("/reset-password")}`,
-  });
-
-  await logActivityEvent({
-    eventType: "password_reset_requested",
-    entityType: "career_profile",
-    metadata: {},
-  });
-
-  return { message: "비밀번호 재설정 메일을 발송했습니다. 메일함을 확인해주세요." };
-}
-
-export async function updatePasswordAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
-  const password = String(formData.get("password") ?? "");
-  const passwordConfirm = String(formData.get("passwordConfirm") ?? "");
-
-  if (password.length < 8 || !/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) {
-    return { fieldErrors: { password: "비밀번호는 영문/숫자를 포함해 8자 이상이어야 합니다." } };
-  }
-  if (password !== passwordConfirm) {
-    return { fieldErrors: { passwordConfirm: "비밀번호가 일치하지 않습니다." } };
-  }
-
-  const supabase = await createServerSupabaseClient();
-  if (!supabase) {
-    return { error: "비밀번호 변경 서비스를 사용할 수 없습니다." };
-  }
-
-  const { data: sessionData } = await supabase.auth.getUser();
-  if (!sessionData.user) {
-    return { error: "인증 링크가 만료되었습니다. 비밀번호 재설정을 다시 요청해주세요." };
-  }
-
-  const { error } = await supabase.auth.updateUser({ password });
-  if (error) {
-    return { error: "비밀번호 변경 중 문제가 발생했습니다. 다시 시도해주세요." };
-  }
-
-  return { message: "비밀번호가 변경되었습니다. 새 비밀번호로 로그인해주세요." };
 }

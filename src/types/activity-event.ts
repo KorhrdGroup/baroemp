@@ -47,6 +47,8 @@ export const KNOWN_ACTIVITY_EVENT_TYPES = [
   "logout",
   "profile_updated",
   "password_reset_requested",
+  "find_id_completed",
+  "password_reset_completed",
   // STEP 7: 이력서/자기소개서 Builder
   "resume_created",
   "resume_updated",

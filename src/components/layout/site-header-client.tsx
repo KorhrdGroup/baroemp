@@ -4,15 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isAuthPath } from "@/lib/auth/redirect";
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { mainNavItems, siteConfig } from "@/lib/site-config";
 import { Logo } from "./logo";
 import { cn } from "@/lib/utils";
@@ -117,78 +110,95 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
             </Button>
           )}
 
-          <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden" aria-label="메뉴 열기">
-                <Menu className="size-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-72">
-              <SheetHeader>
-                <SheetTitle>{siteConfig.name}</SheetTitle>
-              </SheetHeader>
-              <nav className="mt-2 flex flex-col gap-1 px-4">
-                {mainNavItems.map((item) => {
-                  const current = isCurrentNav(item.href);
-                  return (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setMobileOpen(false)}
-                      aria-current={current ? "page" : undefined}
-                      className={cn(
-                        "rounded-lg px-3 py-3 text-body-2 hover:bg-brand-blue-50",
-                        current ? "font-semibold text-brand-blue-600" : "font-medium text-slate-700",
-                      )}
-                    >
-                      {item.label}
-                    </Link>
-                  );
-                })}
-                <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
-                  {user ? (
-                    <>
-                      {isAdmin && (
-                        <Button variant="outline" asChild>
-                          <Link href="/admin" onClick={() => setMobileOpen(false)}>
-                            관리자
-                          </Link>
-                        </Button>
-                      )}
-                      <Button variant="outline" asChild>
-                        <Link href="/mypage" onClick={() => setMobileOpen(false)}>
-                          마이페이지
-                        </Link>
-                      </Button>
-                      <form action={signOutAction}>
-                        <Button type="submit" className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
-                          로그아웃
-                        </Button>
-                      </form>
-                    </>
-                  ) : (
-                    <>
-                      <Button variant="outline" asChild>
-                        <Link href={loginHref} onClick={() => setMobileOpen(false)}>
-                          로그인
-                        </Link>
-                      </Button>
-                      {/*
-                        회원가입도 로그인 화면으로 보낸다. 가입은 그 화면 하단 링크에서
-                        이어지므로 진입점을 하나로 모은다.
-                      */}
-                      <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                        <Link href={loginHref} onClick={() => setMobileOpen(false)}>
-                          회원가입
-                        </Link>
-                      </Button>
-                    </>
-                  )}
-                </div>
-              </nav>
-            </SheetContent>
-          </Sheet>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="lg:hidden"
+            aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
+            aria-expanded={mobileOpen}
+            aria-controls="mobile-menu"
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
+          </Button>
         </div>
+      </div>
+
+      {/*
+       * 모바일 메뉴. 헤더(로고)는 그대로 두고 그 아래로 펼쳐진다.
+       *
+       * absolute + top-full 로 헤더 아래에 겹쳐 띄운다. 문서 흐름에 두면 열 때마다
+       * 아래 콘텐츠가 통째로 밀려 화면이 출렁인다.
+       * 높이를 애니메이션하면(max-height/grid-rows) 콘텐츠 높이와 어긋나 덜컥거리므로,
+       * 레이아웃에 관여하지 않는 opacity+transform 으로만 부드럽게 내린다.
+       * 닫혔을 때는 invisible 로 키보드 포커스에서도 빠진다.
+       */}
+      <div
+        id="mobile-menu"
+        className={cn(
+          "absolute inset-x-0 top-full origin-top transition-[opacity,transform,visibility] duration-200 ease-out lg:hidden",
+          mobileOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0",
+        )}
+      >
+        <nav className="mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-4 py-3 shadow-lg sm:px-6">
+        {mainNavItems.map((item) => {
+          const current = isCurrentNav(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              onClick={() => setMobileOpen(false)}
+              aria-current={current ? "page" : undefined}
+              className={cn(
+                "rounded-lg px-3 py-3 text-body-2 hover:bg-brand-blue-50",
+                current ? "font-semibold text-brand-blue-600" : "font-medium text-slate-700",
+              )}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+        <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
+          {user ? (
+            <>
+              {isAdmin && (
+                <Button variant="outline" asChild>
+                  <Link href="/admin" onClick={() => setMobileOpen(false)}>
+                    관리자
+                  </Link>
+                </Button>
+              )}
+              <Button variant="outline" asChild>
+                <Link href="/mypage" onClick={() => setMobileOpen(false)}>
+                  마이페이지
+                </Link>
+              </Button>
+              <form action={signOutAction}>
+                <Button type="submit" className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
+                  로그아웃
+                </Button>
+              </form>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" asChild>
+                <Link href={loginHref} onClick={() => setMobileOpen(false)}>
+                  로그인
+                </Link>
+              </Button>
+              {/*
+                회원가입도 로그인 화면으로 보낸다. 가입은 그 화면 하단 링크에서
+                이어지므로 진입점을 하나로 모은다.
+              */}
+              <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                <Link href={loginHref} onClick={() => setMobileOpen(false)}>
+                  회원가입
+                </Link>
+              </Button>
+            </>
+          )}
+        </div>
+        </nav>
       </div>
     </header>
   );
