@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResumeAgentPicker, type ResumeAgentOption } from "./resume-agent-picker";
 import { AiButton } from "@/components/common/ai-button";
@@ -41,6 +42,7 @@ import {
   saveResumeAction,
   trackResumeExportedAction,
 } from "./resume-actions";
+import { calculateResumeCompleteness } from "@/lib/resume/completeness";
 import { ResumePreview } from "./resume-preview";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
@@ -209,6 +211,14 @@ export function ResumeEditor({
     } as ResumeDetail;
   }
 
+  /*
+    완성도는 저장할 때 서버가 다시 계산하지만, 채우는 즉시 반응해야 진행이 보인다.
+    서버와 같은 함수(calculateResumeCompleteness)에 현재 입력값을 그대로 넣어
+    두 값이 어긋나지 않게 한다. 가중치가 0인 항목(프로젝트·대외활동)은 애초에
+    빠져 있어 필수 항목만 센다.
+  */
+  const liveCompleteness = calculateResumeCompleteness(currentPreviewDetail());
+
   function handleSave(): Promise<ResumeDetail> {
     return new Promise((resolve, reject) => {
       startSave(async () => {
@@ -352,9 +362,6 @@ export function ResumeEditor({
               className="mt-1"
             />
           </div>
-          <Badge variant="outline" className="rounded-full">
-            완성도 {detail.resume.completeness}%
-          </Badge>
         </div>
 
         {reviewResult && (
@@ -986,7 +993,25 @@ export function ResumeEditor({
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
           </Button>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+
+          {/*
+            완성도는 저장 버튼 옆에서 진행 막대로 보여준다. 상단 배지로 두면
+            한참 스크롤한 뒤에는 보이지 않아 얼마나 남았는지 알 수 없었다.
+            남은 항목 이름을 함께 적어 다음에 무엇을 채울지 바로 알게 한다.
+          */}
+          <div className="mx-4 hidden min-w-0 flex-1 sm:block">
+            <div className="flex items-center justify-between gap-2 text-label-2">
+              <span className="truncate text-slate-500">
+                {liveCompleteness.missing.length > 0
+                  ? `다음: ${liveCompleteness.missing[0].label}`
+                  : "필수 항목을 모두 채웠어요"}
+              </span>
+              <span className="shrink-0 font-semibold text-slate-600">{liveCompleteness.score}%</span>
+            </div>
+            <Progress value={liveCompleteness.score} className="mt-1 h-1.5" />
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
             {saveMessage && <span className="shrink-0 text-label-2 text-slate-400">{saveMessage}</span>}
             <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
               <Eye className="size-4" /> 미리보기
