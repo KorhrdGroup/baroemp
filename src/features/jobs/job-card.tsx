@@ -89,10 +89,15 @@ export function JobCard({
           {salary.amount}
         </p>
 
+        {/*
+          채운 배지에도 투명 테두리를 준다. border-0 은 24.8px, 아웃라인 배지는
+          1px 테두리 때문에 26.8px 라, 배지 조합에 따라 카드가 2px 달라져
+          탭을 옮길 때 판이 덜컹거렸다. 배경은 border-box 로 칠해져 보이는 건 같다.
+        */}
         {(readiness || job.isBeginnerFriendly || midlifeRecommended || closingSoon) && (
           <div className="mt-3 flex flex-wrap items-center gap-1.5">
             {readiness && (
-              <Badge className={cn("rounded-full border-0 text-label-2 font-semibold", READINESS_BADGE_CLASS[readiness.level])}>
+              <Badge className={cn("rounded-full border border-transparent text-label-2 font-semibold", READINESS_BADGE_CLASS[readiness.level])}>
                 {readiness.label}
               </Badge>
             )}
@@ -108,7 +113,7 @@ export function JobCard({
             )}
             {/* 마감임박만 색을 유지한다. 나머지 태그는 공고의 분류지만 이건 시간 경고다. */}
             {closingSoon && (
-              <Badge className="rounded-full border-0 bg-rose-50 text-label-2 font-semibold text-rose-600">
+              <Badge className="rounded-full border border-transparent bg-rose-50 text-label-2 font-semibold text-rose-600">
                 마감임박
               </Badge>
             )}
