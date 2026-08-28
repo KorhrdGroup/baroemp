@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
-import { ResumeSessionBanner } from "@/components/common/resume-session-banner";
+import { ResumeSessionDialog } from "@/components/common/resume-session-dialog";
 import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, REGION_LABELS } from "@/lib/labels";
 import {
   getResumableSupportSessionAction,
@@ -510,19 +510,9 @@ const INFO_ITEMS = [
 
 const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지역 지원제도", "지원 가능성 등급", "신청 방법과 서류"];
 
-function SupportIntro({
-  onStart,
-  loading,
-  resumeBanner,
-}: {
-  onStart: () => void;
-  loading: boolean;
-  /** 하다 만 진단이 있을 때 히어로 위에 띄우는 이어하기 안내 */
-  resumeBanner?: React.ReactNode;
-}) {
+function SupportIntro({ onStart, loading }: { onStart: () => void; loading: boolean }) {
   return (
     <IntroHero
-      beforeContent={resumeBanner}
       icon={Coins}
       title="놓치고 있는 취업·교육 혜택을 찾아보세요"
       description={
@@ -594,16 +584,6 @@ export function SupportFlow({
     void handleStart();
   }, [autoStart]);
 
-  // 소개 화면에 머무는 동안 하다 만 진단이 있는지 한 번만 확인한다.
-  const resumeCheckedRef = useRef(false);
-  useEffect(() => {
-    if (phase !== "intro" || autoStart || resumeCheckedRef.current) return;
-    resumeCheckedRef.current = true;
-    void getResumableSupportSessionAction({ anonymousId: getOrCreateAnonymousId() || undefined })
-      .then(setResumable)
-      .catch(() => {});
-  }, [phase, autoStart]);
-
   /** 하다 만 진단을 이어서 진행한다 - 저장된 답변을 불러오고 첫 미답변 문항으로 이동한다. */
   function handleResume() {
     if (!resumable) return;
@@ -616,6 +596,22 @@ export function SupportFlow({
     setPhase("wizard");
   }
 
+  /** 이어하기 확인 없이 새로 시작한다 (팝업에서 "처음부터 다시"를 고른 경우). */
+  async function handleStartFresh() {
+    setLoadingPrefill(true);
+    try {
+      const anonymousId = getOrCreateAnonymousId();
+      const prefill = await getSupportAssessmentPrefillAction({ anonymousId: anonymousId || undefined });
+      setAnswers((prev) => ({ ...prev, ...prefill }));
+    } catch {
+      // 프리필 실패는 진단 진행을 막지 않는다 - 빈 값으로 시작한다.
+    } finally {
+      setSessionId(undefined);
+      setLoadingPrefill(false);
+      setPhase("wizard");
+    }
+  }
+
   async function handleStart() {
     // 소개 화면은 비로그인도 볼 수 있다. 진단 결과를 계정에 남기므로
     // 시작하는 시점에 로그인으로 보내고, 끝나면 곧바로 시작 지점으로 돌아온다.
@@ -626,6 +622,20 @@ export function SupportFlow({
       return;
     }
     setLoadingPrefill(true);
+    // 하다 만 진단이 있으면 새로 시작하기 전에 팝업으로 물어본다.
+    try {
+      const found = await getResumableSupportSessionAction({
+        anonymousId: getOrCreateAnonymousId() || undefined,
+      });
+      if (found) {
+        setResumable(found);
+        setLoadingPrefill(false);
+        return;
+      }
+    } catch {
+      // 조회 실패는 진단 시작을 막지 않는다 - 새로 시작한다.
+    }
+
     try {
       const anonymousId = getOrCreateAnonymousId();
       const prefill = await getSupportAssessmentPrefillAction({ anonymousId: anonymousId || undefined });
@@ -649,20 +659,26 @@ export function SupportFlow({
       );
     }
     return (
-      <SupportIntro
-        onStart={() => void handleStart()}
-        loading={loadingPrefill}
-        resumeBanner={
-          resumable ? (
-            <ResumeSessionBanner
-              onResume={handleResume}
-              progressLabel={`${STEPS.length}문항 중 ${
-                STEPS.filter((st) => isStepFilled(st, resumable.answers)).length
-              }문항`}
-            />
-          ) : null
-        }
-      />
+      <>
+        <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} />
+        <ResumeSessionDialog
+          open={Boolean(resumable)}
+          onOpenChange={(open) => {
+            if (!open) setResumable(null);
+          }}
+          progressLabel={
+            resumable
+              ? `${STEPS.length}문항 중 ${STEPS.filter((st) => isStepFilled(st, resumable.answers)).length}문항`
+              : undefined
+          }
+          busy={loadingPrefill}
+          onResume={handleResume}
+          onRestart={() => {
+            setResumable(null);
+            void handleStartFresh();
+          }}
+        />
+      </>
     );
   }
 

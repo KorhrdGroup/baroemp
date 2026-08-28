@@ -19,8 +19,6 @@ export interface IntroHeroProps {
   highlightTitle: string;
   highlights: string[];
   note: ReactNode;
-  /** 히어로 위에 먼저 보여줄 내용 (예: 하다 만 진단 이어하기 안내) */
-  beforeContent?: ReactNode;
 }
 
 export function IntroHero({
@@ -34,11 +32,9 @@ export function IntroHero({
   highlightTitle,
   highlights,
   note,
-  beforeContent,
 }: IntroHeroProps) {
   return (
     <>
-      {beforeContent ? <div className="px-4 pt-4 sm:px-6 lg:px-8">{beforeContent}</div> : null}
       {/* pb는 CTA 바가 겹쳐 올라올 자리다. 아래 카드의 -mt와 짝을 이룬다. */}
       <section className="relative overflow-hidden bg-gov-surface pb-37 sm:pb-28">
         {/* 홈 히어로와 같은 밝은 파랑 한 갈래. 색을 여러 갈래로 섞으면 위에 얹히는 흰 요소가 묻힌다. */}

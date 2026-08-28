@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { AssessmentIntro } from "@/features/assessment/assessment-intro";
 import { AssessmentAutoStart } from "@/features/assessment/assessment-auto-start";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
-import { findResumableSession } from "@/features/assessment-engine/assessment-service";
-import { ResumeSessionBanner } from "@/components/common/resume-session-banner";
 
 export const metadata: Metadata = {
   title: "내게 맞는 직업 찾기 | 한평생 바로취업",
@@ -31,22 +29,7 @@ export default async function AssessmentPage({
   // 로그인할 이유도 생기지 않는다. 시작 버튼을 누르는 순간 로그인으로 보낸다.
   const user = await getCurrentUser();
 
-  // 하다 만 진단이 있으면 처음부터 다시 하지 않도록 이어하기를 먼저 안내한다.
-  const resumable = user ? await findResumableSession({ userId: user.id }) : null;
-
+  // 이어하기 여부는 시작 버튼을 누르는 순간 팝업으로 묻는다 (StartAssessmentButton).
   // 히어로가 화면 폭을 꽉 채우므로 페이지에서 폭을 제한하지 않는다.
-  return (
-    <AssessmentIntro
-      isLoggedIn={Boolean(user)}
-      resumeBanner={
-        resumable ? (
-          <ResumeSessionBanner
-            href={`/assessment/${resumable.id}`}
-            progressLabel={`${resumable.totalSteps}문항 중 ${resumable.currentStep}문항`}
-            updatedAt={resumable.updatedAt}
-          />
-        ) : null
-      }
-    />
-  );
+  return <AssessmentIntro isLoggedIn={Boolean(user)} />;
 }

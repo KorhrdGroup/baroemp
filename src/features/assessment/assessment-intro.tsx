@@ -16,17 +16,9 @@ const INFO_ITEMS = [
   { icon: Sparkles, label: "결과 즉시 확인" },
 ];
 
-export function AssessmentIntro({
-  isLoggedIn = true,
-  resumeBanner,
-}: {
-  isLoggedIn?: boolean;
-  /** 하다 만 진단이 있을 때 소개 화면 위에 띄우는 안내 */
-  resumeBanner?: React.ReactNode;
-}) {
+export function AssessmentIntro({ isLoggedIn = true }: { isLoggedIn?: boolean }) {
   return (
     <IntroHero
-      beforeContent={resumeBanner}
       icon={Briefcase}
       title="지금 나에게 맞는 일은 무엇일까요?"
       description={
