@@ -68,10 +68,15 @@ export function JobCard({
       >
         {/*
           지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
-          높이를 늘려 잡지 않는다. 찜 버튼(size-9)은 top-2 에 놓여 아래끝이 44px 이고
-          제목은 48px 에서 시작해 겹치지 않는다.
+
+          찜 버튼은 버튼 중첩을 피하려 카드 Link 밖에 두는데, 그러면 흐름에서 빠져
+          카드 여백선과 어긋난 채 떠 보였다. 그렇다고 여백선(20px)에 맞추면
+          아래끝이 제목 첫 줄을 침범한다.
+
+          이 줄 높이를 버튼과 같은 32px(min-h-8)로 잡아 버튼이 이 줄을 그대로
+          채우게 한다. 버튼은 카드 여백선에 맞고(top-5 right-5) 제목과도 겹치지 않는다.
         */}
-        <div className="flex items-center justify-between gap-2 pr-10">
+        <div className="flex min-h-8 items-center justify-between gap-2 pr-10">
           <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
         </div>
 
@@ -160,7 +165,7 @@ export function JobCard({
         jobCategory={job.jobCategory}
         isAuthenticated={isAuthenticated}
         initialBookmarked={isBookmarked}
-        className="absolute right-3 top-2"
+        className="absolute right-5 top-5"
       />
     </div>
   );
