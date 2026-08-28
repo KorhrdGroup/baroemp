@@ -1,4 +1,4 @@
--- 0050_job_category_codes.sql
+-- 0051_job_category_codes.sql
 -- 워크넷 직종코드 ↔ 직종명 참조 표.
 --
 -- 채용공고 목록 API는 직종코드(jobsCd)만 내려주고 이름을 주지 않는다. 그래서 관리자 통계에
