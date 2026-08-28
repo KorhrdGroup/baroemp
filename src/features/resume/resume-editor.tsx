@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Check, Eye, Loader2, Pencil, Plus, Printer, SlidersHorizontal, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,20 +12,15 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResumeAgentPicker, type ResumeAgentOption } from "./resume-agent-picker";
 import {
+  EXTRA_SECTION_CODES,
   isRequiredSection,
   isSectionFilled,
   resolveResumeSections,
   resumeSectionLabel,
+  type ResumeSectionOption,
 } from "@/lib/resume/completeness";
 import { AiButton } from "@/components/common/ai-button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -119,11 +114,7 @@ const GRADUATION_STATUSES = ["졸업", "졸업예정", "재학중", "휴학", "�
  * 교육 이수는 여기 두지 않는다 - 전용 "교육/훈련" 섹션이 과정명과 교육기관을
  * 따로 받으므로, 여기에도 두면 같은 내용을 두 군데 쓰게 된다.
  */
-/**
- * "봉사·수상 등 추가 경력" 카드 하나가 PROJECT와 ACTIVITY 두 항목을 함께 받는다.
- * 왼쪽 목록에서는 이 둘을 한 줄로 묶어 보여준다.
- */
-const EXTRA_SECTION_CODES = ["PROJECT", "ACTIVITY"];
+/** 봉사·수상 카드 한 줄(PROJECT + ACTIVITY)을 목록에서 가리키는 이름. */
 const EXTRA_SECTION_KEY = "EXTRA";
 
 const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
@@ -142,7 +133,7 @@ export function ResumeEditor({
   initialDetail: ResumeDetail;
   templates?: ResumeAgentOption[];
   /** 담을 수 있는 항목 전체. 편집 중에도 항목을 넣고 뺄 수 있게 한다. */
-  sectionOptions?: { code: string; label: string; required: boolean }[];
+  sectionOptions?: ResumeSectionOption[];
 }) {
   const [detail, setDetail] = useState(initialDetail);
   const resume = detail.resume;
@@ -175,11 +166,44 @@ export function ResumeEditor({
     return list;
   }, [sectionCodes]);
 
+  /** 기본정보는 맨 위에 고정이라, 그 아래부터 자리를 옮길 수 있다. */
+  const firstMovableIndex = navItems.findIndex((i) => !i.codes.includes("BASIC_INFO"));
+
+  /** 아직 안 담은 항목. 목록 아래에 두어 무엇을 더 담을 수 있는지 보이게 한다. */
+  const addableSections = sectionOptions.filter((o) => !o.codes.some((c) => sectionCodes.includes(c)));
+
+  /**
+   * 항목 빼기. 적어둔 내용은 지우지 않는다 - 다시 담으면 그대로 있다.
+   * 봉사·수상 한 줄은 PROJECT/ACTIVITY 둘을 함께 받으므로 둘 다 뺀다.
+   */
+  function removeSectionItem(item: { codes: string[] }) {
+    setSectionCodes((prev) => prev.filter((c) => !item.codes.includes(c)));
+  }
+
+  /** 항목 순서 옮기기. 화면 목록과 인쇄물의 순서가 이 배열 하나로 정해진다. */
+  function moveSectionItem(item: { codes: string[] }, direction: -1 | 1) {
+    setSectionCodes((prev) => {
+      const from = prev.findIndex((c) => item.codes.includes(c));
+      if (from < 0) return prev;
+      // 한 칸 옆이 같은 줄(봉사·수상)에 묶인 코드면 그 줄 전체를 건너뛴다.
+      let to = from + direction;
+      while (to >= 0 && to < prev.length && item.codes.includes(prev[to])) to += direction;
+      if (to < 0 || to >= prev.length) return prev;
+      // 기본정보 위로는 아무것도 올리지 않는다. 화면에서도 막지만 값 쪽에서도 지킨다.
+      if (prev[to] === "BASIC_INFO") return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }
+
   /** 한 번에 한 항목만 보여준다. 여덟 카드가 한 화면에 늘어서면 어디부터 쓸지 정하다 지친다. */
   const [activeKey, setActiveKey] = useState<string | null>(null);
   const activeItem = navItems.find((i) => i.key === activeKey) ?? navItems[0];
   const showSection = (code: string) => Boolean(activeItem?.codes.includes(code));
-  const [sectionPickerOpen, setSectionPickerOpen] = useState(false);
+  /** 순서를 바꾸는 중인지. 켜면 담긴 항목마다 위/아래 버튼이 나온다. */
+  const [reordering, setReordering] = useState(false);
 
   const [isChangingTemplate, startTemplateChange] = useTransition();
 
@@ -510,52 +534,142 @@ export function ResumeEditor({
           좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
         */}
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-          <nav className="rounded-xl bg-white p-3 lg:sticky lg:top-24 lg:w-60 lg:shrink-0">
-            <p className="px-2 pb-2 text-label-2 font-semibold text-slate-400">항목 {navItems.length}개</p>
-            <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
-              {navItems.map((item, idx) => {
-                const filled = isNavItemFilled(item);
-                const isActive = item.key === activeItem?.key;
-                return (
-                  <li key={item.key} className="shrink-0 lg:shrink">
-                    <button
-                      type="button"
-                      onClick={() => setActiveKey(item.key)}
-                      aria-current={isActive}
-                      className={cn(
-                        // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
-                        "flex w-full max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 transition-colors lg:max-w-none",
-                        isActive
-                          ? "bg-brand-blue-50 font-semibold text-brand-blue-700"
-                          : "text-slate-600 hover:bg-slate-50",
-                      )}
-                    >
-                      <span
+          {/*
+            사이드바 한 곳에서 이력서의 상태(완성도)와 구성(항목)을 함께 본다.
+            완성도만 아래 고정바에 두면 "얼마나 남았는지"와 "무엇을 더 담을 수 있는지"가
+            화면 양 끝으로 갈라져, 완성도를 올리려고 항목을 손보는 흐름이 끊긴다.
+          */}
+          <nav className="rounded-xl bg-white p-4 lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-label-1 font-bold text-slate-900">이력서 완성도</p>
+              <p className="text-body-1 font-bold text-brand-blue-600">{liveCompleteness.score}%</p>
+            </div>
+            <Progress value={liveCompleteness.score} className="mt-2 h-2" />
+            <p className="mt-2 text-label-2 text-slate-500">
+              {liveCompleteness.missing.length > 0
+                ? `다음은 ${liveCompleteness.missing[0].label} 차례예요.`
+                : `${form.name ? `${form.name} 회원님의 ` : ""}이력서가 다 채워졌어요!`}
+            </p>
+
+            <div className="mt-4 border-t border-border pt-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="px-1 text-label-2 font-semibold text-slate-400">담긴 항목 {navItems.length}개</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-label-2 text-slate-500"
+                  onClick={() => setReordering((v) => !v)}
+                >
+                  {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
+                </Button>
+              </div>
+
+              <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+                {navItems.map((item, idx) => {
+                  const filled = isNavItemFilled(item);
+                  const isActive = item.key === activeItem?.key;
+                  const fixed = item.codes.includes("BASIC_INFO");
+                  return (
+                    <li key={item.key} className="shrink-0 lg:shrink">
+                      <div
                         className={cn(
-                          "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
-                          filled
-                            ? "bg-brand-blue-600 text-white"
-                            : isActive
-                              ? "bg-white text-brand-blue-700 ring-1 ring-brand-blue-200"
-                              : "bg-slate-100 text-slate-400",
+                          "group flex items-center rounded-lg transition-colors",
+                          isActive ? "bg-brand-blue-50" : "hover:bg-slate-50",
                         )}
                       >
-                        {filled ? <Check className="size-3.5" /> : idx + 1}
-                      </span>
-                      <span className="truncate">{item.label}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="mt-2 w-full justify-start text-slate-600"
-              onClick={() => setSectionPickerOpen(true)}
-            >
-              <SlidersHorizontal className="size-4" /> 항목 고르기
-            </Button>
+                        <button
+                          type="button"
+                          onClick={() => setActiveKey(item.key)}
+                          aria-current={isActive}
+                          className={cn(
+                            // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
+                            "flex min-w-0 flex-1 max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 lg:max-w-none",
+                            isActive ? "font-semibold text-brand-blue-700" : "text-slate-600",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
+                              filled
+                                ? "bg-brand-blue-600 text-white"
+                                : isActive
+                                  ? "bg-white text-brand-blue-700 ring-1 ring-brand-blue-200"
+                                  : "bg-slate-100 text-slate-400",
+                            )}
+                          >
+                            {filled ? <Check className="size-3.5" /> : idx + 1}
+                          </span>
+                          <span className="truncate">{item.label}</span>
+                        </button>
+
+                        {/*
+                          기본정보는 이력서가 이력서이기 위한 최소한이라 뺄 수 없고, 자리도 맨 위에
+                          고정한다. 이름과 연락처가 문서 중간에 오면 이력서로 안 읽힌다.
+                        */}
+                        {fixed ? (
+                          <span className="shrink-0 pr-3 text-label-2 text-slate-400">필수</span>
+                        ) : reordering ? (
+                          <span className="flex shrink-0 items-center pr-1">
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              aria-label={`${item.label} 위로`}
+                              disabled={idx === firstMovableIndex}
+                              onClick={() => moveSectionItem(item, -1)}
+                            >
+                              <ArrowUp className="size-3.5 text-slate-400" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon-xs"
+                              aria-label={`${item.label} 아래로`}
+                              disabled={idx === navItems.length - 1}
+                              onClick={() => moveSectionItem(item, 1)}
+                            >
+                              <ArrowDown className="size-3.5 text-slate-400" />
+                            </Button>
+                          </span>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            className="mr-1.5 shrink-0"
+                            aria-label={`${item.label} 빼기`}
+                            onClick={() => removeSectionItem(item)}
+                          >
+                            <Minus className="size-4 text-slate-400" />
+                          </Button>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            {/*
+              뺀 항목은 목록에서 지우지 않고 아래로 내려둔다. 사라지면 다시 담을 방법을
+              찾아야 하고, 무엇을 더 담을 수 있는지도 알 수 없다.
+            */}
+            {addableSections.length > 0 && (
+              <div className="mt-4 border-t border-border pt-3">
+                <p className="px-1 pb-1 text-label-2 font-semibold text-slate-400">더 담을 수 있는 항목</p>
+                <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+                  {addableSections.map((option) => (
+                    <li key={option.code} className="shrink-0 lg:shrink">
+                      <button
+                        type="button"
+                        onClick={() => setSectionCodes((prev) => [...prev, option.code])}
+                        className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg py-2 pr-1.5 pl-2.5 text-left text-label-1 text-slate-500 transition-colors hover:bg-slate-50"
+                      >
+                        <span className="truncate">{option.label}</span>
+                        <Plus className="size-4 shrink-0 text-slate-400" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </nav>
 
           <div className="min-w-0 flex-1">
@@ -1238,16 +1352,23 @@ export function ResumeEditor({
             한참 스크롤한 뒤에는 보이지 않아 얼마나 남았는지 알 수 없었다.
             남은 항목 이름을 함께 적어 다음에 무엇을 채울지 바로 알게 한다.
           */}
+          {/*
+            완성도는 왼쪽 항목 목록 맨 위에 있다. 그 목록이 화면에 붙어 있는 넓은 화면에서는
+            여기까지 두면 같은 값이 두 군데 보인다. 목록이 위로 밀려 올라가는 좁은 화면에서만 둔다.
+          */}
+          {/* 바깥 칸은 넓은 화면에서도 자리를 지킨다. 통째로 감추면 오른쪽 버튼들이 왼쪽으로 몰린다. */}
           <div className="mx-4 hidden min-w-0 flex-1 sm:block">
-            <div className="flex items-center justify-between gap-2 text-label-2">
-              <span className="truncate text-slate-500">
-                {liveCompleteness.missing.length > 0
-                  ? `다음: ${liveCompleteness.missing[0].label}`
-                  : "필수 항목을 모두 채웠어요"}
-              </span>
-              <span className="shrink-0 font-semibold text-slate-600">{liveCompleteness.score}%</span>
+            <div className="lg:hidden">
+              <div className="flex items-center justify-between gap-2 text-label-2">
+                <span className="truncate text-slate-500">
+                  {liveCompleteness.missing.length > 0
+                    ? `다음: ${liveCompleteness.missing[0].label}`
+                    : "필수 항목을 모두 채웠어요"}
+                </span>
+                <span className="shrink-0 font-semibold text-slate-600">{liveCompleteness.score}%</span>
+              </div>
+              <Progress value={liveCompleteness.score} className="mt-1 h-1.5" />
             </div>
-            <Progress value={liveCompleteness.score} className="mt-1 h-1.5" />
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
@@ -1263,62 +1384,6 @@ export function ResumeEditor({
           </div>
         </div>
       </div>
-
-      {/*
-        담을 항목 고르기. 뺀 항목은 화면에서 사라지고 완성도에서도 빠진다.
-        적어둔 내용은 지우지 않는다 - 다시 담으면 그대로 있다.
-      */}
-      <Dialog open={sectionPickerOpen} onOpenChange={setSectionPickerOpen}>
-        <DialogContent className="print:hidden sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>이력서에 담을 항목</DialogTitle>
-            <DialogDescription>
-              뺀 항목은 이력서에 나오지 않고 완성도에도 세지 않아요. 적어둔 내용은 그대로 남습니다.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            {sectionOptions.map((option) => {
-              const picked = sectionCodes.includes(option.code);
-              const fixed = option.code === "BASIC_INFO";
-              return (
-                <button
-                  key={option.code}
-                  type="button"
-                  disabled={fixed}
-                  aria-pressed={picked}
-                  onClick={() =>
-                    setSectionCodes((prev) =>
-                      prev.includes(option.code) ? prev.filter((c) => c !== option.code) : [...prev, option.code],
-                    )
-                  }
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
-                    fixed ? "cursor-default" : "cursor-pointer hover:border-brand-blue-200",
-                    picked ? "border-brand-blue-600 bg-brand-blue-50" : "border-border bg-white",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "flex size-5 shrink-0 items-center justify-center rounded border",
-                      picked ? "border-brand-blue-600 bg-brand-blue-600" : "border-slate-300",
-                    )}
-                  >
-                    {picked && <Check className="size-3.5 text-white" />}
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block text-body-2 font-semibold text-slate-900">{option.label}</span>
-                    {(fixed || !option.required) && (
-                      <span className="mt-0.5 block text-label-2 text-slate-500">
-                        {fixed ? "이력서에 꼭 있어야 하는 항목이에요." : "없어도 완성도가 깎이지 않아요."}
-                      </span>
-                    )}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="print:hidden sm:max-w-3xl">

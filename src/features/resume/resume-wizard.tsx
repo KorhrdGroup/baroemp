@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import type { ResumeSectionOption } from "@/lib/resume/completeness";
 import { createResumeAction } from "./resume-actions";
 
 type Step = "template" | "sections" | "prefill";
@@ -43,13 +44,6 @@ export interface WizardResumeTemplate {
   name: string;
   description?: string;
   sections: string[];
-}
-
-export interface SectionOption {
-  code: string;
-  label: string;
-  /** 완성도에 세는 항목인지. 안 세는 항목은 "없어도 괜찮아요"로 알려준다. */
-  required: boolean;
 }
 
 /** 작성 시작 화면에서 보여줄 "불러올 내 정보". 서버가 실제로 채울 값과 같은 곳에서 온다. */
@@ -116,7 +110,7 @@ export function ResumeWizard({
 }: {
   templates: WizardResumeTemplate[];
   /** 고를 수 있는 항목 전체(모든 양식의 항목을 모은 것) */
-  sectionOptions: SectionOption[];
+  sectionOptions: ResumeSectionOption[];
   prefill: PrefillPreview;
   initialTitle?: string;
   targetJobId?: string;
@@ -171,9 +165,16 @@ export function ResumeWizard({
     goToStep("sections");
   }
 
-  function toggleSection(code: string) {
-    if (code === FIXED_SECTION) return;
-    setSections((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]));
+  /** 한 줄이 여러 코드를 함께 다룰 수 있어(봉사·수상) 담고 뺄 때 그 줄 전체를 다룬다. */
+  function isSectionPicked(option: ResumeSectionOption) {
+    return option.codes.some((c) => sections.includes(c));
+  }
+
+  function toggleSection(option: ResumeSectionOption) {
+    if (option.code === FIXED_SECTION) return;
+    setSections((prev) =>
+      isSectionPicked(option) ? prev.filter((c) => !option.codes.includes(c)) : [...prev, option.code],
+    );
   }
 
   function handleCreate() {
@@ -251,7 +252,7 @@ export function ResumeWizard({
   /* ── 1단계: 항목 고르기 ───────────────────────────────────────────────── */
 
   if (step === "sections") {
-    const picked = sectionOptions.filter((o) => sections.includes(o.code));
+    const picked = sectionOptions.filter(isSectionPicked);
 
     return (
       <WizardCard>
@@ -276,15 +277,15 @@ export function ResumeWizard({
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {sectionOptions.map((option) => {
-                  const isPicked = sections.includes(option.code);
-                  const recommended = template.sections.includes(option.code);
+                  const isPicked = isSectionPicked(option);
+                  const recommended = option.codes.some((c) => template.sections.includes(c));
                   const fixed = option.code === FIXED_SECTION;
                   return (
                     <button
                       key={option.code}
                       type="button"
                       disabled={fixed}
-                      onClick={() => toggleSection(option.code)}
+                      onClick={() => toggleSection(option)}
                       aria-pressed={isPicked}
                       className={cn(
                         "flex items-center gap-1 rounded-lg border px-3 py-1.5 text-label-1 transition-colors",
@@ -318,7 +319,7 @@ export function ResumeWizard({
                       variant="ghost"
                       size="sm"
                       className="shrink-0 text-slate-500"
-                      onClick={() => toggleSection(option.code)}
+                      onClick={() => toggleSection(option)}
                     >
                       <Trash2 className="size-3.5" /> 삭제
                     </Button>

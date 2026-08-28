@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { getResumeRepository, getResumeTemplateRepository } from "@/lib/repositories";
 import { getResumeDetail } from "@/services/resume.service";
-import { isRequiredSection, resumeSectionLabel } from "@/lib/resume/completeness";
+import { buildResumeSectionOptions } from "@/lib/resume/completeness";
 import { ResumeEditor } from "@/features/resume/resume-editor";
 
 export const metadata: Metadata = {
@@ -37,11 +37,7 @@ export default async function ResumeEditPage({
   }));
 
   // 편집 중에도 항목을 넣고 뺄 수 있게, 작성 시작 화면과 같은 목록을 내려준다.
-  const sectionOptions = [...new Set(ordered.flatMap((t) => t.sections))].map((code) => ({
-    code,
-    label: resumeSectionLabel(code),
-    required: isRequiredSection(code),
-  }));
+  const sectionOptions = buildResumeSectionOptions(ordered);
 
   return (
     // 입력칸이 흰색으로 도드라지도록 편집 화면만 회색 바탕을 깐다.
