@@ -31,7 +31,7 @@ function formatPeriod(start?: string, end?: string, isCurrent?: boolean): string
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-2 border-b-2 border-slate-800 pb-1 text-label-1 font-bold tracking-wide text-slate-900">
+    <h2 className="mb-3 border-b-2 border-slate-800 pb-1.5 text-label-1 font-bold tracking-wide text-slate-900">
       {children}
     </h2>
   );
@@ -50,7 +50,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
     switch (section) {
       case "BASIC_INFO":
         return (
-          <div key={section} className="mb-5 border-b border-slate-300 pb-4">
+          <div key={section} className="mb-8 border-b border-slate-300 pb-5">
             <div className="flex items-start justify-between gap-4">
               <div>
                 <p className="text-title-3 font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
@@ -83,17 +83,17 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "SUMMARY":
         if (!resume.summary) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>핵심 경력 / 한 줄 소개</SectionTitle>
-            <p className="text-label-1 text-slate-700">{resume.summary}</p>
+            <p className="text-label-1 leading-relaxed text-slate-700">{resume.summary}</p>
           </div>
         );
       case "EXPERIENCE":
         if (experiences.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>경력</SectionTitle>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {experiences.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -105,10 +105,10 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
                     <p className="text-label-2 text-slate-500">{formatPeriod(exp.startDate, exp.endDate, exp.isCurrent)}</p>
                   </div>
                   {exp.responsibilities && (
-                    <p className="mt-0.5 text-label-2 text-slate-700">담당업무: {exp.responsibilities}</p>
+                    <p className="mt-1 text-label-2 leading-relaxed text-slate-700">담당업무: {exp.responsibilities}</p>
                   )}
                   {exp.achievements && (
-                    <p className="mt-0.5 text-label-2 text-slate-700">주요성과: {exp.achievements}</p>
+                    <p className="mt-1 text-label-2 leading-relaxed text-slate-700">주요성과: {exp.achievements}</p>
                   )}
                 </div>
               ))}
@@ -118,9 +118,9 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "EDUCATION":
         if (educations.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>학력</SectionTitle>
-            <div className="space-y-1.5">
+            <div className="space-y-4">
               {educations.map((edu) => (
                 <div key={edu.id} className="flex flex-wrap items-baseline justify-between gap-2 text-label-2">
                   <p className="text-slate-800">
@@ -142,9 +142,9 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "QUALIFICATION":
         if (qualifications.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>보유 자격</SectionTitle>
-            <div className="space-y-1 text-label-2 text-slate-800">
+            <div className="space-y-2 text-label-2 text-slate-800">
               {qualifications.map((q) => (
                 <div key={q.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
@@ -160,9 +160,9 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "TRAINING":
         if (trainings.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>교육/훈련</SectionTitle>
-            <div className="space-y-1 text-label-2 text-slate-800">
+            <div className="space-y-2 text-label-2 text-slate-800">
               {trainings.map((t) => (
                 <div key={t.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
@@ -178,7 +178,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "SKILLS":
         if (skills.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>보유 스킬</SectionTitle>
             <p className="text-label-2 text-slate-800">{skills.map((s) => s.name).join(" · ")}</p>
           </div>
@@ -186,9 +186,9 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "PROJECT":
         if (projects.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>프로젝트</SectionTitle>
-            <div className="space-y-1.5 text-label-2 text-slate-800">
+            <div className="space-y-2.5 text-label-2 text-slate-800">
               {projects.map((p) => (
                 <div key={p.id}>
                   <p className="font-medium">
@@ -204,9 +204,9 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "ACTIVITY":
         if (activities.length === 0 && awards.length === 0 && languages.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>대외활동 / 수상 / 외국어</SectionTitle>
-            <div className="space-y-1 text-label-2 text-slate-800">
+            <div className="space-y-2 text-label-2 text-slate-800">
               {[...activities, ...awards, ...languages].map((item) => (
                 <div key={item.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
