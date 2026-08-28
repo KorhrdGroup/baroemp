@@ -181,6 +181,8 @@ export function ResumeEditor({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   // 미리보기는 입력 폭을 좁히지 않도록 팝업으로 띄운다.
   const [previewOpen, setPreviewOpen] = useState(false);
+  /** 마지막으로 저장한 내용의 스냅샷. 변경 여부를 이 값과 비교해 판단한다. */
+  const savedSnapshot = useRef<string | null>(null);
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
@@ -220,27 +222,45 @@ export function ResumeEditor({
   */
   const liveCompleteness = calculateResumeCompleteness(currentPreviewDetail());
 
+  /*
+    마지막으로 저장한 내용과 지금 입력이 같으면 저장할 것이 없다.
+    누를 수는 있는데 아무 일도 안 일어나면 저장이 안 된 건지 헷갈린다.
+  */
+  const currentPayload = JSON.stringify(buildSavePayload());
+  // 처음 그릴 때의 값을 기준점으로 잡는다. 아직 아무것도 고치지 않은 상태다.
+  savedSnapshot.current ??= currentPayload;
+  const isDirty = currentPayload !== savedSnapshot.current;
+
+  /**
+   * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
+   * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
+   */
+  function buildSavePayload() {
+    return {
+      resume: { id: resume.id, ...form },
+      educations: educations.map((e) => ({
+        ...stripKey(e),
+        admissionDate: toDbDate(e.admissionDate),
+        graduationDate: toDbDate(e.graduationDate),
+      })),
+      experiences: experiences.map((e) => ({
+        ...stripKey(e),
+        startDate: toDbDate(e.startDate),
+        endDate: toDbDate(e.endDate),
+      })),
+      qualifications: qualifications.map(stripKey),
+      trainings: trainings.map(stripKey),
+      skills: skills.map(stripKey),
+      items: items.map(stripKey),
+    };
+  }
+
   function handleSave(): Promise<ResumeDetail> {
     return new Promise((resolve, reject) => {
       startSave(async () => {
         try {
-          const saved = await saveResumeAction({
-            resume: { id: resume.id, ...form },
-            educations: educations.map((e) => ({
-              ...stripKey(e),
-              admissionDate: toDbDate(e.admissionDate),
-              graduationDate: toDbDate(e.graduationDate),
-            })),
-            experiences: experiences.map((e) => ({
-              ...stripKey(e),
-              startDate: toDbDate(e.startDate),
-              endDate: toDbDate(e.endDate),
-            })),
-            qualifications: qualifications.map(stripKey),
-            trainings: trainings.map(stripKey),
-            skills: skills.map(stripKey),
-            items: items.map(stripKey),
-          });
+          const payload = buildSavePayload();
+          const saved = await saveResumeAction(payload);
           setDetail(saved);
           setEducations(withKeys(saved.educations, "edu"));
           setExperiences(withKeys(saved.experiences, "exp"));
@@ -248,6 +268,12 @@ export function ResumeEditor({
           setTrainings(withKeys(saved.trainings, "train"));
           setSkills(withKeys(saved.skills, "skill"));
           setItems(withKeys(saved.items, "item"));
+          /*
+            여기서 바로 스냅샷을 찍으면 위 setState 들이 아직 반영되기 전이라
+            서버가 새로 부여한 id 가 빠진 값이 찍힌다. 비워두면 다음 렌더에서
+            저장된 상태 그대로 다시 잡힌다.
+          */
+          savedSnapshot.current = null;
           setSaveMessage(`저장 완료 · 완성도 ${saved.resume.completeness}%`);
           resolve(saved);
         } catch (err) {
@@ -1092,9 +1118,10 @@ export function ResumeEditor({
             <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
               <Eye className="size-4" /> 미리보기
             </Button>
-            <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
+            {/* 고친 것이 없으면 누를 수 있어도 아무 일도 일어나지 않아 저장 여부가 헷갈린다. */}
+            <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-              저장
+              {isSaving ? "저장" : isDirty ? "저장" : "저장됨"}
             </Button>
           </div>
         </div>
