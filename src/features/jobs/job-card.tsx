@@ -69,14 +69,11 @@ export function JobCard({
         {/*
           지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
 
-          찜 버튼은 버튼 중첩을 피하려 카드 Link 밖에 두는데, 그러면 흐름에서 빠져
-          카드 여백선과 어긋난 채 떠 보였다. 그렇다고 여백선(20px)에 맞추면
-          아래끝이 제목 첫 줄을 침범한다.
-
-          이 줄 높이를 버튼과 같은 32px(min-h-8)로 잡아 버튼이 이 줄을 그대로
-          채우게 한다. 버튼은 카드 여백선에 맞고(top-5 right-5) 제목과도 겹치지 않는다.
+          줄 높이를 늘려 잡지 않는다. 버튼(size-8) 높이에 맞춰 32px 로 벌리면
+          회사명과 제목 사이가 붕 떠 보인다. 대신 버튼을 회사명 글자의
+          세로 가운데(top-3.5)에 맞춰 이 줄과 짝지어 보이게 한다.
         */}
-        <div className="flex min-h-8 items-center justify-between gap-2 pr-10">
+        <div className="flex items-center justify-between gap-2 pr-10">
           <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
         </div>
 
@@ -89,8 +86,11 @@ export function JobCard({
           text-balance 는 두 줄 길이를 맞춰 마지막 줄에 한 단어만 남는 걸 막는다.
           둘을 같이 써야 한다 - balance 만 주면 오히려 단어 중간에서 끊는다.
           balance 를 모르는 브라우저는 break-keep 만 적용되어 그대로 쓸 만하다.
+
+          줄간격은 body-1 기본값이 120%(21.6px)라 두 줄이 붙어 보인다.
+          같은 시스템의 body-1-reading 과 같은 140%(25.2px)로 띄운다.
         */}
-        <h3 className="mt-2 line-clamp-2 break-keep text-balance text-body-1 font-bold text-slate-900 group-hover:underline">
+        <h3 className="mt-2 line-clamp-2 break-keep text-balance text-body-1 leading-[1.4] font-bold text-slate-900 group-hover:underline">
           {job.title}
         </h3>
 
@@ -171,7 +171,7 @@ export function JobCard({
         jobCategory={job.jobCategory}
         isAuthenticated={isAuthenticated}
         initialBookmarked={isBookmarked}
-        className="absolute right-5 top-5"
+        className="absolute right-5 top-3.5"
       />
     </div>
   );
