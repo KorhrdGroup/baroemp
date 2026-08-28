@@ -62,14 +62,16 @@ export function SupportBookmarkButton({
 
   if (variant === "full") {
     return (
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleClick}
-        disabled={pending}
-      >
+      <Button type="button" variant="outline" onClick={handleClick} disabled={pending}>
+        {/*
+          찜은 하단바에서 "지원하러 가기" 옆에 선다. 채운 파랑으로 두면 파란 버튼이
+          둘이 되어 어느 것이 주 동작인지 흐려진다. 흰 버튼으로 두고 찜한 상태만
+          책갈피를 파랗게 채워 알린다.
+        */}
+        <Bookmark
+          className={cn("size-4", bookmarked ? "fill-brand-blue-400 text-brand-blue-400" : "text-slate-400")}
+        />
         {bookmarked ? "찜 완료" : "찜하기"}
-        <Bookmark className={cn("size-4", bookmarked ? "fill-brand-blue-500 text-brand-blue-500" : "text-slate-400")} />
       </Button>
     );
   }
