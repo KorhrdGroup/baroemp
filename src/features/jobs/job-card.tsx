@@ -111,8 +111,15 @@ export function JobCard({
           </div>
         )}
 
-        {/* 지원금 카드와 같은 파이프 구분 메타 줄. 아이콘 없이 텍스트만 둬서 줄이 조용하다. */}
-        <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-4 text-label-1 font-medium text-slate-500">
+        {/*
+          지원금 카드와 같은 파이프 구분 메타 줄. 아이콘 없이 텍스트만 둬서 줄이 조용하다.
+
+          맞은 근거가 붙으면 두 줄, 없으면 한 줄이 되는데 카드 높이는 그 줄의
+          제일 큰 카드를 따라간다. 그래서 탭을 옮길 때마다 판 높이가 튀었다.
+          두 줄 자리를 늘 잡아 둔다: pt-4(1rem) + 19.6px 두 줄 + gap-y-1(0.25rem).
+          content-start 는 한 줄일 때 글자가 가운데로 내려앉지 않게 위에 붙인다.
+        */}
+        <div className="mt-auto flex min-h-[3.7rem] flex-wrap content-start items-center gap-x-2 gap-y-1 pt-4 text-label-1 font-medium text-slate-500">
           {matchReasonLabel && (
             <>
               <span className="text-brand-blue-600">✓ {matchReasonLabel}</span>
