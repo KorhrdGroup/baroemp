@@ -95,6 +95,17 @@ export interface ResumePrefillChoice {
   skills?: boolean;
 }
 
+/**
+ * 한 회원이 가질 수 있는 이력서 수.
+ *
+ * DB가 버거워서 두는 값이 아니다. 이력서 한 건을 저장할 때 도는 쿼리는 몇 건을 갖고
+ * 있든 똑같고, 목록도 한 번만 읽는다. 막는 이유는 화면이다 - 제목이 비슷한 이력서가
+ * 여러 개 쌓이면 어느 것이 어느 것인지 못 고른다.
+ */
+export const MAX_RESUMES_PER_USER = 10;
+
+export const RESUME_LIMIT_MESSAGE = `이력서는 ${MAX_RESUMES_PER_USER}개까지 만들 수 있어요. 쓰지 않는 이력서를 지우고 다시 시도해주세요.`;
+
 export async function createResumeFromTemplate(params: {
   userId: string;
   templateId: string;
@@ -116,6 +127,7 @@ export async function createResumeFromTemplate(params: {
   };
 
   const existing = await listResumesForUser(userId);
+  if (existing.length >= MAX_RESUMES_PER_USER) throw new Error(RESUME_LIMIT_MESSAGE);
   const isFirstResume = existing.length === 0;
 
   const resume = await getResumeRepository().create({

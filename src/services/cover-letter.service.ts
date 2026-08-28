@@ -27,6 +27,14 @@ export async function getCoverLetterDetail(coverLetterId: string): Promise<Cover
   return { coverLetter, sections, template: template ?? undefined };
 }
 
+/**
+ * 한 회원이 가질 수 있는 자기소개서 수.
+ * 공고마다 하나씩 쓰는 문서라 이력서보다 넉넉히 둔다. 이유는 이력서와 같다(화면).
+ */
+export const MAX_COVER_LETTERS_PER_USER = 20;
+
+export const COVER_LETTER_LIMIT_MESSAGE = `자기소개서는 ${MAX_COVER_LETTERS_PER_USER}개까지 만들 수 있어요. 쓰지 않는 자기소개서를 지우고 다시 시도해주세요.`;
+
 export async function createCoverLetterFromTemplate(params: {
   userId: string;
   templateId: string;
@@ -42,6 +50,9 @@ export async function createCoverLetterFromTemplate(params: {
   /** 작성 시작 화면에서 고른 재료 경험. 편집 화면에서 AI 초안 후보로 쓴다. */
   experienceBankIds?: string[];
 }): Promise<CoverLetterDetail> {
+  const existing = await listCoverLettersForUser(params.userId);
+  if (existing.length >= MAX_COVER_LETTERS_PER_USER) throw new Error(COVER_LETTER_LIMIT_MESSAGE);
+
   const template = await getCoverLetterTemplateRepository().findById(params.templateId);
 
   const coverLetter = await getCoverLetterRepository().create({

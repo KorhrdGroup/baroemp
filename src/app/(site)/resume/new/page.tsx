@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
 import { getResumeTemplateRepository, getJobRepository } from "@/lib/repositories";
-import { getResumePrefill } from "@/services/resume.service";
+import { getResumePrefill, listResumesForUser, MAX_RESUMES_PER_USER } from "@/services/resume.service";
 import { buildResumeSectionOptions } from "@/lib/resume/completeness";
 import { ResumeWizard } from "@/features/resume/resume-wizard";
 
@@ -18,14 +18,17 @@ export default async function ResumeNewPage({
   const user = await requireUser("/resume/new");
   const { job: targetJobId, occupation: targetOccupationId, title } = await searchParams;
 
-  const [templates, job, prefill] = await Promise.all([
+  const [templates, job, prefill, existing] = await Promise.all([
     getResumeTemplateRepository().findAll({ status: "active" }),
     targetJobId ? getJobRepository().findById(targetJobId) : Promise.resolve(null),
     getResumePrefill(user.id),
+    listResumesForUser(user.id),
   ]);
 
   const ordered = [...templates].sort((a, b) => a.orderIndex - b.orderIndex);
   if (ordered.length === 0) redirect("/resume");
+  // 주소로 바로 들어와도 상한이면 시작할 수 없다. 목록에 왜 못 만드는지 적혀 있다.
+  if (existing.length >= MAX_RESUMES_PER_USER) redirect("/resume");
 
   return (
     // 양식 고르기 화면은 짧아서, 회색 바탕을 화면 끝까지 깔아야 흰 띠가 안 남는다.
