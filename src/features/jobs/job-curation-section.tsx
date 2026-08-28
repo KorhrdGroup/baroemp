@@ -18,16 +18,22 @@ import {
  * (신규 3일 · 마감임박 7일 · 개인화 탭은 희망 직종/지역 후보군).
  * "자격 따면 열리는 공고"만 조건 이름이 회원마다 달라 화면에서 만든다.
  */
-const TABS: { key: JobCurationTab; label: string; description?: string }[] = [
-  { key: "new", label: "신규 일자리", description: "최근 3일 안에 올라온 공고예요." },
-  { key: "closing_soon", label: "마감임박", description: "일주일 안에 마감되는 공고예요." },
-  { key: "matched", label: "맞춤 추천", description: "희망 직종·지역을 기준으로 잘 맞는 순서로 골랐어요." },
+const TABS: { key: JobCurationTab; emoji: string; label: string; description?: string }[] = [
+  { key: "new", emoji: "✨", label: "신규 일자리", description: "최근 3일 안에 올라온 공고예요." },
+  { key: "closing_soon", emoji: "⏰", label: "마감임박", description: "일주일 안에 마감되는 공고예요." },
+  {
+    key: "matched",
+    emoji: "🎯",
+    label: "맞춤 추천",
+    description: "희망 직종·지역을 기준으로 잘 맞는 순서로 골랐어요.",
+  },
   {
     key: "ready_to_apply",
+    emoji: "✅",
     label: "지금 지원가능",
     description: "지금 갖춘 조건만으로 지원할 수 있는 공고예요.",
   },
-  { key: "unlockable", label: "자격 따면 열리는 공고" },
+  { key: "unlockable", emoji: "🔑", label: "자격 따면 열리는 공고" },
 ];
 
 
@@ -172,6 +178,13 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
             onFocus={() => prefetchTab(t.key)}
             className={cn(filterPillClass, activeTab === t.key ? filterPillOnSolidClass : filterPillOffClass)}
           >
+            {/*
+              그림문자는 읽어줄 것이 없다. 라벨이 이미 같은 말을 하므로 화면에서만 보이게 감춘다.
+              mr 로 띄우는 이유는 gap 을 쓰면 감춘 요소에도 간격이 잡히기 때문이다.
+            */}
+            <span aria-hidden className="mr-1">
+              {t.emoji}
+            </span>
             {t.label}
           </button>
         ))}
