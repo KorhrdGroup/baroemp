@@ -38,14 +38,15 @@ export function PillPicker({
 
   return (
     /*
-      바탕을 연한 파랑으로 둔다. 아래 흰 카드들은 이력서 내용이고 이 줄은 설정이라,
-      같은 흰 면이면 무엇이 문서이고 무엇이 설정인지 갈리지 않는다.
+      바탕은 아래 카드들과 같은 흰색으로 둔다. 연한 파랑도 대봤는데,
+      페이지 바탕이 회색이라 회색-파랑-흰색 세 면이 겹쳐 오히려 어수선했다.
+      설정과 문서는 색이 아니라 순서(맨 위)와 제목으로 갈린다.
 
       세 층으로 쌓는다: 무엇을 고르는지(제목 + 딸린 버튼) -> 선택지 -> 고른 것의 설명.
       한 줄에 제목과 알약을 섞으면 어디까지가 제목인지 흐리고,
       설명만 아래 왼쪽에 남아 버튼과 따로 놀았다.
     */
-    <div className="rounded-xl bg-brand-blue-50 px-4 py-3">
+    <div className="rounded-xl bg-white px-4 py-3">
       <div className="flex items-center justify-between gap-3">
         <span className="flex shrink-0 items-center gap-1.5 text-label-1 font-semibold text-slate-500">
           {icon}
