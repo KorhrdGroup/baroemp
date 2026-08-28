@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 import { TrackedLink } from "./tracked-link";
 
 const GRADE_STYLE: Record<OccupationRecommendation["grade"], string> = {
-  "매우 잘 맞아요": "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  "잘 맞아요": "bg-brand-blue-50 text-brand-blue-700 ring-brand-blue-200",
-  "도전해볼 만해요": "bg-amber-50 text-amber-700 ring-amber-200",
-  "준비가 더 필요해요": "bg-slate-100 text-slate-600 ring-slate-200",
+  "매우 잘 맞아요": "bg-emerald-50 text-emerald-700",
+  "잘 맞아요": "bg-brand-blue-50 text-brand-blue-700",
+  "도전해볼 만해요": "bg-amber-50 text-amber-700",
+  "준비가 더 필요해요": "bg-slate-100 text-slate-600",
 };
 
 /**
@@ -80,7 +80,7 @@ export function OccupationRecommendationCard({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn("hidden rounded-full px-3 py-1 text-label-1 font-semibold ring-1 sm:inline-flex", GRADE_STYLE[rec.grade])}>
+          <span className={cn("hidden rounded-full px-3 py-1 text-label-1 font-semibold sm:inline-flex", GRADE_STYLE[rec.grade])}>
             {rec.grade}
           </span>
           <div className="text-right">
