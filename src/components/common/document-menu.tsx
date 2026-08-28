@@ -14,29 +14,33 @@ import {
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 
 /**
- * 이력서·자기소개서 목록 카드 오른쪽의 더보기 메뉴.
+ * 이력서·자기소개서의 더보기 메뉴. 목록 카드 오른쪽과 편집 화면 하단바에서 함께 쓴다.
  *
- * 전에는 아무 동작도 없는 연필 아이콘(16px) 바로 옆 8px 자리에 삭제 버튼(32px)이
+ * 목록에서는 전에 아무 동작도 없는 연필 아이콘(16px) 바로 옆 8px 자리에 삭제 버튼(32px)이
  * 있었다. 수정하려고 연필을 겨눴다가 조금만 빗나가면 삭제가 눌린다. 게다가 연필은
  * 버튼이 아니라 그림이라, 눌러서 편집으로 가는 건 카드 전체가 링크인 덕이었다.
  *
  * 되돌릴 수 없는 동작은 한 겹 안으로 넣는다. 여는 버튼은 40px로 키우고, 메뉴 안에서는
- * 아이콘이 아니라 "수정하기" / "삭제"라고 글자로 고른다.
+ * 아이콘이 아니라 글자로 고른다.
  *
- * 카드 전체가 Link라 메뉴 안에서의 클릭이 편집으로 새지 않게 전파를 막는다.
+ * 목록에서는 카드 전체가 Link라 메뉴 안에서의 클릭이 편집으로 새지 않게 전파를 막는다.
  */
-export function DocumentCardMenu({
+export function DocumentMenu({
   label,
   editHref,
   title,
   onDelete,
+  afterDelete,
 }: {
   /** "이력서" / "자기소개서". 읽어주는 이름과 확인 문구에 쓴다. */
   label: string;
-  editHref: string;
+  /** 목록에서만 준다. 편집 화면에서는 이미 그 문서를 보고 있어 "수정하기"가 갈 곳이 없다. */
+  editHref?: string;
   /** 무엇을 지우는지 확인 창에서 이름으로 물어본다. */
   title?: string;
   onDelete: () => Promise<void>;
+  /** 지운 뒤 할 일. 편집 화면은 보던 문서가 사라지므로 목록으로 나가야 한다. */
+  afterDelete?: () => void;
 }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
@@ -62,11 +66,13 @@ export function DocumentCardMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-36">
-          <DropdownMenuItem asChild className="py-2 text-label-1">
-            <Link href={editHref}>
-              <Pencil /> 수정하기
-            </Link>
-          </DropdownMenuItem>
+          {editHref && (
+            <DropdownMenuItem asChild className="py-2 text-label-1">
+              <Link href={editHref}>
+                <Pencil /> 수정하기
+              </Link>
+            </DropdownMenuItem>
+          )}
           <DropdownMenuItem
             variant="destructive"
             className="py-2 text-label-1"
@@ -93,7 +99,8 @@ export function DocumentCardMenu({
           startDelete(async () => {
             await onDelete();
             setConfirming(false);
-            router.refresh();
+            if (afterDelete) afterDelete();
+            else router.refresh();
           });
         }}
       />
