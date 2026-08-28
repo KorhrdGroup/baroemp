@@ -9,13 +9,6 @@ import type { Job } from "@/types";
 
 const CLOSING_SOON_DAYS = 7;
 
-/**
- * 매칭 점수는 이 값 이상일 때만 배지로 보여준다(evaluateJobFit 의 C등급 경계).
- * 프로필이 덜 채워졌거나 직종이 다르면 대부분 0~10점이 나오는데,
- * "매칭 0점"을 카드마다 붙이면 알려주는 것 없이 지원을 단념시키기만 한다.
- */
-const MATCH_SCORE_VISIBLE_MIN = 35;
-
 /** 마감이 가까우면 "D-3"·"D-DAY", 아니면 null. 마감일 옆에 붙이고 마감임박 여부도 이걸로 판단한다. */
 function ddayLabel(job: Job): string | null {
   if (!job.applyDeadline) return null;
@@ -35,7 +28,6 @@ function isMidlifeRecommended(job: Job): boolean {
 
 export interface JobCardProps {
   job: Job;
-  matchScore?: number;
   matchReasonLabel?: string;
   className?: string;
   isAuthenticated?: boolean;
@@ -55,7 +47,6 @@ export interface JobCardProps {
  */
 export function JobCard({
   job,
-  matchScore,
   matchReasonLabel,
   className,
   isAuthenticated,
@@ -82,11 +73,6 @@ export function JobCard({
         */}
         <div className="flex items-center justify-between gap-2 pr-10">
           <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
-          {typeof matchScore === "number" && matchScore >= MATCH_SCORE_VISIBLE_MIN && (
-            <span className="shrink-0 rounded-full bg-brand-blue-50 px-3 py-1.5 text-label-1 font-bold text-brand-blue-700">
-              매칭 {matchScore}점
-            </span>
-          )}
         </div>
 
         <h3 className="mt-4 line-clamp-2 text-body-1 font-bold text-slate-900 group-hover:underline">

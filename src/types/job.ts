@@ -190,6 +190,8 @@ export interface JobCurationItem {
   readiness?: JobReadiness;
   matchScore?: number;
   matchGrade?: string;
+  /** "희망 직종 일치"처럼 무엇이 맞았는지. 점수 숫자 대신 카드에 이걸 보여준다. */
+  matchReasonLabel?: string;
   unlockRequirementName?: string;
 }
 

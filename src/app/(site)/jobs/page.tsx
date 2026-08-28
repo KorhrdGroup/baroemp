@@ -177,7 +177,6 @@ export default async function JobsPage({
                 <JobCard
                   key={job.id}
                   job={job}
-                  matchScore={job.match?.score}
                   matchReasonLabel={job.match?.reasons[0]?.label}
                   isAuthenticated={isAuthenticated}
                   isBookmarked={bookmarkedSet.has(job.id)}

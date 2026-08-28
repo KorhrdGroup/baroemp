@@ -232,5 +232,11 @@ function scoreCandidates(profile: CareerProfile, jobs: Job[]): JobCurationItem[]
     .map((job) => ({ job, match: evaluateJobFit(profile, job) }))
     .filter((x): x is { job: Job; match: NonNullable<ReturnType<typeof evaluateJobFit>> } => Boolean(x.match && x.match.score > 0))
     .sort((a, b) => b.match.score - a.match.score)
-    .map(({ job, match }) => ({ job, matchScore: match.score, matchGrade: match.grade }));
+    .map(({ job, match }) => ({
+      job,
+      matchScore: match.score,
+      matchGrade: match.grade,
+      // reasons 는 배점 내림차순이라 첫 항목이 가장 크게 맞은 조건이다.
+      matchReasonLabel: match.reasons[0]?.label,
+    }));
 }

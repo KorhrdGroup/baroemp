@@ -208,7 +208,7 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
                 )}
                 <JobCard
                   job={item.job}
-                  matchScore={item.matchScore}
+                  matchReasonLabel={item.matchReasonLabel}
                   isAuthenticated
                   isBookmarked={bookmarkedIds.includes(item.job.id)}
                   readiness={item.readiness}
