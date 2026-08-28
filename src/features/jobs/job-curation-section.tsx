@@ -211,10 +211,14 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
         탭마다 무엇을 고른 결과인지 한 줄로 알려준다. 자리를 늘 잡아 두어
         (19.6px = label-1 한 줄) 탭을 옮겨도 판이 튀지 않는다.
 
+        위아래 여백을 16px 로 맞추고, 왼쪽은 20px 들여 쓴다. 이 줄만 상자가 없어
+        글자가 판 끝에 붙는데, 위 알약 글자는 17px·아래 카드 글자는 21px 에서
+        시작해 혼자 튀어나와 보였다.
+
         문구에 "자격"을 넣지 않는다. 조건 이름이 "요양보호사 자격"이면
         "자격 자격을"이 되고, "운전 가능"처럼 자격이 아닌 조건도 온다.
       */}
-      <p className="mb-3 min-h-[19.6px] text-label-1 text-slate-600">
+      <p className="mb-4 min-h-[19.6px] pl-5 text-label-1 text-slate-600">
         {unlockRequirementName ? (
           <>
             <strong className="font-semibold text-brand-blue-700">{unlockRequirementName}</strong>
