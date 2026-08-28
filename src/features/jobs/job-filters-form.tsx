@@ -135,7 +135,7 @@ export function JobFiltersForm({
             <input
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="직업명, 회사명으로 검색"
+              placeholder="예: 요양보호사, 경비, 조리"
               className="w-full min-w-0 border-0 bg-transparent text-body-2 text-slate-900 outline-none placeholder:text-slate-400"
             />
           </div>
