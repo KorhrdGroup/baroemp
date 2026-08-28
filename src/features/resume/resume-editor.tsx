@@ -551,14 +551,13 @@ export function ResumeEditor({
                         <CompactInput value={exp.position ?? ""} onChange={(e) => updateAt(setExperiences, exp._key, { position: e.target.value })} />
                       </Field>
                       <Field label="입사년월">
-                        <CompactInput type="month" value={toMonth(exp.startDate)} onChange={(e) => updateAt(setExperiences, exp._key, { startDate: e.target.value })} />
+                        <MonthPicker value={toMonth(exp.startDate)} onChange={(v) => updateAt(setExperiences, exp._key, { startDate: v })} />
                       </Field>
                       <Field label="퇴사년월">
-                        <CompactInput
-                          type="month"
+                        <MonthPicker
                           value={toMonth(exp.endDate)}
                           disabled={exp.isCurrent}
-                          onChange={(e) => updateAt(setExperiences, exp._key, { endDate: e.target.value })}
+                          onChange={(v) => updateAt(setExperiences, exp._key, { endDate: v })}
                         />
                       </Field>
                     </div>
@@ -723,11 +722,11 @@ export function ResumeEditor({
                         </Field>
                         {!isSimpleEducation && (
                           <Field label="입학년월" className="sm:col-span-2">
-                            <CompactInput type="month" value={toMonth(edu.admissionDate)} onChange={(e) => updateAt(setEducations, edu._key, { admissionDate: e.target.value })} />
+                            <MonthPicker value={toMonth(edu.admissionDate)} onChange={(v) => updateAt(setEducations, edu._key, { admissionDate: v })} />
                           </Field>
                         )}
                         <Field label={isGed ? "합격년월" : "졸업년월"} className="sm:col-span-2">
-                          <CompactInput type="month" value={toMonth(edu.graduationDate)} onChange={(e) => updateAt(setEducations, edu._key, { graduationDate: e.target.value })} />
+                          <MonthPicker value={toMonth(edu.graduationDate)} onChange={(v) => updateAt(setEducations, edu._key, { graduationDate: v })} />
                         </Field>
                         {!isGed && (
                           <Field label="졸업상태" className="sm:col-span-2">
@@ -925,17 +924,15 @@ export function ResumeEditor({
                     </Field>
                     {/* 다른 항목과 같이 연월만 받는다. 수료 시기가 없으면 최근 교육인지 알 수 없다. */}
                     <Field label="시작">
-                      <CompactInput
-                        type="month"
+                      <MonthPicker
                         value={toMonth(t.startDate)}
-                        onChange={(e) => updateAt(setTrainings, t._key, { startDate: toDbDate(e.target.value) })}
+                        onChange={(v) => updateAt(setTrainings, t._key, { startDate: toDbDate(v) })}
                       />
                     </Field>
                     <Field label="수료">
-                      <CompactInput
-                        type="month"
+                      <MonthPicker
                         value={toMonth(t.endDate)}
-                        onChange={(e) => updateAt(setTrainings, t._key, { endDate: toDbDate(e.target.value) })}
+                        onChange={(v) => updateAt(setTrainings, t._key, { endDate: toDbDate(v) })}
                       />
                     </Field>
                     <div className="flex items-end justify-end gap-1">
@@ -1129,6 +1126,70 @@ function Field({
         {required && <RequiredMark />}
       </Label>
       {children}
+    </div>
+  );
+}
+
+
+/**
+ * 연·월을 각각 고르는 입력칸.
+ *
+ * type="month" 는 브라우저마다 달력이 다르게 뜨고, 중장년 이용자에게는 달력에서
+ * 연도를 거슬러 올라가는 조작이 특히 번거롭다. 목록에서 고르는 편이 확실하다.
+ *
+ * 값은 지금까지와 같은 "YYYY-MM" 문자열이라 저장 쪽은 달라지지 않는다.
+ * 한쪽만 고르면 나머지는 기본값을 채우고 그 값을 화면에도 그대로 보여준다
+ * (보이는 것과 저장되는 것이 어긋나지 않게 한다).
+ */
+const MONTH_PICKER_START_YEAR = 1960;
+
+function MonthPicker({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const [year = "", month = ""] = value ? value.split("-") : [];
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: thisYear - MONTH_PICKER_START_YEAR + 1 }, (_, i) => String(thisYear - i));
+
+  return (
+    <div className="flex gap-2">
+      <Select
+        value={year}
+        disabled={disabled}
+        onValueChange={(y) => onChange(`${y}-${month || "01"}`)}
+      >
+        <CompactSelectTrigger className="flex-1">
+          <SelectValue placeholder="연도" />
+        </CompactSelectTrigger>
+        <SelectContent>
+          {years.map((y) => (
+            <SelectItem key={y} value={y}>
+              {y}년
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={month}
+        disabled={disabled}
+        onValueChange={(m) => onChange(`${year || String(thisYear)}-${m}`)}
+      >
+        <CompactSelectTrigger className="w-24">
+          <SelectValue placeholder="월" />
+        </CompactSelectTrigger>
+        <SelectContent>
+          {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((m) => (
+            <SelectItem key={m} value={m}>
+              {Number(m)}월
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
