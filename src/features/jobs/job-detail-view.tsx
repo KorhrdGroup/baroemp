@@ -5,6 +5,7 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  ExternalLink,
   FileText,
   GraduationCap,
   HelpCircle,
@@ -75,6 +76,24 @@ const COMPARISON_GROUPS = [
  * 바탕색은 위 "희망 근무조건" 카드와 같은 계열을 쓴다. 회색 바탕에 글자만
  * 색을 넣으면 줄을 하나씩 읽어야 상태를 알 수 있다.
  */
+
+/**
+ * 못 갖춘 자격의 준비 경로.
+ * 자격 종류(qualifications.type)에 따라 안내처가 다르다.
+ * 경험·스킬처럼 자격이 연결되지 않은 요건과 운전면허(OTHER)는 안내하지 않는다.
+ */
+const QUALIFICATION_PREP_URL: Record<string, string> = {
+  NATIONAL_LICENSE: "https://www.hpsedu.co.kr/",
+  PRIVATE_CERTIFICATE: "https://www.korhrd.co.kr/",
+};
+
+function prepUrlFor(item: JobRequirementComparisonItem): string | undefined {
+  // 못 갖춘 것이 확인된 경우에만 권한다. 아직 모르는 자격까지 권하면
+  // 이미 가진 사람에게도 "따세요"라고 하는 셈이 된다.
+  if (item.userStatus !== "NOT_SATISFIED") return undefined;
+  return item.qualificationType ? QUALIFICATION_PREP_URL[item.qualificationType] : undefined;
+}
+
 const REQUIREMENT_STATUS_STYLE: Record<
   string,
   { icon: LucideIcon; label: string; className: string; box: string }
@@ -242,11 +261,12 @@ export function JobDetailView({
                 {requirementComparison!.map((item) => {
                   const style = REQUIREMENT_STATUS_STYLE[item.userStatus] ?? REQUIREMENT_STATUS_STYLE.UNKNOWN;
                   const Icon = style.icon;
+                  const prepUrl = prepUrlFor(item);
                   return (
                     <div
                       key={item.requirementId}
                       className={cn(
-                        "flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-label-1",
+                        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-lg px-3 py-2.5 text-label-1",
                         style.box,
                       )}
                     >
@@ -256,9 +276,23 @@ export function JobDetailView({
                           {item.jobLevel === "REQUIRED" ? "필수" : item.jobLevel === "PREFERRED" ? "우대" : "언급"}
                         </span>
                       </span>
-                      <span className={cn("flex shrink-0 items-center gap-1 font-semibold", style.className)}>
-                        <Icon className="size-4" />
-                        {style.label}
+                      <span className="flex shrink-0 items-center gap-3">
+                        {/* 못 갖춘 자격은 취득 경로를 바로 열어준다. 외부 사이트라 새 창으로. */}
+                        {prepUrl && (
+                          <a
+                            href={prepUrl}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            className="flex items-center gap-1 rounded-md border border-border bg-white px-2.5 py-1 text-label-2 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            자격 준비하기
+                            <ExternalLink className="size-3.5" />
+                          </a>
+                        )}
+                        <span className={cn("flex items-center gap-1 font-semibold", style.className)}>
+                          <Icon className="size-4" />
+                          {style.label}
+                        </span>
                       </span>
                     </div>
                   );
