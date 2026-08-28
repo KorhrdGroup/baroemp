@@ -41,9 +41,11 @@ export function SupportProgramCard({
   return (
     <Link
       href={`/support/${program.id}`}
-      className={cn(
-        "group flex flex-col overflow-hidden rounded-xl bg-white",
-      )}
+      /*
+        일자리 카드(JobCard)와 같은 틀로 맞춘다. 테두리가 없으면 흰 바탕 위에서
+        카드로 안 읽히고, h-full 이 없으면 한 줄에 나란히 선 카드끼리 키가 어긋난다.
+      */
+      className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-white"
     >
       <div className="flex items-center justify-between gap-2 px-5 pt-5">
         {(() => {
@@ -65,12 +67,16 @@ export function SupportProgramCard({
         )}
       </div>
 
-      <h3 className="mt-3 px-5 text-body-1 font-bold text-slate-900 group-hover:underline">{program.title}</h3>
+      {/* break-keep 이 없으면 한글이 음절 단위로 잘린다. 일자리 카드 제목과 같은 규칙. */}
+      <h3 className="mt-3 line-clamp-2 break-keep px-5 text-balance text-body-1 leading-[1.4] font-bold text-slate-900 group-hover:underline">
+        {program.title}
+      </h3>
       <p className="mt-2 px-5 line-clamp-2 text-label-1 text-slate-600">
         {program.benefitDescription ?? program.summary}
       </p>
 
-      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pb-5 pt-4 text-label-2 text-slate-500">
+      {/* 맨 아랫줄 글자는 일자리 카드와 같게 둔다(label-1 medium). 같은 성격의 줄이 크기가 다르면 두 카드가 다른 규칙으로 보인다. */}
+      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pt-4 pb-5 text-label-1 font-medium text-slate-500">
         {topReason && (
           <>
             <span>✓ {topReason}</span>
