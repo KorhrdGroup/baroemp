@@ -8,8 +8,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
+import { ResumeSessionBanner } from "@/components/common/resume-session-banner";
 import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, REGION_LABELS } from "@/lib/labels";
-import { getSupportAssessmentPrefillAction, submitSupportAssessmentAction } from "./support-actions";
+import {
+  getResumableSupportSessionAction,
+  getSupportAssessmentPrefillAction,
+  saveSupportProgressAction,
+  submitSupportAssessmentAction,
+} from "./support-actions";
 import type { AgeGroup, DesiredStartTiming, EmploymentStatus, Region, SupportAssessmentAnswers } from "@/types";
 
 const AGE_GROUP_OPTIONS = Object.entries(AGE_GROUP_LABELS) as [AgeGroup, string][];
@@ -504,9 +510,19 @@ const INFO_ITEMS = [
 
 const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지역 지원제도", "지원 가능성 등급", "신청 방법과 서류"];
 
-function SupportIntro({ onStart, loading }: { onStart: () => void; loading: boolean }) {
+function SupportIntro({
+  onStart,
+  loading,
+  resumeBanner,
+}: {
+  onStart: () => void;
+  loading: boolean;
+  /** 하다 만 진단이 있을 때 히어로 위에 띄우는 이어하기 안내 */
+  resumeBanner?: React.ReactNode;
+}) {
   return (
     <IntroHero
+      beforeContent={resumeBanner}
       icon={Coins}
       title="놓치고 있는 취업·교육 혜택을 찾아보세요"
       description={
@@ -564,6 +580,10 @@ export function SupportFlow({
   const [answers, setAnswers] = useState<SupportAssessmentAnswers>({});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 진행 중 저장에 쓰는 세션 id. 첫 저장 때 서버가 만들어 돌려준다.
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  // 하다 만 진단 (소개 화면에서 "이어서 하기"로 이어붙일 대상)
+  const [resumable, setResumable] = useState<{ sessionId: string; answers: SupportAssessmentAnswers } | null>(null);
 
   // React StrictMode의 이중 실행으로 프리필이 두 번 돌지 않게 막는다.
   const autoStartedRef = useRef(false);
@@ -573,6 +593,28 @@ export function SupportFlow({
     // handleStart는 렌더마다 새로 만들어지지만 여기서는 최초 1회만 쓰면 된다.
     void handleStart();
   }, [autoStart]);
+
+  // 소개 화면에 머무는 동안 하다 만 진단이 있는지 한 번만 확인한다.
+  const resumeCheckedRef = useRef(false);
+  useEffect(() => {
+    if (phase !== "intro" || autoStart || resumeCheckedRef.current) return;
+    resumeCheckedRef.current = true;
+    void getResumableSupportSessionAction({ anonymousId: getOrCreateAnonymousId() || undefined })
+      .then(setResumable)
+      .catch(() => {});
+  }, [phase, autoStart]);
+
+  /** 하다 만 진단을 이어서 진행한다 - 저장된 답변을 불러오고 첫 미답변 문항으로 이동한다. */
+  function handleResume() {
+    if (!resumable) return;
+    setAnswers(resumable.answers);
+    setSessionId(resumable.sessionId);
+    const firstUnanswered = STEPS.findIndex((st) => !isStepFilled(st, resumable.answers));
+    const target = firstUnanswered === -1 ? STEPS.length - 1 : firstUnanswered;
+    setStepIndex(target);
+    setFurthestIndex(target);
+    setPhase("wizard");
+  }
 
   async function handleStart() {
     // 소개 화면은 비로그인도 볼 수 있다. 진단 결과를 계정에 남기므로
@@ -606,7 +648,22 @@ export function SupportFlow({
         </div>
       );
     }
-    return <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} />;
+    return (
+      <SupportIntro
+        onStart={() => void handleStart()}
+        loading={loadingPrefill}
+        resumeBanner={
+          resumable ? (
+            <ResumeSessionBanner
+              onResume={handleResume}
+              progressLabel={`${STEPS.length}문항 중 ${
+                STEPS.filter((st) => isStepFilled(st, resumable.answers)).length
+              }문항`}
+            />
+          ) : null
+        }
+      />
+    );
   }
 
   const step = STEPS[stepIndex];
@@ -638,6 +695,15 @@ export function SupportFlow({
       setStepIndex(next);
       setFurthestIndex((f) => Math.max(f, next));
       window.scrollTo({ top: 0, behavior: "smooth" });
+      // 문항을 넘길 때마다 서버에 남긴다. 중간에 나가도 이어서 할 수 있고,
+      // 완료하지 못한 응답도 관리자 통계에 잡힌다. 실패해도 진행은 막지 않는다.
+      void saveSupportProgressAction({
+        sessionId,
+        anonymousId: getOrCreateAnonymousId() || undefined,
+        answers,
+      })
+        .then((r) => setSessionId(r.sessionId))
+        .catch(() => {});
       return;
     }
 
@@ -645,7 +711,7 @@ export function SupportFlow({
     setError(null);
     try {
       const anonymousId = getOrCreateAnonymousId();
-      const result = await submitSupportAssessmentAction({ anonymousId: anonymousId || undefined, answers });
+      const result = await submitSupportAssessmentAction({ sessionId, anonymousId: anonymousId || undefined, answers });
       router.push(`/support/result/${result.sessionId}`);
     } catch {
       setError("결과를 계산하는 중 문제가 발생했어요. 다시 시도해주세요.");

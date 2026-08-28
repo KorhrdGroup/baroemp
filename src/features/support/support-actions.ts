@@ -14,6 +14,7 @@ async function resolveActorIds(anonymousId?: string): Promise<{ userId?: string;
 import {
   completeSupportAssessment,
   getSupportAssessmentPrefill,
+  findResumableSupportSession,
   saveSupportAssessmentAnswers,
   startSupportAssessment,
 } from "@/services/support-assessment.service";
@@ -45,7 +46,42 @@ export async function getSupportAssessmentPrefillAction(
   return getSupportAssessmentPrefill(actor);
 }
 
+/**
+ * 진행 중 답변 저장.
+ *
+ * 지원금 진단은 원래 마지막 제출 때 한 번에 세션을 만들어, 중간에 나가면 답변이 통째로 사라졌다.
+ * 문항을 넘길 때마다 여기에 저장해 두면 "이어서 하기"가 가능하고,
+ * 완료하지 못한 응답도 관리자 통계에 잡힌다.
+ */
+export async function saveSupportProgressAction(input: {
+  sessionId?: string;
+  anonymousId?: string;
+  answers: Partial<SupportAssessmentAnswers>;
+}): Promise<{ sessionId: string }> {
+  const actor = await resolveActorIds(input.anonymousId);
+  const sessionId =
+    input.sessionId ??
+    (await startSupportAssessment({ userId: actor.userId, anonymousId: actor.anonymousId })).id;
+  await saveSupportAssessmentAnswers(sessionId, input.answers);
+  return { sessionId };
+}
+
+/** 하다 만 진단이 있으면 그 세션과 답변을 돌려준다 (소개 화면의 이어하기 안내용). */
+export async function getResumableSupportSessionAction(input: { anonymousId?: string }): Promise<{
+  sessionId: string;
+  answers: SupportAssessmentAnswers;
+} | null> {
+  const actor = await resolveActorIds(input.anonymousId);
+  const session = await findResumableSupportSession({
+    userId: actor.userId,
+    anonymousId: actor.anonymousId,
+  });
+  return session ? { sessionId: session.id, answers: session.answers ?? {} } : null;
+}
+
 export interface SubmitSupportAssessmentInput {
+  /** 진행 중 저장으로 이미 만들어진 세션이 있으면 그 세션을 완결한다 (새로 만들면 중간 답변이 버려진다). */
+  sessionId?: string;
   userId?: string;
   anonymousId?: string;
   answers: SupportAssessmentAnswers;
@@ -67,14 +103,16 @@ export async function submitSupportAssessmentAction(
   input: SubmitSupportAssessmentInput,
 ): Promise<SubmitSupportAssessmentResult> {
   const actor = await resolveActorIds(input.anonymousId);
-  const session = await startSupportAssessment({ userId: actor.userId, anonymousId: actor.anonymousId });
-  await saveSupportAssessmentAnswers(session.id, input.answers);
-  const result = await completeSupportAssessment(session.id);
+  const sessionId =
+    input.sessionId ??
+    (await startSupportAssessment({ userId: actor.userId, anonymousId: actor.anonymousId })).id;
+  await saveSupportAssessmentAnswers(sessionId, input.answers);
+  const result = await completeSupportAssessment(sessionId);
 
   if (actor.userId) await recalculateLeadScore(actor.userId);
 
   return {
-    sessionId: session.id,
+    sessionId,
     highCount: result?.highCount ?? 0,
     checkRequiredCount: result?.checkRequiredCount ?? 0,
     totalCount: result?.matches.length ?? 0,
