@@ -419,6 +419,8 @@ export function CoverLetterEditor({
                     size="xs"
                     onClick={() => handleReviewSection(active)}
                     loading={busyKey === `review-${active._key}`}
+                    /* 다듬을 글이 없으면 누를 수 없다. 빈 칸에서 눌러도 할 일이 없다. */
+                    disabled={!active.content?.trim()}
                   >
                     AI로 다듬기
                   </AiButton>

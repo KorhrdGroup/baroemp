@@ -16,7 +16,6 @@ import {
   isRequiredSection,
   isSectionFilled,
   resolveResumeSections,
-  resumeSectionLabel,
   type ResumeSectionOption,
 } from "@/lib/resume/completeness";
 import { AiButton } from "@/components/common/ai-button";
@@ -137,6 +136,56 @@ const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   PROJECT: "프로젝트",
 };
 
+/**
+ * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
+ * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
+ *
+ * 처음 그린 값으로도 한 번 만들어야 해서(저장할 것이 있는지 재는 기준점) 화면 상태를
+ * 안에서 읽지 않고 인자로 받는다.
+ */
+interface ResumeFormState {
+  title: string;
+  summary: string;
+  desiredJobTitle: string;
+  desiredRegion: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  portfolioUrl: string;
+  hasNoWorkExperience: boolean;
+}
+
+function buildResumeSavePayload(source: {
+  id: string;
+  form: ResumeFormState;
+  sectionCodes: string[];
+  educations: EditableEducation[];
+  experiences: EditableExperience[];
+  qualifications: EditableQualification[];
+  trainings: EditableTraining[];
+  skills: EditableSkill[];
+  items: EditableItem[];
+}) {
+  return {
+    resume: { id: source.id, ...source.form, sectionCodes: source.sectionCodes },
+    educations: source.educations.map((e) => ({
+      ...stripKey(e),
+      admissionDate: toDbDate(e.admissionDate),
+      graduationDate: toDbDate(e.graduationDate),
+    })),
+    experiences: source.experiences.map((e) => ({
+      ...stripKey(e),
+      startDate: toDbDate(e.startDate),
+      endDate: toDbDate(e.endDate),
+    })),
+    qualifications: source.qualifications.map(stripKey),
+    trainings: source.trainings.map(stripKey),
+    skills: source.skills.map(stripKey),
+    items: source.items.map(stripKey),
+  };
+}
+
 export function ResumeEditor({
   initialDetail,
   templates = [],
@@ -151,38 +200,61 @@ export function ResumeEditor({
   const resume = detail.resume;
 
   /*
-    이력서에 담긴 항목. 작성 시작 화면에서 고른 것이 있으면 그것을,
-    없으면(그 전에 만든 이력서) 양식이 정한 항목을 따른다.
+    사이드바에 세우는 자리. 담을 수 있는 항목이 전부 한 줄씩 들어간다.
+    봉사·수상 카드 하나가 PROJECT와 ACTIVITY 둘을 함께 받으므로 그 둘은 한 자리로 묶는다.
   */
-  const [sectionCodes, setSectionCodes] = useState<string[]>(() => resolveResumeSections(initialDetail));
+  const slots = useMemo(
+    () =>
+      sectionOptions.map((option) => ({
+        key: EXTRA_SECTION_CODES.includes(option.code) ? EXTRA_SECTION_KEY : option.code,
+        label: option.label,
+        codes: option.codes,
+      })),
+    [sectionOptions],
+  );
 
   /*
-    왼쪽 목록에 세울 항목. 봉사·수상 카드 하나가 PROJECT와 ACTIVITY 둘을 함께 받으므로
-    목록에서는 하나로 묶는다.
+    자리의 순서. 담기고 빠지는 것과 따로 둔다. 담긴 것만 들고 있으면 항목을 뺄 때마다
+    그 줄이 목록 끝으로 튀어, 방금 무엇을 뺐는지 눈으로 쫓아야 한다.
+
+    이력서에 담긴 순서를 먼저 놓고, 아직 안 담은 항목을 그 뒤에 잇는다.
   */
-  const navItems = useMemo(() => {
-    const list: { key: string; label: string; codes: string[] }[] = [];
-    for (const code of sectionCodes) {
-      if (EXTRA_SECTION_CODES.includes(code)) {
-        if (!list.some((i) => i.key === EXTRA_SECTION_KEY)) {
-          list.push({
-            key: EXTRA_SECTION_KEY,
-            label: resumeSectionLabel("ACTIVITY"),
-            codes: EXTRA_SECTION_CODES,
-          });
-        }
-        continue;
-      }
-      list.push({ key: code, label: resumeSectionLabel(code), codes: [code] });
-    }
-    return list;
-  }, [sectionCodes]);
+  const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
+    const chosen = resolveResumeSections(initialDetail).map((code) =>
+      EXTRA_SECTION_CODES.includes(code) ? EXTRA_SECTION_KEY : code,
+    );
+    const all = sectionOptions.map((o) =>
+      EXTRA_SECTION_CODES.includes(o.code) ? EXTRA_SECTION_KEY : o.code,
+    );
+    return [...new Set([...chosen.filter((k) => all.includes(k)), ...all])];
+  });
+
+  /** 지금 이력서에 담긴 자리. */
+  const [includedKeys, setIncludedKeys] = useState<string[]>(() => {
+    const chosen = resolveResumeSections(initialDetail);
+    return [
+      ...new Set(chosen.map((code) => (EXTRA_SECTION_CODES.includes(code) ? EXTRA_SECTION_KEY : code))),
+    ];
+  });
+
+  /** 담긴 항목만, 자리 순서대로. 오른쪽 카드도 이 순서로 그린다. */
+  const navItems = useMemo(
+    () =>
+      sectionOrder
+        .filter((key) => includedKeys.includes(key))
+        .map((key) => slots.find((s) => s.key === key))
+        .filter((slot) => slot !== undefined),
+    [sectionOrder, includedKeys, slots],
+  );
+
+  /** 저장할 항목 코드. 자리 순서를 그대로 따른다. */
+  const sectionCodes = navItems.flatMap((item) => item.codes);
 
   /** 기본정보는 맨 위에 고정이라, 그 아래부터 자리를 옮길 수 있다. */
   const firstMovableIndex = navItems.findIndex((i) => !i.codes.includes("BASIC_INFO"));
 
   function addSectionRow(row: { key: string }) {
-    setSectionCodes((prev) => [...prev, row.key]);
+    setIncludedKeys((prev) => [...prev, row.key]);
   }
 
   /** 사이드바에서 누른 항목으로 내려간다. 항목이 다 펼쳐져 있으므로 감추는 대신 옮겨준다. */
@@ -191,24 +263,21 @@ export function ResumeEditor({
   }
 
   /**
-   * 항목 빼기. 적어둔 내용은 지우지 않는다 - 다시 담으면 그대로 있다.
-   * 봉사·수상 한 줄은 PROJECT/ACTIVITY 둘을 함께 받으므로 둘 다 뺀다.
+   * 항목 빼기. 줄은 자리를 지키고 담김 표시만 풀린다.
+   * 적어둔 내용도 지우지 않아 다시 담으면 그대로 있다.
    */
-  function removeSectionItem(item: { codes: string[] }) {
-    setSectionCodes((prev) => prev.filter((c) => !item.codes.includes(c)));
+  function removeSectionItem(item: { key: string }) {
+    setIncludedKeys((prev) => prev.filter((k) => k !== item.key));
   }
 
-  /** 항목 순서 옮기기. 화면 목록과 인쇄물의 순서가 이 배열 하나로 정해진다. */
-  function moveSectionItem(item: { codes: string[] }, direction: -1 | 1) {
-    setSectionCodes((prev) => {
-      const from = prev.findIndex((c) => item.codes.includes(c));
-      if (from < 0) return prev;
-      // 한 칸 옆이 같은 줄(봉사·수상)에 묶인 코드면 그 줄 전체를 건너뛴다.
-      let to = from + direction;
-      while (to >= 0 && to < prev.length && item.codes.includes(prev[to])) to += direction;
-      if (to < 0 || to >= prev.length) return prev;
-      // 기본정보 위로는 아무것도 올리지 않는다. 화면에서도 막지만 값 쪽에서도 지킨다.
-      if (prev[to] === "BASIC_INFO") return prev;
+  /** 항목 순서 옮기기. 담긴 항목끼리의 순서를 바꾼다 - 화면 목록과 인쇄물이 이 순서를 따른다. */
+  function moveSectionItem(item: { key: string }, direction: -1 | 1) {
+    const target = navItems[navItems.findIndex((i) => i.key === item.key) + direction];
+    if (!target || target.codes.includes("BASIC_INFO")) return;
+    setSectionOrder((prev) => {
+      const from = prev.indexOf(item.key);
+      const to = prev.indexOf(target.key);
+      if (from < 0 || to < 0) return prev;
       const next = [...prev];
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
@@ -224,24 +293,41 @@ export function ResumeEditor({
 
   const [isChangingTemplate, startTemplateChange] = useTransition();
 
-  const [form, setForm] = useState({
-    title: resume.title,
-    summary: resume.summary ?? "",
-    desiredJobTitle: resume.desiredJobTitle ?? "",
-    desiredRegion: resume.desiredRegion ?? "",
-    name: resume.name ?? "",
-    email: resume.email ?? "",
-    phone: resume.phone ?? "",
-    address: resume.address ?? "",
-    portfolioUrl: resume.portfolioUrl ?? "",
-    hasNoWorkExperience: resume.hasNoWorkExperience ?? false,
-  });
-  const [educations, setEducations] = useState<EditableEducation[]>(withKeys(initialDetail.educations, "edu"));
-  const [experiences, setExperiences] = useState<EditableExperience[]>(withKeys(initialDetail.experiences, "exp"));
-  const [qualifications, setQualifications] = useState<EditableQualification[]>(withKeys(initialDetail.qualifications, "qual"));
-  const [trainings, setTrainings] = useState<EditableTraining[]>(withKeys(initialDetail.trainings, "train"));
-  const [skills, setSkills] = useState<EditableSkill[]>(withKeys(initialDetail.skills, "skill"));
-  const [items, setItems] = useState<EditableItem[]>(withKeys(initialDetail.items, "item"));
+  /*
+    처음 값은 한 번만 만든다. 상태와 "저장할 것이 있는지" 재는 기준점이 같은 값에서
+    나와야, 열자마자 고친 것도 없는데 저장 버튼이 켜져 있는 일이 없다.
+  */
+  const initial = useMemo(
+    () => ({
+      form: {
+        title: initialDetail.resume.title,
+        summary: initialDetail.resume.summary ?? "",
+        desiredJobTitle: initialDetail.resume.desiredJobTitle ?? "",
+        desiredRegion: initialDetail.resume.desiredRegion ?? "",
+        name: initialDetail.resume.name ?? "",
+        email: initialDetail.resume.email ?? "",
+        phone: initialDetail.resume.phone ?? "",
+        address: initialDetail.resume.address ?? "",
+        portfolioUrl: initialDetail.resume.portfolioUrl ?? "",
+        hasNoWorkExperience: initialDetail.resume.hasNoWorkExperience ?? false,
+      },
+      educations: withKeys(initialDetail.educations, "edu"),
+      experiences: withKeys(initialDetail.experiences, "exp"),
+      qualifications: withKeys(initialDetail.qualifications, "qual"),
+      trainings: withKeys(initialDetail.trainings, "train"),
+      skills: withKeys(initialDetail.skills, "skill"),
+      items: withKeys(initialDetail.items, "item"),
+    }),
+    [initialDetail],
+  );
+
+  const [form, setForm] = useState<ResumeFormState>(initial.form);
+  const [educations, setEducations] = useState<EditableEducation[]>(initial.educations);
+  const [experiences, setExperiences] = useState<EditableExperience[]>(initial.experiences);
+  const [qualifications, setQualifications] = useState<EditableQualification[]>(initial.qualifications);
+  const [trainings, setTrainings] = useState<EditableTraining[]>(initial.trainings);
+  const [skills, setSkills] = useState<EditableSkill[]>(initial.skills);
+  const [items, setItems] = useState<EditableItem[]>(initial.items);
   const [skillDraft, setSkillDraft] = useState("");
 
   /**
@@ -263,8 +349,12 @@ export function ResumeEditor({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   // 미리보기는 입력 폭을 좁히지 않도록 팝업으로 띄운다.
   const [previewOpen, setPreviewOpen] = useState(false);
-  /** 마지막으로 저장한 내용의 스냅샷. 변경 여부를 이 값과 비교해 판단한다. */
-  const savedSnapshot = useRef<string | null>(null);
+  /** 마지막으로 저장한 내용. 지금 입력과 이 값을 비교해 저장할 것이 있는지 본다. */
+  const [savedPayload, setSavedPayload] = useState(() =>
+    JSON.stringify(
+      buildResumeSavePayload({ id: initialDetail.resume.id, sectionCodes, ...initial }),
+    ),
+  );
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
@@ -316,63 +406,44 @@ export function ResumeEditor({
   }
 
   /**
-   * 사이드바에 세우는 줄. 담긴 항목을 순서대로 놓고, 아직 안 담은 항목을 그 뒤에 잇는다.
-   * 안 담은 것을 목록에서 빼버리면 다시 담을 방법도, 무엇을 더 담을 수 있는지도 알 수 없다.
+   * 사이드바에 세우는 줄. 담을 수 있는 항목이 전부, 자리 순서 그대로 들어간다.
+   * 뺀 항목도 그 자리에 남는다 - 줄이 목록 끝으로 튀면 방금 무엇을 뺐는지 눈으로 쫓아야 한다.
    */
-  const sectionRows = [
-    ...navItems.map((item, idx) => ({
-      ...item,
-      included: true,
-      order: idx + 1,
-      navIndex: idx,
-      fixed: item.codes.includes("BASIC_INFO"),
-      filled: isNavItemFilled(item),
-    })),
-    ...sectionOptions
-      .filter((o) => !o.codes.some((c) => sectionCodes.includes(c)))
-      .map((o) => ({
-        key: o.code,
-        label: o.label,
-        codes: o.codes,
-        included: false,
-        order: 0,
-        navIndex: -1,
-        fixed: false,
-        filled: false,
-      })),
-  ];
+  const sectionRows = sectionOrder
+    .map((key) => slots.find((s) => s.key === key))
+    .filter((slot) => slot !== undefined)
+    .map((slot) => {
+      const navIndex = navItems.findIndex((i) => i.key === slot.key);
+      const included = navIndex >= 0;
+      return {
+        ...slot,
+        included,
+        order: navIndex + 1,
+        navIndex,
+        fixed: slot.codes.includes("BASIC_INFO"),
+        filled: included && isNavItemFilled(slot),
+      };
+    });
 
   /*
     마지막으로 저장한 내용과 지금 입력이 같으면 저장할 것이 없다.
     누를 수는 있는데 아무 일도 안 일어나면 저장이 안 된 건지 헷갈린다.
   */
-  const currentPayload = JSON.stringify(buildSavePayload());
-  // 처음 그릴 때의 값을 기준점으로 잡는다. 아직 아무것도 고치지 않은 상태다.
-  savedSnapshot.current ??= currentPayload;
-  const isDirty = currentPayload !== savedSnapshot.current;
+  const isDirty = JSON.stringify(buildSavePayload()) !== savedPayload;
 
-  /**
-   * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
-   * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
-   */
+  /** 지금 화면에 있는 값으로 저장 payload 를 만든다. */
   function buildSavePayload() {
-    return {
-      resume: { id: resume.id, ...form, sectionCodes },
-      educations: educations.map((e) => ({
-        ...stripKey(e),
-        admissionDate: toDbDate(e.admissionDate),
-        graduationDate: toDbDate(e.graduationDate),
-      })),
-      experiences: experiences.map((e) => ({
-        ...stripKey(e),
-        startDate: toDbDate(e.startDate),
-        endDate: toDbDate(e.endDate),
-      })),
-      qualifications: qualifications.map(stripKey),
-      trainings: trainings.map(stripKey),
-      skills: skills.map(stripKey),
-      items: items.map(stripKey),
-    };
+    return buildResumeSavePayload({
+      id: resume.id,
+      form,
+      sectionCodes,
+      educations,
+      experiences,
+      qualifications,
+      trainings,
+      skills,
+      items,
+    });
   }
 
   function handleSave(): Promise<ResumeDetail> {
@@ -389,11 +460,25 @@ export function ResumeEditor({
           setSkills(withKeys(saved.skills, "skill"));
           setItems(withKeys(saved.items, "item"));
           /*
-            여기서 바로 스냅샷을 찍으면 위 setState 들이 아직 반영되기 전이라
-            서버가 새로 부여한 id 가 빠진 값이 찍힌다. 비워두면 다음 렌더에서
-            저장된 상태 그대로 다시 잡힌다.
+            기준점은 화면 상태가 아니라 서버가 돌려준 값으로 잡는다. 이 시점에는
+            위 setState 들이 아직 반영되기 전이라, 화면 상태로 찍으면 서버가 새로
+            부여한 id 가 빠진 값이 기준점이 된다.
           */
-          savedSnapshot.current = null;
+          setSavedPayload(
+            JSON.stringify(
+              buildResumeSavePayload({
+                id: saved.resume.id,
+                form: { ...form, title: saved.resume.title },
+                sectionCodes: saved.resume.sectionCodes ?? sectionCodes,
+                educations: withKeys(saved.educations, "edu"),
+                experiences: withKeys(saved.experiences, "exp"),
+                qualifications: withKeys(saved.qualifications, "qual"),
+                trainings: withKeys(saved.trainings, "train"),
+                skills: withKeys(saved.skills, "skill"),
+                items: withKeys(saved.items, "item"),
+              }),
+            ),
+          );
           setSaveMessage(`저장 완료 · 완성도 ${saved.resume.completeness}%`);
           resolve(saved);
         } catch (err) {
@@ -548,7 +633,12 @@ export function ResumeEditor({
                   실제 동작은 아래 경력·자격·스킬을 재료로 문장을 만들어 제안하는 것이다.
                   이 칸에 쓴 글 자체를 고치지는 않는다.
                 */}
-                <AiButton onClick={handleGenerateSummary} loading={isGeneratingSummary}>
+                <AiButton
+                  onClick={handleGenerateSummary}
+                  loading={isGeneratingSummary}
+                  /* 다듬을 글이 없으면 누를 수 없다. 빈 칸에서 눌러도 할 일이 없다. */
+                  disabled={!form.summary.trim()}
+                >
                   AI로 다듬기
                 </AiButton>
               </CardHeader>
@@ -595,31 +685,13 @@ export function ResumeEditor({
               </CardHeader>
               <CardContent className="space-y-4">
                 {/*
-                  경력이 아예 없는 회원(신입·경력단절)은 이 항목을 채울 방법이 없어
-                  완성도가 끝까지 오르지 않았다. "없다"고 밝히는 것도 답이므로
-                  체크하면 채운 것으로 센다.
+                  경력이 없는 회원은 왼쪽 목록에서 경력 항목을 통째로 빼면 된다.
+                  "아직 경력이 없어요" 체크를 여기 따로 두면 같은 말을 두 군데서 하게 된다.
                 */}
-                <label
-                  className={cn(
-                    "flex w-fit items-center gap-2 text-label-1",
-                    experiences.length > 0 ? "cursor-not-allowed text-slate-300" : "cursor-pointer text-slate-600",
-                  )}
-                >
-                  {/* 경력을 적어둔 채로 "없음"을 켜면 두 말이 어긋난다. 비었을 때만 켤 수 있다. */}
-                  <Checkbox
-                    checked={Boolean(form.hasNoWorkExperience)}
-                    disabled={experiences.length > 0}
-                    onCheckedChange={(v) => setForm((f) => ({ ...f, hasNoWorkExperience: v === true }))}
-                  />
-                  아직 경력이 없어요
-                </label>
-
-                {form.hasNoWorkExperience ? (
+                {experiences.length === 0 && (
                   <p className="text-label-1 text-slate-400">
-                    경력 없이도 지원할 수 있는 공고가 많습니다. 자격·교육·봉사 경험으로 채워보세요.
+                    아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.
                   </p>
-                ) : (
-                  experiences.length === 0 && <p className="text-label-1 text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>
                 )}
                 {experiences.map((exp, idx) => (
                   isEntryEditing(exp._key) ? (
@@ -672,6 +744,7 @@ export function ResumeEditor({
                         className="mt-1 ml-auto flex w-fit"
                         onClick={() => openRewrite(exp._key, "responsibilities", exp.responsibilities ?? "")}
                         loading={rewritePending?.key === exp._key && rewritePending.field === "responsibilities"}
+                        disabled={!exp.responsibilities?.trim()}
                       >
                         AI 다듬기
                       </AiButton>
@@ -688,6 +761,7 @@ export function ResumeEditor({
                         className="mt-1 ml-auto flex w-fit"
                         onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")}
                         loading={rewritePending?.key === exp._key && rewritePending.field === "achievements"}
+                        disabled={!exp.achievements?.trim()}
                       >
                         AI 다듬기
                       </AiButton>
@@ -1143,11 +1217,11 @@ export function ResumeEditor({
         <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
           <div className="min-w-48 flex-1">
             <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
-              이력서 이름
+              이력서 제목
             </Label>
             <CompactInput
               id="resume-title"
-              placeholder="제목을 입력해주세요"
+              placeholder="이력서 제목을 입력해주세요"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className="mt-1"
@@ -1232,8 +1306,9 @@ export function ResumeEditor({
               늘 펼쳐두면 쓰지도 않을 선택지가 화면 위 한 줄을 계속 차지한다. 버튼 하나로 두고,
               누르면 기준을 고르는 창을 띄운다.
             */}
+            {/* 이 화면에서 가장 먼저 권하는 동작이라, 다른 AI 버튼과 달리 채운 파랑으로 둔다. */}
             <AiButton
-              className="mt-4 w-full"
+              className="mt-4 w-full bg-brand-blue-600 text-white hover:bg-brand-blue-700 active:bg-brand-blue-700"
               onClick={() => setReviewPickerOpen(true)}
               loading={isReviewing || isChangingTemplate}
             >
@@ -1244,9 +1319,9 @@ export function ResumeEditor({
               <div className="flex items-center justify-between gap-2">
                 <p className="px-1 text-label-2 font-semibold text-slate-400">이력서 항목 {navItems.length}/{sectionRows.length}</p>
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   size="sm"
-                  className="h-7 px-2 text-label-2 text-slate-500"
+                  className="h-7 shrink-0 px-2.5 text-label-2 text-slate-600"
                   onClick={() => setReordering((v) => !v)}
                 >
                   {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
@@ -1273,7 +1348,7 @@ export function ResumeEditor({
                             !row.included
                               ? "text-slate-300"
                               : row.filled
-                                ? "bg-brand-blue-600 text-white"
+                                ? "bg-brand-blue-100 text-brand-blue-600"
                                 : "bg-slate-100 text-slate-400",
                           )}
                         >
