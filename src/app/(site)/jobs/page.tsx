@@ -116,8 +116,8 @@ export default async function JobsPage({
         }}
         jobCategoryLabel={jobCategoryLabel}
         summary={
-          <p className="text-label-1 text-slate-500">
-            총 <span className="font-semibold text-brand-blue-600">{result.total}건</span>
+          <p className="text-body-2 text-slate-500">
+            총 <span className="font-bold text-brand-blue-600">{result.total.toLocaleString()}건</span>
           </p>
         }
       >
