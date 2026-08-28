@@ -68,19 +68,23 @@ export function JobCard({
       >
         {/*
           지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
-          높이를 늘려 잡지 않는다. 찜 버튼은 top-3 에 놓여 이 줄과 가운데가 맞고,
-          아래끝(48px)도 제목이 시작하는 56px 보다 위라 겹치지 않는다.
+          높이를 늘려 잡지 않는다. 찜 버튼(size-9)은 top-2 에 놓여 아래끝이 44px 이고
+          제목은 48px 에서 시작해 겹치지 않는다.
         */}
         <div className="flex items-center justify-between gap-2 pr-10">
           <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
         </div>
 
-        <h3 className="mt-4 line-clamp-2 text-body-1 font-bold text-slate-900 group-hover:underline">
+        {/*
+          회사명과 제목은 "누가 무엇을"이라 한 덩어리로 붙이고(mt-2),
+          급여는 별개의 사실이라 한 칸 띄운다(mt-3).
+        */}
+        <h3 className="mt-2 line-clamp-2 text-body-1 font-bold text-slate-900 group-hover:underline">
           {job.title}
         </h3>
 
         {/* 종류는 금액을 읽는 단위일 뿐이라 무채색으로 두고, 금액만 파랗게 강조한다. */}
-        <p className="mt-2 break-keep text-body-2 font-bold text-brand-blue-600">
+        <p className="mt-3 break-keep text-body-2 font-bold text-brand-blue-600">
           {salary.typeLabel && <span className="mr-1 font-medium text-slate-500">{salary.typeLabel}</span>}
           {salary.amount}
         </p>
@@ -117,9 +121,10 @@ export function JobCard({
           맞은 근거가 붙으면 두 줄, 없으면 한 줄이 되는데 카드 높이는 그 줄의
           제일 큰 카드를 따라간다. 그래서 탭을 옮길 때마다 판 높이가 튀었다.
           두 줄 자리를 늘 잡아 둔다: pt-4(1rem) + 19.6px 두 줄 + gap-y-1(0.25rem).
-          content-start 는 한 줄일 때 글자가 가운데로 내려앉지 않게 위에 붙인다.
+          content-end 는 남는 자리를 위에 두고 글자를 아래에 붙인다. 카드의 마지막
+          줄이라 아래 여백에 맞춰 떨어져 있어야 카드마다 바닥선이 같아 보인다.
         */}
-        <div className="mt-auto flex min-h-[3.7rem] flex-wrap content-start items-center gap-x-2 gap-y-1 pt-4 text-label-1 font-medium text-slate-500">
+        <div className="mt-auto flex min-h-[3.7rem] flex-wrap content-end items-center gap-x-2 gap-y-1 pt-4 text-label-1 font-medium text-slate-500">
           {matchReasonLabel && (
             <>
               <span className="text-brand-blue-600">✓ {matchReasonLabel}</span>
@@ -150,7 +155,7 @@ export function JobCard({
         jobCategory={job.jobCategory}
         isAuthenticated={isAuthenticated}
         initialBookmarked={isBookmarked}
-        className="absolute right-3 top-3"
+        className="absolute right-3 top-2"
       />
     </div>
   );
