@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
 import { interactiveCardClass } from "@/lib/ui-classes";
 import Link from "next/link";
-import { FileText, Pencil, Plus } from "lucide-react";
+import { FileText, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import {
   listResumesForUser,
@@ -16,8 +16,9 @@ import {
 } from "@/services/cover-letter.service";
 import { listExperienceBankForUser } from "@/services/experience-bank.service";
 import { ExperienceBankSection } from "@/features/experience-bank/experience-bank-section";
-import { ResumeDeleteButton } from "@/features/resume/resume-delete-button";
-import { CoverLetterDeleteButton } from "@/features/cover-letter/cover-letter-delete-button";
+import { DocumentCardMenu } from "@/components/common/document-card-menu";
+import { deleteResumeAction } from "@/features/resume/resume-actions";
+import { deleteCoverLetterAction } from "@/features/cover-letter/cover-letter-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -134,8 +135,15 @@ export default async function ResumeListPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-label-1 font-bold text-brand-blue-600">완성도 {resume.completeness}%</span>
-                  <Pencil className="size-4 text-slate-400" />
-                  <ResumeDeleteButton resumeId={resume.id} />
+                  <DocumentCardMenu
+                    label="이력서"
+                    title={resume.title}
+                    editHref={`/resume/${resume.id}/edit`}
+                    onDelete={async () => {
+                      "use server";
+                      await deleteResumeAction(resume.id);
+                    }}
+                  />
                 </div>
               </Link>
             ))}
@@ -191,8 +199,15 @@ export default async function ResumeListPage() {
                   <p className="mt-1 text-label-1 text-slate-400">최근수정 {new Date(cl.updatedAt).toLocaleDateString("ko-KR")}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Pencil className="size-4 text-slate-400" />
-                  <CoverLetterDeleteButton coverLetterId={cl.id} />
+                  <DocumentCardMenu
+                    label="자기소개서"
+                    title={cl.title}
+                    editHref={`/cover-letter/${cl.id}/edit`}
+                    onDelete={async () => {
+                      "use server";
+                      await deleteCoverLetterAction(cl.id);
+                    }}
+                  />
                 </div>
               </Link>
             ))}
