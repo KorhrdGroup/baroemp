@@ -29,6 +29,7 @@ function createMockResumeRepository(): ResumeRepository {
         desiredJobTitle: input.desiredJobTitle,
         desiredRegion: input.desiredRegion,
         status: input.status ?? "draft",
+        sectionCodes: input.sectionCodes ?? [],
         isPrimary: input.isPrimary ?? false,
         version: input.version ?? 1,
         completeness: 0,

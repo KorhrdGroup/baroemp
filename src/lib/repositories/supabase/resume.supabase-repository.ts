@@ -16,6 +16,7 @@ function mapRow(row: Record<string, unknown>): Resume {
     desiredJobTitle: (row.desired_job_title as string | null) ?? undefined,
     desiredRegion: (row.desired_region as string | null) ?? undefined,
     status: (row.status as Resume["status"]) ?? "draft",
+    sectionCodes: Array.isArray(row.section_codes) ? (row.section_codes as string[]) : [],
     isPrimary: Boolean(row.is_primary),
     version: Number(row.version ?? 1),
     completeness: Number(row.completeness ?? 0),
@@ -41,6 +42,7 @@ function toRow(input: Partial<ResumeInput>): Record<string, unknown> {
   if (input.desiredJobTitle !== undefined) row.desired_job_title = input.desiredJobTitle;
   if (input.desiredRegion !== undefined) row.desired_region = input.desiredRegion;
   if (input.status !== undefined) row.status = input.status;
+  if (input.sectionCodes !== undefined) row.section_codes = input.sectionCodes;
   if (input.isPrimary !== undefined) row.is_primary = input.isPrimary;
   if (input.version !== undefined) row.version = input.version;
   if (input.name !== undefined) row.name = input.name;

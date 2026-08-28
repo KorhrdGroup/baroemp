@@ -19,19 +19,40 @@ const SECTION_WEIGHTS: Record<string, number> = {
   ACTIVITY: 0,
 };
 
+/*
+  항목 이름. 작성 시작 화면, 편집 화면의 항목 목록, 완성도의 "다음: OO" 가 모두 이 표를 쓴다.
+  화면마다 따로 적어두면 같은 항목이 "보유자격"과 "보유 자격"으로 갈린다.
+*/
 const SECTION_LABELS: Record<string, string> = {
   BASIC_INFO: "기본정보",
-  SUMMARY: "핵심경력 요약",
-  EXPERIENCE: "경력 담당업무",
+  SUMMARY: "핵심 경력 / 한 줄 소개",
+  EXPERIENCE: "경력",
   EDUCATION: "학력",
-  QUALIFICATION: "보유자격",
-  SKILLS: "보유스킬",
+  QUALIFICATION: "보유 자격",
+  SKILLS: "보유 스킬",
   TRAINING: "교육/훈련",
   PROJECT: "프로젝트",
-  ACTIVITY: "대외활동",
+  ACTIVITY: "봉사·수상 등 추가 경력",
 };
 
-function isSectionFilled(section: ResumeSectionCode, detail: ResumeDetail): boolean {
+/** 이 이력서가 담기로 한 항목. 고른 것이 없으면 양식이 정한 항목을 따른다. */
+export function resolveResumeSections(detail: ResumeDetail): ResumeSectionCode[] {
+  if (detail.resume.sectionCodes?.length) return detail.resume.sectionCodes;
+  if (detail.template?.sections?.length) return detail.template.sections;
+  return Object.keys(SECTION_WEIGHTS) as ResumeSectionCode[];
+}
+
+/** 항목 이름. 편집 화면의 항목 목록과 완성도가 같은 이름을 쓴다. */
+export function resumeSectionLabel(section: ResumeSectionCode): string {
+  return SECTION_LABELS[section as string] ?? String(section);
+}
+
+/** 완성도에 세는 항목인가. 세지 않는 항목은 안 채워도 완성도가 깎이지 않는다. */
+export function isRequiredSection(section: ResumeSectionCode): boolean {
+  return (SECTION_WEIGHTS[section as string] ?? 0) > 0;
+}
+
+export function isSectionFilled(section: ResumeSectionCode, detail: ResumeDetail): boolean {
   const { resume, experiences, educations, qualifications, skills } = detail;
   switch (section) {
     case "BASIC_INFO":
@@ -57,11 +78,7 @@ function isSectionFilled(section: ResumeSectionCode, detail: ResumeDetail): bool
 }
 
 export function calculateResumeCompleteness(detail: ResumeDetail): ResumeCompletenessResult {
-  const sections = detail.template?.sections?.length
-    ? detail.template.sections
-    : (Object.keys(SECTION_WEIGHTS) as ResumeSectionCode[]);
-
-  const weighted = sections
+  const weighted = resolveResumeSections(detail)
     .map((section) => ({ section, weight: SECTION_WEIGHTS[section as string] ?? 0 }))
     .filter((s) => s.weight > 0);
 
@@ -73,7 +90,7 @@ export function calculateResumeCompleteness(detail: ResumeDetail): ResumeComplet
     if (isSectionFilled(section, detail)) {
       filledWeight += weight;
     } else {
-      missing.push({ section, label: SECTION_LABELS[section as string] ?? String(section) });
+      missing.push({ section, label: resumeSectionLabel(section) });
     }
   }
 

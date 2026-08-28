@@ -52,7 +52,15 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 export function ResumePreview({ detail }: { detail: ResumeDetail }) {
   const { resume, educations, experiences, qualifications, trainings, skills, items } = detail;
-  const sectionOrder = detail.template?.sections?.length ? detail.template.sections : DEFAULT_SECTION_ORDER;
+  /*
+    문서에 싣는 항목은 편집 화면이 보여주는 항목과 같아야 한다. 여기서 따로 정하면
+    "뺐는데 인쇄물에는 나온다"가 된다. 고른 항목도 양식도 없을 때만 기본 순서를 쓴다.
+  */
+  const sectionOrder = detail.resume.sectionCodes?.length
+    ? detail.resume.sectionCodes
+    : detail.template?.sections?.length
+      ? detail.template.sections
+      : DEFAULT_SECTION_ORDER;
 
   const awards = items.filter((i) => i.sectionType === "AWARD");
   const projects = items.filter((i) => i.sectionType === "PROJECT");
