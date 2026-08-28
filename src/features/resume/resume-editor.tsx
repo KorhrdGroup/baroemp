@@ -807,31 +807,41 @@ export function ResumeEditor({
                 {qualifications.length === 0 && <p className="text-label-1 text-slate-400">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
                 {qualifications.map((q, idx) => (
                   isEntryEditing(q._key) ? (
-                  <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_1fr_auto]">
-                    <Field label="자격명">
-                      <CompactInput value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
-                    </Field>
-                    <Field label="발급기관">
-                      <CompactInput value={q.issuer ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { issuer: e.target.value })} />
-                    </Field>
-                    <Field label="취득일">
-                      <CompactInput type="date" value={q.acquiredAt ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { acquiredAt: e.target.value })} />
-                    </Field>
-                    <div className="flex items-end justify-end gap-1">
-                      <Button variant="outline" size="sm" onClick={() => setEntryEditing(q._key, false)}>
-                        완료
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setQualifications((prev) => prev.filter((x) => x._key !== q._key))}>
-                        <Trash2 className="size-4 text-slate-400" />
-                      </Button>
+                  /* 교육/훈련과 같은 구조. 연월이 두 칸이라 한 줄에 다 넣으면 좁다. */
+                  <div key={q._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-label-2 font-semibold text-slate-400">자격 {idx + 1}</p>
+                      <div className="flex items-center gap-1">
+                        <Button variant="outline" size="sm" onClick={() => setEntryEditing(q._key, false)}>
+                          완료
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setQualifications((prev) => prev.filter((x) => x._key !== q._key))}>
+                          <Trash2 className="size-4 text-slate-400" />
+                        </Button>
+                      </div>
                     </div>
+                    <div className="grid gap-2 sm:grid-cols-[1.4fr_1fr]">
+                      <Field label="자격명">
+                        <CompactInput value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
+                      </Field>
+                      <Field label="발급기관">
+                        <CompactInput value={q.issuer ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { issuer: e.target.value })} />
+                      </Field>
+                    </div>
+                    <Field label="취득년월" className="sm:max-w-xs">
+                      {/* 다른 항목과 같이 연월만 받는다. 자격증에 일자까지 필요한 곳은 없다. */}
+                      <MonthPicker
+                        value={toMonth(q.acquiredAt)}
+                        onChange={(v) => updateAt(setQualifications, q._key, { acquiredAt: toDbDate(v) })}
+                      />
+                    </Field>
                   </div>
                   ) : (
                   <EntrySummaryCard
                     key={q._key}
                     title={q.name || "자격명 미입력"}
                     subtitle={q.issuer || undefined}
-                    meta={q.acquiredAt ? q.acquiredAt.replaceAll("-", ".") : undefined}
+                    meta={q.acquiredAt ? toMonth(q.acquiredAt).replace("-", ".") : undefined}
                     editLabel={`자격 ${idx + 1} 수정`}
                     onEdit={() => setEntryEditing(q._key, true)}
                   />
@@ -915,33 +925,44 @@ export function ResumeEditor({
               <CardContent className="space-y-3">
                 {trainings.map((t, idx) => (
                   isEntryEditing(t._key) ? (
-                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_auto_auto_auto]">
-                    <Field label="과정명">
-                      <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
-                    </Field>
-                    <Field label="교육기관">
-                      <CompactInput value={t.institution ?? ""} onChange={(e) => updateAt(setTrainings, t._key, { institution: e.target.value })} />
-                    </Field>
+                  /*
+                    연월이 연도·월 두 칸으로 늘어 한 줄에 다 넣으면 칸마다 너무 좁다.
+                    경력 편집처럼 머리줄(제목 + 완료·삭제) 아래로 두 줄에 나눠 담는다.
+                  */
+                  <div key={t._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-label-2 font-semibold text-slate-400">교육 {idx + 1}</p>
+                      <div className="flex items-center gap-1">
+                        <Button variant="outline" size="sm" onClick={() => setEntryEditing(t._key, false)}>
+                          완료
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setTrainings((prev) => prev.filter((x) => x._key !== t._key))}>
+                          <Trash2 className="size-4 text-slate-400" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-[1.4fr_1fr]">
+                      <Field label="과정명">
+                        <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
+                      </Field>
+                      <Field label="교육기관">
+                        <CompactInput value={t.institution ?? ""} onChange={(e) => updateAt(setTrainings, t._key, { institution: e.target.value })} />
+                      </Field>
+                    </div>
                     {/* 다른 항목과 같이 연월만 받는다. 수료 시기가 없으면 최근 교육인지 알 수 없다. */}
-                    <Field label="시작">
-                      <MonthPicker
-                        value={toMonth(t.startDate)}
-                        onChange={(v) => updateAt(setTrainings, t._key, { startDate: toDbDate(v) })}
-                      />
-                    </Field>
-                    <Field label="수료">
-                      <MonthPicker
-                        value={toMonth(t.endDate)}
-                        onChange={(v) => updateAt(setTrainings, t._key, { endDate: toDbDate(v) })}
-                      />
-                    </Field>
-                    <div className="flex items-end justify-end gap-1">
-                      <Button variant="outline" size="sm" onClick={() => setEntryEditing(t._key, false)}>
-                        완료
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setTrainings((prev) => prev.filter((x) => x._key !== t._key))}>
-                        <Trash2 className="size-4 text-slate-400" />
-                      </Button>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Field label="시작">
+                        <MonthPicker
+                          value={toMonth(t.startDate)}
+                          onChange={(v) => updateAt(setTrainings, t._key, { startDate: toDbDate(v) })}
+                        />
+                      </Field>
+                      <Field label="수료">
+                        <MonthPicker
+                          value={toMonth(t.endDate)}
+                          onChange={(v) => updateAt(setTrainings, t._key, { endDate: toDbDate(v) })}
+                        />
+                      </Field>
                     </div>
                   </div>
                   ) : (
