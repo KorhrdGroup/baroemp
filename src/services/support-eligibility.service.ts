@@ -48,6 +48,7 @@ export interface SupportMatchDetail {
 }
 
 const AGE_GROUP_MIDPOINT: Record<AgeGroup, number> = {
+  "10s": 18,
   "20s": 25,
   "30s": 35,
   "40s": 45,
