@@ -29,6 +29,17 @@ function formatPeriod(start?: string, end?: string, isCurrent?: boolean): string
   return [s, e].filter(Boolean).join(" ~ ");
 }
 
+/*
+  인쇄용 문서의 글자 체계는 두 단만 쓴다.
+
+    이름          title-3  굵게
+    섹션 제목      label-1  굵게      (한 문서에서 이 크기는 섹션 제목뿐)
+    항목 제목      label-2  semibold  (회사명 등)
+    본문·보조      label-2  기본      (담당업무·요약·자격명, 기간은 흐리게)
+
+  전에는 요약과 회사명만 label-1 이라 본문끼리 크기가 갈리고
+  회사명이 섹션 제목과 같은 크기여서 무엇이 상위인지 읽히지 않았다.
+*/
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <h2 className="mb-3 border-b border-slate-300 pb-1.5 text-label-1 font-bold tracking-wide text-slate-900">
@@ -85,7 +96,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
         return (
           <div key={section} className="mb-8">
             <SectionTitle>핵심 경력 / 한 줄 소개</SectionTitle>
-            <p className="text-label-1 leading-relaxed text-slate-700">{resume.summary}</p>
+            <p className="text-label-2 leading-relaxed text-slate-700">{resume.summary}</p>
           </div>
         );
       case "EXPERIENCE":
@@ -97,7 +108,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
               {experiences.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="text-label-1 font-semibold text-slate-900">
+                    <p className="text-label-2 font-semibold text-slate-900">
                       {exp.companyName}
                       {exp.position ? ` · ${exp.position}` : ""}
                       {exp.jobTitle ? ` (${exp.jobTitle})` : ""}
