@@ -8,6 +8,7 @@ import {
   Briefcase,
   Check,
   FileText,
+  HeartHandshake,
   Loader2,
   Pencil,
   Plus,
@@ -51,9 +52,17 @@ export interface WizardJob {
   companyName: string;
 }
 
-/** 어디에 낼 자기소개서인가. 고른 값에 따라 1단계에서 묻는 것이 달라진다. */
-type Mode = "job" | "field" | "general";
-type Step = "method" | "questions" | "experiences";
+type Step = "template" | "questions" | "experiences";
+
+/*
+  양식 카드의 겉모습. 양식은 관리자가 늘릴 수 있어 이름으로 짝지을 수 없으므로
+  차례대로 돌려 쓴다. 무슨 양식인지는 카드에 적힌 이름과 설명이 말한다.
+*/
+const TEMPLATE_CARD_STYLES = [
+  { icon: FileText, tone: "bg-slate-50", iconTone: "text-slate-500" },
+  { icon: Briefcase, tone: "bg-sky-50", iconTone: "text-brand-blue-600" },
+  { icon: HeartHandshake, tone: "bg-violet-50", iconTone: "text-violet-500" },
+];
 
 type PickedQuestion = CoverLetterTemplateQuestion & { key: string };
 
@@ -136,18 +145,12 @@ export function CoverLetterWizard({
 }) {
   const router = useRouter();
 
-  /*
-    기본형은 맨 앞 양식(일반 자기소개서), 분야 맞춤은 그 뒤의 분야별 양식을 쓴다.
-    양식 코드를 화면에 박아두면 관리자가 양식을 추가할 때 화면을 같이 고쳐야 한다.
-  */
-  const generalTemplate = templates[0];
-  const fieldTemplates = templates.slice(1);
+  const firstTemplate = templates[0];
 
-  const [step, setStep] = useState<Step>("method");
-  const [mode, setMode] = useState<Mode>("general");
-  const [templateId, setTemplateId] = useState(generalTemplate.id);
+  const [step, setStep] = useState<Step>("template");
+  const [templateId, setTemplateId] = useState(firstTemplate.id);
   const [jobId, setJobId] = useState<string | undefined>(initialJobId);
-  const [questions, setQuestions] = useState<PickedQuestion[]>(() => toPicked(generalTemplate.defaultQuestions));
+  const [questions, setQuestions] = useState<PickedQuestion[]>(() => toPicked(firstTemplate.defaultQuestions));
   const [title, setTitle] = useState(initialTitle ?? "");
 
   const [experiences, setExperiences] = useState(initialExperiences);
@@ -162,7 +165,7 @@ export function CoverLetterWizard({
   const [isCreating, startCreate] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
-  const template = templates.find((t) => t.id === templateId) ?? generalTemplate;
+  const template = templates.find((t) => t.id === templateId) ?? firstTemplate;
   const selectedJob = jobs.find((j) => j.id === jobId);
 
   /*
@@ -174,21 +177,11 @@ export function CoverLetterWizard({
     window.scrollTo({ top: 0 });
   }
 
-  function startMode(next: Mode) {
-    setMode(next);
-    const base = next === "field" ? (fieldTemplates[0] ?? generalTemplate) : generalTemplate;
-    setTemplateId(base.id);
-    setQuestions(toPicked(base.defaultQuestions));
-    if (next !== "job") setJobId(undefined);
-    goToStep("questions");
-  }
-
-  /** 분야를 바꾸면 그 분야에서 자주 묻는 문항으로 갈아끼운다. 아직 아무것도 안 쓴 단계라 잃을 것이 없다. */
-  function pickTemplate(nextId: string) {
-    const next = templates.find((t) => t.id === nextId);
-    if (!next) return;
-    setTemplateId(nextId);
+  /** 양식을 고르면 그 양식의 기본 문항을 담아 1단계로 넘어간다. */
+  function startWithTemplate(next: WizardTemplate) {
+    setTemplateId(next.id);
     setQuestions(toPicked(next.defaultQuestions));
+    goToStep("questions");
   }
 
   function toggleQuestion(entry: QuestionCatalogEntry) {
@@ -224,7 +217,7 @@ export function CoverLetterWizard({
           templateId,
           title: title.trim() || undefined,
           resumeId,
-          targetJobId: mode === "job" ? jobId : undefined,
+          targetJobId: jobId,
           targetOccupationId,
           questions: questions.map((q) => ({
             questionType: q.questionType,
@@ -240,46 +233,9 @@ export function CoverLetterWizard({
     });
   }
 
-  /* ── 작성 방법 고르기 ─────────────────────────────────────────────────── */
+  /* ── 양식 고르기 ───────────────────────────────────────────────────────── */
 
-  if (step === "method") {
-    const methods: {
-      mode: Mode;
-      icon: React.ReactNode;
-      name: string;
-      description: string;
-      tone: string;
-      disabled?: { message: string; href: string; linkLabel: string };
-      hidden?: boolean;
-    }[] = [
-      {
-        mode: "job",
-        icon: <Briefcase className="size-7 text-brand-blue-600" />,
-        name: "공고 맞춤 자기소개서",
-        description: "넣을 곳이 정해졌다면, 그 공고에 맞춘 자기소개서를 만들 수 있어요.",
-        tone: "bg-sky-50",
-        disabled:
-          jobs.length === 0
-            ? { message: "스크랩해둔 공고가 없어요.", href: "/jobs", linkLabel: "일자리 찾아보기 →" }
-            : undefined,
-      },
-      {
-        mode: "field",
-        icon: <FileText className="size-7 text-violet-500" />,
-        name: "분야 맞춤 자기소개서",
-        description: "돌봄·복지처럼 분야가 정해졌다면, 그 분야에서 자주 묻는 문항으로 시작할 수 있어요.",
-        tone: "bg-violet-50",
-        hidden: fieldTemplates.length === 0,
-      },
-      {
-        mode: "general",
-        icon: <Pencil className="size-7 text-slate-500" />,
-        name: "기본형 자기소개서",
-        description: "아직 어디 낼지 안 정했다면, 여러 곳에 두루 쓰는 문항으로 바로 시작할 수 있어요.",
-        tone: "bg-slate-50",
-      },
-    ];
-
+  if (step === "template") {
     return (
       <div>
         <div className="text-center">
@@ -293,33 +249,29 @@ export function CoverLetterWizard({
         </div>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
-          {methods
-            .filter((m) => !m.hidden)
-            .map((m) => (
-              <div key={m.mode} className={cn("flex flex-col rounded-2xl p-7 text-center", m.tone)}>
-                <div className="flex justify-center">{m.icon}</div>
-                <p className="mt-4 break-keep text-body-1 font-bold text-slate-900">{m.name}</p>
-                {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "정해졌다 / 면," 처럼 끊긴다. */}
+          {templates.map((t, idx) => {
+            const style = TEMPLATE_CARD_STYLES[idx % TEMPLATE_CARD_STYLES.length];
+            const Icon = style.icon;
+            return (
+              <div key={t.id} className={cn("flex flex-col rounded-2xl p-7 text-center", style.tone)}>
+                <div className="flex justify-center">
+                  <Icon className={cn("size-7", style.iconTone)} />
+                </div>
+                <p className="mt-4 break-keep text-body-1 font-bold text-slate-900">{t.name}</p>
+                {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "자기소개 / 서입니다." 처럼 끊긴다. */}
                 <p className="mt-2 flex-1 break-keep text-body-2 leading-relaxed text-slate-600">
-                  {m.description}
+                  {t.description}
                 </p>
-                {m.disabled ? (
-                  <div className="mt-5">
-                    <p className="text-label-2 text-slate-500">{m.disabled.message}</p>
-                    <Link
-                      href={m.disabled.href}
-                      className="mt-1 inline-block text-label-1 font-semibold text-brand-blue-600 hover:underline"
-                    >
-                      {m.disabled.linkLabel}
-                    </Link>
-                  </div>
-                ) : (
-                  <Button className="mt-6 h-11 self-center rounded-full px-7" onClick={() => startMode(m.mode)}>
-                    시작하기
-                  </Button>
-                )}
+                <p className="mt-3 text-label-2 text-slate-500">문항 {t.defaultQuestions.length}개</p>
+                <Button
+                  className="mt-4 h-11 self-center rounded-full px-7"
+                  onClick={() => startWithTemplate(t)}
+                >
+                  시작하기
+                </Button>
               </div>
-            ))}
+            );
+          })}
         </div>
 
         <div className="mt-8 text-center">
@@ -336,7 +288,7 @@ export function CoverLetterWizard({
   /* ── 1단계: 문항 고르기 ───────────────────────────────────────────────── */
 
   if (step === "questions") {
-    const canGoNext = questions.length > 0 && (mode !== "job" || Boolean(jobId));
+    const canGoNext = questions.length > 0;
 
     return (
       <>
@@ -346,65 +298,50 @@ export function CoverLetterWizard({
             title="문항 고르기"
             description="자기소개서에 담을 문항을 골라주세요. 나중에 편집 화면에서도 바꿀 수 있어요."
           />
+          {/* 앞 화면에서 고른 양식. 지금 무엇을 바탕으로 담겨 있는지 알아야 문항을 손볼 수 있다. */}
+          <p className="mt-4 text-center text-label-1 text-slate-500">
+            고른 양식 <span className="font-semibold text-slate-700">{template.name}</span>
+          </p>
 
           <div className="mt-10 space-y-8">
-            {mode === "job" && (
+            {jobs.length > 0 && (
               <div>
-                <FieldLabel hint="스크랩해둔 공고 중에서 고를 수 있어요.">지원할 공고</FieldLabel>
+                <FieldLabel hint="고르면 AI가 그 공고를 보고 초안을 써드려요. 스크랩해둔 공고에서 고를 수 있어요.">
+                  지원할 공고 (선택)
+                </FieldLabel>
                 <div className="space-y-2">
-                  {jobs.map((job) => (
-                    <button
-                      key={job.id}
-                      type="button"
-                      onClick={() => setJobId(job.id)}
-                      aria-pressed={job.id === jobId}
-                      className={cn(
-                        "flex w-full cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
-                        job.id === jobId
-                          ? "border-brand-blue-600 bg-brand-blue-50"
-                          : "border-border bg-white hover:border-brand-blue-200",
-                      )}
-                    >
-                      <span
+                  {jobs.map((job) => {
+                    const picked = job.id === jobId;
+                    return (
+                      <button
+                        key={job.id}
+                        type="button"
+                        /* 다시 누르면 풀린다. 특정 공고용이 아닌 자기소개서도 만들 수 있어야 한다. */
+                        onClick={() => setJobId(picked ? undefined : job.id)}
+                        aria-pressed={picked}
                         className={cn(
-                          "flex size-5 shrink-0 items-center justify-center rounded-full border",
-                          job.id === jobId ? "border-brand-blue-600 bg-brand-blue-600" : "border-slate-300",
+                          "flex w-full cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
+                          picked
+                            ? "border-brand-blue-600 bg-brand-blue-50"
+                            : "border-border bg-white hover:border-brand-blue-200",
                         )}
                       >
-                        {job.id === jobId && <Check className="size-3 text-white" />}
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block truncate text-body-2 font-semibold text-slate-900">{job.title}</span>
-                        <span className="block truncate text-label-1 text-slate-500">{job.companyName}</span>
-                      </span>
-                    </button>
-                  ))}
+                        <span
+                          className={cn(
+                            "flex size-5 shrink-0 items-center justify-center rounded-full border",
+                            picked ? "border-brand-blue-600 bg-brand-blue-600" : "border-slate-300",
+                          )}
+                        >
+                          {picked && <Check className="size-3 text-white" />}
+                        </span>
+                        <span className="min-w-0">
+                          <span className="block truncate text-body-2 font-semibold text-slate-900">{job.title}</span>
+                          <span className="block truncate text-label-1 text-slate-500">{job.companyName}</span>
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
-              </div>
-            )}
-
-            {mode === "field" && (
-              <div>
-                <FieldLabel hint="고른 분야에서 자주 묻는 문항으로 아래 목록을 채워드려요.">지원 분야</FieldLabel>
-                <div className="flex flex-wrap gap-2">
-                  {fieldTemplates.map((t) => (
-                    <button
-                      key={t.id}
-                      type="button"
-                      onClick={() => pickTemplate(t.id)}
-                      aria-pressed={t.id === templateId}
-                      className={cn(
-                        "cursor-pointer rounded-full border px-4 py-2 text-label-1 font-medium transition-colors",
-                        t.id === templateId
-                          ? "border-transparent bg-brand-blue-600 text-white"
-                          : "border-border bg-white text-slate-600 hover:border-brand-blue-200",
-                      )}
-                    >
-                      {t.name}
-                    </button>
-                  ))}
-                </div>
-                {template.description && <p className="mt-2 text-label-1 text-slate-500">{template.description}</p>}
               </div>
             )}
 
@@ -416,7 +353,7 @@ export function CoverLetterWizard({
               <div className="rounded-xl bg-brand-blue-50 p-4">
                 <p className="text-label-1 font-semibold text-slate-700">추천 문항</p>
                 <p className="mt-1 flex items-center gap-1 text-label-2 text-slate-500">
-                  <ThumbsUp className="size-3.5" /> 표시는 이 분야에서 자주 묻는 문항이에요.
+                  <ThumbsUp className="size-3.5" /> 표시는 고르신 자기소개서에서 자주 묻는 문항이에요.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {catalog.map((entry) => {
@@ -503,7 +440,7 @@ export function CoverLetterWizard({
           </div>
 
           <div className="mt-10 flex justify-center gap-3">
-            <Button variant="outline" className="h-12 min-w-32 rounded-full" onClick={() => goToStep("method")}>
+            <Button variant="outline" className="h-12 min-w-32 rounded-full" onClick={() => goToStep("template")}>
               이전
             </Button>
             <Button className="h-12 min-w-32 rounded-full" disabled={!canGoNext} onClick={() => goToStep("experiences")}>
