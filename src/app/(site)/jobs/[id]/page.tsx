@@ -17,7 +17,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { id } = await params;
   const job = await getJobRepository().findById(id);
-  return { title: job ? `${job.title} - ${job.companyName} | 한평생 바로취업` : "채용공고 | 한평생 바로취업" };
+  return { title: job ? `${job.title} - ${job.companyName} | 한평생 바로취업` : "일자리 찾기 | 한평생 바로취업" };
 }
 
 export default async function JobDetailPage({ params }: { params: Promise<{ id: string }> }) {

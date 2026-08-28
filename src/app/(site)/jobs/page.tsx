@@ -15,7 +15,7 @@ import { getUserQualificationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
 
 export const metadata: Metadata = {
-  title: "전국 채용공고 | 한평생 바로취업",
+  title: "일자리 찾기 | 한평생 바로취업",
 };
 
 const PAGE_SIZE = 10;
