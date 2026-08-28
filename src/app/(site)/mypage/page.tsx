@@ -10,7 +10,6 @@ import {
   Headset,
   Pencil,
   Search,
-  Send,
   Sparkles,
   Star,
   Target,
@@ -22,7 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { labelDesiredStartTiming, labelEmploymentStatus, labelRegion, labelWorkType } from "@/lib/labels";
-import { getJobRepository, getSupportAssessmentSessionRepository, getSupportProgramRepository } from "@/lib/repositories";
+import { formatSalary } from "@/lib/salary";
+import {
+  getJobRepository,
+  getMatchResultRepository,
+  getSupportAssessmentSessionRepository,
+  getSupportProgramRepository,
+} from "@/lib/repositories";
 import { activityEventLogger } from "@/lib/activity/event-logger";
 import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-search.service";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
@@ -31,8 +36,8 @@ import { getUserCrmDetail } from "@/services/user-crm.service";
 import { requireUser, isAdminRole } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
-import { SUPPORT_CATEGORY_LABELS } from "@/types";
-import type { Job, SupportProgram } from "@/types";
+import { SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
+import type { Job, MatchResult, SupportEligibilityGrade, SupportProgram } from "@/types";
 
 interface MyPageJobData {
   bookmarked: Job[];
@@ -80,23 +85,29 @@ interface MyPageSupportData {
   applyHistory: { program: SupportProgram; occurredAt: string }[];
   bookmarkCount: number;
   applyCount: number;
+  /** 진단이 "받을 만하다"고 꼽아준 제도 상위 몇 건. 결과 화면과 같은 값(match_results)을 읽는다. */
+  topMatches: { program: SupportProgram; grade?: MatchResult["grade"] }[];
 }
 
 /** loadMyPageJobData와 동일한 철학으로 지원제도(STEP 5) 이력을 모은다. */
 async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData> {
   try {
-    const [bookmarkIds, events, sessions] = await Promise.all([
+    const [bookmarkIds, events, sessions, matches] = await Promise.all([
       getUserSupportBookmarkIdsAction(),
       activityEventLogger.getEventsByUser(userId),
       getSupportAssessmentSessionRepository().findAll({ userId, status: "completed" }),
+      getMatchResultRepository().findAll({ sourceId: userId, targetType: "support_program" }),
     ]);
 
     const supportRepo = getSupportProgramRepository();
     const applyEvents = events.filter((e) => e.eventType === "support_apply_clicked" && e.entityId).slice(0, 4);
 
-    const [bookmarked, applyPrograms] = await Promise.all([
+    const topMatchRows = [...matches].sort((a, b) => b.score - a.score).slice(0, 3);
+
+    const [bookmarked, applyPrograms, topPrograms] = await Promise.all([
       Promise.all(bookmarkIds.slice(0, 6).map((id) => supportRepo.findById(id))),
       Promise.all(applyEvents.map((e) => supportRepo.findById(e.entityId!))),
+      Promise.all(topMatchRows.map((m) => supportRepo.findById(m.targetId))),
     ]);
 
     const latestSession = [...sessions].sort((a, b) => ((a.completedAt ?? "") < (b.completedAt ?? "") ? 1 : -1))[0];
@@ -110,9 +121,13 @@ async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData>
         .filter((x): x is { program: SupportProgram; occurredAt: string } => Boolean(x.program)),
       bookmarkCount: bookmarkIds.length,
       applyCount: events.filter((e) => e.eventType === "support_apply_clicked" && e.entityId).length,
+      topMatches: topMatchRows.flatMap((m, i) => {
+        const program = topPrograms[i];
+        return program ? [{ program, grade: m.grade }] : [];
+      }),
     };
   } catch {
-    return { bookmarked: [], applyHistory: [], bookmarkCount: 0, applyCount: 0 };
+    return { bookmarked: [], applyHistory: [], bookmarkCount: 0, applyCount: 0, topMatches: [] };
   }
 }
 
@@ -166,12 +181,6 @@ export default async function MyPage() {
     그 내용이 있는 자리로 데려간다. 찜·지원은 아래 카드가 있을 때만 그 카드로 내려가고,
     없으면 채우러 갈 화면으로 보낸다.
   */
-  // 카드가 하나도 없으면 채용공고 묶음 자체를 그리지 않는다 (제목만 남는 빈 섹션 방지).
-  const hasJobActivity =
-    jobData.recommended.length > 0 ||
-    jobData.bookmarked.length > 0 ||
-    jobData.applyHistory.length > 0;
-
   const stats = [
     {
       key: "resume",
@@ -191,9 +200,9 @@ export default async function MyPage() {
     },
     {
       key: "jobBookmark",
-      label: "찜한 공고",
+      label: "찜한 일자리",
       value: jobData.bookmarkCount,
-      href: jobData.bookmarked.length > 0 ? "#bookmarked-jobs" : "/jobs",
+      href: "#bookmarked-jobs",
       icon: Star,
       tone: "bg-amber-50 text-amber-500",
     },
@@ -201,19 +210,16 @@ export default async function MyPage() {
       key: "supportBookmark",
       label: "찜한 지원금",
       value: supportData.bookmarkCount,
-      href: supportData.bookmarked.length > 0 ? "#bookmarked-support" : "/support",
+      href: "#bookmarked-support",
       icon: Gift,
       tone: "bg-emerald-50 text-emerald-600",
     },
-    {
-      key: "apply",
-      label: "지원한 곳",
-      value: jobData.applyCount + supportData.applyCount,
-      href: jobData.applyHistory.length > 0 ? "#apply-history" : "/jobs",
-      icon: Send,
-      tone: "bg-rose-50 text-rose-500",
-    },
   ];
+  /*
+    "지원한 곳"은 세지 않는다. 이 사이트에서 지원까지 하는 것이 아니라 지원 페이지로
+    보내주기만 하므로, 숫자로 세면 여기서 지원한 것처럼 읽힌다. 아래 이력 카드는
+    "지원 페이지로 이동한" 이라고 밝혀 적으므로 그대로 둔다.
+  */
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
@@ -244,7 +250,7 @@ export default async function MyPage() {
         요약 줄. 칸 사이는 테두리 대신 1px 틈으로 가른다 - 테두리를 칸마다 두면
         가운데 선이 두 겹으로 겹친다.
       */}
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border sm:grid-cols-4">
         {stats.map((stat, idx) => (
           <Link
             key={stat.key}
@@ -273,7 +279,111 @@ export default async function MyPage() {
         옆자리가 비었다. 목록 카드는 이제 한 칸을 다 써서 공고 제목도 덜 잘린다.
       */}
       <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-start">
-        <div className="min-w-0 flex-1 space-y-10">
+        {/*
+          늘 같은 자리에 있어야 하는 것들. 내 정보는 확인하러 오는 값이라 본문 흐름에
+          섞이면 매번 찾아야 하고, 바로가기는 여기서 다음에 갈 곳을 고르는 자리다.
+
+          본문과 마찬가지로 제목을 얹는다. 한쪽만 제목이 있으면 그만큼 아래로 밀려
+          두 칸의 첫 상자가 어긋난 채로 시작한다.
+          긴 본문을 내려도 따라오도록 화면에 붙여 둔다.
+
+          좁은 화면에서는 위아래로 쌓이므로 본문 뒤로 보낸다. 확인하러 오는 값이
+          맨 위를 차지하면 정작 볼 것이 한참 아래로 밀린다.
+        */}
+        <aside className="order-2 w-full lg:sticky lg:top-24 lg:order-1 lg:w-72 lg:shrink-0">
+          <h2 className="mb-4 text-body-1 font-bold text-slate-900">내 정보</h2>
+          <div className="space-y-4">
+            {/* A. 내 정보 */}
+            <Card className="rounded-xl border-0 ring-1 ring-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <UserRound className="size-4" /> 기본 정보
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-label-1 text-slate-600">
+                <p>
+                  <span className="text-slate-400">이름</span> · {profile.name ?? "-"}
+                </p>
+                <p>
+                  <span className="text-slate-400">이메일</span> · {profile.email ?? "-"}
+                </p>
+                <p>
+                  <span className="text-slate-400">휴대전화번호</span> · {formatPhone(profile.phone)}
+                </p>
+                <p>
+                  <span className="text-slate-400">가입일</span> · {profile.createdAt.slice(0, 10)}
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* B. 취업 프로필 */}
+            <Card className="rounded-xl border-0 ring-1 ring-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <Briefcase className="size-4" /> 취업 프로필
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 text-label-1 text-slate-600">
+                <p>
+                  <span className="text-slate-400">취업상태</span> · {labelEmploymentStatus(careerProfile?.employmentStatus)}
+                </p>
+                <p>
+                  <span className="text-slate-400">희망지역</span> · {labelRegion(careerProfile?.region)}
+                </p>
+                <p>
+                  <span className="text-slate-400">희망근무형태</span> ·{" "}
+                  {careerProfile?.desiredWorkTypes && careerProfile.desiredWorkTypes.length > 0
+                    ? careerProfile.desiredWorkTypes.map((t) => labelWorkType(t)).join(", ")
+                    : "-"}
+                </p>
+                <p>
+                  <span className="text-slate-400">희망급여</span> ·{" "}
+                  {careerProfile?.desiredSalaryMin || careerProfile?.desiredSalaryMax
+                    ? `${careerProfile?.desiredSalaryMin ?? "-"} ~ ${careerProfile?.desiredSalaryMax ?? "-"}만원`
+                    : "-"}
+                </p>
+                <p>
+                  <span className="text-slate-400">희망 취업시기</span> · {labelDesiredStartTiming(careerProfile?.desiredStartTiming)}
+                </p>
+                <p>
+                  <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
+                </p>
+                {/* Lead 등급·점수는 영업용 내부 지표다. 본인 화면이라도 일반 회원에게는 노출하지 않는다. */}
+                {lead && isAdminRole(user.role) && (
+                  <p className="pt-1">
+                    <span className="text-slate-400">Lead</span> ·{" "}
+                    <Badge className="rounded-md border-0 bg-brand-blue-50 text-label-2 text-brand-blue-700">
+                      {lead.score.grade}등급 {lead.score.totalScore}점
+                    </Badge>
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="rounded-xl border-0 ring-1 ring-border">
+            <CardHeader>
+              <CardTitle className="text-body-2">바로가기</CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-2">
+              {SHORTCUTS.map((shortcut) => (
+                <Link
+                  key={shortcut.href}
+                  href={shortcut.href}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-xl px-2 py-4 text-center text-label-1 text-slate-600",
+                    interactiveRowClass,
+                  )}
+                >
+                  <shortcut.icon className="size-5 text-brand-blue-600" />
+                  {shortcut.label}
+                </Link>
+              ))}
+            </CardContent>
+            </Card>
+          </div>
+        </aside>
+
+        <div className="order-1 min-w-0 flex-1 space-y-10 lg:order-2">
         <section>
           <h2 className="mb-4 text-body-1 font-bold text-slate-900">취업 준비</h2>
           <div className="space-y-4">
@@ -402,15 +512,14 @@ export default async function MyPage() {
           </div>
         </section>
 
-        {hasJobActivity && (
-          <section>
-            <h2 className="mb-4 text-body-1 font-bold text-slate-900">채용공고</h2>
+        <section>
+            <h2 className="mb-4 text-body-1 font-bold text-slate-900">일자리</h2>
             <div className="space-y-4">
               {/* D. 채용공고 */}
               {jobData.recommended.length > 0 && (
                 <Card className="rounded-xl border-0 ring-1 ring-border">
                   <CardHeader>
-                    <CardTitle className="text-body-2">맞춤 채용공고</CardTitle>
+                    <CardTitle className="text-body-2">맞춤 일자리</CardTitle>
                   </CardHeader>
                   {/* 카드가 반 칸이 되어 2열로 나누면 공고 제목이 심하게 잘린다. 다른 목록 카드와 같이 한 열로 둔다. */}
                   <CardContent className="space-y-1.5 text-label-1 text-slate-600">
@@ -428,31 +537,53 @@ export default async function MyPage() {
                 </Card>
               )}
 
-              {jobData.bookmarked.length > 0 && (
-                <Card id="bookmarked-jobs" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
-                  <CardHeader>
-                    <CardTitle className="text-body-2">찜한 채용공고</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-1.5 text-label-1 text-slate-600">
-                    {jobData.bookmarked.map((job) => (
+              {/*
+                찜한 것이 없다고 카드를 통째로 감추면, 맨 위 요약에서 "찜한 공고 0"을 보고
+                내려온 사람이 그 자리에서 아무것도 못 찾는다. 없으면 없다고 적어준다.
+              */}
+              <Card id="bookmarked-jobs" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
+                <CardHeader>
+                  <CardTitle className="text-body-2">찜한 일자리</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+                  {jobData.bookmarked.length === 0 ? (
+                    <p className="text-slate-400">
+                      아직 찜한 일자리가 없어요.{" "}
+                      <Link href="/jobs" className="font-semibold text-brand-blue-600 hover:underline">
+                        일자리 찾아보기 →
+                      </Link>
+                    </p>
+                  ) : (
+                    jobData.bookmarked.map((job) => (
                       <Link
                         key={job.id}
                         href={`/jobs/${job.id}`}
-                        className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveRowClass)}
+                        className={cn("block rounded-lg bg-slate-50 px-3 py-2.5", interactiveRowClass)}
                       >
-                        <span className="truncate font-medium text-slate-700">{job.title}</span>
-                        <span className="shrink-0 text-slate-400">{job.companyName}</span>
+                        {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "모집합니 / 다." 처럼 끊긴다. */}
+                        <p className="line-clamp-2 break-keep font-medium text-slate-800">{job.title}</p>
+                        <p className="mt-1 truncate text-label-2 text-slate-500">
+                          {[job.companyName, job.regionSigungu ?? labelRegion(job.region)]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                        <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-2">
+                          <span className="font-semibold text-brand-blue-600">{formatSalary(job)}</span>
+                          {job.applyDeadline && (
+                            <span className="text-slate-400">마감 {job.applyDeadline.slice(5, 10).replace("-", ".")}</span>
+                          )}
+                        </p>
                       </Link>
-                    ))}
-                  </CardContent>
-                </Card>
-              )}
+                    ))
+                  )}
+                </CardContent>
+              </Card>
 
               {jobData.applyHistory.length > 0 && (
                 <Card id="apply-history" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-1.5 text-body-2">
-                      <Briefcase className="size-4" /> 지원 페이지로 이동한 공고
+                      <Briefcase className="size-4" /> 지원 페이지로 이동한 일자리
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-1.5 text-label-1 text-slate-600">
@@ -476,8 +607,7 @@ export default async function MyPage() {
                 </Card>
               )}
             </div>
-          </section>
-        )}
+        </section>
 
         <section>
           <h2 className="mb-4 text-body-1 font-bold text-slate-900">지원제도</h2>
@@ -493,6 +623,24 @@ export default async function MyPage() {
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   {supportData.latestCompletedAt && (
                     <p className="text-slate-400">검사일 · {supportData.latestCompletedAt.slice(0, 10)}</p>
+                  )}
+                  {/* 검사일과 버튼만 있으면 무엇이 나왔는지 다시 들어가 봐야 안다. 직업진단처럼 상위 몇 건을 적는다. */}
+                  {supportData.topMatches.length > 0 && (
+                    <div className="space-y-1.5">
+                      {supportData.topMatches.map(({ program, grade }) => (
+                        <div
+                          key={program.id}
+                          className="flex items-center justify-between gap-2 rounded-lg bg-slate-50 px-3 py-2"
+                        >
+                          <span className="truncate font-medium text-slate-700">{program.title}</span>
+                          {grade && (
+                            <Badge variant="outline" className="shrink-0 rounded-full text-label-2 text-slate-500">
+                              {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade as SupportEligibilityGrade] ?? grade}
+                            </Badge>
+                          )}
+                        </div>
+                      ))}
+                    </div>
                   )}
                   <Button variant="outline" className="mt-auto w-full" asChild>
                     <Link href={`/support/result/${supportData.latestSessionId}`}>
@@ -518,27 +666,45 @@ export default async function MyPage() {
               </Card>
             )}
 
-            {supportData.bookmarked.length > 0 && (
-              <Card id="bookmarked-support" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
-                <CardHeader>
-                  <CardTitle className="text-body-2">찜한 지원제도</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1.5 text-label-1 text-slate-600">
-                  {supportData.bookmarked.map((program) => (
+            <Card id="bookmarked-support" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
+              <CardHeader>
+                <CardTitle className="text-body-2">찜한 지원제도</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+                {supportData.bookmarked.length === 0 ? (
+                  <p className="text-slate-400">
+                    아직 찜한 지원제도가 없어요.{" "}
+                    <Link href="/support" className="font-semibold text-brand-blue-600 hover:underline">
+                      지원금 찾아보기 →
+                    </Link>
+                  </p>
+                ) : (
+                  supportData.bookmarked.map((program) => (
                     <Link
                       key={program.id}
                       href={`/support/${program.id}`}
-                      className={cn("flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2", interactiveRowClass)}
+                      className={cn("block rounded-lg bg-slate-50 px-3 py-2.5", interactiveRowClass)}
                     >
-                      <span className="truncate font-medium text-slate-700">{program.title}</span>
-                      <Badge variant="outline" className="shrink-0 rounded-full text-label-2 text-slate-500">
-                        {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
-                      </Badge>
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="line-clamp-2 break-keep font-medium text-slate-800">{program.title}</p>
+                        <Badge variant="outline" className="shrink-0 rounded-full text-label-2 text-slate-500">
+                          {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
+                        </Badge>
+                      </div>
+                      <p className="mt-1 truncate text-label-2 text-slate-500">
+                        {program.organizationName ?? program.organization}
+                      </p>
+                      <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-2">
+                        {program.supportAmountText && (
+                          <span className="font-semibold text-brand-blue-600">{program.supportAmountText}</span>
+                        )}
+                        <span className="text-slate-400">신청 {program.applicationPeriod ?? "상시"}</span>
+                      </p>
                     </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
+                  ))
+                )}
+              </CardContent>
+            </Card>
 
             {supportData.applyHistory.length > 0 && (
               <Card className="rounded-xl border-0 ring-1 ring-border">
@@ -571,99 +737,6 @@ export default async function MyPage() {
         </section>
         </div>
 
-        {/*
-          늘 같은 자리에 있어야 하는 것들. 내 정보는 확인하러 오는 값이라 본문 흐름에
-          섞이면 매번 찾아야 하고, 바로가기는 여기서 다음에 갈 곳을 고르는 자리다.
-        */}
-        <aside className="w-full space-y-4 lg:w-80 lg:shrink-0">
-            {/* A. 내 정보 */}
-            <Card className="rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
-                  <UserRound className="size-4" /> 내 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-label-1 text-slate-600">
-                <p>
-                  <span className="text-slate-400">이름</span> · {profile.name ?? "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">이메일</span> · {profile.email ?? "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">휴대전화번호</span> · {formatPhone(profile.phone)}
-                </p>
-                <p>
-                  <span className="text-slate-400">가입일</span> · {profile.createdAt.slice(0, 10)}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* B. 취업 프로필 */}
-            <Card className="rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
-                  <Briefcase className="size-4" /> 취업 프로필
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-label-1 text-slate-600">
-                <p>
-                  <span className="text-slate-400">취업상태</span> · {labelEmploymentStatus(careerProfile?.employmentStatus)}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망지역</span> · {labelRegion(careerProfile?.region)}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망근무형태</span> ·{" "}
-                  {careerProfile?.desiredWorkTypes && careerProfile.desiredWorkTypes.length > 0
-                    ? careerProfile.desiredWorkTypes.map((t) => labelWorkType(t)).join(", ")
-                    : "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망급여</span> ·{" "}
-                  {careerProfile?.desiredSalaryMin || careerProfile?.desiredSalaryMax
-                    ? `${careerProfile?.desiredSalaryMin ?? "-"} ~ ${careerProfile?.desiredSalaryMax ?? "-"}만원`
-                    : "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망 취업시기</span> · {labelDesiredStartTiming(careerProfile?.desiredStartTiming)}
-                </p>
-                <p>
-                  <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
-                </p>
-                {/* Lead 등급·점수는 영업용 내부 지표다. 본인 화면이라도 일반 회원에게는 노출하지 않는다. */}
-                {lead && isAdminRole(user.role) && (
-                  <p className="pt-1">
-                    <span className="text-slate-400">Lead</span> ·{" "}
-                    <Badge className="rounded-md border-0 bg-brand-blue-50 text-label-2 text-brand-blue-700">
-                      {lead.score.grade}등급 {lead.score.totalScore}점
-                    </Badge>
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-
-          <Card className="rounded-xl border-0 ring-1 ring-border">
-            <CardHeader>
-              <CardTitle className="text-body-2">바로가기</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-2">
-              {SHORTCUTS.map((shortcut) => (
-                <Link
-                  key={shortcut.href}
-                  href={shortcut.href}
-                  className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl px-2 py-4 text-center text-label-1 text-slate-600",
-                    interactiveRowClass,
-                  )}
-                >
-                  <shortcut.icon className="size-5 text-brand-blue-600" />
-                  {shortcut.label}
-                </Link>
-              ))}
-            </CardContent>
-          </Card>
-        </aside>
       </div>
     </div>
   );
