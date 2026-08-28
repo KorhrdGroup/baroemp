@@ -123,7 +123,7 @@ export function JobCard({
         )}
 
         {/* 지원금 카드와 같은 파이프 구분 메타 줄. 아이콘 없이 텍스트만 둬서 줄이 조용하다. */}
-        <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-4 text-label-1 text-slate-500">
+        <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-4 text-label-1 font-medium text-slate-500">
           {matchReasonLabel && (
             <>
               <span className="text-brand-blue-600">✓ {matchReasonLabel}</span>
