@@ -439,13 +439,11 @@ export function ResumeEditor({
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개</CardTitle>
                 {/*
-                  이 칸에 쓴 글을 고치는 게 아니라 아래 경력·자격·스킬을 재료로
-                  문장을 만들어 제안한다("AI 생성"은 빈손에서 지어내는 것처럼,
-                  "다듬기"는 쓴 글을 고치는 것처럼 읽혀 둘 다 맞지 않는다).
-                  항목별 "AI 다듬기"와도 하는 일이 달라 이름을 갈라 둔다.
+                  실제 동작은 아래 경력·자격·스킬을 재료로 문장을 만들어 제안하는 것이다.
+                  이 칸에 쓴 글 자체를 고치지는 않는다.
                 */}
                 <AiButton onClick={handleGenerateSummary} loading={isGeneratingSummary}>
-                  내 경력으로 추천받기
+                  AI로 다듬기
                 </AiButton>
               </CardHeader>
               <CardContent>
