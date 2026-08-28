@@ -184,12 +184,21 @@ async function getReadyToApplyTab(userId: string, ctx: PersonalContext) {
   // requirements/사용자 상태맵을 1회만 로드하고 공고별로는 순수 함수만 반복하는 배치 경로 사용
   const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
 
-  // 결과에서 blocked 아닌 것을 순서대로 골라 TAB_LIMIT개 추출
+  /*
+    "지금 지원가능"은 필수 요건이 하나도 걸리지 않는 공고만 담는다.
+    갖췄다고 확인된 것(SATISFIED)이 아니면 전부 뺀다.
+
+    예전에는 미충족이 확인된 것만 뺐는데, 자격을 등록하지 않은 회원은 모든 자격이
+    UNKNOWN 이라 "요양보호사 자격 필요" 배지가 붙은 공고가 이 탭에 그대로 들어왔다.
+    카드와 탭이 서로 다른 말을 한 셈이다.
+
+    이렇게 좁혀도 자격 요건이 아예 없는 공고가 대부분이라 탭이 비지 않는다.
+  */
   const items: JobCurationItem[] = [];
   for (const item of top) {
     if (items.length >= TAB_LIMIT) break;
     const comparison = comparisons.get(item.job.id) ?? [];
-    const blocked = comparison.some((c) => c.jobLevel === "REQUIRED" && c.userStatus === "NOT_SATISFIED");
+    const blocked = comparison.some((c) => c.jobLevel === "REQUIRED" && c.userStatus !== "SATISFIED");
     if (!blocked) items.push(item);
   }
 
