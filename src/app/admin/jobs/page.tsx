@@ -131,6 +131,11 @@ export default async function AdminJobsPage({
               현재 Provider · <span className="font-semibold text-slate-800">{syncOverview.providerName}</span>
               {syncOverview.isMock && <span className="ml-1.5 text-rose-600">(Mock Provider - WORK24_API_KEY 미설정)</span>}
             </p>
+            {/* 아래 "최근 동기화"는 그 회차의 실적일 뿐이라, 실제 보유 건수를 먼저 보여준다. */}
+            <p className="mt-1">
+              보유 공고 <span className="font-semibold text-slate-800">{syncOverview.totalJobCount.toLocaleString()}건</span>
+              <span className="text-slate-400"> · 노출중 {syncOverview.activeJobCount.toLocaleString()}건</span>
+            </p>
             {syncOverview.latestRun ? (
               <p className="mt-1 text-slate-500">
                 최근 동기화 · {syncOverview.latestRun.completedAt?.slice(0, 16).replace("T", " ") ?? "진행중"} ·{" "}
@@ -192,6 +197,12 @@ export default async function AdminJobsPage({
             </Link>
           ))}
         </div>
+
+        {/* 목록은 최신 500건만 불러온다(6만+건 전체 조회는 타임아웃). 전체 건수는 상단에 표시한다. */}
+        <p className="text-label-2 text-slate-400">
+          최신 {jobs.length.toLocaleString()}건 표시 (필터 적용 {filtered.length.toLocaleString()}건) · 전체{" "}
+          {syncOverview.totalJobCount.toLocaleString()}건
+        </p>
 
         <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
           <div className="overflow-x-auto">
