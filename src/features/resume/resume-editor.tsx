@@ -331,6 +331,13 @@ export function ResumeEditor({
   const [skillDraft, setSkillDraft] = useState("");
 
   /**
+   * 한 줄 소개를 만들 재료가 있는지. AI 는 경력·자격·스킬을 읽어 문장을 만든다
+   * (generateCareerSummaryWithAI). 셋 다 비어 있으면 만들 것이 없다.
+   */
+  const hasSummaryMaterial = experiences.length + qualifications.length + skills.length > 0;
+
+
+  /**
    * 경력/학력 항목의 편집 상태. 작성이 끝난 항목은 폼 대신 정리된 요약 카드로 보여주고,
    * 연필을 눌렀거나 방금 추가한 항목만 폼을 펼친다.
    */
@@ -630,16 +637,17 @@ export function ResumeEditor({
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
                 {/*
-                  실제 동작은 아래 경력·자격·스킬을 재료로 문장을 만들어 제안하는 것이다.
-                  이 칸에 쓴 글 자체를 고치지는 않는다.
+                  이 버튼은 이 칸에 쓴 글을 고치는 것이 아니라, 경력·자격·스킬을 재료로
+                  문장을 만들어 제안한다. "다듬기"라고 부르면 쓴 글을 손봐주는 줄 알고
+                  빈 칸에서 누르게 되고, 재료가 없으면 아무것도 못 만든다.
+                  이름으로 무엇을 재료 삼는지 밝히고, 재료가 없으면 누를 수 없게 한다.
                 */}
                 <AiButton
                   onClick={handleGenerateSummary}
                   loading={isGeneratingSummary}
-                  /* 다듬을 글이 없으면 누를 수 없다. 빈 칸에서 눌러도 할 일이 없다. */
-                  disabled={!form.summary.trim()}
+                  disabled={!hasSummaryMaterial}
                 >
-                  AI로 다듬기
+                  내 경력으로 문장 만들기
                 </AiButton>
               </CardHeader>
               <CardContent>
@@ -649,6 +657,12 @@ export function ResumeEditor({
                   onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
                   rows={3}
                 />
+                {/* 버튼이 왜 잠겨 있는지 버튼 옆에서 바로 알 수 있어야 한다. */}
+                {!hasSummaryMaterial && (
+                  <p className="mt-2 text-label-1 text-slate-500">
+                    아래 경력·자격·스킬을 하나라도 채우시면, 그 내용으로 이 문장을 만들어드려요.
+                  </p>
+                )}
                 {summarySuggestion && (
                   <div className="mt-2 rounded-lg bg-brand-blue-50 p-3 text-label-1">
                     <p className="text-slate-700">{summarySuggestion}</p>
