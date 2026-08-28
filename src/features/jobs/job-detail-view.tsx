@@ -88,7 +88,7 @@ export function JobDetailView({
         )}
       </div>
 
-      <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">{job.title}</h1>
+      <h1 className="break-keep text-balance text-title-2 font-bold text-slate-900 sm:text-headline-3">{job.title}</h1>
       <p className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
         <Building2 className="size-4" />
         {job.companyName}
