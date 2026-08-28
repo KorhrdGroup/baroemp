@@ -2,15 +2,19 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, FileText, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Eye, FileText, Loader2, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillPicker } from "@/components/common/pill-picker";
+import { CoverLetterPreview } from "./cover-letter-preview";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AiButton } from "@/components/common/ai-button";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
@@ -64,6 +68,9 @@ export function CoverLetterEditor({
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, { text: string; prompts: string[] }>>({});
   const [isChangingTemplate, startTemplateChange] = useTransition();
+  // 양식을 바꾸면 새 양식에 없는 문항의 답이 사라져 먼저 확인을 받는다.
+  const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const marketComparisonRequestedRef = useRef(false);
 
@@ -73,18 +80,20 @@ export function CoverLetterEditor({
    * 새 양식에 없는 문항의 답변은 사라지므로 먼저 확인을 받는다.
    */
   function handleTemplateChange(templateId: string) {
-    const coverLetter = detail.coverLetter;
-    if (templateId === coverLetter.templateId) return;
+    if (templateId === detail.coverLetter.templateId) return;
 
-    const written = sections.filter((s) => s.content?.trim());
-    if (written.length > 0) {
-      const ok = window.confirm(
-        "양식을 바꾸면 문항 구성이 새 양식으로 교체됩니다.\n" +
-          "같은 종류의 문항에 쓴 내용은 그대로 옮겨지지만, 새 양식에 없는 문항의 내용은 사라집니다.\n\n" +
-          "계속할까요?",
-      );
-      if (!ok) return;
+    // 쓴 내용이 있으면 먼저 확인을 받는다. 없으면 잃을 것이 없어 바로 바꾼다.
+    if (sections.some((s) => s.content?.trim())) {
+      setConfirmingTemplateId(templateId);
+      return;
     }
+    applyTemplateChange(templateId);
+  }
+
+  function applyTemplateChange(templateId: string) {
+    const coverLetter = detail.coverLetter;
+    const written = sections.filter((s) => s.content?.trim());
+    setConfirmingTemplateId(null);
 
     startTemplateChange(async () => {
       // 답변 이관은 서버에 저장된 내용을 기준으로 한다.
@@ -195,8 +204,35 @@ export function CoverLetterEditor({
   }
 
 
+  /** 저장 전 상태 그대로 보여준다. 저장해야만 미리보기가 맞는 건 불편하다. */
+  function currentPreviewDetail(): CoverLetterDetail {
+    return {
+      ...detail,
+      coverLetter: { ...detail.coverLetter, title },
+      sections: sections.map((sec, idx) => ({
+        ...sec,
+        id: sec._key,
+        coverLetterId: detail.coverLetter.id,
+        content: sec.content ?? "",
+        orderIndex: sec.orderIndex ?? idx,
+      })),
+    } as CoverLetterDetail;
+  }
+
+  /** 팝업 오버레이가 인쇄물에 끼지 않도록 닫힘 애니메이션이 끝난 뒤 인쇄한다. */
+  function handlePopupPrint() {
+    setPreviewOpen(false);
+    setTimeout(() => window.print(), 200);
+  }
+
+  // 진행률은 답을 쓴 문항 수로 센다. 화면에서 바로 세어지는 값이라 설명이 필요 없다.
+  const writtenCount = sections.filter((sec) => sec.content?.trim()).length;
+  const writtenRatio = sections.length > 0 ? Math.round((writtenCount / sections.length) * 100) : 0;
+  const firstEmptyIndex = sections.findIndex((sec) => !sec.content?.trim());
+
   return (
-    <div className="space-y-4">
+    // 설정 줄(양식 선택)과 문서 사이만 넓게 띄운다. 이력서 편집과 같은 간격.
+    <div className="space-y-6">
       <PillPicker
         label="자기소개서 양식"
         icon={<FileText className="size-4 text-brand-blue-600" />}
@@ -210,6 +246,7 @@ export function CoverLetterEditor({
         pending={isChangingTemplate}
       />
 
+      <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4">
         <div className="min-w-48 flex-1">
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
@@ -240,7 +277,11 @@ export function CoverLetterEditor({
                 <Input
                   value={section.question}
                   onChange={(e) => updateSection(section._key, { question: e.target.value })}
-                  className="mt-1 h-10 border-0 bg-transparent px-0 text-body-2 font-bold shadow-none focus-visible:ring-0"
+                  /*
+                    Input 기본 클래스에 md:text-label-1 이 있어 넓은 화면에서는
+                    그쪽이 이긴다. 반응형 단계까지 함께 지정해야 크기가 적용된다.
+                  */
+                  className="mt-1 h-11 border-0 bg-transparent px-0 text-body-1 font-semibold shadow-none focus-visible:ring-0 md:text-body-1"
                 />
               </div>
               <div className="flex items-center gap-1">
@@ -366,6 +407,7 @@ export function CoverLetterEditor({
       >
         <Plus className="size-4" /> 문항 추가
       </Button>
+      </div>
 
       {/*
         이력서 편집기와 동일한 구조. 왼쪽은 문서를 벗어나는 동작(목록으로)이라 ghost로 눌러두고,
@@ -379,9 +421,29 @@ export function CoverLetterEditor({
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
           </Button>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+          {/*
+            이력서와 같은 자리에 진행 막대를 둔다. 자기소개서에는 완성도 점수가
+            없으므로 "답을 쓴 문항 수"를 그대로 쓴다. 남은 문항 번호를 함께 적어
+            다음에 무엇을 채울지 알게 한다.
+          */}
+          <div className="mx-4 hidden min-w-0 flex-1 sm:block">
+            <div className="flex items-center justify-between gap-2 text-label-2">
+              <span className="truncate text-slate-500">
+                {firstEmptyIndex >= 0 ? `다음: 문항 ${firstEmptyIndex + 1}` : "모든 문항을 채웠어요"}
+              </span>
+              <span className="shrink-0 font-semibold text-slate-600">
+                {writtenCount}/{sections.length}문항
+              </span>
+            </div>
+            <Progress value={writtenRatio} className="mt-1 h-1.5" />
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
             {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
             {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
+            <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
+              <Eye className="size-4" /> 미리보기
+            </Button>
             <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
               {isSaving && <Loader2 className="size-4 animate-spin" />}
               저장
@@ -389,6 +451,33 @@ export function CoverLetterEditor({
           </div>
         </div>
       </div>
+
+      {/* 이력서와 같은 방식. 입력 폭을 좁히지 않도록 팝업으로 띄우고 인쇄로 PDF 저장한다. */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="print:hidden sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>미리보기</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border">
+            <CoverLetterPreview detail={currentPreviewDetail()} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handlePopupPrint}>
+              <Printer className="size-4" /> PDF로 저장/인쇄
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={confirmingTemplateId !== null}
+        onOpenChange={(next) => !next && setConfirmingTemplateId(null)}
+        title="양식을 바꿀까요?"
+        description="같은 종류의 문항에 쓴 내용은 그대로 옮겨지지만, 새 양식에 없는 문항의 내용은 사라집니다."
+        confirmLabel="양식 바꾸기"
+        pending={isChangingTemplate}
+        onConfirm={() => confirmingTemplateId && applyTemplateChange(confirmingTemplateId)}
+      />
     </div>
   );
 }

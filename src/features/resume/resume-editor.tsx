@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResumeAgentPicker, type ResumeAgentOption } from "./resume-agent-picker";
 import { AiButton } from "@/components/common/ai-button";
@@ -41,6 +42,7 @@ import {
   saveResumeAction,
   trackResumeExportedAction,
 } from "./resume-actions";
+import { calculateResumeCompleteness } from "@/lib/resume/completeness";
 import { ResumePreview } from "./resume-preview";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
@@ -98,12 +100,17 @@ const GED_SCHOOL_NAME = "대입자격검정고시";
 const SIMPLE_EDUCATION_TYPES = new Set<string>(["고등학교", GED_TYPE]);
 const GRADUATION_STATUSES = ["졸업", "졸업예정", "재학중", "휴학", "중퇴", "수료"] as const;
 
+/**
+ * "기타" 항목의 종류. 자주 쓰는 것을 앞에 둔다.
+ * 교육 이수는 여기 두지 않는다 - 전용 "교육/훈련" 섹션이 과정명과 교육기관을
+ * 따로 받으므로, 여기에도 두면 같은 내용을 두 군데 쓰게 된다.
+ */
 const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   AWARD: "수상",
-  PROJECT: "프로젝트",
-  ACTIVITY: "대외활동",
   VOLUNTEER: "봉사활동",
   LANGUAGE: "외국어",
+  ACTIVITY: "대외활동",
+  PROJECT: "프로젝트",
 };
 
 export function ResumeEditor({
@@ -203,6 +210,14 @@ export function ResumeEditor({
       items: items.map((i) => ({ ...i, id: i._key, resumeId: resume.id, orderIndex: i.orderIndex ?? 0 })),
     } as ResumeDetail;
   }
+
+  /*
+    완성도는 저장할 때 서버가 다시 계산하지만, 채우는 즉시 반응해야 진행이 보인다.
+    서버와 같은 함수(calculateResumeCompleteness)에 현재 입력값을 그대로 넣어
+    두 값이 어긋나지 않게 한다. 가중치가 0인 항목(프로젝트·대외활동)은 애초에
+    빠져 있어 필수 항목만 센다.
+  */
+  const liveCompleteness = calculateResumeCompleteness(currentPreviewDetail());
 
   function handleSave(): Promise<ResumeDetail> {
     return new Promise((resolve, reject) => {
@@ -315,12 +330,21 @@ export function ResumeEditor({
   return (
     // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
     <div className="space-y-6">
+      {/*
+        점검은 이력서 전체를 보는 기능이고 그 기준을 정하는 것이 여기서 고른 에이전트라,
+        버튼을 카드 밖에 두지 않고 같은 상자 오른쪽에 넣는다.
+      */}
       <div className="print:hidden">
         <ResumeAgentPicker
           agents={templates}
           value={resume.templateId ?? undefined}
           onChange={handleTemplateChange}
           pending={isChangingTemplate}
+          action={
+            <AiButton onClick={handleReview} loading={isReviewing}>
+              이력서 전체 점검
+            </AiButton>
+          }
         />
       </div>
 
@@ -337,14 +361,6 @@ export function ResumeEditor({
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               className="mt-1"
             />
-          </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="rounded-full">
-              완성도 {detail.resume.completeness}%
-            </Badge>
-            <AiButton onClick={handleReview} loading={isReviewing}>
-              AI 점검
-            </AiButton>
           </div>
         </div>
 
@@ -402,16 +418,16 @@ export function ResumeEditor({
           {showSection("BASIC_INFO") && (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
-                <CardTitle className="text-body-2">기본정보</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">기본정보</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
-                <Field label="이름">
+                <Field label="이름" required>
                   <CompactInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
                 </Field>
-                <Field label="이메일">
+                <Field label="이메일" required>
                   <CompactInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
                 </Field>
-                <Field label="전화번호">
+                <Field label="전화번호" required>
                   <CompactInput value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
                 </Field>
                 <Field label="주소/거주지역">
@@ -430,9 +446,13 @@ export function ResumeEditor({
           {showSection("SUMMARY") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
+                {/*
+                  실제 동작은 아래 경력·자격·스킬을 재료로 문장을 만들어 제안하는 것이다.
+                  이 칸에 쓴 글 자체를 고치지는 않는다.
+                */}
                 <AiButton onClick={handleGenerateSummary} loading={isGeneratingSummary}>
-                  AI 생성
+                  AI로 다듬기
                 </AiButton>
               </CardHeader>
               <CardContent>
@@ -462,10 +482,11 @@ export function ResumeEditor({
           {showSection("EXPERIENCE") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-2">경력</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("exp");
                     setExperiences((prev) => [...prev, { _key: key, companyName: "", isCurrent: false, orderIndex: prev.length }]);
@@ -517,7 +538,7 @@ export function ResumeEditor({
                       <Checkbox checked={exp.isCurrent} onCheckedChange={(v) => updateAt(setExperiences, exp._key, { isCurrent: Boolean(v) })} />
                       현재 재직중
                     </label>
-                    <Field label="어떤 일을 하셨나요? (예: 고객상담, 거래처 관리, 문서작성)">
+                    <Field label="어떤 일을 하셨나요? (예: 고객상담, 거래처 관리, 문서작성)" required>
                       <Textarea
                         className="bg-white"
                         value={exp.responsibilities ?? ""}
@@ -526,7 +547,7 @@ export function ResumeEditor({
                       />
                       <AiButton
                         size="xs"
-                        className="mt-1"
+                        className="mt-1 ml-auto flex w-fit"
                         onClick={() => openRewrite(exp._key, "responsibilities", exp.responsibilities ?? "")}
                         loading={rewritePending?.key === exp._key && rewritePending.field === "responsibilities"}
                       >
@@ -542,7 +563,7 @@ export function ResumeEditor({
                       />
                       <AiButton
                         size="xs"
-                        className="mt-1"
+                        className="mt-1 ml-auto flex w-fit"
                         onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")}
                         loading={rewritePending?.key === exp._key && rewritePending.field === "achievements"}
                       >
@@ -591,10 +612,11 @@ export function ResumeEditor({
           {showSection("EDUCATION") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-2">학력</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">학력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("edu");
                     setEducations((prev) => [...prev, { _key: key, schoolName: "", orderIndex: prev.length }]);
@@ -740,10 +762,11 @@ export function ResumeEditor({
           {showSection("QUALIFICATION") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-2">보유 자격</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">보유 자격</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("qual");
                     setQualifications((prev) => [...prev, { _key: key, name: "", orderIndex: prev.length }]);
@@ -757,8 +780,8 @@ export function ResumeEditor({
                 {qualifications.length === 0 && <p className="text-label-1 text-slate-400">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
                 {qualifications.map((q, idx) => (
                   isEntryEditing(q._key) ? (
-                  <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-4">
-                    <Field label={`자격명 ${idx + 1}`}>
+                  <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_1fr_auto]">
+                    <Field label="자격명">
                       <CompactInput value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
                     </Field>
                     <Field label="발급기관">
@@ -794,7 +817,7 @@ export function ResumeEditor({
           {showSection("SKILLS") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader>
-                <CardTitle className="text-body-2">보유 스킬</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">보유 스킬</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
@@ -813,6 +836,7 @@ export function ResumeEditor({
                   <Button
                     variant="outline"
                     size="sm"
+                    className="text-slate-700"
                     onClick={() => {
                       if (!skillDraft.trim()) return;
                       setSkills((prev) => [...prev, { _key: nextKey("skill"), name: skillDraft.trim(), orderIndex: prev.length }]);
@@ -824,9 +848,17 @@ export function ResumeEditor({
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {skills.map((s) => (
-                    <Badge key={s._key} variant="secondary" className="gap-1 rounded-full py-1.5">
+                    <Badge
+                      key={s._key}
+                      /* 직접 넣은 값이라 회색보다 눈에 들어와야 하고, 옆 × 를 누르려면 손가락이 닿을 만큼은 커야 한다. */
+                      className="gap-1.5 rounded-full border-transparent bg-brand-blue-50 px-3 py-2 text-label-1 font-semibold text-brand-blue-700"
+                    >
                       {s.name}
-                      <button onClick={() => setSkills((prev) => prev.filter((x) => x._key !== s._key))} aria-label="삭제">
+                      <button
+                        onClick={() => setSkills((prev) => prev.filter((x) => x._key !== s._key))}
+                        aria-label={`${s.name} 삭제`}
+                        className="-mr-0.5 flex size-4 items-center justify-center rounded-full text-brand-blue-600 transition-colors hover:bg-brand-blue-100 hover:text-brand-blue-800"
+                      >
                         ×
                       </button>
                     </Badge>
@@ -839,10 +871,11 @@ export function ResumeEditor({
           {showSection("TRAINING") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-2">교육/훈련</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">교육/훈련</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("train");
                     setTrainings((prev) => [...prev, { _key: key, courseName: "", orderIndex: prev.length }]);
@@ -855,12 +888,27 @@ export function ResumeEditor({
               <CardContent className="space-y-3">
                 {trainings.map((t, idx) => (
                   isEntryEditing(t._key) ? (
-                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-3">
-                    <Field label={`과정명 ${idx + 1}`}>
+                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_auto_auto_auto]">
+                    <Field label="과정명">
                       <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
                     </Field>
                     <Field label="교육기관">
                       <CompactInput value={t.institution ?? ""} onChange={(e) => updateAt(setTrainings, t._key, { institution: e.target.value })} />
+                    </Field>
+                    {/* 다른 항목과 같이 연월만 받는다. 수료 시기가 없으면 최근 교육인지 알 수 없다. */}
+                    <Field label="시작">
+                      <CompactInput
+                        type="month"
+                        value={toMonth(t.startDate)}
+                        onChange={(e) => updateAt(setTrainings, t._key, { startDate: toDbDate(e.target.value) })}
+                      />
+                    </Field>
+                    <Field label="수료">
+                      <CompactInput
+                        type="month"
+                        value={toMonth(t.endDate)}
+                        onChange={(e) => updateAt(setTrainings, t._key, { endDate: toDbDate(e.target.value) })}
+                      />
                     </Field>
                     <div className="flex items-end justify-end gap-1">
                       <Button variant="outline" size="sm" onClick={() => setEntryEditing(t._key, false)}>
@@ -876,6 +924,7 @@ export function ResumeEditor({
                     key={t._key}
                     title={t.courseName || "과정명 미입력"}
                     subtitle={t.institution || undefined}
+                    meta={periodLabel(t.startDate, t.endDate) || undefined}
                     editLabel={`교육 ${idx + 1} 수정`}
                     onEdit={() => setEntryEditing(t._key, true)}
                   />
@@ -888,13 +937,14 @@ export function ResumeEditor({
           {(showSection("PROJECT") || showSection("ACTIVITY")) && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-2">기타 (수상/프로젝트/대외활동/봉사/외국어)</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">봉사·수상 등 추가 경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("item");
-                    setItems((prev) => [...prev, { _key: key, sectionType: "PROJECT", title: "", orderIndex: prev.length }]);
+                    setItems((prev) => [...prev, { _key: key, sectionType: "AWARD", title: "", orderIndex: prev.length }]);
                     setEntryEditing(key, true);
                   }}
                 >
@@ -905,10 +955,15 @@ export function ResumeEditor({
                 {items.length === 0 && <p className="text-label-1 text-slate-400">모든 사용자에게 필수는 아닙니다. 있으면 추가해주세요.</p>}
                 {items.map((item, idx) => (
                   isEntryEditing(item._key) ? (
-                  <div key={item._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-4">
+                  <div
+                    key={item._key}
+                    /* 칸마다 필요한 폭이 달라 4등분하지 않는다. 설명이 가장 길고 버튼은 제 크기면 된다. */
+                    className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[9rem_1fr_1.6fr_auto]"
+                  >
                     <Select value={item.sectionType} onValueChange={(v) => updateAt(setItems, item._key, { sectionType: v as ResumeItemSectionType })}>
-                      <CompactSelectTrigger className="w-fit">
-                        <SelectValue />
+                      <CompactSelectTrigger>
+                        {/* 저장된 값이 목록에 없으면 빈칸이 되어 무엇을 골라야 할지 알 수 없다. */}
+                        <SelectValue placeholder="종류 선택" />
                       </CompactSelectTrigger>
                       <SelectContent>
                         {Object.entries(ITEM_SECTION_LABELS).map(([value, label]) => (
@@ -968,7 +1023,25 @@ export function ResumeEditor({
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
           </Button>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+
+          {/*
+            완성도는 저장 버튼 옆에서 진행 막대로 보여준다. 상단 배지로 두면
+            한참 스크롤한 뒤에는 보이지 않아 얼마나 남았는지 알 수 없었다.
+            남은 항목 이름을 함께 적어 다음에 무엇을 채울지 바로 알게 한다.
+          */}
+          <div className="mx-4 hidden min-w-0 flex-1 sm:block">
+            <div className="flex items-center justify-between gap-2 text-label-2">
+              <span className="truncate text-slate-500">
+                {liveCompleteness.missing.length > 0
+                  ? `다음: ${liveCompleteness.missing[0].label}`
+                  : "필수 항목을 모두 채웠어요"}
+              </span>
+              <span className="shrink-0 font-semibold text-slate-600">{liveCompleteness.score}%</span>
+            </div>
+            <Progress value={liveCompleteness.score} className="mt-1 h-1.5" />
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
             {saveMessage && <span className="shrink-0 text-label-2 text-slate-400">{saveMessage}</span>}
             <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
               <Eye className="size-4" /> 미리보기
@@ -1000,10 +1073,33 @@ export function ResumeEditor({
   );
 }
 
-function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+/** 완성도에 세는 항목임을 알리는 별표. 섹션 제목과 입력칸 라벨에 함께 쓴다. */
+function RequiredMark() {
+  return (
+    <span className="ml-0.5 text-brand-blue-600" aria-label="필수 입력">
+      *
+    </span>
+  );
+}
+
+function Field({
+  label,
+  children,
+  className,
+  required,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+  /** 완성도에 세는 항목. 별표로 표시해 무엇부터 채워야 하는지 보이게 한다. */
+  required?: boolean;
+}) {
   return (
     <div className={cn("space-y-1", className)}>
-      <Label className="text-label-2 text-slate-500">{label}</Label>
+      <Label className="text-label-2 text-slate-500">
+        {label}
+        {required && <RequiredMark />}
+      </Label>
       {children}
     </div>
   );
@@ -1046,7 +1142,7 @@ function EntrySummaryCard({
       <div className="min-w-0 flex-1">
         {/* 짧은 정보는 세로로 쌓지 않고 한 줄에 나열한다. 기간·상태는 오른쪽 끝으로 보낸다. */}
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <p className="text-label-1 font-bold text-slate-900">{title}</p>
+          <p className="text-label-1 font-semibold text-slate-900">{title}</p>
           {subtitle && <p className="text-label-2 text-slate-600">{subtitle}</p>}
           {meta && <p className="ml-auto text-label-2 text-slate-400">{meta}</p>}
         </div>
