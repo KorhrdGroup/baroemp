@@ -5,6 +5,7 @@ import {
   Calendar,
   CheckCircle2,
   Clock,
+  ExternalLink,
   FileText,
   GraduationCap,
   HelpCircle,
@@ -33,7 +34,7 @@ import { BackButton } from "@/components/common/back-button";
 /**
  * evaluateJobFit 이 희망 조건과 함께 담는, 공고 요건 성격의 고정 라벨.
  * 아래 "공고가 요구하는 것" 묶음이 필수/우대까지 붙여 더 자세히 보여주므로
- * 위 "내가 바라는 조건"에서는 뺀다.
+ * 위 "희망 근무조건"에서는 뺀다.
  *
  * 요건 이름이 그대로 들어오는 항목은 requirementNames 로 따로 거른다.
  * "경력무관/신입가능" 은 요건 목록에 없어 여기 넣지 않는다 - 빼면 아무 데서도 안 보인다.
@@ -70,11 +71,37 @@ const COMPARISON_GROUPS = [
   head: string;
 }[];
 
-const REQUIREMENT_STATUS_STYLE: Record<string, { icon: LucideIcon; label: string; className: string }> = {
-  SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700" },
-  NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600" },
-  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600" },
-  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600" },
+/**
+ * 요건 행의 상태 표시.
+ * 바탕색은 위 "희망 근무조건" 카드와 같은 계열을 쓴다. 회색 바탕에 글자만
+ * 색을 넣으면 줄을 하나씩 읽어야 상태를 알 수 있다.
+ */
+
+/**
+ * 못 갖춘 자격의 준비 경로.
+ * 자격 종류(qualifications.type)에 따라 안내처가 다르다.
+ * 경험·스킬처럼 자격이 연결되지 않은 요건과 운전면허(OTHER)는 안내하지 않는다.
+ */
+const QUALIFICATION_PREP_URL: Record<string, string> = {
+  NATIONAL_LICENSE: "https://www.hpsedu.co.kr/",
+  PRIVATE_CERTIFICATE: "https://www.korhrd.co.kr/",
+};
+
+function prepUrlFor(item: JobRequirementComparisonItem): string | undefined {
+  // 못 갖춘 것이 확인된 경우에만 권한다. 아직 모르는 자격까지 권하면
+  // 이미 가진 사람에게도 "따세요"라고 하는 셈이 된다.
+  if (item.userStatus !== "NOT_SATISFIED") return undefined;
+  return item.qualificationType ? QUALIFICATION_PREP_URL[item.qualificationType] : undefined;
+}
+
+const REQUIREMENT_STATUS_STYLE: Record<
+  string,
+  { icon: LucideIcon; label: string; className: string; box: string }
+> = {
+  SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700", box: "bg-emerald-50/60" },
+  NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600", box: "bg-rose-50/60" },
+  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50/60" },
+  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50/60" },
 };
 
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value?: string }) {
@@ -110,7 +137,7 @@ export function JobDetailView({
   const showRequirements = Boolean(isAuthenticated && requirementComparison && requirementComparison.length > 0);
 
   /*
-    "내가 바라는 조건"에서 요구조건 묶음이 이미 말해주는 항목을 뺀다.
+    "희망 근무조건"에서 요구조건 묶음이 이미 말해주는 항목을 뺀다.
     evaluateJobFit 은 희망 조건(지역·급여·근무형태)과 공고 요건(운전·자격)을 한 배열에
     섞어 담는데, 요건 쪽은 아래 묶음이 필수/우대까지 붙여 더 자세히 보여준다.
   */
@@ -204,12 +231,12 @@ export function JobDetailView({
         <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고와 내 조건 비교</h2>
           <p className="mt-1 text-label-1 text-slate-400">
-            바라는 근무조건과 공고가 요구하는 것을 함께 봤어요.
+            희망하신 근무조건과 공고가 요구하는 조건을 함께 봤어요.
           </p>
 
           {visibleComparisons.length > 0 && match && (
             <div className="mt-5">
-              <p className="text-label-1 font-semibold text-slate-500">내가 바라는 조건</p>
+              <p className="text-label-1 font-semibold text-slate-500">희망 근무조건</p>
               <div className={cn("mt-2 grid gap-3", visibleComparisons.length > 1 && "sm:grid-cols-2")}>
                 {visibleComparisons.map(({ key, label, icon: Icon, box, head }) => (
                   <div key={key} className={cn("rounded-lg p-4", box)}>
@@ -229,25 +256,43 @@ export function JobDetailView({
 
           {showRequirements && (
             <div className="mt-5">
-              <p className="text-label-1 font-semibold text-slate-500">공고가 요구하는 것</p>
+              <p className="text-label-1 font-semibold text-slate-500">공고 요구조건</p>
               <div className="mt-2 space-y-2">
                 {requirementComparison!.map((item) => {
                   const style = REQUIREMENT_STATUS_STYLE[item.userStatus] ?? REQUIREMENT_STATUS_STYLE.UNKNOWN;
                   const Icon = style.icon;
+                  const prepUrl = prepUrlFor(item);
                   return (
                     <div
                       key={item.requirementId}
-                      className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2.5 text-label-1"
+                      className={cn(
+                        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-lg px-3 py-2.5 text-label-1",
+                        style.box,
+                      )}
                     >
-                      <span className="text-slate-700">
+                      <span className="font-medium text-slate-700">
                         {item.requirementName}
-                        <span className="ml-1.5 text-label-2 text-slate-400">
+                        <span className="ml-1.5 text-label-2 font-normal text-slate-500">
                           {item.jobLevel === "REQUIRED" ? "필수" : item.jobLevel === "PREFERRED" ? "우대" : "언급"}
                         </span>
                       </span>
-                      <span className={cn("flex shrink-0 items-center gap-1 font-semibold", style.className)}>
-                        <Icon className="size-4" />
-                        {style.label}
+                      <span className="flex shrink-0 items-center gap-3">
+                        {/* 못 갖춘 자격은 취득 경로를 바로 열어준다. 외부 사이트라 새 창으로. */}
+                        {prepUrl && (
+                          <a
+                            href={prepUrl}
+                            target="_blank"
+                            rel="noreferrer noopener"
+                            className="flex items-center gap-1 rounded-md border border-border bg-white px-2.5 py-1 text-label-2 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                          >
+                            자격 준비하기
+                            <ExternalLink className="size-3.5" />
+                          </a>
+                        )}
+                        <span className={cn("flex items-center gap-1 font-semibold", style.className)}>
+                          <Icon className="size-4" />
+                          {style.label}
+                        </span>
                       </span>
                     </div>
                   );

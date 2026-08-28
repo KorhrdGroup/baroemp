@@ -175,7 +175,7 @@ export type JobCurationTab = "new" | "closing_soon" | "matched" | "ready_to_appl
 export type JobCurationState = "READY" | "NEEDS_PROFILE" | "EMPTY";
 
 /** 공고의 필수 자격 대비 회원의 준비 상태. 계산은 features/jobs/job-readiness. */
-export type JobReadinessLevel = "no_requirement" | "satisfied" | "near" | "gap";
+export type JobReadinessLevel = "no_requirement" | "satisfied" | "preferred" | "near" | "gap";
 
 export interface JobReadiness {
   level: JobReadinessLevel;

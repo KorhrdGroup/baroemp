@@ -18,34 +18,53 @@ export type { JobReadiness, JobReadinessLevel } from "@/types";
  */
 export function readinessFromComparison(items: JobRequirementComparisonItem[]): JobReadiness {
   const required = items.filter((i) => i.jobLevel === "REQUIRED");
-  if (required.length === 0) {
-    return { level: "no_requirement", label: "자격 요건 없음" };
-  }
+  const preferred = items.filter((i) => i.jobLevel === "PREFERRED");
 
+  // 지원을 막는 것이 가장 먼저다.
   const missing = required.filter((i) => i.userStatus === "NOT_SATISFIED");
-  if (missing.length === 0) {
-    const satisfied = required.some((i) => i.userStatus === "SATISFIED");
-    // 회원 자격 정보가 없어 모름(UNKNOWN)인 경우도 "필요"로 묶는다.
-    // 두 경우의 문구가 같아("요양보호사 자격 필요") 색을 갈라 봐야
-    // 읽는 사람에게 전달되는 차이가 없었다.
-    return satisfied
-      ? { level: "satisfied", label: "보유 자격 충족" }
+  if (missing.length === 1) return { level: "near", label: `${missing[0].requirementName} 필요` };
+  if (missing.length > 1) return { level: "gap", label: `자격 ${missing.length}개 필요` };
+
+  if (required.length > 0) {
+    // 모름(UNKNOWN)은 부족으로 세지 않는다. 회원이 자격을 안 적었을 뿐인데
+    // "부족"을 붙이면 지원할 수 있는 자리를 단념시킨다.
+    const met = required.find((i) => i.userStatus === "SATISFIED");
+    return met
+      ? { level: "satisfied", label: `${met.requirementName} 충족` }
       : { level: "near", label: `${required[0].requirementName} 필요` };
   }
-  if (missing.length === 1) {
-    return { level: "near", label: `${missing[0].requirementName} 필요` };
+
+  // 필수가 없으면 우대를 알려준다. 예전에는 이 경우도 "자격 요건 없음"이라
+  // 우대 조건이 있는 공고와 아무 조건도 없는 공고가 똑같아 보였다.
+  if (preferred.length > 0) {
+    const met = preferred.find((i) => i.userStatus === "SATISFIED");
+    return met
+      ? { level: "satisfied", label: `${met.requirementName} 우대 충족` }
+      : { level: "preferred", label: `${preferred[0].requirementName} 우대` };
   }
-  return { level: "gap", label: `자격 ${missing.length}개 필요` };
+
+  return { level: "no_requirement", label: "자격 요건 없음" };
 }
 
+
 /**
- * 초록은 "내가 갖춘 것"에만 쓴다.
- * 자격 요건이 없는 건 공고 쪽 사실이지 회원의 성취가 아니라서 무채색으로 둔다.
+ * 색이 곧 뜻이다.
+ *   무채색  할 일 없음      자격 요건 없음
+ *   초록    갖춤            ○○ 충족 · ○○ 우대 충족
+ *
+ * 필수와 우대는 색이 아니라 문구로 가른다("요양보호사 자격 충족" vs
+ * "운전 가능 우대 충족"). 갖췄다는 사실은 같으므로 색을 나누면
+ * 초록이 두 가지가 되어 오히려 읽기 어렵다.
+ *   파랑    있으면 유리      ○○ 우대
+ *   주황    지원을 막음      ○○ 필요 · 자격 N개 필요
  */
 export const READINESS_BADGE_CLASS: Record<JobReadinessLevel, string> = {
-  // 무채색은 "할 일이 없다"는 뜻으로만 쓴다. 요건이 있으면 반드시 색이 들어간다.
+  // 무채색: 지원에 지장이 없다. 요건이 아예 없거나, 우대라 없어도 그만이다.
   no_requirement: "bg-slate-100 text-slate-600",
+  preferred: "bg-slate-100 text-slate-600",
+  // 초록: 갖췄다.
   satisfied: "bg-emerald-50 text-emerald-700",
-  near: "bg-brand-blue-50 text-brand-blue-700",
+  // 주황: 지원이 막힌다. 개수만 다를 뿐 같은 뜻이라 같은 색을 쓴다.
+  near: "bg-amber-50 text-amber-700",
   gap: "bg-amber-50 text-amber-700",
 };

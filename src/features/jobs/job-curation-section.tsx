@@ -12,13 +12,31 @@ import {
   trackCurationTabViewedAction,
 } from "./job-actions";
 
-const TABS: { key: JobCurationTab; label: string }[] = [
-  { key: "new", label: "신규 일자리" },
-  { key: "closing_soon", label: "마감임박" },
-  { key: "matched", label: "맞춤 추천" },
-  { key: "ready_to_apply", label: "지금 지원가능" },
+/**
+ * description 은 각 탭이 무엇을 고른 결과인지 한 줄로 알려준다.
+ * 문구는 job-curation.service 의 실제 기준과 맞춰야 한다
+ * (신규 3일 · 마감임박 7일 · 개인화 탭은 희망 직종/지역 후보군).
+ * "자격 따면 열리는 공고"만 조건 이름이 회원마다 달라 화면에서 만든다.
+ */
+const TABS: { key: JobCurationTab; label: string; description?: string }[] = [
+  { key: "new", label: "신규 일자리", description: "최근 3일 안에 올라온 공고예요." },
+  { key: "closing_soon", label: "마감임박", description: "일주일 안에 마감되는 공고예요." },
+  { key: "matched", label: "맞춤 추천", description: "희망 직종·지역을 기준으로 잘 맞는 순서로 골랐어요." },
+  {
+    key: "ready_to_apply",
+    label: "지금 지원가능",
+    description: "지금 갖춘 조건만으로 지원할 수 있는 공고예요.",
+  },
   { key: "unlockable", label: "자격 따면 열리는 공고" },
 ];
+
+
+/**
+ * 카드 한 장의 높이. 빈 상태와 자리지킴 카드가 같은 자리를 잡아
+ * 탭을 옮길 때 판이 접혔다 펴지지 않게 한다.
+ * JobCard 안쪽 여백이 바뀌면 이 값도 함께 맞춰야 한다.
+ */
+const CARD_HEIGHT = "min-h-[249px]";
 
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
@@ -127,6 +145,7 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
   }
 
   const current = results[activeTab];
+  const unlockRequirementName = current?.items[0]?.unlockRequirementName;
 
   return (
     /*
@@ -136,8 +155,13 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
     */
     <section className="mb-8 rounded-2xl bg-brand-blue-50 p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
-      <h2 className="mb-3 text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      {/*
+        제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
+        모두 상자가 없는 요소라 판 끝(0px)에 그대로 붙으면 카드보다
+        튀어나와 보인다. 제목은 글자가 굵어 더 튀므로 한 단계 덜 준다.
+      */}
+      <h2 className="mb-3 pl-1 text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1 pl-2">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -161,16 +185,54 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
       {loadingTabs.has(activeTab) && !current && (
         <div aria-busy="true" aria-label="불러오는 중" className="flex gap-4 overflow-hidden pb-2">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-[222px] w-80 shrink-0 animate-pulse rounded-xl border border-border bg-white/60" />
+            <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-xl border border-border bg-white/60", CARD_HEIGHT)} />
           ))}
         </div>
       )}
 
       {current && current.items.length === 0 && (
-        <p className="rounded-xl bg-white/70 py-8 text-center text-label-1 text-slate-500">
-          {EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}
-        </p>
+        /*
+          아래 여백 19px = 카드 줄의 pb-2(8px) + 가로 스크롤바가 차지하는 자리(11px).
+          카드 줄은 내용이 넘쳐 스크롤바 자리를 잡는데 빈 상태는 넘칠 게 없어
+          그만큼 낮아진다. scrollbar-gutter 는 가로 스크롤바에 적용되지 않아
+          실측값을 쓴다.
+        */
+        <div className="flex pb-[19px]">
+          <div
+            className={cn(
+              "flex w-full items-center justify-center rounded-xl bg-white/70 px-6 text-center text-label-1 text-slate-500",
+              CARD_HEIGHT,
+            )}
+          >
+            {EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}
+          </div>
+        </div>
       )}
+
+      {/*
+        어떤 조건이 이 목록을 열어주는지는 공고마다 같으므로 줄 위에 한 번만 쓴다.
+        카드마다 캡션을 얹으면 카드 윗변이 어긋난다.
+
+        탭마다 무엇을 고른 결과인지 한 줄로 알려준다. 자리를 늘 잡아 두어
+        (19.6px = label-1 한 줄) 탭을 옮겨도 판이 튀지 않는다.
+
+        위아래 여백을 16px 로 맞추고, 왼쪽은 8px 들여 쓴다. 이 줄만 상자가 없어
+        글자가 판 끝(0px)에 붙는데, 위 알약 글자는 17px·아래 카드 글자는 21px 에서
+        시작해 혼자 튀어나와 보였다. 알약에 딱 맞추기보다 살짝만 들여 둔다.
+
+        문구에 "자격"을 넣지 않는다. 조건 이름이 "요양보호사 자격"이면
+        "자격 자격을"이 되고, "운전 가능"처럼 자격이 아닌 조건도 온다.
+      */}
+      <p className="mb-4 min-h-[19.6px] pl-2 text-label-1 text-slate-600">
+        {unlockRequirementName ? (
+          <>
+            <strong className="font-semibold text-brand-blue-700">{unlockRequirementName}</strong>
+            {" "}하나만 채우면 지원할 수 있는 공고예요.
+          </>
+        ) : (
+          TABS.find((t) => t.key === activeTab)?.description
+        )}
+      </p>
 
       {current && current.items.length > 0 && (
         <div className="relative">
@@ -201,11 +263,6 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
                   void trackCurationJobClickedAction({ tab: activeTab, jobId: item.job.id }).catch(() => {});
                 }}
               >
-                {item.unlockRequirementName && (
-                  <p className="mb-1 text-label-2 font-semibold text-brand-blue-600">
-                    {item.unlockRequirementName} 취득 시 지원 가능
-                  </p>
-                )}
                 <JobCard
                   job={item.job}
                   matchReasonLabel={item.matchReasonLabel}

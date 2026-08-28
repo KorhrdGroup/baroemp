@@ -61,14 +61,12 @@ export function JobFiltersForm({
   const [keyword, setKeyword] = useState(initial.keyword ?? "");
   const [region, setRegion] = useState(initial.region ?? "all");
   const [jobCategory, setJobCategory] = useState(initial.jobCategory ?? "all");
-  const [jobQuery, setJobQuery] = useState("");
   const [beginnerOnly, setBeginnerOnly] = useState(Boolean(initial.isBeginnerFriendly));
   const [closingSoon, setClosingSoon] = useState(Boolean(initial.closingSoon));
   const [sort, setSort] = useState<JobSortOrder>(initial.sort ?? "recommended");
 
   const regionActive = region !== "all";
   const jobActive = jobCategory !== "all";
-  const roleOptions = mockJobRoles.filter((r) => r.name.includes(jobQuery.trim()));
   // 선택된 직종 이름: 목록에서 찾고, 없으면 서버가 넘겨준 이름을 쓴다.
   const selectedJobLabel =
     mockJobRoles.find((r) => r.jobCategory === jobCategory)?.name ?? jobCategoryLabel ?? "선택한 직종";
@@ -241,23 +239,13 @@ export function JobFiltersForm({
         {/* 직종 패널 */}
         {panel === "job" && (
           <div className={panelClass}>
-            <div className="mb-4 flex items-center justify-between gap-4">
-              <div className="flex h-10 flex-1 items-center gap-2.5 rounded-lg border border-border px-3.5 sm:max-w-105">
-                <Search className="size-4 shrink-0 text-slate-400" />
-                <input
-                  value={jobQuery}
-                  onChange={(e) => setJobQuery(e.target.value)}
-                  placeholder="직업(직무) 또는 전문분야 입력"
-                  className="w-full border-0 bg-transparent text-label-1 outline-none placeholder:text-slate-400"
-                />
-              </div>
+            {/* 지역 패널과 같은 꼴. 목록이 한 화면에 다 들어와 검색칸이 필요 없다. */}
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-label-1 font-bold text-slate-900">직종 선택</span>
               <button
                 type="button"
-                onClick={() => {
-                  setJobCategory("all");
-                  setJobQuery("");
-                }}
-                className="flex shrink-0 items-center gap-1.5 text-label-2 text-slate-400 hover:text-slate-600"
+                onClick={() => setJobCategory("all")}
+                className="flex items-center gap-1.5 text-label-2 text-slate-400 hover:text-slate-600"
               >
                 선택 초기화 <RotateCcw className="size-3" />
               </button>
@@ -266,7 +254,7 @@ export function JobFiltersForm({
               <button type="button" className={cellClass(!jobActive)} onClick={() => setJobCategory("all")}>
                 직종 전체
               </button>
-              {roleOptions.map((role) => (
+              {mockJobRoles.map((role) => (
                 <button
                   key={role.jobCategory}
                   type="button"
