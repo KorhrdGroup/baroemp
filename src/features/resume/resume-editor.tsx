@@ -418,7 +418,7 @@ export function ResumeEditor({
           {showSection("BASIC_INFO") && (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
-                <CardTitle className="text-body-1">기본정보</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">기본정보</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
                 <Field label="이름" required>
@@ -446,7 +446,7 @@ export function ResumeEditor({
           {showSection("SUMMARY") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
+                <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
                 {/*
                   실제 동작은 아래 경력·자격·스킬을 재료로 문장을 만들어 제안하는 것이다.
                   이 칸에 쓴 글 자체를 고치지는 않는다.
@@ -482,10 +482,11 @@ export function ResumeEditor({
           {showSection("EXPERIENCE") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1">경력</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("exp");
                     setExperiences((prev) => [...prev, { _key: key, companyName: "", isCurrent: false, orderIndex: prev.length }]);
@@ -611,10 +612,11 @@ export function ResumeEditor({
           {showSection("EDUCATION") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1">학력</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">학력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("edu");
                     setEducations((prev) => [...prev, { _key: key, schoolName: "", orderIndex: prev.length }]);
@@ -760,10 +762,11 @@ export function ResumeEditor({
           {showSection("QUALIFICATION") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1">보유 자격</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">보유 자격</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("qual");
                     setQualifications((prev) => [...prev, { _key: key, name: "", orderIndex: prev.length }]);
@@ -814,7 +817,7 @@ export function ResumeEditor({
           {showSection("SKILLS") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader>
-                <CardTitle className="text-body-1">보유 스킬</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">보유 스킬</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
@@ -833,6 +836,7 @@ export function ResumeEditor({
                   <Button
                     variant="outline"
                     size="sm"
+                    className="text-slate-700"
                     onClick={() => {
                       if (!skillDraft.trim()) return;
                       setSkills((prev) => [...prev, { _key: nextKey("skill"), name: skillDraft.trim(), orderIndex: prev.length }]);
@@ -847,7 +851,7 @@ export function ResumeEditor({
                     <Badge
                       key={s._key}
                       /* 직접 넣은 값이라 회색보다 눈에 들어와야 하고, 옆 × 를 누르려면 손가락이 닿을 만큼은 커야 한다. */
-                      className="gap-1.5 rounded-full border-transparent bg-brand-blue-50 px-3 py-2 text-label-1 font-medium text-brand-blue-700"
+                      className="gap-1.5 rounded-full border-transparent bg-brand-blue-50 px-3 py-2 text-label-1 font-semibold text-brand-blue-700"
                     >
                       {s.name}
                       <button
@@ -867,10 +871,11 @@ export function ResumeEditor({
           {showSection("TRAINING") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1">교육/훈련</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">교육/훈련</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("train");
                     setTrainings((prev) => [...prev, { _key: key, courseName: "", orderIndex: prev.length }]);
@@ -916,10 +921,11 @@ export function ResumeEditor({
           {(showSection("PROJECT") || showSection("ACTIVITY")) && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1">봉사·수상 등 추가 경력</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">봉사·수상 등 추가 경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
+                  className="text-slate-700"
                   onClick={() => {
                     const key = nextKey("item");
                     setItems((prev) => [...prev, { _key: key, sectionType: "AWARD", title: "", orderIndex: prev.length }]);
