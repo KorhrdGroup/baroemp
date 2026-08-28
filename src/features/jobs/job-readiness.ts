@@ -25,9 +25,12 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
   const missing = required.filter((i) => i.userStatus === "NOT_SATISFIED");
   if (missing.length === 0) {
     const satisfied = required.some((i) => i.userStatus === "SATISFIED");
+    // 회원 자격 정보가 없어 모름(UNKNOWN)인 경우도 "필요"로 묶는다.
+    // 두 경우의 문구가 같아("요양보호사 자격 필요") 색을 갈라 봐야
+    // 읽는 사람에게 전달되는 차이가 없었다.
     return satisfied
       ? { level: "satisfied", label: "보유 자격 충족" }
-      : { level: "required_unknown", label: `${required[0].requirementName} 필요` };
+      : { level: "near", label: `${required[0].requirementName} 필요` };
   }
   if (missing.length === 1) {
     return { level: "near", label: `${missing[0].requirementName} 필요` };
@@ -40,10 +43,8 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
  * 자격 요건이 없는 건 공고 쪽 사실이지 회원의 성취가 아니라서 무채색으로 둔다.
  */
 export const READINESS_BADGE_CLASS: Record<JobReadinessLevel, string> = {
+  // 무채색은 "할 일이 없다"는 뜻으로만 쓴다. 요건이 있으면 반드시 색이 들어간다.
   no_requirement: "bg-slate-100 text-slate-600",
-  // 공고는 자격을 요구하는데 회원 자격 정보가 없는 경우. 공고 쪽 사실만 알리고
-  // 부족하다고 단정하지 않으므로 무채색으로 둔다.
-  required_unknown: "bg-slate-100 text-slate-600",
   satisfied: "bg-emerald-50 text-emerald-700",
   near: "bg-brand-blue-50 text-brand-blue-700",
   gap: "bg-amber-50 text-amber-700",
