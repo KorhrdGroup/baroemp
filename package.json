@@ -19,6 +19,7 @@
     "e2e:assessment": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-assessment-flow.ts",
     "e2e:job": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-job-flow.ts",
     "sync:jobs": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/sync-jobs.ts",
+    "sync:job-category-names": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/sync-job-category-names.ts",
     "map:occupation-codes": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/map-occupation-codes.ts",
     "e2e:support": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-support-flow.ts",
     "e2e:support:public": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-support-flow-public.ts",

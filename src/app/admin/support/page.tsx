@@ -10,12 +10,14 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AdminPageShell } from "@/features/admin/admin-page-shell";
+import { AdminFilterBar } from "@/features/admin/admin-filter-bar";
 import { SupportSyncButton } from "@/features/admin/support-sync-button";
 import { SupportActiveToggleButton } from "@/features/admin/support-active-toggle-button";
 import { labelRegion } from "@/lib/labels";
 import { SUPPORT_CATEGORY_LABELS } from "@/types";
 import type { Region } from "@/types";
 import { listAdminSupportProgramsWithStats, getSupportSyncOverview } from "@/services/admin-support.service";
+import { getSupportResponseAnalytics } from "@/services/support-response-analytics.service";
 import { CAREER_RELEVANCE_THRESHOLD } from "@/lib/support/career-relevance";
 
 interface AdminSupportSearchParams {
@@ -32,9 +34,10 @@ export default async function AdminSupportPage({
   searchParams: Promise<AdminSupportSearchParams>;
 }) {
   const sp = await searchParams;
-  const [programs, syncOverview] = await Promise.all([
+  const [programs, syncOverview, responses] = await Promise.all([
     listAdminSupportProgramsWithStats(),
     getSupportSyncOverview(),
+    getSupportResponseAnalytics(),
   ]);
 
   const filtered = programs.filter((program) => {
@@ -93,71 +96,105 @@ export default async function AdminSupportPage({
           <SupportSyncButton />
         </div>
 
-        <div className="flex flex-wrap gap-2 text-label-2">
-          <span className="text-slate-400">Provider:</span>
-          <Link href={buildHref({ provider: "all" })} className={!sp.provider ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
-            전체
-          </Link>
-          {providers.map((p) => (
-            <Link
-              key={p}
-              href={buildHref({ provider: p })}
-              className={sp.provider === p ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {p}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">카테고리:</span>
-          <Link href={buildHref({ category: "all" })} className={!sp.category ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
-            전체
-          </Link>
-          {categories.map((c) => (
-            <Link
-              key={c}
-              href={buildHref({ category: c })}
-              className={sp.category === c ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {SUPPORT_CATEGORY_LABELS[c] ?? c}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">지역:</span>
-          <Link href={buildHref({ region: "all" })} className={!sp.region ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
-            전체
-          </Link>
-          {regions.map((r) => (
-            <Link
-              key={r}
-              href={buildHref({ region: r })}
-              className={sp.region === r ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {r === "national" ? "전국" : labelRegion(r as Region)}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">상태:</span>
-          {(["all", "active", "inactive"] as const).map((s) => (
-            <Link
-              key={s}
-              href={buildHref({ status: s })}
-              className={(sp.status ?? "all") === s ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {s === "all" ? "전체" : s === "active" ? "노출중" : "비활성"}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">바로취업 관련도:</span>
-          {(["all", "relevant", "irrelevant"] as const).map((r) => (
-            <Link
-              key={r}
-              href={buildHref({ relevance: r })}
-              className={(sp.relevance ?? "all") === r ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {r === "all" ? "전체" : r === "relevant" ? `적합(≥${CAREER_RELEVANCE_THRESHOLD})` : "부적합"}
-            </Link>
-          ))}
-        </div>
+        {/* 회원이 진단에서 실제로 무엇을 골랐는지 — 문항별 선택 분포 */}
+        <section className="rounded-xl bg-white ring-1 ring-slate-200">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-slate-100 px-4 py-3">
+            <h2 className="text-body-2 font-semibold text-slate-900">지원금찾기 응답 분포</h2>
+            <p className="text-label-2 text-slate-400">
+              진단 {responses.totalSessions.toLocaleString()}건 · 완료 {responses.completedSessions.toLocaleString()}건
+            </p>
+          </div>
+          {responses.questions.length === 0 ? (
+            <p className="px-4 py-6 text-label-2 text-slate-400">
+              아직 응답 데이터가 없습니다. 회원이 지원금찾기를 진행하면 여기에 집계됩니다.
+            </p>
+          ) : (
+            <div className="grid gap-x-6 gap-y-5 p-4 sm:grid-cols-2 lg:grid-cols-3">
+              {responses.questions.map((q) => {
+                const max = Math.max(...q.rows.map((r) => r.count), 1);
+                return (
+                  <div key={q.question}>
+                    <p className="mb-2 text-label-1 font-semibold text-brand-blue-600">
+                      {q.question}
+                      <span className="ml-1.5 font-normal text-slate-400">응답 {q.answeredCount}건</span>
+                    </p>
+                    <ul className="flex flex-col gap-1.5">
+                      {q.rows.map((r) => (
+                        <li key={r.label} className="flex items-center gap-2 text-label-2">
+                          <span className="w-32 shrink-0 truncate text-slate-600" title={r.label}>
+                            {r.label}
+                          </span>
+                          <span className="h-1.5 flex-1 rounded-full bg-slate-100">
+                            <span
+                              className="block h-1.5 rounded-full bg-brand-blue-500"
+                              style={{ width: `${Math.max(4, Math.round((r.count / max) * 100))}%` }}
+                            />
+                          </span>
+                          <span className="w-8 shrink-0 text-right font-semibold text-slate-900">{r.count}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </section>
+
+        <AdminFilterBar
+          groups={[
+            {
+              label: "Provider",
+              options: [
+                { label: "전체", href: buildHref({ provider: "all" }), selected: !sp.provider },
+                ...providers.map((p) => ({
+                  label: p,
+                  href: buildHref({ provider: p }),
+                  selected: sp.provider === p,
+                })),
+              ],
+            },
+            {
+              label: "카테고리",
+              options: [
+                { label: "전체", href: buildHref({ category: "all" }), selected: !sp.category },
+                ...categories.map((c) => ({
+                  label: SUPPORT_CATEGORY_LABELS[c] ?? c,
+                  href: buildHref({ category: c }),
+                  selected: sp.category === c,
+                })),
+              ],
+            },
+            {
+              label: "지역",
+              options: [
+                { label: "전체", href: buildHref({ region: "all" }), selected: !sp.region },
+                ...regions.map((r) => ({
+                  label: r === "national" ? "전국" : labelRegion(r as Region),
+                  href: buildHref({ region: r }),
+                  selected: sp.region === r,
+                })),
+              ],
+            },
+            {
+              label: "상태",
+              options: (["all", "active", "inactive"] as const).map((st) => ({
+                label: st === "all" ? "전체" : st === "active" ? "노출중" : "비활성",
+                href: buildHref({ status: st }),
+                selected: (sp.status ?? "all") === st,
+              })),
+            },
+            {
+              label: "관련도",
+              options: (["all", "relevant", "irrelevant"] as const).map((rel) => ({
+                label:
+                  rel === "all" ? "전체" : rel === "relevant" ? `적합(≥${CAREER_RELEVANCE_THRESHOLD})` : "부적합",
+                href: buildHref({ relevance: rel }),
+                selected: (sp.relevance ?? "all") === rel,
+              })),
+            },
+          ]}
+        />
 
         <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
           <div className="overflow-x-auto">

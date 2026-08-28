@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { LayoutDashboard, Coins, ClipboardList, Briefcase, FileText } from "lucide-react";
+import { LayoutDashboard, Coins, ClipboardList, Briefcase, FileText, Users } from "lucide-react";
 
 export interface AdminNavItem {
   label: string;
@@ -13,6 +13,7 @@ export interface AdminNavItem {
  */
 export const adminNavItems: AdminNavItem[] = [
   { label: "대시보드", href: "/admin", icon: LayoutDashboard },
+  { label: "회원 관리", href: "/admin/users", icon: Users },
   { label: "내게 맞는 직업찾기", href: "/admin/assessments", icon: ClipboardList },
   { label: "전국 채용공고", href: "/admin/jobs", icon: Briefcase },
   { label: "지원금찾기", href: "/admin/support", icon: Coins },
@@ -20,6 +21,7 @@ export const adminNavItems: AdminNavItem[] = [
 ];
 
 export const adminTopNavItems = [
+  { label: "회원", href: "/admin/users" },
   { label: "직업찾기", href: "/admin/assessments" },
   { label: "채용공고", href: "/admin/jobs" },
   { label: "지원금", href: "/admin/support" },

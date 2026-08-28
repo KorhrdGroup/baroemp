@@ -3,11 +3,40 @@ import {
   getAssessmentSessionRepository,
   getCareerProfileRepository,
 } from "@/lib/repositories";
-import { labelAgeGroup } from "@/lib/labels";
-import type { Assessment, AssessmentQuestion } from "@/types";
+import { REGION_LABELS, labelAgeGroup } from "@/lib/labels";
+import type { Assessment, AssessmentQuestion, Region } from "@/types";
 
 /** 표 컬럼 순서를 고정하기 위한 연령대 표시 순서 */
 const AGE_COLUMN_ORDER = ["20대", "30대", "40대", "50대", "60대", "70대 이상", "미입력", "비로그인"];
+
+/**
+ * 객체로 저장된 답변을 사람이 읽는 문구로 바꾼다.
+ * 지역은 {sido}, 희망 급여는 {min,max} 형태로 저장돼 있어 그대로 두면
+ * 관리자 화면에 {"sido":"seoul"} 같은 코드가 그대로 노출된다.
+ */
+function formatObjectAnswer(raw: unknown): string {
+  if (!raw || typeof raw !== "object") return String(raw);
+  const obj = raw as Record<string, unknown>;
+
+  if (typeof obj.sido === "string") {
+    const sido = REGION_LABELS[obj.sido as Region] ?? obj.sido;
+    const sigungu = typeof obj.sigungu === "string" && obj.sigungu ? ` ${obj.sigungu}` : "";
+    return `${sido}${sigungu}`;
+  }
+
+  const min = typeof obj.min === "number" ? obj.min : undefined;
+  const max = typeof obj.max === "number" ? obj.max : undefined;
+  if (min !== undefined || max !== undefined) {
+    if (min !== undefined && max !== undefined) return `${min}~${max}만원`;
+    if (min !== undefined) return `${min}만원 이상`;
+    return `${max}만원 이하`;
+  }
+
+  // 알 수 없는 형태도 코드처럼 보이지 않도록 "키: 값"으로 펼친다.
+  return Object.entries(obj)
+    .map(([k, v]) => `${k}: ${String(v)}`)
+    .join(", ");
+}
 
 export interface AnswerDistributionRow {
   /** 선택지 텍스트 (SCALE/NUMBER 등은 입력값) */
@@ -76,7 +105,7 @@ export async function getAssessmentResponseAnalytics(
       const raw = record.rawValue;
       if (q?.answerType === "SCALE") return [`${raw}점`];
       if (typeof raw === "string" || typeof raw === "number") return [String(raw)];
-      return [JSON.stringify(raw)];
+      return [formatObjectAnswer(raw)];
     }
     return [];
   }
