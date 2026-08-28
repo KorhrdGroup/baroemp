@@ -12,11 +12,21 @@ import {
   trackCurationTabViewedAction,
 } from "./job-actions";
 
-const TABS: { key: JobCurationTab; label: string }[] = [
-  { key: "new", label: "신규 일자리" },
-  { key: "closing_soon", label: "마감임박" },
-  { key: "matched", label: "맞춤 추천" },
-  { key: "ready_to_apply", label: "지금 지원가능" },
+/**
+ * description 은 각 탭이 무엇을 고른 결과인지 한 줄로 알려준다.
+ * 문구는 job-curation.service 의 실제 기준과 맞춰야 한다
+ * (신규 3일 · 마감임박 7일 · 개인화 탭은 희망 직종/지역 후보군).
+ * "자격 따면 열리는 공고"만 조건 이름이 회원마다 달라 화면에서 만든다.
+ */
+const TABS: { key: JobCurationTab; label: string; description?: string }[] = [
+  { key: "new", label: "신규 일자리", description: "최근 3일 안에 올라온 공고예요." },
+  { key: "closing_soon", label: "마감임박", description: "일주일 안에 마감되는 공고예요." },
+  { key: "matched", label: "맞춤 추천", description: "희망 직종·지역을 기준으로 잘 맞는 순서로 골랐어요." },
+  {
+    key: "ready_to_apply",
+    label: "지금 지원가능",
+    description: "지금 갖춘 조건만으로 지원할 수 있는 공고예요.",
+  },
   { key: "unlockable", label: "자격 따면 열리는 공고" },
 ];
 
@@ -198,18 +208,20 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
         어떤 조건이 이 목록을 열어주는지는 공고마다 같으므로 줄 위에 한 번만 쓴다.
         카드마다 캡션을 얹으면 카드 윗변이 어긋난다.
 
-        이 탭에서만 나타나는 줄이라 자리를 늘 잡아 둔다(19.6px = label-1 한 줄).
-        안 그러면 탭을 옮길 때마다 판이 이 줄 높이만큼 튄다.
+        탭마다 무엇을 고른 결과인지 한 줄로 알려준다. 자리를 늘 잡아 두어
+        (19.6px = label-1 한 줄) 탭을 옮겨도 판이 튀지 않는다.
 
         문구에 "자격"을 넣지 않는다. 조건 이름이 "요양보호사 자격"이면
         "자격 자격을"이 되고, "운전 가능"처럼 자격이 아닌 조건도 온다.
       */}
       <p className="mb-3 min-h-[19.6px] text-label-1 text-slate-600">
-        {unlockRequirementName && (
+        {unlockRequirementName ? (
           <>
             <strong className="font-semibold text-brand-blue-700">{unlockRequirementName}</strong>
             {" "}하나만 채우면 지원할 수 있는 공고예요.
           </>
+        ) : (
+          TABS.find((t) => t.key === activeTab)?.description
         )}
       </p>
 
