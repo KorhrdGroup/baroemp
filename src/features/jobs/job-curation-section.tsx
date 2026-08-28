@@ -81,11 +81,12 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
   return (
     /*
       하늘색 판을 깔아 아래 검색 결과 목록과 갈라 놓는다.
-      제목 없이 탭만 두는데, 탭 이름이 이미 무엇을 보는지 말해준다.
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
     <section className="mb-8 rounded-2xl bg-brand-blue-50 p-5 sm:p-6">
+      {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
+      <h2 className="mb-3 text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {TABS.map((t) => (
           <button
