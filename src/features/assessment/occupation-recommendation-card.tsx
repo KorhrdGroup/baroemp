@@ -112,24 +112,27 @@ export function OccupationRecommendationCard({
           ))}
         </div>
 
-        {/* 왜 추천되었는지 / 고려할 점 */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div>
-            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-              <Sparkles className="size-4 text-brand-blue-600" /> 왜 추천되었나요
+        {/*
+          지원금 상세의 "내 조건과 비교"와 같은 방식.
+          맞는 이유(파랑)와 걸리는 점(주황)을 색 있는 면으로 갈라 한눈에 구분되게 한다.
+        */}
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg bg-brand-blue-50/60 p-4">
+            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
+              <Sparkles className="size-4" /> 왜 추천되었나요
             </p>
-            <ul className="mt-2 space-y-1.5 text-label-1 text-slate-600">
+            <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
               {rec.reasons.map((reason) => (
                 <li key={reason}>· {reason}</li>
               ))}
             </ul>
           </div>
           {rec.risks.length > 0 && (
-            <div>
-              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-                <AlertTriangle className="size-4 text-orange-500" /> 고려할 점
+            <div className="rounded-lg bg-orange-50/60 p-4">
+              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
+                <AlertTriangle className="size-4" /> 고려할 점
               </p>
-              <ul className="mt-2 space-y-1.5 text-label-1 text-slate-600">
+              <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
                 {rec.risks.map((risk) => (
                   <li key={risk}>· {risk}</li>
                 ))}
@@ -140,13 +143,13 @@ export function OccupationRecommendationCard({
 
         {/* 부족한 조건 / 필요한 자격 */}
         {(rec.missingConditions.length > 0 || rec.requiredQualifications.length > 0) && (
-          <div className="mt-6">
+          <div className="mt-3 rounded-lg bg-slate-50 p-4">
             <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
               <ListChecks className="size-4 text-slate-500" /> 필요한 자격 · 부족한 조건
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
               {rec.requiredQualifications.map((q) => (
-                <span key={q} className="rounded-full bg-slate-100 px-3 py-1 text-label-1 text-slate-600">
+                <span key={q} className="rounded-full bg-white px-3 py-1 text-label-1 text-slate-600">
                   {q}
                 </span>
               ))}
