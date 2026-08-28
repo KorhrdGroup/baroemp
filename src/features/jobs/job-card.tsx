@@ -72,6 +72,9 @@ export function JobCard({
           줄 높이를 늘려 잡지 않는다. 버튼(size-8) 높이에 맞춰 32px 로 벌리면
           회사명과 제목 사이가 붕 떠 보인다. 대신 버튼을 회사명 글자의
           세로 가운데(top-3.5)에 맞춰 이 줄과 짝지어 보이게 한다.
+
+          오른쪽도 같은 14px 로 둔다. 카드 여백선(20px)에 맞추면 위아래 간격이
+          달라 모서리가 어긋나 보이고, 위를 20px 로 내리면 제목 첫 줄과 겹친다.
         */}
         <div className="flex items-center justify-between gap-2 pr-10">
           <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
@@ -171,7 +174,7 @@ export function JobCard({
         jobCategory={job.jobCategory}
         isAuthenticated={isAuthenticated}
         initialBookmarked={isBookmarked}
-        className="absolute right-5 top-3.5"
+        className="absolute right-3.5 top-3.5"
       />
     </div>
   );
