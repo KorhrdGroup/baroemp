@@ -321,19 +321,21 @@ export function ResumeEditor({
     // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
     <div className="space-y-6">
       {/*
-        AI 점검은 이력서 전체를 보는 기능이라 개별 항목이 아니라 에이전트 줄에 둔다.
-        점검 기준을 정하는 것도 여기서 고른 에이전트다.
+        점검은 이력서 전체를 보는 기능이고 그 기준을 정하는 것이 여기서 고른 에이전트라,
+        버튼을 카드 밖에 두지 않고 같은 상자 오른쪽에 넣는다.
       */}
-      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
+      <div className="print:hidden">
         <ResumeAgentPicker
           agents={templates}
           value={resume.templateId ?? undefined}
           onChange={handleTemplateChange}
           pending={isChangingTemplate}
+          action={
+            <AiButton onClick={handleReview} loading={isReviewing}>
+              이력서 전체 점검
+            </AiButton>
+          }
         />
-        <AiButton onClick={handleReview} loading={isReviewing}>
-          이력서 전체 점검
-        </AiButton>
       </div>
 
       <div className="space-y-4 print:hidden">
@@ -768,7 +770,7 @@ export function ResumeEditor({
                 {qualifications.length === 0 && <p className="text-label-1 text-slate-400">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
                 {qualifications.map((q, idx) => (
                   isEntryEditing(q._key) ? (
-                  <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-4">
+                  <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_1fr_auto]">
                     <Field label={`자격명 ${idx + 1}`}>
                       <CompactInput value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
                     </Field>
@@ -866,7 +868,7 @@ export function ResumeEditor({
               <CardContent className="space-y-3">
                 {trainings.map((t, idx) => (
                   isEntryEditing(t._key) ? (
-                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-3">
+                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_auto]">
                     <Field label={`과정명 ${idx + 1}`}>
                       <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
                     </Field>
@@ -916,7 +918,11 @@ export function ResumeEditor({
                 {items.length === 0 && <p className="text-label-1 text-slate-400">모든 사용자에게 필수는 아닙니다. 있으면 추가해주세요.</p>}
                 {items.map((item, idx) => (
                   isEntryEditing(item._key) ? (
-                  <div key={item._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-4">
+                  <div
+                    key={item._key}
+                    /* 칸마다 필요한 폭이 달라 4등분하지 않는다. 설명이 가장 길고 버튼은 제 크기면 된다. */
+                    className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[9rem_1fr_1.6fr_auto]"
+                  >
                     <Select value={item.sectionType} onValueChange={(v) => updateAt(setItems, item._key, { sectionType: v as ResumeItemSectionType })}>
                       <CompactSelectTrigger className="w-fit">
                         {/* 저장된 값이 목록에 없으면 빈칸이 되어 무엇을 골라야 할지 알 수 없다. */}

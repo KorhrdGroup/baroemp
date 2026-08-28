@@ -40,11 +40,13 @@ export function ResumeAgentPicker({
   value,
   onChange,
   pending,
+  action,
 }: {
   agents: ResumeAgentOption[];
   value?: string;
   onChange: (templateId: string) => void;
   pending?: boolean;
+  action?: React.ReactNode;
 }) {
   const options = agents.map((agent) => {
     const preset = agent.code ? AGENT_PRESETS[agent.code] : undefined;
@@ -63,6 +65,7 @@ export function ResumeAgentPicker({
       value={value}
       onChange={onChange}
       pending={pending}
+      action={action}
     />
   );
 }

@@ -21,6 +21,7 @@ export function PillPicker({
   value,
   onChange,
   pending,
+  action,
 }: {
   label: string;
   icon?: React.ReactNode;
@@ -28,13 +29,16 @@ export function PillPicker({
   value?: string;
   onChange: (id: string) => void;
   pending?: boolean;
+  /** 카드 오른쪽 끝에 함께 놓을 버튼. 고른 값에 딸린 행동을 같은 상자 안에 둔다. */
+  action?: React.ReactNode;
 }) {
   if (options.length === 0) return null;
 
   const current = options.find((o) => o.id === value) ?? options[0];
 
   return (
-    <div className="rounded-xl bg-white px-4 py-3">
+    <div className="flex flex-wrap items-start justify-between gap-3 rounded-xl bg-white px-4 py-3">
+      <div className="min-w-0 flex-1">
       <div className="flex flex-wrap items-center gap-2">
         <span className="mr-1 flex shrink-0 items-center gap-1.5 text-label-1 font-semibold text-slate-500">
           {icon}
@@ -65,6 +69,8 @@ export function PillPicker({
       {current.description && (
         <p className="mt-1.5 text-label-2 text-slate-400">{current.description}</p>
       )}
+      </div>
+      {action}
     </div>
   );
 }
