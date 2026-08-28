@@ -315,13 +315,20 @@ export function ResumeEditor({
   return (
     // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
     <div className="space-y-6">
-      <div className="print:hidden">
+      {/*
+        AI 점검은 이력서 전체를 보는 기능이라 개별 항목이 아니라 에이전트 줄에 둔다.
+        점검 기준을 정하는 것도 여기서 고른 에이전트다.
+      */}
+      <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
         <ResumeAgentPicker
           agents={templates}
           value={resume.templateId ?? undefined}
           onChange={handleTemplateChange}
           pending={isChangingTemplate}
         />
+        <AiButton onClick={handleReview} loading={isReviewing}>
+          이력서 전체 점검
+        </AiButton>
       </div>
 
       <div className="space-y-4 print:hidden">
@@ -338,14 +345,9 @@ export function ResumeEditor({
               className="mt-1"
             />
           </div>
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="rounded-full">
-              완성도 {detail.resume.completeness}%
-            </Badge>
-            <AiButton onClick={handleReview} loading={isReviewing}>
-              AI 점검
-            </AiButton>
-          </div>
+          <Badge variant="outline" className="rounded-full">
+            완성도 {detail.resume.completeness}%
+          </Badge>
         </div>
 
         {reviewResult && (
@@ -431,8 +433,14 @@ export function ResumeEditor({
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개</CardTitle>
+                {/*
+                  이 칸에 쓴 글을 고치는 게 아니라 아래 경력·자격·스킬을 재료로
+                  문장을 만들어 제안한다("AI 생성"은 빈손에서 지어내는 것처럼,
+                  "다듬기"는 쓴 글을 고치는 것처럼 읽혀 둘 다 맞지 않는다).
+                  항목별 "AI 다듬기"와도 하는 일이 달라 이름을 갈라 둔다.
+                */}
                 <AiButton onClick={handleGenerateSummary} loading={isGeneratingSummary}>
-                  AI 생성
+                  내 경력으로 추천받기
                 </AiButton>
               </CardHeader>
               <CardContent>
