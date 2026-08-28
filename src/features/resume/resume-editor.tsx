@@ -931,7 +931,7 @@ export function ResumeEditor({
                     className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[9rem_1fr_1.6fr_auto]"
                   >
                     <Select value={item.sectionType} onValueChange={(v) => updateAt(setItems, item._key, { sectionType: v as ResumeItemSectionType })}>
-                      <CompactSelectTrigger className="w-fit">
+                      <CompactSelectTrigger>
                         {/* 저장된 값이 목록에 없으면 빈칸이 되어 무엇을 골라야 할지 알 수 없다. */}
                         <SelectValue placeholder="종류 선택" />
                       </CompactSelectTrigger>
