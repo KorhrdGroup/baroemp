@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { formatSalary } from "@/lib/salary";
 import { labelCareerRequirement, labelQualification, labelRegion, labelWorkType } from "@/lib/labels";
 import { JobApplyButton } from "./job-apply-button";
 import { JobBookmarkButton } from "./job-bookmark-button";
@@ -23,6 +24,51 @@ import type { CareerContent, Job } from "@/types";
 import type { JobMatchDetail } from "@/services/job-match.service";
 import type { JobRequirementComparisonItem } from "@/services/job-requirement-comparison.service";
 import { BackButton } from "@/components/common/back-button";
+
+
+/**
+ * "이 공고와 내 조건 비교" 묶음.
+ * 초록은 갖춘 것, 주황은 공고 원문만으로 판단이 안 되는 것, 빨강은 모자란 것.
+ */
+/**
+ * evaluateJobFit 이 희망 조건과 함께 담는, 공고 요건 성격의 고정 라벨.
+ * 아래 "공고가 요구하는 것" 묶음이 필수/우대까지 붙여 더 자세히 보여주므로
+ * 위 "내가 바라는 조건"에서는 뺀다.
+ *
+ * 요건 이름이 그대로 들어오는 항목은 requirementNames 로 따로 거른다.
+ * "경력무관/신입가능" 은 요건 목록에 없어 여기 넣지 않는다 - 빼면 아무 데서도 안 보인다.
+ */
+const REQUIREMENT_ECHOES = new Set(["운전 가능 여부", "필요 자격"]);
+
+const COMPARISON_GROUPS = [
+  {
+    key: "fulfilled",
+    label: "충족",
+    icon: CheckCircle2,
+    box: "bg-emerald-50/60",
+    head: "text-emerald-700",
+  },
+  {
+    key: "needsCheck",
+    label: "확인 필요",
+    icon: HelpCircle,
+    box: "bg-orange-50/60",
+    head: "text-orange-600",
+  },
+  {
+    key: "lacking",
+    label: "부족",
+    icon: XCircle,
+    box: "bg-rose-50/60",
+    head: "text-rose-600",
+  },
+] as const satisfies readonly {
+  key: "fulfilled" | "needsCheck" | "lacking";
+  label: string;
+  icon: LucideIcon;
+  box: string;
+  head: string;
+}[];
 
 const REQUIREMENT_STATUS_STYLE: Record<string, { icon: LucideIcon; label: string; className: string }> = {
   SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700" },
@@ -61,6 +107,26 @@ export function JobDetailView({
   isBookmarked?: boolean;
   requirementComparison?: JobRequirementComparisonItem[];
 }) {
+  const showRequirements = Boolean(isAuthenticated && requirementComparison && requirementComparison.length > 0);
+
+  /*
+    "내가 바라는 조건"에서 요구조건 묶음이 이미 말해주는 항목을 뺀다.
+    evaluateJobFit 은 희망 조건(지역·급여·근무형태)과 공고 요건(운전·자격)을 한 배열에
+    섞어 담는데, 요건 쪽은 아래 묶음이 필수/우대까지 붙여 더 자세히 보여준다.
+  */
+  const requirementNames = new Set(requirementComparison?.map((r) => r.requirementName) ?? []);
+  const isPreferenceItem = (text: string) =>
+    !REQUIREMENT_ECHOES.has(text) && !requirementNames.has(text);
+
+  const preferenceItems = {
+    fulfilled: match?.fulfilled.filter(isPreferenceItem) ?? [],
+    needsCheck: match?.needsCheck.filter(isPreferenceItem) ?? [],
+    lacking: match?.lacking.filter(isPreferenceItem) ?? [],
+  };
+
+  // 비어 있지 않은 묶음만. 개수에 따라 열 수가 달라진다.
+  const visibleComparisons = COMPARISON_GROUPS.filter((g) => preferenceItems[g.key].length > 0);
+
   return (
     // 지원금 상세와 같은 뼈대: 회색 바탕 위에 흰 카드를 쌓고, 지원 동작은 하단에 고정한다.
     <div className="min-h-screen bg-slate-50">
@@ -75,11 +141,6 @@ export function JobDetailView({
         {job.isBeginnerFriendly && (
           <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">신입가능</Badge>
         )}
-        {match && (
-          <Badge className="rounded-full border-0 bg-brand-blue-400 text-label-2 font-semibold text-white">
-            매칭 {match.score}점 ({match.grade})
-          </Badge>
-        )}
         {job.externalSource && (
           <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
             출처 · {job.externalSource === "work24" ? "고용24" : job.externalSource}
@@ -87,7 +148,7 @@ export function JobDetailView({
         )}
       </div>
 
-      <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">{job.title}</h1>
+      <h1 className="break-keep text-balance text-title-2 font-bold text-slate-900 sm:text-headline-3">{job.title}</h1>
       <p className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
         <Building2 className="size-4" />
         {job.companyName}
@@ -99,7 +160,7 @@ export function JobDetailView({
           label="근무지역"
           value={job.address ?? job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
         />
-        <InfoRow icon={Wallet} label="급여" value={job.salaryText ?? "협의 가능"} />
+        <InfoRow icon={Wallet} label="급여" value={formatSalary(job)} />
         <InfoRow icon={Briefcase} label="고용형태" value={labelWorkType(job.workType)} />
         <InfoRow icon={Briefcase} label="경력조건" value={labelCareerRequirement(job.careerRequirement)} />
         <InfoRow icon={GraduationCap} label="학력" value={job.educationRequirement} />
@@ -134,90 +195,78 @@ export function JobDetailView({
         )}
       </div>
 
-      {match ? (
+      {/*
+        희망 조건과 공고 요구조건을 한 카드에 담는다.
+        예전에는 두 섹션으로 나뉘어 있었는데 재료가 다를 뿐(프로필 매칭 vs 원문 요건 추출)
+        "운전 가능 여부" 같은 항목이 양쪽에 나와 같은 말을 두 번 했다.
+      */}
+      {(match || showRequirements) && (
         <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고와 내 조건 비교</h2>
-          <p className="mt-1 text-label-1 text-slate-400">최근 진단 결과를 기준으로 비교했어요.</p>
-          <div className="mt-4 space-y-4">
-            {match.fulfilled.length > 0 && (
-              <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-emerald-700">
-                  <CheckCircle2 className="size-4" /> 충족
-                </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
-                  {match.fulfilled.map((f) => (
-                    <li key={f}>· {f}</li>
-                  ))}
-                </ul>
+          <p className="mt-1 text-label-1 text-slate-400">
+            바라는 근무조건과 공고가 요구하는 것을 함께 봤어요.
+          </p>
+
+          {visibleComparisons.length > 0 && match && (
+            <div className="mt-5">
+              <p className="text-label-1 font-semibold text-slate-500">내가 바라는 조건</p>
+              <div className={cn("mt-2 grid gap-3", visibleComparisons.length > 1 && "sm:grid-cols-2")}>
+                {visibleComparisons.map(({ key, label, icon: Icon, box, head }) => (
+                  <div key={key} className={cn("rounded-lg p-4", box)}>
+                    <p className={cn("flex items-center gap-1.5 text-label-1 font-semibold", head)}>
+                      <Icon className="size-4" /> {label}
+                    </p>
+                    <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+                      {preferenceItems[key].map((f) => (
+                        <li key={f}>· {f}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
-            )}
-            {match.needsCheck.length > 0 && (
-              <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
-                  <HelpCircle className="size-4" /> 확인 필요
-                </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
-                  {match.needsCheck.map((f) => (
-                    <li key={f}>· {f}</li>
-                  ))}
-                </ul>
+            </div>
+          )}
+
+          {showRequirements && (
+            <div className="mt-5">
+              <p className="text-label-1 font-semibold text-slate-500">공고가 요구하는 것</p>
+              <div className="mt-2 space-y-2">
+                {requirementComparison!.map((item) => {
+                  const style = REQUIREMENT_STATUS_STYLE[item.userStatus] ?? REQUIREMENT_STATUS_STYLE.UNKNOWN;
+                  const Icon = style.icon;
+                  return (
+                    <div
+                      key={item.requirementId}
+                      className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2.5 text-label-1"
+                    >
+                      <span className="text-slate-700">
+                        {item.requirementName}
+                        <span className="ml-1.5 text-label-2 text-slate-400">
+                          {item.jobLevel === "REQUIRED" ? "필수" : item.jobLevel === "PREFERRED" ? "우대" : "언급"}
+                        </span>
+                      </span>
+                      <span className={cn("flex shrink-0 items-center gap-1 font-semibold", style.className)}>
+                        <Icon className="size-4" />
+                        {style.label}
+                      </span>
+                    </div>
+                  );
+                })}
               </div>
-            )}
-            {match.lacking.length > 0 && (
-              <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-rose-600">
-                  <XCircle className="size-4" /> 부족
-                </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
-                  {match.lacking.map((f) => (
-                    <li key={f}>· {f}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
-      ) : (
-        !hasCareerSignal && (
-          <div className="mt-6 rounded-xl bg-brand-blue-50/40 p-6 text-center">
-            <p className="text-label-1 text-slate-600">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
-            <Link
-              href="/assessment"
-              className="mt-3 inline-block rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
-            >
-              내게 맞는 직업 찾기
-            </Link>
-          </div>
-        )
       )}
 
-      {isAuthenticated && requirementComparison && requirementComparison.length > 0 && (
-        <div className="mt-6 rounded-xl bg-white p-6">
-          <h2 className="text-body-1 font-bold text-slate-900">이 공고 요구조건과 내 준비상태</h2>
-          <p className="mt-1 text-label-1 text-slate-400">이 공고 원문에서 확인된 요구조건을 회원님의 Career DB와 비교했어요.</p>
-          <div className="mt-4 space-y-2">
-            {requirementComparison.map((item) => {
-              const style = REQUIREMENT_STATUS_STYLE[item.userStatus] ?? REQUIREMENT_STATUS_STYLE.UNKNOWN;
-              const Icon = style.icon;
-              return (
-                <div
-                  key={item.requirementId}
-                  className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2.5 text-label-1"
-                >
-                  <span className="text-slate-700">
-                    {item.requirementName}
-                    <span className="ml-1.5 text-label-2 text-slate-400">
-                      {item.jobLevel === "REQUIRED" ? "필수" : item.jobLevel === "PREFERRED" ? "우대" : "언급"}
-                    </span>
-                  </span>
-                  <span className={cn("flex shrink-0 items-center gap-1 font-semibold", style.className)}>
-                    <Icon className="size-4" />
-                    {style.label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
+      {!match && !hasCareerSignal && (
+        <div className="mt-6 rounded-xl bg-brand-blue-50/40 p-6 text-center">
+          <p className="text-label-1 text-slate-600">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
+          <Link
+            href="/assessment"
+            className="mt-3 inline-block rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+          >
+            내게 맞는 직업 찾기
+          </Link>
         </div>
       )}
 

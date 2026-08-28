@@ -174,11 +174,24 @@ export type JobCurationTab = "new" | "closing_soon" | "matched" | "ready_to_appl
  */
 export type JobCurationState = "READY" | "NEEDS_PROFILE" | "EMPTY";
 
+/** 공고의 필수 자격 대비 회원의 준비 상태. 계산은 features/jobs/job-readiness. */
+export type JobReadinessLevel = "no_requirement" | "satisfied" | "near" | "gap";
+
+export interface JobReadiness {
+  level: JobReadinessLevel;
+  /** 배지에 그대로 쓰는 문구. 계산 내용을 그대로 적어 배지 자체가 근거가 되게 한다. */
+  label: string;
+}
+
 /** 큐레이션 탭에 노출되는 개별 공고 항목. matchScore/matchGrade는 개인화 탭에서만, unlockRequirementName은 자격 탭에서만 채워진다. */
 export interface JobCurationItem {
   job: Job;
+  /** 서버에서 계산해 실어 보내는 자격 배지. 요건 사전이 필요해 화면에서 못 만든다. */
+  readiness?: JobReadiness;
   matchScore?: number;
   matchGrade?: string;
+  /** "희망 직종 일치"처럼 무엇이 맞았는지. 점수 숫자 대신 카드에 이걸 보여준다. */
+  matchReasonLabel?: string;
   unlockRequirementName?: string;
 }
 

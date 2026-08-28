@@ -88,3 +88,32 @@ export function parseWork24ListXml(xml: string): Work24ParsedList {
   const totalCount = findTotalCount(parsed) || entries.length;
   return { totalCount, entries };
 }
+
+/**
+ * 상세 조회(callTp=D) 응답 파서.
+ *
+ * 응답은 <wantedDtl> 아래 <corpInfo>(회사)와 <wantedInfo>(공고)로 나뉘는데,
+ * 두 묶음에 이름이 겹치는 키가 없어 한 겹으로 펴서 돌려준다.
+ * 목록 파서(findEntryArray)는 wantedAuthNo 를 가진 "반복 객체"를 찾는 구조라
+ * 중첩된 상세 응답에는 맞지 않아 따로 둔다.
+ */
+export function parseWork24DetailXml(xml: string): Record<string, unknown> | null {
+  const parsed = parser.parse(xml) as Record<string, unknown>;
+
+  const errorMessage = extractWork24Error(parsed);
+  if (errorMessage) {
+    throw new Error(`Work24 상세 API 오류: ${errorMessage}`);
+  }
+
+  const flat: Record<string, unknown> = {};
+  const visit = (node: unknown) => {
+    if (!isPlainObject(node)) return;
+    for (const [key, value] of Object.entries(node)) {
+      if (isPlainObject(value)) visit(value);
+      else if (value !== null && value !== "") flat[key] = value;
+    }
+  };
+  visit(parsed);
+
+  return flat.wantedAuthNo ? flat : null;
+}

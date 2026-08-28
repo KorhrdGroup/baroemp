@@ -73,3 +73,9 @@ export const outlinedCardClass = `${cardBorderClass} hover:border-brand-blue-300
 export const filterPillClass = "shrink-0 rounded-full border px-4 py-2 text-label-1 transition-colors";
 export const filterPillOnClass = "border-brand-blue-300 bg-brand-blue-50 font-semibold text-brand-blue-600";
 export const filterPillOffClass = "border-border bg-white font-medium text-slate-600 hover:bg-slate-50";
+
+/**
+ * 색 있는 바탕 위에 놓는 필터 칩의 켜진 상태.
+ * 연한 파랑(filterPillOnClass)은 파란 판 위에서 배경과 같은 색이라 켜졌는지 안 보인다.
+ */
+export const filterPillOnSolidClass = "border-brand-blue-400 bg-brand-blue-400 font-semibold text-white";

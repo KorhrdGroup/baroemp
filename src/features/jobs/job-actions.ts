@@ -6,7 +6,7 @@ import { getCurrentUser, requireSessionUser } from "@/lib/auth/session";
 import { getJobBookmarkRepository, getJobRepository } from "@/lib/repositories";
 import { recalculateLeadScore } from "@/services/lead-score.service";
 import { recordJobInterestSignal } from "@/services/job-interest.service";
-import { getJobCuration } from "@/services/job-curation.service";
+import { getAllJobCurations, getJobCuration } from "@/services/job-curation.service";
 import type { Job, JobSearchFilter, JobCurationTab, JobCurationResult } from "@/types";
 
 /** 활동 로그용 userId/anonymousId를 결정한다. 클라이언트가 넘긴 userId는 신뢰하지 않고 항상 세션을 우선한다. */
@@ -265,6 +265,12 @@ export async function getJobCurationAction(tab: JobCurationTab): Promise<JobCura
   assertValidCurationTab(tab);
   const user = await requireSessionUser();
   return getJobCuration(user.id, tab);
+}
+
+/** 큐레이션 다섯 탭을 한 번에 받는다. 탭을 눌렀을 때 기다리지 않도록 화면이 뜬 뒤 미리 부른다. */
+export async function getAllJobCurationsAction(): Promise<JobCurationResult[]> {
+  const user = await requireSessionUser();
+  return getAllJobCurations(user.id);
 }
 
 /** 채용공고 큐레이션 섹션 - 탭 조회 트래킹 */
