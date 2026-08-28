@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { formatSalary } from "@/lib/salary";
 import { labelCareerRequirement, labelQualification, labelRegion, labelWorkType } from "@/lib/labels";
 import { JobApplyButton } from "./job-apply-button";
 import { JobBookmarkButton } from "./job-bookmark-button";
@@ -99,7 +100,7 @@ export function JobDetailView({
           label="근무지역"
           value={job.address ?? job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
         />
-        <InfoRow icon={Wallet} label="급여" value={job.salaryText ?? "협의 가능"} />
+        <InfoRow icon={Wallet} label="급여" value={formatSalary(job)} />
         <InfoRow icon={Briefcase} label="고용형태" value={labelWorkType(job.workType)} />
         <InfoRow icon={Briefcase} label="경력조건" value={labelCareerRequirement(job.careerRequirement)} />
         <InfoRow icon={GraduationCap} label="학력" value={job.educationRequirement} />

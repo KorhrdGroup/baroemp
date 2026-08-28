@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { labelRegion, labelWorkType } from "@/lib/labels";
 import { cn } from "@/lib/utils";
+import { formatSalary } from "@/lib/salary";
 import { JobBookmarkButton } from "./job-bookmark-button";
 import { computeJobReadiness, READINESS_BADGE_CLASS } from "./job-readiness";
 import type { Job } from "@/types";
@@ -89,7 +90,7 @@ export function JobCard({
         </h3>
 
         <p className="mt-2 break-keep text-body-2 font-bold text-brand-blue-600">
-          {job.salaryText ?? "협의 가능"}
+          {formatSalary(job)}
         </p>
 
         {(readiness || job.isBeginnerFriendly || midlifeRecommended || closingSoon) && (
@@ -122,7 +123,7 @@ export function JobCard({
         <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-4 text-label-1 text-slate-500">
           {matchReasonLabel && (
             <>
-              <span className="text-brand-blue-700">✓ {matchReasonLabel}</span>
+              <span className="text-brand-blue-600">✓ {matchReasonLabel}</span>
               <span aria-hidden>|</span>
             </>
           )}
