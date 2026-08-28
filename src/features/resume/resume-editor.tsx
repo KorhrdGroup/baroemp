@@ -99,12 +99,11 @@ const SIMPLE_EDUCATION_TYPES = new Set<string>(["고등학교", GED_TYPE]);
 const GRADUATION_STATUSES = ["졸업", "졸업예정", "재학중", "휴학", "중퇴", "수료"] as const;
 
 /**
- * "기타" 항목의 종류.
- * 교육 이수를 맨 앞에 둔다. 중장년 재취업에서 가장 자주 쓰는 항목인데
- * 기존 다섯 종류는 신입/사무직 이력서 기준이라 넣을 칸이 없었다.
+ * "기타" 항목의 종류. 자주 쓰는 것을 앞에 둔다.
+ * 교육 이수는 여기 두지 않는다 - 전용 "교육/훈련" 섹션이 과정명과 교육기관을
+ * 따로 받으므로, 여기에도 두면 같은 내용을 두 군데 쓰게 된다.
  */
 const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
-  TRAINING: "교육 이수",
   AWARD: "수상",
   VOLUNTEER: "봉사활동",
   LANGUAGE: "외국어",
@@ -902,13 +901,13 @@ export function ResumeEditor({
           {(showSection("PROJECT") || showSection("ACTIVITY")) && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-2">교육·봉사·수상 등 추가 경력</CardTitle>
+                <CardTitle className="text-body-2">봉사·수상 등 추가 경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => {
                     const key = nextKey("item");
-                    setItems((prev) => [...prev, { _key: key, sectionType: "TRAINING", title: "", orderIndex: prev.length }]);
+                    setItems((prev) => [...prev, { _key: key, sectionType: "AWARD", title: "", orderIndex: prev.length }]);
                     setEntryEditing(key, true);
                   }}
                 >

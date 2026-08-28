@@ -148,7 +148,7 @@ export interface ResumeSkill {
 export type ResumeSkillInput = Partial<Omit<ResumeSkill, "id" | "resumeId">> & { name: string };
 
 /** 수상/프로젝트/대외활동/봉사/외국어 등 선택 항목. 강제하지 않는 부가 섹션. */
-export type ResumeItemSectionType = "AWARD" | "PROJECT" | "ACTIVITY" | "VOLUNTEER" | "LANGUAGE" | "TRAINING";
+export type ResumeItemSectionType = "AWARD" | "PROJECT" | "ACTIVITY" | "VOLUNTEER" | "LANGUAGE";
 export interface ResumeItem {
   id: string;
   resumeId: string;
