@@ -20,6 +20,14 @@ const TABS: { key: JobCurationTab; label: string }[] = [
   { key: "unlockable", label: "자격 따면 열리는 공고" },
 ];
 
+
+/**
+ * 카드 한 장의 높이. 빈 상태와 자리지킴 카드가 같은 자리를 잡아
+ * 탭을 옮길 때 판이 접혔다 펴지지 않게 한다.
+ * JobCard 안쪽 여백이 바뀌면 이 값도 함께 맞춰야 한다.
+ */
+const CARD_HEIGHT = "min-h-[249px]";
+
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
   NEEDS_PROFILE: "희망직무를 설정하면 맞춤 공고를 보여드려요.",
@@ -161,15 +169,28 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
       {loadingTabs.has(activeTab) && !current && (
         <div aria-busy="true" aria-label="불러오는 중" className="flex gap-4 overflow-hidden pb-2">
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className="h-[222px] w-80 shrink-0 animate-pulse rounded-xl border border-border bg-white/60" />
+            <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-xl border border-border bg-white/60", CARD_HEIGHT)} />
           ))}
         </div>
       )}
 
       {current && current.items.length === 0 && (
-        <p className="rounded-xl bg-white/70 py-8 text-center text-label-1 text-slate-500">
-          {EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}
-        </p>
+        /*
+          아래 여백 19px = 카드 줄의 pb-2(8px) + 가로 스크롤바가 차지하는 자리(11px).
+          카드 줄은 내용이 넘쳐 스크롤바 자리를 잡는데 빈 상태는 넘칠 게 없어
+          그만큼 낮아진다. scrollbar-gutter 는 가로 스크롤바에 적용되지 않아
+          실측값을 쓴다.
+        */
+        <div className="flex pb-[19px]">
+          <div
+            className={cn(
+              "flex w-full items-center justify-center rounded-xl bg-white/70 px-6 text-center text-label-1 text-slate-500",
+              CARD_HEIGHT,
+            )}
+          >
+            {EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}
+          </div>
+        </div>
       )}
 
       {current && current.items.length > 0 && (
