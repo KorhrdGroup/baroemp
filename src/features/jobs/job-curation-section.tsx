@@ -79,8 +79,13 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
   const current = results[activeTab];
 
   return (
-    <section className="mb-8">
-      <h2 className="mb-3 text-body-1 font-bold text-slate-900">큐레이션 JOB</h2>
+    /*
+      하늘색 판을 깔아 아래 검색 결과 목록과 갈라 놓는다.
+      제목 없이 탭만 두는데, 탭 이름이 이미 무엇을 보는지 말해준다.
+      배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
+      반투명이면 페이드 자리에만 진한 띠가 남는다.
+    */
+    <section className="mb-8 rounded-2xl bg-brand-blue-50 p-5 sm:p-6">
       <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
         {TABS.map((t) => (
           <button
@@ -99,7 +104,7 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
       )}
 
       {current && current.items.length === 0 && (
-        <p className="rounded-xl bg-slate-50 py-8 text-center text-label-1 text-slate-500">
+        <p className="rounded-xl bg-white/70 py-8 text-center text-label-1 text-slate-500">
           {EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}
         </p>
       )}
@@ -110,14 +115,14 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-white to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-brand-blue-50 to-transparent transition-opacity",
             fade.start ? "opacity-100" : "opacity-0",
           )}
         />
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-white to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-brand-blue-50 to-transparent transition-opacity",
             fade.end ? "opacity-100" : "opacity-0",
           )}
         />
