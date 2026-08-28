@@ -84,7 +84,13 @@ export function JobCard({
           회사명과 제목은 "누가 무엇을"이라 한 덩어리로 붙이고(mt-2),
           급여는 별개의 사실이라 한 칸 띄운다(mt-3).
         */}
-        <h3 className="mt-2 line-clamp-2 text-body-1 font-bold text-slate-900 group-hover:underline">
+        {/*
+          break-keep 이 없으면 한글이 음절 단위로 잘려 "모집합니 / 다." 처럼 끊긴다.
+          text-balance 는 두 줄 길이를 맞춰 마지막 줄에 한 단어만 남는 걸 막는다.
+          둘을 같이 써야 한다 - balance 만 주면 오히려 단어 중간에서 끊는다.
+          balance 를 모르는 브라우저는 break-keep 만 적용되어 그대로 쓸 만하다.
+        */}
+        <h3 className="mt-2 line-clamp-2 break-keep text-balance text-body-1 font-bold text-slate-900 group-hover:underline">
           {job.title}
         </h3>
 
