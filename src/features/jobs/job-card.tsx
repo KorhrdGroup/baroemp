@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { labelRegion, labelWorkType } from "@/lib/labels";
 import { cn } from "@/lib/utils";
-import { formatSalary } from "@/lib/salary";
+import { splitSalary } from "@/lib/salary";
 import { JobBookmarkButton } from "./job-bookmark-button";
 import { computeJobReadiness, READINESS_BADGE_CLASS } from "./job-readiness";
 import type { Job } from "@/types";
@@ -58,6 +58,7 @@ export function JobCard({
   isBookmarked,
   heldQualifications,
 }: JobCardProps) {
+  const salary = splitSalary(job);
   const dday = ddayLabel(job);
   const closingSoon = dday !== null;
   const midlifeRecommended = isMidlifeRecommended(job);
@@ -89,8 +90,10 @@ export function JobCard({
           {job.title}
         </h3>
 
+        {/* 종류는 금액을 읽는 단위일 뿐이라 무채색으로 두고, 금액만 파랗게 강조한다. */}
         <p className="mt-2 break-keep text-body-2 font-bold text-brand-blue-600">
-          {formatSalary(job)}
+          {salary.typeLabel && <span className="mr-1 font-medium text-slate-500">{salary.typeLabel}</span>}
+          {salary.amount}
         </p>
 
         {(readiness || job.isBeginnerFriendly || midlifeRecommended || closingSoon) && (
