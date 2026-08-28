@@ -75,7 +75,8 @@ export function SupportProgramCard({
         {program.benefitDescription ?? program.summary}
       </p>
 
-      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pb-5 pt-4 text-label-2 text-slate-500">
+      {/* 맨 아랫줄 글자는 일자리 카드와 같게 둔다(label-1 medium). 같은 성격의 줄이 크기가 다르면 두 카드가 다른 규칙으로 보인다. */}
+      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pt-4 pb-5 text-label-1 font-medium text-slate-500">
         {topReason && (
           <>
             <span>✓ {topReason}</span>
