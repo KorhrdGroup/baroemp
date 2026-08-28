@@ -49,6 +49,24 @@ interface AssessmentWizardProps {
   skippedCount?: number;
 }
 
+/**
+ * 이 개수부터 "아래에 더 있어요" 힌트를 붙인다.
+ *
+ * 문항 앞머리(진행률·질문·설명)를 빼면 세로 목록은 한 화면에 여섯 개까지 들어간다.
+ * 연령대(6개)는 다 보이고 자격증(7개)은 잘리므로 경계는 7이다.
+ * 화면 높이를 재서 판단하면 기기마다 결과가 갈려 고정값으로 둔다.
+ */
+const SCROLL_HINT_MIN_OPTIONS = 7;
+
+/**
+ * 답변 유형은 보지 않고 선택지 개수만 센다.
+ * 유형을 나열하면 QUALIFICATION_MULTI처럼 나중에 늘어난 유형이 조용히 빠진다.
+ * 척도·숫자·지역 등 목록이 아닌 유형은 옵션이 0개라 자연히 걸러진다.
+ */
+function needsScrollHint(question: AssessmentQuestion): boolean {
+  return (question.options?.length ?? 0) >= SCROLL_HINT_MIN_OPTIONS;
+}
+
 /** 결과 화면으로 넘어가기 전 분석 화면을 보여줄 최소 시간. */
 const ANALYZING_MS = 2500;
 const ANALYZING_STEPS = [
@@ -237,8 +255,8 @@ export function AssessmentWizard({
 
         {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
 
-        {/* 선택지가 화면을 넘치면 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
-        <ScrollMoreHint />
+        {/* 선택지가 긴 문항에서만 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
+        {needsScrollHint(question) && <ScrollMoreHint key={question.id} />}
       </div>
 
       {/* 하단 고정 CTA */}
