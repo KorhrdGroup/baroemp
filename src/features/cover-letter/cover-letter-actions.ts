@@ -9,6 +9,7 @@ import type {
   CoverLetterDetail,
   CoverLetterDetailSaveInput,
   CoverLetterTemplate,
+  CoverLetterTemplateQuestion,
   ResumeMarketComparisonView,
 } from "@/types";
 
@@ -23,7 +24,6 @@ import {
   getCoverLetterDetail,
   listCoverLettersForUser,
   saveCoverLetterDetail,
-  changeCoverLetterTemplate,
 } from "@/services/cover-letter.service";
 import { generateCoverLetterDraftWithAI, reviewCoverLetterSectionWithAI } from "@/services/ai-resume.service";
 import { getCoverLetterMarketComparison } from "@/services/resume-market-comparison.service";
@@ -58,6 +58,10 @@ export async function createCoverLetterAction(input: {
   resumeId?: string;
   targetJobId?: string;
   targetOccupationId?: string;
+  /** 작성 시작 화면에서 고른 문항. 비우면 양식의 기본 문항을 쓴다. */
+  questions?: CoverLetterTemplateQuestion[];
+  /** 작성 시작 화면에서 고른 재료 경험 */
+  experienceBankIds?: string[];
 }): Promise<CoverLetterDetail> {
   const user = await requireSessionUser();
   return createCoverLetterFromTemplate({ userId: user.id, ...input });
@@ -99,12 +103,4 @@ export async function generateCoverLetterDraftAiAction(input: {
 }): Promise<AICoverLetterDraftResult> {
   await requireOwnCoverLetter(input.coverLetterId);
   return generateCoverLetterDraftWithAI(input);
-}
-
-export async function changeCoverLetterTemplateAction(
-  coverLetterId: string,
-  templateId: string,
-): Promise<CoverLetterDetail | null> {
-  await requireOwnCoverLetter(coverLetterId);
-  return changeCoverLetterTemplate(coverLetterId, templateId);
 }

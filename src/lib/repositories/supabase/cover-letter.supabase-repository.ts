@@ -13,6 +13,7 @@ function mapRow(row: Record<string, unknown>): CoverLetter {
     targetOccupationId: (row.target_occupation_id as string | null) ?? undefined,
     title: String(row.title),
     templateId: (row.template_id as string | null) ?? undefined,
+    experienceBankIds: Array.isArray(row.experience_bank_ids) ? (row.experience_bank_ids as string[]) : [],
     status: (row.status as CoverLetter["status"]) ?? "draft",
     version: Number(row.version ?? 1),
     createdAt: String(row.created_at),
@@ -27,6 +28,7 @@ function toRow(input: Partial<CoverLetterInput>): Record<string, unknown> {
   if (input.targetJobId !== undefined) row.target_job_id = input.targetJobId;
   if (input.targetOccupationId !== undefined) row.target_occupation_id = input.targetOccupationId;
   if (input.templateId !== undefined) row.template_id = input.templateId;
+  if (input.experienceBankIds !== undefined) row.experience_bank_ids = input.experienceBankIds;
   if (input.status !== undefined) row.status = input.status;
   if (input.version !== undefined) row.version = input.version;
   return row;

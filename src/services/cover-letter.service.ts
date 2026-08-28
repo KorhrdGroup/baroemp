@@ -1,4 +1,9 @@
-import type { CoverLetter, CoverLetterDetail, CoverLetterDetailSaveInput } from "@/types";
+import type {
+  CoverLetter,
+  CoverLetterDetail,
+  CoverLetterDetailSaveInput,
+  CoverLetterTemplateQuestion,
+} from "@/types";
 import {
   getCoverLetterRepository,
   getCoverLetterSectionRepository,
@@ -29,6 +34,13 @@ export async function createCoverLetterFromTemplate(params: {
   resumeId?: string;
   targetJobId?: string;
   targetOccupationId?: string;
+  /**
+   * 작성 시작 화면에서 직접 고른 문항. 넘기지 않으면 양식의 기본 문항을 그대로 쓴다.
+   * 고른 문항은 양식에 없는 것이 섞일 수 있어(직접 입력) 양식 문항으로 되돌려 찾지 않는다.
+   */
+  questions?: CoverLetterTemplateQuestion[];
+  /** 작성 시작 화면에서 고른 재료 경험. 편집 화면에서 AI 초안 후보로 쓴다. */
+  experienceBankIds?: string[];
 }): Promise<CoverLetterDetail> {
   const template = await getCoverLetterTemplateRepository().findById(params.templateId);
 
@@ -40,13 +52,14 @@ export async function createCoverLetterFromTemplate(params: {
     resumeId: params.resumeId,
     targetJobId: params.targetJobId,
     targetOccupationId: params.targetOccupationId,
+    experienceBankIds: params.experienceBankIds ?? [],
     status: "draft",
   });
 
-  const defaultQuestions = template?.defaultQuestions ?? [];
+  const questions = params.questions?.length ? params.questions : (template?.defaultQuestions ?? []);
   await getCoverLetterSectionRepository().replaceSections(
     coverLetter.id,
-    defaultQuestions.map((q, i) => ({
+    questions.map((q, i) => ({
       questionType: q.questionType,
       question: q.question,
       content: "",
@@ -106,51 +119,4 @@ export async function saveCoverLetterDetail(input: CoverLetterDetailSaveInput): 
 
 export async function deleteCoverLetter(coverLetterId: string): Promise<void> {
   await getCoverLetterRepository().remove(coverLetterId);
-}
-
-/**
- * 자기소개서 양식 변경.
- * 자기소개서에서 템플릿은 문항 세트 자체를 정의하므로 교체하면 문항이 통째로 바뀐다.
- * 이미 쓴 답변이 사라지지 않도록, 같은 questionType의 답변은 새 문항으로 옮겨 담는다.
- * 새 양식에 없는 문항의 답변은 유지할 자리가 없어 사라지므로 호출부에서 반드시 확인을 받는다.
- */
-export async function changeCoverLetterTemplate(
-  coverLetterId: string,
-  templateId: string,
-): Promise<CoverLetterDetail | null> {
-  const current = await getCoverLetterDetail(coverLetterId);
-  if (!current) return null;
-
-  const template = await getCoverLetterTemplateRepository().findById(templateId);
-  const defaultQuestions = template?.defaultQuestions ?? [];
-
-  // questionType이 같은 기존 답변을 새 문항에 옮겨 담는다.
-  const contentByType = new Map<string, string>();
-  for (const section of current.sections) {
-    if (section.content?.trim()) contentByType.set(section.questionType, section.content);
-  }
-
-  await getCoverLetterRepository().update(coverLetterId, { templateId });
-  await getCoverLetterSectionRepository().replaceSections(
-    coverLetterId,
-    defaultQuestions.map((q, i) => ({
-      questionType: q.questionType,
-      question: q.question,
-      content: contentByType.get(q.questionType) ?? "",
-      characterLimit: q.characterLimit,
-      orderIndex: i,
-    })),
-  );
-
-  await logActivityEvent({
-    userId: current.coverLetter.userId,
-    // 전용 이벤트 타입을 새로 만들지 않는다. ACTIVITY_EVENT_TYPES에 없는 값을 넣으면
-    // 분석 쿼리와 DB 제약에서 걸린다. 양식 변경은 metadata로 구분한다.
-    eventType: "cover_letter_updated",
-    entityType: "cover_letter",
-    entityId: coverLetterId,
-    metadata: { action: "template_changed", templateCode: template?.code },
-  });
-
-  return getCoverLetterDetail(coverLetterId);
 }
