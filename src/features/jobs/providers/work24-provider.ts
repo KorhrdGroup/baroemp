@@ -158,6 +158,43 @@ export function adaptWork24Entry(entry: Record<string, unknown>, fetchedAt: stri
   };
 }
 
+
+/**
+ * 고용24 상세 본문의 이중 이스케이프를 푼다.
+ *
+ * 원본 XML 에 &amp;#xd; 로 들어 있어 파서가 &amp; 만 풀고 "&#xd;" 가 글자로 남는다.
+ * 상세를 받은 공고 29,802건에서 이 문자열이 본문에 그대로 보였다.
+ * 숫자 엔티티를 먼저 풀어야 한다 - 이름 엔티티를 먼저 풀면 "&amp;#xd;" 가
+ * "&#xd;" 로 되살아나 한 번 더 남는다.
+ */
+const NAMED_ENTITIES: Record<string, string> = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
+  nbsp: " ",
+};
+
+function decodeEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number(dec)))
+    .replace(/&(amp|lt|gt|quot|apos|nbsp);/g, (_, name: string) => NAMED_ENTITIES[name] ?? _);
+}
+
+/** 상세 본문용: 엔티티를 풀고 줄바꿈을 정리한다. */
+function cleanDetailText(value: unknown): string | undefined {
+  const text = toStr(value);
+  if (!text) return undefined;
+  const cleaned = decodeEntities(text)
+    .replace(/\r\n?/g, "\n")     // CR / CRLF -> LF
+    .replace(/[ \t]+$/gm, "")     // 줄 끝 공백
+    .replace(/\n{3,}/g, "\n\n")  // 빈 줄이 셋 이상이면 둘로
+    .trim();
+  return cleaned || undefined;
+}
+
 function buildQueryParams(authKey: string, params: JobProviderSearchParams): URLSearchParams {
   const qs = new URLSearchParams();
   qs.set("authKey", authKey);
@@ -258,15 +295,17 @@ export class Work24JobProvider extends BaseJobProvider {
     if (!detail) return null;
 
     // 4대보험·퇴직금은 별도 칸으로 오는데 화면에서는 한 줄로 읽히는 게 자연스럽다.
-    const benefits = [toStr(detail.fourIns), toStr(detail.retirepay)].filter(Boolean).join(", ");
+    const benefits = [cleanDetailText(detail.fourIns), cleanDetailText(detail.retirepay)]
+      .filter(Boolean)
+      .join(", ");
 
     return {
       externalId,
-      title: toStr(detail.wantedTitle),
-      description: toStr(detail.jobCont),
-      requirements: toStr(detail.enterTpNm),
-      qualificationRequirements: toStr(detail.certNm) ?? toStr(detail.licenseNm),
-      workHours: toStr(detail.workdayWorkhrCont),
+      title: cleanDetailText(detail.wantedTitle),
+      description: cleanDetailText(detail.jobCont),
+      requirements: cleanDetailText(detail.enterTpNm),
+      qualificationRequirements: cleanDetailText(detail.certNm) ?? cleanDetailText(detail.licenseNm),
+      workHours: cleanDetailText(detail.workdayWorkhrCont),
       benefits: benefits || undefined,
       rawDetail: detail,
     };
