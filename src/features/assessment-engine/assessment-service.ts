@@ -142,6 +142,14 @@ export async function completeAssessmentSession(sessionId: string): Promise<Asse
   const session = await sessionRepo.findById(sessionId);
   if (!session) throw new Error("검사 세션을 찾을 수 없습니다.");
 
+  /*
+   * 완료 요청이 두 번 들어와도 결과는 세션당 하나여야 한다.
+   * 마지막 문항 제출이 중복 실행되면(더블클릭·재시도) 같은 세션에 결과가 두 건 쌓였고,
+   * 결과 조회는 한 건을 전제하므로 그때부터 결과 화면이 통째로 열리지 않았다.
+   */
+  const existingResult = await getAssessmentResultRepository().findBySessionId(sessionId);
+  if (existingResult) return existingResult;
+
   const loaded = await loadAssessment(session.assessmentId);
   if (!loaded) throw new Error("검사 정보를 불러올 수 없습니다.");
 
