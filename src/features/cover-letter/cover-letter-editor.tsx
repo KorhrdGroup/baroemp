@@ -52,10 +52,13 @@ export function CoverLetterEditor({
   initialDetail,
   experienceBank,
   templates = [],
+  applicantName,
 }: {
   initialDetail: CoverLetterDetail;
   experienceBank: ExperienceBankItem[];
   templates?: CoverLetterTemplateOption[];
+  /** 미리보기 문서에 찍는 지원자 이름. 편집 폼에는 쓰지 않는다. */
+  applicantName?: string;
 }) {
   const [detail, setDetail] = useState(initialDetail);
   const [title, setTitle] = useState(initialDetail.coverLetter.title);
@@ -459,7 +462,7 @@ export function CoverLetterEditor({
             <DialogTitle>미리보기</DialogTitle>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border">
-            <CoverLetterPreview detail={currentPreviewDetail()} />
+            <CoverLetterPreview detail={currentPreviewDetail()} applicantName={applicantName} />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={handlePopupPrint}>

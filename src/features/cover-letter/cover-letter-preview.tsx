@@ -45,17 +45,28 @@ function sectionHeading(questionType: string, question: string): string {
   );
 }
 
-export function CoverLetterPreview({ detail }: { detail: CoverLetterDetail }) {
-  const { coverLetter, sections, template } = detail;
+export function CoverLetterPreview({
+  detail,
+  applicantName,
+}: {
+  detail: CoverLetterDetail;
+  /** 문서에 찍는 지원자 이름. 연결된 이력서의 이름을 먼저 쓰고 없으면 계정 이름. */
+  applicantName?: string;
+}) {
+  const { coverLetter, sections } = detail;
   const ordered = [...sections].sort((a, b) => a.orderIndex - b.orderIndex);
 
   return (
     <div className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-0">
-      <div className="mb-8 border-b border-slate-300 pb-5">
+      {/*
+        머리글에는 선을 두지 않는다. 아래 문항마다 밑줄이 있어 선이 겹치면
+        문서가 표처럼 보인다. 제목과 이름은 크기 차이로 이미 구분된다.
+      */}
+      <div className="mb-8 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <p className="text-title-2 font-bold text-slate-900">
           {coverLetter.title?.trim() || "자기소개서"}
         </p>
-        {template?.name && <p className="mt-2 text-label-1 text-slate-600">{template.name}</p>}
+        {applicantName && <p className="text-body-2 font-semibold text-slate-700">{applicantName}</p>}
       </div>
 
       {ordered.map((section) => (
