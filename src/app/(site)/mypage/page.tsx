@@ -7,10 +7,7 @@ import {
   ExternalLink,
   FileText,
   Gift,
-  Headset,
   Pencil,
-  Search,
-  Sparkles,
   Star,
   Target,
   UserRound,
@@ -131,15 +128,11 @@ async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData>
   }
 }
 
-/** 오른쪽 아래에 세우는 다음에 갈 곳. 마이페이지에서 나가는 길을 한 곳에 모은다. */
-const SHORTCUTS: { href: string; label: string; icon: typeof Search }[] = [
-  { href: "/assessment", label: "직업진단", icon: Sparkles },
-  { href: "/jobs", label: "일자리찾기", icon: Search },
-  { href: "/support", label: "지원금찾기", icon: Gift },
-  { href: "/resume", label: "이력서 첨삭", icon: FileText },
-  { href: "/resume#experience-bank", label: "경험뱅크", icon: ClipboardList },
-  { href: "/consulting", label: "취업컨설팅", icon: Headset },
-];
+/*
+  "바로가기"는 두지 않는다. 직업진단·일자리찾기·지원금찾기·이력서 첨삭·취업컨설팅은
+  모두 상단 메뉴에 이미 있고, 경험뱅크도 이력서 화면에서 간다. 같은 길을 두 번 내면
+  어느 쪽이 진짜인지 헷갈리고, 메뉴가 바뀔 때 여기도 같이 고쳐야 한다.
+*/
 
 export const metadata: Metadata = {
   title: "마이페이지 | 한평생 바로취업",
@@ -275,8 +268,8 @@ export default async function MyPage() {
       */}
       <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-start">
         {/*
-          늘 같은 자리에 있어야 하는 것들. 내 정보는 확인하러 오는 값이라 본문 흐름에
-          섞이면 매번 찾아야 하고, 바로가기는 여기서 다음에 갈 곳을 고르는 자리다.
+          내 정보는 확인하러 오는 값이라 본문 흐름에 섞이면 매번 찾아야 한다.
+          늘 같은 자리에 둔다.
 
           본문과 마찬가지로 제목을 얹는다. 한쪽만 제목이 있으면 그만큼 아래로 밀려
           두 칸의 첫 상자가 어긋난 채로 시작한다.
@@ -355,26 +348,6 @@ export default async function MyPage() {
               </CardContent>
             </Card>
 
-            <Card className="rounded-xl border-0 ring-1 ring-border">
-            <CardHeader>
-              <CardTitle className="text-body-2">바로가기</CardTitle>
-            </CardHeader>
-            <CardContent className="grid grid-cols-2 gap-2">
-              {SHORTCUTS.map((shortcut) => (
-                <Link
-                  key={shortcut.href}
-                  href={shortcut.href}
-                  className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl px-2 py-4 text-center text-label-1 text-slate-600",
-                    interactiveRowClass,
-                  )}
-                >
-                  <shortcut.icon className="size-5 text-brand-blue-600" />
-                  {shortcut.label}
-                </Link>
-              ))}
-            </CardContent>
-            </Card>
           </div>
         </aside>
 
