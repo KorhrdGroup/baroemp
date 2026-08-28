@@ -15,7 +15,7 @@ export interface NavItem {
 
 export const mainNavItems: NavItem[] = [
   { label: "직업진단", href: "/assessment" },
-  { label: "채용공고", href: "/jobs" },
+  { label: "일자리찾기", href: "/jobs" },
   { label: "지원금찾기", href: "/support" },
   { label: "이력서 첨삭", href: "/resume" }, // 푸터에서는 "이력서·자소서 첨삭" (가로 여유가 있어 전체 명칭 사용)
   { label: "취업컨설팅", href: "/consulting" },
@@ -23,7 +23,7 @@ export const mainNavItems: NavItem[] = [
 
 export const footerServiceLinks: NavItem[] = [
   { label: "직업진단", href: "/assessment" },
-  { label: "채용공고", href: "/jobs" },
+  { label: "일자리찾기", href: "/jobs" },
   { label: "지원금찾기", href: "/support" },
   { label: "이력서·자소서 첨삭", href: "/resume" },
   { label: "취업컨설팅", href: "/consulting" },
