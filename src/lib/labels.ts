@@ -1,3 +1,4 @@
+import { mockJobRoles } from "@/mocks/job-roles.mock";
 import type { AgeGroup, CareerRequirement, DesiredStartTiming, EmploymentStatus, Region, WorkType } from "@/types";
 import type { Lead } from "@/types";
 
@@ -133,4 +134,13 @@ export function labelCareerRequirement(value?: CareerRequirement): string {
 
 export function labelPreferentialCode(code: string): string {
   return PREFERENTIAL_CODE_LABELS[code] ?? code;
+}
+
+/**
+ * 희망직무 분류 코드("care_worker")를 사람이 읽는 이름("요양보호사")으로.
+ * 이름을 모르는 코드는 코드를 그대로 돌려주지 않고 비워 둔다 - 이력서나 화면에
+ * 코드가 찍히면 고장으로 보인다. 부르는 쪽에서 빈 값을 처리한다.
+ */
+export function labelJobCategory(code: string): string | undefined {
+  return mockJobRoles.find((role) => role.jobCategory === code)?.name;
 }

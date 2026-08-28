@@ -21,6 +21,7 @@ export type ResumeSaveActionInput = Omit<ResumeDetailSaveInput, "resume"> & {
 import { requireSessionUser } from "@/lib/auth/session";
 import { getResumeRepository, getResumeTemplateRepository } from "@/lib/repositories";
 import { logActivityEvent } from "@/lib/activity/event-logger";
+import type { ResumePrefillChoice } from "@/services/resume.service";
 import {
   createResumeFromTemplate,
   deleteResume,
@@ -71,6 +72,10 @@ export async function createResumeAction(input: {
   title?: string;
   targetJobId?: string;
   targetOccupationId?: string;
+  /** 작성 시작 화면에서 고른 항목. 비우면 양식이 정한 항목을 따른다. */
+  sectionCodes?: string[];
+  /** 불러올 내 정보 중 무엇을 쓸지 */
+  include?: ResumePrefillChoice;
 }): Promise<ResumeDetail> {
   const user = await requireSessionUser();
   return createResumeFromTemplate({ userId: user.id, ...input });
