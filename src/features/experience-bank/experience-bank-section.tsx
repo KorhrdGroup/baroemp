@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import type { ExperienceBankItem } from "@/types";
 import { cn } from "@/lib/utils";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import {
   createExperienceBankItemAction,
   deleteExperienceBankItemAction,
@@ -64,6 +65,8 @@ export function ExperienceBankSection({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, startSave] = useTransition();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  // 확인 창은 지울 항목을 들고 있는다. 이름을 물어보는 말에 그대로 쓴다.
+  const [confirmingDelete, setConfirmingDelete] = useState<ExperienceBankItem | null>(null);
 
   function openCreate() {
     setEditingId(null);
@@ -102,7 +105,7 @@ export function ExperienceBankSection({
   }
 
   async function handleDelete(item: ExperienceBankItem) {
-    if (!window.confirm(`'${item.title}' 경험을 삭제할까요?`)) return;
+    setConfirmingDelete(null);
     setDeletingId(item.id);
     try {
       await deleteExperienceBankItemAction(item.id);
@@ -176,7 +179,7 @@ export function ExperienceBankSection({
                   size="icon"
                   aria-label={`${item.title} 삭제`}
                   disabled={deletingId === item.id}
-                  onClick={() => void handleDelete(item)}
+                  onClick={() => setConfirmingDelete(item)}
                 >
                   {deletingId === item.id ? (
                     <Loader2 className="size-4 animate-spin text-slate-400" />
@@ -235,6 +238,15 @@ export function ExperienceBankSection({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={confirmingDelete !== null}
+        onOpenChange={(next) => !next && setConfirmingDelete(null)}
+        title={confirmingDelete ? `'${confirmingDelete.title}' 경험을 삭제할까요?` : ""}
+        description="삭제하면 되돌릴 수 없습니다. 이 경험을 넣어 쓴 자기소개서 내용은 그대로 남습니다."
+        pending={deletingId !== null}
+        onConfirm={() => confirmingDelete && void handleDelete(confirmingDelete)}
+      />
     </div>
   );
 }

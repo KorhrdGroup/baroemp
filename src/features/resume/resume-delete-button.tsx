@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ConfirmDeleteDialog } from "@/components/common/confirm-delete-dialog";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { deleteResumeAction } from "./resume-actions";
 
 /**
@@ -37,7 +37,7 @@ export function ResumeDeleteButton({ resumeId }: { resumeId: string }) {
 
       {/* 카드가 Link 안이라 창 안에서의 클릭도 편집으로 새지 않게 막는다. */}
       <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-        <ConfirmDeleteDialog
+        <ConfirmDialog
           open={confirming}
           onOpenChange={setConfirming}
           title="이 이력서를 삭제할까요?"

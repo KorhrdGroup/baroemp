@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowLeft, ArrowUp, FileText, Loader2, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -64,6 +65,8 @@ export function CoverLetterEditor({
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, { text: string; prompts: string[] }>>({});
   const [isChangingTemplate, startTemplateChange] = useTransition();
+  // 양식을 바꾸면 새 양식에 없는 문항의 답이 사라져 먼저 확인을 받는다.
+  const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const marketComparisonRequestedRef = useRef(false);
 
@@ -73,18 +76,20 @@ export function CoverLetterEditor({
    * 새 양식에 없는 문항의 답변은 사라지므로 먼저 확인을 받는다.
    */
   function handleTemplateChange(templateId: string) {
-    const coverLetter = detail.coverLetter;
-    if (templateId === coverLetter.templateId) return;
+    if (templateId === detail.coverLetter.templateId) return;
 
-    const written = sections.filter((s) => s.content?.trim());
-    if (written.length > 0) {
-      const ok = window.confirm(
-        "양식을 바꾸면 문항 구성이 새 양식으로 교체됩니다.\n" +
-          "같은 종류의 문항에 쓴 내용은 그대로 옮겨지지만, 새 양식에 없는 문항의 내용은 사라집니다.\n\n" +
-          "계속할까요?",
-      );
-      if (!ok) return;
+    // 쓴 내용이 있으면 먼저 확인을 받는다. 없으면 잃을 것이 없어 바로 바꾼다.
+    if (sections.some((s) => s.content?.trim())) {
+      setConfirmingTemplateId(templateId);
+      return;
     }
+    applyTemplateChange(templateId);
+  }
+
+  function applyTemplateChange(templateId: string) {
+    const coverLetter = detail.coverLetter;
+    const written = sections.filter((s) => s.content?.trim());
+    setConfirmingTemplateId(null);
 
     startTemplateChange(async () => {
       // 답변 이관은 서버에 저장된 내용을 기준으로 한다.
@@ -389,6 +394,16 @@ export function CoverLetterEditor({
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        open={confirmingTemplateId !== null}
+        onOpenChange={(next) => !next && setConfirmingTemplateId(null)}
+        title="양식을 바꿀까요?"
+        description="같은 종류의 문항에 쓴 내용은 그대로 옮겨지지만, 새 양식에 없는 문항의 내용은 사라집니다."
+        confirmLabel="양식 바꾸기"
+        pending={isChangingTemplate}
+        onConfirm={() => confirmingTemplateId && applyTemplateChange(confirmingTemplateId)}
+      />
     </div>
   );
 }

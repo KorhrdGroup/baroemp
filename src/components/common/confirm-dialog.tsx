@@ -12,13 +12,13 @@ import {
 } from "@/components/ui/dialog";
 
 /**
- * 삭제 확인 창.
+ * 되돌릴 수 없는 행동을 하기 전에 받는 확인 창.
  *
  * window.confirm 을 쓰면 브라우저·임베드 환경에 따라 창이 뜨지 않고 취소로 처리되어
- * 삭제가 조용히 무시된다. 앱 안에서 그리면 어디서 열어도 같게 동작하고,
- * 무엇을 지우는지 이름까지 보여줄 수 있다.
+ * 아무 일도 일어나지 않는다. 실패한 티조차 나지 않는다.
+ * 앱 안에서 그리면 어디서 열어도 같게 동작하고, 무엇이 사라지는지 길게 설명할 수도 있다.
  */
-export function ConfirmDeleteDialog({
+export function ConfirmDialog({
   open,
   onOpenChange,
   title,
