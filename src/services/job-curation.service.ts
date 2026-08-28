@@ -1,7 +1,7 @@
 import { findCareerProfileByUserId, getJobRepository } from "@/lib/repositories";
 import type { CareerProfile, Job, JobCurationItem, JobCurationResult, JobCurationTab, JobSearchFilter } from "@/types";
 import { evaluateJobFit } from "./job-match.service";
-import { compareUserToJobsRequirements } from "./job-requirement-comparison.service";
+import { compareUserToJobsRequirements, type JobRequirementComparisonItem } from "./job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
 
 const TAB_LIMIT = 8;
@@ -202,17 +202,20 @@ async function getReadyToApplyTab(userId: string, ctx: PersonalContext) {
  * (computeUserRequirementStatuses)와 공고 원문 요건만으로 판정한다.
  * 필수 요건 중 미충족이 "딱 하나"인 공고를 모아, 그 하나로 가장 많은 공고가 열리는 조건을 고른다.
  */
-async function getUnlockableTab(userId: string, ctx: PersonalContext) {
-  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
-
-  const top = ctx.scored.slice(0, READY_CHECK_LIMIT);
-  const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
-
-  // 조건별로 "이 하나만 채우면 지원 가능해지는" 공고를 모은다.
+/**
+ * "이 조건 하나만 채우면 열리는" 공고를 조건별로 모아, 가장 많은 공고를
+ * 열어주는 조건 하나를 고른다. 걸림돌 판정 기준은 호출하는 쪽이 정한다.
+ */
+function pickUnlockRequirement(
+  candidates: JobCurationItem[],
+  comparisons: Map<string, JobRequirementComparisonItem[]>,
+  isBlocker: (item: JobRequirementComparisonItem) => boolean,
+): { name: string; items: JobCurationItem[] } | null {
   const byRequirement = new Map<string, { name: string; items: JobCurationItem[] }>();
-  for (const item of top) {
+
+  for (const item of candidates) {
     const blockers = (comparisons.get(item.job.id) ?? []).filter(
-      (c) => c.jobLevel === "REQUIRED" && c.userStatus === "NOT_SATISFIED",
+      (c) => c.jobLevel === "REQUIRED" && isBlocker(c),
     );
     if (blockers.length !== 1) continue;
     const blocker = blockers[0];
@@ -221,8 +224,30 @@ async function getUnlockableTab(userId: string, ctx: PersonalContext) {
     byRequirement.set(blocker.requirementId, entry);
   }
 
-  // 가장 많은 공고를 열어주는 조건 하나만 보여준다.
-  const best = [...byRequirement.values()].sort((a, b) => b.items.length - a.items.length)[0];
+  return [...byRequirement.values()].sort((a, b) => b.items.length - a.items.length)[0] ?? null;
+}
+
+async function getUnlockableTab(userId: string, ctx: PersonalContext) {
+  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
+
+  const top = ctx.scored.slice(0, READY_CHECK_LIMIT);
+  const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
+
+  /*
+    1차는 미충족이 확인된 자격만 본다.
+    비면 아직 모르는 자격(UNKNOWN)까지 넓힌다. 자격을 한 건도 등록하지 않은 회원은
+    모든 자격이 UNKNOWN 이라 1차에서 늘 빈 화면이 나왔는데, 그런 회원일수록
+    "이거 하나 따면 이만큼 열려요"를 봐야 할 사람이다.
+    후보군 자체가 희망 직종·지역에서 나오므로 관심 분야를 벗어나지 않는다.
+  */
+  const best =
+    pickUnlockRequirement(top, comparisons, (c) => c.userStatus === "NOT_SATISFIED") ??
+    pickUnlockRequirement(
+      top,
+      comparisons,
+      (c) => c.userStatus === "NOT_SATISFIED" || c.userStatus === "UNKNOWN",
+    );
+
   if (!best) return { state: "EMPTY" as const, items: [] };
   return { state: "READY" as const, items: best.items.slice(0, TAB_LIMIT) };
 }

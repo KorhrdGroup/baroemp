@@ -135,6 +135,7 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
   }
 
   const current = results[activeTab];
+  const unlockRequirementName = current?.items[0]?.unlockRequirementName;
 
   return (
     /*
@@ -193,6 +194,17 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
         </div>
       )}
 
+      {/*
+        어떤 자격이 이 목록을 열어주는지는 공고마다 같으므로 줄 위에 한 번만 쓴다.
+        카드마다 캡션을 얹으면 카드 윗변이 어긋난다.
+      */}
+      {unlockRequirementName && (
+        <p className="mb-3 text-label-1 text-slate-600">
+          <strong className="font-semibold text-brand-blue-700">{unlockRequirementName}</strong>
+          {" "}자격을 따면 지원할 수 있는 공고예요.
+        </p>
+      )}
+
       {current && current.items.length > 0 && (
         <div className="relative">
         {/* 페이드는 스크롤을 가리면 안 되므로 클릭·스크롤을 통과시킨다. */}
@@ -222,11 +234,6 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
                   void trackCurationJobClickedAction({ tab: activeTab, jobId: item.job.id }).catch(() => {});
                 }}
               >
-                {item.unlockRequirementName && (
-                  <p className="mb-1 text-label-2 font-semibold text-brand-blue-600">
-                    {item.unlockRequirementName} 취득 시 지원 가능
-                  </p>
-                )}
                 <JobCard
                   job={item.job}
                   matchReasonLabel={item.matchReasonLabel}
