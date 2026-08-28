@@ -1,4 +1,4 @@
--- 0054_admin_member_composition_rpc.sql
+-- 0058_admin_member_composition_rpc.sql
 -- 통계 > 회원 구성 탭 집계.
 --
 -- 클라이언트로 행을 끌어와 세면 PostgREST 기본 1000행 상한에 조용히 걸려

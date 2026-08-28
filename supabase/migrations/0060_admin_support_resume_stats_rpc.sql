@@ -1,4 +1,4 @@
--- 0056_admin_support_resume_stats_rpc.sql
+-- 0060_admin_support_resume_stats_rpc.sql
 -- 통계 > 지원금·이력서 탭 집계.
 --
 -- 기존 support/resume analytics 서비스는 getRecentEvents(3000)과 findAll()에 기대고 있어

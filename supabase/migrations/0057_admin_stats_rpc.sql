@@ -1,4 +1,4 @@
--- 0053_admin_stats_rpc.sql
+-- 0057_admin_stats_rpc.sql
 -- 관리자 통계·엑셀 내보내기용 집계 함수.
 --
 -- 기존 분석 서비스는 activityEventLogger.getRecentEvents(3000)으로 최근 3000건만

@@ -1,4 +1,4 @@
--- 0055_admin_assessment_stats_rpc.sql
+-- 0059_admin_assessment_stats_rpc.sql
 -- 통계 > 직업진단 탭 집계.
 --
 -- 기존 assessment-analytics.service는 세션·결과를 findAll()로 전량 끌어와 세고,
