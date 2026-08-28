@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillPicker } from "@/components/common/pill-picker";
@@ -200,8 +201,14 @@ export function CoverLetterEditor({
   }
 
 
+  // 진행률은 답을 쓴 문항 수로 센다. 화면에서 바로 세어지는 값이라 설명이 필요 없다.
+  const writtenCount = sections.filter((sec) => sec.content?.trim()).length;
+  const writtenRatio = sections.length > 0 ? Math.round((writtenCount / sections.length) * 100) : 0;
+  const firstEmptyIndex = sections.findIndex((sec) => !sec.content?.trim());
+
   return (
-    <div className="space-y-4">
+    // 설정 줄(양식 선택)과 문서 사이만 넓게 띄운다. 이력서 편집과 같은 간격.
+    <div className="space-y-6">
       <PillPicker
         label="자기소개서 양식"
         icon={<FileText className="size-4 text-brand-blue-600" />}
@@ -215,6 +222,7 @@ export function CoverLetterEditor({
         pending={isChangingTemplate}
       />
 
+      <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4">
         <div className="min-w-48 flex-1">
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
@@ -245,7 +253,11 @@ export function CoverLetterEditor({
                 <Input
                   value={section.question}
                   onChange={(e) => updateSection(section._key, { question: e.target.value })}
-                  className="mt-1 h-10 border-0 bg-transparent px-0 text-body-2 font-bold shadow-none focus-visible:ring-0"
+                  /*
+                    Input 기본 클래스에 md:text-label-1 이 있어 넓은 화면에서는
+                    그쪽이 이긴다. 반응형 단계까지 함께 지정해야 크기가 적용된다.
+                  */
+                  className="mt-1 h-11 border-0 bg-transparent px-0 text-body-1 font-semibold shadow-none focus-visible:ring-0 md:text-body-1"
                 />
               </div>
               <div className="flex items-center gap-1">
@@ -371,6 +383,7 @@ export function CoverLetterEditor({
       >
         <Plus className="size-4" /> 문항 추가
       </Button>
+      </div>
 
       {/*
         이력서 편집기와 동일한 구조. 왼쪽은 문서를 벗어나는 동작(목록으로)이라 ghost로 눌러두고,
@@ -384,7 +397,24 @@ export function CoverLetterEditor({
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
           </Button>
-          <div className="ml-auto flex shrink-0 items-center gap-2">
+          {/*
+            이력서와 같은 자리에 진행 막대를 둔다. 자기소개서에는 완성도 점수가
+            없으므로 "답을 쓴 문항 수"를 그대로 쓴다. 남은 문항 번호를 함께 적어
+            다음에 무엇을 채울지 알게 한다.
+          */}
+          <div className="mx-4 hidden min-w-0 flex-1 sm:block">
+            <div className="flex items-center justify-between gap-2 text-label-2">
+              <span className="truncate text-slate-500">
+                {firstEmptyIndex >= 0 ? `다음: 문항 ${firstEmptyIndex + 1}` : "모든 문항을 채웠어요"}
+              </span>
+              <span className="shrink-0 font-semibold text-slate-600">
+                {writtenCount}/{sections.length}문항
+              </span>
+            </div>
+            <Progress value={writtenRatio} className="mt-1 h-1.5" />
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2">
             {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
             {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
             <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
