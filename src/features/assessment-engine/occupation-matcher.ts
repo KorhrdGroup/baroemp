@@ -5,6 +5,7 @@ import type {
   OccupationMatchingRule,
   OccupationRecommendation,
 } from "@/types";
+import { isPreferredQualification, NO_REQUIRED_QUALIFICATION_RISK } from "@/lib/qualification";
 import { getDimensionScore } from "./dimension-scorer";
 
 const DIMENSION_REASON_TEMPLATES: Record<string, string> = {
@@ -180,8 +181,18 @@ export function matchOccupations(input: OccupationMatchInput, limit = 5): Occupa
     }
 
     const risks: string[] = [];
-    if (!hasRequiredQualification && occupation.requiredQualifications.length > 0) {
-      risks.push("현재 관련 자격을 보유하지 않았습니다.");
+    /*
+     * 우대 자격만 없는 경우는 걸림돌이 아니다.
+     * 자격 요건 배열에는 필수와 우대가 섞여 있어(이름 뒤 "(우대)" 접미사로만 구분),
+     * 이를 갈라 보지 않으면 자격 없이도 지원 가능한 직업까지 경고가 붙는다.
+     */
+    const missingRequired = occupation.requiredQualifications.filter(
+      (req) =>
+        !isPreferredQualification(req) &&
+        !heldQualifications.some((held) => req.includes(held) || held.includes(req)),
+    );
+    if (missingRequired.length > 0) {
+      risks.push(NO_REQUIRED_QUALIFICATION_RISK);
     }
     for (const dimension of weakRequiredDimensions) {
       const label = DIMENSION_LABELS[dimension];

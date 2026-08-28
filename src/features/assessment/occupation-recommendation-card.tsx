@@ -1,8 +1,13 @@
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, ChevronDown, FileText, ListChecks, MapPin, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, FileText, ListChecks, MapPin, Plus, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Occupation, OccupationRecommendation } from "@/types";
 import { cn } from "@/lib/utils";
+import {
+  isPreferredQualification,
+  NO_REQUIRED_QUALIFICATION_RISK,
+  qualificationName,
+} from "@/lib/qualification";
 import { TrackedLink } from "./tracked-link";
 
 const GRADE_STYLE: Record<OccupationRecommendation["grade"], string> = {
@@ -55,6 +60,17 @@ export function OccupationRecommendationCard({
   jobCount,
 }: OccupationRecommendationCardProps) {
   const postingCount = jobCount?.total ?? 0;
+
+  /*
+   * 이미 저장된 진단 결과에는 우대 자격만 없어도 "자격 없음"이 걸림돌로 들어가 있다.
+   * (매처는 고쳤지만 지난 결과는 그대로다.) 읽는 시점에 필수가 실제로 빈 경우만 남긴다.
+   */
+  const missesRequiredQualification = rec.requiredQualifications.some(
+    (q) => !isPreferredQualification(q) && rec.missingConditions.includes(q),
+  );
+  const risks = missesRequiredQualification
+    ? rec.risks
+    : rec.risks.filter((risk) => risk !== NO_REQUIRED_QUALIFICATION_RISK);
 
   return (
     <details
@@ -127,13 +143,13 @@ export function OccupationRecommendationCard({
               ))}
             </ul>
           </div>
-          {rec.risks.length > 0 ? (
+          {risks.length > 0 ? (
             <div className="rounded-lg bg-orange-50/60 p-4">
               <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
                 <AlertTriangle className="size-4" /> 고려할 점
               </p>
               <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
-                {rec.risks.map((risk) => (
+                {risks.map((risk) => (
                   <li key={risk}>· {risk}</li>
                 ))}
               </ul>
@@ -153,6 +169,9 @@ export function OccupationRecommendationCard({
           자격 요건.
           이전에는 "필요한 자격 · 부족한 조건" 한 줄에 요건과 미충족을 섞어 넣어서,
           이미 보유한 자격도 부족한 것처럼 읽혔다. 보유/필요를 갈라 표시한다.
+
+          없는 자격이라도 우대는 필수와 무게가 다르다.
+          둘 다 주황 "필요"로 칠하면 자격 없이도 지원 가능한 직업이 막힌 것처럼 보인다.
         */}
         {rec.requiredQualifications.length > 0 && (
           <div className="mt-3 rounded-lg bg-slate-50 p-4">
@@ -162,17 +181,30 @@ export function OccupationRecommendationCard({
             <div className="mt-2 flex flex-wrap gap-2">
               {rec.requiredQualifications.map((q) => {
                 const missing = rec.missingConditions.includes(q);
+                const preferred = isPreferredQualification(q);
                 return (
                   <span
                     key={q}
                     className={cn(
                       "inline-flex items-center gap-1 rounded-full px-3 py-1 text-label-1",
-                      missing ? "bg-orange-50 text-orange-700" : "bg-emerald-50 text-emerald-700",
+                      !missing
+                        ? "bg-emerald-50 text-emerald-700"
+                        : preferred
+                          ? "bg-slate-100 text-slate-600"
+                          : "bg-orange-50 text-orange-700",
                     )}
                   >
-                    {missing ? <AlertTriangle className="size-3.5" /> : <CheckCircle2 className="size-3.5" />}
-                    {q}
-                    <span className="text-label-2 opacity-70">{missing ? "필요" : "보유"}</span>
+                    {!missing ? (
+                      <CheckCircle2 className="size-3.5" />
+                    ) : preferred ? (
+                      <Plus className="size-3.5" />
+                    ) : (
+                      <AlertTriangle className="size-3.5" />
+                    )}
+                    {qualificationName(q)}
+                    <span className="text-label-2 opacity-70">
+                      {!missing ? "보유" : preferred ? "우대" : "필수"}
+                    </span>
                   </span>
                 );
               })}
