@@ -1,15 +1,20 @@
 import Link from "next/link";
-import { AlertTriangle, ChevronDown, FileText, ListChecks, MapPin, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, ListChecks, MapPin, Plus, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Occupation, OccupationRecommendation } from "@/types";
 import { cn } from "@/lib/utils";
+import {
+  isPreferredQualification,
+  NO_REQUIRED_QUALIFICATION_RISK,
+  qualificationName,
+} from "@/lib/qualification";
 import { TrackedLink } from "./tracked-link";
 
 const GRADE_STYLE: Record<OccupationRecommendation["grade"], string> = {
-  "매우 잘 맞아요": "bg-emerald-50 text-emerald-700 ring-emerald-200",
-  "잘 맞아요": "bg-brand-blue-50 text-brand-blue-700 ring-brand-blue-200",
-  "도전해볼 만해요": "bg-amber-50 text-amber-700 ring-amber-200",
-  "준비가 더 필요해요": "bg-slate-100 text-slate-600 ring-slate-200",
+  "매우 잘 맞아요": "bg-emerald-50 text-emerald-700",
+  "잘 맞아요": "bg-brand-blue-50 text-brand-blue-700",
+  "도전해볼 만해요": "bg-amber-50 text-amber-700",
+  "준비가 더 필요해요": "bg-slate-100 text-slate-600",
 };
 
 /**
@@ -56,6 +61,17 @@ export function OccupationRecommendationCard({
 }: OccupationRecommendationCardProps) {
   const postingCount = jobCount?.total ?? 0;
 
+  /*
+   * 이미 저장된 진단 결과에는 우대 자격만 없어도 "자격 없음"이 걸림돌로 들어가 있다.
+   * (매처는 고쳤지만 지난 결과는 그대로다.) 읽는 시점에 필수가 실제로 빈 경우만 남긴다.
+   */
+  const missesRequiredQualification = rec.requiredQualifications.some(
+    (q) => !isPreferredQualification(q) && rec.missingConditions.includes(q),
+  );
+  const risks = missesRequiredQualification
+    ? rec.risks
+    : rec.risks.filter((risk) => risk !== NO_REQUIRED_QUALIFICATION_RISK);
+
   return (
     <details
       open={defaultOpen}
@@ -80,7 +96,7 @@ export function OccupationRecommendationCard({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn("hidden rounded-full px-3 py-1 text-label-1 font-semibold ring-1 sm:inline-flex", GRADE_STYLE[rec.grade])}>
+          <span className={cn("hidden rounded-full px-3 py-1 text-label-1 font-semibold sm:inline-flex", GRADE_STYLE[rec.grade])}>
             {rec.grade}
           </span>
           <div className="text-right">
@@ -112,67 +128,91 @@ export function OccupationRecommendationCard({
           ))}
         </div>
 
-        {/* 왜 추천되었는지 / 고려할 점 */}
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div>
-            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-              <Sparkles className="size-4 text-brand-blue-600" /> 왜 추천되었나요
+        {/*
+          지원금 상세의 "내 조건과 비교"와 같은 방식.
+          맞는 이유(파랑)와 걸리는 점(주황)을 색 있는 면으로 갈라 한눈에 구분되게 한다.
+        */}
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg bg-brand-blue-50/60 p-4">
+            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
+              <Sparkles className="size-4" /> 왜 추천되었나요
             </p>
-            <ul className="mt-2 space-y-1.5 text-label-1 text-slate-600">
+            <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
               {rec.reasons.map((reason) => (
                 <li key={reason}>· {reason}</li>
               ))}
             </ul>
           </div>
-          {rec.risks.length > 0 && (
-            <div>
-              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-                <AlertTriangle className="size-4 text-orange-500" /> 고려할 점
+          {risks.length > 0 ? (
+            <div className="rounded-lg bg-orange-50/60 p-4">
+              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
+                <AlertTriangle className="size-4" /> 고려할 점
               </p>
-              <ul className="mt-2 space-y-1.5 text-label-1 text-slate-600">
-                {rec.risks.map((risk) => (
+              <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+                {risks.map((risk) => (
                   <li key={risk}>· {risk}</li>
                 ))}
               </ul>
             </div>
+          ) : (
+            /* 비워두면 "안 뜬 건가?" 싶다. 걸리는 게 없다는 것도 알려줄 값이다. */
+            <div className="rounded-lg bg-emerald-50/60 p-4">
+              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-emerald-700">
+                <CheckCircle2 className="size-4" /> 고려할 점
+              </p>
+              <p className="mt-2 text-label-1 text-slate-600">지금 조건에서 걸리는 점이 없어요.</p>
+            </div>
           )}
         </div>
 
-        {/* 부족한 조건 / 필요한 자격 */}
-        {(rec.missingConditions.length > 0 || rec.requiredQualifications.length > 0) && (
-          <div className="mt-6">
+        {/*
+          자격 요건.
+          이전에는 "필요한 자격 · 부족한 조건" 한 줄에 요건과 미충족을 섞어 넣어서,
+          이미 보유한 자격도 부족한 것처럼 읽혔다. 보유/필요를 갈라 표시한다.
+
+          없는 자격이라도 우대는 필수와 무게가 다르다.
+          둘 다 주황 "필요"로 칠하면 자격 없이도 지원 가능한 직업이 막힌 것처럼 보인다.
+          우대는 파랑으로 둔다. 회색은 배경인 slate-50에 묻혀 없는 칩처럼 읽혔고,
+          막는 조건(주황)이 아니라 갖추면 유리한 것이라는 신호를 따로 줘야 한다.
+        */}
+        {rec.requiredQualifications.length > 0 && (
+          <div className="mt-3 rounded-lg bg-slate-50 p-4">
             <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-              <ListChecks className="size-4 text-slate-500" /> 필요한 자격 · 부족한 조건
+              <ListChecks className="size-4 text-slate-500" /> 자격 요건
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {rec.requiredQualifications.map((q) => (
-                <span key={q} className="rounded-full bg-slate-100 px-3 py-1 text-label-1 text-slate-600">
-                  {q}
-                </span>
-              ))}
-              {rec.missingConditions
-                .filter((c) => !rec.requiredQualifications.includes(c))
-                .map((c) => (
-                  <span key={c} className="rounded-full bg-orange-50 px-3 py-1 text-label-1 text-orange-700">
-                    {c}
+              {rec.requiredQualifications.map((q) => {
+                const missing = rec.missingConditions.includes(q);
+                const preferred = isPreferredQualification(q);
+                return (
+                  <span
+                    key={q}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-3 py-1 text-label-1",
+                      !missing
+                        ? "bg-emerald-50 text-emerald-700"
+                        : preferred
+                          ? "bg-brand-blue-50 text-brand-blue-700"
+                          : "bg-orange-50 text-orange-700",
+                    )}
+                  >
+                    {!missing ? (
+                      <CheckCircle2 className="size-3.5" />
+                    ) : preferred ? (
+                      <Plus className="size-3.5" />
+                    ) : (
+                      <AlertTriangle className="size-3.5" />
+                    )}
+                    {qualificationName(q)}
+                    <span className="text-label-2 opacity-70">
+                      {!missing ? "보유" : preferred ? "우대" : "필수"}
+                    </span>
                   </span>
-                ))}
+                );
+              })}
             </div>
           </div>
         )}
-
-        {/* Career Path */}
-        <div className="mt-6">
-          <p className="text-label-1 font-semibold text-slate-700">예상 준비경로</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-label-1 text-slate-500">
-            {["현재 상태", "필요 자격", "실무 준비", "이력서/면접", "채용지원"].map((step, i) => (
-              <span key={step} className="flex items-center gap-2">
-                <span className="rounded-full border border-border px-3 py-1.5">{step}</span>
-                {i < 4 && <span className="text-slate-300">→</span>}
-              </span>
-            ))}
-          </div>
-        </div>
 
         {/* 관련 채용공고 */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-4">
@@ -206,14 +246,18 @@ export function OccupationRecommendationCard({
           </TrackedLink>
         </div>
 
-        {/* 이력서 준비 연결 (스펙 34번: 강제하지 않는 선택적 CTA) */}
+        {/*
+          이력서 준비 연결 (스펙 34번: 강제하지 않는 선택적 CTA).
+          홈의 "바로가기"와 같은 테두리 버튼을 쓴다. 파란 밑줄 링크로 두면
+          바로 위 "채용공고 보기"와 무게가 비슷해져 무엇이 주된 행동인지 흐려진다.
+        */}
         <div className="mt-3 flex flex-wrap justify-end gap-4">
           <Link
             href={`/resume/new?occupation=${rec.occupationId}&title=${encodeURIComponent(rec.occupationName)}`}
-            className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-600 hover:underline"
+            className="flex h-10 items-center gap-1 rounded-lg border border-border px-4 text-label-1 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
           >
-            <FileText className="size-4" />
             {rec.occupationName} 취업용 이력서 준비하기
+            <ChevronRight className="size-4" />
           </Link>
         </div>
       </div>
