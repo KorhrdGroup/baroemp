@@ -86,6 +86,7 @@ export async function syncJobDetails(
             .from("jobs")
             .update({
               // 빈 값이 오면 기존 값을 지우지 않는다.
+              ...(patch.title ? { title: patch.title } : {}),
               ...(patch.description ? { description: patch.description } : {}),
               ...(patch.requirements ? { requirements: patch.requirements } : {}),
               ...(patch.qualificationRequirements

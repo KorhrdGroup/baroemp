@@ -262,6 +262,7 @@ export class Work24JobProvider extends BaseJobProvider {
 
     return {
       externalId,
+      title: toStr(detail.wantedTitle),
       description: toStr(detail.jobCont),
       requirements: toStr(detail.enterTpNm),
       qualificationRequirements: toStr(detail.certNm) ?? toStr(detail.licenseNm),

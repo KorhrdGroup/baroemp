@@ -76,6 +76,11 @@ export interface NormalizedJob {
  */
 export interface JobDetailPatch {
   externalId: string;
+  /**
+   * 공고 제목 전문(wantedTitle).
+   * 목록 응답의 title 은 30자 남짓에서 "..." 로 잘려 온다(전체의 28.7%).
+   */
+  title?: string;
   /** 실제 직무내용(jobCont). 목록의 description 은 제목 복사본이라 이걸로 덮는다. */
   description?: string;
   /** 경력 조건 원문(enterTpNm). "경력 (최소3년) 필수"처럼 필수/우대 표시가 붙어 온다. */
