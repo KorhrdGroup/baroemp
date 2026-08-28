@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { ResumeSessionDialog } from "@/components/common/resume-session-dialog";
 import { ScrollMoreHint } from "@/components/common/scroll-more-hint";
+import { AnalyzingScreen } from "@/components/common/analyzing-screen";
 import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, REGION_LABELS } from "@/lib/labels";
 import {
   getResumableSupportSessionAction,
@@ -555,6 +556,15 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
   );
 }
 
+/** 결과 화면으로 넘어가기 전 분석 화면을 보여줄 최소 시간. */
+const ANALYZING_MS = 2500;
+const ANALYZING_STEPS = [
+  "입력하신 조건을 정리하고 있어요",
+  "조건에 맞는 지원제도를 찾고 있어요",
+  "자격 요건을 확인하고 있어요",
+  "결과를 준비하고 있어요",
+];
+
 export function SupportFlow({
   autoStart = false,
   isLoggedIn = true,
@@ -570,6 +580,7 @@ export function SupportFlow({
   const [furthestIndex, setFurthestIndex] = useState(0);
   const [answers, setAnswers] = useState<SupportAssessmentAnswers>({});
   const [submitting, setSubmitting] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // 진행 중 저장에 쓰는 세션 id. 첫 저장 때 서버가 만들어 돌려준다.
   const [sessionId, setSessionId] = useState<string | undefined>(undefined);
@@ -682,6 +693,14 @@ export function SupportFlow({
     );
   }
 
+  if (analyzing) {
+    return (
+      <div data-wizard="true">
+        <AnalyzingScreen steps={ANALYZING_STEPS} durationMs={ANALYZING_MS} />
+      </div>
+    );
+  }
+
   const step = STEPS[stepIndex];
   const isLast = stepIndex === STEPS.length - 1;
   const canProceed = isStepFilled(step, answers);
@@ -727,9 +746,15 @@ export function SupportFlow({
     setError(null);
     try {
       const anonymousId = getOrCreateAnonymousId();
-      const result = await submitSupportAssessmentAction({ sessionId, anonymousId: anonymousId || undefined, answers });
+      setAnalyzing(true);
+      // 계산과 최소 노출 시간을 함께 기다린다 (둘 중 늦은 쪽 기준).
+      const [result] = await Promise.all([
+        submitSupportAssessmentAction({ sessionId, anonymousId: anonymousId || undefined, answers }),
+        new Promise((resolve) => setTimeout(resolve, ANALYZING_MS)),
+      ]);
       router.push(`/support/result/${result.sessionId}`);
     } catch {
+      setAnalyzing(false);
       setError("결과를 계산하는 중 문제가 발생했어요. 다시 시도해주세요.");
       setSubmitting(false);
     }
