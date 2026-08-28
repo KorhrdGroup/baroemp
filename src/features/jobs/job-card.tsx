@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { labelRegion, labelWorkType } from "@/lib/labels";
 import { cn } from "@/lib/utils";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import { splitSalary } from "@/lib/salary";
 import { JobBookmarkButton } from "./job-bookmark-button";
 import { READINESS_BADGE_CLASS, type JobReadiness } from "./job-readiness";
@@ -18,7 +19,13 @@ function ddayLabel(job: Job): string | null {
   return rounded === 0 ? "D-DAY" : `D-${rounded}`;
 }
 
-function isMidlifeRecommended(job: Job): boolean {
+/**
+ * 색으로 말하지 않는 배지에만 그림문자를 붙인다.
+ * 자격 충족(초록)·마감임박(빨강)은 이미 색이 뜻을 말하고 있어, 그림문자까지 얹으면
+ * 배지 하나가 색·그림·글자 셋으로 같은 말을 한다.
+ * 읽어줄 것은 글자뿐이라 그림문자는 aria-hidden 으로 감춘다.
+ */
+export function isMidlifeRecommended(job: Job): boolean {
   return (
     (job.midlifeRecommendationScore ?? 0) >= 4.3 ||
     Boolean(job.recommendedAgeGroups?.some((g) => g === "50s" || g === "60s")) ||
@@ -64,7 +71,7 @@ export function JobCard({
     <div className={cn("relative h-full", className)}>
       <Link
         href={`/jobs/${job.id}`}
-        className="group flex h-full flex-col rounded-xl border border-border bg-white p-5"
+        className={cn("group flex h-full flex-col rounded-xl border border-border bg-white p-5", interactiveCardClass)}
       >
         {/*
           지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
@@ -117,11 +124,13 @@ export function JobCard({
             )}
             {job.isBeginnerFriendly && (
               <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
+                <span aria-hidden className="mr-0.5">🌱</span>
                 신입가능
               </Badge>
             )}
             {midlifeRecommended && (
               <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
+                <span aria-hidden className="mr-0.5">🙌</span>
                 중장년 추천
               </Badge>
             )}
