@@ -17,7 +17,7 @@ const DEFAULT_SECTION_ORDER: ResumeSectionCode[] = [
   "ACTIVITY",
 ];
 
-/** 입사/퇴사/입학/졸업은 연월까지만 받으므로 기간도 YYYY.MM으로 보여준다. */
+/** 날짜는 문서 전체에서 YYYY.MM 으로 통일한다. 취득일에 일자까지는 필요 없다. */
 function formatMonth(value?: string): string {
   return value ? value.slice(0, 7).replace("-", ".") : "";
 }
@@ -151,7 +151,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
                     {q.name}
                     {q.issuer ? ` (${q.issuer})` : ""}
                   </span>
-                  <span className="text-slate-500">{q.acquiredAt ?? ""}</span>
+                  <span className="text-slate-500">{formatMonth(q.acquiredAt)}</span>
                 </div>
               ))}
             </div>
