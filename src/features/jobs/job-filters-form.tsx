@@ -302,7 +302,8 @@ export function JobFiltersForm({
       */}
       <div className="mt-8 flex flex-wrap items-center gap-3">
         {summary}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* 건수는 왼쪽, 필터는 오른쪽 끝. ml-auto 라 줄이 접혀도 각자 제 끝에 붙는다. */}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => {
