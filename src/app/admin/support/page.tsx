@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AdminPageShell } from "@/features/admin/admin-page-shell";
+import { AdminFilterBar } from "@/features/admin/admin-filter-bar";
 import { SupportSyncButton } from "@/features/admin/support-sync-button";
 import { SupportActiveToggleButton } from "@/features/admin/support-active-toggle-button";
 import { labelRegion } from "@/lib/labels";
@@ -140,71 +141,60 @@ export default async function AdminSupportPage({
           )}
         </section>
 
-        <div className="flex flex-wrap gap-2 text-label-2">
-          <span className="text-slate-400">Provider:</span>
-          <Link href={buildHref({ provider: "all" })} className={!sp.provider ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
-            전체
-          </Link>
-          {providers.map((p) => (
-            <Link
-              key={p}
-              href={buildHref({ provider: p })}
-              className={sp.provider === p ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {p}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">카테고리:</span>
-          <Link href={buildHref({ category: "all" })} className={!sp.category ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
-            전체
-          </Link>
-          {categories.map((c) => (
-            <Link
-              key={c}
-              href={buildHref({ category: c })}
-              className={sp.category === c ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {SUPPORT_CATEGORY_LABELS[c] ?? c}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">지역:</span>
-          <Link href={buildHref({ region: "all" })} className={!sp.region ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
-            전체
-          </Link>
-          {regions.map((r) => (
-            <Link
-              key={r}
-              href={buildHref({ region: r })}
-              className={sp.region === r ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {r === "national" ? "전국" : labelRegion(r as Region)}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">상태:</span>
-          {(["all", "active", "inactive"] as const).map((s) => (
-            <Link
-              key={s}
-              href={buildHref({ status: s })}
-              className={(sp.status ?? "all") === s ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {s === "all" ? "전체" : s === "active" ? "노출중" : "비활성"}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">바로취업 관련도:</span>
-          {(["all", "relevant", "irrelevant"] as const).map((r) => (
-            <Link
-              key={r}
-              href={buildHref({ relevance: r })}
-              className={(sp.relevance ?? "all") === r ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {r === "all" ? "전체" : r === "relevant" ? `적합(≥${CAREER_RELEVANCE_THRESHOLD})` : "부적합"}
-            </Link>
-          ))}
-        </div>
+        <AdminFilterBar
+          groups={[
+            {
+              label: "Provider",
+              options: [
+                { label: "전체", href: buildHref({ provider: "all" }), selected: !sp.provider },
+                ...providers.map((p) => ({
+                  label: p,
+                  href: buildHref({ provider: p }),
+                  selected: sp.provider === p,
+                })),
+              ],
+            },
+            {
+              label: "카테고리",
+              options: [
+                { label: "전체", href: buildHref({ category: "all" }), selected: !sp.category },
+                ...categories.map((c) => ({
+                  label: SUPPORT_CATEGORY_LABELS[c] ?? c,
+                  href: buildHref({ category: c }),
+                  selected: sp.category === c,
+                })),
+              ],
+            },
+            {
+              label: "지역",
+              options: [
+                { label: "전체", href: buildHref({ region: "all" }), selected: !sp.region },
+                ...regions.map((r) => ({
+                  label: r === "national" ? "전국" : labelRegion(r as Region),
+                  href: buildHref({ region: r }),
+                  selected: sp.region === r,
+                })),
+              ],
+            },
+            {
+              label: "상태",
+              options: (["all", "active", "inactive"] as const).map((st) => ({
+                label: st === "all" ? "전체" : st === "active" ? "노출중" : "비활성",
+                href: buildHref({ status: st }),
+                selected: (sp.status ?? "all") === st,
+              })),
+            },
+            {
+              label: "관련도",
+              options: (["all", "relevant", "irrelevant"] as const).map((rel) => ({
+                label:
+                  rel === "all" ? "전체" : rel === "relevant" ? `적합(≥${CAREER_RELEVANCE_THRESHOLD})` : "부적합",
+                href: buildHref({ relevance: rel }),
+                selected: (sp.relevance ?? "all") === rel,
+              })),
+            },
+          ]}
+        />
 
         <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
           <div className="overflow-x-auto">
