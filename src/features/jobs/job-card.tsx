@@ -66,8 +66,12 @@ export function JobCard({
         href={`/jobs/${job.id}`}
         className="group flex h-full flex-col rounded-xl border border-border bg-white p-5"
       >
-        {/* 지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리. */}
-        <div className="flex items-center justify-between gap-2 pr-10">
+        {/*
+          지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
+          min-h-9 는 찜 버튼(size-9)의 높이를 이 줄이 대신 차지하게 한다.
+          이게 없으면 겹쳐 둔 버튼의 아래끝이 제목 첫 줄에 그대로 닿는다.
+        */}
+        <div className="flex min-h-9 items-center justify-between gap-2 pr-10">
           <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
           {typeof matchScore === "number" && matchScore >= MATCH_SCORE_VISIBLE_MIN && (
             <span className="shrink-0 rounded-full bg-brand-blue-50 px-3 py-1.5 text-label-1 font-bold text-brand-blue-700">
@@ -76,7 +80,7 @@ export function JobCard({
           )}
         </div>
 
-        <h3 className="mt-3 line-clamp-2 text-body-1 font-bold text-slate-900 group-hover:underline">
+        <h3 className="mt-4 line-clamp-2 text-body-1 font-bold text-slate-900 group-hover:underline">
           {job.title}
         </h3>
 
@@ -135,7 +139,7 @@ export function JobCard({
         jobCategory={job.jobCategory}
         isAuthenticated={isAuthenticated}
         initialBookmarked={isBookmarked}
-        className="absolute right-4 top-4"
+        className="absolute right-3 top-3"
       />
     </div>
   );
