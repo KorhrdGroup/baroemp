@@ -24,14 +24,6 @@ const EMPTY_MESSAGES: Record<string, string> = {
   NEEDS_PROFILE: "희망직무를 설정하면 맞춤 공고를 보여드려요.",
 };
 
-/** 마감임박 탭 전용: JobCard는 "마감임박"/"~날짜" 문구만 보여주고 D-day 캡션은 없으므로 여기서 계산해 덧붙인다. */
-function formatDday(applyDeadline?: string): string | null {
-  if (!applyDeadline) return null;
-  const daysLeft = Math.ceil((new Date(applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  if (daysLeft < 0) return null;
-  return daysLeft === 0 ? "D-DAY" : `D-${daysLeft}`;
-}
-
 interface JobCurationSectionProps {
   initialNew: JobCurationResult;
   heldQualifications: string[];
@@ -131,7 +123,6 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
         />
         <div ref={rowRef} onScroll={syncFade} className="scrollbar-on-hover flex gap-4 overflow-x-auto pb-2">
           {current.items.map((item) => {
-            const dday = activeTab === "closing_soon" ? formatDday(item.job.applyDeadline) : null;
             return (
               <div
                 key={item.job.id}
@@ -146,9 +137,6 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
                   <p className="mb-1 text-label-2 font-semibold text-brand-blue-600">
                     {item.unlockRequirementName} 취득 시 지원 가능
                   </p>
-                )}
-                {dday && (
-                  <p className="mb-1 text-label-2 font-semibold text-rose-600">{dday}</p>
                 )}
                 <JobCard
                   job={item.job}
