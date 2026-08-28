@@ -15,10 +15,13 @@ const CLOSING_SOON_DAYS = 7;
  */
 const MATCH_SCORE_VISIBLE_MIN = 35;
 
-function isClosingSoon(job: Job): boolean {
-  if (!job.applyDeadline) return false;
+/** 마감이 가까우면 "D-3"·"D-DAY", 아니면 null. 마감일 옆에 붙이고 마감임박 여부도 이걸로 판단한다. */
+function ddayLabel(job: Job): string | null {
+  if (!job.applyDeadline) return null;
   const daysLeft = (new Date(job.applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-  return daysLeft >= 0 && daysLeft <= CLOSING_SOON_DAYS;
+  if (daysLeft < 0 || daysLeft > CLOSING_SOON_DAYS) return null;
+  const rounded = Math.ceil(daysLeft);
+  return rounded === 0 ? "D-DAY" : `D-${rounded}`;
 }
 
 function isMidlifeRecommended(job: Job): boolean {
@@ -54,7 +57,8 @@ export function JobCard({
   isBookmarked,
   heldQualifications,
 }: JobCardProps) {
-  const closingSoon = isClosingSoon(job);
+  const dday = ddayLabel(job);
+  const closingSoon = dday !== null;
   const midlifeRecommended = isMidlifeRecommended(job);
   const readiness = heldQualifications ? computeJobReadiness(job, heldQualifications) : null;
   const location = job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ");
@@ -130,7 +134,14 @@ export function JobCard({
           )}
           <span>{labelWorkType(job.workType)}</span>
           <span aria-hidden>|</span>
-          <span>{job.applyDeadline ? `~${job.applyDeadline.slice(0, 10)}` : "상시채용"}</span>
+          {/*
+            남은 기간은 마감일을 구체화하는 값이라 날짜 바로 옆에 둔다.
+            한 span 으로 묶어야 지역명이 긴 카드에서 D-day 만 다음 줄로 떨어지지 않는다.
+          */}
+          <span className="whitespace-nowrap">
+            {job.applyDeadline ? `~${job.applyDeadline.slice(0, 10)}` : "상시채용"}
+            {dday && <span className="ml-1.5 font-semibold text-rose-600">{dday}</span>}
+          </span>
         </div>
       </Link>
 

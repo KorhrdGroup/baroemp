@@ -12,7 +12,7 @@ import {
 } from "./job-actions";
 
 const TABS: { key: JobCurationTab; label: string }[] = [
-  { key: "new", label: "신규 공고" },
+  { key: "new", label: "신규 일자리" },
   { key: "closing_soon", label: "마감임박" },
   { key: "matched", label: "맞춤 추천" },
   { key: "ready_to_apply", label: "지금 지원가능" },
