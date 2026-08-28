@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Briefcase, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
+import { compareUserToJobsRequirements } from "@/services/job-requirement-comparison.service";
+import { readinessFromComparison } from "@/features/jobs/job-readiness";
 import { JobCard } from "@/features/jobs/job-card";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { JobCurationSection } from "@/features/jobs/job-curation-section";
@@ -11,7 +13,6 @@ import { searchJobs, getRecommendedJobsForAnonymous, type JobSearchParams } from
 import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { getOccupationRepository } from "@/lib/repositories";
-import { getUserQualificationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
 
 export const metadata: Metadata = {
@@ -75,10 +76,20 @@ export default async function JobsPage({
   const jobCategoryLabel = sp.category
     ? (await getOccupationRepository().findAll()).find((o) => o.jobCategoryCode === sp.category)?.name
     : undefined;
-  // 취업준비성 배지용 보유 자격증 (이력서/검사에서 등록된 user_qualifications 기준)
-  const heldQualifications = currentUser
-    ? (await getUserQualificationRepository().findByUserId(currentUser.id)).map((q) => q.name)
-    : undefined;
+  /*
+    자격 배지용 요건 비교.
+    공고 원문에서 필수 요건을 뽑아 회원 준비 상태와 맞춰본다. 요건 사전이 필요해
+    카드 안에서는 못 만들고, 여기서 이 페이지에 그릴 공고만 한 번에 계산해 넘긴다.
+  */
+  const badgeJobs = [...result.items, ...(recommendation?.jobs ?? [])];
+  const readinessMap = currentUser
+    ? new Map(
+        [...(await compareUserToJobsRequirements(currentUser.id, badgeJobs))].map(([jobId, items]) => [
+          jobId,
+          readinessFromComparison(items),
+        ]),
+      )
+    : new Map();
   const bookmarkedSet = new Set(bookmarkedIds);
 
   const totalPages = Math.max(1, Math.ceil(result.total / PAGE_SIZE));
@@ -136,7 +147,7 @@ export default async function JobsPage({
                 job={job}
                 isAuthenticated={isAuthenticated}
                 isBookmarked={bookmarkedSet.has(job.id)}
-                heldQualifications={heldQualifications}
+                readiness={readinessMap.get(job.id)}
               />
             ))}
           </div>
@@ -146,7 +157,6 @@ export default async function JobsPage({
       <div className="mt-8">
         <JobCurationSection
           initialNew={initialCuration}
-          heldQualifications={heldQualifications ?? []}
           bookmarkedIds={bookmarkedIds}
         />
       </div>
@@ -171,7 +181,7 @@ export default async function JobsPage({
                   matchReasonLabel={job.match?.reasons[0]?.label}
                   isAuthenticated={isAuthenticated}
                   isBookmarked={bookmarkedSet.has(job.id)}
-                  heldQualifications={heldQualifications}
+                  readiness={readinessMap.get(job.id)}
                 />
               ))}
             </div>

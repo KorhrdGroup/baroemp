@@ -4,7 +4,7 @@ import { labelRegion, labelWorkType } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import { splitSalary } from "@/lib/salary";
 import { JobBookmarkButton } from "./job-bookmark-button";
-import { computeJobReadiness, READINESS_BADGE_CLASS } from "./job-readiness";
+import { READINESS_BADGE_CLASS, type JobReadiness } from "./job-readiness";
 import type { Job } from "@/types";
 
 const CLOSING_SOON_DAYS = 7;
@@ -41,7 +41,11 @@ export interface JobCardProps {
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
   /** 로그인 회원의 보유 자격증명. 전달되면 카드에 취업준비성 배지를 표시한다. */
-  heldQualifications?: string[];
+  /**
+   * 서버에서 계산한 자격 준비 상태. 판정에 요건 사전(career_requirements)이 필요해
+   * 카드 안에서 만들 수 없다. 없으면 배지를 띄우지 않는다.
+   */
+  readiness?: JobReadiness;
 }
 
 /**
@@ -56,13 +60,12 @@ export function JobCard({
   className,
   isAuthenticated,
   isBookmarked,
-  heldQualifications,
+  readiness,
 }: JobCardProps) {
   const salary = splitSalary(job);
   const dday = ddayLabel(job);
   const closingSoon = dday !== null;
   const midlifeRecommended = isMidlifeRecommended(job);
-  const readiness = heldQualifications ? computeJobReadiness(job, heldQualifications) : null;
   const location = job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ");
 
   return (

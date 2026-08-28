@@ -2,6 +2,7 @@ import { findCareerProfileByUserId, getJobRepository } from "@/lib/repositories"
 import type { CareerProfile, Job, JobCurationItem, JobCurationResult, JobCurationTab, JobSearchFilter } from "@/types";
 import { evaluateJobFit } from "./job-match.service";
 import { compareUserToJobsRequirements } from "./job-requirement-comparison.service";
+import { readinessFromComparison } from "@/features/jobs/job-readiness";
 
 const TAB_LIMIT = 8;
 const CANDIDATE_LIMIT = 500;
@@ -19,18 +20,19 @@ const commonTabCache = new Map<string, { at: number; items: JobCurationItem[] }>
  * 개인화 탭은 절대 전체 jobs를 스캔하지 않는다 - getCandidateJobsForUser로 후보군 500건 제한.
  */
 export async function getJobCuration(userId: string, tab: JobCurationTab): Promise<JobCurationResult> {
+  const withBadges = async (result: JobCurationResult) => (await attachReadiness(userId, [result]))[0];
   try {
     switch (tab) {
       case "new":
-        return { tab, ...(await getCommonTab("new")) };
+        return withBadges({ tab, ...(await getCommonTab("new")) });
       case "closing_soon":
-        return { tab, ...(await getCommonTab("closing_soon")) };
+        return withBadges({ tab, ...(await getCommonTab("closing_soon")) });
       case "matched":
-        return { tab, ...(await getMatchedTab(await loadPersonalContext(userId))) };
+        return withBadges({ tab, ...(await getMatchedTab(await loadPersonalContext(userId))) });
       case "ready_to_apply":
-        return { tab, ...(await getReadyToApplyTab(userId, await loadPersonalContext(userId))) };
+        return withBadges({ tab, ...(await getReadyToApplyTab(userId, await loadPersonalContext(userId))) });
       case "unlockable":
-        return { tab, ...(await getUnlockableTab(userId, await loadPersonalContext(userId))) };
+        return withBadges({ tab, ...(await getUnlockableTab(userId, await loadPersonalContext(userId))) });
       default:
         return { tab, state: "EMPTY", items: [] };
     }
@@ -51,6 +53,28 @@ export async function getJobCuration(userId: string, tab: JobCurationTab): Promi
  * 여기서는 컨텍스트를 한 벌만 만들어 넘기므로, 다섯 탭 전부를 받아도
  * 조회량은 개인화 탭 하나를 부를 때와 같다.
  */
+
+/**
+ * 탭 결과에 자격 배지를 붙인다.
+ *
+ * 신규·마감임박은 전 유저 공통이라 서버 캐시를 타는데, 배지는 회원마다 다르다.
+ * 그래서 캐시에서 꺼낸 뒤 여기서 입힌다. 여러 탭에 같은 공고가 겹치므로
+ * 전체를 한 번에 비교해 요건 사전·회원 스냅샷 조회를 한 벌로 끝낸다.
+ */
+async function attachReadiness(userId: string, results: JobCurationResult[]): Promise<JobCurationResult[]> {
+  const jobs = [...new Map(results.flatMap((r) => r.items).map((i) => [i.job.id, i.job])).values()];
+  if (jobs.length === 0) return results;
+
+  const comparisons = await compareUserToJobsRequirements(userId, jobs);
+  return results.map((result) => ({
+    ...result,
+    items: result.items.map((item) => ({
+      ...item,
+      readiness: readinessFromComparison(comparisons.get(item.job.id) ?? []),
+    })),
+  }));
+}
+
 export async function getAllJobCurations(userId: string): Promise<JobCurationResult[]> {
   try {
     const ctx = await loadPersonalContext(userId);
@@ -61,13 +85,13 @@ export async function getAllJobCurations(userId: string): Promise<JobCurationRes
       getReadyToApplyTab(userId, ctx),
       getUnlockableTab(userId, ctx),
     ]);
-    return [
+    return attachReadiness(userId, [
       { tab: "new", ...newTab },
       { tab: "closing_soon", ...closingSoon },
       { tab: "matched", ...matched },
       { tab: "ready_to_apply", ...readyToApply },
       { tab: "unlockable", ...unlockable },
-    ];
+    ]);
   } catch (error) {
     console.error("[job-curation] 전체 탭 계산 실패", error);
     return [];

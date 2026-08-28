@@ -27,11 +27,10 @@ const EMPTY_MESSAGES: Record<string, string> = {
 
 interface JobCurationSectionProps {
   initialNew: JobCurationResult;
-  heldQualifications: string[];
   bookmarkedIds: string[];
 }
 
-export function JobCurationSection({ initialNew, heldQualifications, bookmarkedIds }: JobCurationSectionProps) {
+export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSectionProps) {
   const [activeTab, setActiveTab] = useState<JobCurationTab>("new");
   const [results, setResults] = useState<Partial<Record<JobCurationTab, JobCurationResult>>>({ new: initialNew });
   const [loadingTabs, setLoadingTabs] = useState<Set<JobCurationTab>>(new Set());
@@ -212,7 +211,7 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
                   matchScore={item.matchScore}
                   isAuthenticated
                   isBookmarked={bookmarkedIds.includes(item.job.id)}
-                  heldQualifications={heldQualifications}
+                  readiness={item.readiness}
                 />
               </div>
             );
