@@ -81,7 +81,18 @@ async function exchangeCodeForToken(
     body,
     cache: "no-store",
   });
-  const json = (await res.json()) as { access_token?: string };
+  const json = (await res.json()) as { access_token?: string; error?: string; error_description?: string };
+  if (!json.access_token) {
+    // 실패 이유를 버리면 콜백은 social_profile_failed 한 줄만 남아 원인을 알 수 없다.
+    // access_token은 찍지 않는다 - 실패 응답에는 애초에 없다.
+    console.error("[social-oauth] kakao token exchange failed", {
+      status: res.status,
+      error: json.error,
+      description: json.error_description,
+      redirectUri,
+      hasClientSecret: Boolean(process.env.KAKAO_CLIENT_SECRET),
+    });
+  }
   return json.access_token ?? null;
 }
 
@@ -109,9 +120,18 @@ async function fetchSocialProfile(provider: SocialProvider, accessToken: string)
   });
   const json = (await res.json()) as {
     id?: number;
+    msg?: string;
+    code?: number;
     kakao_account?: { name?: string; phone_number?: string; profile?: { nickname?: string } };
   };
-  if (!json.id) return null;
+  if (!json.id) {
+    console.error("[social-oauth] kakao profile fetch failed", {
+      status: res.status,
+      code: json.code,
+      msg: json.msg,
+    });
+    return null;
+  }
   // 카카오 전화번호는 "+82 10-1234-5678" 형태 → 국내 표기로 변환
   const rawPhone = json.kakao_account?.phone_number?.replace(/^\+82\s?/, "0");
   return {
