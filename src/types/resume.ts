@@ -45,6 +45,11 @@ export interface Resume {
   id: string;
   userId: string;
   templateId?: string;
+  /**
+   * 이 이력서에 담을 항목. 비어 있으면 양식(template.sections)을 따른다.
+   * 화면에 무엇을 보여줄지와 완성도에 무엇을 셀지를 같은 값으로 정한다.
+   */
+  sectionCodes: ResumeSectionCode[];
   title: string;
   targetJobId?: string;
   targetOccupationId?: string;

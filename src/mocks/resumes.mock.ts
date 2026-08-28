@@ -61,6 +61,7 @@ export const mockResumes: Resume[] = [
     id: "resume-001",
     userId: "user-1005",
     templateId: "tpl-standard",
+    sectionCodes: [],
     title: "한은지_이력서_2026",
     summary: "사무·고객응대 경력 8년, 사회복지 분야로 직무전환을 준비하는 지원자",
     desiredJobTitle: "사회복지사",

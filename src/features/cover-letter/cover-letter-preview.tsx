@@ -1,4 +1,5 @@
 import type { CoverLetterDetail } from "@/types";
+import { questionHeading } from "@/lib/cover-letter/questions";
 
 /**
  * A4 인쇄 기준 자기소개서 Preview.
@@ -10,40 +11,6 @@ import type { CoverLetterDetail } from "@/types";
  *   문항        body-2   굵게      (16px, 한 문서에서 이 크기는 문항 제목뿐)
  *   답변·보조   label-1  기본      (14px)
  */
-
-/**
- * 문서에 찍는 문항 제목.
- *
- * 편집 화면의 질문은 "지원 동기를 작성해주세요." 처럼 시키는 말이다. 쓰는 동안에는
- * 그게 맞지만 완성된 문서 제목으로는 어색하다. 종류별로 제목을 따로 둔다.
- *
- * 관리자가 직접 넣은 문항(CUSTOM)은 종류가 없으므로 질문에서 시키는 말꼬리만 뗀다.
- */
-const QUESTION_HEADINGS: Record<string, string> = {
-  MOTIVATION: "지원 동기",
-  FIELD_INTEREST: "지원 분야에 관심을 갖게 된 계기",
-  EXPERIENCE: "주요 경력",
-  JOB_FIT: "직무 적합성",
-  STRENGTH: "나의 강점",
-  PROBLEM_SOLVING: "문제해결 경험",
-  INTERPERSONAL: "대인관계 경험",
-  CONFLICT_HANDLING: "갈등 대응 경험",
-  RESPONSIBILITY: "책임감과 업무 태도",
-  CONTRIBUTION: "기여할 수 있는 점",
-  ASPIRATION: "입사 후 포부",
-};
-
-function sectionHeading(questionType: string, question: string): string {
-  const preset = QUESTION_HEADINGS[questionType];
-  if (preset) return preset;
-
-  return (
-    question
-      .trim()
-      .replace(/\s*(을|를|에 대해|에 대하여|에 관해|에 관하여)?\s*(작성|기술|서술)해\s*주세요[.!]?$/, "")
-      .trim() || question
-  );
-}
 
 export function CoverLetterPreview({
   detail,
@@ -72,7 +39,7 @@ export function CoverLetterPreview({
       {ordered.map((section) => (
         <div key={section.id} className="mb-8">
           <h2 className="mb-3 border-b border-slate-300 pb-1.5 text-body-2 font-bold tracking-wide text-slate-900">
-            {sectionHeading(section.questionType, section.question)}
+            {questionHeading(section.questionType, section.question)}
           </h2>
           {section.content?.trim() ? (
             /* 문단 사이를 살려야 읽힌다. 답변은 줄바꿈을 그대로 두고 줄간격만 넉넉히 준다. */

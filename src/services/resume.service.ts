@@ -20,7 +20,8 @@ import { calculateResumeCompleteness } from "@/lib/resume/completeness";
 import { logActivityEvent } from "@/lib/activity/event-logger";
 import { recalculateLeadScore } from "./lead-score.service";
 import { mergeResumeToCareerProfile } from "./resume-career-merge.service";
-import { labelRegion } from "@/lib/labels";
+import { labelJobCategory, labelRegion } from "@/lib/labels";
+import { resolveOccupationForJobCategory } from "@/lib/jobs/job-occupation-resolver";
 
 /** 이력서 목록 (본인 소유). 최근 수정순으로 정렬한다. */
 export async function listResumesForUser(userId: string): Promise<Resume[]> {
@@ -52,18 +53,58 @@ async function buildPrefill(userId: string, targetJobId?: string) {
     targetJobId ? getJobRepository().findById(targetJobId) : Promise.resolve(null),
   ]);
 
+  /*
+    희망직무는 커리어 프로필에 "care_worker" 같은 분류 코드로 들어있다. 그대로 쓰면
+    이력서 희망직무 칸과 인쇄물에 코드가 그대로 찍힌다. 사람이 읽는 이름으로 바꾼다.
+
+    occupations 에 그 분류 코드를 쓰는 직종이 있으면 그 이름을, 없으면 직종 목록의
+    이름을 쓴다(다른 화면에서 이미 이 순서로 이름을 찾는다). 둘 다 없으면 비워 둔다.
+    코드가 찍힌 이력서보다 빈 칸이 낫다 - 빈 칸은 본인이 채우면 된다.
+  */
+  const desiredCategory = careerProfile?.desiredJobCategories?.[0];
+  const desiredOccupation = desiredCategory ? await resolveOccupationForJobCategory(desiredCategory) : null;
+  const desiredJobName =
+    desiredOccupation?.name ?? (desiredCategory ? labelJobCategory(desiredCategory) : undefined);
+
   return {
     name: profile?.name,
     email: profile?.email,
     phone: profile?.phone,
     address: careerProfile?.region ? labelRegion(careerProfile.region) : profile?.regionSido,
     desiredRegion: careerProfile?.region,
-    desiredJobTitle: job?.title ?? careerProfile?.desiredJobCategories?.[0],
+    desiredJobTitle: job?.title ?? desiredJobName,
     targetOccupationId: undefined as string | undefined,
     qualifications: heldQualifications.map((q, i) => ({ name: q.name, orderIndex: i })),
     skills: heldSkills.map((s, i) => ({ name: s.name, orderIndex: i })),
   };
 }
+
+/**
+ * 작성 시작 화면에서 "불러올 내 정보"로 보여줄 값.
+ * 만들 때 실제로 채우는 값과 같은 함수에서 나와야, 보여준 것과 채워진 것이 어긋나지 않는다.
+ */
+export async function getResumePrefill(userId: string) {
+  return buildPrefill(userId);
+}
+
+/** 불러올 정보 중 무엇을 쓸지. 넘기지 않으면 지금까지처럼 전부 불러온다. */
+export interface ResumePrefillChoice {
+  basicInfo?: boolean;
+  desired?: boolean;
+  qualifications?: boolean;
+  skills?: boolean;
+}
+
+/**
+ * 한 회원이 가질 수 있는 이력서 수.
+ *
+ * DB가 버거워서 두는 값이 아니다. 이력서 한 건을 저장할 때 도는 쿼리는 몇 건을 갖고
+ * 있든 똑같고, 목록도 한 번만 읽는다. 막는 이유는 화면이다 - 제목이 비슷한 이력서가
+ * 여러 개 쌓이면 어느 것이 어느 것인지 못 고른다.
+ */
+export const MAX_RESUMES_PER_USER = 10;
+
+export const RESUME_LIMIT_MESSAGE = `이력서는 ${MAX_RESUMES_PER_USER}개까지 만들 수 있어요. 쓰지 않는 이력서를 지우고 다시 시도해주세요.`;
 
 export async function createResumeFromTemplate(params: {
   userId: string;
@@ -71,12 +112,22 @@ export async function createResumeFromTemplate(params: {
   title?: string;
   targetJobId?: string;
   targetOccupationId?: string;
+  /** 이 이력서에 담을 항목. 비우면 양식이 정한 항목을 따른다. */
+  sectionCodes?: string[];
+  include?: ResumePrefillChoice;
 }): Promise<ResumeDetail> {
   const { userId, templateId, targetJobId, targetOccupationId } = params;
   const template = await getResumeTemplateRepository().findById(templateId);
   const prefill = await buildPrefill(userId, targetJobId);
+  const include = {
+    basicInfo: params.include?.basicInfo ?? true,
+    desired: params.include?.desired ?? true,
+    qualifications: params.include?.qualifications ?? true,
+    skills: params.include?.skills ?? true,
+  };
 
   const existing = await listResumesForUser(userId);
+  if (existing.length >= MAX_RESUMES_PER_USER) throw new Error(RESUME_LIMIT_MESSAGE);
   const isFirstResume = existing.length === 0;
 
   const resume = await getResumeRepository().create({
@@ -86,20 +137,21 @@ export async function createResumeFromTemplate(params: {
     title: params.title?.trim() ?? "",
     targetJobId,
     targetOccupationId: targetOccupationId ?? prefill.targetOccupationId,
-    desiredJobTitle: prefill.desiredJobTitle,
-    desiredRegion: prefill.desiredRegion,
-    name: prefill.name,
-    email: prefill.email,
-    phone: prefill.phone,
-    address: prefill.address,
+    sectionCodes: params.sectionCodes ?? [],
+    desiredJobTitle: include.desired ? prefill.desiredJobTitle : undefined,
+    desiredRegion: include.desired ? prefill.desiredRegion : undefined,
+    name: include.basicInfo ? prefill.name : undefined,
+    email: include.basicInfo ? prefill.email : undefined,
+    phone: include.basicInfo ? prefill.phone : undefined,
+    address: include.basicInfo ? prefill.address : undefined,
     status: "draft",
     isPrimary: isFirstResume,
   });
 
   const detailRepo = getResumeDetailRepository();
   await Promise.all([
-    detailRepo.replaceQualifications(resume.id, prefill.qualifications),
-    detailRepo.replaceSkills(resume.id, prefill.skills),
+    detailRepo.replaceQualifications(resume.id, include.qualifications ? prefill.qualifications : []),
+    detailRepo.replaceSkills(resume.id, include.skills ? prefill.skills : []),
   ]);
 
   await logActivityEvent({

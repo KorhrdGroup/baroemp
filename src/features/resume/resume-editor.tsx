@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Eye, Loader2, Pencil, Plus, Printer, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,9 +10,23 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResumeAgentPicker, type ResumeAgentOption } from "./resume-agent-picker";
+import { resolveResumeAgent, type ResumeAgentOption } from "./resume-agents";
+import {
+  EXTRA_SECTION_CODES,
+  isRequiredSection,
+  isSectionFilled,
+  resolveResumeSections,
+  type ResumeSectionOption,
+} from "@/lib/resume/completeness";
 import { AiButton } from "@/components/common/ai-button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -46,6 +60,7 @@ import { calculateResumeCompleteness } from "@/lib/resume/completeness";
 import { ResumePreview } from "./resume-preview";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
+import { REGION_LABELS } from "@/lib/labels";
 
 let keySeq = 0;
 function nextKey(prefix: string) {
@@ -105,6 +120,14 @@ const GRADUATION_STATUSES = ["졸업", "졸업예정", "재학중", "휴학", "�
  * 교육 이수는 여기 두지 않는다 - 전용 "교육/훈련" 섹션이 과정명과 교육기관을
  * 따로 받으므로, 여기에도 두면 같은 내용을 두 군데 쓰게 된다.
  */
+/** 봉사·수상 카드 한 줄(PROJECT + ACTIVITY)을 목록에서 가리키는 이름. */
+const EXTRA_SECTION_KEY = "EXTRA";
+
+/** 사이드바에서 카드로 내려갈 때 쓰는 자리 이름. */
+function sectionAnchorId(key: string) {
+  return `resume-section-${key}`;
+}
+
 const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   AWARD: "수상",
   VOLUNTEER: "봉사활동",
@@ -113,54 +136,206 @@ const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   PROJECT: "프로젝트",
 };
 
+/**
+ * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
+ * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
+ *
+ * 처음 그린 값으로도 한 번 만들어야 해서(저장할 것이 있는지 재는 기준점) 화면 상태를
+ * 안에서 읽지 않고 인자로 받는다.
+ */
+interface ResumeFormState {
+  title: string;
+  summary: string;
+  desiredJobTitle: string;
+  desiredRegion: string;
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  portfolioUrl: string;
+  hasNoWorkExperience: boolean;
+}
+
+function buildResumeSavePayload(source: {
+  id: string;
+  form: ResumeFormState;
+  sectionCodes: string[];
+  educations: EditableEducation[];
+  experiences: EditableExperience[];
+  qualifications: EditableQualification[];
+  trainings: EditableTraining[];
+  skills: EditableSkill[];
+  items: EditableItem[];
+}) {
+  return {
+    resume: { id: source.id, ...source.form, sectionCodes: source.sectionCodes },
+    educations: source.educations.map((e) => ({
+      ...stripKey(e),
+      admissionDate: toDbDate(e.admissionDate),
+      graduationDate: toDbDate(e.graduationDate),
+    })),
+    experiences: source.experiences.map((e) => ({
+      ...stripKey(e),
+      startDate: toDbDate(e.startDate),
+      endDate: toDbDate(e.endDate),
+    })),
+    qualifications: source.qualifications.map(stripKey),
+    trainings: source.trainings.map(stripKey),
+    skills: source.skills.map(stripKey),
+    items: source.items.map(stripKey),
+  };
+}
+
 export function ResumeEditor({
   initialDetail,
   templates = [],
+  sectionOptions = [],
 }: {
   initialDetail: ResumeDetail;
   templates?: ResumeAgentOption[];
+  /** 담을 수 있는 항목 전체. 편집 중에도 항목을 넣고 뺄 수 있게 한다. */
+  sectionOptions?: ResumeSectionOption[];
 }) {
   const [detail, setDetail] = useState(initialDetail);
   const resume = detail.resume;
-  const sections = useMemo(
-    () => new Set(detail.template?.sections?.length ? detail.template.sections : undefined),
-    [detail.template],
-  );
-  const showSection = (code: string) => sections.size === 0 || sections.has(code);
 
-  const [isChangingTemplate, startTemplateChange] = useTransition();
+  /*
+    사이드바에 세우는 자리. 담을 수 있는 항목이 전부 한 줄씩 들어간다.
+    봉사·수상 카드 하나가 PROJECT와 ACTIVITY 둘을 함께 받으므로 그 둘은 한 자리로 묶는다.
+  */
+  const slots = useMemo(
+    () =>
+      sectionOptions.map((option) => ({
+        key: EXTRA_SECTION_CODES.includes(option.code) ? EXTRA_SECTION_KEY : option.code,
+        label: option.label,
+        codes: option.codes,
+      })),
+    [sectionOptions],
+  );
+
+  /*
+    자리의 순서. 담기고 빠지는 것과 따로 둔다. 담긴 것만 들고 있으면 항목을 뺄 때마다
+    그 줄이 목록 끝으로 튀어, 방금 무엇을 뺐는지 눈으로 쫓아야 한다.
+
+    이력서에 담긴 순서를 먼저 놓고, 아직 안 담은 항목을 그 뒤에 잇는다.
+  */
+  const [sectionOrder, setSectionOrder] = useState<string[]>(() => {
+    const chosen = resolveResumeSections(initialDetail).map((code) =>
+      EXTRA_SECTION_CODES.includes(code) ? EXTRA_SECTION_KEY : code,
+    );
+    const all = sectionOptions.map((o) =>
+      EXTRA_SECTION_CODES.includes(o.code) ? EXTRA_SECTION_KEY : o.code,
+    );
+    return [...new Set([...chosen.filter((k) => all.includes(k)), ...all])];
+  });
+
+  /** 지금 이력서에 담긴 자리. */
+  const [includedKeys, setIncludedKeys] = useState<string[]>(() => {
+    const chosen = resolveResumeSections(initialDetail);
+    return [
+      ...new Set(chosen.map((code) => (EXTRA_SECTION_CODES.includes(code) ? EXTRA_SECTION_KEY : code))),
+    ];
+  });
+
+  /** 담긴 항목만, 자리 순서대로. 오른쪽 카드도 이 순서로 그린다. */
+  const navItems = useMemo(
+    () =>
+      sectionOrder
+        .filter((key) => includedKeys.includes(key))
+        .map((key) => slots.find((s) => s.key === key))
+        .filter((slot) => slot !== undefined),
+    [sectionOrder, includedKeys, slots],
+  );
+
+  /** 저장할 항목 코드. 자리 순서를 그대로 따른다. */
+  const sectionCodes = navItems.flatMap((item) => item.codes);
+
+  /** 기본정보는 맨 위에 고정이라, 그 아래부터 자리를 옮길 수 있다. */
+  const firstMovableIndex = navItems.findIndex((i) => !i.codes.includes("BASIC_INFO"));
+
+  function addSectionRow(row: { key: string }) {
+    setIncludedKeys((prev) => [...prev, row.key]);
+  }
+
+  /** 사이드바에서 누른 항목으로 내려간다. 항목이 다 펼쳐져 있으므로 감추는 대신 옮겨준다. */
+  function scrollToSection(key: string) {
+    document.getElementById(sectionAnchorId(key))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   /**
-   * 에이전트(=템플릿)는 노출 섹션과 AI 점검·생성 기준만 결정하고 입력값은 그대로 남는다.
-   * 확인 없이 바로 바꿔도 잃는 데이터가 없다.
+   * 항목 빼기. 줄은 자리를 지키고 담김 표시만 풀린다.
+   * 적어둔 내용도 지우지 않아 다시 담으면 그대로 있다.
    */
-  function handleTemplateChange(templateId: string) {
-    if (templateId === resume.templateId) return;
-    startTemplateChange(async () => {
-      const next = await changeResumeTemplateAction(resume.id, templateId);
-      if (next) setDetail(next);
+  function removeSectionItem(item: { key: string }) {
+    setIncludedKeys((prev) => prev.filter((k) => k !== item.key));
+  }
+
+  /** 항목 순서 옮기기. 담긴 항목끼리의 순서를 바꾼다 - 화면 목록과 인쇄물이 이 순서를 따른다. */
+  function moveSectionItem(item: { key: string }, direction: -1 | 1) {
+    const target = navItems[navItems.findIndex((i) => i.key === item.key) + direction];
+    if (!target || target.codes.includes("BASIC_INFO")) return;
+    setSectionOrder((prev) => {
+      const from = prev.indexOf(item.key);
+      const to = prev.indexOf(target.key);
+      if (from < 0 || to < 0) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
     });
   }
 
-  const [form, setForm] = useState({
-    title: resume.title,
-    summary: resume.summary ?? "",
-    desiredJobTitle: resume.desiredJobTitle ?? "",
-    desiredRegion: resume.desiredRegion ?? "",
-    name: resume.name ?? "",
-    email: resume.email ?? "",
-    phone: resume.phone ?? "",
-    address: resume.address ?? "",
-    portfolioUrl: resume.portfolioUrl ?? "",
-    hasNoWorkExperience: resume.hasNoWorkExperience ?? false,
-  });
-  const [educations, setEducations] = useState<EditableEducation[]>(withKeys(initialDetail.educations, "edu"));
-  const [experiences, setExperiences] = useState<EditableExperience[]>(withKeys(initialDetail.experiences, "exp"));
-  const [qualifications, setQualifications] = useState<EditableQualification[]>(withKeys(initialDetail.qualifications, "qual"));
-  const [trainings, setTrainings] = useState<EditableTraining[]>(withKeys(initialDetail.trainings, "train"));
-  const [skills, setSkills] = useState<EditableSkill[]>(withKeys(initialDetail.skills, "skill"));
-  const [items, setItems] = useState<EditableItem[]>(withKeys(initialDetail.items, "item"));
+  /** 순서를 바꾸는 중인지. 켜면 담긴 항목마다 위/아래 버튼이 나온다. */
+  const [reordering, setReordering] = useState(false);
+  /** 점검 기준(에이전트)을 고르는 창. 열 때 지금 기준을 미리 골라둔다. */
+  const [reviewPickerOpen, setReviewPickerOpen] = useState(false);
+  const [pickedAgentId, setPickedAgentId] = useState<string | undefined>(initialDetail.resume.templateId);
+
+  const [isChangingTemplate, startTemplateChange] = useTransition();
+
+  /*
+    처음 값은 한 번만 만든다. 상태와 "저장할 것이 있는지" 재는 기준점이 같은 값에서
+    나와야, 열자마자 고친 것도 없는데 저장 버튼이 켜져 있는 일이 없다.
+  */
+  const initial = useMemo(
+    () => ({
+      form: {
+        title: initialDetail.resume.title,
+        summary: initialDetail.resume.summary ?? "",
+        desiredJobTitle: initialDetail.resume.desiredJobTitle ?? "",
+        desiredRegion: initialDetail.resume.desiredRegion ?? "",
+        name: initialDetail.resume.name ?? "",
+        email: initialDetail.resume.email ?? "",
+        phone: initialDetail.resume.phone ?? "",
+        address: initialDetail.resume.address ?? "",
+        portfolioUrl: initialDetail.resume.portfolioUrl ?? "",
+        hasNoWorkExperience: initialDetail.resume.hasNoWorkExperience ?? false,
+      },
+      educations: withKeys(initialDetail.educations, "edu"),
+      experiences: withKeys(initialDetail.experiences, "exp"),
+      qualifications: withKeys(initialDetail.qualifications, "qual"),
+      trainings: withKeys(initialDetail.trainings, "train"),
+      skills: withKeys(initialDetail.skills, "skill"),
+      items: withKeys(initialDetail.items, "item"),
+    }),
+    [initialDetail],
+  );
+
+  const [form, setForm] = useState<ResumeFormState>(initial.form);
+  const [educations, setEducations] = useState<EditableEducation[]>(initial.educations);
+  const [experiences, setExperiences] = useState<EditableExperience[]>(initial.experiences);
+  const [qualifications, setQualifications] = useState<EditableQualification[]>(initial.qualifications);
+  const [trainings, setTrainings] = useState<EditableTraining[]>(initial.trainings);
+  const [skills, setSkills] = useState<EditableSkill[]>(initial.skills);
+  const [items, setItems] = useState<EditableItem[]>(initial.items);
   const [skillDraft, setSkillDraft] = useState("");
+
+  /**
+   * 한 줄 소개를 만들 재료가 있는지. AI 는 경력·자격·스킬을 읽어 문장을 만든다
+   * (generateCareerSummaryWithAI). 셋 다 비어 있으면 만들 것이 없다.
+   */
+  const hasSummaryMaterial = experiences.length + qualifications.length + skills.length > 0;
+
 
   /**
    * 경력/학력 항목의 편집 상태. 작성이 끝난 항목은 폼 대신 정리된 요약 카드로 보여주고,
@@ -181,8 +356,12 @@ export function ResumeEditor({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   // 미리보기는 입력 폭을 좁히지 않도록 팝업으로 띄운다.
   const [previewOpen, setPreviewOpen] = useState(false);
-  /** 마지막으로 저장한 내용의 스냅샷. 변경 여부를 이 값과 비교해 판단한다. */
-  const savedSnapshot = useRef<string | null>(null);
+  /** 마지막으로 저장한 내용. 지금 입력과 이 값을 비교해 저장할 것이 있는지 본다. */
+  const [savedPayload, setSavedPayload] = useState(() =>
+    JSON.stringify(
+      buildResumeSavePayload({ id: initialDetail.resume.id, sectionCodes, ...initial }),
+    ),
+  );
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
@@ -198,7 +377,7 @@ export function ResumeEditor({
   function currentPreviewDetail(): ResumeDetail {
     return {
       ...detail,
-      resume: { ...resume, ...form },
+      resume: { ...resume, ...form, sectionCodes },
       educations: educations.map((e) => ({ ...e, id: e._key, resumeId: resume.id, orderIndex: e.orderIndex ?? 0 })),
       experiences: experiences.map((e) => ({
         ...e,
@@ -220,39 +399,58 @@ export function ResumeEditor({
     두 값이 어긋나지 않게 한다. 가중치가 0인 항목(프로젝트·대외활동)은 애초에
     빠져 있어 필수 항목만 센다.
   */
-  const liveCompleteness = calculateResumeCompleteness(currentPreviewDetail());
+  const livePreview = currentPreviewDetail();
+  const liveCompleteness = calculateResumeCompleteness(livePreview);
+
+  /**
+   * 항목 목록의 체크 표시.
+   * 완성도에 세지 않는 항목(봉사·수상 등)은 채웠는지 물을 기준이 없으므로 적힌 것이 있으면 채운 것으로 본다.
+   */
+  function isNavItemFilled(item: { key: string; codes: string[] }): boolean {
+    if (item.key === EXTRA_SECTION_KEY) return items.length > 0;
+    if (!isRequiredSection(item.key)) return false;
+    return isSectionFilled(item.key, livePreview);
+  }
+
+  /**
+   * 사이드바에 세우는 줄. 담을 수 있는 항목이 전부, 자리 순서 그대로 들어간다.
+   * 뺀 항목도 그 자리에 남는다 - 줄이 목록 끝으로 튀면 방금 무엇을 뺐는지 눈으로 쫓아야 한다.
+   */
+  const sectionRows = sectionOrder
+    .map((key) => slots.find((s) => s.key === key))
+    .filter((slot) => slot !== undefined)
+    .map((slot) => {
+      const navIndex = navItems.findIndex((i) => i.key === slot.key);
+      const included = navIndex >= 0;
+      return {
+        ...slot,
+        included,
+        order: navIndex + 1,
+        navIndex,
+        fixed: slot.codes.includes("BASIC_INFO"),
+        filled: included && isNavItemFilled(slot),
+      };
+    });
 
   /*
     마지막으로 저장한 내용과 지금 입력이 같으면 저장할 것이 없다.
     누를 수는 있는데 아무 일도 안 일어나면 저장이 안 된 건지 헷갈린다.
   */
-  const currentPayload = JSON.stringify(buildSavePayload());
-  // 처음 그릴 때의 값을 기준점으로 잡는다. 아직 아무것도 고치지 않은 상태다.
-  savedSnapshot.current ??= currentPayload;
-  const isDirty = currentPayload !== savedSnapshot.current;
+  const isDirty = JSON.stringify(buildSavePayload()) !== savedPayload;
 
-  /**
-   * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
-   * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
-   */
+  /** 지금 화면에 있는 값으로 저장 payload 를 만든다. */
   function buildSavePayload() {
-    return {
-      resume: { id: resume.id, ...form },
-      educations: educations.map((e) => ({
-        ...stripKey(e),
-        admissionDate: toDbDate(e.admissionDate),
-        graduationDate: toDbDate(e.graduationDate),
-      })),
-      experiences: experiences.map((e) => ({
-        ...stripKey(e),
-        startDate: toDbDate(e.startDate),
-        endDate: toDbDate(e.endDate),
-      })),
-      qualifications: qualifications.map(stripKey),
-      trainings: trainings.map(stripKey),
-      skills: skills.map(stripKey),
-      items: items.map(stripKey),
-    };
+    return buildResumeSavePayload({
+      id: resume.id,
+      form,
+      sectionCodes,
+      educations,
+      experiences,
+      qualifications,
+      trainings,
+      skills,
+      items,
+    });
   }
 
   function handleSave(): Promise<ResumeDetail> {
@@ -269,11 +467,25 @@ export function ResumeEditor({
           setSkills(withKeys(saved.skills, "skill"));
           setItems(withKeys(saved.items, "item"));
           /*
-            여기서 바로 스냅샷을 찍으면 위 setState 들이 아직 반영되기 전이라
-            서버가 새로 부여한 id 가 빠진 값이 찍힌다. 비워두면 다음 렌더에서
-            저장된 상태 그대로 다시 잡힌다.
+            기준점은 화면 상태가 아니라 서버가 돌려준 값으로 잡는다. 이 시점에는
+            위 setState 들이 아직 반영되기 전이라, 화면 상태로 찍으면 서버가 새로
+            부여한 id 가 빠진 값이 기준점이 된다.
           */
-          savedSnapshot.current = null;
+          setSavedPayload(
+            JSON.stringify(
+              buildResumeSavePayload({
+                id: saved.resume.id,
+                form: { ...form, title: saved.resume.title },
+                sectionCodes: saved.resume.sectionCodes ?? sectionCodes,
+                educations: withKeys(saved.educations, "edu"),
+                experiences: withKeys(saved.experiences, "exp"),
+                qualifications: withKeys(saved.qualifications, "qual"),
+                trainings: withKeys(saved.trainings, "train"),
+                skills: withKeys(saved.skills, "skill"),
+                items: withKeys(saved.items, "item"),
+              }),
+            ),
+          );
           setSaveMessage(`저장 완료 · 완성도 ${saved.resume.completeness}%`);
           resolve(saved);
         } catch (err) {
@@ -281,6 +493,21 @@ export function ResumeEditor({
           reject(err);
         }
       });
+    });
+  }
+
+  /**
+   * 창에서 고른 기준으로 점검한다. 기준이 바뀌었으면 먼저 바꾼 뒤 그 기준으로 본다.
+   * 기준을 바꾸는 동안에도 버튼이 도는 상태여야 해서 점검까지 한 전환으로 묶는다.
+   */
+  function handleReviewWithAgent() {
+    setReviewPickerOpen(false);
+    startTemplateChange(async () => {
+      if (pickedAgentId && pickedAgentId !== resume.templateId) {
+        const next = await changeResumeTemplateAction(resume.id, pickedAgentId);
+        if (next) setDetail(next);
+      }
+      await handleReview();
     });
   }
 
@@ -354,95 +581,12 @@ export function ResumeEditor({
     setTimeout(() => handlePrint(), 200);
   }
 
-  return (
-    // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
-    <div className="space-y-6">
-      {/*
-        점검은 이력서 전체를 보는 기능이고 그 기준을 정하는 것이 여기서 고른 에이전트라,
-        버튼을 카드 밖에 두지 않고 같은 상자 오른쪽에 넣는다.
-      */}
-      <div className="print:hidden">
-        <ResumeAgentPicker
-          agents={templates}
-          value={resume.templateId ?? undefined}
-          onChange={handleTemplateChange}
-          pending={isChangingTemplate}
-          action={
-            <AiButton onClick={handleReview} loading={isReviewing}>
-              이력서 전체 점검
-            </AiButton>
-          }
-        />
-      </div>
-
-      <div className="space-y-4 print:hidden">
-        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
-          <div className="min-w-48 flex-1">
-            <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
-              이력서 이름
-            </Label>
-            <CompactInput
-              id="resume-title"
-              placeholder="제목을 입력해주세요"
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="mt-1"
-            />
-          </div>
-        </div>
-
-        {reviewResult && (
-          <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-body-2">
-                AI 점검 결과 <Badge className="bg-brand-blue-400">{reviewResult.score}점</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-label-1">
-              {reviewResult.strengths.length > 0 && (
-                <div>
-                  <p className="font-semibold text-emerald-700">잘 작성된 부분</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.strengths.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {reviewResult.improvements.length > 0 && (
-                <div>
-                  <p className="font-semibold text-orange-700">보완할 부분</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.improvements.map((s, i) => (
-                      <li key={i}>{s.comment}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {reviewResult.missingInformation.length > 0 && (
-                <div>
-                  <p className="font-semibold text-orange-700">누락된 정보</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.missingInformation.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {reviewResult && marketComparison && (
-          <MarketComparisonCard
-            key={marketComparison.analysisId ?? "no-analysis"}
-            view={marketComparison}
-            source="resume_review"
-          />
-        )}
-
-        <div>
-          {showSection("BASIC_INFO") && (
+  /*
+    항목별 카드. 사이드바에서 정한 순서대로 그려야 하므로 코드로 꺼내 쓸 수 있게 모아둔다.
+    JSX 를 쓰인 자리에 그대로 두면 파일에 적힌 순서로만 나와, 순서를 바꿔도 화면이 그대로다.
+  */
+  const sectionCards: Record<string, React.ReactNode> = {
+    BASIC_INFO: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-body-1 font-semibold">기본정보</CardTitle>
@@ -463,23 +607,47 @@ export function ResumeEditor({
                 <Field label="희망직무">
                   <CompactInput value={form.desiredJobTitle} onChange={(e) => setForm((f) => ({ ...f, desiredJobTitle: e.target.value }))} />
                 </Field>
+                {/*
+                  희망근무지역은 "gwangju" 같은 지역 코드로 저장된다. 자유 입력으로 두면
+                  코드가 그대로 보이고, 사람이 "광주"라고 고쳐 쓰면 저장된 값이 코드가
+                  아니게 돼 지역으로 걸리는 추천에서 빠진다. 목록에서 고르게 한다.
+                */}
                 <Field label="희망근무지역">
-                  <CompactInput value={form.desiredRegion} onChange={(e) => setForm((f) => ({ ...f, desiredRegion: e.target.value }))} />
+                  <Select
+                    value={form.desiredRegion || undefined}
+                    onValueChange={(v) => setForm((f) => ({ ...f, desiredRegion: v }))}
+                  >
+                    <CompactSelectTrigger>
+                      <SelectValue placeholder="선택" />
+                    </CompactSelectTrigger>
+                    <SelectContent>
+                      {Object.entries(REGION_LABELS).map(([code, label]) => (
+                        <SelectItem key={code} value={code}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
               </CardContent>
             </Card>
-          )}
-
-          {showSection("SUMMARY") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+    ),
+    SUMMARY: (
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
                 {/*
-                  실제 동작은 아래 경력·자격·스킬을 재료로 문장을 만들어 제안하는 것이다.
-                  이 칸에 쓴 글 자체를 고치지는 않는다.
+                  이 버튼은 이 칸에 쓴 글을 고치는 것이 아니라, 경력·자격·스킬을 재료로
+                  문장을 만들어 제안한다. "다듬기"라고 부르면 쓴 글을 손봐주는 줄 알고
+                  빈 칸에서 누르게 되고, 재료가 없으면 아무것도 못 만든다.
+                  이름으로 무엇을 재료 삼는지 밝히고, 재료가 없으면 누를 수 없게 한다.
                 */}
-                <AiButton onClick={handleGenerateSummary} loading={isGeneratingSummary}>
-                  AI로 다듬기
+                <AiButton
+                  onClick={handleGenerateSummary}
+                  loading={isGeneratingSummary}
+                  disabled={!hasSummaryMaterial}
+                >
+                  내 경력으로 문장 만들기
                 </AiButton>
               </CardHeader>
               <CardContent>
@@ -489,6 +657,12 @@ export function ResumeEditor({
                   onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
                   rows={3}
                 />
+                {/* 버튼이 왜 잠겨 있는지 버튼 옆에서 바로 알 수 있어야 한다. */}
+                {!hasSummaryMaterial && (
+                  <p className="mt-2 text-label-1 text-slate-500">
+                    아래 경력·자격·스킬을 하나라도 채우시면, 그 내용으로 이 문장을 만들어드려요.
+                  </p>
+                )}
                 {summarySuggestion && (
                   <div className="mt-2 rounded-lg bg-brand-blue-50 p-3 text-label-1">
                     <p className="text-slate-700">{summarySuggestion}</p>
@@ -504,10 +678,9 @@ export function ResumeEditor({
                 )}
               </CardContent>
             </Card>
-          )}
-
-          {showSection("EXPERIENCE") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+    ),
+    EXPERIENCE: (
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">경력</CardTitle>
                 <Button
@@ -526,31 +699,13 @@ export function ResumeEditor({
               </CardHeader>
               <CardContent className="space-y-4">
                 {/*
-                  경력이 아예 없는 회원(신입·경력단절)은 이 항목을 채울 방법이 없어
-                  완성도가 끝까지 오르지 않았다. "없다"고 밝히는 것도 답이므로
-                  체크하면 채운 것으로 센다.
+                  경력이 없는 회원은 왼쪽 목록에서 경력 항목을 통째로 빼면 된다.
+                  "아직 경력이 없어요" 체크를 여기 따로 두면 같은 말을 두 군데서 하게 된다.
                 */}
-                <label
-                  className={cn(
-                    "flex w-fit items-center gap-2 text-label-1",
-                    experiences.length > 0 ? "cursor-not-allowed text-slate-300" : "cursor-pointer text-slate-600",
-                  )}
-                >
-                  {/* 경력을 적어둔 채로 "없음"을 켜면 두 말이 어긋난다. 비었을 때만 켤 수 있다. */}
-                  <Checkbox
-                    checked={Boolean(form.hasNoWorkExperience)}
-                    disabled={experiences.length > 0}
-                    onCheckedChange={(v) => setForm((f) => ({ ...f, hasNoWorkExperience: v === true }))}
-                  />
-                  아직 경력이 없어요
-                </label>
-
-                {form.hasNoWorkExperience ? (
+                {experiences.length === 0 && (
                   <p className="text-label-1 text-slate-400">
-                    경력 없이도 지원할 수 있는 공고가 많습니다. 자격·교육·봉사 경험으로 채워보세요.
+                    아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.
                   </p>
-                ) : (
-                  experiences.length === 0 && <p className="text-label-1 text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>
                 )}
                 {experiences.map((exp, idx) => (
                   isEntryEditing(exp._key) ? (
@@ -603,6 +758,7 @@ export function ResumeEditor({
                         className="mt-1 ml-auto flex w-fit"
                         onClick={() => openRewrite(exp._key, "responsibilities", exp.responsibilities ?? "")}
                         loading={rewritePending?.key === exp._key && rewritePending.field === "responsibilities"}
+                        disabled={!exp.responsibilities?.trim()}
                       >
                         AI 다듬기
                       </AiButton>
@@ -619,6 +775,7 @@ export function ResumeEditor({
                         className="mt-1 ml-auto flex w-fit"
                         onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")}
                         loading={rewritePending?.key === exp._key && rewritePending.field === "achievements"}
+                        disabled={!exp.achievements?.trim()}
                       >
                         AI 다듬기
                       </AiButton>
@@ -660,10 +817,9 @@ export function ResumeEditor({
                 ))}
               </CardContent>
             </Card>
-          )}
-
-          {showSection("EDUCATION") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+    ),
+    EDUCATION: (
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">학력</CardTitle>
                 <Button
@@ -810,10 +966,9 @@ export function ResumeEditor({
                 })}
               </CardContent>
             </Card>
-          )}
-
-          {showSection("QUALIFICATION") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+    ),
+    QUALIFICATION: (
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">보유 자격</CardTitle>
                 <Button
@@ -875,10 +1030,9 @@ export function ResumeEditor({
                 ))}
               </CardContent>
             </Card>
-          )}
-
-          {showSection("SKILLS") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+    ),
+    SKILLS: (
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-body-1 font-semibold">보유 스킬</CardTitle>
               </CardHeader>
@@ -929,10 +1083,9 @@ export function ResumeEditor({
                 </div>
               </CardContent>
             </Card>
-          )}
-
-          {showSection("TRAINING") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+    ),
+    TRAINING: (
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">교육/훈련</CardTitle>
                 <Button
@@ -1004,10 +1157,9 @@ export function ResumeEditor({
                 ))}
               </CardContent>
             </Card>
-          )}
-
-          {(showSection("PROJECT") || showSection("ACTIVITY")) && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+    ),
+    EXTRA: (
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">봉사·수상 등 추가 경력</CardTitle>
                 <Button
@@ -1069,7 +1221,220 @@ export function ResumeEditor({
                 ))}
               </CardContent>
             </Card>
-          )}
+    ),
+  };
+
+  return (
+    <div className="space-y-6">
+
+      <div className="space-y-4 print:hidden">
+        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
+          <div className="min-w-48 flex-1">
+            <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
+              이력서 제목
+            </Label>
+            <CompactInput
+              id="resume-title"
+              placeholder="이력서 제목을 입력해주세요"
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              className="mt-1"
+            />
+          </div>
+        </div>
+
+        {reviewResult && (
+          <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-body-2">
+                AI 점검 결과 <Badge className="bg-brand-blue-400">{reviewResult.score}점</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-label-1">
+              {reviewResult.strengths.length > 0 && (
+                <div>
+                  <p className="font-semibold text-emerald-700">잘 작성된 부분</p>
+                  <ul className="ml-4 list-disc text-slate-600">
+                    {reviewResult.strengths.map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {reviewResult.improvements.length > 0 && (
+                <div>
+                  <p className="font-semibold text-orange-700">보완할 부분</p>
+                  <ul className="ml-4 list-disc text-slate-600">
+                    {reviewResult.improvements.map((s, i) => (
+                      <li key={i}>{s.comment}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {reviewResult.missingInformation.length > 0 && (
+                <div>
+                  <p className="font-semibold text-orange-700">누락된 정보</p>
+                  <ul className="ml-4 list-disc text-slate-600">
+                    {reviewResult.missingInformation.map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {reviewResult && marketComparison && (
+          <MarketComparisonCard
+            key={marketComparison.analysisId ?? "no-analysis"}
+            view={marketComparison}
+            source="resume_review"
+          />
+        )}
+
+        {/*
+          왼쪽은 항목 목록, 오른쪽은 지금 채우는 항목 하나.
+          좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
+        */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          {/*
+            사이드바 한 곳에서 이력서의 상태(완성도)와 구성(항목)을 함께 본다.
+            완성도만 아래 고정바에 두면 "얼마나 남았는지"와 "무엇을 더 담을 수 있는지"가
+            화면 양 끝으로 갈라져, 완성도를 올리려고 항목을 손보는 흐름이 끊긴다.
+          */}
+          <nav className="rounded-xl bg-white p-4 lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-label-1 font-bold text-slate-900">이력서 완성도</p>
+              <p className="text-body-1 font-bold text-brand-blue-600">{liveCompleteness.score}%</p>
+            </div>
+            <Progress value={liveCompleteness.score} className="mt-2 h-2" />
+            <p className="mt-2 text-label-2 text-slate-500">
+              {liveCompleteness.missing.length > 0
+                ? `다음은 ${liveCompleteness.missing[0].label} 차례예요.`
+                : `${form.name ? `${form.name} 회원님의 ` : ""}이력서가 다 채워졌어요!`}
+            </p>
+
+            {/*
+              점검은 "무엇을 기준으로 볼지"를 먼저 정해야 하는 일이다. 기준(에이전트) 네 개를
+              늘 펼쳐두면 쓰지도 않을 선택지가 화면 위 한 줄을 계속 차지한다. 버튼 하나로 두고,
+              누르면 기준을 고르는 창을 띄운다.
+            */}
+            {/* 이 화면에서 가장 먼저 권하는 동작이라, 다른 AI 버튼과 달리 채운 파랑으로 둔다. */}
+            <AiButton
+              className="mt-4 w-full bg-brand-blue-600 text-white hover:bg-brand-blue-700 active:bg-brand-blue-700"
+              onClick={() => setReviewPickerOpen(true)}
+              loading={isReviewing || isChangingTemplate}
+            >
+              AI 이력서 점검 받기
+            </AiButton>
+
+            <div className="mt-4 border-t border-border pt-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="px-1 text-label-2 font-semibold text-slate-400">이력서 항목 {navItems.length}/{sectionRows.length}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="h-7 shrink-0 px-2.5 text-label-2 text-slate-600"
+                  onClick={() => setReordering((v) => !v)}
+                >
+                  {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
+                </Button>
+              </div>
+
+              <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+                {sectionRows.map((row) => (
+                  <li key={row.key} className="shrink-0 lg:shrink">
+                    <div className="flex items-center rounded-lg transition-colors hover:bg-slate-50">
+                      <button
+                        type="button"
+                        disabled={!row.included}
+                        onClick={() => scrollToSection(row.key)}
+                        className={cn(
+                          // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
+                          "flex max-w-40 min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 lg:max-w-none",
+                          row.included ? "cursor-pointer text-slate-700" : "text-slate-400",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
+                            !row.included
+                              ? "text-slate-300"
+                              : row.filled
+                                ? "bg-brand-blue-100 text-brand-blue-600"
+                                : "bg-slate-100 text-slate-400",
+                          )}
+                        >
+                          {/* 안 담은 항목은 자리만 비워 이름 끝이 위아래로 맞게 둔다. */}
+                          {!row.included ? "" : row.filled ? <Check className="size-3.5" /> : row.order}
+                        </span>
+                        <span className="truncate">{row.label}</span>
+                      </button>
+
+                      {/*
+                        기본정보는 이력서가 이력서이기 위한 최소한이라 뺄 수 없고, 자리도 맨 위에
+                        고정한다. 이름과 연락처가 문서 중간에 오면 이력서로 안 읽힌다.
+                      */}
+                      {row.fixed ? (
+                        <span className="shrink-0 pr-3 text-label-2 text-slate-400">필수</span>
+                      ) : !row.included ? (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          className="mr-1.5 shrink-0"
+                          aria-label={`${row.label} 담기`}
+                          onClick={() => addSectionRow(row)}
+                        >
+                          <Plus className="size-4 text-slate-400" />
+                        </Button>
+                      ) : reordering ? (
+                        <span className="flex shrink-0 items-center pr-1">
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={`${row.label} 위로`}
+                            disabled={row.navIndex === firstMovableIndex}
+                            onClick={() => moveSectionItem(row, -1)}
+                          >
+                            <ArrowUp className="size-3.5 text-slate-400" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={`${row.label} 아래로`}
+                            disabled={row.navIndex === navItems.length - 1}
+                            onClick={() => moveSectionItem(row, 1)}
+                          >
+                            <ArrowDown className="size-3.5 text-slate-400" />
+                          </Button>
+                        </span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          className="mr-1.5 shrink-0"
+                          aria-label={`${row.label} 빼기`}
+                          onClick={() => removeSectionItem(row)}
+                        >
+                          <Minus className="size-4 text-slate-400" />
+                        </Button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+
+          <div className="min-w-0 flex-1 space-y-4">
+            {navItems.map((item) => (
+              /* 사이드바에서 누르면 이 자리로 내려온다. 헤더에 제목이 가리지 않게 여백을 둔다. */
+              <div key={item.key} id={sectionAnchorId(item.key)} className="scroll-mt-24">
+                {sectionCards[item.key]}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -1089,7 +1454,7 @@ export function ResumeEditor({
         삭제는 편집 화면이 아니라 이력서 목록에서 처리한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
-        <div className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
           <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
@@ -1101,16 +1466,23 @@ export function ResumeEditor({
             한참 스크롤한 뒤에는 보이지 않아 얼마나 남았는지 알 수 없었다.
             남은 항목 이름을 함께 적어 다음에 무엇을 채울지 바로 알게 한다.
           */}
+          {/*
+            완성도는 왼쪽 항목 목록 맨 위에 있다. 그 목록이 화면에 붙어 있는 넓은 화면에서는
+            여기까지 두면 같은 값이 두 군데 보인다. 목록이 위로 밀려 올라가는 좁은 화면에서만 둔다.
+          */}
+          {/* 바깥 칸은 넓은 화면에서도 자리를 지킨다. 통째로 감추면 오른쪽 버튼들이 왼쪽으로 몰린다. */}
           <div className="mx-4 hidden min-w-0 flex-1 sm:block">
-            <div className="flex items-center justify-between gap-2 text-label-2">
-              <span className="truncate text-slate-500">
-                {liveCompleteness.missing.length > 0
-                  ? `다음: ${liveCompleteness.missing[0].label}`
-                  : "필수 항목을 모두 채웠어요"}
-              </span>
-              <span className="shrink-0 font-semibold text-slate-600">{liveCompleteness.score}%</span>
+            <div className="lg:hidden">
+              <div className="flex items-center justify-between gap-2 text-label-2">
+                <span className="truncate text-slate-500">
+                  {liveCompleteness.missing.length > 0
+                    ? `다음: ${liveCompleteness.missing[0].label}`
+                    : "필수 항목을 모두 채웠어요"}
+                </span>
+                <span className="shrink-0 font-semibold text-slate-600">{liveCompleteness.score}%</span>
+              </div>
+              <Progress value={liveCompleteness.score} className="mt-1 h-1.5" />
             </div>
-            <Progress value={liveCompleteness.score} className="mt-1 h-1.5" />
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
@@ -1126,6 +1498,65 @@ export function ResumeEditor({
           </div>
         </div>
       </div>
+
+      <Dialog
+        open={reviewPickerOpen}
+        onOpenChange={(next) => {
+          // 열 때마다 지금 기준으로 되돌린다. 고르다 닫은 값이 다음에 남아있으면 안 된다.
+          if (next) setPickedAgentId(resume.templateId);
+          setReviewPickerOpen(next);
+        }}
+      >
+        <DialogContent className="print:hidden sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>어떤 기준으로 점검할까요?</DialogTitle>
+            <DialogDescription>
+              고른 기준에 맞춰 AI가 이력서를 처음부터 끝까지 살펴봅니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {templates.map((template) => {
+              const agent = resolveResumeAgent(template);
+              const picked = agent.id === pickedAgentId;
+              return (
+                <button
+                  key={agent.id}
+                  type="button"
+                  aria-pressed={picked}
+                  onClick={() => setPickedAgentId(agent.id)}
+                  className={cn(
+                    "flex w-full cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
+                    picked ? "border-brand-blue-600 bg-brand-blue-50" : "border-border bg-white hover:border-brand-blue-200",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
+                      picked ? "border-brand-blue-600 bg-brand-blue-600" : "border-slate-300",
+                    )}
+                  >
+                    {picked && <Check className="size-3 text-white" />}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-body-2 font-semibold text-slate-900">{agent.name}</span>
+                    {agent.description && (
+                      <span className="mt-0.5 block text-label-1 text-slate-500">{agent.description}</span>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReviewPickerOpen(false)}>
+              취소
+            </Button>
+            <Button disabled={!pickedAgentId} onClick={handleReviewWithAgent}>
+              이 기준으로 점검
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="print:hidden sm:max-w-3xl">

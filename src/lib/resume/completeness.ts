@@ -19,19 +19,82 @@ const SECTION_WEIGHTS: Record<string, number> = {
   ACTIVITY: 0,
 };
 
+/*
+  항목 이름. 작성 시작 화면, 편집 화면의 항목 목록, 완성도의 "다음: OO" 가 모두 이 표를 쓴다.
+  화면마다 따로 적어두면 같은 항목이 "보유자격"과 "보유 자격"으로 갈린다.
+*/
 const SECTION_LABELS: Record<string, string> = {
   BASIC_INFO: "기본정보",
-  SUMMARY: "핵심경력 요약",
-  EXPERIENCE: "경력 담당업무",
+  SUMMARY: "핵심 경력 / 한 줄 소개",
+  EXPERIENCE: "경력",
   EDUCATION: "학력",
-  QUALIFICATION: "보유자격",
-  SKILLS: "보유스킬",
+  QUALIFICATION: "보유 자격",
+  SKILLS: "보유 스킬",
   TRAINING: "교육/훈련",
   PROJECT: "프로젝트",
-  ACTIVITY: "대외활동",
+  ACTIVITY: "봉사·수상 등 추가 경력",
 };
 
-function isSectionFilled(section: ResumeSectionCode, detail: ResumeDetail): boolean {
+/** 이 이력서가 담기로 한 항목. 고른 것이 없으면 양식이 정한 항목을 따른다. */
+export function resolveResumeSections(detail: ResumeDetail): ResumeSectionCode[] {
+  if (detail.resume.sectionCodes?.length) return detail.resume.sectionCodes;
+  if (detail.template?.sections?.length) return detail.template.sections;
+  return Object.keys(SECTION_WEIGHTS) as ResumeSectionCode[];
+}
+
+/** 항목 이름. 편집 화면의 항목 목록과 완성도가 같은 이름을 쓴다. */
+export function resumeSectionLabel(section: ResumeSectionCode): string {
+  return SECTION_LABELS[section as string] ?? String(section);
+}
+
+/** 완성도에 세는 항목인가. 세지 않는 항목은 안 채워도 완성도가 깎이지 않는다. */
+export function isRequiredSection(section: ResumeSectionCode): boolean {
+  return (SECTION_WEIGHTS[section as string] ?? 0) > 0;
+}
+
+/**
+ * 편집 화면의 "봉사·수상 등 추가 경력" 카드 하나가 이 두 항목을 함께 받는다.
+ * 그래서 고르는 목록에서도 한 줄로 합쳐 보여준다 - 따로 두면 프로젝트를 담아도
+ * 화면에 아무 변화가 없어 눌러도 안 먹는 것처럼 보인다.
+ */
+export const EXTRA_SECTION_CODES: ResumeSectionCode[] = ["PROJECT", "ACTIVITY"];
+
+export interface ResumeSectionOption {
+  /** 담을 때 이력서에 저장하는 코드 */
+  code: ResumeSectionCode;
+  /** 이 한 줄이 함께 다루는 코드. 대부분 자기 자신 하나뿐이다. */
+  codes: ResumeSectionCode[];
+  label: string;
+  required: boolean;
+}
+
+/**
+ * 담을 수 있는 항목 목록.
+ *
+ * 양식들의 항목을 모두 모아 중복만 없앤다. 양식별로 나눠 보여주면 "내 양식에 없는
+ * 항목은 못 담나" 하고 멈춘다. 작성 시작 화면과 편집 화면이 같은 목록을 쓴다.
+ */
+export function buildResumeSectionOptions(
+  templates: { sections: ResumeSectionCode[] }[],
+): ResumeSectionOption[] {
+  const options: ResumeSectionOption[] = [];
+
+  for (const code of templates.flatMap((t) => t.sections)) {
+    const isExtra = EXTRA_SECTION_CODES.includes(code);
+    const key = isExtra ? "ACTIVITY" : code;
+    if (options.some((o) => o.code === key)) continue;
+    options.push({
+      code: key,
+      codes: isExtra ? EXTRA_SECTION_CODES : [code],
+      label: resumeSectionLabel(key),
+      required: isRequiredSection(key),
+    });
+  }
+
+  return options;
+}
+
+export function isSectionFilled(section: ResumeSectionCode, detail: ResumeDetail): boolean {
   const { resume, experiences, educations, qualifications, skills } = detail;
   switch (section) {
     case "BASIC_INFO":
@@ -57,11 +120,7 @@ function isSectionFilled(section: ResumeSectionCode, detail: ResumeDetail): bool
 }
 
 export function calculateResumeCompleteness(detail: ResumeDetail): ResumeCompletenessResult {
-  const sections = detail.template?.sections?.length
-    ? detail.template.sections
-    : (Object.keys(SECTION_WEIGHTS) as ResumeSectionCode[]);
-
-  const weighted = sections
+  const weighted = resolveResumeSections(detail)
     .map((section) => ({ section, weight: SECTION_WEIGHTS[section as string] ?? 0 }))
     .filter((s) => s.weight > 0);
 
@@ -73,7 +132,7 @@ export function calculateResumeCompleteness(detail: ResumeDetail): ResumeComplet
     if (isSectionFilled(section, detail)) {
       filledWeight += weight;
     } else {
-      missing.push({ section, label: SECTION_LABELS[section as string] ?? String(section) });
+      missing.push({ section, label: resumeSectionLabel(section) });
     }
   }
 

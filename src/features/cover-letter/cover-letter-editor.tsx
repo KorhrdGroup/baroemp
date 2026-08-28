@@ -2,7 +2,18 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, Eye, FileText, Loader2, Plus, Printer, Trash2 } from "lucide-react";
+import {
+  ArrowDown,
+  ArrowLeft,
+  ArrowUp,
+  Check,
+  Eye,
+  Loader2,
+  Plus,
+  Printer,
+  Repeat2,
+  Trash2,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Input } from "@/components/ui/input";
@@ -10,16 +21,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { PillPicker } from "@/components/common/pill-picker";
 import { CoverLetterPreview } from "./cover-letter-preview";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AiButton } from "@/components/common/ai-button";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
+import { cn } from "@/lib/utils";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
+import type { QuestionCatalogEntry } from "@/lib/cover-letter/questions";
+import { questionHeading } from "@/lib/cover-letter/questions";
 import {
-  changeCoverLetterTemplateAction,
   generateCoverLetterDraftAiAction,
   getCoverLetterMarketComparisonAction,
   reviewCoverLetterSectionAiAction,
@@ -34,29 +44,35 @@ function nextKey() {
 
 type EditableSection = CoverLetterSectionInput & { _key: string };
 
-function stripKey<T extends { _key: string }>(item: T): Omit<T, "_key"> {
-  const rest: Record<string, unknown> = { ...item };
+/** 화면에서만 쓰는 _key를 뗀다. 서버에 보내는 값과 저장 여부를 재는 값 양쪽에서 쓴다. */
+function stripKey(section: CoverLetterSectionInput & { _key?: string }): CoverLetterSectionInput {
+  const rest = { ...section };
   delete rest._key;
-  return rest as Omit<T, "_key">;
+  return rest;
 }
 
-export interface CoverLetterTemplateOption {
-  id: string;
-  name: string;
-  description?: string;
-  /** "문항 5개" 같은 부가 정보 */
-  hint?: string;
+/**
+ * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
+ * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
+ */
+function buildSavePayload(source: { id: string; title: string; sections: (CoverLetterSectionInput & { _key?: string })[] }) {
+  return {
+    coverLetter: { id: source.id, title: source.title },
+    sections: source.sections.map(stripKey),
+  };
 }
 
 export function CoverLetterEditor({
   initialDetail,
   experienceBank,
-  templates = [],
+  catalog,
   applicantName,
 }: {
   initialDetail: CoverLetterDetail;
+  /** 회원의 경험뱅크 전체. 작성 시작 화면에서 고른 것만 재료로 올려두고, 나머지는 더 담기에서 꺼낸다. */
   experienceBank: ExperienceBankItem[];
-  templates?: CoverLetterTemplateOption[];
+  /** 고를 수 있는 문항 목록. 문항을 통째로 바꿀 때 쓴다. */
+  catalog: QuestionCatalogEntry[];
   /** 미리보기 문서에 찍는 지원자 이름. 편집 폼에는 쓰지 않는다. */
   applicantName?: string;
 }) {
@@ -65,78 +81,71 @@ export function CoverLetterEditor({
   const [sections, setSections] = useState<EditableSection[]>(
     initialDetail.sections.map((s) => ({ ...s, _key: nextKey() })),
   );
+  /** 한 번에 한 문항만 보여준다. 다섯 문항이 한 화면에 늘어서면 어디부터 쓸지 정하다 지친다. */
+  const [activeKey, setActiveKey] = useState<string | null>(null);
   const [selectedExperiences, setSelectedExperiences] = useState<Record<string, string[]>>({});
   const [isSaving, startSave] = useTransition();
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [suggestions, setSuggestions] = useState<Record<string, { text: string; prompts: string[] }>>({});
-  const [isChangingTemplate, startTemplateChange] = useTransition();
-  // 양식을 바꾸면 새 양식에 없는 문항의 답이 사라져 먼저 확인을 받는다.
-  const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
-  /** 마지막으로 저장한 내용의 스냅샷. 변경 여부를 이 값과 비교해 판단한다. */
-  const savedSnapshot = useRef<string | null>(null);
+  const [swapOpen, setSwapOpen] = useState(false);
+  const [confirmingDeleteKey, setConfirmingDeleteKey] = useState<string | null>(null);
+  /** 마지막으로 저장한 내용. 지금 입력과 이 값을 비교해 저장할 것이 있는지 본다. */
+  const [savedPayload, setSavedPayload] = useState(() =>
+    JSON.stringify(
+      buildSavePayload({
+        id: initialDetail.coverLetter.id,
+        title: initialDetail.coverLetter.title,
+        sections: initialDetail.sections,
+      }),
+    ),
+  );
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const marketComparisonRequestedRef = useRef(false);
 
-  /**
-   * 이력서와 달리 자기소개서는 양식이 문항 세트 자체를 정의한다.
-   * 같은 questionType의 답변은 서비스에서 새 문항으로 옮겨 담지만,
-   * 새 양식에 없는 문항의 답변은 사라지므로 먼저 확인을 받는다.
-   */
-  function handleTemplateChange(templateId: string) {
-    if (templateId === detail.coverLetter.templateId) return;
+  /*
+    재료로 올려둘 경험. 작성 시작 화면에서 고른 것만 쓴다.
+    그 전에 만든 자기소개서는 고른 기록이 없으므로 경험뱅크 전체를 그대로 쓴다.
+  */
+  const pickedIds = detail.coverLetter.experienceBankIds ?? [];
+  const experiencePool = pickedIds.length > 0
+    ? experienceBank.filter((e) => pickedIds.includes(e.id))
+    : experienceBank;
 
-    // 쓴 내용이 있으면 먼저 확인을 받는다. 없으면 잃을 것이 없어 바로 바꾼다.
-    if (sections.some((s) => s.content?.trim())) {
-      setConfirmingTemplateId(templateId);
-      return;
-    }
-    applyTemplateChange(templateId);
-  }
-
-  function applyTemplateChange(templateId: string) {
-    const coverLetter = detail.coverLetter;
-    const written = sections.filter((s) => s.content?.trim());
-    setConfirmingTemplateId(null);
-
-    startTemplateChange(async () => {
-      // 답변 이관은 서버에 저장된 내용을 기준으로 한다.
-      // 먼저 저장하지 않으면 화면에서 방금 쓴 내용이 그대로 사라진다.
-      if (written.length > 0) await handleSave();
-      const next = await changeCoverLetterTemplateAction(coverLetter.id, templateId);
-      if (!next) return;
-      setDetail(next);
-      setSections(next.sections.map((s) => ({ ...s, _key: nextKey() })));
-      setSuggestions({});
-      setSelectedExperiences({});
-    });
-  }
-
-  /**
-   * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
-   * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
-   */
-  function buildSavePayload() {
-    return {
-      coverLetter: { id: detail.coverLetter.id, title },
-      sections: sections.map(stripKey),
-    };
-  }
+  // 삭제 등으로 활성 문항이 사라졌으면 첫 문항으로 돌아온다.
+  const active = sections.find((s) => s._key === activeKey) ?? sections[0];
+  const activeIndex = active ? sections.findIndex((s) => s._key === active._key) : -1;
 
   function handleSave() {
     return new Promise<void>((resolve, reject) => {
       startSave(async () => {
         try {
-          const saved = await saveCoverLetterAction(buildSavePayload());
+          const saved = await saveCoverLetterAction(
+            buildSavePayload({ id: detail.coverLetter.id, title, sections }),
+          );
           setDetail(saved);
-          setSections(saved.sections.map((s) => ({ ...s, _key: nextKey() })));
           /*
-            여기서 바로 스냅샷을 찍으면 위 setState 들이 아직 반영되기 전이라
-            서버가 새로 부여한 id 가 빠진 값이 찍힌다. 비워두면 다음 렌더에서
-            저장된 상태 그대로 다시 잡힌다.
+            _key 는 그대로 두고 서버가 돌려준 값만 덮어쓴다. 저장할 때마다 새로 매기면
+            지금 보던 문항, 문항별로 띄워둔 AI 결과, 골라둔 경험이 전부 옛 키에 남아
+            화면에서 사라진다. 문항은 순서대로 다시 오므로 자리끼리 짝지으면 된다.
           */
-          savedSnapshot.current = null;
+          const ordered = [...saved.sections].sort((a, b) => a.orderIndex - b.orderIndex);
+          setSections((prev) => ordered.map((s, i) => ({ ...s, _key: prev[i]?._key ?? nextKey() })));
+          /*
+            기준점은 화면 상태가 아니라 서버가 돌려준 값으로 잡는다. 이 시점에는
+            위 setState 들이 아직 반영되기 전이라, 화면 상태로 찍으면 서버가 새로
+            부여한 문항 id 가 빠진 값이 기준점이 된다.
+          */
+          setSavedPayload(
+            JSON.stringify(
+              buildSavePayload({
+                id: saved.coverLetter.id,
+                title: saved.coverLetter.title,
+                sections: saved.sections,
+              }),
+            ),
+          );
           setSaveMessage("저장 완료");
           resolve();
         } catch (err) {
@@ -162,12 +171,32 @@ export function CoverLetterEditor({
     });
   }
 
+  function addSection() {
+    const key = nextKey();
+    setSections((prev) => [
+      ...prev,
+      { _key: key, questionType: "CUSTOM", question: "새 문항을 입력해주세요.", content: "", orderIndex: prev.length },
+    ]);
+    setActiveKey(key);
+  }
+
+  function deleteSection(key: string) {
+    setConfirmingDeleteKey(null);
+    setSections((prev) => prev.filter((s) => s._key !== key).map((s, i) => ({ ...s, orderIndex: i })));
+    if (activeKey === key) setActiveKey(null);
+  }
+
+  /** 이 문항에 쓸 경험. 아직 손대지 않았으면 고른 경험 전부를 쓴다. */
+  function experienceIdsFor(section: EditableSection): string[] {
+    return selectedExperiences[section._key] ?? experiencePool.map((e) => e.id);
+  }
+
   async function handleGenerateDraft(section: EditableSection) {
-    const experienceIds = selectedExperiences[section._key] ?? [];
+    const experienceIds = experienceIdsFor(section);
     if (experienceIds.length === 0) {
       setSuggestions((prev) => ({
         ...prev,
-        [section._key]: { text: "", prompts: ["이 질문에 사용할 경험을 아래 경험뱅크에서 선택해주세요."] },
+        [section._key]: { text: "", prompts: ["초안을 쓰려면 아래에서 이 문항에 쓸 경험을 하나 이상 골라주세요."] },
       }));
       return;
     }
@@ -222,7 +251,6 @@ export function CoverLetterEditor({
     }
   }
 
-
   /** 저장 전 상태 그대로 보여준다. 저장해야만 미리보기가 맞는 건 불편하다. */
   function currentPreviewDetail(): CoverLetterDetail {
     return {
@@ -253,28 +281,14 @@ export function CoverLetterEditor({
     마지막으로 저장한 내용과 지금 입력이 같으면 저장할 것이 없다.
     누를 수는 있는데 아무 일도 안 일어나면 저장이 안 된 건지 헷갈린다.
   */
-  const currentPayload = JSON.stringify(buildSavePayload());
-  savedSnapshot.current ??= currentPayload;
-  const isDirty = currentPayload !== savedSnapshot.current;
+  const isDirty =
+    JSON.stringify(buildSavePayload({ id: detail.coverLetter.id, title, sections })) !== savedPayload;
+
+  const suggestion = active ? suggestions[active._key] : undefined;
 
   return (
-    // 설정 줄(양식 선택)과 문서 사이만 넓게 띄운다. 이력서 편집과 같은 간격.
-    <div className="space-y-6">
-      <PillPicker
-        label="자기소개서 양식"
-        icon={<FileText className="size-4 text-brand-blue-600" />}
-        options={templates.map((t) => ({
-          id: t.id,
-          name: t.name,
-          description: [t.description, t.hint].filter(Boolean).join(" · ") || undefined,
-        }))}
-        value={detail.coverLetter.templateId ?? undefined}
-        onChange={handleTemplateChange}
-        pending={isChangingTemplate}
-      />
-
-      <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-white p-4">
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
         <div className="min-w-48 flex-1">
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
           <Input
@@ -284,114 +298,148 @@ export function CoverLetterEditor({
             className="mt-1 h-10 bg-white"
           />
         </div>
+        {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl bg-white p-4">
-        <p className="text-label-1 text-slate-500">
-          {experienceBank.length > 0 ? "경험뱅크에서 문항별로 사용할 경험을 선택하세요" : "경험뱅크가 비어있어요"}
-        </p>
-        <Link href="/resume#experience-bank" className="text-label-1 font-medium text-brand-blue-600 hover:underline">
-          경험뱅크 관리 →
-        </Link>
-      </div>
+      {/*
+        왼쪽은 문항 목록, 오른쪽은 지금 쓰는 문항 하나.
+        좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
+      */}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+        <nav className="rounded-xl bg-white p-3 lg:sticky lg:top-24 lg:w-60 lg:shrink-0">
+          <p className="px-2 pb-2 text-label-2 font-semibold text-slate-400">문항 {sections.length}개</p>
+          <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+            {sections.map((section, idx) => {
+              const written = Boolean(section.content?.trim());
+              const isActive = section._key === active?._key;
+              return (
+                <li key={section._key} className="shrink-0 lg:shrink">
+                  <button
+                    type="button"
+                    onClick={() => setActiveKey(section._key)}
+                    aria-current={isActive}
+                    className={cn(
+                      // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
+                      "flex w-full max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 transition-colors lg:max-w-none",
+                      isActive ? "bg-brand-blue-50 font-semibold text-brand-blue-700" : "text-slate-600 hover:bg-slate-50",
+                    )}
+                  >
+                    <span
+                      className={cn(
+                        "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
+                        written
+                          ? "bg-brand-blue-600 text-white"
+                          : isActive
+                            ? "bg-white text-brand-blue-700 ring-1 ring-brand-blue-200"
+                            : "bg-slate-100 text-slate-400",
+                      )}
+                    >
+                      {written ? <Check className="size-3.5" /> : idx + 1}
+                    </span>
+                    <span className="truncate">{questionHeading(section.questionType, section.question)}</span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+          <Button variant="ghost" size="sm" className="mt-2 w-full justify-start text-slate-600" onClick={addSection}>
+            <Plus className="size-4" /> 문항 추가
+          </Button>
+        </nav>
 
-      <div className="space-y-4">
-        {sections.map((section, idx) => (
-          <Card key={section._key} className="rounded-xl border-0 ring-0">
-            <CardHeader className="flex flex-row items-start justify-between gap-3">
-              <div className="flex-1">
-                <p className="text-label-2 font-semibold text-slate-400">문항 {idx + 1}</p>
-                <Input
-                  value={section.question}
-                  onChange={(e) => updateSection(section._key, { question: e.target.value })}
-                  /*
-                    Input 기본 클래스에 md:text-label-1 이 있어 넓은 화면에서는
-                    그쪽이 이긴다. 반응형 단계까지 함께 지정해야 크기가 적용된다.
-                  */
-                  className="mt-1 h-11 border-0 bg-transparent px-0 text-body-1 font-semibold shadow-none focus-visible:ring-0 md:text-body-1"
-                />
+        <div className="min-w-0 flex-1 space-y-4">
+          {active && (
+            <div className="rounded-xl bg-white p-5">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-label-2 font-semibold text-slate-400">문항 {activeIndex + 1}</p>
+                <div className="flex items-center gap-1">
+                  <Button variant="ghost" size="sm" className="text-slate-500" onClick={() => setSwapOpen(true)}>
+                    <Repeat2 className="size-3.5" /> 문항 바꾸기
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="위로 이동"
+                    onClick={() => moveSection(active._key, -1)}
+                    disabled={activeIndex === 0}
+                  >
+                    <ArrowUp className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="아래로 이동"
+                    onClick={() => moveSection(active._key, 1)}
+                    disabled={activeIndex === sections.length - 1}
+                  >
+                    <ArrowDown className="size-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    aria-label="문항 삭제"
+                    onClick={() => setConfirmingDeleteKey(active._key)}
+                  >
+                    <Trash2 className="size-4 text-slate-400" />
+                  </Button>
+                </div>
               </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon-sm" aria-label="위로 이동" onClick={() => moveSection(section._key, -1)} disabled={idx === 0}>
-                  <ArrowUp className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon-sm" aria-label="아래로 이동" onClick={() => moveSection(section._key, 1)} disabled={idx === sections.length - 1}>
-                  <ArrowDown className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon-sm" aria-label="문항 삭제" onClick={() => setSections((prev) => prev.filter((s) => s._key !== section._key))}>
-                  <Trash2 className="size-4 text-slate-400" />
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
+
+              <Input
+                value={active.question}
+                onChange={(e) => updateSection(active._key, { question: e.target.value })}
+                /*
+                  Input 기본 클래스에 md:text-label-1 이 있어 넓은 화면에서는
+                  그쪽이 이긴다. 반응형 단계까지 함께 지정해야 크기가 적용된다.
+                */
+                className="mt-1 h-11 border-0 bg-transparent px-0 text-body-1 font-semibold shadow-none focus-visible:ring-0 md:text-body-1"
+              />
+
+              {/*
+                Textarea 는 field-sizing-content 라 rows 를 무시하고 내용만큼만 커진다.
+                빈 칸이 두 줄짜리로 보이면 한 문단 쓰는 자리로 안 읽혀서 최소 높이를 직접 준다.
+                글자도 기본값(md:text-label-1, 14px)이면 길게 쓰는 칸치고 작아 16px로 올린다.
+              */}
               <Textarea
-                className="bg-white"
-                value={section.content ?? ""}
-                onChange={(e) => updateSection(section._key, { content: e.target.value })}
-                rows={6}
+                className="mt-2 min-h-80 bg-white text-body-2 leading-relaxed md:text-body-2"
+                value={active.content ?? ""}
+                onChange={(e) => updateSection(active._key, { content: e.target.value })}
                 placeholder="이 질문에 대한 답변을 작성해주세요."
               />
-              <div className="flex items-center justify-between text-label-2 text-slate-400">
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-label-2 text-slate-400">
                 <span>
-                  {section.content?.length ?? 0}
-                  {section.characterLimit ? ` / ${section.characterLimit}자` : "자"}
+                  {active.content?.length ?? 0}
+                  {active.characterLimit ? ` / ${active.characterLimit}자` : "자"}
                 </span>
                 <div className="flex gap-2">
-                  <AiButton
-                    size="xs"
-                    onClick={() => handleGenerateDraft(section)}
-                    loading={busyKey === section._key}
-                  >
-                    AI 초안 생성
+                  <AiButton size="xs" onClick={() => handleGenerateDraft(active)} loading={busyKey === active._key}>
+                    AI 초안 만들기
                   </AiButton>
                   <AiButton
                     size="xs"
-                    onClick={() => handleReviewSection(section)}
-                    loading={busyKey === `review-${section._key}`}
+                    onClick={() => handleReviewSection(active)}
+                    loading={busyKey === `review-${active._key}`}
+                    /* 다듬을 글이 없으면 누를 수 없다. 빈 칸에서 눌러도 할 일이 없다. */
+                    disabled={!active.content?.trim()}
                   >
-                    AI 점검
+                    AI로 다듬기
                   </AiButton>
                 </div>
               </div>
 
-              {experienceBank.length > 0 && (
-                <div className="flex flex-wrap gap-2 rounded-lg bg-slate-50 p-3">
-                  {experienceBank.map((exp) => {
-                    const checked = (selectedExperiences[section._key] ?? []).includes(exp.id);
-                    return (
-                      <label key={exp.id} className="flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-label-2 ring-1 ring-border">
-                        <Checkbox
-                          checked={checked}
-                          onCheckedChange={(v) =>
-                            setSelectedExperiences((prev) => {
-                              const current = prev[section._key] ?? [];
-                              return {
-                                ...prev,
-                                [section._key]: v ? [...current, exp.id] : current.filter((id) => id !== exp.id),
-                              };
-                            })
-                          }
-                        />
-                        {exp.title}
-                      </label>
-                    );
-                  })}
-                </div>
-              )}
-
-              {suggestions[section._key] && (
-                <div className="rounded-lg bg-brand-blue-50 p-3 text-label-1">
-                  {suggestions[section._key].text && (
+              {suggestion && (
+                <div className="mt-3 rounded-lg bg-brand-blue-50 p-3 text-label-1">
+                  {suggestion.text && (
                     <>
-                      <p className="whitespace-pre-line text-slate-700">{suggestions[section._key].text}</p>
+                      <p className="whitespace-pre-line text-slate-700">{suggestion.text}</p>
                       <Button
                         size="sm"
                         className="mt-2"
                         onClick={() => {
-                          updateSection(section._key, { content: suggestions[section._key].text });
+                          updateSection(active._key, { content: suggestion.text });
                           setSuggestions((prev) => {
                             const next = { ...prev };
-                            delete next[section._key];
+                            delete next[active._key];
                             return next;
                           });
                         }}
@@ -400,40 +448,84 @@ export function CoverLetterEditor({
                       </Button>
                     </>
                   )}
-                  {suggestions[section._key].prompts.length > 0 && (
+                  {suggestion.prompts.length > 0 && (
                     <ul className="mt-2 list-disc pl-4 text-slate-600">
-                      {suggestions[section._key].prompts.map((p, i) => (
+                      {suggestion.prompts.map((p, i) => (
                         <li key={i}>{p}</li>
                       ))}
                     </ul>
                   )}
                 </div>
               )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+            </div>
+          )}
 
-      {marketComparison && (
-        <MarketComparisonCard
-          key={marketComparison.analysisId ?? "no-analysis"}
-          view={marketComparison}
-          source="cover_letter_review"
-        />
-      )}
+          {/*
+            AI 초안의 재료. 작성 시작 화면에서 고른 경험을 그대로 올려두고,
+            이 문항에 안 맞는 것만 빼게 한다. 매번 고르게 하면 초안 한 번 받기까지 손이 많이 간다.
+          */}
+          {active && (
+            <div className="rounded-xl bg-white p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <p className="text-label-1 font-semibold text-slate-900">이 문항에 쓸 내 경험</p>
+                  <p className="mt-0.5 text-label-2 text-slate-500">
+                    {experiencePool.length > 0
+                      ? "고른 경험을 재료로 AI가 초안을 씁니다. 이 문항과 안 맞는 것은 빼주세요."
+                      : "정리해둔 경험이 없어 AI가 쓸 재료가 없어요."}
+                  </p>
+                </div>
+                <Link
+                  href="/resume#experience-bank"
+                  className="text-label-1 font-medium text-brand-blue-600 hover:underline"
+                >
+                  경험뱅크 관리 →
+                </Link>
+              </div>
 
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() =>
-          setSections((prev) => [
-            ...prev,
-            { _key: nextKey(), questionType: "CUSTOM", question: "새 문항을 입력해주세요.", content: "", orderIndex: prev.length },
-          ])
-        }
-      >
-        <Plus className="size-4" /> 문항 추가
-      </Button>
+              {experiencePool.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {experiencePool.map((exp) => {
+                    const checked = experienceIdsFor(active).includes(exp.id);
+                    return (
+                      <button
+                        key={exp.id}
+                        type="button"
+                        aria-pressed={checked}
+                        onClick={() =>
+                          setSelectedExperiences((prev) => {
+                            const current = prev[active._key] ?? experiencePool.map((e) => e.id);
+                            return {
+                              ...prev,
+                              [active._key]: checked ? current.filter((id) => id !== exp.id) : [...current, exp.id],
+                            };
+                          })
+                        }
+                        className={cn(
+                          "flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-label-1 transition-colors",
+                          checked
+                            ? "border-transparent bg-brand-blue-600 font-medium text-white"
+                            : "border-border bg-white text-slate-600 hover:border-brand-blue-200",
+                        )}
+                      >
+                        {checked && <Check className="size-3.5" />}
+                        {exp.title}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {marketComparison && (
+            <MarketComparisonCard
+              key={marketComparison.analysisId ?? "no-analysis"}
+              view={marketComparison}
+              source="cover_letter_review"
+            />
+          )}
+        </div>
       </div>
 
       {/*
@@ -442,7 +534,7 @@ export function CoverLetterEditor({
         삭제는 편집 화면이 아니라 자기소개서 목록에서 처리한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
           <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
@@ -466,7 +558,6 @@ export function CoverLetterEditor({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
             {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
             <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
               <Eye className="size-4" /> 미리보기
@@ -496,14 +587,55 @@ export function CoverLetterEditor({
         </DialogContent>
       </Dialog>
 
+      {/* 문항 통째로 바꾸기. 쓴 내용은 그대로 두고 질문만 갈아끼운다. */}
+      <Dialog open={swapOpen} onOpenChange={setSwapOpen}>
+        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>어떤 문항으로 바꿀까요?</DialogTitle>
+            <DialogDescription>
+              이미 쓴 내용은 지워지지 않아요. 질문만 바뀝니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {catalog.map((entry) => {
+              const used = sections.some((s) => s.questionType === entry.questionType && s._key !== active?._key);
+              return (
+                <button
+                  key={entry.questionType}
+                  type="button"
+                  disabled={used}
+                  onClick={() => {
+                    if (!active) return;
+                    updateSection(active._key, {
+                      questionType: entry.questionType,
+                      question: entry.question,
+                      characterLimit: entry.characterLimit,
+                    });
+                    setSwapOpen(false);
+                  }}
+                  className={cn(
+                    "w-full cursor-pointer rounded-xl border border-border px-4 py-3 text-left transition-colors hover:border-brand-blue-200 disabled:cursor-not-allowed disabled:opacity-40",
+                    active?.questionType === entry.questionType && "border-brand-blue-600 bg-brand-blue-50",
+                  )}
+                >
+                  <p className="text-body-2 font-semibold text-slate-900">{entry.label}</p>
+                  <p className="mt-0.5 text-label-1 text-slate-500">
+                    {used ? "이미 담긴 문항이에요." : entry.question}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       <ConfirmDialog
-        open={confirmingTemplateId !== null}
-        onOpenChange={(next) => !next && setConfirmingTemplateId(null)}
-        title="양식을 바꿀까요?"
-        description="같은 종류의 문항에 쓴 내용은 그대로 옮겨지지만, 새 양식에 없는 문항의 내용은 사라집니다."
-        confirmLabel="양식 바꾸기"
-        pending={isChangingTemplate}
-        onConfirm={() => confirmingTemplateId && applyTemplateChange(confirmingTemplateId)}
+        open={confirmingDeleteKey !== null}
+        onOpenChange={(next) => !next && setConfirmingDeleteKey(null)}
+        title="이 문항을 삭제할까요?"
+        description="문항에 쓴 내용도 함께 사라집니다."
+        pending={false}
+        onConfirm={() => confirmingDeleteKey && deleteSection(confirmingDeleteKey)}
       />
     </div>
   );
