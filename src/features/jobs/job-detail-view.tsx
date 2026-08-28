@@ -33,7 +33,7 @@ import { BackButton } from "@/components/common/back-button";
 /**
  * evaluateJobFit 이 희망 조건과 함께 담는, 공고 요건 성격의 고정 라벨.
  * 아래 "공고가 요구하는 것" 묶음이 필수/우대까지 붙여 더 자세히 보여주므로
- * 위 "내가 바라는 조건"에서는 뺀다.
+ * 위 "희망 근무조건"에서는 뺀다.
  *
  * 요건 이름이 그대로 들어오는 항목은 requirementNames 로 따로 거른다.
  * "경력무관/신입가능" 은 요건 목록에 없어 여기 넣지 않는다 - 빼면 아무 데서도 안 보인다.
@@ -70,11 +70,19 @@ const COMPARISON_GROUPS = [
   head: string;
 }[];
 
-const REQUIREMENT_STATUS_STYLE: Record<string, { icon: LucideIcon; label: string; className: string }> = {
-  SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700" },
-  NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600" },
-  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600" },
-  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600" },
+/**
+ * 요건 행의 상태 표시.
+ * 바탕색은 위 "희망 근무조건" 카드와 같은 계열을 쓴다. 회색 바탕에 글자만
+ * 색을 넣으면 줄을 하나씩 읽어야 상태를 알 수 있다.
+ */
+const REQUIREMENT_STATUS_STYLE: Record<
+  string,
+  { icon: LucideIcon; label: string; className: string; box: string }
+> = {
+  SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700", box: "bg-emerald-50/60" },
+  NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600", box: "bg-rose-50/60" },
+  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50/60" },
+  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50/60" },
 };
 
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value?: string }) {
@@ -110,7 +118,7 @@ export function JobDetailView({
   const showRequirements = Boolean(isAuthenticated && requirementComparison && requirementComparison.length > 0);
 
   /*
-    "내가 바라는 조건"에서 요구조건 묶음이 이미 말해주는 항목을 뺀다.
+    "희망 근무조건"에서 요구조건 묶음이 이미 말해주는 항목을 뺀다.
     evaluateJobFit 은 희망 조건(지역·급여·근무형태)과 공고 요건(운전·자격)을 한 배열에
     섞어 담는데, 요건 쪽은 아래 묶음이 필수/우대까지 붙여 더 자세히 보여준다.
   */
@@ -204,12 +212,12 @@ export function JobDetailView({
         <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고와 내 조건 비교</h2>
           <p className="mt-1 text-label-1 text-slate-400">
-            바라는 근무조건과 공고가 요구하는 것을 함께 봤어요.
+            희망하신 근무조건과 공고가 요구하는 조건을 함께 봤어요.
           </p>
 
           {visibleComparisons.length > 0 && match && (
             <div className="mt-5">
-              <p className="text-label-1 font-semibold text-slate-500">내가 바라는 조건</p>
+              <p className="text-label-1 font-semibold text-slate-500">희망 근무조건</p>
               <div className={cn("mt-2 grid gap-3", visibleComparisons.length > 1 && "sm:grid-cols-2")}>
                 {visibleComparisons.map(({ key, label, icon: Icon, box, head }) => (
                   <div key={key} className={cn("rounded-lg p-4", box)}>
@@ -229,7 +237,7 @@ export function JobDetailView({
 
           {showRequirements && (
             <div className="mt-5">
-              <p className="text-label-1 font-semibold text-slate-500">공고가 요구하는 것</p>
+              <p className="text-label-1 font-semibold text-slate-500">공고 요구조건</p>
               <div className="mt-2 space-y-2">
                 {requirementComparison!.map((item) => {
                   const style = REQUIREMENT_STATUS_STYLE[item.userStatus] ?? REQUIREMENT_STATUS_STYLE.UNKNOWN;
@@ -237,11 +245,14 @@ export function JobDetailView({
                   return (
                     <div
                       key={item.requirementId}
-                      className="flex items-center justify-between gap-3 rounded-lg bg-slate-50 px-3 py-2.5 text-label-1"
+                      className={cn(
+                        "flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-label-1",
+                        style.box,
+                      )}
                     >
-                      <span className="text-slate-700">
+                      <span className="font-medium text-slate-700">
                         {item.requirementName}
-                        <span className="ml-1.5 text-label-2 text-slate-400">
+                        <span className="ml-1.5 text-label-2 font-normal text-slate-500">
                           {item.jobLevel === "REQUIRED" ? "필수" : item.jobLevel === "PREFERRED" ? "우대" : "언급"}
                         </span>
                       </span>
