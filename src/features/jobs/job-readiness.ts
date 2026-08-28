@@ -59,13 +59,12 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
  *   주황    지원을 막음      ○○ 필요 · 자격 N개 필요
  */
 export const READINESS_BADGE_CLASS: Record<JobReadinessLevel, string> = {
-  // 무채색은 "할 일이 없다"는 뜻으로만 쓴다. 요건이 있으면 반드시 색이 들어간다.
+  // 무채색: 지원에 지장이 없다. 요건이 아예 없거나, 우대라 없어도 그만이다.
   no_requirement: "bg-slate-100 text-slate-600",
-  // 초록은 갖춘 것에만.
+  preferred: "bg-slate-100 text-slate-600",
+  // 초록: 갖췄다.
   satisfied: "bg-emerald-50 text-emerald-700",
-  // 파랑은 있으면 좋은 것. 없어도 지원을 막지 않는다.
-  preferred: "bg-brand-blue-50 text-brand-blue-700",
-  // 주황은 지원을 막는 것. 개수만 다를 뿐 같은 뜻이라 같은 색을 쓴다.
+  // 주황: 지원이 막힌다. 개수만 다를 뿐 같은 뜻이라 같은 색을 쓴다.
   near: "bg-amber-50 text-amber-700",
   gap: "bg-amber-50 text-amber-700",
 };
