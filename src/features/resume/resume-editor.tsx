@@ -421,13 +421,13 @@ export function ResumeEditor({
                 <CardTitle className="text-body-2">기본정보</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
-                <Field label="이름">
+                <Field label="이름" required>
                   <CompactInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
                 </Field>
-                <Field label="이메일">
+                <Field label="이메일" required>
                   <CompactInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
                 </Field>
-                <Field label="전화번호">
+                <Field label="전화번호" required>
                   <CompactInput value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
                 </Field>
                 <Field label="주소/거주지역">
@@ -446,7 +446,7 @@ export function ResumeEditor({
           {showSection("SUMMARY") && (
             <Card className="mt-4 rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개</CardTitle>
+                <CardTitle className="text-body-2">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
                 {/*
                   실제 동작은 아래 경력·자격·스킬을 재료로 문장을 만들어 제안하는 것이다.
                   이 칸에 쓴 글 자체를 고치지는 않는다.
@@ -537,7 +537,7 @@ export function ResumeEditor({
                       <Checkbox checked={exp.isCurrent} onCheckedChange={(v) => updateAt(setExperiences, exp._key, { isCurrent: Boolean(v) })} />
                       현재 재직중
                     </label>
-                    <Field label="어떤 일을 하셨나요? (예: 고객상담, 거래처 관리, 문서작성)">
+                    <Field label="어떤 일을 하셨나요? (예: 고객상담, 거래처 관리, 문서작성)" required>
                       <Textarea
                         className="bg-white"
                         value={exp.responsibilities ?? ""}
@@ -546,7 +546,7 @@ export function ResumeEditor({
                       />
                       <AiButton
                         size="xs"
-                        className="mt-1"
+                        className="mt-1 ml-auto flex w-fit"
                         onClick={() => openRewrite(exp._key, "responsibilities", exp.responsibilities ?? "")}
                         loading={rewritePending?.key === exp._key && rewritePending.field === "responsibilities"}
                       >
@@ -562,7 +562,7 @@ export function ResumeEditor({
                       />
                       <AiButton
                         size="xs"
-                        className="mt-1"
+                        className="mt-1 ml-auto flex w-fit"
                         onClick={() => openRewrite(exp._key, "achievements", exp.achievements ?? "")}
                         loading={rewritePending?.key === exp._key && rewritePending.field === "achievements"}
                       >
@@ -778,7 +778,7 @@ export function ResumeEditor({
                 {qualifications.map((q, idx) => (
                   isEntryEditing(q._key) ? (
                   <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_1fr_auto]">
-                    <Field label={`자격명 ${idx + 1}`}>
+                    <Field label="자격명">
                       <CompactInput value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
                     </Field>
                     <Field label="발급기관">
@@ -844,9 +844,17 @@ export function ResumeEditor({
                 </div>
                 <div className="mt-3 flex flex-wrap gap-2">
                   {skills.map((s) => (
-                    <Badge key={s._key} variant="secondary" className="gap-1 rounded-full py-1.5">
+                    <Badge
+                      key={s._key}
+                      /* 직접 넣은 값이라 회색보다 눈에 들어와야 하고, 옆 × 를 누르려면 손가락이 닿을 만큼은 커야 한다. */
+                      className="gap-1.5 rounded-full border-transparent bg-brand-blue-50 px-3 py-2 text-label-1 font-medium text-brand-blue-700"
+                    >
                       {s.name}
-                      <button onClick={() => setSkills((prev) => prev.filter((x) => x._key !== s._key))} aria-label="삭제">
+                      <button
+                        onClick={() => setSkills((prev) => prev.filter((x) => x._key !== s._key))}
+                        aria-label={`${s.name} 삭제`}
+                        className="-mr-0.5 flex size-4 items-center justify-center rounded-full text-brand-blue-600 transition-colors hover:bg-brand-blue-100 hover:text-brand-blue-800"
+                      >
                         ×
                       </button>
                     </Badge>
@@ -876,7 +884,7 @@ export function ResumeEditor({
                 {trainings.map((t, idx) => (
                   isEntryEditing(t._key) ? (
                   <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_auto]">
-                    <Field label={`과정명 ${idx + 1}`}>
+                    <Field label="과정명">
                       <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
                     </Field>
                     <Field label="교육기관">
@@ -1043,10 +1051,33 @@ export function ResumeEditor({
   );
 }
 
-function Field({ label, children, className }: { label: string; children: React.ReactNode; className?: string }) {
+/** 완성도에 세는 항목임을 알리는 별표. 섹션 제목과 입력칸 라벨에 함께 쓴다. */
+function RequiredMark() {
+  return (
+    <span className="ml-0.5 text-brand-blue-600" aria-label="필수 입력">
+      *
+    </span>
+  );
+}
+
+function Field({
+  label,
+  children,
+  className,
+  required,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+  /** 완성도에 세는 항목. 별표로 표시해 무엇부터 채워야 하는지 보이게 한다. */
+  required?: boolean;
+}) {
   return (
     <div className={cn("space-y-1", className)}>
-      <Label className="text-label-2 text-slate-500">{label}</Label>
+      <Label className="text-label-2 text-slate-500">
+        {label}
+        {required && <RequiredMark />}
+      </Label>
       {children}
     </div>
   );
