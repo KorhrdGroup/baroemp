@@ -19,15 +19,20 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [resumable, setResumable] = useState<Resumable | null>(null);
+  // 실패를 조용히 삼키면 버튼을 눌러도 아무 일도 안 일어난 것처럼 보인다.
+  const [error, setError] = useState<string | null>(null);
 
   /** 새 세션을 만들어 첫 문항으로 이동한다. */
   async function startNew() {
     setLoading(true);
+    setError(null);
     try {
       const anonymousId = getOrCreateAnonymousId();
       const { sessionId } = await startAssessmentSessionAction({ anonymousId: anonymousId || undefined });
       router.push(`/assessment/${sessionId}`);
-    } catch {
+    } catch (err) {
+      console.error("[assessment] 시작 실패", err);
+      setError("진단을 시작하지 못했어요. 잠시 후 다시 시도해주세요.");
       setLoading(false);
     }
   }
@@ -43,6 +48,7 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
     }
 
     setLoading(true);
+    setError(null);
     // 하다 만 진단이 있으면 새로 시작하기 전에 물어본다.
     // 소개 화면에 안내만 띄우면 그냥 지나치고 시작 버튼을 눌러 이전 답변이 버려진다.
     try {
@@ -53,8 +59,9 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
         setLoading(false);
         return;
       }
-    } catch {
+    } catch (err) {
       // 조회 실패는 진단 시작을 막지 않는다 - 새로 시작한다.
+      console.error("[assessment] 이어하기 조회 실패", err);
     }
 
     await startNew();
@@ -70,6 +77,12 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
       >
         {loading ? <Loader2 className="size-5 animate-spin" /> : <>직업진단 시작하기 <ArrowRight className="size-5" /></>}
       </Button>
+
+      {error ? (
+        <p role="alert" className="mt-2 text-label-2 text-[#e5484d]">
+          {error}
+        </p>
+      ) : null}
 
       <ResumeSessionDialog
         open={Boolean(resumable)}
