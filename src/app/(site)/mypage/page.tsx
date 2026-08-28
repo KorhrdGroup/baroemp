@@ -202,7 +202,7 @@ export default async function MyPage() {
       key: "jobBookmark",
       label: "찜한 일자리",
       value: jobData.bookmarkCount,
-      href: "#bookmarked-jobs",
+      href: "/mypage/bookmarks#jobs",
       icon: Star,
       tone: "bg-amber-50 text-amber-500",
     },
@@ -210,7 +210,7 @@ export default async function MyPage() {
       key: "supportBookmark",
       label: "찜한 지원금",
       value: supportData.bookmarkCount,
-      href: "#bookmarked-support",
+      href: "/mypage/bookmarks#support",
       icon: Gift,
       tone: "bg-emerald-50 text-emerald-600",
     },
@@ -246,19 +246,14 @@ export default async function MyPage() {
         </Button>
       </div>
 
-      {/*
-        요약 줄. 칸 사이는 테두리 대신 1px 틈으로 가른다 - 테두리를 칸마다 두면
-        가운데 선이 두 겹으로 겹친다.
-      */}
-      <div className="grid grid-cols-2 gap-px overflow-hidden rounded-2xl bg-border sm:grid-cols-4">
-        {stats.map((stat, idx) => (
+      {/* 요약. 아래 카드들과 같은 모양의 카드 넉 장으로 세운다. */}
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        {stats.map((stat) => (
           <Link
             key={stat.key}
             href={stat.href}
             className={cn(
-              "flex items-center gap-3 bg-white px-4 py-5",
-              // 좁은 화면은 2열이라 홀수 개면 마지막 칸 옆이 빈 채로 바탕색이 드러난다.
-              idx === stats.length - 1 && stats.length % 2 === 1 && "col-span-2 sm:col-span-1",
+              "flex items-center gap-3 rounded-xl bg-white px-4 py-5 ring-1 ring-border",
               interactiveRowClass,
             )}
           >
@@ -542,8 +537,20 @@ export default async function MyPage() {
                 내려온 사람이 그 자리에서 아무것도 못 찾는다. 없으면 없다고 적어준다.
               */}
               <Card id="bookmarked-jobs" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <CardTitle className="text-body-2">찜한 일자리</CardTitle>
+                  {/*
+                    카드에는 앞의 몇 건만 담긴다. 넘칠 때만 길을 열면 그 전에는 전체 목록이
+                    있다는 것조차 모른다. 하나라도 있으면 항상 둔다.
+                  */}
+                  {jobData.bookmarkCount > 0 && (
+                    <Link
+                      href="/mypage/bookmarks#jobs"
+                      className="shrink-0 text-label-1 font-medium text-brand-blue-600 hover:underline"
+                    >
+                      전체보기 ({jobData.bookmarkCount}) →
+                    </Link>
+                  )}
                 </CardHeader>
                 <CardContent className="space-y-1.5 text-label-1 text-slate-600">
                   {jobData.bookmarked.length === 0 ? (
@@ -667,8 +674,16 @@ export default async function MyPage() {
             )}
 
             <Card id="bookmarked-support" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between gap-2">
                 <CardTitle className="text-body-2">찜한 지원제도</CardTitle>
+                {supportData.bookmarkCount > 0 && (
+                  <Link
+                    href="/mypage/bookmarks#support"
+                    className="shrink-0 text-label-1 font-medium text-brand-blue-600 hover:underline"
+                  >
+                    전체보기 ({supportData.bookmarkCount}) →
+                  </Link>
+                )}
               </CardHeader>
               <CardContent className="space-y-1.5 text-label-1 text-slate-600">
                 {supportData.bookmarked.length === 0 ? (
