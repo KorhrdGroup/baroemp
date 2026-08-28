@@ -180,19 +180,6 @@ export function OccupationRecommendationCard({
           </div>
         )}
 
-        {/* Career Path */}
-        <div className="mt-6">
-          <p className="text-label-1 font-semibold text-slate-700">예상 준비경로</p>
-          <div className="mt-2 flex flex-wrap items-center gap-2 text-label-1 text-slate-500">
-            {["현재 상태", "필요 자격", "실무 준비", "이력서/면접", "채용지원"].map((step, i) => (
-              <span key={step} className="flex items-center gap-2">
-                <span className="rounded-full border border-border px-3 py-1.5">{step}</span>
-                {i < 4 && <span className="text-slate-300">→</span>}
-              </span>
-            ))}
-          </div>
-        </div>
-
         {/* 관련 채용공고 */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-4">
           <div className="text-label-1 text-slate-600">
