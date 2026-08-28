@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ChevronDown, FileText, ListChecks, MapPin, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, FileText, ListChecks, MapPin, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Occupation, OccupationRecommendation } from "@/types";
 import { cn } from "@/lib/utils";
@@ -127,7 +127,7 @@ export function OccupationRecommendationCard({
               ))}
             </ul>
           </div>
-          {rec.risks.length > 0 && (
+          {rec.risks.length > 0 ? (
             <div className="rounded-lg bg-orange-50/60 p-4">
               <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
                 <AlertTriangle className="size-4" /> 고려할 점
@@ -138,28 +138,44 @@ export function OccupationRecommendationCard({
                 ))}
               </ul>
             </div>
+          ) : (
+            /* 비워두면 "안 뜬 건가?" 싶다. 걸리는 게 없다는 것도 알려줄 값이다. */
+            <div className="rounded-lg bg-emerald-50/60 p-4">
+              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-emerald-700">
+                <CheckCircle2 className="size-4" /> 고려할 점
+              </p>
+              <p className="mt-2 text-label-1 text-slate-600">지금 조건에서 걸리는 점이 없어요.</p>
+            </div>
           )}
         </div>
 
-        {/* 부족한 조건 / 필요한 자격 */}
-        {(rec.missingConditions.length > 0 || rec.requiredQualifications.length > 0) && (
+        {/*
+          자격 요건.
+          이전에는 "필요한 자격 · 부족한 조건" 한 줄에 요건과 미충족을 섞어 넣어서,
+          이미 보유한 자격도 부족한 것처럼 읽혔다. 보유/필요를 갈라 표시한다.
+        */}
+        {rec.requiredQualifications.length > 0 && (
           <div className="mt-3 rounded-lg bg-slate-50 p-4">
             <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
-              <ListChecks className="size-4 text-slate-500" /> 필요한 자격 · 부족한 조건
+              <ListChecks className="size-4 text-slate-500" /> 자격 요건
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
-              {rec.requiredQualifications.map((q) => (
-                <span key={q} className="rounded-full bg-white px-3 py-1 text-label-1 text-slate-600">
-                  {q}
-                </span>
-              ))}
-              {rec.missingConditions
-                .filter((c) => !rec.requiredQualifications.includes(c))
-                .map((c) => (
-                  <span key={c} className="rounded-full bg-orange-50 px-3 py-1 text-label-1 text-orange-700">
-                    {c}
+              {rec.requiredQualifications.map((q) => {
+                const missing = rec.missingConditions.includes(q);
+                return (
+                  <span
+                    key={q}
+                    className={cn(
+                      "inline-flex items-center gap-1 rounded-full px-3 py-1 text-label-1",
+                      missing ? "bg-orange-50 text-orange-700" : "bg-emerald-50 text-emerald-700",
+                    )}
+                  >
+                    {missing ? <AlertTriangle className="size-3.5" /> : <CheckCircle2 className="size-3.5" />}
+                    {q}
+                    <span className="text-label-2 opacity-70">{missing ? "필요" : "보유"}</span>
                   </span>
-                ))}
+                );
+              })}
             </div>
           </div>
         )}

@@ -36,7 +36,7 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
         {result.generatedTags.length > 0 && (
           <div className="mt-5 flex flex-wrap gap-2">
             {result.generatedTags.map((tag) => (
-              <span key={tag} className="rounded-full bg-white px-3 py-1 text-label-1 font-medium text-brand-blue-600">
+              <span key={tag} className="rounded-full bg-white px-3 py-1 text-label-1 font-medium text-slate-700">
                 {tag}
               </span>
             ))}
