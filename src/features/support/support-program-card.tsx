@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { interactiveCardClass } from "@/lib/ui-classes";
+import { SupportBookmarkButton } from "./support-bookmark-button";
 import { REGION_LABELS } from "@/lib/labels";
 import type { MatchReasonDetail, SupportEligibilityGrade, SupportProgram } from "@/types";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
@@ -31,15 +32,21 @@ export function SupportProgramCard({
   grade,
   score,
   reasons,
+  isAuthenticated = false,
+  isBookmarked = false,
 }: {
   program: SupportProgram;
   grade?: SupportEligibilityGrade;
   score?: number;
   reasons?: MatchReasonDetail[];
+  isAuthenticated?: boolean;
+  isBookmarked?: boolean;
 }) {
   const topReason = reasons?.[0]?.label;
 
   return (
+    // 찜 버튼은 카드 Link 안에 넣을 수 없어(버튼 중첩) 형제로 두고 위에 겹친다. 공고 카드와 같다.
+    <div className="relative h-full">
     <Link
       href={`/support/${program.id}`}
       /*
@@ -51,7 +58,11 @@ export function SupportProgramCard({
         interactiveCardClass,
       )}
     >
-      <div className="flex items-center justify-between gap-2 px-5 pt-5">
+      {/*
+        오른쪽 끝은 겹쳐 놓은 찜 버튼 자리다. pr-14 로 비워 두지 않으면 적합등급 배지가
+        버튼 밑으로 들어간다. 기관 로고 - 등급 배지 - (빈자리) 순으로 선다.
+      */}
+      <div className="flex items-center justify-between gap-2 px-5 pt-5 pr-14">
         {(() => {
           const orgName = program.organizationName ?? program.organization;
           const logo = ORG_LOGO[orgName];
@@ -92,5 +103,13 @@ export function SupportProgramCard({
         <span>{program.applicationPeriod ?? "상시"}</span>
       </div>
     </Link>
+
+    <SupportBookmarkButton
+      supportProgramId={program.id}
+      isAuthenticated={isAuthenticated}
+      initialBookmarked={isBookmarked}
+      className="absolute right-3.5 top-3.5"
+    />
+    </div>
   );
 }

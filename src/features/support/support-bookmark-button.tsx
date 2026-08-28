@@ -21,11 +21,14 @@ import { toggleSupportBookmarkAction, trackAnonymousSupportBookmarkAction } from
 export function SupportBookmarkButton({
   supportProgramId,
   variant = "icon",
+  className,
   isAuthenticated = false,
   initialBookmarked = false,
 }: {
   supportProgramId: string;
   variant?: "icon" | "full";
+  /** 카드가 통째로 Link일 때 버튼을 겹쳐 놓기 위한 위치 지정용. */
+  className?: string;
   isAuthenticated?: boolean;
   initialBookmarked?: boolean;
 }) {
@@ -88,6 +91,7 @@ export function SupportBookmarkButton({
         bookmarked
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-600"
           : "border-border bg-white text-slate-400",
+        className,
       )}
     >
       <Bookmark className={cn("size-4", bookmarked && "fill-current")} />

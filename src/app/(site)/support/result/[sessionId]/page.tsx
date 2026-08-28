@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { SupportMatchViewTracker } from "@/features/support/support-match-view-tracker";
 import { SupportResultSections } from "@/features/support/support-card-grid";
 import { getSupportResultView } from "@/services/support-search.service";
+import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 
 export const metadata: Metadata = {
   title: "지원금 진단 결과 | 한평생 바로취업",
@@ -18,7 +19,10 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
   const { sessionId } = await params;
   // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
   const user = await requireUser(`/support/result/${sessionId}`);
-  const view = await getSupportResultView(sessionId);
+  const [view, bookmarkedIds] = await Promise.all([
+    getSupportResultView(sessionId),
+    getUserSupportBookmarkIdsAction(),
+  ]);
   if (!view) notFound();
   const likelyCount = view.gradeCounts.HIGH + view.gradeCounts.MEDIUM;
   const displayName = user.name ? `${user.name}님` : "회원님";
@@ -66,6 +70,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
         <SupportResultSections
           categories={view.categories}
           gradeCounts={view.gradeCounts}
+          bookmarkedIds={bookmarkedIds}
         />
       )}
     </div>

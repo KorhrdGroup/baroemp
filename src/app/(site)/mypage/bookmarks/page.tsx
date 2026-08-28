@@ -92,7 +92,7 @@ export default async function BookmarksPage() {
         ) : (
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {bookmarkedPrograms.map((program) => (
-              <SupportProgramCard key={program.id} program={program} />
+              <SupportProgramCard key={program.id} program={program} isAuthenticated isBookmarked />
             ))}
           </div>
         )}
