@@ -28,8 +28,9 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
   if (required.length > 0) {
     // 모름(UNKNOWN)은 부족으로 세지 않는다. 회원이 자격을 안 적었을 뿐인데
     // "부족"을 붙이면 지원할 수 있는 자리를 단념시킨다.
-    return required.some((i) => i.userStatus === "SATISFIED")
-      ? { level: "satisfied", label: "보유 자격 충족" }
+    const met = required.find((i) => i.userStatus === "SATISFIED");
+    return met
+      ? { level: "satisfied", label: `${met.requirementName} 충족` }
       : { level: "near", label: `${required[0].requirementName} 필요` };
   }
 
@@ -49,7 +50,11 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
 /**
  * 색이 곧 뜻이다.
  *   무채색  할 일 없음      자격 요건 없음
- *   초록    갖춤            보유 자격 충족 · ○○ 우대 충족
+ *   초록    갖춤            ○○ 충족 · ○○ 우대 충족
+ *
+ * 필수와 우대는 색이 아니라 문구로 가른다("요양보호사 자격 충족" vs
+ * "운전 가능 우대 충족"). 갖췄다는 사실은 같으므로 색을 나누면
+ * 초록이 두 가지가 되어 오히려 읽기 어렵다.
  *   파랑    있으면 유리      ○○ 우대
  *   주황    지원을 막음      ○○ 필요 · 자격 N개 필요
  */
