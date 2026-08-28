@@ -172,6 +172,8 @@ export function OccupationRecommendationCard({
 
           없는 자격이라도 우대는 필수와 무게가 다르다.
           둘 다 주황 "필요"로 칠하면 자격 없이도 지원 가능한 직업이 막힌 것처럼 보인다.
+          우대는 파랑으로 둔다. 회색은 배경인 slate-50에 묻혀 없는 칩처럼 읽혔고,
+          막는 조건(주황)이 아니라 갖추면 유리한 것이라는 신호를 따로 줘야 한다.
         */}
         {rec.requiredQualifications.length > 0 && (
           <div className="mt-3 rounded-lg bg-slate-50 p-4">
@@ -190,7 +192,7 @@ export function OccupationRecommendationCard({
                       !missing
                         ? "bg-emerald-50 text-emerald-700"
                         : preferred
-                          ? "bg-slate-100 text-slate-600"
+                          ? "bg-brand-blue-50 text-brand-blue-700"
                           : "bg-orange-50 text-orange-700",
                     )}
                   >
