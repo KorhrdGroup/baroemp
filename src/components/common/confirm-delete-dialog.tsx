@@ -42,15 +42,24 @@ export function ConfirmDeleteDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={pending}>
+        {/*
+          공용 DialogFooter 의 회색 띠(bg-muted/50 + 위 테두리)를 걷어낸다.
+          묻는 말 한 줄과 버튼 둘뿐인 창이라 영역을 나눌 것이 없다.
+        */}
+        <DialogFooter className="mx-0 mb-0 border-t-0 bg-transparent p-0 pt-2">
+          {/* 두 버튼은 크기·모양을 맞추고 색으로만 무게를 가른다. */}
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={pending}
+            className="min-w-24"
+          >
             취소
           </Button>
           <Button
-            variant="destructive"
             onClick={onConfirm}
             disabled={pending}
-            className="min-w-20"
+            className="min-w-24 bg-destructive text-white hover:bg-destructive/90 active:bg-destructive/80"
           >
             {pending ? <Loader2 className="animate-spin" /> : confirmLabel}
           </Button>
