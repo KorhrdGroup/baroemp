@@ -22,6 +22,7 @@ function createMockCoverLetterRepository(): CoverLetterRepository {
         targetJobId: input.targetJobId,
         targetOccupationId: input.targetOccupationId,
         templateId: input.templateId,
+        experienceBankIds: input.experienceBankIds ?? [],
         status: input.status ?? "draft",
         version: input.version ?? 1,
         createdAt: now,

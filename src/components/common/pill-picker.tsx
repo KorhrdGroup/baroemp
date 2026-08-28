@@ -21,6 +21,7 @@ export function PillPicker({
   value,
   onChange,
   pending,
+  action,
 }: {
   label: string;
   icon?: React.ReactNode;
@@ -28,18 +29,33 @@ export function PillPicker({
   value?: string;
   onChange: (id: string) => void;
   pending?: boolean;
+  /** 카드 오른쪽 끝에 함께 놓을 버튼. 고른 값에 딸린 행동을 같은 상자 안에 둔다. */
+  action?: React.ReactNode;
 }) {
   if (options.length === 0) return null;
 
   const current = options.find((o) => o.id === value) ?? options[0];
 
   return (
+    /*
+      바탕은 아래 카드들과 같은 흰색으로 둔다. 연한 파랑도 대봤는데,
+      페이지 바탕이 회색이라 회색-파랑-흰색 세 면이 겹쳐 오히려 어수선했다.
+      설정과 문서는 색이 아니라 순서(맨 위)와 제목으로 갈린다.
+
+      세 층으로 쌓는다: 무엇을 고르는지(제목 + 딸린 버튼) -> 선택지 -> 고른 것의 설명.
+      한 줄에 제목과 알약을 섞으면 어디까지가 제목인지 흐리고,
+      설명만 아래 왼쪽에 남아 버튼과 따로 놀았다.
+    */
     <div className="rounded-xl bg-white px-4 py-3">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="mr-1 flex shrink-0 items-center gap-1.5 text-label-1 font-semibold text-slate-500">
+      <div className="flex items-center justify-between gap-3">
+        <span className="flex shrink-0 items-center gap-1.5 text-label-1 font-semibold text-slate-500">
           {icon}
           {label}
         </span>
+        {action}
+      </div>
+
+      <div className="mt-2.5 flex flex-wrap items-center gap-2">
         {options.map((option) => {
           const selected = option.id === current.id;
           return (
@@ -62,8 +78,9 @@ export function PillPicker({
         })}
         {pending && <Loader2 className="size-4 animate-spin text-slate-400" />}
       </div>
+
       {current.description && (
-        <p className="mt-1.5 text-label-2 text-slate-400">{current.description}</p>
+        <p className="mt-2 text-label-2 text-slate-400">{current.description}</p>
       )}
     </div>
   );

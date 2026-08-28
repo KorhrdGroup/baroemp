@@ -52,6 +52,12 @@ export interface CoverLetter {
   targetOccupationId?: string;
   title: string;
   templateId?: string;
+  /**
+   * 작성 시작 단계에서 고른 경험뱅크 항목 id.
+   * 편집 화면에서 문항마다 AI 초안 재료로 올려둘 후보를 이 목록으로 좁힌다.
+   * 경험뱅크에서 지워진 id가 남아있을 수 있으므로 읽는 쪽에서 추려 쓴다.
+   */
+  experienceBankIds: string[];
   status: CoverLetterStatus;
   version: number;
   createdAt: ISODateString;

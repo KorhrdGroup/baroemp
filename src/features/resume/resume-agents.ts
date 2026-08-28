@@ -1,8 +1,3 @@
-"use client";
-
-import { Bot } from "lucide-react";
-import { PillPicker } from "@/components/common/pill-picker";
-
 export interface ResumeAgentOption {
   id: string;
   /** ResumeTemplate.code — 에이전트 프리셋 매칭 키. 관리자가 새 양식을 추가하면 없을 수 있다. */
@@ -35,34 +30,12 @@ const AGENT_PRESETS: Record<string, { name: string; tagline: string }> = {
   },
 };
 
-export function ResumeAgentPicker({
-  agents,
-  value,
-  onChange,
-  pending,
-}: {
-  agents: ResumeAgentOption[];
-  value?: string;
-  onChange: (templateId: string) => void;
-  pending?: boolean;
-}) {
-  const options = agents.map((agent) => {
-    const preset = agent.code ? AGENT_PRESETS[agent.code] : undefined;
-    return {
-      id: agent.id,
-      name: preset?.name ?? agent.name,
-      description: preset?.tagline ?? agent.description,
-    };
-  });
-
-  return (
-    <PillPicker
-      label="AI 에이전트"
-      icon={<Bot className="size-4 text-brand-blue-600" />}
-      options={options}
-      value={value}
-      onChange={onChange}
-      pending={pending}
-    />
-  );
+/** 화면에 보여줄 에이전트 이름과 설명. 양식 이름("한평생 표준 이력서")을 그대로 쓰지 않는다. */
+export function resolveResumeAgent(agent: ResumeAgentOption): { id: string; name: string; description?: string } {
+  const preset = agent.code ? AGENT_PRESETS[agent.code] : undefined;
+  return {
+    id: agent.id,
+    name: preset?.name ?? agent.name,
+    description: preset?.tagline ?? agent.description,
+  };
 }

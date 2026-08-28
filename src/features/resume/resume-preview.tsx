@@ -17,7 +17,7 @@ const DEFAULT_SECTION_ORDER: ResumeSectionCode[] = [
   "ACTIVITY",
 ];
 
-/** 입사/퇴사/입학/졸업은 연월까지만 받으므로 기간도 YYYY.MM으로 보여준다. */
+/** 날짜는 문서 전체에서 YYYY.MM 으로 통일한다. 취득일에 일자까지는 필요 없다. */
 function formatMonth(value?: string): string {
   return value ? value.slice(0, 7).replace("-", ".") : "";
 }
@@ -29,9 +29,22 @@ function formatPeriod(start?: string, end?: string, isCurrent?: boolean): string
   return [s, e].filter(Boolean).join(" ~ ");
 }
 
+/*
+  인쇄용 문서의 글자 체계는 두 단만 쓴다.
+
+    이름          title-2  굵게      (24px)
+    섹션 제목      body-2   굵게      (16px, 한 문서에서 이 크기는 섹션 제목뿐)
+    항목 제목      label-1  semibold  (14px, 회사명 등)
+    본문·보조      label-1  기본      (14px, 담당업무·요약·자격명, 기간은 흐리게)
+
+  인쇄물이라 화면 목록보다 한 단계 크게 잡는다. 두 장이 되어도 읽히는 쪽이 낫다.
+
+  전에는 요약과 회사명만 label-1 이라 본문끼리 크기가 갈리고
+  회사명이 섹션 제목과 같은 크기여서 무엇이 상위인지 읽히지 않았다.
+*/
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="mb-2 border-b-2 border-slate-800 pb-1 text-label-1 font-bold tracking-wide text-slate-900">
+    <h2 className="mb-3 border-b border-slate-300 pb-1.5 text-body-2 font-bold tracking-wide text-slate-900">
       {children}
     </h2>
   );
@@ -39,7 +52,15 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 
 export function ResumePreview({ detail }: { detail: ResumeDetail }) {
   const { resume, educations, experiences, qualifications, trainings, skills, items } = detail;
-  const sectionOrder = detail.template?.sections?.length ? detail.template.sections : DEFAULT_SECTION_ORDER;
+  /*
+    문서에 싣는 항목은 편집 화면이 보여주는 항목과 같아야 한다. 여기서 따로 정하면
+    "뺐는데 인쇄물에는 나온다"가 된다. 고른 항목도 양식도 없을 때만 기본 순서를 쓴다.
+  */
+  const sectionOrder = detail.resume.sectionCodes?.length
+    ? detail.resume.sectionCodes
+    : detail.template?.sections?.length
+      ? detail.template.sections
+      : DEFAULT_SECTION_ORDER;
 
   const awards = items.filter((i) => i.sectionType === "AWARD");
   const projects = items.filter((i) => i.sectionType === "PROJECT");
@@ -50,11 +71,11 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
     switch (section) {
       case "BASIC_INFO":
         return (
-          <div key={section} className="mb-5 border-b border-slate-300 pb-4">
+          <div key={section} className="mb-8 border-b border-slate-300 pb-5">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-title-3 font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
-                <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-label-2 text-slate-600">
+                <p className="text-title-2 font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
+                <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-label-1 text-slate-600">
                   <div>
                     <dt className="inline text-slate-400">이메일 </dt>
                     <dd className="inline">{resume.email || "-"}</dd>
@@ -83,17 +104,17 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "SUMMARY":
         if (!resume.summary) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>핵심 경력 / 한 줄 소개</SectionTitle>
-            <p className="text-label-1 text-slate-700">{resume.summary}</p>
+            <p className="text-label-1 leading-relaxed text-slate-700">{resume.summary}</p>
           </div>
         );
       case "EXPERIENCE":
         if (experiences.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>경력</SectionTitle>
-            <div className="space-y-3">
+            <div className="space-y-4">
               {experiences.map((exp) => (
                 <div key={exp.id}>
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -102,13 +123,13 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
                       {exp.position ? ` · ${exp.position}` : ""}
                       {exp.jobTitle ? ` (${exp.jobTitle})` : ""}
                     </p>
-                    <p className="text-label-2 text-slate-500">{formatPeriod(exp.startDate, exp.endDate, exp.isCurrent)}</p>
+                    <p className="text-label-1 text-slate-500">{formatPeriod(exp.startDate, exp.endDate, exp.isCurrent)}</p>
                   </div>
                   {exp.responsibilities && (
-                    <p className="mt-0.5 text-label-2 text-slate-700">담당업무: {exp.responsibilities}</p>
+                    <p className="mt-1 text-label-1 leading-relaxed text-slate-700">담당업무: {exp.responsibilities}</p>
                   )}
                   {exp.achievements && (
-                    <p className="mt-0.5 text-label-2 text-slate-700">주요성과: {exp.achievements}</p>
+                    <p className="mt-1 text-label-1 leading-relaxed text-slate-700">주요성과: {exp.achievements}</p>
                   )}
                 </div>
               ))}
@@ -118,11 +139,11 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "EDUCATION":
         if (educations.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>학력</SectionTitle>
-            <div className="space-y-1.5">
+            <div className="space-y-4">
               {educations.map((edu) => (
-                <div key={edu.id} className="flex flex-wrap items-baseline justify-between gap-2 text-label-2">
+                <div key={edu.id} className="flex flex-wrap items-baseline justify-between gap-2 text-label-1">
                   <p className="text-slate-800">
                     {/* 검정고시처럼 학교명이 없는 학력은 학교구분으로 표시한다. */}
                     {edu.schoolName || edu.educationType || ""}
@@ -142,16 +163,16 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "QUALIFICATION":
         if (qualifications.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>보유 자격</SectionTitle>
-            <div className="space-y-1 text-label-2 text-slate-800">
+            <div className="space-y-2 text-label-1 text-slate-800">
               {qualifications.map((q) => (
                 <div key={q.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
                     {q.name}
                     {q.issuer ? ` (${q.issuer})` : ""}
                   </span>
-                  <span className="text-slate-500">{q.acquiredAt ?? ""}</span>
+                  <span className="text-slate-500">{formatMonth(q.acquiredAt)}</span>
                 </div>
               ))}
             </div>
@@ -160,9 +181,9 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "TRAINING":
         if (trainings.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>교육/훈련</SectionTitle>
-            <div className="space-y-1 text-label-2 text-slate-800">
+            <div className="space-y-2 text-label-1 text-slate-800">
               {trainings.map((t) => (
                 <div key={t.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
@@ -178,17 +199,17 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "SKILLS":
         if (skills.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>보유 스킬</SectionTitle>
-            <p className="text-label-2 text-slate-800">{skills.map((s) => s.name).join(" · ")}</p>
+            <p className="text-label-1 text-slate-800">{skills.map((s) => s.name).join(" · ")}</p>
           </div>
         );
       case "PROJECT":
         if (projects.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>프로젝트</SectionTitle>
-            <div className="space-y-1.5 text-label-2 text-slate-800">
+            <div className="space-y-2.5 text-label-1 text-slate-800">
               {projects.map((p) => (
                 <div key={p.id}>
                   <p className="font-medium">
@@ -204,9 +225,9 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "ACTIVITY":
         if (activities.length === 0 && awards.length === 0 && languages.length === 0) return null;
         return (
-          <div key={section} className="mb-5">
+          <div key={section} className="mb-8">
             <SectionTitle>대외활동 / 수상 / 외국어</SectionTitle>
-            <div className="space-y-1 text-label-2 text-slate-800">
+            <div className="space-y-2 text-label-1 text-slate-800">
               {[...activities, ...awards, ...languages].map((item) => (
                 <div key={item.id} className="flex flex-wrap items-baseline justify-between gap-2">
                   <span>
@@ -225,10 +246,10 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
   }
 
   return (
-    <div id="resume-print-area" className="mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-0">
+    <div id="resume-print-area" className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-0">
       {sectionOrder.map((section) => renderSection(section))}
       {resume.portfolioUrl && (
-        <p className="mt-4 text-label-2 text-slate-400">포트폴리오: {resume.portfolioUrl}</p>
+        <p className="mt-4 text-label-1 text-slate-400">포트폴리오: {resume.portfolioUrl}</p>
       )}
     </div>
   );

@@ -16,6 +16,7 @@ function mapRow(row: Record<string, unknown>): Resume {
     desiredJobTitle: (row.desired_job_title as string | null) ?? undefined,
     desiredRegion: (row.desired_region as string | null) ?? undefined,
     status: (row.status as Resume["status"]) ?? "draft",
+    sectionCodes: Array.isArray(row.section_codes) ? (row.section_codes as string[]) : [],
     isPrimary: Boolean(row.is_primary),
     version: Number(row.version ?? 1),
     completeness: Number(row.completeness ?? 0),
@@ -25,6 +26,7 @@ function mapRow(row: Record<string, unknown>): Resume {
     address: (row.address as string | null) ?? undefined,
     photoUrl: (row.photo_url as string | null) ?? undefined,
     portfolioUrl: (row.portfolio_url as string | null) ?? undefined,
+    hasNoWorkExperience: Boolean(row.has_no_work_experience),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };
@@ -40,6 +42,7 @@ function toRow(input: Partial<ResumeInput>): Record<string, unknown> {
   if (input.desiredJobTitle !== undefined) row.desired_job_title = input.desiredJobTitle;
   if (input.desiredRegion !== undefined) row.desired_region = input.desiredRegion;
   if (input.status !== undefined) row.status = input.status;
+  if (input.sectionCodes !== undefined) row.section_codes = input.sectionCodes;
   if (input.isPrimary !== undefined) row.is_primary = input.isPrimary;
   if (input.version !== undefined) row.version = input.version;
   if (input.name !== undefined) row.name = input.name;
@@ -48,6 +51,7 @@ function toRow(input: Partial<ResumeInput>): Record<string, unknown> {
   if (input.address !== undefined) row.address = input.address;
   if (input.photoUrl !== undefined) row.photo_url = input.photoUrl;
   if (input.portfolioUrl !== undefined) row.portfolio_url = input.portfolioUrl;
+  if (input.hasNoWorkExperience !== undefined) row.has_no_work_experience = input.hasNoWorkExperience;
   if (input.completeness !== undefined) row.completeness = input.completeness;
   return row;
 }

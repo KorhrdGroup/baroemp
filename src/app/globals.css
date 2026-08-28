@@ -304,20 +304,20 @@
 }
 
 /*
- * STEP 7: 이력서 PDF Export.
+ * STEP 7: 이력서·자기소개서 PDF Export.
  * 별도 PDF 생성 라이브러리(한글 폰트 임베딩 문제)를 쓰지 않고, 브라우저 인쇄(Ctrl+P → PDF로 저장)를
  * A4 규격에 맞춰 그대로 활용한다. 인쇄 시에는 이 페이지 외의 모든 UI(헤더/버튼/폼)를 숨기고
- * #resume-print-area만 출력한다.
+ * .print-document 만 출력한다. 문서가 둘 이상이라 id 가 아니라 클래스로 잡는다.
  */
 @media print {
   body * {
     visibility: hidden;
   }
-  #resume-print-area,
-  #resume-print-area * {
+  .print-document,
+  .print-document * {
     visibility: visible;
   }
-  #resume-print-area {
+  .print-document {
     position: absolute;
     inset: 0;
     width: 210mm;

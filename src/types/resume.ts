@@ -45,6 +45,11 @@ export interface Resume {
   id: string;
   userId: string;
   templateId?: string;
+  /**
+   * 이 이력서에 담을 항목. 비어 있으면 양식(template.sections)을 따른다.
+   * 화면에 무엇을 보여줄지와 완성도에 무엇을 셀지를 같은 값으로 정한다.
+   */
+  sectionCodes: ResumeSectionCode[];
   title: string;
   targetJobId?: string;
   targetOccupationId?: string;
@@ -52,6 +57,11 @@ export interface Resume {
   desiredJobTitle?: string;
   desiredRegion?: string;
   status: ResumeStatus;
+  /**
+   * 경력이 아예 없다고 밝힌 이력서. 빈 것과 없다고 밝힌 것은 다르다.
+   * 완성도는 이 값이 true 면 경력 항목을 채운 것으로 센다.
+   */
+  hasNoWorkExperience?: boolean;
   isPrimary: boolean;
   version: number;
   completeness: number;

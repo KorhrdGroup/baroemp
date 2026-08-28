@@ -4,8 +4,16 @@ import { interactiveCardClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import { FileText, Pencil, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
-import { listResumesForUser } from "@/services/resume.service";
-import { listCoverLettersForUser } from "@/services/cover-letter.service";
+import {
+  listResumesForUser,
+  MAX_RESUMES_PER_USER,
+  RESUME_LIMIT_MESSAGE,
+} from "@/services/resume.service";
+import {
+  COVER_LETTER_LIMIT_MESSAGE,
+  listCoverLettersForUser,
+  MAX_COVER_LETTERS_PER_USER,
+} from "@/services/cover-letter.service";
 import { listExperienceBankForUser } from "@/services/experience-bank.service";
 import { ExperienceBankSection } from "@/features/experience-bank/experience-bank-section";
 import { ResumeDeleteButton } from "@/features/resume/resume-delete-button";
@@ -54,8 +62,15 @@ export default async function ResumeListPage() {
     listExperienceBankForUser(user.id),
   ]);
 
+  /*
+    상한에 닿으면 만들기 버튼을 잠근다. 눌러서 세 단계를 다 거친 뒤 마지막에 막히면
+    그때까지 고른 것이 다 사라진다. 들어가기 전에 알려준다.
+  */
+  const resumeAtLimit = resumes.length >= MAX_RESUMES_PER_USER;
+  const coverLetterAtLimit = coverLetters.length >= MAX_COVER_LETTERS_PER_USER;
+
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">이력서 · 자기소개서</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">취업에 바로 사용할 이력서를 만들어보세요.</h1>
@@ -68,12 +83,19 @@ export default async function ResumeListPage() {
         <SectionHeader
           title="내 이력서"
           count={resumes.length}
+          description={resumeAtLimit ? RESUME_LIMIT_MESSAGE : undefined}
           action={
-            <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-              <Link href="/resume/new">
+            resumeAtLimit ? (
+              <Button disabled>
                 <Plus className="size-4" /> 새 이력서 만들기
-              </Link>
-            </Button>
+              </Button>
+            ) : (
+              <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                <Link href="/resume/new">
+                  <Plus className="size-4" /> 새 이력서 만들기
+                </Link>
+              </Button>
+            )
           }
         />
         {resumes.length === 0 ? (
@@ -121,17 +143,28 @@ export default async function ResumeListPage() {
         )}
       </div>
 
-      <div className="mt-10">
+      {/* 이력서와 자기소개서는 별개의 묶음이라 섹션 사이를 넉넉히 띄운다. */}
+      <div className="mt-16">
         <SectionHeader
           title="내 자기소개서"
           count={coverLetters.length}
-          description="아래 경험뱅크에 정리해둔 경험을 문항마다 골라 넣어 작성할 수 있어요."
+          description={
+            coverLetterAtLimit
+              ? COVER_LETTER_LIMIT_MESSAGE
+              : "아래 경험뱅크에 정리해둔 경험을 문항마다 골라 넣어 작성할 수 있어요."
+          }
           action={
-            <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-              <Link href="/cover-letter/new">
+            coverLetterAtLimit ? (
+              <Button disabled>
                 <Plus className="size-4" /> 새 자기소개서 만들기
-              </Link>
-            </Button>
+              </Button>
+            ) : (
+              <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                <Link href="/cover-letter/new">
+                  <Plus className="size-4" /> 새 자기소개서 만들기
+                </Link>
+              </Button>
+            )
           }
         />
         {coverLetters.length === 0 ? (
