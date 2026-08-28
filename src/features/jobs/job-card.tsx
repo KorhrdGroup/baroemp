@@ -74,10 +74,10 @@ export function JobCard({
       >
         {/*
           지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
-          min-h-9 는 찜 버튼(size-9)의 높이를 이 줄이 대신 차지하게 한다.
-          이게 없으면 겹쳐 둔 버튼의 아래끝이 제목 첫 줄에 그대로 닿는다.
+          높이를 늘려 잡지 않는다. 찜 버튼은 top-3 에 놓여 이 줄과 가운데가 맞고,
+          아래끝(48px)도 제목이 시작하는 56px 보다 위라 겹치지 않는다.
         */}
-        <div className="flex min-h-9 items-center justify-between gap-2 pr-10">
+        <div className="flex items-center justify-between gap-2 pr-10">
           <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
           {typeof matchScore === "number" && matchScore >= MATCH_SCORE_VISIBLE_MIN && (
             <span className="shrink-0 rounded-full bg-brand-blue-50 px-3 py-1.5 text-label-1 font-bold text-brand-blue-700">
