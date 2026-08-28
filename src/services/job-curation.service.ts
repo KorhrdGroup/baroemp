@@ -26,11 +26,11 @@ export async function getJobCuration(userId: string, tab: JobCurationTab): Promi
       case "closing_soon":
         return { tab, ...(await getCommonTab("closing_soon")) };
       case "matched":
-        return { tab, ...(await getMatchedTab(userId)) };
+        return { tab, ...(await getMatchedTab(await loadPersonalContext(userId))) };
       case "ready_to_apply":
-        return { tab, ...(await getReadyToApplyTab(userId)) };
+        return { tab, ...(await getReadyToApplyTab(userId, await loadPersonalContext(userId))) };
       case "unlockable":
-        return { tab, ...(await getUnlockableTab(userId)) };
+        return { tab, ...(await getUnlockableTab(userId, await loadPersonalContext(userId))) };
       default:
         return { tab, state: "EMPTY", items: [] };
     }
@@ -44,6 +44,36 @@ export async function getJobCuration(userId: string, tab: JobCurationTab): Promi
  * 개인화 탭 공용 후보군: 희망 직종코드별 최신 공고 + 희망 지역 최신 공고를 합쳐
  * 최신순 상한 limit건. 6만+건 전체 스캔을 막는 성능 경계다.
  */
+/**
+ * 다섯 탭을 한 번에 계산한다.
+ *
+ * 탭마다 따로 부르면 개인화 탭 세 개가 프로필·후보군 조회를 각각 되풀이한다.
+ * 여기서는 컨텍스트를 한 벌만 만들어 넘기므로, 다섯 탭 전부를 받아도
+ * 조회량은 개인화 탭 하나를 부를 때와 같다.
+ */
+export async function getAllJobCurations(userId: string): Promise<JobCurationResult[]> {
+  try {
+    const ctx = await loadPersonalContext(userId);
+    const [newTab, closingSoon, matched, readyToApply, unlockable] = await Promise.all([
+      getCommonTab("new"),
+      getCommonTab("closing_soon"),
+      getMatchedTab(ctx),
+      getReadyToApplyTab(userId, ctx),
+      getUnlockableTab(userId, ctx),
+    ]);
+    return [
+      { tab: "new", ...newTab },
+      { tab: "closing_soon", ...closingSoon },
+      { tab: "matched", ...matched },
+      { tab: "ready_to_apply", ...readyToApply },
+      { tab: "unlockable", ...unlockable },
+    ];
+  } catch (error) {
+    console.error("[job-curation] 전체 탭 계산 실패", error);
+    return [];
+  }
+}
+
 export async function getCandidateJobsForUser(userId: string, limit = CANDIDATE_LIMIT): Promise<Job[]> {
   const profile = await findCareerProfileByUserId(userId);
   if (!profile) return [];
@@ -98,22 +128,34 @@ async function getCommonTab(kind: "new" | "closing_soon"): Promise<{ state: "REA
   return { state: items.length > 0 ? "READY" : "EMPTY", items };
 }
 
-async function getMatchedTab(userId: string) {
+
+/**
+ * 개인화 탭(맞춤 추천·지금 지원가능·자격 따면 열리는) 공통 재료.
+ *
+ * 세 탭이 저마다 프로필과 후보군 500건을 다시 불러오면 같은 조회가 세 번 돈다.
+ * 한 번 만들어 돌려쓰면 세 탭을 한 요청에 계산해도 조회는 한 벌로 끝난다.
+ * 희망 직종·지역이 없어 개인화가 불가능하면 null.
+ */
+async function loadPersonalContext(
+  userId: string,
+): Promise<{ profile: CareerProfile; scored: JobCurationItem[] } | null> {
   const profile = await findCareerProfileByUserId(userId);
-  if (!profile || ((profile.desiredJobCategories ?? []).length === 0 && !profile.region)) {
-    return { state: "NEEDS_PROFILE" as const, items: [] };
-  }
-  const items = scoreCandidates(profile, await getCandidateJobsForUser(userId)).slice(0, TAB_LIMIT);
+  if (!profile || ((profile.desiredJobCategories ?? []).length === 0 && !profile.region)) return null;
+  return { profile, scored: scoreCandidates(profile, await getCandidateJobsForUser(userId)) };
+}
+
+type PersonalContext = Awaited<ReturnType<typeof loadPersonalContext>>;
+
+async function getMatchedTab(ctx: PersonalContext) {
+  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
+  const items = ctx.scored.slice(0, TAB_LIMIT);
   return { state: items.length > 0 ? ("READY" as const) : ("EMPTY" as const), items };
 }
 
-async function getReadyToApplyTab(userId: string) {
-  const profile = await findCareerProfileByUserId(userId);
-  if (!profile || ((profile.desiredJobCategories ?? []).length === 0 && !profile.region)) {
-    return { state: "NEEDS_PROFILE" as const, items: [] };
-  }
+async function getReadyToApplyTab(userId: string, ctx: PersonalContext) {
+  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
 
-  const top = scoreCandidates(profile, await getCandidateJobsForUser(userId)).slice(0, READY_CHECK_LIMIT);
+  const top = ctx.scored.slice(0, READY_CHECK_LIMIT);
 
   // requirements/사용자 상태맵을 1회만 로드하고 공고별로는 순수 함수만 반복하는 배치 경로 사용
   const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
@@ -136,13 +178,10 @@ async function getReadyToApplyTab(userId: string) {
  * (computeUserRequirementStatuses)와 공고 원문 요건만으로 판정한다.
  * 필수 요건 중 미충족이 "딱 하나"인 공고를 모아, 그 하나로 가장 많은 공고가 열리는 조건을 고른다.
  */
-async function getUnlockableTab(userId: string) {
-  const profile = await findCareerProfileByUserId(userId);
-  if (!profile || ((profile.desiredJobCategories ?? []).length === 0 && !profile.region)) {
-    return { state: "NEEDS_PROFILE" as const, items: [] };
-  }
+async function getUnlockableTab(userId: string, ctx: PersonalContext) {
+  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
 
-  const top = scoreCandidates(profile, await getCandidateJobsForUser(userId)).slice(0, READY_CHECK_LIMIT);
+  const top = ctx.scored.slice(0, READY_CHECK_LIMIT);
   const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
 
   // 조건별로 "이 하나만 채우면 지원 가능해지는" 공고를 모은다.
