@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, ChevronDown, FileText, ListChecks, MapPin, Plus, Sparkles } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, ListChecks, MapPin, Plus, Sparkles } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Occupation, OccupationRecommendation } from "@/types";
 import { cn } from "@/lib/utils";
@@ -246,14 +246,18 @@ export function OccupationRecommendationCard({
           </TrackedLink>
         </div>
 
-        {/* 이력서 준비 연결 (스펙 34번: 강제하지 않는 선택적 CTA) */}
+        {/*
+          이력서 준비 연결 (스펙 34번: 강제하지 않는 선택적 CTA).
+          홈의 "바로가기"와 같은 테두리 버튼을 쓴다. 파란 밑줄 링크로 두면
+          바로 위 "채용공고 보기"와 무게가 비슷해져 무엇이 주된 행동인지 흐려진다.
+        */}
         <div className="mt-3 flex flex-wrap justify-end gap-4">
           <Link
             href={`/resume/new?occupation=${rec.occupationId}&title=${encodeURIComponent(rec.occupationName)}`}
-            className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-600 hover:underline"
+            className="flex h-10 items-center gap-1 rounded-lg border border-border px-4 text-label-1 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
           >
-            <FileText className="size-4" />
             {rec.occupationName} 취업용 이력서 준비하기
+            <ChevronRight className="size-4" />
           </Link>
         </div>
       </div>
