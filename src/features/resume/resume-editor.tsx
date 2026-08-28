@@ -152,6 +152,7 @@ export function ResumeEditor({
     phone: resume.phone ?? "",
     address: resume.address ?? "",
     portfolioUrl: resume.portfolioUrl ?? "",
+    hasNoWorkExperience: resume.hasNoWorkExperience ?? false,
   });
   const [educations, setEducations] = useState<EditableEducation[]>(withKeys(initialDetail.educations, "edu"));
   const [experiences, setExperiences] = useState<EditableExperience[]>(withKeys(initialDetail.experiences, "exp"));
@@ -487,6 +488,7 @@ export function ResumeEditor({
                   variant="outline"
                   size="sm"
                   className="text-slate-700"
+                  disabled={Boolean(form.hasNoWorkExperience)}
                   onClick={() => {
                     const key = nextKey("exp");
                     setExperiences((prev) => [...prev, { _key: key, companyName: "", isCurrent: false, orderIndex: prev.length }]);
@@ -497,7 +499,33 @@ export function ResumeEditor({
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {experiences.length === 0 && <p className="text-label-1 text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>}
+                {/*
+                  경력이 아예 없는 회원(신입·경력단절)은 이 항목을 채울 방법이 없어
+                  완성도가 끝까지 오르지 않았다. "없다"고 밝히는 것도 답이므로
+                  체크하면 채운 것으로 센다.
+                */}
+                <label
+                  className={cn(
+                    "flex w-fit items-center gap-2 text-label-1",
+                    experiences.length > 0 ? "cursor-not-allowed text-slate-300" : "cursor-pointer text-slate-600",
+                  )}
+                >
+                  {/* 경력을 적어둔 채로 "없음"을 켜면 두 말이 어긋난다. 비었을 때만 켤 수 있다. */}
+                  <Checkbox
+                    checked={Boolean(form.hasNoWorkExperience)}
+                    disabled={experiences.length > 0}
+                    onCheckedChange={(v) => setForm((f) => ({ ...f, hasNoWorkExperience: v === true }))}
+                  />
+                  아직 경력이 없어요
+                </label>
+
+                {form.hasNoWorkExperience ? (
+                  <p className="text-label-1 text-slate-400">
+                    경력 없이도 지원할 수 있는 공고가 많습니다. 자격·교육·봉사 경험으로 채워보세요.
+                  </p>
+                ) : (
+                  experiences.length === 0 && <p className="text-label-1 text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>
+                )}
                 {experiences.map((exp, idx) => (
                   isEntryEditing(exp._key) ? (
                   <div key={exp._key} className="space-y-2 rounded-xl bg-slate-50 p-3">

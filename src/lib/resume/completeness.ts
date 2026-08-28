@@ -39,6 +39,9 @@ function isSectionFilled(section: ResumeSectionCode, detail: ResumeDetail): bool
     case "SUMMARY":
       return Boolean(resume.summary && resume.summary.trim().length >= 5);
     case "EXPERIENCE":
+      // 경력이 없다고 밝힌 것도 답을 한 것이다. 그렇지 않으면 경력이 없는
+      // 회원은 완성도를 끝까지 올릴 방법이 없다.
+      if (resume.hasNoWorkExperience) return true;
       return experiences.length > 0 && experiences.every((e) => Boolean(e.responsibilities && e.responsibilities.trim()));
     case "EDUCATION":
       return educations.length > 0;
