@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, FileText, Loader2, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, Eye, FileText, Loader2, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,8 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PillPicker } from "@/components/common/pill-picker";
+import { CoverLetterPreview } from "./cover-letter-preview";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AiButton } from "@/components/common/ai-button";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
@@ -68,6 +70,7 @@ export function CoverLetterEditor({
   const [isChangingTemplate, startTemplateChange] = useTransition();
   // 양식을 바꾸면 새 양식에 없는 문항의 답이 사라져 먼저 확인을 받는다.
   const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const marketComparisonRequestedRef = useRef(false);
 
@@ -200,6 +203,27 @@ export function CoverLetterEditor({
     }
   }
 
+
+  /** 저장 전 상태 그대로 보여준다. 저장해야만 미리보기가 맞는 건 불편하다. */
+  function currentPreviewDetail(): CoverLetterDetail {
+    return {
+      ...detail,
+      coverLetter: { ...detail.coverLetter, title },
+      sections: sections.map((sec, idx) => ({
+        ...sec,
+        id: sec._key,
+        coverLetterId: detail.coverLetter.id,
+        content: sec.content ?? "",
+        orderIndex: sec.orderIndex ?? idx,
+      })),
+    } as CoverLetterDetail;
+  }
+
+  /** 팝업 오버레이가 인쇄물에 끼지 않도록 닫힘 애니메이션이 끝난 뒤 인쇄한다. */
+  function handlePopupPrint() {
+    setPreviewOpen(false);
+    setTimeout(() => window.print(), 200);
+  }
 
   // 진행률은 답을 쓴 문항 수로 센다. 화면에서 바로 세어지는 값이라 설명이 필요 없다.
   const writtenCount = sections.filter((sec) => sec.content?.trim()).length;
@@ -417,6 +441,9 @@ export function CoverLetterEditor({
           <div className="flex shrink-0 items-center gap-2">
             {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
             {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
+            <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
+              <Eye className="size-4" /> 미리보기
+            </Button>
             <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
               {isSaving && <Loader2 className="size-4 animate-spin" />}
               저장
@@ -424,6 +451,23 @@ export function CoverLetterEditor({
           </div>
         </div>
       </div>
+
+      {/* 이력서와 같은 방식. 입력 폭을 좁히지 않도록 팝업으로 띄우고 인쇄로 PDF 저장한다. */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="print:hidden sm:max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>미리보기</DialogTitle>
+          </DialogHeader>
+          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border">
+            <CoverLetterPreview detail={currentPreviewDetail()} />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handlePopupPrint}>
+              <Printer className="size-4" /> PDF로 저장/인쇄
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <ConfirmDialog
         open={confirmingTemplateId !== null}
