@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { JobCurationResult, JobCurationTab } from "@/types";
 import { cn } from "@/lib/utils";
-import { filterPillClass, filterPillOffClass, filterPillOnClass } from "@/lib/ui-classes";
+import { filterPillClass, filterPillOffClass, filterPillOnSolidClass } from "@/lib/ui-classes";
 import { JobCard } from "./job-card";
 import {
   getJobCurationAction,
@@ -92,7 +92,7 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
             key={t.key}
             type="button"
             onClick={() => handleTab(t.key)}
-            className={cn(filterPillClass, activeTab === t.key ? filterPillOnClass : filterPillOffClass)}
+            className={cn(filterPillClass, activeTab === t.key ? filterPillOnSolidClass : filterPillOffClass)}
           >
             {t.label}
           </button>
@@ -131,7 +131,7 @@ export function JobCurationSection({ initialNew, heldQualifications, bookmarkedI
             return (
               <div
                 key={item.job.id}
-                className="w-72 shrink-0"
+                className="w-80 shrink-0"
                 onClickCapture={(e) => {
                   const t = e.target as HTMLElement;
                   if (t.closest("button")) return;
