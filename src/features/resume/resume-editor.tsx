@@ -888,12 +888,27 @@ export function ResumeEditor({
               <CardContent className="space-y-3">
                 {trainings.map((t, idx) => (
                   isEntryEditing(t._key) ? (
-                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_auto]">
+                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_auto_auto_auto]">
                     <Field label="과정명">
                       <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
                     </Field>
                     <Field label="교육기관">
                       <CompactInput value={t.institution ?? ""} onChange={(e) => updateAt(setTrainings, t._key, { institution: e.target.value })} />
+                    </Field>
+                    {/* 다른 항목과 같이 연월만 받는다. 수료 시기가 없으면 최근 교육인지 알 수 없다. */}
+                    <Field label="시작">
+                      <CompactInput
+                        type="month"
+                        value={toMonth(t.startDate)}
+                        onChange={(e) => updateAt(setTrainings, t._key, { startDate: toDbDate(e.target.value) })}
+                      />
+                    </Field>
+                    <Field label="수료">
+                      <CompactInput
+                        type="month"
+                        value={toMonth(t.endDate)}
+                        onChange={(e) => updateAt(setTrainings, t._key, { endDate: toDbDate(e.target.value) })}
+                      />
                     </Field>
                     <div className="flex items-end justify-end gap-1">
                       <Button variant="outline" size="sm" onClick={() => setEntryEditing(t._key, false)}>
@@ -909,6 +924,7 @@ export function ResumeEditor({
                     key={t._key}
                     title={t.courseName || "과정명 미입력"}
                     subtitle={t.institution || undefined}
+                    meta={periodLabel(t.startDate, t.endDate) || undefined}
                     editLabel={`교육 ${idx + 1} 수정`}
                     onEdit={() => setEntryEditing(t._key, true)}
                   />
@@ -1126,7 +1142,7 @@ function EntrySummaryCard({
       <div className="min-w-0 flex-1">
         {/* 짧은 정보는 세로로 쌓지 않고 한 줄에 나열한다. 기간·상태는 오른쪽 끝으로 보낸다. */}
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <p className="text-label-1 font-bold text-slate-900">{title}</p>
+          <p className="text-label-1 font-semibold text-slate-900">{title}</p>
           {subtitle && <p className="text-label-2 text-slate-600">{subtitle}</p>}
           {meta && <p className="ml-auto text-label-2 text-slate-400">{meta}</p>}
         </div>
