@@ -57,6 +57,33 @@ export function detectRequirementLevel(haystack: { full: string; structured: str
   return "MENTIONED";
 }
 
+
+/**
+ * 직종코드가 곧 법정 자격인 경우.
+ *
+ * 한국 채용공고는 "요양보호사 자격 필수"라고 쓰지 않고 그냥 "요양보호사 모집"이라고 쓴다.
+ * 자격이 직종명에 녹아 있어서 "필수"·"반드시" 마커가 붙지 않고, 그래서 키워드 주변만
+ * 보는 detectRequirementLevel 은 실제 공고 12건 중 1건에서만 REQUIRED 를 냈다.
+ *
+ * 요양보호사·사회복지사는 자격 없이는 그 일을 할 수 없는 법정 자격이므로,
+ * 고용24 직종코드로 걸러 REQUIRED 로 본다. 제목 문구보다 직종코드가 넓게 잡는다
+ * (5501xx 공고 중 제목에 "요양보호"가 있는 건 79%, 2311xx 는 68.5%).
+ */
+const OCCUPATION_CODE_REQUIREMENTS: { prefix: string; requirementKey: string; label: string }[] = [
+  { prefix: "5501", requirementKey: "care_worker_certificate", label: "요양보호사 직종(고용24 5501xx)" },
+  { prefix: "2311", requirementKey: "social_worker_level_2", label: "사회복지사 직종(고용24 2311xx)" },
+];
+
+/** 이 공고의 직종코드가 해당 자격을 전제로 하는지. */
+function matchOccupationRequirement(job: Job, requirementKey: string): string | null {
+  const code = job.occupationCode?.trim();
+  if (!code) return null;
+  const rule = OCCUPATION_CODE_REQUIREMENTS.find(
+    (r) => r.requirementKey === requirementKey && code.startsWith(r.prefix),
+  );
+  return rule ? rule.label : null;
+}
+
 export interface ExtractedJobRequirement {
   requirementId: string;
   requirementLevel: RequirementLevel;
@@ -77,6 +104,14 @@ export function extractJobRequirements(job: Job, requirements: CareerGapRequirem
     // Work24 pfPreferential 코드(14=운전가능자)는 자유서술 텍스트보다 신뢰도가 높은 구조화 신호다.
     if (requirement.key === "driving_available" && job.preferentialCodes?.includes("14")) {
       results.push({ requirementId: requirement.id, requirementLevel: "PREFERRED", sourceText: "pfPreferential=14", confidence: 1 });
+      continue;
+    }
+
+    // 직종코드는 자유서술보다 신뢰도가 높다. 자격이 직종명에 녹아 있어 본문에
+    // "필수"가 안 붙는 공고를 여기서 REQUIRED 로 건진다.
+    const occupationLabel = matchOccupationRequirement(job, requirement.key);
+    if (occupationLabel) {
+      results.push({ requirementId: requirement.id, requirementLevel: "REQUIRED", sourceText: occupationLabel, confidence: 0.95 });
       continue;
     }
 

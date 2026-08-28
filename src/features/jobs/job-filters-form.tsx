@@ -135,7 +135,7 @@ export function JobFiltersForm({
             <input
               value={keyword}
               onChange={(e) => setKeyword(e.target.value)}
-              placeholder="직업명, 회사명으로 검색"
+              placeholder="예: 요양보호사, 경비, 조리"
               className="w-full min-w-0 border-0 bg-transparent text-body-2 text-slate-900 outline-none placeholder:text-slate-400"
             />
           </div>
@@ -302,7 +302,8 @@ export function JobFiltersForm({
       */}
       <div className="mt-8 flex flex-wrap items-center gap-3">
         {summary}
-        <div className="flex flex-wrap items-center gap-2">
+        {/* 건수는 왼쪽, 필터는 오른쪽 끝. ml-auto 라 줄이 접혀도 각자 제 끝에 붙는다. */}
+        <div className="ml-auto flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={() => {

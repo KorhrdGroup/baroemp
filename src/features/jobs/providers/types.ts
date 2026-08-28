@@ -70,6 +70,28 @@ export interface NormalizedJob {
   fetchedAt: string;
 }
 
+/**
+ * 상세 조회(callTp=D)로만 얻을 수 있는 보강 필드.
+ * 목록 응답에는 제목·급여·지역 같은 요약만 있어 직무내용과 경력 조건이 비어 있다.
+ */
+export interface JobDetailPatch {
+  externalId: string;
+  /**
+   * 공고 제목 전문(wantedTitle).
+   * 목록 응답의 title 은 30자 남짓에서 "..." 로 잘려 온다(전체의 28.7%).
+   */
+  title?: string;
+  /** 실제 직무내용(jobCont). 목록의 description 은 제목 복사본이라 이걸로 덮는다. */
+  description?: string;
+  /** 경력 조건 원문(enterTpNm). "경력 (최소3년) 필수"처럼 필수/우대 표시가 붙어 온다. */
+  requirements?: string;
+  qualificationRequirements?: string;
+  workHours?: string;
+  benefits?: string;
+  /** 상세 원본 스냅샷. 필드가 늘어도 재파싱할 수 있게 통째로 보관한다. */
+  rawDetail: Record<string, unknown>;
+}
+
 /** V1에서 우선 지원하는 검색 파라미터 (고용24 스펙 기준, Provider마다 지원 범위가 다를 수 있다). */
 export interface JobProviderSearchParams {
   keyword?: string;
@@ -112,4 +134,10 @@ export interface JobProvider {
   getProviderName(): JobProviderName;
   searchJobs(params: JobProviderSearchParams): Promise<JobProviderSearchResult>;
   getJobDetail(externalId: string): Promise<NormalizedJob | null>;
+
+  /**
+   * 상세 전용 응답에서만 얻는 보강 필드를 받아 온다.
+   * 상세 엔드포인트가 따로 없는 Provider 는 구현하지 않아도 된다.
+   */
+  fetchJobDetail?(externalId: string, infoSvc?: string): Promise<JobDetailPatch | null>;
 }
