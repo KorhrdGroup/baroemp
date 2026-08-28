@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowLeft, Eye, Loader2, Pencil, Plus, Printer, Trash2 } from "lucide-react";
+import { ArrowLeft, Check, Eye, Loader2, Pencil, Plus, Printer, SlidersHorizontal, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -11,8 +11,21 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ResumeAgentPicker, type ResumeAgentOption } from "./resume-agent-picker";
+import {
+  isRequiredSection,
+  isSectionFilled,
+  resolveResumeSections,
+  resumeSectionLabel,
+} from "@/lib/resume/completeness";
 import { AiButton } from "@/components/common/ai-button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -46,6 +59,7 @@ import { calculateResumeCompleteness } from "@/lib/resume/completeness";
 import { ResumePreview } from "./resume-preview";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
+import { REGION_LABELS } from "@/lib/labels";
 
 let keySeq = 0;
 function nextKey(prefix: string) {
@@ -105,6 +119,13 @@ const GRADUATION_STATUSES = ["졸업", "졸업예정", "재학중", "휴학", "�
  * 교육 이수는 여기 두지 않는다 - 전용 "교육/훈련" 섹션이 과정명과 교육기관을
  * 따로 받으므로, 여기에도 두면 같은 내용을 두 군데 쓰게 된다.
  */
+/**
+ * "봉사·수상 등 추가 경력" 카드 하나가 PROJECT와 ACTIVITY 두 항목을 함께 받는다.
+ * 왼쪽 목록에서는 이 둘을 한 줄로 묶어 보여준다.
+ */
+const EXTRA_SECTION_CODES = ["PROJECT", "ACTIVITY"];
+const EXTRA_SECTION_KEY = "EXTRA";
+
 const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   AWARD: "수상",
   VOLUNTEER: "봉사활동",
@@ -116,17 +137,49 @@ const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
 export function ResumeEditor({
   initialDetail,
   templates = [],
+  sectionOptions = [],
 }: {
   initialDetail: ResumeDetail;
   templates?: ResumeAgentOption[];
+  /** 담을 수 있는 항목 전체. 편집 중에도 항목을 넣고 뺄 수 있게 한다. */
+  sectionOptions?: { code: string; label: string; required: boolean }[];
 }) {
   const [detail, setDetail] = useState(initialDetail);
   const resume = detail.resume;
-  const sections = useMemo(
-    () => new Set(detail.template?.sections?.length ? detail.template.sections : undefined),
-    [detail.template],
-  );
-  const showSection = (code: string) => sections.size === 0 || sections.has(code);
+
+  /*
+    이력서에 담긴 항목. 작성 시작 화면에서 고른 것이 있으면 그것을,
+    없으면(그 전에 만든 이력서) 양식이 정한 항목을 따른다.
+  */
+  const [sectionCodes, setSectionCodes] = useState<string[]>(() => resolveResumeSections(initialDetail));
+
+  /*
+    왼쪽 목록에 세울 항목. 봉사·수상 카드 하나가 PROJECT와 ACTIVITY 둘을 함께 받으므로
+    목록에서는 하나로 묶는다.
+  */
+  const navItems = useMemo(() => {
+    const list: { key: string; label: string; codes: string[] }[] = [];
+    for (const code of sectionCodes) {
+      if (EXTRA_SECTION_CODES.includes(code)) {
+        if (!list.some((i) => i.key === EXTRA_SECTION_KEY)) {
+          list.push({
+            key: EXTRA_SECTION_KEY,
+            label: resumeSectionLabel("ACTIVITY"),
+            codes: EXTRA_SECTION_CODES,
+          });
+        }
+        continue;
+      }
+      list.push({ key: code, label: resumeSectionLabel(code), codes: [code] });
+    }
+    return list;
+  }, [sectionCodes]);
+
+  /** 한 번에 한 항목만 보여준다. 여덟 카드가 한 화면에 늘어서면 어디부터 쓸지 정하다 지친다. */
+  const [activeKey, setActiveKey] = useState<string | null>(null);
+  const activeItem = navItems.find((i) => i.key === activeKey) ?? navItems[0];
+  const showSection = (code: string) => Boolean(activeItem?.codes.includes(code));
+  const [sectionPickerOpen, setSectionPickerOpen] = useState(false);
 
   const [isChangingTemplate, startTemplateChange] = useTransition();
 
@@ -198,7 +251,7 @@ export function ResumeEditor({
   function currentPreviewDetail(): ResumeDetail {
     return {
       ...detail,
-      resume: { ...resume, ...form },
+      resume: { ...resume, ...form, sectionCodes },
       educations: educations.map((e) => ({ ...e, id: e._key, resumeId: resume.id, orderIndex: e.orderIndex ?? 0 })),
       experiences: experiences.map((e) => ({
         ...e,
@@ -220,7 +273,18 @@ export function ResumeEditor({
     두 값이 어긋나지 않게 한다. 가중치가 0인 항목(프로젝트·대외활동)은 애초에
     빠져 있어 필수 항목만 센다.
   */
-  const liveCompleteness = calculateResumeCompleteness(currentPreviewDetail());
+  const livePreview = currentPreviewDetail();
+  const liveCompleteness = calculateResumeCompleteness(livePreview);
+
+  /**
+   * 항목 목록의 체크 표시.
+   * 완성도에 세지 않는 항목(봉사·수상 등)은 채웠는지 물을 기준이 없으므로 적힌 것이 있으면 채운 것으로 본다.
+   */
+  function isNavItemFilled(item: { key: string; codes: string[] }): boolean {
+    if (item.key === EXTRA_SECTION_KEY) return items.length > 0;
+    if (!isRequiredSection(item.key)) return false;
+    return isSectionFilled(item.key, livePreview);
+  }
 
   /*
     마지막으로 저장한 내용과 지금 입력이 같으면 저장할 것이 없다.
@@ -237,7 +301,7 @@ export function ResumeEditor({
    */
   function buildSavePayload() {
     return {
-      resume: { id: resume.id, ...form },
+      resume: { id: resume.id, ...form, sectionCodes },
       educations: educations.map((e) => ({
         ...stripKey(e),
         admissionDate: toDbDate(e.admissionDate),
@@ -441,7 +505,60 @@ export function ResumeEditor({
           />
         )}
 
-        <div>
+        {/*
+          왼쪽은 항목 목록, 오른쪽은 지금 채우는 항목 하나.
+          좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
+        */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          <nav className="rounded-xl bg-white p-3 lg:sticky lg:top-24 lg:w-60 lg:shrink-0">
+            <p className="px-2 pb-2 text-label-2 font-semibold text-slate-400">항목 {navItems.length}개</p>
+            <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+              {navItems.map((item, idx) => {
+                const filled = isNavItemFilled(item);
+                const isActive = item.key === activeItem?.key;
+                return (
+                  <li key={item.key} className="shrink-0 lg:shrink">
+                    <button
+                      type="button"
+                      onClick={() => setActiveKey(item.key)}
+                      aria-current={isActive}
+                      className={cn(
+                        // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
+                        "flex w-full max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 transition-colors lg:max-w-none",
+                        isActive
+                          ? "bg-brand-blue-50 font-semibold text-brand-blue-700"
+                          : "text-slate-600 hover:bg-slate-50",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
+                          filled
+                            ? "bg-brand-blue-600 text-white"
+                            : isActive
+                              ? "bg-white text-brand-blue-700 ring-1 ring-brand-blue-200"
+                              : "bg-slate-100 text-slate-400",
+                        )}
+                      >
+                        {filled ? <Check className="size-3.5" /> : idx + 1}
+                      </span>
+                      <span className="truncate">{item.label}</span>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="mt-2 w-full justify-start text-slate-600"
+              onClick={() => setSectionPickerOpen(true)}
+            >
+              <SlidersHorizontal className="size-4" /> 항목 고르기
+            </Button>
+          </nav>
+
+          <div className="min-w-0 flex-1">
           {showSection("BASIC_INFO") && (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
@@ -463,15 +580,34 @@ export function ResumeEditor({
                 <Field label="희망직무">
                   <CompactInput value={form.desiredJobTitle} onChange={(e) => setForm((f) => ({ ...f, desiredJobTitle: e.target.value }))} />
                 </Field>
+                {/*
+                  희망근무지역은 "gwangju" 같은 지역 코드로 저장된다. 자유 입력으로 두면
+                  코드가 그대로 보이고, 사람이 "광주"라고 고쳐 쓰면 저장된 값이 코드가
+                  아니게 돼 지역으로 걸리는 추천에서 빠진다. 목록에서 고르게 한다.
+                */}
                 <Field label="희망근무지역">
-                  <CompactInput value={form.desiredRegion} onChange={(e) => setForm((f) => ({ ...f, desiredRegion: e.target.value }))} />
+                  <Select
+                    value={form.desiredRegion || undefined}
+                    onValueChange={(v) => setForm((f) => ({ ...f, desiredRegion: v }))}
+                  >
+                    <CompactSelectTrigger>
+                      <SelectValue placeholder="선택" />
+                    </CompactSelectTrigger>
+                    <SelectContent>
+                      {Object.entries(REGION_LABELS).map(([code, label]) => (
+                        <SelectItem key={code} value={code}>
+                          {label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
               </CardContent>
             </Card>
           )}
 
           {showSection("SUMMARY") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
                 {/*
@@ -507,7 +643,7 @@ export function ResumeEditor({
           )}
 
           {showSection("EXPERIENCE") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">경력</CardTitle>
                 <Button
@@ -663,7 +799,7 @@ export function ResumeEditor({
           )}
 
           {showSection("EDUCATION") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">학력</CardTitle>
                 <Button
@@ -813,7 +949,7 @@ export function ResumeEditor({
           )}
 
           {showSection("QUALIFICATION") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">보유 자격</CardTitle>
                 <Button
@@ -878,7 +1014,7 @@ export function ResumeEditor({
           )}
 
           {showSection("SKILLS") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-body-1 font-semibold">보유 스킬</CardTitle>
               </CardHeader>
@@ -932,7 +1068,7 @@ export function ResumeEditor({
           )}
 
           {showSection("TRAINING") && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">교육/훈련</CardTitle>
                 <Button
@@ -1007,7 +1143,7 @@ export function ResumeEditor({
           )}
 
           {(showSection("PROJECT") || showSection("ACTIVITY")) && (
-            <Card className="mt-4 rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">봉사·수상 등 추가 경력</CardTitle>
                 <Button
@@ -1070,6 +1206,7 @@ export function ResumeEditor({
               </CardContent>
             </Card>
           )}
+          </div>
         </div>
       </div>
 
@@ -1089,7 +1226,7 @@ export function ResumeEditor({
         삭제는 편집 화면이 아니라 이력서 목록에서 처리한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
-        <div className="mx-auto flex max-w-4xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
           <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
@@ -1126,6 +1263,62 @@ export function ResumeEditor({
           </div>
         </div>
       </div>
+
+      {/*
+        담을 항목 고르기. 뺀 항목은 화면에서 사라지고 완성도에서도 빠진다.
+        적어둔 내용은 지우지 않는다 - 다시 담으면 그대로 있다.
+      */}
+      <Dialog open={sectionPickerOpen} onOpenChange={setSectionPickerOpen}>
+        <DialogContent className="print:hidden sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>이력서에 담을 항목</DialogTitle>
+            <DialogDescription>
+              뺀 항목은 이력서에 나오지 않고 완성도에도 세지 않아요. 적어둔 내용은 그대로 남습니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {sectionOptions.map((option) => {
+              const picked = sectionCodes.includes(option.code);
+              const fixed = option.code === "BASIC_INFO";
+              return (
+                <button
+                  key={option.code}
+                  type="button"
+                  disabled={fixed}
+                  aria-pressed={picked}
+                  onClick={() =>
+                    setSectionCodes((prev) =>
+                      prev.includes(option.code) ? prev.filter((c) => c !== option.code) : [...prev, option.code],
+                    )
+                  }
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
+                    fixed ? "cursor-default" : "cursor-pointer hover:border-brand-blue-200",
+                    picked ? "border-brand-blue-600 bg-brand-blue-50" : "border-border bg-white",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "flex size-5 shrink-0 items-center justify-center rounded border",
+                      picked ? "border-brand-blue-600 bg-brand-blue-600" : "border-slate-300",
+                    )}
+                  >
+                    {picked && <Check className="size-3.5 text-white" />}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-body-2 font-semibold text-slate-900">{option.label}</span>
+                    {(fixed || !option.required) && (
+                      <span className="mt-0.5 block text-label-2 text-slate-500">
+                        {fixed ? "이력서에 꼭 있어야 하는 항목이에요." : "없어도 완성도가 깎이지 않아요."}
+                      </span>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="print:hidden sm:max-w-3xl">
