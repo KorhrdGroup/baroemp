@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { interactiveCardClass } from "@/lib/ui-classes";
 import { REGION_LABELS } from "@/lib/labels";
 import type { MatchReasonDetail, SupportEligibilityGrade, SupportProgram } from "@/types";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
@@ -45,7 +46,10 @@ export function SupportProgramCard({
         일자리 카드(JobCard)와 같은 틀로 맞춘다. 테두리가 없으면 흰 바탕 위에서
         카드로 안 읽히고, h-full 이 없으면 한 줄에 나란히 선 카드끼리 키가 어긋난다.
       */
-      className="group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-white"
+      className={cn(
+        "group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-white",
+        interactiveCardClass,
+      )}
     >
       <div className="flex items-center justify-between gap-2 px-5 pt-5">
         {(() => {
