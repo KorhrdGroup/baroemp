@@ -46,12 +46,6 @@ export interface WizardTemplate {
   defaultQuestions: CoverLetterTemplateQuestion[];
 }
 
-export interface WizardJob {
-  id: string;
-  title: string;
-  companyName: string;
-}
-
 type Step = "template" | "questions" | "experiences";
 
 /*
@@ -126,8 +120,6 @@ function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: stri
 export function CoverLetterWizard({
   templates,
   catalog,
-  jobs,
-  initialJobId,
   initialTitle,
   experiences: initialExperiences,
   resumeId,
@@ -135,9 +127,6 @@ export function CoverLetterWizard({
 }: {
   templates: WizardTemplate[];
   catalog: QuestionCatalogEntry[];
-  /** 고를 수 있는 공고(스크랩해둔 공고 + 공고 상세에서 바로 넘어온 공고) */
-  jobs: WizardJob[];
-  initialJobId?: string;
   initialTitle?: string;
   experiences: ExperienceBankItem[];
   resumeId?: string;
@@ -149,7 +138,6 @@ export function CoverLetterWizard({
 
   const [step, setStep] = useState<Step>("template");
   const [templateId, setTemplateId] = useState(firstTemplate.id);
-  const [jobId, setJobId] = useState<string | undefined>(initialJobId);
   const [questions, setQuestions] = useState<PickedQuestion[]>(() => toPicked(firstTemplate.defaultQuestions));
   const [title, setTitle] = useState(initialTitle ?? "");
 
@@ -166,7 +154,6 @@ export function CoverLetterWizard({
   const [error, setError] = useState<string | null>(null);
 
   const template = templates.find((t) => t.id === templateId) ?? firstTemplate;
-  const selectedJob = jobs.find((j) => j.id === jobId);
 
   /*
     단계를 넘길 때 맨 위로 올린다. 다음 버튼은 화면 아래에 있어서, 그냥 두면
@@ -217,7 +204,6 @@ export function CoverLetterWizard({
           templateId,
           title: title.trim() || undefined,
           resumeId,
-          targetJobId: jobId,
           targetOccupationId,
           questions: questions.map((q) => ({
             questionType: q.questionType,
@@ -304,47 +290,6 @@ export function CoverLetterWizard({
           </p>
 
           <div className="mt-10 space-y-8">
-            {jobs.length > 0 && (
-              <div>
-                <FieldLabel hint="고르면 AI가 그 공고를 보고 초안을 써드려요. 스크랩해둔 공고에서 고를 수 있어요.">
-                  지원할 공고 (선택)
-                </FieldLabel>
-                <div className="space-y-2">
-                  {jobs.map((job) => {
-                    const picked = job.id === jobId;
-                    return (
-                      <button
-                        key={job.id}
-                        type="button"
-                        /* 다시 누르면 풀린다. 특정 공고용이 아닌 자기소개서도 만들 수 있어야 한다. */
-                        onClick={() => setJobId(picked ? undefined : job.id)}
-                        aria-pressed={picked}
-                        className={cn(
-                          "flex w-full cursor-pointer items-center gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
-                          picked
-                            ? "border-brand-blue-600 bg-brand-blue-50"
-                            : "border-border bg-white hover:border-brand-blue-200",
-                        )}
-                      >
-                        <span
-                          className={cn(
-                            "flex size-5 shrink-0 items-center justify-center rounded-full border",
-                            picked ? "border-brand-blue-600 bg-brand-blue-600" : "border-slate-300",
-                          )}
-                        >
-                          {picked && <Check className="size-3 text-white" />}
-                        </span>
-                        <span className="min-w-0">
-                          <span className="block truncate text-body-2 font-semibold text-slate-900">{job.title}</span>
-                          <span className="block truncate text-label-1 text-slate-500">{job.companyName}</span>
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
             <div>
               <FieldLabel hint={`고르면 아래 목록에 담깁니다. 최대 ${MAX_QUESTIONS}개까지 담을 수 있어요.`}>
                 자기소개서 문항
@@ -433,7 +378,7 @@ export function CoverLetterWizard({
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder={selectedJob ? `${selectedJob.title} 지원용 자기소개서` : "예: 요양보호사 지원용 자기소개서"}
+                placeholder="예: 요양보호사 지원용 자기소개서"
                 className="h-12 bg-white"
               />
             </div>
