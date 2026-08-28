@@ -195,15 +195,23 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
       )}
 
       {/*
-        어떤 자격이 이 목록을 열어주는지는 공고마다 같으므로 줄 위에 한 번만 쓴다.
+        어떤 조건이 이 목록을 열어주는지는 공고마다 같으므로 줄 위에 한 번만 쓴다.
         카드마다 캡션을 얹으면 카드 윗변이 어긋난다.
+
+        이 탭에서만 나타나는 줄이라 자리를 늘 잡아 둔다(19.6px = label-1 한 줄).
+        안 그러면 탭을 옮길 때마다 판이 이 줄 높이만큼 튄다.
+
+        문구에 "자격"을 넣지 않는다. 조건 이름이 "요양보호사 자격"이면
+        "자격 자격을"이 되고, "운전 가능"처럼 자격이 아닌 조건도 온다.
       */}
-      {unlockRequirementName && (
-        <p className="mb-3 text-label-1 text-slate-600">
-          <strong className="font-semibold text-brand-blue-700">{unlockRequirementName}</strong>
-          {" "}자격을 따면 지원할 수 있는 공고예요.
-        </p>
-      )}
+      <p className="mb-3 min-h-[19.6px] text-label-1 text-slate-600">
+        {unlockRequirementName && (
+          <>
+            <strong className="font-semibold text-brand-blue-700">{unlockRequirementName}</strong>
+            {" "}하나만 채우면 지원할 수 있는 공고예요.
+          </>
+        )}
+      </p>
 
       {current && current.items.length > 0 && (
         <div className="relative">
