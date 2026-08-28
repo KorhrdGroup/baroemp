@@ -61,6 +61,30 @@ export function toSupportMatchProfile(answers: SupportAssessmentAnswers): Suppor
   };
 }
 
+/**
+ * 하다 만 지원금 진단 중 이어서 진행할 수 있는 가장 최근 1건.
+ *
+ * 지원금 진단은 마지막 제출 때 한 번에 세션을 만들던 구조라, 중간에 나가면 답변이
+ * 서버에 남지 않았다. 진행 중 저장(saveSupportAssessmentAnswers)과 짝을 이뤄
+ * 중도이탈자가 처음부터 다시 하지 않게 한다.
+ */
+export async function findResumableSupportSession(params: {
+  userId?: string;
+  anonymousId?: string;
+}): Promise<SupportAssessmentSession | null> {
+  if (!params.userId && !params.anonymousId) return null;
+
+  const sessions = await getSupportAssessmentSessionRepository().findAll(
+    params.userId ? { userId: params.userId } : { anonymousId: params.anonymousId },
+  );
+
+  return (
+    sessions
+      .filter((s) => s.status === "in_progress" && Object.keys(s.answers ?? {}).length > 0)
+      .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))[0] ?? null
+  );
+}
+
 export async function startSupportAssessment(input: StartSupportAssessmentInput): Promise<SupportAssessmentSession> {
   const prefill = await getSupportAssessmentPrefill(input);
   const session = await getSupportAssessmentSessionRepository().create({

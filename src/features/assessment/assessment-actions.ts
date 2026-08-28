@@ -2,6 +2,7 @@
 
 import {
   completeAssessmentSession,
+  findResumableSession,
   logContentRecommendationClicked,
   logOccupationResultClicked,
   startAssessmentSession,
@@ -14,6 +15,28 @@ import { getCurrentUser } from "@/lib/auth/session";
  * /assessment는 Member-first 보호 Route이므로 정상 Flow에서는 항상 로그인 사용자여야 하지만,
  * 방어적으로 세션이 없는 경우 anonymousId만으로도 동작하게 유지한다 (기존 anonymous 호환).
  */
+/** 하다 만 진단이 있으면 이어하기 안내에 쓸 정보를 돌려준다. */
+export async function getResumableAssessmentAction(params: { anonymousId?: string }): Promise<{
+  sessionId: string;
+  currentStep: number;
+  totalSteps: number;
+  updatedAt: string;
+} | null> {
+  const user = await getCurrentUser();
+  const session = await findResumableSession({
+    userId: user?.id,
+    anonymousId: user ? undefined : params.anonymousId,
+  });
+  return session
+    ? {
+        sessionId: session.id,
+        currentStep: session.currentStep,
+        totalSteps: session.totalSteps,
+        updatedAt: session.updatedAt,
+      }
+    : null;
+}
+
 export async function startAssessmentSessionAction(params: { anonymousId?: string }) {
   const user = await getCurrentUser();
   const { session, assessment } = await startAssessmentSession({

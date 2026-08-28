@@ -8,8 +8,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
+import { ResumeSessionDialog } from "@/components/common/resume-session-dialog";
+import { ScrollMoreHint } from "@/components/common/scroll-more-hint";
+import { AnalyzingScreen } from "@/components/common/analyzing-screen";
 import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, REGION_LABELS } from "@/lib/labels";
-import { getSupportAssessmentPrefillAction, submitSupportAssessmentAction } from "./support-actions";
+import {
+  getResumableSupportSessionAction,
+  getSupportAssessmentPrefillAction,
+  saveSupportProgressAction,
+  submitSupportAssessmentAction,
+} from "./support-actions";
 import type { AgeGroup, DesiredStartTiming, EmploymentStatus, Region, SupportAssessmentAnswers } from "@/types";
 
 const AGE_GROUP_OPTIONS = Object.entries(AGE_GROUP_LABELS) as [AgeGroup, string][];
@@ -548,6 +556,15 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
   );
 }
 
+/** 결과 화면으로 넘어가기 전 분석 화면을 보여줄 최소 시간. */
+const ANALYZING_MS = 2500;
+const ANALYZING_STEPS = [
+  "입력하신 조건을 정리하고 있어요",
+  "조건에 맞는 지원제도를 찾고 있어요",
+  "자격 요건을 확인하고 있어요",
+  "결과를 준비하고 있어요",
+];
+
 export function SupportFlow({
   autoStart = false,
   isLoggedIn = true,
@@ -563,7 +580,12 @@ export function SupportFlow({
   const [furthestIndex, setFurthestIndex] = useState(0);
   const [answers, setAnswers] = useState<SupportAssessmentAnswers>({});
   const [submitting, setSubmitting] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // 진행 중 저장에 쓰는 세션 id. 첫 저장 때 서버가 만들어 돌려준다.
+  const [sessionId, setSessionId] = useState<string | undefined>(undefined);
+  // 하다 만 진단 (소개 화면에서 "이어서 하기"로 이어붙일 대상)
+  const [resumable, setResumable] = useState<{ sessionId: string; answers: SupportAssessmentAnswers } | null>(null);
 
   // React StrictMode의 이중 실행으로 프리필이 두 번 돌지 않게 막는다.
   const autoStartedRef = useRef(false);
@@ -573,6 +595,34 @@ export function SupportFlow({
     // handleStart는 렌더마다 새로 만들어지지만 여기서는 최초 1회만 쓰면 된다.
     void handleStart();
   }, [autoStart]);
+
+  /** 하다 만 진단을 이어서 진행한다 - 저장된 답변을 불러오고 첫 미답변 문항으로 이동한다. */
+  function handleResume() {
+    if (!resumable) return;
+    setAnswers(resumable.answers);
+    setSessionId(resumable.sessionId);
+    const firstUnanswered = STEPS.findIndex((st) => !isStepFilled(st, resumable.answers));
+    const target = firstUnanswered === -1 ? STEPS.length - 1 : firstUnanswered;
+    setStepIndex(target);
+    setFurthestIndex(target);
+    setPhase("wizard");
+  }
+
+  /** 이어하기 확인 없이 새로 시작한다 (팝업에서 "처음부터 다시"를 고른 경우). */
+  async function handleStartFresh() {
+    setLoadingPrefill(true);
+    try {
+      const anonymousId = getOrCreateAnonymousId();
+      const prefill = await getSupportAssessmentPrefillAction({ anonymousId: anonymousId || undefined });
+      setAnswers((prev) => ({ ...prev, ...prefill }));
+    } catch {
+      // 프리필 실패는 진단 진행을 막지 않는다 - 빈 값으로 시작한다.
+    } finally {
+      setSessionId(undefined);
+      setLoadingPrefill(false);
+      setPhase("wizard");
+    }
+  }
 
   async function handleStart() {
     // 소개 화면은 비로그인도 볼 수 있다. 진단 결과를 계정에 남기므로
@@ -584,6 +634,20 @@ export function SupportFlow({
       return;
     }
     setLoadingPrefill(true);
+    // 하다 만 진단이 있으면 새로 시작하기 전에 팝업으로 물어본다.
+    try {
+      const found = await getResumableSupportSessionAction({
+        anonymousId: getOrCreateAnonymousId() || undefined,
+      });
+      if (found) {
+        setResumable(found);
+        setLoadingPrefill(false);
+        return;
+      }
+    } catch {
+      // 조회 실패는 진단 시작을 막지 않는다 - 새로 시작한다.
+    }
+
     try {
       const anonymousId = getOrCreateAnonymousId();
       const prefill = await getSupportAssessmentPrefillAction({ anonymousId: anonymousId || undefined });
@@ -606,7 +670,35 @@ export function SupportFlow({
         </div>
       );
     }
-    return <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} />;
+    return (
+      <>
+        <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} />
+        <ResumeSessionDialog
+          open={Boolean(resumable)}
+          onOpenChange={(open) => {
+            if (!open) setResumable(null);
+          }}
+          answeredQuestions={
+            resumable ? STEPS.filter((st) => isStepFilled(st, resumable.answers)).length : 0
+          }
+          totalQuestions={STEPS.length}
+          busy={loadingPrefill}
+          onResume={handleResume}
+          onRestart={() => {
+            setResumable(null);
+            void handleStartFresh();
+          }}
+        />
+      </>
+    );
+  }
+
+  if (analyzing) {
+    return (
+      <div data-wizard="true">
+        <AnalyzingScreen steps={ANALYZING_STEPS} durationMs={ANALYZING_MS} />
+      </div>
+    );
   }
 
   const step = STEPS[stepIndex];
@@ -638,6 +730,15 @@ export function SupportFlow({
       setStepIndex(next);
       setFurthestIndex((f) => Math.max(f, next));
       window.scrollTo({ top: 0, behavior: "smooth" });
+      // 문항을 넘길 때마다 서버에 남긴다. 중간에 나가도 이어서 할 수 있고,
+      // 완료하지 못한 응답도 관리자 통계에 잡힌다. 실패해도 진행은 막지 않는다.
+      void saveSupportProgressAction({
+        sessionId,
+        anonymousId: getOrCreateAnonymousId() || undefined,
+        answers,
+      })
+        .then((r) => setSessionId(r.sessionId))
+        .catch(() => {});
       return;
     }
 
@@ -645,9 +746,15 @@ export function SupportFlow({
     setError(null);
     try {
       const anonymousId = getOrCreateAnonymousId();
-      const result = await submitSupportAssessmentAction({ anonymousId: anonymousId || undefined, answers });
+      setAnalyzing(true);
+      // 계산과 최소 노출 시간을 함께 기다린다 (둘 중 늦은 쪽 기준).
+      const [result] = await Promise.all([
+        submitSupportAssessmentAction({ sessionId, anonymousId: anonymousId || undefined, answers }),
+        new Promise((resolve) => setTimeout(resolve, ANALYZING_MS)),
+      ]);
       router.push(`/support/result/${result.sessionId}`);
     } catch {
+      setAnalyzing(false);
       setError("결과를 계산하는 중 문제가 발생했어요. 다시 시도해주세요.");
       setSubmitting(false);
     }
@@ -721,6 +828,9 @@ export function SupportFlow({
         </div>
 
         {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
+
+        {/* 선택지가 화면을 넘치면 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
+        <ScrollMoreHint />
       </div>
 
       {/* 하단 고정 CTA */}
