@@ -25,6 +25,41 @@ import type { JobMatchDetail } from "@/services/job-match.service";
 import type { JobRequirementComparisonItem } from "@/services/job-requirement-comparison.service";
 import { BackButton } from "@/components/common/back-button";
 
+
+/**
+ * "이 공고와 내 조건 비교" 묶음.
+ * 초록은 갖춘 것, 주황은 공고 원문만으로 판단이 안 되는 것, 빨강은 모자란 것.
+ */
+const COMPARISON_GROUPS = [
+  {
+    key: "fulfilled",
+    label: "충족",
+    icon: CheckCircle2,
+    box: "bg-emerald-50/60",
+    head: "text-emerald-700",
+  },
+  {
+    key: "needsCheck",
+    label: "확인 필요",
+    icon: HelpCircle,
+    box: "bg-orange-50/60",
+    head: "text-orange-600",
+  },
+  {
+    key: "lacking",
+    label: "부족",
+    icon: XCircle,
+    box: "bg-rose-50/60",
+    head: "text-rose-600",
+  },
+] as const satisfies readonly {
+  key: "fulfilled" | "needsCheck" | "lacking";
+  label: string;
+  icon: LucideIcon;
+  box: string;
+  head: string;
+}[];
+
 const REQUIREMENT_STATUS_STYLE: Record<string, { icon: LucideIcon; label: string; className: string }> = {
   SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700" },
   NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600" },
@@ -75,11 +110,6 @@ export function JobDetailView({
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         {job.isBeginnerFriendly && (
           <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">신입가능</Badge>
-        )}
-        {match && (
-          <Badge className="rounded-full border-0 bg-brand-blue-400 text-label-2 font-semibold text-white">
-            매칭 {match.score}점 ({match.grade})
-          </Badge>
         )}
         {job.externalSource && (
           <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
@@ -139,43 +169,28 @@ export function JobDetailView({
         <div className="mt-6 rounded-xl bg-white p-6">
           <h2 className="text-body-1 font-bold text-slate-900">이 공고와 내 조건 비교</h2>
           <p className="mt-1 text-label-1 text-slate-400">최근 진단 결과를 기준으로 비교했어요.</p>
-          <div className="mt-4 space-y-4">
-            {match.fulfilled.length > 0 && (
-              <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-emerald-700">
-                  <CheckCircle2 className="size-4" /> 충족
-                </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
-                  {match.fulfilled.map((f) => (
-                    <li key={f}>· {f}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {match.needsCheck.length > 0 && (
-              <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
-                  <HelpCircle className="size-4" /> 확인 필요
-                </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
-                  {match.needsCheck.map((f) => (
-                    <li key={f}>· {f}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            {match.lacking.length > 0 && (
-              <div>
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-rose-600">
-                  <XCircle className="size-4" /> 부족
-                </p>
-                <ul className="mt-1.5 space-y-1 text-label-1 text-slate-600">
-                  {match.lacking.map((f) => (
-                    <li key={f}>· {f}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
+          {/*
+            지원금 상세의 "내 조건과 비교"와 같은 방식.
+            글머리표만 색을 달리하면 어디까지가 한 묶음인지 흐려서, 묶음마다
+            색 있는 면을 깔아 충족·확인 필요·부족을 한눈에 가른다.
+          */}
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {COMPARISON_GROUPS.map(({ key, label, icon: Icon, box, head }) => {
+              const values = match[key];
+              if (values.length === 0) return null;
+              return (
+                <div key={key} className={cn("rounded-lg p-4", box)}>
+                  <p className={cn("flex items-center gap-1.5 text-label-1 font-semibold", head)}>
+                    <Icon className="size-4" /> {label}
+                  </p>
+                  <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+                    {values.map((f) => (
+                      <li key={f}>· {f}</li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : (
