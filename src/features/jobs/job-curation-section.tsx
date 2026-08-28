@@ -155,8 +155,13 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
     */
     <section className="mb-8 rounded-2xl bg-brand-blue-50 p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
-      <h2 className="mb-3 text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+      {/*
+        제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
+        모두 상자가 없는 요소라 판 끝(0px)에 그대로 붙으면 카드보다
+        튀어나와 보인다. 제목은 글자가 굵어 더 튀므로 한 단계 덜 준다.
+      */}
+      <h2 className="mb-3 pl-1 text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
+      <div className="mb-4 flex gap-2 overflow-x-auto pb-1 pl-2">
         {TABS.map((t) => (
           <button
             key={t.key}
