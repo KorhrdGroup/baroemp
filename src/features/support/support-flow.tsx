@@ -9,6 +9,7 @@ import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { ResumeSessionDialog } from "@/components/common/resume-session-dialog";
+import { ScrollMoreHint } from "@/components/common/scroll-more-hint";
 import { AGE_GROUP_LABELS, EMPLOYMENT_STATUS_LABELS, DESIRED_START_TIMING_LABELS, REGION_LABELS } from "@/lib/labels";
 import {
   getResumableSupportSessionAction,
@@ -666,11 +667,10 @@ export function SupportFlow({
           onOpenChange={(open) => {
             if (!open) setResumable(null);
           }}
-          progressLabel={
-            resumable
-              ? `${STEPS.length}문항 중 ${STEPS.filter((st) => isStepFilled(st, resumable.answers)).length}문항`
-              : undefined
+          answeredQuestions={
+            resumable ? STEPS.filter((st) => isStepFilled(st, resumable.answers)).length : 0
           }
+          totalQuestions={STEPS.length}
           busy={loadingPrefill}
           onResume={handleResume}
           onRestart={() => {
@@ -803,6 +803,9 @@ export function SupportFlow({
         </div>
 
         {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
+
+        {/* 선택지가 화면을 넘치면 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
+        <ScrollMoreHint />
       </div>
 
       {/* 하단 고정 CTA */}

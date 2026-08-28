@@ -89,7 +89,8 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
         onOpenChange={(open) => {
           if (!open) setResumable(null);
         }}
-        progressLabel={resumable ? `${resumable.totalSteps}문항 중 ${resumable.currentStep}문항` : undefined}
+        answeredQuestions={resumable?.currentStep ?? 0}
+        totalQuestions={resumable?.totalSteps ?? 0}
         updatedAt={resumable?.updatedAt}
         busy={loading}
         onResume={() => {

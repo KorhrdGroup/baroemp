@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollMoreHint } from "@/components/common/scroll-more-hint";
 import type { AssessmentQuestion, AssessmentSection } from "@/types";
 import {
   completeAssessmentSessionAction,
@@ -209,6 +210,9 @@ export function AssessmentWizard({
         </div>
 
         {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
+
+        {/* 선택지가 화면을 넘치면 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
+        <ScrollMoreHint />
       </div>
 
       {/* 하단 고정 CTA */}
