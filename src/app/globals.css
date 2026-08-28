@@ -47,17 +47,21 @@
    *   sm(4)  태그·체크박스 같은 Small 레벨
    *   md(6)  32~40px 짜리 작은 버튼·칩
    *   lg(8)  버튼·입력·셀렉트 같은 Medium 레벨(48~64px)
-   *   xl(10) 카드 같은 Large 레벨(72~80px)
-   *   2xl(12) 배너·큰 카드·다이얼로그 같은 Xlarge 레벨(96px~)
+   *   xl(12) 카드 같은 Large 레벨(72~80px)
+   *   2xl(14) 배너·큰 카드·다이얼로그 같은 Xlarge 레벨(96px~)
+   *
+   * 상자(xl 이상)만 한 단계 올려 KRDS 상한(12px)을 넘긴다. 카드가 많은 화면에서
+   * 10px 는 모서리가 각져 보였다. 버튼·입력 같은 작은 컨트롤(lg 이하)은 그대로다 -
+   * 같이 올리면 알약처럼 보여 누르는 것과 담는 것이 구분되지 않는다.
    */
   --radius-xs: 2px;
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius-lg: 8px;
-  --radius-xl: 10px;
-  --radius-2xl: 12px;
-  --radius-3xl: 12px;
-  --radius-4xl: 12px;
+  --radius-xl: 12px;
+  --radius-2xl: 14px;
+  --radius-3xl: 14px;
+  --radius-4xl: 14px;
 
   /* HDS 타이포 스케일 (Figma: HDS / Typography) */
   --text-display-1: 72px;
@@ -191,7 +195,7 @@
   --chart-3: oklch(0.75 0.15 90);
   --chart-4: oklch(0.65 0.2 30);
   --chart-5: oklch(0.55 0.1 320);
-  --radius: 10px;
+  --radius: 12px;
   --sidebar: var(--atomic-blue-900);
   --sidebar-foreground: var(--atomic-mono-100);
   --sidebar-primary: var(--atomic-blue-400);
