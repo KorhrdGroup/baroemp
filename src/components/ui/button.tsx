@@ -5,9 +5,9 @@ import { Slot } from "radix-ui"
 import { cn } from "@/lib/utils"
 
 /*
- * KRDS 버튼 규격.
+ * 버튼 규격. KRDS 에서 출발했고, radius 는 이 서비스 눈금(globals.css)을 따른다.
  *   크기   xs 32 / sm 40 / default 48 / lg 56 (px), 8-point grid
- *   radius 32~40px 은 6px, 48px 이상은 8px
+ *   radius 32~40px 은 md(8px), 48px 이상은 lg(10px)
  *   호버   배경색만 한 단계 진해진다. 이동·그림자 없음.
  *          채운 버튼은 hover 한 단계·active 두 단계, 흰 버튼은 회색 5→10.
  *   전환   ease-in-out. KRDS 명시값은 0.4s 인데 호버가 굼떠서 0.2s 로 낮췄다.
