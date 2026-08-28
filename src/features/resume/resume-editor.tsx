@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResumeAgentPicker, type ResumeAgentOption } from "./resume-agent-picker";
+import { resolveResumeAgent, type ResumeAgentOption } from "./resume-agents";
 import {
   EXTRA_SECTION_CODES,
   isRequiredSection,
@@ -20,7 +20,14 @@ import {
   type ResumeSectionOption,
 } from "@/lib/resume/completeness";
 import { AiButton } from "@/components/common/ai-button";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -117,6 +124,11 @@ const GRADUATION_STATUSES = ["졸업", "졸업예정", "재학중", "휴학", "�
 /** 봉사·수상 카드 한 줄(PROJECT + ACTIVITY)을 목록에서 가리키는 이름. */
 const EXTRA_SECTION_KEY = "EXTRA";
 
+/** 사이드바에서 카드로 내려갈 때 쓰는 자리 이름. */
+function sectionAnchorId(key: string) {
+  return `resume-section-${key}`;
+}
+
 const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   AWARD: "수상",
   VOLUNTEER: "봉사활동",
@@ -169,8 +181,14 @@ export function ResumeEditor({
   /** 기본정보는 맨 위에 고정이라, 그 아래부터 자리를 옮길 수 있다. */
   const firstMovableIndex = navItems.findIndex((i) => !i.codes.includes("BASIC_INFO"));
 
-  /** 아직 안 담은 항목. 목록 아래에 두어 무엇을 더 담을 수 있는지 보이게 한다. */
-  const addableSections = sectionOptions.filter((o) => !o.codes.some((c) => sectionCodes.includes(c)));
+  function addSectionRow(row: { key: string }) {
+    setSectionCodes((prev) => [...prev, row.key]);
+  }
+
+  /** 사이드바에서 누른 항목으로 내려간다. 항목이 다 펼쳐져 있으므로 감추는 대신 옮겨준다. */
+  function scrollToSection(key: string) {
+    document.getElementById(sectionAnchorId(key))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   /**
    * 항목 빼기. 적어둔 내용은 지우지 않는다 - 다시 담으면 그대로 있다.
@@ -198,26 +216,13 @@ export function ResumeEditor({
     });
   }
 
-  /** 한 번에 한 항목만 보여준다. 여덟 카드가 한 화면에 늘어서면 어디부터 쓸지 정하다 지친다. */
-  const [activeKey, setActiveKey] = useState<string | null>(null);
-  const activeItem = navItems.find((i) => i.key === activeKey) ?? navItems[0];
-  const showSection = (code: string) => Boolean(activeItem?.codes.includes(code));
   /** 순서를 바꾸는 중인지. 켜면 담긴 항목마다 위/아래 버튼이 나온다. */
   const [reordering, setReordering] = useState(false);
+  /** 점검 기준(에이전트)을 고르는 창. 열 때 지금 기준을 미리 골라둔다. */
+  const [reviewPickerOpen, setReviewPickerOpen] = useState(false);
+  const [pickedAgentId, setPickedAgentId] = useState<string | undefined>(initialDetail.resume.templateId);
 
   const [isChangingTemplate, startTemplateChange] = useTransition();
-
-  /**
-   * 에이전트(=템플릿)는 노출 섹션과 AI 점검·생성 기준만 결정하고 입력값은 그대로 남는다.
-   * 확인 없이 바로 바꿔도 잃는 데이터가 없다.
-   */
-  function handleTemplateChange(templateId: string) {
-    if (templateId === resume.templateId) return;
-    startTemplateChange(async () => {
-      const next = await changeResumeTemplateAction(resume.id, templateId);
-      if (next) setDetail(next);
-    });
-  }
 
   const [form, setForm] = useState({
     title: resume.title,
@@ -310,6 +315,33 @@ export function ResumeEditor({
     return isSectionFilled(item.key, livePreview);
   }
 
+  /**
+   * 사이드바에 세우는 줄. 담긴 항목을 순서대로 놓고, 아직 안 담은 항목을 그 뒤에 잇는다.
+   * 안 담은 것을 목록에서 빼버리면 다시 담을 방법도, 무엇을 더 담을 수 있는지도 알 수 없다.
+   */
+  const sectionRows = [
+    ...navItems.map((item, idx) => ({
+      ...item,
+      included: true,
+      order: idx + 1,
+      navIndex: idx,
+      fixed: item.codes.includes("BASIC_INFO"),
+      filled: isNavItemFilled(item),
+    })),
+    ...sectionOptions
+      .filter((o) => !o.codes.some((c) => sectionCodes.includes(c)))
+      .map((o) => ({
+        key: o.code,
+        label: o.label,
+        codes: o.codes,
+        included: false,
+        order: 0,
+        navIndex: -1,
+        fixed: false,
+        filled: false,
+      })),
+  ];
+
   /*
     마지막으로 저장한 내용과 지금 입력이 같으면 저장할 것이 없다.
     누를 수는 있는데 아무 일도 안 일어나면 저장이 안 된 건지 헷갈린다.
@@ -369,6 +401,21 @@ export function ResumeEditor({
           reject(err);
         }
       });
+    });
+  }
+
+  /**
+   * 창에서 고른 기준으로 점검한다. 기준이 바뀌었으면 먼저 바꾼 뒤 그 기준으로 본다.
+   * 기준을 바꾸는 동안에도 버튼이 도는 상태여야 해서 점검까지 한 전환으로 묶는다.
+   */
+  function handleReviewWithAgent() {
+    setReviewPickerOpen(false);
+    startTemplateChange(async () => {
+      if (pickedAgentId && pickedAgentId !== resume.templateId) {
+        const next = await changeResumeTemplateAction(resume.id, pickedAgentId);
+        if (next) setDetail(next);
+      }
+      await handleReview();
     });
   }
 
@@ -442,238 +489,12 @@ export function ResumeEditor({
     setTimeout(() => handlePrint(), 200);
   }
 
-  return (
-    // 양식 선택은 편집 폼을 밀어내지 않도록 2단 그리드 바깥, 전체 폭에 둔다.
-    <div className="space-y-6">
-      {/*
-        점검은 이력서 전체를 보는 기능이고 그 기준을 정하는 것이 여기서 고른 에이전트라,
-        버튼을 카드 밖에 두지 않고 같은 상자 오른쪽에 넣는다.
-      */}
-      <div className="print:hidden">
-        <ResumeAgentPicker
-          agents={templates}
-          value={resume.templateId ?? undefined}
-          onChange={handleTemplateChange}
-          pending={isChangingTemplate}
-          action={
-            <AiButton onClick={handleReview} loading={isReviewing}>
-              이력서 전체 점검
-            </AiButton>
-          }
-        />
-      </div>
-
-      <div className="space-y-4 print:hidden">
-        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
-          <div className="min-w-48 flex-1">
-            <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
-              이력서 이름
-            </Label>
-            <CompactInput
-              id="resume-title"
-              placeholder="제목을 입력해주세요"
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="mt-1"
-            />
-          </div>
-        </div>
-
-        {reviewResult && (
-          <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-body-2">
-                AI 점검 결과 <Badge className="bg-brand-blue-400">{reviewResult.score}점</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-label-1">
-              {reviewResult.strengths.length > 0 && (
-                <div>
-                  <p className="font-semibold text-emerald-700">잘 작성된 부분</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.strengths.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {reviewResult.improvements.length > 0 && (
-                <div>
-                  <p className="font-semibold text-orange-700">보완할 부분</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.improvements.map((s, i) => (
-                      <li key={i}>{s.comment}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {reviewResult.missingInformation.length > 0 && (
-                <div>
-                  <p className="font-semibold text-orange-700">누락된 정보</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.missingInformation.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        )}
-
-        {reviewResult && marketComparison && (
-          <MarketComparisonCard
-            key={marketComparison.analysisId ?? "no-analysis"}
-            view={marketComparison}
-            source="resume_review"
-          />
-        )}
-
-        {/*
-          왼쪽은 항목 목록, 오른쪽은 지금 채우는 항목 하나.
-          좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
-        */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-          {/*
-            사이드바 한 곳에서 이력서의 상태(완성도)와 구성(항목)을 함께 본다.
-            완성도만 아래 고정바에 두면 "얼마나 남았는지"와 "무엇을 더 담을 수 있는지"가
-            화면 양 끝으로 갈라져, 완성도를 올리려고 항목을 손보는 흐름이 끊긴다.
-          */}
-          <nav className="rounded-xl bg-white p-4 lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
-            <div className="flex items-baseline justify-between gap-2">
-              <p className="text-label-1 font-bold text-slate-900">이력서 완성도</p>
-              <p className="text-body-1 font-bold text-brand-blue-600">{liveCompleteness.score}%</p>
-            </div>
-            <Progress value={liveCompleteness.score} className="mt-2 h-2" />
-            <p className="mt-2 text-label-2 text-slate-500">
-              {liveCompleteness.missing.length > 0
-                ? `다음은 ${liveCompleteness.missing[0].label} 차례예요.`
-                : `${form.name ? `${form.name} 회원님의 ` : ""}이력서가 다 채워졌어요!`}
-            </p>
-
-            <div className="mt-4 border-t border-border pt-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="px-1 text-label-2 font-semibold text-slate-400">담긴 항목 {navItems.length}개</p>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-7 px-2 text-label-2 text-slate-500"
-                  onClick={() => setReordering((v) => !v)}
-                >
-                  {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
-                </Button>
-              </div>
-
-              <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
-                {navItems.map((item, idx) => {
-                  const filled = isNavItemFilled(item);
-                  const isActive = item.key === activeItem?.key;
-                  const fixed = item.codes.includes("BASIC_INFO");
-                  return (
-                    <li key={item.key} className="shrink-0 lg:shrink">
-                      <div
-                        className={cn(
-                          "group flex items-center rounded-lg transition-colors",
-                          isActive ? "bg-brand-blue-50" : "hover:bg-slate-50",
-                        )}
-                      >
-                        <button
-                          type="button"
-                          onClick={() => setActiveKey(item.key)}
-                          aria-current={isActive}
-                          className={cn(
-                            // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
-                            "flex min-w-0 flex-1 max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 lg:max-w-none",
-                            isActive ? "font-semibold text-brand-blue-700" : "text-slate-600",
-                          )}
-                        >
-                          <span
-                            className={cn(
-                              "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
-                              filled
-                                ? "bg-brand-blue-600 text-white"
-                                : isActive
-                                  ? "bg-white text-brand-blue-700 ring-1 ring-brand-blue-200"
-                                  : "bg-slate-100 text-slate-400",
-                            )}
-                          >
-                            {filled ? <Check className="size-3.5" /> : idx + 1}
-                          </span>
-                          <span className="truncate">{item.label}</span>
-                        </button>
-
-                        {/*
-                          기본정보는 이력서가 이력서이기 위한 최소한이라 뺄 수 없고, 자리도 맨 위에
-                          고정한다. 이름과 연락처가 문서 중간에 오면 이력서로 안 읽힌다.
-                        */}
-                        {fixed ? (
-                          <span className="shrink-0 pr-3 text-label-2 text-slate-400">필수</span>
-                        ) : reordering ? (
-                          <span className="flex shrink-0 items-center pr-1">
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              aria-label={`${item.label} 위로`}
-                              disabled={idx === firstMovableIndex}
-                              onClick={() => moveSectionItem(item, -1)}
-                            >
-                              <ArrowUp className="size-3.5 text-slate-400" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              aria-label={`${item.label} 아래로`}
-                              disabled={idx === navItems.length - 1}
-                              onClick={() => moveSectionItem(item, 1)}
-                            >
-                              <ArrowDown className="size-3.5 text-slate-400" />
-                            </Button>
-                          </span>
-                        ) : (
-                          <Button
-                            variant="ghost"
-                            size="icon-xs"
-                            className="mr-1.5 shrink-0"
-                            aria-label={`${item.label} 빼기`}
-                            onClick={() => removeSectionItem(item)}
-                          >
-                            <Minus className="size-4 text-slate-400" />
-                          </Button>
-                        )}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            {/*
-              뺀 항목은 목록에서 지우지 않고 아래로 내려둔다. 사라지면 다시 담을 방법을
-              찾아야 하고, 무엇을 더 담을 수 있는지도 알 수 없다.
-            */}
-            {addableSections.length > 0 && (
-              <div className="mt-4 border-t border-border pt-3">
-                <p className="px-1 pb-1 text-label-2 font-semibold text-slate-400">더 담을 수 있는 항목</p>
-                <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
-                  {addableSections.map((option) => (
-                    <li key={option.code} className="shrink-0 lg:shrink">
-                      <button
-                        type="button"
-                        onClick={() => setSectionCodes((prev) => [...prev, option.code])}
-                        className="flex w-full cursor-pointer items-center justify-between gap-2 rounded-lg py-2 pr-1.5 pl-2.5 text-left text-label-1 text-slate-500 transition-colors hover:bg-slate-50"
-                      >
-                        <span className="truncate">{option.label}</span>
-                        <Plus className="size-4 shrink-0 text-slate-400" />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </nav>
-
-          <div className="min-w-0 flex-1">
-          {showSection("BASIC_INFO") && (
+  /*
+    항목별 카드. 사이드바에서 정한 순서대로 그려야 하므로 코드로 꺼내 쓸 수 있게 모아둔다.
+    JSX 를 쓰인 자리에 그대로 두면 파일에 적힌 순서로만 나와, 순서를 바꿔도 화면이 그대로다.
+  */
+  const sectionCards: Record<string, React.ReactNode> = {
+    BASIC_INFO: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-body-1 font-semibold">기본정보</CardTitle>
@@ -718,9 +539,8 @@ export function ResumeEditor({
                 </Field>
               </CardContent>
             </Card>
-          )}
-
-          {showSection("SUMMARY") && (
+    ),
+    SUMMARY: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
@@ -754,9 +574,8 @@ export function ResumeEditor({
                 )}
               </CardContent>
             </Card>
-          )}
-
-          {showSection("EXPERIENCE") && (
+    ),
+    EXPERIENCE: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">경력</CardTitle>
@@ -910,9 +729,8 @@ export function ResumeEditor({
                 ))}
               </CardContent>
             </Card>
-          )}
-
-          {showSection("EDUCATION") && (
+    ),
+    EDUCATION: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">학력</CardTitle>
@@ -1060,9 +878,8 @@ export function ResumeEditor({
                 })}
               </CardContent>
             </Card>
-          )}
-
-          {showSection("QUALIFICATION") && (
+    ),
+    QUALIFICATION: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">보유 자격</CardTitle>
@@ -1125,9 +942,8 @@ export function ResumeEditor({
                 ))}
               </CardContent>
             </Card>
-          )}
-
-          {showSection("SKILLS") && (
+    ),
+    SKILLS: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-body-1 font-semibold">보유 스킬</CardTitle>
@@ -1179,9 +995,8 @@ export function ResumeEditor({
                 </div>
               </CardContent>
             </Card>
-          )}
-
-          {showSection("TRAINING") && (
+    ),
+    TRAINING: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">교육/훈련</CardTitle>
@@ -1254,9 +1069,8 @@ export function ResumeEditor({
                 ))}
               </CardContent>
             </Card>
-          )}
-
-          {(showSection("PROJECT") || showSection("ACTIVITY")) && (
+    ),
+    EXTRA: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-body-1 font-semibold">봉사·수상 등 추가 경력</CardTitle>
@@ -1319,7 +1133,218 @@ export function ResumeEditor({
                 ))}
               </CardContent>
             </Card>
-          )}
+    ),
+  };
+
+  return (
+    <div className="space-y-6">
+
+      <div className="space-y-4 print:hidden">
+        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
+          <div className="min-w-48 flex-1">
+            <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
+              이력서 이름
+            </Label>
+            <CompactInput
+              id="resume-title"
+              placeholder="제목을 입력해주세요"
+              value={form.title}
+              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              className="mt-1"
+            />
+          </div>
+        </div>
+
+        {reviewResult && (
+          <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between text-body-2">
+                AI 점검 결과 <Badge className="bg-brand-blue-400">{reviewResult.score}점</Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-label-1">
+              {reviewResult.strengths.length > 0 && (
+                <div>
+                  <p className="font-semibold text-emerald-700">잘 작성된 부분</p>
+                  <ul className="ml-4 list-disc text-slate-600">
+                    {reviewResult.strengths.map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {reviewResult.improvements.length > 0 && (
+                <div>
+                  <p className="font-semibold text-orange-700">보완할 부분</p>
+                  <ul className="ml-4 list-disc text-slate-600">
+                    {reviewResult.improvements.map((s, i) => (
+                      <li key={i}>{s.comment}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {reviewResult.missingInformation.length > 0 && (
+                <div>
+                  <p className="font-semibold text-orange-700">누락된 정보</p>
+                  <ul className="ml-4 list-disc text-slate-600">
+                    {reviewResult.missingInformation.map((s, i) => (
+                      <li key={i}>{s}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {reviewResult && marketComparison && (
+          <MarketComparisonCard
+            key={marketComparison.analysisId ?? "no-analysis"}
+            view={marketComparison}
+            source="resume_review"
+          />
+        )}
+
+        {/*
+          왼쪽은 항목 목록, 오른쪽은 지금 채우는 항목 하나.
+          좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
+        */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+          {/*
+            사이드바 한 곳에서 이력서의 상태(완성도)와 구성(항목)을 함께 본다.
+            완성도만 아래 고정바에 두면 "얼마나 남았는지"와 "무엇을 더 담을 수 있는지"가
+            화면 양 끝으로 갈라져, 완성도를 올리려고 항목을 손보는 흐름이 끊긴다.
+          */}
+          <nav className="rounded-xl bg-white p-4 lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-label-1 font-bold text-slate-900">이력서 완성도</p>
+              <p className="text-body-1 font-bold text-brand-blue-600">{liveCompleteness.score}%</p>
+            </div>
+            <Progress value={liveCompleteness.score} className="mt-2 h-2" />
+            <p className="mt-2 text-label-2 text-slate-500">
+              {liveCompleteness.missing.length > 0
+                ? `다음은 ${liveCompleteness.missing[0].label} 차례예요.`
+                : `${form.name ? `${form.name} 회원님의 ` : ""}이력서가 다 채워졌어요!`}
+            </p>
+
+            {/*
+              점검은 "무엇을 기준으로 볼지"를 먼저 정해야 하는 일이다. 기준(에이전트) 네 개를
+              늘 펼쳐두면 쓰지도 않을 선택지가 화면 위 한 줄을 계속 차지한다. 버튼 하나로 두고,
+              누르면 기준을 고르는 창을 띄운다.
+            */}
+            <AiButton
+              className="mt-4 w-full"
+              onClick={() => setReviewPickerOpen(true)}
+              loading={isReviewing || isChangingTemplate}
+            >
+              AI 이력서 점검 받기
+            </AiButton>
+
+            <div className="mt-4 border-t border-border pt-3">
+              <div className="flex items-center justify-between gap-2">
+                <p className="px-1 text-label-2 font-semibold text-slate-400">이력서 항목 {navItems.length}/{sectionRows.length}</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-label-2 text-slate-500"
+                  onClick={() => setReordering((v) => !v)}
+                >
+                  {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
+                </Button>
+              </div>
+
+              <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+                {sectionRows.map((row) => (
+                  <li key={row.key} className="shrink-0 lg:shrink">
+                    <div className="flex items-center rounded-lg transition-colors hover:bg-slate-50">
+                      <button
+                        type="button"
+                        disabled={!row.included}
+                        onClick={() => scrollToSection(row.key)}
+                        className={cn(
+                          // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
+                          "flex max-w-40 min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 lg:max-w-none",
+                          row.included ? "cursor-pointer text-slate-700" : "text-slate-400",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
+                            !row.included
+                              ? "text-slate-300"
+                              : row.filled
+                                ? "bg-brand-blue-600 text-white"
+                                : "bg-slate-100 text-slate-400",
+                          )}
+                        >
+                          {/* 안 담은 항목은 자리만 비워 이름 끝이 위아래로 맞게 둔다. */}
+                          {!row.included ? "" : row.filled ? <Check className="size-3.5" /> : row.order}
+                        </span>
+                        <span className="truncate">{row.label}</span>
+                      </button>
+
+                      {/*
+                        기본정보는 이력서가 이력서이기 위한 최소한이라 뺄 수 없고, 자리도 맨 위에
+                        고정한다. 이름과 연락처가 문서 중간에 오면 이력서로 안 읽힌다.
+                      */}
+                      {row.fixed ? (
+                        <span className="shrink-0 pr-3 text-label-2 text-slate-400">필수</span>
+                      ) : !row.included ? (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          className="mr-1.5 shrink-0"
+                          aria-label={`${row.label} 담기`}
+                          onClick={() => addSectionRow(row)}
+                        >
+                          <Plus className="size-4 text-slate-400" />
+                        </Button>
+                      ) : reordering ? (
+                        <span className="flex shrink-0 items-center pr-1">
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={`${row.label} 위로`}
+                            disabled={row.navIndex === firstMovableIndex}
+                            onClick={() => moveSectionItem(row, -1)}
+                          >
+                            <ArrowUp className="size-3.5 text-slate-400" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-xs"
+                            aria-label={`${row.label} 아래로`}
+                            disabled={row.navIndex === navItems.length - 1}
+                            onClick={() => moveSectionItem(row, 1)}
+                          >
+                            <ArrowDown className="size-3.5 text-slate-400" />
+                          </Button>
+                        </span>
+                      ) : (
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          className="mr-1.5 shrink-0"
+                          aria-label={`${row.label} 빼기`}
+                          onClick={() => removeSectionItem(row)}
+                        >
+                          <Minus className="size-4 text-slate-400" />
+                        </Button>
+                      )}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </nav>
+
+          <div className="min-w-0 flex-1 space-y-4">
+            {navItems.map((item) => (
+              /* 사이드바에서 누르면 이 자리로 내려온다. 헤더에 제목이 가리지 않게 여백을 둔다. */
+              <div key={item.key} id={sectionAnchorId(item.key)} className="scroll-mt-24">
+                {sectionCards[item.key]}
+              </div>
+            ))}
           </div>
         </div>
       </div>
@@ -1384,6 +1409,65 @@ export function ResumeEditor({
           </div>
         </div>
       </div>
+
+      <Dialog
+        open={reviewPickerOpen}
+        onOpenChange={(next) => {
+          // 열 때마다 지금 기준으로 되돌린다. 고르다 닫은 값이 다음에 남아있으면 안 된다.
+          if (next) setPickedAgentId(resume.templateId);
+          setReviewPickerOpen(next);
+        }}
+      >
+        <DialogContent className="print:hidden sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>어떤 기준으로 점검할까요?</DialogTitle>
+            <DialogDescription>
+              고른 기준에 맞춰 AI가 이력서를 처음부터 끝까지 살펴봅니다.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            {templates.map((template) => {
+              const agent = resolveResumeAgent(template);
+              const picked = agent.id === pickedAgentId;
+              return (
+                <button
+                  key={agent.id}
+                  type="button"
+                  aria-pressed={picked}
+                  onClick={() => setPickedAgentId(agent.id)}
+                  className={cn(
+                    "flex w-full cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
+                    picked ? "border-brand-blue-600 bg-brand-blue-50" : "border-border bg-white hover:border-brand-blue-200",
+                  )}
+                >
+                  <span
+                    className={cn(
+                      "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
+                      picked ? "border-brand-blue-600 bg-brand-blue-600" : "border-slate-300",
+                    )}
+                  >
+                    {picked && <Check className="size-3 text-white" />}
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block text-body-2 font-semibold text-slate-900">{agent.name}</span>
+                    {agent.description && (
+                      <span className="mt-0.5 block text-label-1 text-slate-500">{agent.description}</span>
+                    )}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReviewPickerOpen(false)}>
+              취소
+            </Button>
+            <Button disabled={!pickedAgentId} onClick={handleReviewWithAgent}>
+              이 기준으로 점검
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="print:hidden sm:max-w-3xl">
