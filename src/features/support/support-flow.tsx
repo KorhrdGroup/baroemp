@@ -89,6 +89,11 @@ interface StepConfig {
   title: string;
   description?: string;
   required: boolean;
+  /**
+   * 선택지가 한 화면에 안 들어가는 단계. "아래에 더 있어요" 힌트를 띄운다.
+   * 화면 높이로 추측하면 기기마다 결과가 갈리므로 단계마다 직접 지정한다.
+   */
+  scrollHint?: boolean;
 }
 
 type GroupKey = "basic" | "status" | "intent";
@@ -101,7 +106,8 @@ const GROUPS: { key: GroupKey; label: string }[] = [
 
 const STEPS: StepConfig[] = [
   { id: "birthYear", group: "basic", title: "출생연도를 알려주세요", description: "연령 조건이 있는 제도를 정확히 찾아드리기 위해 필요해요.", required: true },
-  { id: "region", group: "basic", title: "거주지역이 어디인가요?", required: true },
+  // 17개 시도를 3열 격자로 깔아 여섯 줄이 되므로 한 화면에 안 들어간다.
+  { id: "region", group: "basic", title: "거주지역이 어디인가요?", required: true, scrollHint: true },
   {
     id: "householdTraits",
     group: "basic",
@@ -829,8 +835,8 @@ export function SupportFlow({
 
         {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
 
-        {/* 선택지가 화면을 넘치면 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
-        <ScrollMoreHint />
+        {/* 선택지가 긴 단계에서만 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
+        {step.scrollHint && <ScrollMoreHint key={step.id} />}
       </div>
 
       {/* 하단 고정 CTA */}
