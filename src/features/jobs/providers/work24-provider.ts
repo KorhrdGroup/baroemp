@@ -122,11 +122,11 @@ export function adaptWork24Entry(entry: Record<string, unknown>, fetchedAt: stri
   return {
     externalSource: "work24",
     externalId,
-    companyName: toStr(entry.company) ?? "",
+    companyName: cleanLineText(entry.company) ?? "",
     businessRegistrationNumber: toStr(entry.busino),
-    industryName: toStr(entry.indTpNm),
-    title: toStr(entry.title) ?? "",
-    description: toStr(entry.title),
+    industryName: cleanLineText(entry.indTpNm),
+    title: cleanLineText(entry.title) ?? "",
+    description: cleanLineText(entry.title),
     // XML 파서(parseTagValue)가 "029202"를 숫자 29202로 바꿔 앞자리 0이 사라지므로 6자리로 복원한다.
     occupationCode: toJobsCode(entry.jobsCd),
     occupationName: undefined,
@@ -144,7 +144,7 @@ export function adaptWork24Entry(entry: Record<string, unknown>, fetchedAt: stri
     educationRequirement,
     qualificationRequirements: undefined,
     workHours: undefined,
-    workDays: toStr(entry.holidayTpNm),
+    workDays: cleanLineText(entry.holidayTpNm),
     preferentialCodes,
     recommendedAgeGroups: guessRecommendedAgeGroups(preferentialCodes),
     applyDeadline: toIsoDate(entry.closeDt),
@@ -160,12 +160,13 @@ export function adaptWork24Entry(entry: Record<string, unknown>, fetchedAt: stri
 
 
 /**
- * 고용24 상세 본문의 이중 이스케이프를 푼다.
+ * 고용24 텍스트의 이스케이프를 푼다.
  *
- * 원본 XML 에 &amp;#xd; 로 들어 있어 파서가 &amp; 만 풀고 "&#xd;" 가 글자로 남는다.
- * 상세를 받은 공고 29,802건에서 이 문자열이 본문에 그대로 보였다.
- * 숫자 엔티티를 먼저 풀어야 한다 - 이름 엔티티를 먼저 풀면 "&amp;#xd;" 가
- * "&#xd;" 로 되살아나 한 번 더 남는다.
+ * 원본 XML 에 &amp;#xd; 로 들어 있어 파서가 &amp; 만 풀면 "&#xd;" 가 글자로 남는다.
+ * 한 번만 풀면 이 남은 것을 못 잡는다 - 숫자 엔티티를 먼저 풀어도 처음 글자는
+ * "&amp;#xd;" 라 숫자 규칙에 걸리지 않고, 이름 규칙이 &amp; 를 풀어 "&#xd;" 를 만들어
+ * 놓은 채 끝난다. 실제로 근무시간 13,570건에 이 문자열이 그대로 남아 있었다.
+ * 그래서 더 풀리지 않을 때까지 돌린다. 몇 겹으로 싸여 있어도 끝까지 벗겨진다.
  */
 const NAMED_ENTITIES: Record<string, string> = {
   amp: "&",
@@ -176,11 +177,23 @@ const NAMED_ENTITIES: Record<string, string> = {
   nbsp: " ",
 };
 
-function decodeEntities(text: string): string {
+/** 한 번 벗기기. 겹쳐 있으면 남을 수 있어 아래 decodeEntities 가 반복해 부른다. */
+function decodeEntitiesOnce(text: string): string {
   return text
     .replace(/&#x([0-9a-fA-F]+);/g, (_, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
     .replace(/&#(\d+);/g, (_, dec: string) => String.fromCodePoint(Number(dec)))
     .replace(/&(amp|lt|gt|quot|apos|nbsp);/g, (_, name: string) => NAMED_ENTITIES[name] ?? _);
+}
+
+function decodeEntities(text: string): string {
+  let current = text;
+  // 겹은 많아야 두세 겹이다. 이상한 입력에 무한히 돌지 않도록 횟수를 막아 둔다.
+  for (let i = 0; i < 5; i += 1) {
+    const next = decodeEntitiesOnce(current);
+    if (next === current) break;
+    current = next;
+  }
+  return current;
 }
 
 /** 상세 본문용: 엔티티를 풀고 줄바꿈을 정리한다. */
@@ -192,6 +205,17 @@ function cleanDetailText(value: unknown): string | undefined {
     .replace(/[ \t]+$/gm, "")     // 줄 끝 공백
     .replace(/\n{3,}/g, "\n\n")  // 빈 줄이 셋 이상이면 둘로
     .trim();
+  return cleaned || undefined;
+}
+
+/**
+ * 한 줄짜리 값용: 엔티티를 풀고 줄바꿈·연속 공백을 공백 하나로 만든다.
+ * 제목·주소처럼 한 줄로 읽히는 칸에 CR 이 그대로 들어가면 목록에서 줄이 깨진다.
+ */
+function cleanLineText(value: unknown): string | undefined {
+  const text = toStr(value);
+  if (!text) return undefined;
+  const cleaned = decodeEntities(text).replace(/\s+/g, " ").trim();
   return cleaned || undefined;
 }
 
@@ -301,7 +325,7 @@ export class Work24JobProvider extends BaseJobProvider {
 
     return {
       externalId,
-      title: cleanDetailText(detail.wantedTitle),
+      title: cleanLineText(detail.wantedTitle),
       description: cleanDetailText(detail.jobCont),
       requirements: cleanDetailText(detail.enterTpNm),
       qualificationRequirements: cleanDetailText(detail.certNm) ?? cleanDetailText(detail.licenseNm),

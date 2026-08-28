@@ -13,11 +13,12 @@
  *
  * 배경 대비가 테두리보다 눈에 잘 띄어서 중장년 사용자에게도 유리하다.
  *
- * 색은 KRDS 가 흰 표면 호버에 쓰는 회색 5→10 단계에 맞췄다.
- * (KRDS gray-5 #F8F8F8 / gray-10 #F0F0F0, 이 프로젝트의 slate-50/100 과 거의 같다)
+ * 색은 아주 옅은 파랑이다. 회색으로 두면 "눌러서 가는 카드"와 그냥 회색 면이
+ * 같은 색으로 밝아져 무엇이 반응한 것인지 흐렸다. 브랜드 파랑의 가장 옅은 단계를
+ * 더 묽혀 쓰므로 흰 카드 위에서 아주 밝게 얹힌다.
  */
 export const interactiveCardClass =
-  "transition-colors duration-200 ease-in-out hover:bg-slate-50 active:bg-slate-100";
+  "transition-colors duration-200 ease-in-out hover:bg-brand-blue-50/60 active:bg-brand-blue-50";
 
 /**
  * 회색 면 위에 얹힌 목록 행의 호버.

@@ -21,11 +21,14 @@ import { toggleSupportBookmarkAction, trackAnonymousSupportBookmarkAction } from
 export function SupportBookmarkButton({
   supportProgramId,
   variant = "icon",
+  className,
   isAuthenticated = false,
   initialBookmarked = false,
 }: {
   supportProgramId: string;
   variant?: "icon" | "full";
+  /** 카드가 통째로 Link일 때 버튼을 겹쳐 놓기 위한 위치 지정용. */
+  className?: string;
   isAuthenticated?: boolean;
   initialBookmarked?: boolean;
 }) {
@@ -62,14 +65,16 @@ export function SupportBookmarkButton({
 
   if (variant === "full") {
     return (
-      <Button
-        type="button"
-        variant="outline"
-        onClick={handleClick}
-        disabled={pending}
-      >
+      <Button type="button" variant="outline" onClick={handleClick} disabled={pending}>
+        {/*
+          찜은 하단바에서 "지원하러 가기" 옆에 선다. 채운 파랑으로 두면 파란 버튼이
+          둘이 되어 어느 것이 주 동작인지 흐려진다. 흰 버튼으로 두고 찜한 상태만
+          책갈피를 파랗게 채워 알린다.
+        */}
+        <Bookmark
+          className={cn("size-4", bookmarked ? "fill-brand-blue-400 text-brand-blue-400" : "text-slate-400")}
+        />
         {bookmarked ? "찜 완료" : "찜하기"}
-        <Bookmark className={cn("size-4", bookmarked ? "fill-brand-blue-500 text-brand-blue-500" : "text-slate-400")} />
       </Button>
     );
   }
@@ -82,13 +87,15 @@ export function SupportBookmarkButton({
       aria-label={bookmarked ? "찜 취소" : "찜하기"}
       aria-pressed={bookmarked}
       className={cn(
-        "flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors",
+        // 크기는 공고 카드의 찜 버튼과 같게 둔다. 같은 동작이 카드마다 다른 크기면 안 된다.
+        "flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors",
         bookmarked
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-600"
           : "border-border bg-white text-slate-400",
+        className,
       )}
     >
-      <Bookmark className={cn("size-4", bookmarked && "fill-current")} />
+      <Bookmark className={cn("size-[18px]", bookmarked && "fill-current")} />
     </button>
   );
 }

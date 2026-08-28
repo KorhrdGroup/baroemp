@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowUp, Briefcase, ChevronDown, ChevronUp, GraduationCap, HeartHandshake, Landmark, MapPin } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -43,10 +43,12 @@ function CollapsibleSection({
   category,
   label,
   items,
+  bookmarkedSet,
 }: {
   category: string;
   label: string;
   items: ResultItem[];
+  bookmarkedSet: Set<string>;
 }) {
   const [expanded, setExpanded] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
@@ -88,6 +90,8 @@ function CollapsibleSection({
             grade={(matchResult.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade}
             score={matchResult.score}
             reasons={matchResult.reasons}
+            isAuthenticated
+            isBookmarked={bookmarkedSet.has(program.id)}
           />
         ))}
       </div>
@@ -131,11 +135,15 @@ function ScrollToTopButton() {
 export function SupportResultSections({
   categories,
   gradeCounts,
+  bookmarkedIds = [],
 }: {
   categories: ResultCategory[];
   gradeCounts: Record<SupportEligibilityGrade, number>;
+  /** 로그인 회원이 이미 찜해둔 지원제도. 카드의 찜 버튼 초기 상태로 쓴다. */
+  bookmarkedIds?: string[];
 }) {
   const [activeGrade, setActiveGrade] = useState<SupportEligibilityGrade | null>(null);
+  const bookmarkedSet = useMemo(() => new Set(bookmarkedIds), [bookmarkedIds]);
 
   const filtered = activeGrade
     ? categories
@@ -176,6 +184,7 @@ export function SupportResultSections({
             category={group.category}
             label={group.label}
             items={group.items}
+            bookmarkedSet={bookmarkedSet}
           />
         ))}
       </div>

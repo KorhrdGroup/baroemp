@@ -15,6 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { isMidlifeRecommended } from "./job-card";
 import { cn } from "@/lib/utils";
 import { formatSalary } from "@/lib/salary";
 import { labelCareerRequirement, labelQualification, labelRegion, labelWorkType } from "@/lib/labels";
@@ -164,9 +165,19 @@ export function JobDetailView({
         <BackButton fallbackHref="/jobs" label="목록으로 돌아가기" />
       </div>
 
+      {/* 카드의 배지 줄과 같은 것을 같게 보여준다. 그림문자 규칙도 카드와 같다(JobCard 주석 참고). */}
       <div className="mb-4 flex flex-wrap items-center gap-1.5">
         {job.isBeginnerFriendly && (
-          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">신입가능</Badge>
+          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
+            <span aria-hidden className="mr-0.5">🌱</span>
+            신입가능
+          </Badge>
+        )}
+        {isMidlifeRecommended(job) && (
+          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
+            <span aria-hidden className="mr-0.5">🙌</span>
+            중장년 추천
+          </Badge>
         )}
         {job.externalSource && (
           <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
