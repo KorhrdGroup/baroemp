@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { requireUser } from "@/lib/auth/session";
-import { getCoverLetterRepository, getCoverLetterTemplateRepository } from "@/lib/repositories";
+import { getCoverLetterRepository, getCoverLetterTemplateRepository, getResumeRepository } from "@/lib/repositories";
 import { getCoverLetterDetail } from "@/services/cover-letter.service";
 import { listExperienceBankForUser } from "@/services/experience-bank.service";
 import { CoverLetterEditor } from "@/features/cover-letter/cover-letter-editor";
@@ -22,12 +22,16 @@ export default async function CoverLetterEditPage({
   if (!coverLetter || coverLetter.userId !== user.id) notFound();
 
   // 양식 선택을 별도 Step으로 두지 않고 편집 화면 상단에서 바꿀 수 있게 목록을 함께 내려준다.
-  const [detail, experienceBank, templates] = await Promise.all([
+  const [detail, experienceBank, templates, linkedResume] = await Promise.all([
     getCoverLetterDetail(id),
     listExperienceBankForUser(user.id),
     getCoverLetterTemplateRepository().findAll({ status: "active" }),
+    // 문서에 찍을 지원자 이름. 연결된 이력서에 적어둔 이름을 먼저 쓴다.
+    coverLetter.resumeId ? getResumeRepository().findById(coverLetter.resumeId) : Promise.resolve(null),
   ]);
   if (!detail) notFound();
+
+  const applicantName = linkedResume?.name?.trim() || user.name?.trim() || undefined;
 
   const templateOptions = [...templates]
     .sort((a, b) => a.orderIndex - b.orderIndex)
@@ -47,6 +51,7 @@ export default async function CoverLetterEditPage({
         initialDetail={detail}
         experienceBank={experienceBank}
         templates={templateOptions}
+        applicantName={applicantName}
       />
       </div>
     </div>

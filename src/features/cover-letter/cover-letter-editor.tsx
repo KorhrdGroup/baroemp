@@ -52,10 +52,13 @@ export function CoverLetterEditor({
   initialDetail,
   experienceBank,
   templates = [],
+  applicantName,
 }: {
   initialDetail: CoverLetterDetail;
   experienceBank: ExperienceBankItem[];
   templates?: CoverLetterTemplateOption[];
+  /** 미리보기 문서에 찍는 지원자 이름. 편집 폼에는 쓰지 않는다. */
+  applicantName?: string;
 }) {
   const [detail, setDetail] = useState(initialDetail);
   const [title, setTitle] = useState(initialDetail.coverLetter.title);
@@ -71,6 +74,8 @@ export function CoverLetterEditor({
   // 양식을 바꾸면 새 양식에 없는 문항의 답이 사라져 먼저 확인을 받는다.
   const [confirmingTemplateId, setConfirmingTemplateId] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  /** 마지막으로 저장한 내용의 스냅샷. 변경 여부를 이 값과 비교해 판단한다. */
+  const savedSnapshot = useRef<string | null>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const marketComparisonRequestedRef = useRef(false);
 
@@ -108,16 +113,30 @@ export function CoverLetterEditor({
     });
   }
 
+  /**
+   * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
+   * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
+   */
+  function buildSavePayload() {
+    return {
+      coverLetter: { id: detail.coverLetter.id, title },
+      sections: sections.map(stripKey),
+    };
+  }
+
   function handleSave() {
     return new Promise<void>((resolve, reject) => {
       startSave(async () => {
         try {
-          const saved = await saveCoverLetterAction({
-            coverLetter: { id: detail.coverLetter.id, title },
-            sections: sections.map(stripKey),
-          });
+          const saved = await saveCoverLetterAction(buildSavePayload());
           setDetail(saved);
           setSections(saved.sections.map((s) => ({ ...s, _key: nextKey() })));
+          /*
+            여기서 바로 스냅샷을 찍으면 위 setState 들이 아직 반영되기 전이라
+            서버가 새로 부여한 id 가 빠진 값이 찍힌다. 비워두면 다음 렌더에서
+            저장된 상태 그대로 다시 잡힌다.
+          */
+          savedSnapshot.current = null;
           setSaveMessage("저장 완료");
           resolve();
         } catch (err) {
@@ -229,6 +248,14 @@ export function CoverLetterEditor({
   const writtenCount = sections.filter((sec) => sec.content?.trim()).length;
   const writtenRatio = sections.length > 0 ? Math.round((writtenCount / sections.length) * 100) : 0;
   const firstEmptyIndex = sections.findIndex((sec) => !sec.content?.trim());
+
+  /*
+    마지막으로 저장한 내용과 지금 입력이 같으면 저장할 것이 없다.
+    누를 수는 있는데 아무 일도 안 일어나면 저장이 안 된 건지 헷갈린다.
+  */
+  const currentPayload = JSON.stringify(buildSavePayload());
+  savedSnapshot.current ??= currentPayload;
+  const isDirty = currentPayload !== savedSnapshot.current;
 
   return (
     // 설정 줄(양식 선택)과 문서 사이만 넓게 띄운다. 이력서 편집과 같은 간격.
@@ -444,9 +471,9 @@ export function CoverLetterEditor({
             <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
               <Eye className="size-4" /> 미리보기
             </Button>
-            <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
+            <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
               {isSaving && <Loader2 className="size-4 animate-spin" />}
-              저장
+              {isSaving || isDirty ? "저장" : "저장됨"}
             </Button>
           </div>
         </div>
@@ -459,7 +486,7 @@ export function CoverLetterEditor({
             <DialogTitle>미리보기</DialogTitle>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border">
-            <CoverLetterPreview detail={currentPreviewDetail()} />
+            <CoverLetterPreview detail={currentPreviewDetail()} applicantName={applicantName} />
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={handlePopupPrint}>

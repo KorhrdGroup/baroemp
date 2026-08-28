@@ -52,6 +52,11 @@ export interface Resume {
   desiredJobTitle?: string;
   desiredRegion?: string;
   status: ResumeStatus;
+  /**
+   * 경력이 아예 없다고 밝힌 이력서. 빈 것과 없다고 밝힌 것은 다르다.
+   * 완성도는 이 값이 true 면 경력 항목을 채운 것으로 센다.
+   */
+  hasNoWorkExperience?: boolean;
   isPrimary: boolean;
   version: number;
   completeness: number;

@@ -152,6 +152,7 @@ export function ResumeEditor({
     phone: resume.phone ?? "",
     address: resume.address ?? "",
     portfolioUrl: resume.portfolioUrl ?? "",
+    hasNoWorkExperience: resume.hasNoWorkExperience ?? false,
   });
   const [educations, setEducations] = useState<EditableEducation[]>(withKeys(initialDetail.educations, "edu"));
   const [experiences, setExperiences] = useState<EditableExperience[]>(withKeys(initialDetail.experiences, "exp"));
@@ -180,6 +181,8 @@ export function ResumeEditor({
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   // 미리보기는 입력 폭을 좁히지 않도록 팝업으로 띄운다.
   const [previewOpen, setPreviewOpen] = useState(false);
+  /** 마지막으로 저장한 내용의 스냅샷. 변경 여부를 이 값과 비교해 판단한다. */
+  const savedSnapshot = useRef<string | null>(null);
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
@@ -219,27 +222,45 @@ export function ResumeEditor({
   */
   const liveCompleteness = calculateResumeCompleteness(currentPreviewDetail());
 
+  /*
+    마지막으로 저장한 내용과 지금 입력이 같으면 저장할 것이 없다.
+    누를 수는 있는데 아무 일도 안 일어나면 저장이 안 된 건지 헷갈린다.
+  */
+  const currentPayload = JSON.stringify(buildSavePayload());
+  // 처음 그릴 때의 값을 기준점으로 잡는다. 아직 아무것도 고치지 않은 상태다.
+  savedSnapshot.current ??= currentPayload;
+  const isDirty = currentPayload !== savedSnapshot.current;
+
+  /**
+   * 저장에 보내는 값. 변경 여부 판단도 이 값으로 한다.
+   * 판단용 데이터를 따로 만들면 저장 형식이 바뀔 때 둘이 어긋난다.
+   */
+  function buildSavePayload() {
+    return {
+      resume: { id: resume.id, ...form },
+      educations: educations.map((e) => ({
+        ...stripKey(e),
+        admissionDate: toDbDate(e.admissionDate),
+        graduationDate: toDbDate(e.graduationDate),
+      })),
+      experiences: experiences.map((e) => ({
+        ...stripKey(e),
+        startDate: toDbDate(e.startDate),
+        endDate: toDbDate(e.endDate),
+      })),
+      qualifications: qualifications.map(stripKey),
+      trainings: trainings.map(stripKey),
+      skills: skills.map(stripKey),
+      items: items.map(stripKey),
+    };
+  }
+
   function handleSave(): Promise<ResumeDetail> {
     return new Promise((resolve, reject) => {
       startSave(async () => {
         try {
-          const saved = await saveResumeAction({
-            resume: { id: resume.id, ...form },
-            educations: educations.map((e) => ({
-              ...stripKey(e),
-              admissionDate: toDbDate(e.admissionDate),
-              graduationDate: toDbDate(e.graduationDate),
-            })),
-            experiences: experiences.map((e) => ({
-              ...stripKey(e),
-              startDate: toDbDate(e.startDate),
-              endDate: toDbDate(e.endDate),
-            })),
-            qualifications: qualifications.map(stripKey),
-            trainings: trainings.map(stripKey),
-            skills: skills.map(stripKey),
-            items: items.map(stripKey),
-          });
+          const payload = buildSavePayload();
+          const saved = await saveResumeAction(payload);
           setDetail(saved);
           setEducations(withKeys(saved.educations, "edu"));
           setExperiences(withKeys(saved.experiences, "exp"));
@@ -247,6 +268,12 @@ export function ResumeEditor({
           setTrainings(withKeys(saved.trainings, "train"));
           setSkills(withKeys(saved.skills, "skill"));
           setItems(withKeys(saved.items, "item"));
+          /*
+            여기서 바로 스냅샷을 찍으면 위 setState 들이 아직 반영되기 전이라
+            서버가 새로 부여한 id 가 빠진 값이 찍힌다. 비워두면 다음 렌더에서
+            저장된 상태 그대로 다시 잡힌다.
+          */
+          savedSnapshot.current = null;
           setSaveMessage(`저장 완료 · 완성도 ${saved.resume.completeness}%`);
           resolve(saved);
         } catch (err) {
@@ -487,6 +514,7 @@ export function ResumeEditor({
                   variant="outline"
                   size="sm"
                   className="text-slate-700"
+                  disabled={Boolean(form.hasNoWorkExperience)}
                   onClick={() => {
                     const key = nextKey("exp");
                     setExperiences((prev) => [...prev, { _key: key, companyName: "", isCurrent: false, orderIndex: prev.length }]);
@@ -497,7 +525,33 @@ export function ResumeEditor({
                 </Button>
               </CardHeader>
               <CardContent className="space-y-4">
-                {experiences.length === 0 && <p className="text-label-1 text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>}
+                {/*
+                  경력이 아예 없는 회원(신입·경력단절)은 이 항목을 채울 방법이 없어
+                  완성도가 끝까지 오르지 않았다. "없다"고 밝히는 것도 답이므로
+                  체크하면 채운 것으로 센다.
+                */}
+                <label
+                  className={cn(
+                    "flex w-fit items-center gap-2 text-label-1",
+                    experiences.length > 0 ? "cursor-not-allowed text-slate-300" : "cursor-pointer text-slate-600",
+                  )}
+                >
+                  {/* 경력을 적어둔 채로 "없음"을 켜면 두 말이 어긋난다. 비었을 때만 켤 수 있다. */}
+                  <Checkbox
+                    checked={Boolean(form.hasNoWorkExperience)}
+                    disabled={experiences.length > 0}
+                    onCheckedChange={(v) => setForm((f) => ({ ...f, hasNoWorkExperience: v === true }))}
+                  />
+                  아직 경력이 없어요
+                </label>
+
+                {form.hasNoWorkExperience ? (
+                  <p className="text-label-1 text-slate-400">
+                    경력 없이도 지원할 수 있는 공고가 많습니다. 자격·교육·봉사 경험으로 채워보세요.
+                  </p>
+                ) : (
+                  experiences.length === 0 && <p className="text-label-1 text-slate-400">아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.</p>
+                )}
                 {experiences.map((exp, idx) => (
                   isEntryEditing(exp._key) ? (
                   <div key={exp._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
@@ -523,14 +577,13 @@ export function ResumeEditor({
                         <CompactInput value={exp.position ?? ""} onChange={(e) => updateAt(setExperiences, exp._key, { position: e.target.value })} />
                       </Field>
                       <Field label="입사년월">
-                        <CompactInput type="month" value={toMonth(exp.startDate)} onChange={(e) => updateAt(setExperiences, exp._key, { startDate: e.target.value })} />
+                        <MonthPicker value={toMonth(exp.startDate)} onChange={(v) => updateAt(setExperiences, exp._key, { startDate: v })} />
                       </Field>
                       <Field label="퇴사년월">
-                        <CompactInput
-                          type="month"
+                        <MonthPicker
                           value={toMonth(exp.endDate)}
                           disabled={exp.isCurrent}
-                          onChange={(e) => updateAt(setExperiences, exp._key, { endDate: e.target.value })}
+                          onChange={(v) => updateAt(setExperiences, exp._key, { endDate: v })}
                         />
                       </Field>
                     </div>
@@ -695,11 +748,11 @@ export function ResumeEditor({
                         </Field>
                         {!isSimpleEducation && (
                           <Field label="입학년월" className="sm:col-span-2">
-                            <CompactInput type="month" value={toMonth(edu.admissionDate)} onChange={(e) => updateAt(setEducations, edu._key, { admissionDate: e.target.value })} />
+                            <MonthPicker value={toMonth(edu.admissionDate)} onChange={(v) => updateAt(setEducations, edu._key, { admissionDate: v })} />
                           </Field>
                         )}
                         <Field label={isGed ? "합격년월" : "졸업년월"} className="sm:col-span-2">
-                          <CompactInput type="month" value={toMonth(edu.graduationDate)} onChange={(e) => updateAt(setEducations, edu._key, { graduationDate: e.target.value })} />
+                          <MonthPicker value={toMonth(edu.graduationDate)} onChange={(v) => updateAt(setEducations, edu._key, { graduationDate: v })} />
                         </Field>
                         {!isGed && (
                           <Field label="졸업상태" className="sm:col-span-2">
@@ -780,31 +833,41 @@ export function ResumeEditor({
                 {qualifications.length === 0 && <p className="text-label-1 text-slate-400">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
                 {qualifications.map((q, idx) => (
                   isEntryEditing(q._key) ? (
-                  <div key={q._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_1fr_auto]">
-                    <Field label="자격명">
-                      <CompactInput value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
-                    </Field>
-                    <Field label="발급기관">
-                      <CompactInput value={q.issuer ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { issuer: e.target.value })} />
-                    </Field>
-                    <Field label="취득일">
-                      <CompactInput type="date" value={q.acquiredAt ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { acquiredAt: e.target.value })} />
-                    </Field>
-                    <div className="flex items-end justify-end gap-1">
-                      <Button variant="outline" size="sm" onClick={() => setEntryEditing(q._key, false)}>
-                        완료
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setQualifications((prev) => prev.filter((x) => x._key !== q._key))}>
-                        <Trash2 className="size-4 text-slate-400" />
-                      </Button>
+                  /* 교육/훈련과 같은 구조. 연월이 두 칸이라 한 줄에 다 넣으면 좁다. */
+                  <div key={q._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-label-2 font-semibold text-slate-400">자격 {idx + 1}</p>
+                      <div className="flex items-center gap-1">
+                        <Button variant="outline" size="sm" onClick={() => setEntryEditing(q._key, false)}>
+                          완료
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setQualifications((prev) => prev.filter((x) => x._key !== q._key))}>
+                          <Trash2 className="size-4 text-slate-400" />
+                        </Button>
+                      </div>
                     </div>
+                    <div className="grid gap-2 sm:grid-cols-[1.4fr_1fr]">
+                      <Field label="자격명">
+                        <CompactInput value={q.name} onChange={(e) => updateAt(setQualifications, q._key, { name: e.target.value })} />
+                      </Field>
+                      <Field label="발급기관">
+                        <CompactInput value={q.issuer ?? ""} onChange={(e) => updateAt(setQualifications, q._key, { issuer: e.target.value })} />
+                      </Field>
+                    </div>
+                    <Field label="취득년월" className="sm:max-w-xs">
+                      {/* 다른 항목과 같이 연월만 받는다. 자격증에 일자까지 필요한 곳은 없다. */}
+                      <MonthPicker
+                        value={toMonth(q.acquiredAt)}
+                        onChange={(v) => updateAt(setQualifications, q._key, { acquiredAt: toDbDate(v) })}
+                      />
+                    </Field>
                   </div>
                   ) : (
                   <EntrySummaryCard
                     key={q._key}
                     title={q.name || "자격명 미입력"}
                     subtitle={q.issuer || undefined}
-                    meta={q.acquiredAt ? q.acquiredAt.replaceAll("-", ".") : undefined}
+                    meta={q.acquiredAt ? toMonth(q.acquiredAt).replace("-", ".") : undefined}
                     editLabel={`자격 ${idx + 1} 수정`}
                     onEdit={() => setEntryEditing(q._key, true)}
                   />
@@ -888,35 +951,44 @@ export function ResumeEditor({
               <CardContent className="space-y-3">
                 {trainings.map((t, idx) => (
                   isEntryEditing(t._key) ? (
-                  <div key={t._key} className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[1.4fr_1fr_auto_auto_auto]">
-                    <Field label="과정명">
-                      <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
-                    </Field>
-                    <Field label="교육기관">
-                      <CompactInput value={t.institution ?? ""} onChange={(e) => updateAt(setTrainings, t._key, { institution: e.target.value })} />
-                    </Field>
+                  /*
+                    연월이 연도·월 두 칸으로 늘어 한 줄에 다 넣으면 칸마다 너무 좁다.
+                    경력 편집처럼 머리줄(제목 + 완료·삭제) 아래로 두 줄에 나눠 담는다.
+                  */
+                  <div key={t._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-label-2 font-semibold text-slate-400">교육 {idx + 1}</p>
+                      <div className="flex items-center gap-1">
+                        <Button variant="outline" size="sm" onClick={() => setEntryEditing(t._key, false)}>
+                          완료
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => setTrainings((prev) => prev.filter((x) => x._key !== t._key))}>
+                          <Trash2 className="size-4 text-slate-400" />
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="grid gap-2 sm:grid-cols-[1.4fr_1fr]">
+                      <Field label="과정명">
+                        <CompactInput value={t.courseName} onChange={(e) => updateAt(setTrainings, t._key, { courseName: e.target.value })} />
+                      </Field>
+                      <Field label="교육기관">
+                        <CompactInput value={t.institution ?? ""} onChange={(e) => updateAt(setTrainings, t._key, { institution: e.target.value })} />
+                      </Field>
+                    </div>
                     {/* 다른 항목과 같이 연월만 받는다. 수료 시기가 없으면 최근 교육인지 알 수 없다. */}
-                    <Field label="시작">
-                      <CompactInput
-                        type="month"
-                        value={toMonth(t.startDate)}
-                        onChange={(e) => updateAt(setTrainings, t._key, { startDate: toDbDate(e.target.value) })}
-                      />
-                    </Field>
-                    <Field label="수료">
-                      <CompactInput
-                        type="month"
-                        value={toMonth(t.endDate)}
-                        onChange={(e) => updateAt(setTrainings, t._key, { endDate: toDbDate(e.target.value) })}
-                      />
-                    </Field>
-                    <div className="flex items-end justify-end gap-1">
-                      <Button variant="outline" size="sm" onClick={() => setEntryEditing(t._key, false)}>
-                        완료
-                      </Button>
-                      <Button variant="ghost" size="sm" onClick={() => setTrainings((prev) => prev.filter((x) => x._key !== t._key))}>
-                        <Trash2 className="size-4 text-slate-400" />
-                      </Button>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      <Field label="시작">
+                        <MonthPicker
+                          value={toMonth(t.startDate)}
+                          onChange={(v) => updateAt(setTrainings, t._key, { startDate: toDbDate(v) })}
+                        />
+                      </Field>
+                      <Field label="수료">
+                        <MonthPicker
+                          value={toMonth(t.endDate)}
+                          onChange={(v) => updateAt(setTrainings, t._key, { endDate: toDbDate(v) })}
+                        />
+                      </Field>
                     </div>
                   </div>
                   ) : (
@@ -1046,9 +1118,10 @@ export function ResumeEditor({
             <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
               <Eye className="size-4" /> 미리보기
             </Button>
-            <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving}>
+            {/* 고친 것이 없으면 누를 수 있어도 아무 일도 일어나지 않아 저장 여부가 헷갈린다. */}
+            <Button size="sm" className="min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-              저장
+              {isSaving ? "저장" : isDirty ? "저장" : "저장됨"}
             </Button>
           </div>
         </div>
@@ -1101,6 +1174,70 @@ function Field({
         {required && <RequiredMark />}
       </Label>
       {children}
+    </div>
+  );
+}
+
+
+/**
+ * 연·월을 각각 고르는 입력칸.
+ *
+ * type="month" 는 브라우저마다 달력이 다르게 뜨고, 중장년 이용자에게는 달력에서
+ * 연도를 거슬러 올라가는 조작이 특히 번거롭다. 목록에서 고르는 편이 확실하다.
+ *
+ * 값은 지금까지와 같은 "YYYY-MM" 문자열이라 저장 쪽은 달라지지 않는다.
+ * 한쪽만 고르면 나머지는 기본값을 채우고 그 값을 화면에도 그대로 보여준다
+ * (보이는 것과 저장되는 것이 어긋나지 않게 한다).
+ */
+const MONTH_PICKER_START_YEAR = 1960;
+
+function MonthPicker({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  disabled?: boolean;
+}) {
+  const [year = "", month = ""] = value ? value.split("-") : [];
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: thisYear - MONTH_PICKER_START_YEAR + 1 }, (_, i) => String(thisYear - i));
+
+  return (
+    <div className="flex gap-2">
+      <Select
+        value={year}
+        disabled={disabled}
+        onValueChange={(y) => onChange(`${y}-${month || "01"}`)}
+      >
+        <CompactSelectTrigger className="flex-1">
+          <SelectValue placeholder="연도" />
+        </CompactSelectTrigger>
+        <SelectContent>
+          {years.map((y) => (
+            <SelectItem key={y} value={y}>
+              {y}년
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <Select
+        value={month}
+        disabled={disabled}
+        onValueChange={(m) => onChange(`${year || String(thisYear)}-${m}`)}
+      >
+        <CompactSelectTrigger className="w-24">
+          <SelectValue placeholder="월" />
+        </CompactSelectTrigger>
+        <SelectContent>
+          {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((m) => (
+            <SelectItem key={m} value={m}>
+              {Number(m)}월
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
     </div>
   );
 }
