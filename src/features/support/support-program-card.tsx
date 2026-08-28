@@ -104,11 +104,16 @@ export function SupportProgramCard({
       </div>
     </Link>
 
+    {/*
+      머리줄 배지와 세로 가운데를 맞춘다. 카드 위 여백이 20px(pt-5)이고 버튼이 32px 라
+      top-5 로 두면 버튼 가운데(36px)가 적합등급 배지 가운데와 같은 자리에 온다.
+      top-3.5 로 두면 4px 떠서 배지와 짝지어 보이지 않는다.
+    */}
     <SupportBookmarkButton
       supportProgramId={program.id}
       isAuthenticated={isAuthenticated}
       initialBookmarked={isBookmarked}
-      className="absolute right-3.5 top-3.5"
+      className="absolute right-4 top-5"
     />
     </div>
   );

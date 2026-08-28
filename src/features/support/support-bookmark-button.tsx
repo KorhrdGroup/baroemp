@@ -87,14 +87,15 @@ export function SupportBookmarkButton({
       aria-label={bookmarked ? "찜 취소" : "찜하기"}
       aria-pressed={bookmarked}
       className={cn(
-        "flex size-9 shrink-0 items-center justify-center rounded-full border transition-colors",
+        // 크기는 공고 카드의 찜 버튼과 같게 둔다. 같은 동작이 카드마다 다른 크기면 안 된다.
+        "flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors",
         bookmarked
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-600"
           : "border-border bg-white text-slate-400",
         className,
       )}
     >
-      <Bookmark className={cn("size-4", bookmarked && "fill-current")} />
+      <Bookmark className={cn("size-[18px]", bookmarked && "fill-current")} />
     </button>
   );
 }
