@@ -31,6 +31,8 @@ import { listCareerGapSummariesForUser } from "./career-gap-engine.service";
 async function buildUserResumeSummary(userId: string, allActivities: ActivityEvent[]): Promise<UserResumeSummary> {
   const [resumes, coverLetters] = await Promise.all([listResumesForUser(userId), listCoverLettersForUser(userId)]);
   const primary = resumes.find((r) => r.isPrimary) ?? resumes[0];
+  /* 목록은 대표를 맨 앞에 두므로, 최근에 손 본 것은 따로 고른다. */
+  const recent = [...resumes].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))[0];
   const lastAiReview = allActivities
     .filter((a) => a.userId === userId && a.eventType === "resume_ai_reviewed")
     .sort((a, b) => (a.occurredAt < b.occurredAt ? 1 : -1))[0];
@@ -44,6 +46,21 @@ async function buildUserResumeSummary(userId: string, allActivities: ActivityEve
           completeness: primary.completeness,
           desiredJobTitle: primary.desiredJobTitle,
           updatedAt: primary.updatedAt,
+        }
+      : undefined,
+    recentResume: recent
+      ? {
+          id: recent.id,
+          title: recent.title,
+          completeness: recent.completeness,
+          updatedAt: recent.updatedAt,
+        }
+      : undefined,
+    recentCoverLetter: coverLetters[0]
+      ? {
+          id: coverLetters[0].id,
+          title: coverLetters[0].title,
+          updatedAt: coverLetters[0].updatedAt,
         }
       : undefined,
     coverLetterCount: coverLetters.length,

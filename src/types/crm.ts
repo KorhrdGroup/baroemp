@@ -74,6 +74,22 @@ export interface UserResumeSummary {
     desiredJobTitle?: string;
     updatedAt: string;
   };
+  /**
+   * 가장 최근에 손 본 이력서/자기소개서. 마이페이지에서 "이어서 하기" 줄로 보여준다.
+   * 대표 이력서(primaryResume)와는 다른 값일 수 있다 - 대표는 진단·상담이 보는 것이고,
+   * 이쪽은 방금 쓰다 만 것이다.
+   */
+  recentResume?: {
+    id: string;
+    title: string;
+    completeness: number;
+    updatedAt: string;
+  };
+  recentCoverLetter?: {
+    id: string;
+    title: string;
+    updatedAt: string;
+  };
   coverLetterCount: number;
   lastCoverLetterUpdatedAt?: string;
   lastAiReviewedAt?: string;
