@@ -122,7 +122,8 @@ function ExportTab({ days }: { days: number }) {
   return (
     <div className="space-y-3">
       <p className="text-label-1 text-slate-500">
-        선택한 기간(최근 {days}일) 기준입니다. 도메인마다 목록 시트 한 장과 요약 시트 두 장이 담깁니다.
+        선택한 기간(최근 {days}일) 기준입니다. 도메인마다 목록 시트 한 장과 요약 시트가 담깁니다. 영업리드는 기간과
+        무관하게 전체 회원 기준입니다.
       </p>
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         {EXPORT_DOMAINS.map((domain) => (
