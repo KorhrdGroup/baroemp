@@ -107,14 +107,28 @@ export function createSupabaseResumeRepository(): ResumeRepository | null {
       if (error) throwDataSourceError("ResumeRepository.remove", error);
       return true;
     },
-    async clearOtherPrimary(userId, exceptResumeId) {
+    async setPrimary(userId, resumeId) {
+      /*
+        대표는 회원당 하나만 허용하는 부분 unique index 가 걸려 있어, 올리기 전에 내려야 한다.
+
+        여기서만 updated_at 을 보내지 않는다. 대표 지정은 이력서 내용을 고친 게 아니라서
+        목록의 "최근수정"이 밀리면 안 된다 - is_primary 만 바뀐 update 는 트리거
+        set_resumes_updated_at() 이 updated_at 을 그대로 두게 되어 있다.
+      */
+      const cleared = await client
+        .from("resumes")
+        .update({ is_primary: false })
+        .eq("user_id", userId)
+        .neq("id", resumeId)
+        .eq("is_primary", true);
+      if (cleared.error) throwDataSourceError("ResumeRepository.setPrimary", cleared.error);
+
       const { error } = await client
         .from("resumes")
-        .update({ is_primary: false, updated_at: new Date().toISOString() })
-        .eq("user_id", userId)
-        .neq("id", exceptResumeId)
-        .eq("is_primary", true);
-      if (error) throwDataSourceError("ResumeRepository.clearOtherPrimary", error);
+        .update({ is_primary: true })
+        .eq("id", resumeId)
+        .eq("user_id", userId);
+      if (error) throwDataSourceError("ResumeRepository.setPrimary", error);
     },
   };
 }

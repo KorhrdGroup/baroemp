@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Loader2, MoreVertical, Pencil, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -29,6 +29,8 @@ export function DocumentMenu({
   label,
   editHref,
   title,
+  onSetPrimary,
+  isPrimary,
   onDelete,
   afterDelete,
 }: {
@@ -38,6 +40,12 @@ export function DocumentMenu({
   editHref?: string;
   /** 무엇을 지우는지 확인 창에서 이름으로 물어본다. */
   title?: string;
+  /**
+   * 대표로 지정. 이력서 목록에서만 준다 - 자기소개서에는 대표라는 개념이 없다.
+   * 이미 대표인 문서에는 눌리지 않는 자리로 남겨, 줄마다 메뉴 모양이 달라지지 않게 한다.
+   */
+  onSetPrimary?: () => Promise<void>;
+  isPrimary?: boolean;
   onDelete: () => Promise<void>;
   /** 지운 뒤 할 일. 편집 화면은 보던 문서가 사라지므로 목록으로 나가야 한다. */
   afterDelete?: () => void;
@@ -45,6 +53,8 @@ export function DocumentMenu({
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [pending, startDelete] = useTransition();
+  const [settingPrimary, startSetPrimary] = useTransition();
+  const busy = pending || settingPrimary;
 
   function stop(e: React.MouseEvent) {
     e.preventDefault();
@@ -60,9 +70,9 @@ export function DocumentMenu({
             size="icon-sm"
             aria-label={`${label} 더보기`}
             className="text-slate-400"
-            disabled={pending}
+            disabled={busy}
           >
-            {pending ? <Loader2 className="size-4 animate-spin" /> : <MoreVertical className="size-4" />}
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <MoreVertical className="size-4" />}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-36">
@@ -71,6 +81,21 @@ export function DocumentMenu({
               <Link href={editHref}>
                 <Pencil /> 수정하기
               </Link>
+            </DropdownMenuItem>
+          )}
+          {onSetPrimary && (
+            <DropdownMenuItem
+              className="py-2 text-label-1"
+              disabled={isPrimary}
+              onSelect={() => {
+                startSetPrimary(async () => {
+                  await onSetPrimary();
+                  router.refresh();
+                });
+              }}
+            >
+              <Star className={isPrimary ? "fill-brand-blue-400 text-brand-blue-400" : undefined} />
+              {isPrimary ? `대표 ${label}` : "대표로 지정"}
             </DropdownMenuItem>
           )}
           <DropdownMenuItem

@@ -17,7 +17,7 @@ import {
 import { listExperienceBankForUser } from "@/services/experience-bank.service";
 import { ExperienceBankSection } from "@/features/experience-bank/experience-bank-section";
 import { DocumentMenu } from "@/components/common/document-menu";
-import { deleteResumeAction } from "@/features/resume/resume-actions";
+import { deleteResumeAction, setPrimaryResumeAction } from "@/features/resume/resume-actions";
 import { deleteCoverLetterAction } from "@/features/cover-letter/cover-letter-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -84,7 +84,17 @@ export default async function ResumeListPage() {
         <SectionHeader
           title="내 이력서"
           count={resumes.length}
-          description={resumeAtLimit ? RESUME_LIMIT_MESSAGE : undefined}
+          /*
+            대표가 무엇인지는 배지만 봐서는 모른다. 고를 수 있는 상황(2개 이상)에서만
+            한 줄로 알려준다. 상한에 닿았을 때는 그쪽이 더 급한 말이라 자리를 내준다.
+          */
+          description={
+            resumeAtLimit
+              ? RESUME_LIMIT_MESSAGE
+              : resumes.length > 1
+                ? "대표 이력서 하나가 맨 위에 올라오고, 진단과 상담에서는 이 이력서를 봐요."
+                : undefined
+          }
           action={
             resumeAtLimit ? (
               <Button disabled>
@@ -139,6 +149,11 @@ export default async function ResumeListPage() {
                     label="이력서"
                     title={resume.title}
                     editHref={`/resume/${resume.id}/edit`}
+                    isPrimary={resume.isPrimary}
+                    onSetPrimary={async () => {
+                      "use server";
+                      await setPrimaryResumeAction(resume.id);
+                    }}
                     onDelete={async () => {
                       "use server";
                       await deleteResumeAction(resume.id);

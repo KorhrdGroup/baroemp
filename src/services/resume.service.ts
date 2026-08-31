@@ -23,10 +23,19 @@ import { mergeResumeToCareerProfile } from "./resume-career-merge.service";
 import { labelJobCategory, labelRegion } from "@/lib/labels";
 import { resolveOccupationForJobCategory } from "@/lib/jobs/job-occupation-resolver";
 
-/** 이력서 목록 (본인 소유). 최근 수정순으로 정렬한다. */
+/**
+ * 이력서 목록 (본인 소유). 대표 이력서를 맨 위에 두고, 나머지는 최근 수정순으로 정렬한다.
+ *
+ * 대표를 위로 올리는 건 화면 편의만이 아니다. 이 목록을 쓰는 쪽 여럿이
+ * `find((r) => r.isPrimary) ?? resumes[0]` 로 대표를 고르는데, 대표가 앞에 있으면
+ * 그 fallback 이 고르는 것도 "가장 최근에 손 본 이력서"가 된다.
+ */
 export async function listResumesForUser(userId: string): Promise<Resume[]> {
   const resumes = await getResumeRepository().findAll({ userId });
-  return [...resumes].sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1));
+  return [...resumes].sort((a, b) => {
+    if (a.isPrimary !== b.isPrimary) return a.isPrimary ? -1 : 1;
+    return a.updatedAt < b.updatedAt ? 1 : -1;
+  });
 }
 
 export async function getResumeDetail(resumeId: string): Promise<ResumeDetail | null> {
@@ -207,7 +216,7 @@ export async function saveResumeDetail(
   if (!existing) throw new Error("saveResumeDetail: 이력서를 찾을 수 없습니다.");
 
   if (input.resume.isPrimary) {
-    await getResumeRepository().clearOtherPrimary(existing.userId, resumeId);
+    await getResumeRepository().setPrimary(existing.userId, resumeId);
   }
 
   await getResumeRepository().update(resumeId, {
@@ -270,6 +279,25 @@ export async function deleteResume(resumeId: string): Promise<void> {
   if (!resume) return;
   await getResumeDetailRepository().removeAllForResume(resumeId);
   await getResumeRepository().remove(resumeId);
+
+  /*
+    대표 이력서를 지웠으면 남은 것 중 가장 최근에 수정한 것을 대표로 올린다.
+    대표가 비어 있으면 목록에 "대표" 배지가 하나도 없고, 지원금 진단·CRM 처럼
+    대표 이력서를 읽는 쪽이 매번 fallback 으로 아무거나 집게 된다.
+  */
+  if (resume.isPrimary) {
+    const remaining = await listResumesForUser(resume.userId);
+    if (remaining.length > 0) {
+      await getResumeRepository().setPrimary(resume.userId, remaining[0].id);
+    }
+  }
+}
+
+/** 대표 이력서를 이 이력서로 바꾼다. 이미 대표면 아무것도 하지 않는다. */
+export async function setPrimaryResume(resumeId: string): Promise<void> {
+  const resume = await getResumeRepository().findById(resumeId);
+  if (!resume || resume.isPrimary) return;
+  await getResumeRepository().setPrimary(resume.userId, resumeId);
 }
 
 export async function listResumeVersions(resumeId: string) {

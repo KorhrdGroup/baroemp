@@ -7,8 +7,11 @@ import { createSupabaseResumeRepository } from "./supabase/resume.supabase-repos
 
 export type ResumeFilter = { userId?: string };
 export type ResumeRepository = CrudRepository<Resume, ResumeInput, ResumeFilter> & {
-  /** 대표 이력서를 하나로 유지하기 위해, 지정한 이력서 외 나머지를 모두 is_primary=false로 내린다. */
-  clearOtherPrimary(userId: string, exceptResumeId: string): Promise<void>;
+  /**
+   * 대표 이력서를 지정한 하나로 바꾼다.
+   * 대표는 회원당 하나뿐(resumes 의 부분 unique index)이라, 기존 대표를 먼저 내리고 나서 올린다.
+   */
+  setPrimary(userId: string, resumeId: string): Promise<void>;
 };
 
 function createMockResumeRepository(): ResumeRepository {
@@ -52,13 +55,14 @@ function createMockResumeRepository(): ResumeRepository {
     create: (input) => base.create(input),
     update: (id, input) => base.update(id, input),
     remove: (id) => base.remove(id),
-    async clearOtherPrimary(userId, exceptResumeId) {
+    async setPrimary(userId, resumeId) {
       const all = await base.findAll({ userId });
       for (const r of all) {
-        if (r.id !== exceptResumeId && r.isPrimary) {
+        if (r.id !== resumeId && r.isPrimary) {
           await base.update(r.id, { isPrimary: false } as Partial<ResumeInput>);
         }
       }
+      await base.update(resumeId, { isPrimary: true } as Partial<ResumeInput>);
     },
   };
 }
