@@ -143,7 +143,11 @@ export default async function ResumeListPage() {
                     최근수정 {new Date(resume.updatedAt).toLocaleDateString("ko-KR")}
                   </p>
                 </div>
-                <div className="flex items-center gap-2">
+                {/*
+                  좁은 화면에서는 이 묶음이 아랫줄로 접힌다. 그냥 두면 완성도와 더보기가 왼쪽에
+                  몰려, 카드 오른쪽이 통째로 비어 보인다. 접힐 때는 양 끝으로 벌린다.
+                */}
+                <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
                   {/*
                     완성도는 다 채웠을 때만 색을 준다. 파란 글자로 늘 띄워두면 20%도 성과처럼 읽혀,
                     아직 할 일이 남았다는 신호가 되지 않는다.
