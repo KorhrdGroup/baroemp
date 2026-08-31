@@ -309,7 +309,11 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
             fade.end ? "opacity-100" : "opacity-0",
           )}
         />
-        <div ref={rowRef} onScroll={syncFade} className="scrollbar-on-hover flex gap-4 overflow-x-auto pb-2">
+        <div ref={rowRef} onScroll={syncFade} /*
+            스크롤바가 자리를 차지하면 카드가 여러 장인 탭만 11px 더 높아, 탭을 옮길 때
+            띠가 들썩였다. 좌우 흐림이 밀리는 줄임을 이미 알려주니 스크롤바는 감춘다.
+          */
+          className="scrollbar-hidden flex gap-4 overflow-x-auto pb-2">
           {current.items.map((item) => {
             return (
               <div
