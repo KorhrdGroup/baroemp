@@ -10,10 +10,13 @@ import { cn } from "@/lib/utils";
 const KEYWORDS = ["요양보호사", "사회복지사", "사무·행정", "병원동행"];
 
 /**
- * 좁은 화면에서 한 줄에 들어가는 개수. 넷을 다 세우면 줄이 접히고, 접히면 하나가 아랫줄에
- * 홀로 남아 검색창 아래 여백이 두 배로 벌어진다. 접느니 뒤엣것을 감춘다.
+ * 화면이 넓어지는 대로 하나씩 더 보여준다. 줄이 접히면 하나가 아랫줄에 홀로 남아
+ * 검색창 아래 여백이 두 배로 벌어지므로, 접느니 감춘다.
+ *
+ * 이름표까지 넣어 셋이 한 줄에 서려면 333px 이 필요하다(390px 화면에서 잰 값).
+ * 좌우 여백 24px 씩을 빼면 화면이 381px 은 되어야 해서, 384px 을 문턱으로 잡는다.
  */
-const MOBILE_VISIBLE = 2;
+const REVEAL_AT = ["", "", "hidden min-[384px]:block", "hidden sm:block"];
 
 export function HeroPopularKeywords() {
   return (
@@ -25,7 +28,7 @@ export function HeroPopularKeywords() {
           href={`/jobs?keyword=${encodeURIComponent(keyword)}`}
           className={cn(
             "shrink-0 rounded-full bg-white/80 px-3 py-1.5 text-label-1 text-slate-600 transition-colors hover:bg-white hover:text-brand-blue-700",
-            i >= MOBILE_VISIBLE && "hidden sm:block",
+            REVEAL_AT[i],
           )}
         >
           {keyword}
