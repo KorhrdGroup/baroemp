@@ -39,9 +39,13 @@ export function parseJobCategories(value: string | undefined): string[] {
 /**
  * 고른 직종을 검색용 코드 앞자리로 바꾼다.
  * 아는 묶음이면 그 앞자리들을, 아니면(직업진단에서 온 6자리 코드) 값을 그대로 쓴다.
+ * 코드 없는 묶음(병원동행)만 고르면 빈 목록이 되는데, 그대로 두면 필터가 통째로
+ * 사라져 전체가 나온다. 아무것도 안 걸리는 표시로 바꿔 정직하게 0건을 보여준다.
  */
 export function toJobCategoryPatterns(tokens: string[]): string[] {
-  return tokens.flatMap((t) => BY_KEY.get(t)?.prefixes ?? [t]);
+  if (tokens.length === 0) return [];
+  const patterns = tokens.flatMap((t) => BY_KEY.get(t)?.prefixes ?? [t]);
+  return patterns.length > 0 ? patterns : ["__none__"];
 }
 
 /** 버튼에 적을 이름. 묶음에 없는 코드는 호출한 쪽이 찾아 넘긴다. */
