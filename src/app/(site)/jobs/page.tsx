@@ -14,6 +14,7 @@ import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { getOccupationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
+import { parseJobCategories, toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 
 export const metadata: Metadata = {
   title: "일자리 찾기 | 한평생 바로취업",
@@ -54,7 +55,8 @@ export default async function JobsPage({
     region: sp.region as Region | undefined,
     /* 여러 구를 고르면 쉼표로 이어 온다. 시·군·구 이름에는 쉼표가 없다. */
     regionSigungus: sp.sgg ? sp.sgg.split(",").filter(Boolean) : undefined,
-    jobCategory: sp.category,
+    /* 직종은 여러 개를 쉼표로 이어 온다. 묶음 이름은 코드 앞자리로, 6자리 코드는 그대로 쓴다. */
+    jobCategoryPatterns: toJobCategoryPatterns(parseJobCategories(sp.category)),
     isBeginnerFriendly: sp.beginner === "1" ? true : undefined,
     closingWithinDays: sp.closingSoon === "1" ? 7 : undefined,
     sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
@@ -77,8 +79,9 @@ export default async function JobsPage({
    * 직업진단 결과에서 넘어오는 직종 코드는 검색바의 직종 목록에 없다.
    * 이름을 찾아 넘겨야 필터가 걸린 것을 버튼에서 알아볼 수 있다.
    */
-  const jobCategoryLabel = sp.category
-    ? (await getOccupationRepository().findAll()).find((o) => o.jobCategoryCode === sp.category)?.name
+  const firstCategory = parseJobCategories(sp.category)[0];
+  const jobCategoryLabel = firstCategory
+    ? (await getOccupationRepository().findAll()).find((o) => o.jobCategoryCode === firstCategory)?.name
     : undefined;
   /*
     자격 배지용 요건 비교.
@@ -126,7 +129,7 @@ export default async function JobsPage({
           keyword: sp.keyword,
           region: sp.region,
           regionSigungus: sp.sgg ? sp.sgg.split(",").filter(Boolean) : undefined,
-          jobCategory: sp.category,
+          jobCategories: parseJobCategories(sp.category),
           isBeginnerFriendly: sp.beginner === "1",
           closingSoon: sp.closingSoon === "1",
           sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",

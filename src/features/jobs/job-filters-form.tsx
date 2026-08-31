@@ -8,7 +8,7 @@ import { filterPillClass, filterPillOffClass, filterPillOnClass } from "@/lib/ui
 import { REGION_LABELS } from "@/lib/labels";
 import { SIGUNGU_BY_REGION } from "@/lib/regions/sigungu-list";
 import type { Region } from "@/types";
-import { mockJobRoles } from "@/mocks/job-roles.mock";
+import { JOB_CATEGORY_GROUPS, jobCategoryLabel as labelOfJobCategory } from "@/lib/jobs/job-category-groups";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { trackJobFilterChangedAction, trackJobSearchAction } from "@/features/jobs/job-actions";
 import type { JobSortOrder } from "@/types";
@@ -25,7 +25,8 @@ const SORT_OPTIONS: { value: JobSortOrder; label: string }[] = [
 
 export interface JobFiltersValue {
   keyword?: string;
-  jobCategory?: string;
+  /** 고른 직종. 여러 개를 고를 수 있고, 직업진단에서 넘어온 6자리 코드도 여기 실린다. */
+  jobCategories?: string[];
   region?: string;
   /** 시·군·구 이름. 시·도를 고른 뒤에만 쓰고, 같은 시·도 안에서 여러 개 고를 수 있다. */
   regionSigungus?: string[];
@@ -68,7 +69,7 @@ export function JobFiltersForm({
   const [keyword, setKeyword] = useState(initial.keyword ?? "");
   const [region, setRegion] = useState(initial.region ?? "all");
   const [sigungus, setSigungus] = useState<string[]>(initial.regionSigungus ?? []);
-  const [jobCategory, setJobCategory] = useState(initial.jobCategory ?? "all");
+  const [jobCategories, setJobCategories] = useState<string[]>(initial.jobCategories ?? []);
   const [beginnerOnly, setBeginnerOnly] = useState(Boolean(initial.isBeginnerFriendly));
   const [closingSoon, setClosingSoon] = useState(Boolean(initial.closingSoon));
   const [sort, setSort] = useState<JobSortOrder>(initial.sort ?? "recommended");
@@ -85,17 +86,24 @@ export function JobFiltersForm({
       : sigungus.length === 1
         ? `${REGION_LABELS[region as Region]} ${sigungus[0]}`
         : `${sigungus[0]} 외 ${sigungus.length - 1}`;
-  const jobActive = jobCategory !== "all";
-  // 선택된 직종 이름: 목록에서 찾고, 없으면 서버가 넘겨준 이름을 쓴다.
-  const selectedJobLabel =
-    mockJobRoles.find((r) => r.jobCategory === jobCategory)?.name ?? jobCategoryLabel ?? "선택한 직종";
+  const jobActive = jobCategories.length > 0;
+  /* 직종 이름: 묶음에서 찾고, 없으면(직업진단에서 온 코드) 서버가 넘겨준 이름을 쓴다.
+     여럿이면 지역과 같게 앞의 하나만 적고 나머지는 수로 센다. */
+  const selectedJobLabel = !jobActive
+    ? "직종 전체"
+    : jobCategories.length === 1
+      ? labelOfJobCategory(jobCategories[0], jobCategoryLabel)
+      : `${labelOfJobCategory(jobCategories[0], jobCategoryLabel)} 외 ${jobCategories.length - 1}`;
+
+  const toggleJobCategory = (key: string) =>
+    setJobCategories((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
 
   const buildParams = (overrides: Partial<JobFiltersValue> = {}) => {
     const next: JobFiltersValue = {
       keyword,
       region: region === "all" ? undefined : region,
       regionSigungus: region === "all" || sigungus.length === 0 ? undefined : sigungus,
-      jobCategory: jobCategory === "all" ? undefined : jobCategory,
+      jobCategories: jobCategories.length > 0 ? jobCategories : undefined,
       isBeginnerFriendly: beginnerOnly || undefined,
       closingSoon: closingSoon || undefined,
       sort,
@@ -105,7 +113,7 @@ export function JobFiltersForm({
     if (next.keyword) params.set("keyword", next.keyword);
     if (next.region) params.set("region", next.region);
     if (next.regionSigungus?.length) params.set("sgg", next.regionSigungus.join(","));
-    if (next.jobCategory) params.set("category", next.jobCategory);
+    if (next.jobCategories?.length) params.set("category", next.jobCategories.join(","));
     if (next.isBeginnerFriendly) params.set("beginner", "1");
     if (next.closingSoon) params.set("closingSoon", "1");
     if (next.sort && next.sort !== "recommended") params.set("sort", next.sort);
@@ -124,9 +132,10 @@ export function JobFiltersForm({
     router.push(`/jobs${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
+  /* 여러 개를 고를 수 있어 지역 목록처럼 앞에 체크를 둔다. 고르지 않은 칸에도 자리를 남긴다. */
   const cellClass = (selected: boolean) =>
     cn(
-      "rounded-lg border px-1 py-2.5 text-center text-label-1 whitespace-nowrap transition-colors",
+      "flex items-center gap-1.5 rounded-lg border px-3 py-2.5 text-left text-label-1 whitespace-nowrap transition-colors",
       selected
         ? "border-brand-blue-400 bg-brand-blue-50 font-semibold text-brand-blue-600"
         : "border-border bg-white font-medium text-slate-600 hover:border-brand-blue-200 hover:bg-brand-blue-50/40",
@@ -425,29 +434,31 @@ export function JobFiltersForm({
             {/* 목록이 한 화면에 다 들어와 검색칸이 필요 없다. */}
             <div className="mt-4 max-h-[19rem] overflow-y-auto px-5 sm:max-h-none sm:px-0">
               <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                <button type="button" className={cellClass(!jobActive)} onClick={() => setJobCategory("all")}>
+                <button type="button" className={cellClass(!jobActive)} onClick={() => setJobCategories([])}>
+                  <Check className={checkClass(!jobActive)} />
                   직종 전체
                 </button>
-                {mockJobRoles.map((role) => (
+                {JOB_CATEGORY_GROUPS.map((group) => (
                   <button
-                    key={role.jobCategory}
+                    key={group.key}
                     type="button"
-                    className={cellClass(jobCategory === role.jobCategory)}
-                    onClick={() => setJobCategory(role.jobCategory)}
+                    className={cellClass(jobCategories.includes(group.key))}
+                    onClick={() => toggleJobCategory(group.key)}
                   >
-                    {role.name}
+                    <Check className={checkClass(jobCategories.includes(group.key))} />
+                    {group.label}
                   </button>
                 ))}
               </div>
             </div>
 
             <div className={sheetFootClass}>
-              <button type="button" onClick={() => setJobCategory("all")} className={resetClass}>
+              <button type="button" onClick={() => setJobCategories([])} className={resetClass}>
                 <RotateCcw className="size-3.5" /> 초기화
               </button>
               <button
                 type="button"
-                onClick={() => void submit({ jobCategory: jobCategory === "all" ? undefined : jobCategory })}
+                onClick={() => void submit({ jobCategories: jobCategories.length > 0 ? jobCategories : undefined })}
                 className={applyClass}
               >
                 적용하기
