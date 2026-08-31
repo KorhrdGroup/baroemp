@@ -366,7 +366,7 @@ export default async function MyPage() {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p className="text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</p>
-                  <div className="space-y-1.5">
+                  <div className="space-y-2.5">
                     {latestResult.recommendations.slice(0, 3).map((rec, i) => (
                       <div key={rec.occupationId} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
                         <span className="font-medium text-slate-700">
@@ -513,7 +513,7 @@ export default async function MyPage() {
                     <CardTitle className="text-body-2">맞춤 일자리</CardTitle>
                   </CardHeader>
                   {/* 카드가 반 칸이 되어 2열로 나누면 공고 제목이 심하게 잘린다. 다른 목록 카드와 같이 한 열로 둔다. */}
-                  <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+                  <CardContent className="space-y-2.5 text-label-1 text-slate-600">
                     {jobData.recommended.map((job) => (
                       <Link
                         key={job.id}
@@ -548,7 +548,7 @@ export default async function MyPage() {
                     </Link>
                   )}
                 </CardHeader>
-                <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+                <CardContent className="space-y-2.5 text-label-1 text-slate-600">
                   {jobData.bookmarked.length === 0 ? (
                     <p className="text-slate-400">
                       아직 찜한 일자리가 없어요.{" "}
@@ -589,7 +589,7 @@ export default async function MyPage() {
                       <Briefcase className="size-4" /> 지원 페이지로 이동한 일자리
                     </CardTitle>
                   </CardHeader>
-                  <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+                  <CardContent className="space-y-2.5 text-label-1 text-slate-600">
                     <p className="text-label-2 text-slate-400">
                       아래 공고는 지원 페이지로 이동한 이력입니다. 실제 지원 완료 여부는 각 사이트에서 확인해주세요.
                     </p>
@@ -629,7 +629,7 @@ export default async function MyPage() {
                   )}
                   {/* 검사일과 버튼만 있으면 무엇이 나왔는지 다시 들어가 봐야 안다. 직업진단처럼 상위 몇 건을 적는다. */}
                   {supportData.topMatches.length > 0 && (
-                    <div className="space-y-1.5">
+                    <div className="space-y-2.5">
                       {supportData.topMatches.map(({ program, grade }) => (
                         <div
                           key={program.id}
@@ -678,7 +678,7 @@ export default async function MyPage() {
                   </Link>
                 )}
               </CardHeader>
-              <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+              <CardContent className="space-y-2.5 text-label-1 text-slate-600">
                 {supportData.bookmarked.length === 0 ? (
                   <p className="text-slate-400">
                     아직 찜한 지원제도가 없어요.{" "}
@@ -721,7 +721,7 @@ export default async function MyPage() {
                     <Gift className="size-4" /> 신청 페이지로 이동한 지원제도
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-1.5 text-label-1 text-slate-600">
+                <CardContent className="space-y-2.5 text-label-1 text-slate-600">
                   <p className="text-label-2 text-slate-400">
                     아래 제도는 신청 페이지로 이동한 이력입니다. 실제 신청 완료 여부는 운영기관에서 확인해주세요.
                   </p>
