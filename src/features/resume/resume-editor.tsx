@@ -2,7 +2,6 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,6 @@ import {
   type ResumeSectionOption,
 } from "@/lib/resume/completeness";
 import { AiButton } from "@/components/common/ai-button";
-import { DocumentMenu } from "@/components/common/document-menu";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +49,6 @@ import type {
 } from "@/types";
 import {
   changeResumeTemplateAction,
-  deleteResumeAction,
   generateCareerSummaryAiAction,
   getResumeMarketComparisonAction,
   reviewResumeAiAction,
@@ -199,7 +196,6 @@ export function ResumeEditor({
   /** 담을 수 있는 항목 전체. 편집 중에도 항목을 넣고 뺄 수 있게 한다. */
   sectionOptions?: ResumeSectionOption[];
 }) {
-  const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const resume = detail.resume;
 
@@ -639,7 +635,12 @@ export function ResumeEditor({
     SUMMARY: (
             <Card className="rounded-xl border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개<RequiredMark /></CardTitle>
+                {/*
+                  * 를 붙이지 않는다. 이 별표는 이름·이메일처럼 "이 칸을 비우면 안 된다"는
+                  뜻으로 쓰는데, 핵심 경력은 항목 자체를 뺄 수 있다. 담은 동안 채워야 하는 건
+                  경력·학력과 똑같고, 그쪽에도 별표는 없다.
+                */}
+                <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개</CardTitle>
                 {/*
                   이 버튼은 이 칸에 쓴 글을 고치는 것이 아니라, 경력·자격·스킬을 재료로
                   문장을 만들어 제안한다. "다듬기"라고 부르면 쓴 글을 손봐주는 줄 알고
@@ -1326,7 +1327,7 @@ export function ResumeEditor({
             */}
             {/* 이 화면에서 가장 먼저 권하는 동작이라, 다른 AI 버튼과 달리 채운 파랑으로 둔다. */}
             <AiButton
-              className="mt-4 w-full bg-brand-blue-600 text-white hover:bg-brand-blue-700 active:bg-brand-blue-700"
+              className="mt-4 w-full bg-brand-blue-600 font-semibold text-white hover:bg-brand-blue-700 active:bg-brand-blue-700"
               onClick={() => setReviewPickerOpen(true)}
               loading={isReviewing || isChangingTemplate}
             >
@@ -1334,17 +1335,7 @@ export function ResumeEditor({
             </AiButton>
 
             <div className="mt-4 border-t border-border pt-3">
-              <div className="flex items-center justify-between gap-2">
-                <p className="px-1 text-label-2 font-semibold text-slate-400">이력서 항목 {navItems.length}/{sectionRows.length}</p>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="h-7 shrink-0 px-2.5 text-label-2 text-slate-600"
-                  onClick={() => setReordering((v) => !v)}
-                >
-                  {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
-                </Button>
-              </div>
+              <p className="px-1 text-label-2 font-semibold text-slate-400">이력서 항목 {navItems.length}/{sectionRows.length}</p>
 
               <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
                 {sectionRows.map((row) => (
@@ -1379,55 +1370,75 @@ export function ResumeEditor({
                       {/*
                         기본정보는 이력서가 이력서이기 위한 최소한이라 뺄 수 없고, 자리도 맨 위에
                         고정한다. 이름과 연락처가 문서 중간에 오면 이력서로 안 읽힌다.
+
+                        넣고 빼는 버튼은 테두리를 둘러 눌리는 것으로 보이게 한다. 회색 기호만
+                        떠 있으면 호버하기 전에는 그림인지 버튼인지 알 수 없다.
                       */}
                       {row.fixed ? (
-                        <span className="shrink-0 pr-3 text-label-2 text-slate-400">필수</span>
+                        /* 회색은 "빼기 버튼이 비활성"처럼 읽힌다. 뺄 수 없다는 뜻이 전해지게
+                           파랑을 쓰되, 메인 파랑(400)은 이 작은 글자에 너무 세서 한 단계 연하게 둔다. */
+                        <span className="shrink-0 pr-3 text-label-2 text-brand-blue-300">필수</span>
                       ) : !row.included ? (
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon-xs"
-                          className="mr-1.5 shrink-0"
+                          className="mr-1.5 shrink-0 text-slate-500"
                           aria-label={`${row.label} 담기`}
                           onClick={() => addSectionRow(row)}
                         >
-                          <Plus className="size-4 text-slate-400" />
+                          <Plus className="size-4" />
                         </Button>
                       ) : reordering ? (
-                        <span className="flex shrink-0 items-center pr-1">
+                        <span className="flex shrink-0 items-center gap-1 pr-1.5">
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="icon-xs"
+                            className="text-slate-500"
                             aria-label={`${row.label} 위로`}
                             disabled={row.navIndex === firstMovableIndex}
                             onClick={() => moveSectionItem(row, -1)}
                           >
-                            <ArrowUp className="size-3.5 text-slate-400" />
+                            <ArrowUp className="size-3.5" />
                           </Button>
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="icon-xs"
+                            className="text-slate-500"
                             aria-label={`${row.label} 아래로`}
                             disabled={row.navIndex === navItems.length - 1}
                             onClick={() => moveSectionItem(row, 1)}
                           >
-                            <ArrowDown className="size-3.5 text-slate-400" />
+                            <ArrowDown className="size-3.5" />
                           </Button>
                         </span>
                       ) : (
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="icon-xs"
-                          className="mr-1.5 shrink-0"
+                          className="mr-1.5 shrink-0 text-slate-500"
                           aria-label={`${row.label} 빼기`}
                           onClick={() => removeSectionItem(row)}
                         >
-                          <Minus className="size-4 text-slate-400" />
+                          <Minus className="size-4" />
                         </Button>
                       )}
                     </div>
                   </li>
                 ))}
               </ul>
+
+              {/*
+                순서 변경은 목록을 다 보고 나서 하는 동작이라 목록 아래에 둔다.
+                제목 옆에 있을 때는 작은 글자 옆의 더 작은 버튼이라 잘 보이지 않았다.
+              */}
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3 w-full text-slate-600"
+                onClick={() => setReordering((v) => !v)}
+              >
+                {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
+              </Button>
             </div>
           </nav>
 
@@ -1453,23 +1464,17 @@ export function ResumeEditor({
         버튼 정렬은 안쪽 컨테이너로 본문 폭에 맞춘다.
       */}
       {/*
-        위계별 그룹핑: 왼쪽은 문서를 벗어나는 동작(목록으로)이라 ghost로 눌러두고,
-        오른쪽은 문서에 대한 동작(미리보기 → 저장)만 모아 확정 동작인 저장 하나만 채운다.
-        삭제는 저장에서 가장 먼 왼쪽 끝, 목록으로 옆에 둔다.
+        위계별 그룹핑: 왼쪽은 문서를 벗어나는 동작(목록으로), 오른쪽은 문서에 대한 동작
+        (미리보기 → 저장)을 모아 확정 동작인 저장 하나만 채운다. 삭제는 여기 두지 않는다 -
+        편집 화면에서 되돌릴 수 없는 동작은 목록으로 나가서 하게 한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
-          <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
+          <Button variant="outline" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
           </Button>
-          <DocumentMenu
-            label="이력서"
-            title={form.title}
-            onDelete={() => deleteResumeAction(resume.id)}
-            afterDelete={() => router.replace("/resume")}
-          />
 
           {/*
             완성도는 저장 버튼 옆에서 진행 막대로 보여준다. 상단 배지로 두면
@@ -1548,7 +1553,10 @@ export function ResumeEditor({
                     {picked && <Check className="size-3 text-white" />}
                   </span>
                   <span className="min-w-0">
-                    <span className="block text-body-2 font-semibold text-slate-900">{agent.name}</span>
+                    <span className="block text-body-2 font-semibold text-slate-900">
+                      {agent.emoji && <span aria-hidden className="mr-1.5">{agent.emoji}</span>}
+                      {agent.name}
+                    </span>
                     {agent.description && (
                       <span className="mt-0.5 block text-label-1 text-slate-500">{agent.description}</span>
                     )}

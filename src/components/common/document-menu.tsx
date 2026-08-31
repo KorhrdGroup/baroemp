@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { Loader2, MoreVertical, Pencil, Star, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -28,7 +28,11 @@ import { ConfirmDialog } from "@/components/common/confirm-dialog";
 export function DocumentMenu({
   label,
   editHref,
+  onEdit,
   title,
+  onSetPrimary,
+  isPrimary,
+  deleteNote,
   onDelete,
   afterDelete,
 }: {
@@ -36,15 +40,30 @@ export function DocumentMenu({
   label: string;
   /** 목록에서만 준다. 편집 화면에서는 이미 그 문서를 보고 있어 "수정하기"가 갈 곳이 없다. */
   editHref?: string;
+  /** 수정이 페이지 이동이 아니라 모달인 경우(경험뱅크). editHref 대신 준다. */
+  onEdit?: () => void;
   /** 무엇을 지우는지 확인 창에서 이름으로 물어본다. */
   title?: string;
+  /** 지우면 무엇이 남고 무엇이 사라지는지 덧붙일 말. 확인 창에서 한 줄 더 보여준다. */
+  deleteNote?: string;
+  /**
+   * 대표로 지정. 이력서 목록에서만 준다 - 자기소개서에는 대표라는 개념이 없다.
+   * 이미 대표인 문서에는 눌리지 않는 자리로 남겨, 줄마다 메뉴 모양이 달라지지 않게 한다.
+   */
+  onSetPrimary?: () => Promise<void>;
+  isPrimary?: boolean;
   onDelete: () => Promise<void>;
-  /** 지운 뒤 할 일. 편집 화면은 보던 문서가 사라지므로 목록으로 나가야 한다. */
+  /**
+   * 지운 뒤 할 일. 편집 화면은 보던 문서가 사라지므로 목록으로 나가야 한다.
+   * 목록을 스스로 들고 있는 화면은 빈 함수를 줘서 새로고침을 막는다.
+   */
   afterDelete?: () => void;
 }) {
   const router = useRouter();
   const [confirming, setConfirming] = useState(false);
   const [pending, startDelete] = useTransition();
+  const [settingPrimary, startSetPrimary] = useTransition();
+  const busy = pending || settingPrimary;
 
   function stop(e: React.MouseEvent) {
     e.preventDefault();
@@ -60,17 +79,36 @@ export function DocumentMenu({
             size="icon-sm"
             aria-label={`${label} 더보기`}
             className="text-slate-400"
-            disabled={pending}
+            disabled={busy}
           >
-            {pending ? <Loader2 className="size-4 animate-spin" /> : <MoreVertical className="size-4" />}
+            {busy ? <Loader2 className="size-4 animate-spin" /> : <MoreVertical className="size-4" />}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="min-w-36">
-          {editHref && (
+          {editHref ? (
             <DropdownMenuItem asChild className="py-2 text-label-1">
               <Link href={editHref}>
                 <Pencil /> 수정하기
               </Link>
+            </DropdownMenuItem>
+          ) : onEdit ? (
+            <DropdownMenuItem className="py-2 text-label-1" onSelect={onEdit}>
+              <Pencil /> 수정하기
+            </DropdownMenuItem>
+          ) : null}
+          {onSetPrimary && (
+            <DropdownMenuItem
+              className="py-2 text-label-1"
+              disabled={isPrimary}
+              onSelect={() => {
+                startSetPrimary(async () => {
+                  await onSetPrimary();
+                  router.refresh();
+                });
+              }}
+            >
+              <Star className={isPrimary ? "fill-brand-blue-400 text-brand-blue-400" : undefined} />
+              {isPrimary ? `대표 ${label}` : "대표로 지정"}
             </DropdownMenuItem>
           )}
           <DropdownMenuItem
@@ -91,9 +129,9 @@ export function DocumentMenu({
           묻는 말에 제목을 넣으면 "'...이력서'을(를)" 처럼 조사가 어색해진다.
           제목은 아래 줄로 내려 무엇을 지우는지만 밝힌다.
         */
-        description={
-          title?.trim() ? `${title.trim()} · 삭제하면 되돌릴 수 없습니다.` : "삭제하면 되돌릴 수 없습니다."
-        }
+        description={[title?.trim() ? `${title.trim()} · 삭제하면 되돌릴 수 없습니다.` : "삭제하면 되돌릴 수 없습니다.", deleteNote]
+          .filter(Boolean)
+          .join(" ")}
         pending={pending}
         onConfirm={() => {
           startDelete(async () => {

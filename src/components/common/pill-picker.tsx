@@ -68,7 +68,7 @@ export function PillPicker({
               className={cn(
                 "cursor-pointer rounded-full border px-3 py-1.5 text-label-1 font-medium transition-colors disabled:opacity-50",
                 selected
-                  ? "border-transparent bg-brand-blue-600 text-white"
+                  ? "border-transparent bg-brand-blue-600 font-semibold text-white"
                   : "border-border bg-white text-slate-600 hover:border-brand-blue-200 hover:text-brand-blue-700",
               )}
             >

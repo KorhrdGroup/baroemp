@@ -57,21 +57,40 @@ export function ExperienceFormDialog({
   editing: ExperienceBankItem | null;
   onSaved: (item: ExperienceBankItem, isNew: boolean) => void;
 }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+        <DialogHeader>
+          <DialogTitle>{editing ? "경험 수정하기" : "내 경험 추가하기"}</DialogTitle>
+          <DialogDescription>
+            여기에 정리해둔 경험은 자기소개서 문항마다 골라 쓸 수 있어요.
+          </DialogDescription>
+        </DialogHeader>
+
+        {/*
+          입력값은 창 안쪽에서 들고 있는다. 창이 닫히면 이 컴포넌트가 통째로 사라지므로,
+          다음에 열 때 지금 고른 경험의 값으로 새로 채워진다. 바깥에서 상태를 들고
+          "열릴 때 다시 채우기"로 맞추면, 부모가 open 을 직접 켜는 경우(목록의 수정하기)
+          그 시점을 알 수 없어 이전 값이 그대로 남는다.
+        */}
+        <ExperienceForm editing={editing} onSaved={onSaved} onClose={() => onOpenChange(false)} />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ExperienceForm({
+  editing,
+  onSaved,
+  onClose,
+}: {
+  editing: ExperienceBankItem | null;
+  onSaved: (item: ExperienceBankItem, isNew: boolean) => void;
+  onClose: () => void;
+}) {
   const [form, setForm] = useState<FormState>(() => toForm(editing));
   const [error, setError] = useState<string | null>(null);
   const [isSaving, startSave] = useTransition();
-
-  /*
-    창을 열 때마다 폼을 다시 채운다. editing 을 effect 로 따라가면 창이 닫히는 도중에도
-    값이 바뀌어 사라지는 글씨가 보인다. 열림 전환 시점에만 갈아끼운다.
-  */
-  function handleOpenChange(next: boolean) {
-    if (next) {
-      setForm(toForm(editing));
-      setError(null);
-    }
-    onOpenChange(next);
-  }
 
   function handleSave() {
     if (!form.title.trim()) {
@@ -88,7 +107,7 @@ export function ExperienceFormDialog({
           const created = await createExperienceBankItemAction(form);
           onSaved(created, true);
         }
-        onOpenChange(false);
+        onClose();
       } catch (err) {
         setError(err instanceof Error ? err.message : "저장에 실패했습니다.");
       }
@@ -96,50 +115,41 @@ export function ExperienceFormDialog({
   }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{editing ? "경험 수정하기" : "내 경험 추가하기"}</DialogTitle>
-          <DialogDescription>
-            여기에 정리해둔 경험은 자기소개서 문항마다 골라 쓸 수 있어요.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-3">
-          <div>
-            <Label className="text-label-2 text-slate-500">
-              이 경험을 뭐라고 부르면 좋을까요? (예: 고객 민원 해결)
-            </Label>
-            <Input
+    <>
+      <div className="space-y-3">
+        <div>
+          <Label className="text-label-2 text-slate-500">
+            이 경험을 뭐라고 부르면 좋을까요? (예: 고객 민원 해결)
+          </Label>
+          <Input
+            className="mt-1"
+            value={form.title}
+            onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+          />
+        </div>
+        {FIELDS.map(({ key, label }) => (
+          <div key={key}>
+            <Label className="text-label-2 text-slate-500">{label}</Label>
+            <Textarea
               className="mt-1"
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+              rows={2}
+              value={form[key]}
+              onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
             />
           </div>
-          {FIELDS.map(({ key, label }) => (
-            <div key={key}>
-              <Label className="text-label-2 text-slate-500">{label}</Label>
-              <Textarea
-                className="mt-1"
-                rows={2}
-                value={form[key]}
-                onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
-              />
-            </div>
-          ))}
-          {error && <p className="text-label-1 text-rose-500">{error}</p>}
-        </div>
+        ))}
+        {error && <p className="text-label-1 text-rose-500">{error}</p>}
+      </div>
 
-        <DialogFooter>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>
-            취소
-          </Button>
-          <Button onClick={handleSave} disabled={isSaving}>
-            {isSaving && <Loader2 className="size-4 animate-spin" />}
-            {editing ? "수정 저장" : "경험 저장하기"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      <DialogFooter>
+        <Button variant="outline" onClick={onClose} disabled={isSaving}>
+          취소
+        </Button>
+        <Button onClick={handleSave} disabled={isSaving}>
+          {isSaving && <Loader2 className="size-4 animate-spin" />}
+          {editing ? "수정 저장" : "경험 저장하기"}
+        </Button>
+      </DialogFooter>
+    </>
   );
 }

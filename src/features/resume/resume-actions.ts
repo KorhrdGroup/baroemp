@@ -28,6 +28,7 @@ import {
   getResumeDetail,
   listResumesForUser,
   saveResumeDetail,
+  setPrimaryResume,
   changeResumeTemplate,
 } from "@/services/resume.service";
 import {
@@ -87,11 +88,23 @@ export async function saveResumeAction(input: ResumeSaveActionInput): Promise<Re
   return saveResumeDetail({ ...input, resume: { ...input.resume, userId: resume.userId } });
 }
 
+/**
+ * 대표 이력서 지정. 대표는 하나뿐이라, 이걸 올리면 전에 대표였던 이력서는 자동으로 내려간다.
+ * 지원금 진단·관리자 화면이 회원당 이력서 하나를 골라 볼 때 이 이력서를 본다.
+ */
+export async function setPrimaryResumeAction(resumeId: string): Promise<void> {
+  await requireOwnResume(resumeId);
+  await setPrimaryResume(resumeId);
+  revalidatePath("/resume");
+  revalidatePath("/mypage");
+}
+
 export async function deleteResumeAction(resumeId: string): Promise<void> {
   await requireOwnResume(resumeId);
   await deleteResume(resumeId);
   // 목록은 서버 컴포넌트라 캐시를 비워야 삭제 결과가 화면에 반영된다.
   revalidatePath("/resume");
+  revalidatePath("/mypage");
 }
 
 export async function reviewResumeAiAction(resumeId: string): Promise<AIResumeReviewResult> {

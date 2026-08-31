@@ -9,7 +9,8 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground [a]:hover:bg-primary/80",
+        // 채운 배지의 흰 글자도 버튼과 같이 한 단계 굵게. 작은 글자라 medium 이면 더 가늘어 보인다.
+        default: "bg-primary font-semibold text-primary-foreground [a]:hover:bg-primary/80",
         secondary:
           "bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80",
         destructive:

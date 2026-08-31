@@ -17,8 +17,9 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
+        // 채운 버튼의 흰 글자는 한 단계 굵게. 진한 바탕 위에서는 medium 이 가늘게 파여 보인다.
         default:
-          "bg-primary text-primary-foreground hover:bg-brand-blue-600 active:bg-brand-blue-700",
+          "bg-primary font-semibold text-primary-foreground hover:bg-brand-blue-600 active:bg-brand-blue-700",
         outline:
           "border-border bg-background hover:bg-slate-50 active:bg-slate-100 aria-expanded:bg-muted aria-expanded:text-foreground dark:border-input dark:bg-input/30 dark:hover:bg-input/50",
         secondary:
