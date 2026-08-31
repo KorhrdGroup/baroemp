@@ -1,4 +1,5 @@
 import type { AgeGroup, Region } from "@/types";
+import { resolveMergedJeonnamGwangju } from "@/lib/labels";
 import type { JobProvider, JobProviderName, JobProviderSearchParams, JobProviderSearchResult, NormalizedJob } from "./types";
 
 /** Work24 고용형태 코드 -> 내부 WorkType 매핑. */
@@ -56,6 +57,12 @@ const REGION_KEYWORD_MAP: Array<{ region: Region; keywords: string[] }> = [
  */
 export function guessRegionFromText(text?: string): Region | undefined {
   if (!text) return undefined;
+  /*
+    "전남광주통합특별시" 는 광주와 전남을 한 이름으로 묶어 보낸다. 키워드를 앞에서부터
+    훑으면 "전남" 이 먼저 걸려 광주 것까지 전남으로 간다. 이 이름은 따로 가른다.
+  */
+  const merged = resolveMergedJeonnamGwangju(text);
+  if (merged) return merged;
   const found = REGION_KEYWORD_MAP.find(({ keywords }) => keywords.some((kw) => text.includes(kw)));
   return found?.region;
 }

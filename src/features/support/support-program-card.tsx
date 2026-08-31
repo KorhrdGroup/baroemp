@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { interactiveCardClass } from "@/lib/ui-classes";
 import { SupportBookmarkButton } from "./support-bookmark-button";
-import { REGION_LABELS } from "@/lib/labels";
+import { labelOrganization, REGION_LABELS } from "@/lib/labels";
 import type { MatchReasonDetail, SupportEligibilityGrade, SupportProgram } from "@/types";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 
@@ -64,7 +64,7 @@ export function SupportProgramCard({
       */}
       <div className="flex items-center justify-between gap-2 px-5 pt-5 pr-14">
         {(() => {
-          const orgName = program.organizationName ?? program.organization;
+          const orgName = labelOrganization(program.organizationName ?? program.organization);
           const logo = ORG_LOGO[orgName];
           return logo ? (
             <Image src={logo.src} alt={orgName} width={logo.w} height={logo.h} className="h-5 w-auto object-contain" />

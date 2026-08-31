@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { labelDesiredStartTiming, labelEmploymentStatus, labelRegion, labelWorkType } from "@/lib/labels";
+import { labelDesiredStartTiming, labelEmploymentStatus, labelOrganization, labelRegion, labelWorkType } from "@/lib/labels";
 import { formatSalary } from "@/lib/salary";
 import {
   getJobRepository,
@@ -695,7 +695,7 @@ export default async function MyPage() {
                         </Badge>
                       </div>
                       <p className="mt-1 truncate text-label-2 text-slate-500">
-                        {program.organizationName ?? program.organization}
+                        {labelOrganization(program.organizationName ?? program.organization)}
                       </p>
                       <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-2">
                         {program.supportAmountText && (

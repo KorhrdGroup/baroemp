@@ -144,3 +144,44 @@ export function labelPreferentialCode(code: string): string {
 export function labelJobCategory(code: string): string | undefined {
   return mockJobRoles.find((role) => role.jobCategory === code)?.name;
 }
+
+/** 광주광역시 자치구. 아래에서 광주와 전남을 가르는 데 쓴다. */
+const GWANGJU_DISTRICTS = ["동구", "서구", "남구", "북구", "광산구"];
+
+const MERGED_JEONNAM_GWANGJU = "전남광주통합특별시";
+
+/**
+ * 원본 데이터가 광주광역시와 전라남도를 "전남광주통합특별시" 한 이름으로 묶어 보낸다.
+ * 뒤에 붙는 자치단체 이름으로 어느 쪽인지 가른다. 묶인 이름이 아니면 undefined.
+ *
+ *   "전남광주통합특별시"        -> gwangju (광역 자체)
+ *   "전남광주통합특별시 서구"    -> gwangju (광주 자치구 5곳)
+ *   "전남광주통합특별시교육청"   -> gwangju (띄지 않고 붙은 것은 광역 단위 기관)
+ *   "전남광주통합특별시 영암군"  -> jeonnam (그 외는 전남 시·군)
+ */
+export function resolveMergedJeonnamGwangju(name: string): "gwangju" | "jeonnam" | undefined {
+  if (!name.startsWith(MERGED_JEONNAM_GWANGJU)) return undefined;
+  const rest = name.slice(MERGED_JEONNAM_GWANGJU.length).trim();
+  if (!rest) return "gwangju";
+  if (GWANGJU_DISTRICTS.includes(rest)) return "gwangju";
+  if (!rest.includes(" ") && !rest.endsWith("시") && !rest.endsWith("군")) return "gwangju";
+  return "jeonnam";
+}
+
+/**
+ * 지원제도 운영기관 이름 표기.
+ *
+ * 아직 출범하지 않은 "전남광주통합특별시" 를 회원이 보면 어디인지 알 수 없다.
+ * 화면에서만 바꿔 적고 데이터는 손대지 않는다. 원본이 정리되면 이 함수만 지우면 된다.
+ */
+export function labelOrganization(name: string): string {
+  const side = resolveMergedJeonnamGwangju(name);
+  if (!side) return name;
+
+  const raw = name.slice(MERGED_JEONNAM_GWANGJU.length);
+  const rest = raw.trim();
+  if (!rest) return "광주광역시";
+  if (side === "jeonnam") return `전라남도 ${rest}`;
+  // 띄어 쓴 것(자치구)은 띄어서, 붙여 쓴 것(교육청·도시공사)은 붙여서 적는다.
+  return raw.startsWith(" ") ? `광주광역시 ${rest}` : `광주광역시${rest}`;
+}

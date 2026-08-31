@@ -14,7 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { labelEmploymentStatus, labelRegion } from "@/lib/labels";
+import { labelEmploymentStatus, labelOrganization, labelRegion } from "@/lib/labels";
 import { SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 import type { CareerContent, Region, SupportEligibilityGrade, SupportProgram } from "@/types";
 import type { SupportMatchDetail } from "@/services/support-eligibility.service";
@@ -91,7 +91,7 @@ export function SupportDetailView({
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
 }) {
-  const orgName = program.organizationName ?? program.organization;
+  const orgName = labelOrganization(program.organizationName ?? program.organization);
   const logo = ORG_LOGO[orgName];
 
   return (
