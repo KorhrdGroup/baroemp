@@ -18,7 +18,7 @@ export function HeroPopularKeywords() {
         검색창 아래 여백이 두 배로 벌어진다. 좁아서 다 안 들어가면 옆으로 밀어 본다.
         가운데 정렬은 넘칠 때 왼쪽 끝이 잘리므로, 넘치지 않는 넓은 화면에서만 준다.
       */}
-      <div className="-mx-4 mt-2 flex gap-2 overflow-x-auto px-4 pb-1 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
+      <div className="-mx-6 mt-2 flex gap-2 overflow-x-auto px-6 pb-1 lg:mx-0 lg:px-0 [&::-webkit-scrollbar]:hidden">
         {KEYWORDS.map((keyword) => (
           <Link
             key={keyword}

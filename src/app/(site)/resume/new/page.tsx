@@ -33,7 +33,7 @@ export default async function ResumeNewPage({
   return (
     // 양식 고르기 화면은 짧아서, 회색 바탕을 화면 끝까지 깔아야 흰 띠가 안 남는다.
     <div className="min-h-screen bg-slate-100">
-      <div className="mx-auto max-w-5xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-6 pt-10 pb-20 lg:px-8">
         <ResumeWizard
           templates={ordered.map((t) => ({
             id: t.id,

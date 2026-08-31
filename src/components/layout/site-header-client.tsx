@@ -38,7 +38,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" aria-label={siteConfig.name} className="flex items-center">
             <Logo height={20} priority />
@@ -143,7 +143,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
           mobileOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0",
         )}
       >
-        <nav className="mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-4 py-3 shadow-lg sm:px-6">
+        <nav className="mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-6 py-3 shadow-lg">
         {mainNavItems.map((item) => {
           const current = isCurrentNav(item.href);
           return (

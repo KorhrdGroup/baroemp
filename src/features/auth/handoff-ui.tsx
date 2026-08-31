@@ -18,7 +18,7 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] w-full justify-center bg-slate-50 px-4 py-8 sm:px-6 sm:py-14">
+    <div className="flex min-h-[calc(100vh-4rem)] w-full justify-center bg-slate-50 px-6 py-8 sm:py-14">
       <div className="w-full max-w-[460px]">
         <div className="rounded-2xl bg-white px-6 py-8 sm:rounded-2xl sm:px-12 sm:py-12">
           {children}

@@ -19,7 +19,7 @@ export function CoreServicesSection() {
         좁은 화면에서도 두 칸으로 세운다. 한 칸씩 세로로 쌓으면 넉 장을 다 보려면
         화면을 두 번 넘겨야 해서, 무엇을 할 수 있는 곳인지 한눈에 안 들어온다.
       */}
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 sm:gap-4 sm:px-6 lg:grid-cols-4 lg:px-8">
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-6 sm:gap-4 lg:grid-cols-4 lg:px-8">
         {coreServices.map((service) => {
           const Icon = service.icon;
           return (

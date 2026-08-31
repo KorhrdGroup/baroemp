@@ -92,7 +92,7 @@ export function SupportDetailView({
 
   return (
     <div className="min-h-screen bg-slate-50">
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-6 py-10 lg:px-8">
       <SupportViewTracker supportProgramId={program.id} matchScore={match?.score} eligibilityGrade={match?.grade} />
 
       <div className="mb-6 -ml-2">
@@ -267,7 +267,7 @@ export function SupportDetailView({
 
     {/* ── 하단 고정 CTA ── */}
     <div className="fixed inset-x-0 bottom-0 z-40 bg-white/95 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
-      <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-3 lg:px-8">
         <SupportApplyButton
           supportProgramId={program.id}
           sourceUrl={program.sourceUrl ?? program.applyUrl}

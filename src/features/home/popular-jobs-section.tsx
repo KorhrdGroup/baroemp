@@ -10,7 +10,7 @@ export function PopularJobsSection() {
   return (
     // 고용24처럼 흰 섹션 사이에 옅은 회청색 띠를 넣어 리듬을 만든다.
     <section className="bg-gov-surface py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <SectionHeading
           title="지금 많이 찾는 인기 직업"
           description="취업 수요가 높고 중장년에게 적합한 직업을 확인해보세요."

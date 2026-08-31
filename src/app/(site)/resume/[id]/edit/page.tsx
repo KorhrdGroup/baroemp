@@ -43,7 +43,7 @@ export default async function ResumeEditPage({
     // 입력칸이 흰색으로 도드라지도록 편집 화면만 회색 바탕을 깐다.
     <div className="min-h-screen bg-slate-100 print:min-h-0 print:bg-transparent">
       {/* 하단 고정 액션 바(fixed)에 마지막 카드가 가려지지 않도록 아래 여백을 크게 둔다. */}
-      <div className="mx-auto max-w-5xl px-4 pb-28 pt-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-6 pb-28 pt-10 lg:px-8">
         <ResumeEditor initialDetail={detail} templates={templateOptions} sectionOptions={sectionOptions} />
       </div>
     </div>
