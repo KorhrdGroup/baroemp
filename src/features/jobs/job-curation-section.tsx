@@ -40,19 +40,13 @@ const TABS: { key: JobCurationTab; emoji: string; label: string; description?: s
 /**
  * 카드 한 장의 높이. 빈 상태와 자리지킴 카드가 같은 자리를 잡아
  * 탭을 옮길 때 판이 접혔다 펴지지 않게 한다.
+ * 내용이 가장 긴 카드가 249.2px 남짓이라, 조금 위에서 못박아야 어느 탭이든 같은 높이가 된다.
+ * 최소높이를 내용보다 낮게 잡으면 내용 짧은 카드만 최소높이로 잘려 소수점만큼 덜컹인다.
  * JobCard 안쪽 여백이 바뀌면 이 값도 함께 맞춰야 한다.
  */
-const CARD_HEIGHT = "min-h-[249px]";
-
-/**
- * 카드 줄의 높이 = 카드(249) + 가로 스크롤바(11).
- *
- * 스크롤바 자리가 곧 카드 아래 여백 노릇을 하므로 padding 은 따로 주지 않는다.
- * 둘을 겹쳐 주면(여백 8 + 스크롤바 11) 스크롤바가 투명한 동안 아래가 훵하게 비어 보였다.
- * 스크롤바는 넘칠 때만 생기니, 카드가 한 장뿐인 탭도 같은 높이가 되게 여기서 못박는다.
- * (scrollbar-gutter 는 세로 스크롤바에만 자리를 잡아줘 가로 줄에는 듣지 않는다.)
- */
-const ROW_HEIGHT = "min-h-[260px]";
+const CARD_HEIGHT = "min-h-[250px]";
+/** 위 클래스와 같은 값. 줄 높이를 계산할 때 쓴다. */
+const CARD_HEIGHT_PX = 250;
 
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
@@ -75,6 +69,25 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
    */
   const rowRef = useRef<HTMLDivElement>(null);
   const [fade, setFade] = useState({ start: false, end: false });
+
+  /*
+    카드 줄 높이 = 카드 + 가로 스크롤바가 차지하는 자리.
+    스크롤바는 넘칠 때만 생겨, 카드가 한 장뿐인 탭이 그만큼 낮아 탭을 옮길 때 판이 덜컹였다.
+    두께는 기기마다 다르다 - 데스크톱은 11px 남짓, 모바일은 화면 위에 겹쳐 떠서 0 이다.
+    같은 규격(scrollbar-on-hover)의 자를 하나 만들어 재 두고, 그만큼만 더 잡는다.
+    (scrollbar-gutter 는 세로 스크롤바에만 자리를 잡아줘 가로 줄에는 듣지 않는다.)
+  */
+  const sectionRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const probe = document.createElement("div");
+    probe.className = "scrollbar-on-hover";
+    probe.style.cssText = "position:absolute;visibility:hidden;overflow-x:scroll;width:100px;height:100px";
+    document.body.appendChild(probe);
+    const thickness = probe.offsetHeight - probe.clientHeight;
+    probe.remove();
+    /* 값은 상태가 아니라 CSS 변수로 흘린다. 그려진 판의 규격을 재서 판에 되돌려주는 일이다. */
+    sectionRef.current?.style.setProperty("--curation-row-h", `${CARD_HEIGHT_PX + thickness}px`);
+  }, []);
   const tabRowRef = useRef<HTMLDivElement>(null);
   const [tabFade, setTabFade] = useState({ start: false, end: false });
 
@@ -192,7 +205,7 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
-    <section className="mb-8 rounded-2xl bg-brand-blue-50 p-5 pt-6 sm:p-6 sm:pt-8">
+    <section ref={sectionRef} className="mb-8 rounded-2xl bg-brand-blue-50 p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
       {/*
         제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
@@ -254,7 +267,7 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
         <div
           aria-busy="true"
           aria-label="불러오는 중"
-          className={cn("flex items-start gap-4 overflow-hidden", ROW_HEIGHT)}
+          className="flex min-h-[var(--curation-row-h,250px)] items-start gap-4 overflow-hidden"
         >
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-xl border border-border bg-white/60", CARD_HEIGHT)} />
@@ -264,7 +277,7 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
 
       {current && current.items.length === 0 && (
         /* 카드 줄과 같은 높이로 세워, 빈 탭으로 옮겨도 판이 들썩이지 않게 한다. */
-        <div className={cn("flex items-start", ROW_HEIGHT)}>
+        <div className="flex min-h-[var(--curation-row-h,250px)] items-start">
           <div
             className={cn(
               "flex w-full items-center justify-center rounded-xl bg-white/70 px-6 text-center text-label-1 text-slate-500",
@@ -290,7 +303,11 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
         문구에 "자격"을 넣지 않는다. 조건 이름이 "요양보호사 자격"이면
         "자격 자격을"이 되고, "운전 가능"처럼 자격이 아닌 조건도 온다.
       */}
-      <p className="mb-4 min-h-[19.6px] pl-2 text-label-1 text-slate-600">
+      {/*
+        탭마다 문구 길이가 달라, 좁은 화면에서는 한 줄짜리와 두 줄짜리가 섞인다.
+        그대로 두면 탭을 옮길 때 판이 19px 씩 오르내려, 좁은 화면에서는 두 줄을 미리 잡아 둔다.
+      */}
+      <p className="mb-4 min-h-[39.2px] pl-2 text-label-1 text-slate-600 sm:min-h-[19.6px]">
         {unlockRequirementName ? (
           <>
             <strong className="font-semibold text-brand-blue-700">{unlockRequirementName}</strong>
@@ -304,7 +321,7 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
       {current && current.items.length > 0 && (
         /* 높이는 바깥 칸이 잡는다. 안쪽 스크롤 줄에 걸면 카드까지 늘어나, 스크롤바가 없는
            탭에서만 카드가 11px 더 길어진다. */
-        <div className={cn("relative", ROW_HEIGHT)}>
+        <div className="relative min-h-[var(--curation-row-h,250px)]">
         {/* 페이드는 스크롤을 가리면 안 되므로 클릭·스크롤을 통과시킨다. */}
         <div
           aria-hidden
