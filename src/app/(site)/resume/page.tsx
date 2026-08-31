@@ -144,7 +144,20 @@ export default async function ResumeListPage() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-label-1 font-bold text-brand-blue-600">완성도 {resume.completeness}%</span>
+                  {/*
+                    완성도는 다 채웠을 때만 색을 준다. 파란 글자로 늘 띄워두면 20%도 성과처럼 읽혀,
+                    아직 할 일이 남았다는 신호가 되지 않는다.
+                  */}
+                  <Badge
+                    className={cn(
+                      "rounded-full text-label-2",
+                      resume.completeness >= 100
+                        ? "bg-brand-blue-50 text-brand-blue-700"
+                        : "bg-slate-100 text-slate-500",
+                    )}
+                  >
+                    완성도 {resume.completeness}%
+                  </Badge>
                   <DocumentMenu
                     label="이력서"
                     title={resume.title}
