@@ -85,11 +85,15 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
           </nav>
         </div>
 
+        {/*
+          오른쪽 버튼들은 lg 부터 보인다. 태블릿에서는 가운데 메뉴가 이미 햄버거로 접혀 있는데
+          여기만 남아 있으면, 메뉴가 두 군데로 갈린다.
+        */}
         <div className="flex items-center gap-2">
           {user ? (
             <>
               {isAdmin && (
-                <Button variant="ghost" size="sm" className="hidden text-slate-700 sm:inline-flex" asChild>
+                <Button variant="ghost" size="sm" className="hidden text-slate-700 lg:inline-flex" asChild>
                   <Link href="/admin">관리자</Link>
                 </Button>
               )}
@@ -97,10 +101,10 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                 로그인 상태의 주 동작. 비로그인일 때 회원가입이 맡던 자리를 그대로 잇는다.
                 헤더 안에서는 기본 크기(48px)가 띠를 눌러 무겁다. 옆 버튼들과 함께 40px 로 맞춘다.
               */}
-              <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+              <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 lg:inline-flex" asChild>
                 <Link href="/mypage">마이페이지</Link>
               </Button>
-              <form action={signOutAction} className="hidden sm:inline-flex">
+              <form action={signOutAction} className="hidden lg:inline-flex">
                 <Button type="submit" variant="ghost" size="sm" className="text-slate-700">
                   로그아웃
                 </Button>
@@ -108,7 +112,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
             </>
           ) : (
             /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
-            <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+            <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 lg:inline-flex" asChild>
               <Link href={loginHref}>로그인/회원가입</Link>
             </Button>
           )}

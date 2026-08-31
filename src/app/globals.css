@@ -298,6 +298,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    /*
+     * 한글은 낱말 가운데서 끊으면 안 읽힌다. 기본이 그렇게 끊는 규칙이라, 화면마다
+     * break-keep 을 붙여 막아 왔는데 빠뜨린 곳이 계속 나왔다(푸터 소개글, 페이지 설명 등).
+     * 여기서 한 번 정해두고, 길이가 화면을 넘기는 낱말(URL·메일 주소)만 예외로 끊는다.
+     */
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
   html {
     @apply font-sans;

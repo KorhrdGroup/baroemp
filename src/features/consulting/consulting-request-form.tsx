@@ -123,7 +123,7 @@ export function ConsultingRequestForm() {
       <Button
         type="submit"
         size="lg"
-        className="h-12 w-full bg-brand-blue-900 text-body-2 font-semibold hover:bg-brand-blue-800"
+        className="w-full bg-brand-blue-900 text-body-2 font-semibold hover:bg-brand-blue-800"
       >
         상담 신청하기
       </Button>
