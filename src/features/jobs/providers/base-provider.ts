@@ -1,5 +1,6 @@
 import type { AgeGroup, Region } from "@/types";
-import { resolveMergedJeonnamGwangju } from "@/lib/labels";
+/* 지역 추정은 lib/labels 로 옮겼다. 공고·지원제도 화면에서도 같은 판단을 써야 해서다. */
+export { guessRegionFromText } from "@/lib/labels";
 import type { JobProvider, JobProviderName, JobProviderSearchParams, JobProviderSearchResult, NormalizedJob } from "./types";
 
 /** Work24 고용형태 코드 -> 내부 WorkType 매핑. */
@@ -30,42 +31,6 @@ export const PREFERENTIAL_CODE_LABELS: Record<string, string> = {
   "14": "운전가능자 우대",
   B: "(준)고령자(50세 이상) 우대",
 };
-
-const REGION_KEYWORD_MAP: Array<{ region: Region; keywords: string[] }> = [
-  { region: "seoul", keywords: ["서울"] },
-  { region: "gyeonggi", keywords: ["경기"] },
-  { region: "incheon", keywords: ["인천"] },
-  { region: "gangwon", keywords: ["강원"] },
-  { region: "chungbuk", keywords: ["충북", "충청북"] },
-  { region: "chungnam", keywords: ["충남", "충청남"] },
-  { region: "daejeon", keywords: ["대전"] },
-  { region: "sejong", keywords: ["세종"] },
-  { region: "jeonbuk", keywords: ["전북", "전라북"] },
-  { region: "jeonnam", keywords: ["전남", "전라남"] },
-  { region: "gwangju", keywords: ["광주"] },
-  { region: "gyeongbuk", keywords: ["경북", "경상북"] },
-  { region: "gyeongnam", keywords: ["경남", "경상남"] },
-  { region: "daegu", keywords: ["대구"] },
-  { region: "ulsan", keywords: ["울산"] },
-  { region: "busan", keywords: ["부산"] },
-  { region: "jeju", keywords: ["제주"] },
-];
-
-/**
- * Work24 등 외부 Provider의 자유 텍스트 지역명(예: "서울 강북구")을
- * 내부 Region 코드로 매핑한다. 매칭 실패 시 undefined (draft 취급, 관리자가 보정 가능).
- */
-export function guessRegionFromText(text?: string): Region | undefined {
-  if (!text) return undefined;
-  /*
-    "전남광주통합특별시" 는 광주와 전남을 한 이름으로 묶어 보낸다. 키워드를 앞에서부터
-    훑으면 "전남" 이 먼저 걸려 광주 것까지 전남으로 간다. 이 이름은 따로 가른다.
-  */
-  const merged = resolveMergedJeonnamGwangju(text);
-  if (merged) return merged;
-  const found = REGION_KEYWORD_MAP.find(({ keywords }) => keywords.some((kw) => text.includes(kw)));
-  return found?.region;
-}
 
 export function splitRegionSigungu(text?: string, sido?: Region): string | undefined {
   if (!text) return undefined;

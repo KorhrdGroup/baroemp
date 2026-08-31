@@ -35,6 +35,7 @@ function mapRow(row: Record<string, unknown>): SupportProgram {
     applicationMethod: (row.application_method as string | null) ?? undefined,
     requiredDocuments: (row.required_documents as string[]) ?? [],
     organizationName: (row.organization_name as string | null) ?? undefined,
+    organizationType: (row.organization_type as string | null) ?? undefined,
     departmentName: (row.department_name as string | null) ?? undefined,
     contact: (row.contact as string | null) ?? undefined,
     tags: (row.tags as SupportProgram["tags"]) ?? [],
@@ -89,6 +90,7 @@ function toRow(input: Partial<SupportProgramInput>): Record<string, unknown> {
   if (input.applicationMethod !== undefined) row.application_method = input.applicationMethod;
   if (input.requiredDocuments !== undefined) row.required_documents = input.requiredDocuments;
   if (input.organizationName !== undefined) row.organization_name = input.organizationName;
+  if (input.organizationType !== undefined) row.organization_type = input.organizationType;
   if (input.departmentName !== undefined) row.department_name = input.departmentName;
   if (input.contact !== undefined) row.contact = input.contact;
   if (input.tags !== undefined) row.tags = input.tags;

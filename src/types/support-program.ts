@@ -71,6 +71,11 @@ export interface SupportProgram {
   requiredDocuments?: string[];
 
   organizationName?: string;
+  /**
+   * 원본 "소관기관유형". 중앙행정기관 / 광역시도 / 시군구 / 교육청 / 공공기관.
+   * 지역을 추정할 때 "이름에 지역이 없다"와 "전국이다"를 가르는 근거로 쓴다.
+   */
+  organizationType?: string;
   departmentName?: string;
   contact?: string;
 

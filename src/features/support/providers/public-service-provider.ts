@@ -176,17 +176,25 @@ function mapSupportType(raw?: string): "cash" | "training_voucher" | "insurance"
 }
 
 /**
- * regionScope 추정: "소관기관유형"이 중앙행정기관이면 전국 대상으로 확정할 수 있다(실측 확인된 필드).
- * 그 외에는 접수기관/소관기관명/지원대상 텍스트에서 명시적 지역명이 발견될 때만 해당 지역으로 추정하고,
- * 찾지 못하면 단정하지 않고 undefined로 남긴다(억지 판정 금지).
+ * regionScope 추정.
+ *
+ * "소관기관유형" 은 중앙행정기관 / 광역시도 / 시군구 / 교육청 / 공공기관 다섯 가지로 들어온다.
+ *   - 중앙행정기관: 전국으로 확정한다.
+ *   - 광역시도·시군구·교육청: 지역 기관이므로 기관명에서 지역을 찾는다. 못 찾으면 비워 둔다
+ *     (틀린 지역을 넣느니 모르는 채로 두는 편이 낫다).
+ *   - 공공기관: 한국장학재단처럼 전국인 곳과 용산구시설관리공단처럼 한 지역인 곳이 섞여 있다.
+ *     기관명에서 지역이 나오면 그 지역, 안 나오면 전국으로 본다.
  */
 function guessRegionScope(row: ServiceListRow): "national" | ReturnType<typeof guessRegionFromText> {
   if (row.소관기관유형 === "중앙행정기관") return "national";
+
   const haystack = [row.접수기관, row.소관기관명, row.지원대상].filter(Boolean).join(" ");
-  return guessRegionFromText(haystack);
+  const region = guessRegionFromText(haystack);
+  if (region) return region;
+
+  return row.소관기관유형 === "공공기관" ? "national" : undefined;
 }
 
-/** serviceList 응답 1건 -> NormalizedSupportProgram (실제 필드명만 사용). */
 function adaptListRow(row: ServiceListRow): NormalizedSupportProgram {
   const eligibilityParts = [row.지원대상, row.선정기준].filter(Boolean);
   const eligibilityRaw = eligibilityParts.length > 0 ? eligibilityParts.join("\n\n") : undefined;
@@ -197,6 +205,7 @@ function adaptListRow(row: ServiceListRow): NormalizedSupportProgram {
     externalId: row.서비스ID,
     title: row.서비스명,
     organizationName: row.소관기관명 ?? "확인 필요",
+    organizationType: toTrimmedString(row.소관기관유형),
     departmentName: toTrimmedString(row.부서명),
     summary: toTrimmedString(row.서비스목적요약),
     description: toTrimmedString(row.지원내용) ?? toTrimmedString(row.서비스목적요약),
