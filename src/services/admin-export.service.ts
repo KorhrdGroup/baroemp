@@ -1,6 +1,7 @@
 import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getJobInterestReport } from "./job-interest-report.service";
+import { getSalesLeads, labelIncomeBand, labelInsurance, type SalesLeadRow } from "./sales-leads.service";
 import { REGION_LABELS } from "@/lib/labels";
 import type { SheetSpec } from "@/lib/export/workbook";
 import type { Region } from "@/types";
@@ -13,9 +14,12 @@ import type { Region } from "@/types";
  * 개인정보는 넣지 않는다. 이름·연락처·이메일 대신 회원 id 앞 8자리만 쓴다.
  * 관리자 화면에 이미 CRM 상세가 있으므로 개인 식별은 그쪽에서 하고,
  * 내보내기는 집계·분석용으로 한정한다.
+ *
+ * 예외: "영업 리드"는 영업단 전달이 목적이라 이름·연락처를 담는다.
+ * 마케팅 활용은 동의 여부 열을 보고 동의한 회원에 한해서 한다.
  */
 
-export const EXPORT_DOMAINS = ["assessment", "jobs", "support", "resume"] as const;
+export const EXPORT_DOMAINS = ["assessment", "jobs", "support", "resume", "leads"] as const;
 export type ExportDomain = (typeof EXPORT_DOMAINS)[number];
 
 export function isExportDomain(value: string): value is ExportDomain {
@@ -27,6 +31,7 @@ export const EXPORT_LABELS: Record<ExportDomain, string> = {
   jobs: "채용공고",
   support: "지원금찾기",
   resume: "이력서첨삭",
+  leads: "영업리드",
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- 시트마다 행 타입이 달라 한 배열에 담으려면 여기서만 느슨하게 받는다.
@@ -288,8 +293,62 @@ async function resumeSheets(client: AdminClient, days: number): Promise<AnySheet
   ];
 }
 
+/** 영업 리드. 진단 데이터를 영업 관점으로 합친 행이라 기간 필터 없이 전체를 담는다. */
+async function leadSheets(): Promise<AnySheetSpec[]> {
+  const rows = await getSalesLeads();
+
+  return [
+    {
+      name: "영업 리드",
+      rows,
+      columns: [
+        { header: "이름", width: 12, value: (r: SalesLeadRow) => r.name },
+        { header: "연락처", width: 16, value: (r: SalesLeadRow) => r.phone ?? "" },
+        { header: "연령대", width: 10, value: (r: SalesLeadRow) => r.ageLabel ?? "" },
+        { header: "지역", width: 10, value: (r: SalesLeadRow) => r.regionLabel ?? "" },
+        { header: "취업상태", width: 14, value: (r: SalesLeadRow) => r.employmentLabel ?? "" },
+        { header: "추천 직업", width: 26, value: (r: SalesLeadRow) => r.topOccupation ?? "" },
+        { header: "제안 과정", width: 26, value: (r: SalesLeadRow) => r.proposedCourse ?? "" },
+        { header: "고용보험", width: 10, value: (r: SalesLeadRow) => (r.insurance ? labelInsurance(r.insurance) : "") },
+        { header: "소득", width: 10, value: (r: SalesLeadRow) => (r.incomeBand ? labelIncomeBand(r.incomeBand) : "") },
+        {
+          header: "훈련의향",
+          width: 10,
+          value: (r: SalesLeadRow) => (r.trainingWillingness != null ? `${r.trainingWillingness}점` : ""),
+        },
+        { header: "영업 태그", width: 44, value: (r: SalesLeadRow) => r.tags.join(", ") },
+        { header: "마케팅 동의", width: 12, value: (r: SalesLeadRow) => (r.marketingConsent ? "Y" : "N") },
+        { header: "가입일", width: 12, value: (r: SalesLeadRow) => r.joinedAt },
+      ],
+    },
+    {
+      name: "요약 - 태그별",
+      rows: countBy(
+        rows.flatMap((r) => (r.tags.length ? r.tags.map((tag) => ({ tag })) : [{ tag: "태그 없음" }])),
+        (r) => r.tag,
+      ),
+      columns: COUNT_COLUMNS,
+    },
+    {
+      name: "요약 - 추천직업별",
+      // "직업명 (72점)" 에서 점수를 떼고 직업명으로 센다.
+      rows: countBy(rows, (r) => (r.topOccupation ? r.topOccupation.replace(/\s*\(\d+점\)$/, "") : "진단 전")),
+      columns: COUNT_COLUMNS,
+    },
+    {
+      name: "요약 - 제안과정별",
+      rows: countBy(
+        rows.filter((r) => r.proposedCourse),
+        (r) => r.proposedCourse ?? "",
+      ),
+      columns: COUNT_COLUMNS,
+    },
+  ];
+}
+
 export async function buildExportSheets(domain: ExportDomain, days: number): Promise<AnySheetSpec[]> {
   if (domain === "jobs") return jobSheets(days);
+  if (domain === "leads") return leadSheets();
 
   const client = createAdminSupabaseClient();
   if (!client) throw new Error("Supabase 관리자 키가 설정되지 않았습니다.");

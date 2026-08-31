@@ -1,4 +1,4 @@
-import { Target } from "lucide-react";
+import { Download, Target } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -28,6 +28,16 @@ export default async function AdminSalesLeadsPage() {
       description="진단 데이터 기반 상담 제안 정보입니다. 태그가 많을수록 우선 컨택 대상이며, 제안 과정은 추천 1위 직업의 미보유 자격입니다."
       icon={Target}
     >
+      {/* 영업단 전달용 한 파일. 목록 + 태그별·추천직업별·제안과정별 요약 시트가 담긴다. */}
+      <div className="mb-4 flex justify-end">
+        <a
+          href="/api/admin/export/leads"
+          className="inline-flex items-center gap-2 rounded-lg bg-brand-blue-500 px-4 py-2.5 text-label-1 font-semibold text-white transition-colors hover:bg-brand-blue-600"
+        >
+          <Download className="size-4" />
+          엑셀로 전달하기
+        </a>
+      </div>
       <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
         <div className="overflow-x-auto">
           <Table>
