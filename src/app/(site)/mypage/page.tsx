@@ -236,14 +236,6 @@ export default async function MyPage() {
             </Badge>
           )}
         </div>
-        {/*
-          이 화면의 동작 버튼에는 아이콘을 붙이지 않는다. 한 줄에 선 버튼 중 하나만
-          아이콘을 갖고 있으면 글자 시작점이 어긋나고, 그 하나가 더 중요한 것처럼 읽힌다.
-          아이콘은 카드 제목에만 쓴다 - 거기서는 무엇에 대한 카드인지 가리키는 표시다.
-        */}
-        <Button variant="outline" asChild>
-          <Link href="/mypage/profile">정보 수정</Link>
-        </Button>
       </div>
 
       {/* 요약. 아래 카드들과 같은 모양의 카드 넉 장으로 세운다. */}
@@ -276,17 +268,20 @@ export default async function MyPage() {
       <div className="mt-8 flex flex-col gap-6 lg:flex-row lg:items-start">
         {/*
           내 정보는 확인하러 오는 값이라 본문 흐름에 섞이면 매번 찾아야 한다.
-          늘 같은 자리에 둔다.
+          넓은 화면에서는 왼쪽에, 좁은 화면에서는 맨 위에 둬 늘 같은 자리에서 찾게 한다.
 
           본문과 마찬가지로 제목을 얹는다. 한쪽만 제목이 있으면 그만큼 아래로 밀려
           두 칸의 첫 상자가 어긋난 채로 시작한다.
           긴 본문을 내려도 따라오도록 화면에 붙여 둔다.
-
-          좁은 화면에서는 위아래로 쌓이므로 본문 뒤로 보낸다. 확인하러 오는 값이
-          맨 위를 차지하면 정작 볼 것이 한참 아래로 밀린다.
         */}
-        <aside className="order-2 w-full lg:sticky lg:top-24 lg:order-1 lg:w-72 lg:shrink-0">
-          <h2 className="mb-4 text-body-1 font-bold text-slate-900">내 정보</h2>
+        <aside className="w-full lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+          {/* 고칠 값 바로 옆에 고치는 버튼을 둔다. 머리글에 있을 때는 무엇을 고치는 건지 멀었다. */}
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <h2 className="text-body-1 font-bold text-slate-900">내 정보</h2>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/mypage/profile">정보 수정</Link>
+            </Button>
+          </div>
           <div className="space-y-4">
             {/* A. 내 정보 */}
             <Card className="rounded-xl border-0 ring-1 ring-border">
@@ -349,7 +344,7 @@ export default async function MyPage() {
           </div>
         </aside>
 
-        <div className="order-1 min-w-0 flex-1 space-y-10 lg:order-2">
+        <div className="min-w-0 flex-1 space-y-10">
         <section>
           <h2 className="mb-4 text-body-1 font-bold text-slate-900">취업 준비</h2>
           <div className="space-y-4">

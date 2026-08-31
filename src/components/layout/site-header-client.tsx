@@ -136,23 +136,29 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
       </div>
 
       {/*
-       * 모바일 메뉴. 헤더(로고)는 그대로 두고 그 아래로 펼쳐진다.
+       * 모바일 메뉴. 헤더(로고)는 그대로 두고 그 아래로 내려온다.
        *
        * absolute + top-full 로 헤더 아래에 겹쳐 띄운다. 문서 흐름에 두면 열 때마다
        * 아래 콘텐츠가 통째로 밀려 화면이 출렁인다.
-       * 높이를 애니메이션하면(max-height/grid-rows) 콘텐츠 높이와 어긋나 덜컥거리므로,
-       * 레이아웃에 관여하지 않는 opacity+transform 으로만 부드럽게 내린다.
-       * 닫혔을 때는 invisible 로 키보드 포커스에서도 빠진다.
+       * 높이를 애니메이션하면(max-height/grid-rows) 콘텐츠 높이와 어긋나 덜컥거린다.
+       * 대신 바깥 칸으로 오려내고(overflow-hidden) 안쪽 판을 제 높이만큼 위로 올려 둔다.
+       * 열리면 제자리로 내려오므로, 헤더 밑에서 판이 빠져나오는 것처럼 보인다.
+       * 그림자가 잘리지 않게 아래쪽만 여유를 둔다. 닫혔을 때는 invisible 로 포커스에서도 빠진다.
        */}
       <div
         id="mobile-menu"
         className={cn(
-          "absolute inset-x-0 top-full origin-top transition-[opacity,transform,visibility] duration-200 ease-out lg:hidden",
-          mobileOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0",
+          "absolute inset-x-0 top-full overflow-hidden pb-4 transition-[visibility] duration-300 lg:hidden",
+          mobileOpen ? "visible" : "invisible",
         )}
       >
         {/* 그림자는 아래로만 드리운다. shadow-lg 는 사방으로 퍼져 바로 위 헤더 밑단을 어둡게 눌렀다. */}
-        <nav className="mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-6 py-3 shadow-[0_12px_16px_-8px_rgba(15,23,42,0.18)]">
+        <nav
+          className={cn(
+            "mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-6 py-3 shadow-[0_12px_16px_-8px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-out",
+            mobileOpen ? "translate-y-0" : "-translate-y-full",
+          )}
+        >
         {mainNavItems.map((item) => {
           const current = isCurrentNav(item.href);
           return (
