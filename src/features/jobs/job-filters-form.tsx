@@ -208,7 +208,7 @@ export function JobFiltersForm({
             e.preventDefault();
             void submit();
           }}
-          className="flex h-14 items-center rounded-xl border-[1.5px] border-border bg-white shadow-[0_4px_20px_rgba(15,40,90,0.06)] sm:h-16"
+          className="flex h-14 items-center rounded-lg border-[1.5px] border-border bg-white shadow-[0_4px_20px_rgba(15,40,90,0.06)] sm:h-16"
         >
           <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-5 pr-2 sm:pl-6">
             <Search className="size-[18px] shrink-0 text-slate-400" />
@@ -314,7 +314,9 @@ export function JobFiltersForm({
               </button>
             </div>
 
-            <div className="mt-4 flex h-[19rem] border-y border-border sm:h-64 sm:rounded-xl sm:border">
+            {/* 좁은 화면에서도 상자로 보이게 좌우를 띄우고 각을 준다. 안쪽 회색 칸이 모서리 밖으로
+                삐져나오지 않게 overflow-hidden 을 함께 건다. */}
+            <div className="mt-4 mx-5 flex h-[19rem] overflow-hidden rounded-xl border border-border sm:mx-0 sm:h-64">
               {/* 왼쪽: 시·도 */}
               {/* 두 칸은 바탕색으로 갈린다. 선까지 그으면 목록 사이에 벽이 하나 더 생긴다. */}
               <div className="w-[7.5rem] shrink-0 overflow-y-auto bg-slate-50 sm:w-36">
@@ -373,7 +375,7 @@ export function JobFiltersForm({
                     key={name}
                     type="button"
                     onClick={() => toggleSigungu(name)}
-                    className="flex items-center gap-1 rounded-md bg-slate-100 py-1.5 pr-2 pl-3 text-label-2 font-medium text-slate-600 hover:bg-slate-200"
+                    className="flex items-center gap-1 rounded-lg bg-slate-100 py-1.5 pr-2 pl-3 text-label-2 font-medium text-slate-600 hover:bg-slate-200"
                   >
                     {REGION_LABELS[region as Region]} &gt; {name}
                     <X className="size-3.5 text-slate-400" />
