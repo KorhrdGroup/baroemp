@@ -142,7 +142,7 @@ export default async function AdminUsersPage({
           <option value="y">동의</option>
           <option value="n">미동의</option>
         </select>
-        <button type="submit" className="h-9 rounded-md bg-brand-blue-400 px-4 text-label-1 font-medium text-white">
+        <button type="submit" className="h-9 rounded-md bg-brand-blue-400 px-4 text-label-1 font-semibold text-white">
           검색
         </button>
         {(sp.q || sp.grade || sp.employmentStatus || sp.region || sp.marketing) && (
