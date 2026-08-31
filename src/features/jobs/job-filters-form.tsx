@@ -180,9 +180,9 @@ export function JobFiltersForm({
   const sheetHeadClass = "flex items-center justify-between px-5 pt-5 sm:px-0 sm:pt-0";
   const sheetFootClass = "flex items-center justify-between gap-3 px-5 py-4 sm:px-0 sm:pt-4 sm:pb-0";
   const resetClass =
-    "flex shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2.5 text-label-1 font-medium text-slate-600 hover:bg-slate-50";
+    "flex shrink-0 items-center gap-1.5 rounded-lg border border-border px-4 py-2.5 text-label-1 font-medium text-slate-600 hover:bg-slate-50";
   const applyClass =
-    "flex-1 rounded-full bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white hover:bg-brand-blue-600 sm:flex-none sm:px-8";
+    "flex-1 rounded-lg bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white hover:bg-brand-blue-600 sm:flex-none sm:px-8";
 
 
   /* 좁은 화면에서 아래에서 올라오는 시트로 여는 패널. 정렬은 작은 드롭다운이라 뺀다. */
@@ -208,7 +208,7 @@ export function JobFiltersForm({
             e.preventDefault();
             void submit();
           }}
-          className="flex h-14 items-center rounded-full border-[1.5px] border-border bg-white shadow-[0_4px_20px_rgba(15,40,90,0.06)] sm:h-16"
+          className="flex h-14 items-center rounded-xl border-[1.5px] border-border bg-white shadow-[0_4px_20px_rgba(15,40,90,0.06)] sm:h-16"
         >
           <div className="flex min-w-0 flex-1 items-center gap-2.5 pl-5 pr-2 sm:pl-6">
             <Search className="size-[18px] shrink-0 text-slate-400" />
@@ -248,7 +248,7 @@ export function JobFiltersForm({
 
           <button
             type="submit"
-            className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-full bg-brand-blue-400 px-6 text-body-2 font-semibold text-white transition-colors hover:bg-brand-blue-600 sm:h-[52px] sm:px-7"
+            className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-lg bg-brand-blue-400 px-6 text-body-2 font-semibold text-white transition-colors hover:bg-brand-blue-600 sm:h-[52px] sm:px-7"
           >
             <Search className="size-4" strokeWidth={2.2} />
             검색
@@ -268,7 +268,7 @@ export function JobFiltersForm({
               type="button"
               onClick={() => setPanel(panel === key ? null : key)}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-full border px-4 py-2.5 text-label-1",
+                "flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-4 py-2.5 text-label-1",
                 (key === "region" ? regionActive : jobActive)
                   ? "border-brand-blue-300 bg-brand-blue-50 font-semibold text-brand-blue-600"
                   : "border-border bg-white font-medium text-slate-600",
@@ -373,7 +373,7 @@ export function JobFiltersForm({
                     key={name}
                     type="button"
                     onClick={() => toggleSigungu(name)}
-                    className="flex items-center gap-1 rounded-full bg-slate-100 py-1.5 pr-2 pl-3 text-label-2 font-medium text-slate-600 hover:bg-slate-200"
+                    className="flex items-center gap-1 rounded-md bg-slate-100 py-1.5 pr-2 pl-3 text-label-2 font-medium text-slate-600 hover:bg-slate-200"
                   >
                     {REGION_LABELS[region as Region]} &gt; {name}
                     <X className="size-3.5 text-slate-400" />
