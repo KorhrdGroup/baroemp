@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -281,6 +281,37 @@ export function ResumeEditor({
 
   /** 순서를 바꾸는 중인지. 켜면 담긴 항목마다 위/아래 버튼이 나온다. */
   const [reordering, setReordering] = useState(false);
+
+  /*
+    좁은 화면용 항목 띠. 목차(사이드바)는 스크롤하면 지나가 버려, 본문 한가운데서는
+    지금 어느 항목을 채우고 있는지도, 다른 항목으로 건너갈 길도 없었다.
+    헤더 밑에 항목 이름 띠를 붙여 두고, 스크롤 위치로 지금 항목을 표시한다.
+  */
+  const [activeSectionKey, setActiveSectionKey] = useState<string | null>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onScroll = () => {
+      /* 띠(헤더 64 + 띠 높이) 바로 아래 지점을 지나는 카드가 "지금 항목"이다. */
+      const line = 120;
+      let current: string | null = null;
+      for (const item of navItems) {
+        const el = document.getElementById(sectionAnchorId(item.key));
+        if (el && el.getBoundingClientRect().top <= line) current = item.key;
+      }
+      setActiveSectionKey((prev) => (prev === current ? prev : current));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [navItems]);
+
+  /* 지금 항목이 띠 밖에 있으면 띠를 따라 옮겨, 표시가 늘 보이게 한다. */
+  useEffect(() => {
+    if (!activeSectionKey) return;
+    stripRef.current
+      ?.querySelector(`[data-strip-key="${activeSectionKey}"]`)
+      ?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+  }, [activeSectionKey]);
   /** 점검 기준(에이전트)을 고르는 창. 열 때 지금 기준을 미리 골라둔다. */
   const [reviewPickerOpen, setReviewPickerOpen] = useState(false);
   const [pickedAgentId, setPickedAgentId] = useState<string | undefined>(initialDetail.resume.templateId);

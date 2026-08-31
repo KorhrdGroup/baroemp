@@ -70,18 +70,23 @@ function CountUpStat({ stat, started }: { stat: (typeof stats)[number]; started:
       좁은 화면에서는 칸마다 폭을 같게 잡는다. 그냥 가운데 두면 "이력서·자소서 첨삭" 처럼
       긴 이름이 있는 칸만 옆으로 퍼져, 위아래 두 줄의 숫자가 서로 어긋나 보인다.
     */
-    <div className="flex w-40 items-center gap-3 sm:w-auto">
+    <div className="flex w-32 items-center gap-2 min-[360px]:w-40 min-[360px]:gap-3 sm:w-auto">
       {/* 어두운 남색 위라 300은 가라앉는다. 글자·아이콘 모두 한두 단계 밝게 올린다. */}
-      <stat.icon className="size-7 shrink-0 text-brand-blue-200" />
-      <div>
-        <p className="text-title-3 font-extrabold text-white sm:text-title-2">
+      <stat.icon className="size-6 shrink-0 text-brand-blue-200 min-[360px]:size-7" />
+      <div className="min-w-0">
+        {/*
+          숫자와 단위는 한 덩어리라 갈라지면 안 된다. 320px 화면에서 "34,500 / 건" 처럼
+          단위만 아랫줄로 떨어져 두 줄이 됐다. 줄바꿈을 막고, 대신 그 폭에서는 글자를
+          한 단계 낮춰 두 칸이 나란히 들어가게 한다.
+        */}
+        <p className="text-body-1 font-extrabold whitespace-nowrap text-white min-[360px]:text-title-3 sm:text-title-2">
           <span className="relative inline-block">
             <span className="invisible">{finalFormatted}</span>
             <span className="absolute inset-0 text-right">{count.toLocaleString()}</span>
           </span>
           <span className="ml-0.5 text-body-2 font-semibold text-brand-blue-100">{stat.unit}</span>
         </p>
-        <p className="text-label-2 text-brand-blue-100">{stat.label}</p>
+        <p className="text-label-2 whitespace-nowrap text-brand-blue-100">{stat.label}</p>
       </div>
     </div>
   );
