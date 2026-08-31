@@ -24,6 +24,8 @@ const PAGE_SIZE = 10;
 interface JobsPageSearchParams {
   keyword?: string;
   region?: string;
+  /** 시·군·구. 지역 필터에서 시·도까지만 고르면 비어 있다. */
+  sgg?: string;
   category?: string;
   beginner?: string;
   closingSoon?: string;
@@ -50,6 +52,7 @@ export default async function JobsPage({
   const filter: JobSearchParams = {
     keyword: sp.keyword,
     region: sp.region as Region | undefined,
+    regionSigungu: sp.sgg,
     jobCategory: sp.category,
     isBeginnerFriendly: sp.beginner === "1" ? true : undefined,
     closingWithinDays: sp.closingSoon === "1" ? 7 : undefined,
@@ -97,6 +100,7 @@ export default async function JobsPage({
     const params = new URLSearchParams();
     if (sp.keyword) params.set("keyword", sp.keyword);
     if (sp.region) params.set("region", sp.region);
+    if (sp.sgg) params.set("sgg", sp.sgg);
     if (sp.category) params.set("category", sp.category);
     if (sp.beginner) params.set("beginner", sp.beginner);
     if (sp.closingSoon) params.set("closingSoon", sp.closingSoon);
@@ -120,6 +124,7 @@ export default async function JobsPage({
         initial={{
           keyword: sp.keyword,
           region: sp.region,
+          regionSigungu: sp.sgg,
           jobCategory: sp.category,
           isBeginnerFriendly: sp.beginner === "1",
           closingSoon: sp.closingSoon === "1",

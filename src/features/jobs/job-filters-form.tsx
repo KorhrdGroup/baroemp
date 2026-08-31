@@ -2,10 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, RotateCcw, Search } from "lucide-react";
+import { ChevronDown, RotateCcw, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { filterPillClass, filterPillOffClass, filterPillOnClass } from "@/lib/ui-classes";
 import { REGION_LABELS } from "@/lib/labels";
+import { SIGUNGU_BY_REGION } from "@/lib/regions/sigungu-list";
+import type { Region } from "@/types";
 import { mockJobRoles } from "@/mocks/job-roles.mock";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { trackJobFilterChangedAction, trackJobSearchAction } from "@/features/jobs/job-actions";
@@ -22,6 +24,8 @@ export interface JobFiltersValue {
   keyword?: string;
   jobCategory?: string;
   region?: string;
+  /** 시·군·구 이름. 시·도를 고른 뒤에만 쓴다. */
+  regionSigungu?: string;
   isBeginnerFriendly?: boolean;
   closingSoon?: boolean;
   sort?: JobSortOrder;
@@ -60,12 +64,19 @@ export function JobFiltersForm({
   const [panel, setPanel] = useState<Panel>(null);
   const [keyword, setKeyword] = useState(initial.keyword ?? "");
   const [region, setRegion] = useState(initial.region ?? "all");
+  const [sigungu, setSigungu] = useState(initial.regionSigungu ?? "");
   const [jobCategory, setJobCategory] = useState(initial.jobCategory ?? "all");
   const [beginnerOnly, setBeginnerOnly] = useState(Boolean(initial.isBeginnerFriendly));
   const [closingSoon, setClosingSoon] = useState(Boolean(initial.closingSoon));
   const [sort, setSort] = useState<JobSortOrder>(initial.sort ?? "recommended");
 
   const regionActive = region !== "all";
+  /* 버튼에는 고른 데까지 적는다. "서울"만 적으면 구까지 좁힌 것이 안 보인다. */
+  const regionLabel = !regionActive
+    ? "지역 전체"
+    : sigungu
+      ? `${REGION_LABELS[region as Region]} ${sigungu}`
+      : REGION_LABELS[region as Region];
   const jobActive = jobCategory !== "all";
   // 선택된 직종 이름: 목록에서 찾고, 없으면 서버가 넘겨준 이름을 쓴다.
   const selectedJobLabel =
@@ -75,6 +86,7 @@ export function JobFiltersForm({
     const next: JobFiltersValue = {
       keyword,
       region: region === "all" ? undefined : region,
+      regionSigungu: region === "all" || !sigungu ? undefined : sigungu,
       jobCategory: jobCategory === "all" ? undefined : jobCategory,
       isBeginnerFriendly: beginnerOnly || undefined,
       closingSoon: closingSoon || undefined,
@@ -84,6 +96,7 @@ export function JobFiltersForm({
     const params = new URLSearchParams();
     if (next.keyword) params.set("keyword", next.keyword);
     if (next.region) params.set("region", next.region);
+    if (next.regionSigungu) params.set("sgg", next.regionSigungu);
     if (next.jobCategory) params.set("category", next.jobCategory);
     if (next.isBeginnerFriendly) params.set("beginner", "1");
     if (next.closingSoon) params.set("closingSoon", "1");
@@ -111,13 +124,49 @@ export function JobFiltersForm({
         : "border-border bg-white font-medium text-slate-600 hover:border-brand-blue-200 hover:bg-brand-blue-50/40",
     );
 
+  /* 시·도를 바꾸면 앞서 고른 구는 그 시·도의 것이 아니라 지워야 한다. */
+  function selectRegion(next: string) {
+    setRegion(next);
+    setSigungu("");
+  }
+
+  const sidoClass = (selected: boolean) =>
+    cn(
+      "block w-full px-4 py-3 text-left text-label-1 transition-colors",
+      selected ? "bg-white font-semibold text-brand-blue-600" : "font-medium text-slate-600 hover:bg-white/70",
+    );
+
+  const sigunguClass = (selected: boolean) =>
+    cn(
+      "block w-full px-4 py-3 text-left text-label-1 transition-colors",
+      selected ? "font-semibold text-brand-blue-600" : "font-medium text-slate-700 hover:bg-slate-50",
+    );
+
+  /*
+    좁은 화면은 아래에서 올라오는 시트로 연다. 목록이 두 칸이라 드롭다운으로 띄우면
+    화면 가운데를 덮으면서도 아래가 잘린다.
+  */
+  const regionPanelClass =
+    "fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white shadow-[0_-8px_32px_rgba(15,40,90,0.18)] sm:absolute sm:inset-x-0 sm:top-[calc(100%+12px)] sm:bottom-auto sm:rounded-2xl sm:border sm:border-border sm:p-7 sm:shadow-[0_16px_48px_rgba(15,40,90,0.14)]";
+
   const panelClass =
     "absolute inset-x-0 top-[calc(100%+12px)] z-50 rounded-2xl border border-border bg-white p-5 shadow-[0_16px_48px_rgba(15,40,90,0.14)] sm:p-7";
 
   return (
     <div>
       {/* 패널 밖 클릭 시 닫기 */}
-      {panel && <button type="button" aria-label="필터 닫기" className="fixed inset-0 z-40 cursor-default" onClick={() => setPanel(null)} />}
+      {panel && (
+        <button
+          type="button"
+          aria-label="필터 닫기"
+          /* 지역은 시트로 열리므로 좁은 화면에서 뒤를 덮어 어둡게 한다. 다른 패널은 드롭다운이라 그대로 둔다. */
+          className={cn(
+            "fixed inset-0 z-40 cursor-default",
+            panel === "region" && "bg-slate-900/30 sm:bg-transparent",
+          )}
+          onClick={() => setPanel(null)}
+        />
+      )}
 
       <div className="relative z-40">
         {/* 알약형 검색바 */}
@@ -147,7 +196,7 @@ export function JobFiltersForm({
               regionActive ? "font-semibold text-brand-blue-600" : "font-medium text-slate-700",
             )}
           >
-            {regionActive ? REGION_LABELS[region as keyof typeof REGION_LABELS] : "지역 전체"}
+            {regionLabel}
             <ChevronDown className={cn("size-3.5 transition-transform", panel === "region" && "rotate-180")} />
           </button>
 
@@ -177,7 +226,7 @@ export function JobFiltersForm({
         <div className="mt-2 flex gap-2 sm:hidden">
           {(
             [
-              ["region", regionActive ? REGION_LABELS[region as keyof typeof REGION_LABELS] : "지역 전체"],
+              ["region", regionLabel],
               ["job", jobActive ? selectedJobLabel : "직종 전체"],
             ] as const
           ).map(([key, label]) => (
@@ -198,39 +247,79 @@ export function JobFiltersForm({
           ))}
         </div>
 
-        {/* 지역 패널 */}
+        {/*
+          지역 패널.
+          시·도만으로는 "서울"이 통째로 걸려 사는 동네에서 다닐 만한 공고를 못 고른다.
+          왼쪽에서 시·도, 오른쪽에서 시·군·구를 고른다.
+          좁은 화면에서는 아래에서 올라오는 시트, 넓은 화면에서는 검색바 아래 판이다.
+        */}
         {panel === "region" && (
-          <div className={panelClass}>
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-label-1 font-bold text-slate-900">지역 선택</span>
+          <div className={regionPanelClass}>
+            <div className="flex items-center justify-between px-5 pt-5 sm:px-0 sm:pt-0">
+              <span className="text-body-2 font-bold text-slate-900">지역</span>
               <button
                 type="button"
-                onClick={() => setRegion("all")}
-                className="flex items-center gap-1.5 text-label-2 text-slate-400 hover:text-slate-600"
+                aria-label="지역 선택 닫기"
+                onClick={() => setPanel(null)}
+                className="-mr-2 rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
               >
-                선택 초기화 <RotateCcw className="size-3" />
+                <X className="size-5" />
               </button>
             </div>
-            <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-              <button type="button" className={cellClass(!regionActive)} onClick={() => setRegion("all")}>
-                전국
-              </button>
-              {Object.entries(REGION_LABELS).map(([value, label]) => (
-                <button key={value} type="button" className={cellClass(region === value)} onClick={() => setRegion(value)}>
-                  {label}
+
+            <div className="mt-4 flex h-[19rem] border-y border-border sm:h-64 sm:rounded-xl sm:border">
+              {/* 왼쪽: 시·도 */}
+              <div className="w-[7.5rem] shrink-0 overflow-y-auto border-r border-border bg-slate-50 sm:w-36">
+                <button type="button" className={sidoClass(!regionActive)} onClick={() => selectRegion("all")}>
+                  전국
                 </button>
-              ))}
+                {Object.entries(REGION_LABELS).map(([value, label]) => (
+                  <button key={value} type="button" className={sidoClass(region === value)} onClick={() => selectRegion(value)}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {/* 오른쪽: 고른 시·도의 시·군·구 */}
+              <div className="flex-1 overflow-y-auto">
+                {!regionActive ? (
+                  <p className="px-4 py-5 text-label-1 break-keep text-slate-400">
+                    왼쪽에서 시·도를 고르면 시·군·구를 고를 수 있어요.
+                  </p>
+                ) : (
+                  <>
+                    <button type="button" className={sigunguClass(!sigungu)} onClick={() => setSigungu("")}>
+                      {REGION_LABELS[region as Region]} 전체
+                    </button>
+                    {SIGUNGU_BY_REGION[region as Region].map((name) => (
+                      <button key={name} type="button" className={sigunguClass(sigungu === name)} onClick={() => setSigungu(name)}>
+                        {name}
+                      </button>
+                    ))}
+                  </>
+                )}
+              </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2 border-t border-slate-100 pt-4">
-              <button type="button" onClick={() => setPanel(null)} className="rounded-full border border-border px-5 py-2 text-label-1 font-medium text-slate-600">
-                닫기
+
+            <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-0 sm:pt-4 sm:pb-0">
+              <button
+                type="button"
+                onClick={() => selectRegion("all")}
+                className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2.5 text-label-1 font-medium text-slate-600 hover:bg-slate-50"
+              >
+                <RotateCcw className="size-3.5" /> 초기화
               </button>
               <button
                 type="button"
-                onClick={() => void submit({ region: region === "all" ? undefined : region })}
-                className="rounded-full bg-brand-blue-400 px-5 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+                onClick={() =>
+                  void submit({
+                    region: region === "all" ? undefined : region,
+                    regionSigungu: region === "all" || !sigungu ? undefined : sigungu,
+                  })
+                }
+                className="flex-1 rounded-full bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white hover:bg-brand-blue-600 sm:flex-none sm:px-8"
               >
-                적용
+                적용하기
               </button>
             </div>
           </div>
