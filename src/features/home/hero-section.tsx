@@ -31,10 +31,11 @@ export function HeroSection() {
             <br />
             <span className="text-brand-blue-600">한곳에서 확인하세요</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-body-2-reading text-slate-600 lg:mx-0">
-            직업진단부터 채용정보, 교육·지원금 정보까지
-            <br className="hidden sm:block" />
-            중장년의 취업 준비에 필요한 서비스를 제공합니다.
+          <p className="mx-auto mt-5 max-w-xl text-body-2-reading text-balance break-keep text-slate-600 lg:mx-0">
+            {/* 줄 나누기는 text-balance 에 맡긴다. <br> 로 자리를 못박으면 좁은 화면에서
+                반 줄짜리 꼬리가 생겨 문구가 세 토막 났다. */}
+            직업진단부터 채용정보, 교육·지원금 정보까지 중장년의 취업 준비에 필요한 서비스를
+            제공합니다.
           </p>
 
           <HeroJobSearch />

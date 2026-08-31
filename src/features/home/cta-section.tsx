@@ -28,7 +28,7 @@ export function CtaSection() {
           <h2 className="mt-3 text-title-2 font-extrabold tracking-tight text-white sm:text-headline-3">
             당신도 할 수 있습니다!
           </h2>
-          <p className="mt-3 max-w-md text-body-2-reading text-slate-300">
+          <p className="mt-3 max-w-md text-body-2-reading text-balance break-keep text-slate-300">
             평균 두 달 안에 새로운 시작을 함께한 회원님들의 이야기를 들어보세요.
           </p>
           <Button

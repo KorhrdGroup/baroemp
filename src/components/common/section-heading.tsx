@@ -35,7 +35,11 @@ export function SectionHeading({
           {title}
         </h2>
         {description && (
-          <p className="mt-2 text-body-2-reading text-slate-500">{description}</p>
+          /*
+            좁은 화면에서 한 줄이 안 되는 문구는 두 줄로 접힌다. text-balance 로 두 줄의
+            길이를 고르게 나눠 "정부·지자체에서 / 운영 중인" 처럼 끝만 밀려 떨어지지 않게 한다.
+          */
+          <p className="mt-2 text-body-2-reading text-balance break-keep text-slate-500">{description}</p>
         )}
       </div>
       {action && <div className="shrink-0">{action}</div>}
