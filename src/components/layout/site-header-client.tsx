@@ -171,31 +171,30 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                   </Link>
                 </Button>
               )}
-              <Button variant="outline" asChild>
+              {/*
+                로그인 상태의 주 동작은 마이페이지다. 채운 버튼은 여기에 준다 - 전에는
+                로그아웃이 채워져 있어, 메뉴를 열면 나가는 버튼이 제일 먼저 눈에 들어왔다.
+              */}
+              <Button asChild>
                 <Link href="/mypage" onClick={() => setMobileOpen(false)}>
                   마이페이지
                 </Link>
               </Button>
               <form action={signOutAction}>
-                <Button type="submit" className="w-full bg-brand-blue-400 hover:bg-brand-blue-600">
+                <Button type="submit" variant="outline" className="w-full">
                   로그아웃
                 </Button>
               </form>
             </>
           ) : (
             <>
-              <Button variant="outline" asChild>
-                <Link href={loginHref} onClick={() => setMobileOpen(false)}>
-                  로그인
-                </Link>
-              </Button>
               {/*
-                회원가입도 로그인 화면으로 보낸다. 가입은 그 화면 하단 링크에서
-                이어지므로 진입점을 하나로 모은다.
+                버튼 하나로 합쳤다. 가입은 로그인 화면 하단 링크에서 이어지므로 둘 다 같은 곳으로
+                갔는데, 나란히 두면 다른 곳으로 가는 줄 읽힌다. 위 헤더도 같은 버튼 하나다.
               */}
-              <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+              <Button asChild>
                 <Link href={loginHref} onClick={() => setMobileOpen(false)}>
-                  회원가입
+                  로그인/회원가입
                 </Link>
               </Button>
             </>

@@ -102,9 +102,16 @@ export function adaptWork24Entry(entry: Record<string, unknown>, fetchedAt: stri
   const regionSido = guessRegionFromText(regionRaw);
   const regionSigungu = splitRegionSigungu(regionRaw, regionSido);
 
-  const address = [toStr(entry.strtnmCd), toStr(entry.basicAddr), toStr(entry.detailAddr)]
-    .filter(Boolean)
-    .join(" ") || undefined;
+  /*
+    strtnmCd 는 도로명 "코드"(12자리 숫자)다. 주소가 아닌데 앞에 붙여서
+    "281774253261 인천광역시 미추홀구 …" 처럼 찍혔다. 빼고 읽을 수 있는 것만 잇는다.
+    detailAddr 에는 "." 이나 "-" 한 글자만 오는 경우가 있어 걸러낸다.
+  */
+  const detailAddr = toStr(entry.detailAddr);
+  const address =
+    [toStr(entry.basicAddr), detailAddr && /[가-힣0-9a-zA-Z]/.test(detailAddr) ? detailAddr : undefined]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   const empTpCd = toStr(entry.empTpCd);
   const minEdubg = toStr(entry.minEdubg);
