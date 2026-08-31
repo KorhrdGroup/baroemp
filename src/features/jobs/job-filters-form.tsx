@@ -58,9 +58,9 @@ export function JobFiltersForm({
    */
   jobCategoryLabel?: string;
   /**
-   * 검색바와 빠른 토글 줄 사이에 들어갈 내용(큐레이션 섹션 등).
-   * 토글·정렬은 아래 목록에 적용되는 조건이라 목록 바로 위에 있어야 읽히는데,
-   * 상태가 이 컴포넌트 안에 있어 DOM을 쪼갤 수 없다. 그래서 사이를 children으로 연다.
+   * 검색바 위에 들어갈 내용(큐레이션 섹션 등).
+   * 검색바는 아래 목록을 좁히는 도구라 목록에 붙어 있어야 하고, 둘러보라고 권하는 띠는
+   * 그보다 위에 온다. 상태가 이 컴포넌트 안에 있어 DOM을 쪼갤 수 없어 children으로 연다.
    */
   children?: React.ReactNode;
 }) {
@@ -208,6 +208,8 @@ export function JobFiltersForm({
           onClick={() => setPanel(null)}
         />
       )}
+
+      {children}
 
       {/* 시트가 열린 동안만 헤더(z-50) 위로 올라가, 그늘이 헤더까지 덮게 한다. */}
       <div className={cn("relative", isSheet ? "z-[60] sm:z-40" : "z-40")}>
@@ -468,8 +470,6 @@ export function JobFiltersForm({
         )}
 
       </div>
-
-      {children}
 
       {/*
         결과 건수·빠른 토글·정렬을 모두 왼쪽에 붙여 한 묶음으로 읽히게 한다.
