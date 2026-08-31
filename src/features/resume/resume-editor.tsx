@@ -2,7 +2,6 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowDown, ArrowLeft, ArrowUp, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +19,6 @@ import {
   type ResumeSectionOption,
 } from "@/lib/resume/completeness";
 import { AiButton } from "@/components/common/ai-button";
-import { DocumentMenu } from "@/components/common/document-menu";
 import {
   Dialog,
   DialogContent,
@@ -51,7 +49,6 @@ import type {
 } from "@/types";
 import {
   changeResumeTemplateAction,
-  deleteResumeAction,
   generateCareerSummaryAiAction,
   getResumeMarketComparisonAction,
   reviewResumeAiAction,
@@ -199,7 +196,6 @@ export function ResumeEditor({
   /** 담을 수 있는 항목 전체. 편집 중에도 항목을 넣고 뺄 수 있게 한다. */
   sectionOptions?: ResumeSectionOption[];
 }) {
-  const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const resume = detail.resume;
 
@@ -1453,23 +1449,17 @@ export function ResumeEditor({
         버튼 정렬은 안쪽 컨테이너로 본문 폭에 맞춘다.
       */}
       {/*
-        위계별 그룹핑: 왼쪽은 문서를 벗어나는 동작(목록으로)이라 ghost로 눌러두고,
-        오른쪽은 문서에 대한 동작(미리보기 → 저장)만 모아 확정 동작인 저장 하나만 채운다.
-        삭제는 저장에서 가장 먼 왼쪽 끝, 목록으로 옆에 둔다.
+        위계별 그룹핑: 왼쪽은 문서를 벗어나는 동작(목록으로), 오른쪽은 문서에 대한 동작
+        (미리보기 → 저장)을 모아 확정 동작인 저장 하나만 채운다. 삭제는 여기 두지 않는다 -
+        편집 화면에서 되돌릴 수 없는 동작은 목록으로 나가서 하게 한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
         <div className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
-          <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
+          <Button variant="outline" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
           </Button>
-          <DocumentMenu
-            label="이력서"
-            title={form.title}
-            onDelete={() => deleteResumeAction(resume.id)}
-            afterDelete={() => router.replace("/resume")}
-          />
 
           {/*
             완성도는 저장 버튼 옆에서 진행 막대로 보여준다. 상단 배지로 두면

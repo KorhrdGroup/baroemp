@@ -2,7 +2,6 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import {
   ArrowDown,
   ArrowLeft,
@@ -25,14 +24,12 @@ import { Progress } from "@/components/ui/progress";
 import { CoverLetterPreview } from "./cover-letter-preview";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AiButton } from "@/components/common/ai-button";
-import { DocumentMenu } from "@/components/common/document-menu";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
 import type { QuestionCatalogEntry } from "@/lib/cover-letter/questions";
 import { questionHeading } from "@/lib/cover-letter/questions";
 import {
-  deleteCoverLetterAction,
   generateCoverLetterDraftAiAction,
   getCoverLetterMarketComparisonAction,
   reviewCoverLetterSectionAiAction,
@@ -79,7 +76,6 @@ export function CoverLetterEditor({
   /** 미리보기 문서에 찍는 지원자 이름. 편집 폼에는 쓰지 않는다. */
   applicantName?: string;
 }) {
-  const router = useRouter();
   const [detail, setDetail] = useState(initialDetail);
   const [title, setTitle] = useState(initialDetail.coverLetter.title);
   const [sections, setSections] = useState<EditableSection[]>(
@@ -533,23 +529,17 @@ export function CoverLetterEditor({
       </div>
 
       {/*
-        이력서 편집기와 동일한 구조. 왼쪽은 문서를 벗어나는 동작(목록으로)이라 ghost로 눌러두고,
-        오른쪽은 확정 동작인 저장만 채운다. 화면 전체 폭에 고정해야 해서 sticky가 아니라 fixed다.
-        삭제는 저장에서 가장 먼 왼쪽 끝, 목록으로 옆에 둔다.
+        이력서 편집기와 동일한 구조. 왼쪽은 문서를 벗어나는 동작(목록으로), 오른쪽은 확정 동작인
+        저장만 채운다. 화면 전체 폭에 고정해야 해서 sticky가 아니라 fixed다.
+        삭제는 이력서와 같이 목록에서만 한다.
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center gap-1 px-4 py-3 sm:px-6 lg:px-8">
-          <Button variant="ghost" size="sm" className="shrink-0 text-slate-500" asChild>
+          <Button variant="outline" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
           </Button>
-          <DocumentMenu
-            label="자기소개서"
-            title={title}
-            onDelete={() => deleteCoverLetterAction(detail.coverLetter.id)}
-            afterDelete={() => router.replace("/resume")}
-          />
           {/*
             이력서와 같은 자리에 진행 막대를 둔다. 자기소개서에는 완성도 점수가
             없으므로 "답을 쓴 문항 수"를 그대로 쓴다. 남은 문항 번호를 함께 적어
