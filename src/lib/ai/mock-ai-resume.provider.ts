@@ -55,7 +55,7 @@ export function createMockAIResumeProvider(): AIResumeProvider {
       if (trimText(input.summary)) {
         strengths.push("핵심 경력 요약이 상단에 명확하게 작성되어 있습니다.");
       } else {
-        missingInformation.push("핵심 경력/한 줄 소개가 비어 있습니다.");
+        missingInformation.push("한 줄 소개가 비어 있습니다.");
         improvements.push({
           section: "SUMMARY",
           severity: "suggestion",

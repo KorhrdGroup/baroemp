@@ -298,6 +298,11 @@ export function ResumeEditor({
         const el = document.getElementById(sectionAnchorId(item.key));
         if (el && el.getBoundingClientRect().top <= line) current = item.key;
       }
+      /* 페이지 끝은 더 밀 수 없어, 마지막 항목들은 저 선을 영영 넘지 못한다. 끝에 닿으면 마지막 항목으로 본다. */
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      if (atBottom) current = navItems.at(-1)?.key ?? current;
+      /* 맨 위에서는 아직 아무 카드도 선을 넘지 않았다. 그래도 띠는 어디 있는지 늘 짚어 준다. */
+      if (!current) current = navItems[0]?.key ?? null;
       setActiveSectionKey((prev) => (prev === current ? prev : current));
     };
     onScroll();
@@ -305,12 +310,18 @@ export function ResumeEditor({
     return () => window.removeEventListener("scroll", onScroll);
   }, [navItems]);
 
-  /* 지금 항목이 띠 밖에 있으면 띠를 따라 옮겨, 표시가 늘 보이게 한다. */
+  /*
+    지금 항목이 띠 밖에 있으면 띠를 따라 옮겨, 표시가 늘 보이게 한다.
+    scrollIntoView 는 쓰지 않는다 - 가로로 옮기면서 세로까지 건드려, 사용자가 내리는
+    페이지를 도로 끌어올려 표시가 제자리에서 맴돌았다. 띠의 가로 위치만 직접 옮긴다.
+  */
   useEffect(() => {
-    if (!activeSectionKey) return;
-    stripRef.current
-      ?.querySelector(`[data-strip-key="${activeSectionKey}"]`)
-      ?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
+    const strip = stripRef.current;
+    if (!strip || !activeSectionKey) return;
+    const btn = strip.querySelector<HTMLElement>(`[data-strip-key="${activeSectionKey}"]`);
+    if (!btn) return;
+    const left = btn.offsetLeft - (strip.clientWidth - btn.offsetWidth) / 2;
+    strip.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
   }, [activeSectionKey]);
   /** 점검 기준(에이전트)을 고르는 창. 열 때 지금 기준을 미리 골라둔다. */
   const [reviewPickerOpen, setReviewPickerOpen] = useState(false);
@@ -659,10 +670,10 @@ export function ResumeEditor({
               <CardHeader className="flex flex-row items-center justify-between">
                 {/*
                   * 를 붙이지 않는다. 이 별표는 이름·이메일처럼 "이 칸을 비우면 안 된다"는
-                  뜻으로 쓰는데, 핵심 경력은 항목 자체를 뺄 수 있다. 담은 동안 채워야 하는 건
+                  뜻으로 쓰는데, 한 줄 소개는 항목 자체를 뺄 수 있다. 담은 동안 채워야 하는 건
                   경력·학력과 똑같고, 그쪽에도 별표는 없다.
                 */}
-                <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">한 줄 소개</CardTitle>
                 {/*
                   이 버튼은 이 칸에 쓴 글을 고치는 것이 아니라, 경력·자격·스킬을 재료로
                   문장을 만들어 제안한다. "다듬기"라고 부르면 쓴 글을 손봐주는 줄 알고
@@ -1248,6 +1259,33 @@ export function ResumeEditor({
   return (
     <div className="space-y-6">
 
+      {/*
+        좁은 화면용 항목 띠. 항목이 세로로 길게 이어져 본문 한가운데서는 지금 무엇을
+        채우는지도, 다른 항목으로 건너갈 길도 없었다. 헤더(64px) 밑에 붙여 두고
+        스크롤 위치에 따라 지금 항목을 짚어 준다. 넓은 화면은 왼쪽 목록이 그 일을 한다.
+      */}
+      <div
+        ref={stripRef}
+        className="scrollbar-hidden sticky top-16 z-30 -mx-6 -mt-10 mb-2 flex gap-1 overflow-x-auto border-b border-border bg-white/95 px-6 py-2 backdrop-blur print:hidden lg:hidden"
+      >
+        {navItems.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            data-strip-key={item.key}
+            onClick={() => scrollToSection(item.key)}
+            className={cn(
+              "shrink-0 rounded-lg px-3 py-2 text-label-1 whitespace-nowrap transition-colors",
+              activeSectionKey === item.key
+                ? "bg-brand-blue-50 font-semibold text-brand-blue-600"
+                : "font-medium text-slate-500",
+            )}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
       <div className="space-y-4 print:hidden">
         <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
           <div className="min-w-48 flex-1">
@@ -1461,7 +1499,7 @@ export function ResumeEditor({
           <div className="min-w-0 flex-1 space-y-4">
             {navItems.map((item) => (
               /* 사이드바에서 누르면 이 자리로 내려온다. 헤더에 제목이 가리지 않게 여백을 둔다. */
-              <div key={item.key} id={sectionAnchorId(item.key)} className="scroll-mt-24">
+              <div key={item.key} id={sectionAnchorId(item.key)} className="scroll-mt-32 lg:scroll-mt-24">
                 {sectionCards[item.key]}
               </div>
             ))}

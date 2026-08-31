@@ -25,7 +25,7 @@ const SECTION_WEIGHTS: Record<string, number> = {
 */
 const SECTION_LABELS: Record<string, string> = {
   BASIC_INFO: "기본정보",
-  SUMMARY: "핵심 경력 / 한 줄 소개",
+  SUMMARY: "한 줄 소개",
   EXPERIENCE: "경력",
   EDUCATION: "학력",
   QUALIFICATION: "보유 자격",
