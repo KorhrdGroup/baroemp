@@ -314,7 +314,9 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
             return (
               <div
                 key={item.job.id}
-                className="w-80 shrink-0"
+                /* 한 장뿐인 탭에서는 옆에 늘어날 카드가 없어 내용 높이로 주저앉는다.
+                   탭을 옮길 때마다 띠 높이가 널뛰지 않게 여기서도 최소 높이를 준다. */
+                className={cn("w-80 shrink-0", CARD_HEIGHT)}
                 onClickCapture={(e) => {
                   const t = e.target as HTMLElement;
                   if (t.closest("button")) return;

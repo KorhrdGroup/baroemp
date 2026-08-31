@@ -25,8 +25,11 @@ export const JOB_CATEGORY_GROUPS: JobCategoryGroup[] = [
   { key: "security", label: "경비·보안", prefixes: ["542"] },
   { key: "nurse_assistant", label: "간호조무사·보건", prefixes: ["304", "307"] },
   { key: "childcare", label: "보육·아동돌봄", prefixes: ["232"] },
-  /* 병원동행은 워크넷 직종코드가 따로 없어 걸리는 공고가 없다. */
-  { key: "hospital_companion", label: "병원동행", prefixes: [] },
+  /*
+    병원동행은 워크넷 직종코드가 따로 없어 목록에서 뺐다. 제목에 "병원동행"이 있는 공고는
+    넷뿐이고 그마저 직종은 요양보호사(5501xx)라 요양보호사로 걸린다.
+    예전 링크(?category=hospital_companion)는 아는 묶음이 아니니 코드로 보고 0건이 된다.
+  */
 ];
 
 const BY_KEY = new Map(JOB_CATEGORY_GROUPS.map((g) => [g.key, g]));
