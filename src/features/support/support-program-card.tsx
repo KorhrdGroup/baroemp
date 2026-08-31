@@ -5,14 +5,9 @@ import { cn } from "@/lib/utils";
 import { interactiveCardClass } from "@/lib/ui-classes";
 import { SupportBookmarkButton } from "./support-bookmark-button";
 import { labelOrganization, REGION_LABELS } from "@/lib/labels";
+import { resolveOrganizationLogo } from "@/lib/support/organization-logo";
 import type { MatchReasonDetail, SupportEligibilityGrade, SupportProgram } from "@/types";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
-
-const ORG_LOGO: Record<string, { src: string; w: number; h: number }> = {
-  고용노동부: { src: "/ministry-logo/고용노동부.svg", w: 80, h: 20 },
-  여성가족부: { src: "/ministry-logo/여성가족부-black.svg", w: 80, h: 20 },
-  "서울시 일자리희망센터": { src: "/ministry-logo/서울특별시_CI_좌우조합_서울특별시.png", w: 80, h: 20 },
-};
 
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   HIGH: "bg-emerald-50 text-emerald-700",
@@ -64,10 +59,11 @@ export function SupportProgramCard({
       */}
       <div className="flex items-center justify-between gap-2 px-5 pt-5 pr-14">
         {(() => {
-          const orgName = labelOrganization(program.organizationName ?? program.organization);
-          const logo = ORG_LOGO[orgName];
+          const organization = program.organizationName ?? program.organization;
+          const orgName = labelOrganization(organization);
+          const logo = resolveOrganizationLogo(organization);
           return logo ? (
-            <Image src={logo.src} alt={orgName} width={logo.w} height={logo.h} className="h-5 w-auto object-contain" />
+            <Image src={logo} alt={orgName} width={80} height={20} className="h-5 w-auto object-contain" />
           ) : (
             <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
               {orgName}
