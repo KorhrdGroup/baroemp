@@ -38,7 +38,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" aria-label={siteConfig.name} className="flex items-center">
             <Logo height={20} priority />
@@ -85,11 +85,15 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
           </nav>
         </div>
 
+        {/*
+          오른쪽 버튼들은 lg 부터 보인다. 태블릿에서는 가운데 메뉴가 이미 햄버거로 접혀 있는데
+          여기만 남아 있으면, 메뉴가 두 군데로 갈린다.
+        */}
         <div className="flex items-center gap-2">
           {user ? (
             <>
               {isAdmin && (
-                <Button variant="ghost" size="sm" className="hidden text-slate-700 sm:inline-flex" asChild>
+                <Button variant="ghost" size="sm" className="hidden text-slate-700 lg:inline-flex" asChild>
                   <Link href="/admin">관리자</Link>
                 </Button>
               )}
@@ -97,10 +101,10 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
                 로그인 상태의 주 동작. 비로그인일 때 회원가입이 맡던 자리를 그대로 잇는다.
                 헤더 안에서는 기본 크기(48px)가 띠를 눌러 무겁다. 옆 버튼들과 함께 40px 로 맞춘다.
               */}
-              <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+              <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 lg:inline-flex" asChild>
                 <Link href="/mypage">마이페이지</Link>
               </Button>
-              <form action={signOutAction} className="hidden sm:inline-flex">
+              <form action={signOutAction} className="hidden lg:inline-flex">
                 <Button type="submit" variant="ghost" size="sm" className="text-slate-700">
                   로그아웃
                 </Button>
@@ -108,7 +112,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
             </>
           ) : (
             /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
-            <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+            <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 lg:inline-flex" asChild>
               <Link href={loginHref}>로그인/회원가입</Link>
             </Button>
           )}
@@ -116,7 +120,11 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            /*
+              열려 있는 동안 회색 배경이 깔리던 것을 없앤다(ghost 의 aria-expanded 기본값).
+              아이콘이 X 로 바뀌어 이미 열린 상태를 말하고 있어, 배경까지 깔면 눌린 채로 굳어 보인다.
+            */
+            className="lg:hidden aria-expanded:bg-transparent"
             aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
@@ -143,7 +151,8 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
           mobileOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0",
         )}
       >
-        <nav className="mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-4 py-3 shadow-lg sm:px-6">
+        {/* 그림자는 아래로만 드리운다. shadow-lg 는 사방으로 퍼져 바로 위 헤더 밑단을 어둡게 눌렀다. */}
+        <nav className="mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-6 py-3 shadow-[0_12px_16px_-8px_rgba(15,23,42,0.18)]">
         {mainNavItems.map((item) => {
           const current = isCurrentNav(item.href);
           return (

@@ -38,7 +38,7 @@ export default async function CoverLetterEditPage({
     // 입력칸이 흰색으로 도드라지도록 편집 화면만 회색 바탕을 깐다.
     <div className="min-h-screen bg-slate-100">
       {/* 하단 고정 액션 바(fixed)에 마지막 문항이 가려지지 않도록 아래 여백을 크게 둔다. */}
-      <div className="mx-auto max-w-5xl px-4 pb-28 pt-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-5xl px-6 pb-28 pt-10 lg:px-8">
         <CoverLetterEditor
           initialDetail={detail}
           experienceBank={experienceBank}

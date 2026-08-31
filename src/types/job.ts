@@ -117,10 +117,17 @@ export type JobSortOrder = "recommended" | "latest" | "deadline" | "salary_desc"
 export interface JobSearchFilter {
   keyword?: string;
   jobCategory?: string;
+  /**
+   * 직종 코드 앞자리 목록. 한 직종이 코드 여러 개로 흩어져 있어(5501xx = 요양보호사)
+   * 앞자리로 훑는다. 여러 직종을 고르면 그중 하나라도 걸리는 공고를 찾는다.
+   */
+  jobCategoryPatterns?: string[];
   occupationCode?: string;
   employmentDestinationId?: string;
   region?: Region;
   regionSigungu?: string;
+  /** 여러 시·군·구를 한 번에 고른 경우. 같은 시·도 안에서만 고를 수 있다. */
+  regionSigungus?: string[];
   workType?: WorkType;
   employmentTypeCode?: string;
   isBeginnerFriendly?: boolean;

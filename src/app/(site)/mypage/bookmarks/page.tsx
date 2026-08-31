@@ -41,14 +41,14 @@ export default async function BookmarksPage() {
   const bookmarkedPrograms = programs.filter((program): program is SupportProgram => Boolean(program));
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-6 pt-10 pb-20 lg:px-8">
       <Button variant="ghost" size="sm" className="-ml-2 text-slate-500" asChild>
         <Link href="/mypage">
           <ArrowLeft className="size-4" /> 마이페이지
         </Link>
       </Button>
       <h1 className="mt-2 text-title-2 font-bold text-slate-900 sm:text-headline-3">찜한 목록</h1>
-      <p className="mt-2 text-body-2-reading text-slate-500">
+      <p className="mt-2 text-body-2-reading text-balance text-slate-500">
         일자리와 지원제도에서 찜해두신 것을 모두 모았어요.
       </p>
 

@@ -71,11 +71,11 @@ export default async function ResumeListPage() {
   const coverLetterAtLimit = coverLetters.length >= MAX_COVER_LETTERS_PER_USER;
 
   return (
-    <div className="mx-auto max-w-6xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-6 pt-10 pb-20 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">이력서 · 자기소개서</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">취업에 바로 사용할 이력서를 만들어보세요.</h1>
-        <p className="mt-2 text-body-2-reading text-slate-500">
+        <p className="mt-2 text-body-2-reading text-balance text-slate-500">
           내 경력/자격/희망직무 정보를 불러와 이력서를 빠르게 작성하고, AI 첨삭으로 다듬을 수 있어요.
         </p>
       </div>

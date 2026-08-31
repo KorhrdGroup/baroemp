@@ -65,13 +65,36 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
    */
   const rowRef = useRef<HTMLDivElement>(null);
   const [fade, setFade] = useState({ start: false, end: false });
+  const tabRowRef = useRef<HTMLDivElement>(null);
+  const [tabFade, setTabFade] = useState({ start: false, end: false });
+
+  function edgeState(el: HTMLDivElement | null) {
+    if (!el) return { start: false, end: false };
+    const maxScroll = el.scrollWidth - el.clientWidth;
+    return { start: el.scrollLeft > 1, end: el.scrollLeft < maxScroll - 1 };
+  }
 
   function syncFade() {
-    const el = rowRef.current;
-    if (!el) return;
-    const maxScroll = el.scrollWidth - el.clientWidth;
-    setFade({ start: el.scrollLeft > 1, end: el.scrollLeft < maxScroll - 1 });
+    setFade(edgeState(rowRef.current));
   }
+
+  function syncTabFade() {
+    setTabFade(edgeState(tabRowRef.current));
+  }
+
+  /*
+    처음 그릴 때와 창 크기가 바뀔 때도 맞춰야 한다. 스크롤할 때만 맞추면, 넘치는데도
+    오른쪽 흐림이 꺼져 있어 더 볼 것이 없는 줄로 읽힌다.
+  */
+  useEffect(() => {
+    const sync = () => {
+      setFade(edgeState(rowRef.current));
+      setTabFade(edgeState(tabRowRef.current));
+    };
+    sync();
+    window.addEventListener("resize", sync);
+    return () => window.removeEventListener("resize", sync);
+  }, []);
   const trackedTabs = useRef(new Set<JobCurationTab>(["new"]));
   const inflight = useRef(new Set<JobCurationTab>());
 
@@ -114,7 +137,7 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
   const currentItemCount = results[activeTab]?.items.length ?? 0;
   useEffect(() => {
     rowRef.current?.scrollTo({ left: 0 });
-    syncFade();
+    setFade(edgeState(rowRef.current));
   }, [activeTab, currentItemCount]);
 
   /**
@@ -167,7 +190,23 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
         튀어나와 보인다. 제목은 글자가 굵어 더 튀므로 한 단계 덜 준다.
       */}
       <h2 className="mb-3 pl-1 text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
-      <div className="mb-4 flex gap-2 overflow-x-auto pb-1 pl-2">
+      {/* 카드 줄과 같은 방식. 좌우 끝을 판 색으로 흐려 잘린 것이 아니라 이어진다고 보이게 한다. */}
+      <div className="relative mb-4">
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-brand-blue-50 to-transparent transition-opacity",
+            tabFade.start ? "opacity-100" : "opacity-0",
+          )}
+        />
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-brand-blue-50 to-transparent transition-opacity",
+            tabFade.end ? "opacity-100" : "opacity-0",
+          )}
+        />
+        <div ref={tabRowRef} onScroll={syncTabFade} className="scrollbar-hidden flex gap-2 overflow-x-auto pb-1 pl-2">
         {TABS.map((t) => (
           <button
             key={t.key}
@@ -191,8 +230,9 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
               {t.emoji}
             </span>
             {t.label}
-          </button>
-        ))}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/*

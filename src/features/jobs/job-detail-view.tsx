@@ -158,7 +158,7 @@ export function JobDetailView({
   return (
     // 지원금 상세와 같은 뼈대: 회색 바탕 위에 흰 카드를 쌓고, 지원 동작은 하단에 고정한다.
     <div className="min-h-screen bg-slate-50">
-    <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-3xl px-6 py-10 lg:px-8">
       <JobViewTracker jobId={job.id} matchScore={match?.score} />
 
       <div className="mb-4 -ml-2">
@@ -360,7 +360,7 @@ export function JobDetailView({
 
     {/* ── 하단 고정 CTA ── */}
     <div className="fixed inset-x-0 bottom-0 z-40 bg-white/95 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
-      <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-3 lg:px-8">
         <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" />
         <JobBookmarkButton
           jobId={job.id}

@@ -120,7 +120,7 @@ export function SupportHighlightsSection() {
 
   return (
     <section className="py-24">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <SectionHeading
           title="지금 신청 가능한 지원금"
           description="중장년 취업을 위해 정부·지자체에서 운영 중인 주요 지원 제도입니다."

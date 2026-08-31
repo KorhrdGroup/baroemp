@@ -24,20 +24,22 @@ export default function ConsultingPage() {
           className="pointer-events-none absolute -bottom-32 left-1/4 size-80 rounded-full bg-brand-blue-500/20 blur-3xl"
         />
 
-        <div className="relative mx-auto max-w-3xl px-4 pb-28 pt-20 sm:px-6 lg:px-8">
+        {/* 좁은 화면에서 글이 화면 가장자리에 붙어 답답했다. 이 페이지는 좌우를 한 단계 넉넉히 둔다. */}
+        <div className="relative mx-auto max-w-3xl px-6 pb-28 pt-20 lg:px-8">
           <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-200">
             <BadgeCheck className="size-4" />
             유료 서비스
           </p>
           <h1 className="mt-2 break-keep text-title-2 font-bold text-white sm:text-headline-3">1:1 취업컨설팅</h1>
-          <p className="mt-2 max-w-xl break-keep text-body-2-reading text-brand-blue-100">
+          {/* 두 줄로 접힐 때 뒷줄에 "받아보세요." 만 남지 않게 줄 길이를 고르게 나눈다. */}
+          <p className="mt-2 max-w-xl text-balance text-body-2-reading text-brand-blue-100">
             전문가와 함께 직업·자격·채용·지원금을 연결하는 맞춤 상담을 받아보세요.
           </p>
         </div>
       </section>
 
       {/* 그라데이션 밴드 아래로 폼을 걸쳐 놓는다. 형제로 빼야 마진 상쇄를 피할 수 있다. */}
-      <div className="relative z-10 mx-auto -mt-20 max-w-3xl px-4 pb-12 sm:px-6 lg:px-8">
+      <div className="relative z-10 mx-auto -mt-20 max-w-3xl px-6 pb-12 lg:px-8">
         <ConsultingRequestForm />
       </div>
     </div>

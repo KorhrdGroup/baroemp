@@ -14,6 +14,7 @@ import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { getOccupationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
+import { parseJobCategories, toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 
 export const metadata: Metadata = {
   title: "일자리 찾기 | 한평생 바로취업",
@@ -24,6 +25,8 @@ const PAGE_SIZE = 10;
 interface JobsPageSearchParams {
   keyword?: string;
   region?: string;
+  /** 시·군·구. 지역 필터에서 시·도까지만 고르면 비어 있다. */
+  sgg?: string;
   category?: string;
   beginner?: string;
   closingSoon?: string;
@@ -50,7 +53,10 @@ export default async function JobsPage({
   const filter: JobSearchParams = {
     keyword: sp.keyword,
     region: sp.region as Region | undefined,
-    jobCategory: sp.category,
+    /* 여러 구를 고르면 쉼표로 이어 온다. 시·군·구 이름에는 쉼표가 없다. */
+    regionSigungus: sp.sgg ? sp.sgg.split(",").filter(Boolean) : undefined,
+    /* 직종은 여러 개를 쉼표로 이어 온다. 묶음 이름은 코드 앞자리로, 6자리 코드는 그대로 쓴다. */
+    jobCategoryPatterns: toJobCategoryPatterns(parseJobCategories(sp.category)),
     isBeginnerFriendly: sp.beginner === "1" ? true : undefined,
     closingWithinDays: sp.closingSoon === "1" ? 7 : undefined,
     sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
@@ -73,8 +79,9 @@ export default async function JobsPage({
    * 직업진단 결과에서 넘어오는 직종 코드는 검색바의 직종 목록에 없다.
    * 이름을 찾아 넘겨야 필터가 걸린 것을 버튼에서 알아볼 수 있다.
    */
-  const jobCategoryLabel = sp.category
-    ? (await getOccupationRepository().findAll()).find((o) => o.jobCategoryCode === sp.category)?.name
+  const firstCategory = parseJobCategories(sp.category)[0];
+  const jobCategoryLabel = firstCategory
+    ? (await getOccupationRepository().findAll()).find((o) => o.jobCategoryCode === firstCategory)?.name
     : undefined;
   /*
     자격 배지용 요건 비교.
@@ -97,6 +104,7 @@ export default async function JobsPage({
     const params = new URLSearchParams();
     if (sp.keyword) params.set("keyword", sp.keyword);
     if (sp.region) params.set("region", sp.region);
+    if (sp.sgg) params.set("sgg", sp.sgg);
     if (sp.category) params.set("category", sp.category);
     if (sp.beginner) params.set("beginner", sp.beginner);
     if (sp.closingSoon) params.set("closingSoon", sp.closingSoon);
@@ -107,11 +115,11 @@ export default async function JobsPage({
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-6 py-10 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">일자리찾기</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나에게 맞는 일자리를 찾아보세요</h1>
-        <p className="mt-2 text-body-2-reading text-slate-500">
+        <p className="mt-2 text-body-2-reading text-balance text-slate-500">
           실시간 채용정보를 조건에 맞게 확인하고, 관심 있는 공고에 바로 지원해보세요.
         </p>
       </div>
@@ -120,7 +128,8 @@ export default async function JobsPage({
         initial={{
           keyword: sp.keyword,
           region: sp.region,
-          jobCategory: sp.category,
+          regionSigungus: sp.sgg ? sp.sgg.split(",").filter(Boolean) : undefined,
+          jobCategories: parseJobCategories(sp.category),
           isBeginnerFriendly: sp.beginner === "1",
           closingSoon: sp.closingSoon === "1",
           sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",

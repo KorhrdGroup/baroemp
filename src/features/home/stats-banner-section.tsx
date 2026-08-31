@@ -66,7 +66,11 @@ function CountUpStat({ stat, started }: { stat: (typeof stats)[number]; started:
   const finalFormatted = stat.value.toLocaleString();
 
   return (
-    <div className="flex items-center gap-3">
+    /*
+      좁은 화면에서는 칸마다 폭을 같게 잡는다. 그냥 가운데 두면 "이력서·자소서 첨삭" 처럼
+      긴 이름이 있는 칸만 옆으로 퍼져, 위아래 두 줄의 숫자가 서로 어긋나 보인다.
+    */
+    <div className="flex w-40 items-center gap-3 sm:w-auto">
       {/* 어두운 남색 위라 300은 가라앉는다. 글자·아이콘 모두 한두 단계 밝게 올린다. */}
       <stat.icon className="size-7 shrink-0 text-brand-blue-200" />
       <div>
@@ -112,7 +116,7 @@ export function StatsBannerSection() {
         좁은 화면은 한 줄에 다 못 들어가 두 칸씩 접히는데, 그때 선이 없어 숫자 넷이
         서로 붙어 보였다. 2×2 로 세우고 칸 사이를 가는 선으로 나눈다.
       */}
-      <div className="mx-auto grid max-w-7xl grid-cols-2 px-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-y-6 sm:px-6 lg:px-8">
+      <div className="mx-auto grid w-fit max-w-7xl grid-cols-2 px-6 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-center sm:gap-y-6 lg:px-8">
         {stats.map((stat, i) => (
           <div
             key={stat.id}

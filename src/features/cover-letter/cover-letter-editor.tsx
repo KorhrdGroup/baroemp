@@ -535,7 +535,7 @@ export function CoverLetterEditor({
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur">
         {/* 좁은 화면에서는 셋이 한 줄에 안 들어가 왼쪽 버튼이 잘렸다. 남는 자리를 가운데가 먹게 둔다. */}
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-6 py-3 lg:px-8">
           <Button variant="outline" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로

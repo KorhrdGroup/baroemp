@@ -18,7 +18,7 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] w-full justify-center bg-slate-50 px-4 py-8 sm:px-6 sm:py-14">
+    <div className="flex min-h-[calc(100vh-4rem)] w-full justify-center bg-slate-50 px-6 py-8 sm:py-14">
       <div className="w-full max-w-[460px]">
         <div className="rounded-2xl bg-white px-6 py-8 sm:rounded-2xl sm:px-12 sm:py-12">
           {children}
@@ -214,7 +214,11 @@ export function SocialButtons({ next }: { next?: string }) {
         href={`/auth/login/kakao${q}`}
         className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[#FEE500] text-[15px] font-bold text-[#191600] transition-colors hover:bg-[#F2DA00]"
       >
-        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-4" fill="currentColor">
+        {/*
+          네이버 N 은 상자를 꽉 채우고 카카오 말풍선은 위쪽에 몰려 있어, 같은 크기로 두면
+          카카오만 작고 높아 보인다. 한 단계 키우고 반 픽셀 내려 두 줄의 눈높이를 맞춘다.
+        */}
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="size-[18px] translate-y-[0.5px]" fill="currentColor">
           <path d="M12 3C6.5 3 2 6.6 2 11c0 2.8 1.9 5.3 4.7 6.7-.2.7-.7 2.6-.8 3-.1.5.2.5.4.4.2-.1 2.7-1.8 3.8-2.6.6.1 1.2.1 1.9.1 5.5 0 10-3.6 10-8s-4.5-8-10-8z" />
         </svg>
         카카오 로그인/회원가입

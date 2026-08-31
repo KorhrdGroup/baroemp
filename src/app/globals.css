@@ -298,6 +298,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    /*
+     * 한글은 낱말 가운데서 끊으면 안 읽힌다. 기본이 그렇게 끊는 규칙이라, 화면마다
+     * break-keep 을 붙여 막아 왔는데 빠뜨린 곳이 계속 나왔다(푸터 소개글, 페이지 설명 등).
+     * 여기서 한 번 정해두고, 길이가 화면을 넘기는 낱말(URL·메일 주소)만 예외로 끊는다.
+     */
+    word-break: keep-all;
+    overflow-wrap: break-word;
   }
   html {
     @apply font-sans;
@@ -360,6 +367,15 @@
  * 스크롤 자체는 그대로라 트랙패드·키보드 조작에는 영향이 없다.
  * 접근성을 위해 키보드 포커스가 안으로 들어왔을 때(focus-within)도 함께 드러낸다.
  */
+@utility scrollbar-hidden {
+  /* 가로로 미는 줄 중에서 스크롤바까지 보일 필요가 없는 것(탭 알약 줄 등). */
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility scrollbar-on-hover {
   /*
    * 스크롤바 자리는 항상 잡아두고 색만 투명 -> 회색으로 바꾼다.

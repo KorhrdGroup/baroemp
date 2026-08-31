@@ -167,7 +167,7 @@ export function SupportResultSections({
               type="button"
               onClick={() => setActiveGrade(isActive ? null : grade)}
               className={cn(
-                "rounded-full border px-4 py-2 text-label-1 font-semibold transition-all",
+                "rounded-lg border px-4 py-2 text-label-1 font-semibold transition-all",
                 isActive ? PILL_CLASS[grade].active : PILL_CLASS[grade].base,
               )}
             >

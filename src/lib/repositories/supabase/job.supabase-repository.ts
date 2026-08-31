@@ -120,11 +120,20 @@ function applySearchFilters(query: any, filter: JobSearchFilter) {
   if (filter.activeOnly !== false) {
     q = q.eq("is_active", true).eq("status", "published");
   }
-  if (filter.jobCategory) q = q.eq("job_category", filter.jobCategory);
+  /* 직종은 코드 앞자리로 훑는다. 여러 개면 그중 하나라도 걸리면 된다. */
+  if (filter.jobCategoryPatterns && filter.jobCategoryPatterns.length > 0) {
+    q = q.or(filter.jobCategoryPatterns.map((p) => `job_category.like.${p}*`).join(","));
+  } else if (filter.jobCategory) {
+    q = q.eq("job_category", filter.jobCategory);
+  }
   if (filter.occupationCode) q = q.eq("occupation_code", filter.occupationCode);
   if (filter.employmentDestinationId) q = q.eq("employment_destination_id", filter.employmentDestinationId);
   if (filter.region) q = q.eq("region", filter.region);
-  if (filter.regionSigungu) q = q.eq("region_sigungu", filter.regionSigungu);
+  if (filter.regionSigungus && filter.regionSigungus.length > 0) {
+    q = q.in("region_sigungu", filter.regionSigungus);
+  } else if (filter.regionSigungu) {
+    q = q.eq("region_sigungu", filter.regionSigungu);
+  }
   if (filter.workType) q = q.eq("work_type", filter.workType);
   if (filter.employmentTypeCode) q = q.eq("employment_type_code", filter.employmentTypeCode);
   if (filter.careerRequirement) q = q.eq("career_requirement", filter.careerRequirement);

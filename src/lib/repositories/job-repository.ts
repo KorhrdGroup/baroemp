@@ -30,6 +30,13 @@ export interface JobRepository extends CrudRepository<Job, JobInput, JobSearchFi
 function matchesFilter(job: Job, filter: JobSearchFilter): boolean {
   if (filter.activeOnly !== false && !job.isActive) return false;
   if (filter.jobCategory && job.jobCategory !== filter.jobCategory) return false;
+  if (
+    filter.jobCategoryPatterns &&
+    filter.jobCategoryPatterns.length > 0 &&
+    !filter.jobCategoryPatterns.some((p) => job.jobCategory.startsWith(p))
+  ) {
+    return false;
+  }
   if (filter.occupationCode && job.occupationCode !== filter.occupationCode) return false;
   if (filter.employmentDestinationId && job.employmentDestinationId !== filter.employmentDestinationId) return false;
   if (filter.region && job.region !== filter.region) return false;

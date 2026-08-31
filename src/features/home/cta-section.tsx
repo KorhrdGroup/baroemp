@@ -19,7 +19,7 @@ const testimonials = [
 export function CtaSection() {
   return (
     // 앞 섹션과 배경색이 같아 구분이 약하므로 여백을 넉넉히 준다.
-    <section className="mx-auto max-w-7xl px-4 py-24 sm:px-6 lg:px-8">
+    <section className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
       <div className="grid grid-cols-1 gap-6 rounded-2xl bg-brand-navy-900 p-8 sm:p-10 lg:grid-cols-2">
         <div className="flex flex-col justify-center">
           <Logo variant="onDark" height={22} className="mb-5" />
