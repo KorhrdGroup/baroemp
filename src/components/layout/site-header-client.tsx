@@ -116,7 +116,11 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden"
+            /*
+              열려 있는 동안 회색 배경이 깔리던 것을 없앤다(ghost 의 aria-expanded 기본값).
+              아이콘이 X 로 바뀌어 이미 열린 상태를 말하고 있어, 배경까지 깔면 눌린 채로 굳어 보인다.
+            */
+            className="lg:hidden aria-expanded:bg-transparent"
             aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
@@ -143,7 +147,8 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
           mobileOpen ? "visible translate-y-0 opacity-100" : "invisible -translate-y-2 opacity-0",
         )}
       >
-        <nav className="mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-6 py-3 shadow-lg">
+        {/* 그림자는 아래로만 드리운다. shadow-lg 는 사방으로 퍼져 바로 위 헤더 밑단을 어둡게 눌렀다. */}
+        <nav className="mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-6 py-3 shadow-[0_12px_16px_-8px_rgba(15,23,42,0.18)]">
         {mainNavItems.map((item) => {
           const current = isCurrentNav(item.href);
           return (

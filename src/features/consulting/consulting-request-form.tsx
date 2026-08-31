@@ -115,7 +115,8 @@ export function ConsultingRequestForm() {
       </div>
 
       {/* 폼 안의 다른 컨트롤과 같은 8px. rounded-lg는 이 프로젝트에서 10px이라 어긋난다. */}
-      <div className="rounded-md bg-brand-blue-50 px-4 py-3 text-center text-label-1 text-brand-blue-700">
+      {/* 두 줄로 접힐 때 "결제 / 안내" 처럼 붙어야 할 말이 갈렸다. 낱말을 지키고 줄 길이를 고르게 나눈다. */}
+        <div className="rounded-md bg-brand-blue-50 px-4 py-3 text-center text-label-1 break-keep text-balance text-brand-blue-700">
         1:1 취업컨설팅은 유료 서비스입니다. 상담 시작 전 결제 안내를 드립니다.
       </div>
 
