@@ -43,7 +43,7 @@ export function IntroHero({
           <span className="absolute -right-24 -top-16 size-[26rem] rounded-full bg-white opacity-60 blur-3xl" />
         </div>
 
-        <div className="relative mx-auto max-w-5xl px-6 pt-10 text-center sm:pt-14 lg:px-8">
+        <div className="relative mx-auto max-w-5xl px-4.5 pt-10 text-center sm:pt-14 lg:px-8">
           <span className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-white text-brand-blue-600 ring-1 ring-brand-blue-100">
             <Icon className="size-7" />
           </span>
@@ -80,7 +80,7 @@ export function IntroHero({
        * -mt는 카드 높이의 절반. sm 이상은 가로 배치라 112px(버튼 h-14 + p-7 상하), 모바일은
        * 버튼이 아래로 내려가 182px가 되므로 값을 나눠 잡는다. CTA 문구 줄 수가 바뀌면 재조정이 필요하다.
        */}
-      <div className="relative z-10 mx-auto -mt-23 max-w-4xl px-6 sm:-mt-14 lg:px-8">
+      <div className="relative z-10 mx-auto -mt-23 max-w-4xl px-4.5 sm:-mt-14 lg:px-8">
         <div className={cn(
             "flex flex-col gap-4 rounded-2xl bg-white p-6 sm:flex-row sm:items-center sm:justify-between sm:p-7",
             cardBorderClass,
@@ -95,7 +95,7 @@ export function IntroHero({
       </div>
 
       <section className="bg-white pb-16 pt-20">
-        <div className="mx-auto max-w-4xl px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl px-4.5 lg:px-8">
           <h2 className="text-center text-title-2 font-extrabold text-slate-900 sm:text-headline-3">
             {highlightTitle}
           </h2>

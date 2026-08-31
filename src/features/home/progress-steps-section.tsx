@@ -17,7 +17,7 @@ export async function ProgressStepsSection() {
 
   return (
     <section className="pb-24 pt-14">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4.5 lg:px-8">
         {/*
           몇 단계를 마쳤는지는 아래 카드가 이미 보여준다. 여기서는 그 숫자를 반복하는 대신
           "그래서 지금 뭘 하면 되는지"를 말한다.

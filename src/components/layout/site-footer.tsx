@@ -6,7 +6,7 @@ import { Logo } from "./logo";
 export function SiteFooter() {
   return (
     <footer className="bg-slate-50">
-      <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4.5 py-12 lg:px-8">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <Logo height={18} />

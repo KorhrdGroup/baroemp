@@ -105,7 +105,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
         if (!resume.summary) return null;
         return (
           <div key={section} className="mb-8">
-            <SectionTitle>핵심 경력 / 한 줄 소개</SectionTitle>
+            <SectionTitle>한 줄 소개</SectionTitle>
             <p className="text-label-1 leading-relaxed text-slate-700">{resume.summary}</p>
           </div>
         );

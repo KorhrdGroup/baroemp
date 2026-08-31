@@ -41,7 +41,7 @@ export default async function BookmarksPage() {
   const bookmarkedPrograms = programs.filter((program): program is SupportProgram => Boolean(program));
 
   return (
-    <div className="mx-auto max-w-6xl px-6 pt-10 pb-20 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
       <Button variant="ghost" size="sm" className="-ml-2 text-slate-500" asChild>
         <Link href="/mypage">
           <ArrowLeft className="size-4" /> 마이페이지

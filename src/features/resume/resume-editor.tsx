@@ -1,8 +1,8 @@
 "use client";
 
-import { useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -281,6 +281,50 @@ export function ResumeEditor({
 
   /** 순서를 바꾸는 중인지. 켜면 담긴 항목마다 위/아래 버튼이 나온다. */
   const [reordering, setReordering] = useState(false);
+  /* 좁은 화면의 항목 편집 시트. 넓은 화면의 reordering 과 따로 둔다. */
+  const [sectionSheetOpen, setSectionSheetOpen] = useState(false);
+
+  /*
+    좁은 화면용 항목 띠. 목차(사이드바)는 스크롤하면 지나가 버려, 본문 한가운데서는
+    지금 어느 항목을 채우고 있는지도, 다른 항목으로 건너갈 길도 없었다.
+    헤더 밑에 항목 이름 띠를 붙여 두고, 스크롤 위치로 지금 항목을 표시한다.
+  */
+  const [activeSectionKey, setActiveSectionKey] = useState<string | null>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const onScroll = () => {
+      /* 띠(헤더 64 + 띠 높이) 바로 아래 지점을 지나는 카드가 "지금 항목"이다. */
+      const line = 120;
+      let current: string | null = null;
+      for (const item of navItems) {
+        const el = document.getElementById(sectionAnchorId(item.key));
+        if (el && el.getBoundingClientRect().top <= line) current = item.key;
+      }
+      /* 페이지 끝은 더 밀 수 없어, 마지막 항목들은 저 선을 영영 넘지 못한다. 끝에 닿으면 마지막 항목으로 본다. */
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 2;
+      if (atBottom) current = navItems.at(-1)?.key ?? current;
+      /* 맨 위에서는 아직 아무 카드도 선을 넘지 않았다. 그래도 띠는 어디 있는지 늘 짚어 준다. */
+      if (!current) current = navItems[0]?.key ?? null;
+      setActiveSectionKey((prev) => (prev === current ? prev : current));
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [navItems]);
+
+  /*
+    지금 항목이 띠 밖에 있으면 띠를 따라 옮겨, 표시가 늘 보이게 한다.
+    scrollIntoView 는 쓰지 않는다 - 가로로 옮기면서 세로까지 건드려, 사용자가 내리는
+    페이지를 도로 끌어올려 표시가 제자리에서 맴돌았다. 띠의 가로 위치만 직접 옮긴다.
+  */
+  useEffect(() => {
+    const strip = stripRef.current;
+    if (!strip || !activeSectionKey) return;
+    const btn = strip.querySelector<HTMLElement>(`[data-strip-key="${activeSectionKey}"]`);
+    if (!btn) return;
+    const left = btn.offsetLeft - (strip.clientWidth - btn.offsetWidth) / 2;
+    strip.scrollTo({ left: Math.max(0, left), behavior: "smooth" });
+  }, [activeSectionKey]);
   /** 점검 기준(에이전트)을 고르는 창. 열 때 지금 기준을 미리 골라둔다. */
   const [reviewPickerOpen, setReviewPickerOpen] = useState(false);
   const [pickedAgentId, setPickedAgentId] = useState<string | undefined>(initialDetail.resume.templateId);
@@ -628,10 +672,10 @@ export function ResumeEditor({
               <CardHeader className="flex flex-row items-center justify-between">
                 {/*
                   * 를 붙이지 않는다. 이 별표는 이름·이메일처럼 "이 칸을 비우면 안 된다"는
-                  뜻으로 쓰는데, 핵심 경력은 항목 자체를 뺄 수 있다. 담은 동안 채워야 하는 건
+                  뜻으로 쓰는데, 한 줄 소개는 항목 자체를 뺄 수 있다. 담은 동안 채워야 하는 건
                   경력·학력과 똑같고, 그쪽에도 별표는 없다.
                 */}
-                <CardTitle className="text-body-1 font-semibold">핵심 경력 / 한 줄 소개</CardTitle>
+                <CardTitle className="text-body-1 font-semibold">한 줄 소개</CardTitle>
                 {/*
                   이 버튼은 이 칸에 쓴 글을 고치는 것이 아니라, 경력·자격·스킬을 재료로
                   문장을 만들어 제안한다. "다듬기"라고 부르면 쓴 글을 손봐주는 줄 알고
@@ -1217,6 +1261,144 @@ export function ResumeEditor({
   return (
     <div className="space-y-6">
 
+      {/*
+        좁은 화면용 항목 띠. 항목이 세로로 길게 이어져 본문 한가운데서는 지금 무엇을
+        채우는지도, 다른 항목으로 건너갈 길도 없었다. 헤더(64px) 밑에 붙여 두고
+        스크롤 위치에 따라 지금 항목을 짚어 준다. 넓은 화면은 왼쪽 목록이 그 일을 한다.
+      */}
+      <div
+        ref={stripRef}
+        className="scrollbar-hidden sticky top-16 z-30 -mx-4.5 -mt-10 mb-2 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur print:hidden lg:hidden"
+      >
+        {/* 항목을 다루는 동작이라 항목 이름들 옆이 제자리다. 누르면 편집 시트가 올라온다. */}
+        <button
+          type="button"
+          onClick={() => setSectionSheetOpen(true)}
+          className="flex shrink-0 items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-label-1 font-medium whitespace-nowrap text-slate-600"
+        >
+          <ArrowUpDown className="size-3.5" />
+          항목 편집
+        </button>
+        <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border" />
+        {navItems.map((item) => (
+          <button
+            key={item.key}
+            type="button"
+            data-strip-key={item.key}
+            onClick={() => scrollToSection(item.key)}
+            className={cn(
+              "shrink-0 rounded-lg px-3 py-2 text-label-1 whitespace-nowrap transition-colors",
+              activeSectionKey === item.key
+                ? "bg-brand-blue-50 font-semibold text-brand-blue-600"
+                : "font-medium text-slate-500",
+            )}
+          >
+            {item.label}
+          </button>
+        ))}
+      </div>
+
+      {/*
+        좁은 화면의 항목 편집 시트. 지역 필터와 같은 형태 - 뒤를 어둡게 덮고 아래에서 올라온다.
+        담기·빼기·순서를 한 화면에서 끝내고 완료로 닫는다. 바꾼 것은 저장 버튼을 누를 때 함께 저장된다.
+      */}
+      {sectionSheetOpen && (
+        <div className="print:hidden lg:hidden">
+          <button
+            type="button"
+            aria-label="항목 편집 닫기"
+            className="fixed inset-0 z-40 cursor-default bg-slate-900/30"
+            onClick={() => setSectionSheetOpen(false)}
+          />
+          <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white pb-4 shadow-[0_-8px_32px_rgba(15,40,90,0.18)]">
+            <div className="flex items-center justify-between px-5 pt-5">
+              <span className="text-body-2 font-bold text-slate-900">이력서 항목</span>
+              <button
+                type="button"
+                aria-label="항목 편집 닫기"
+                onClick={() => setSectionSheetOpen(false)}
+                className="-mr-2 rounded-lg p-2 text-slate-400"
+              >
+                <X className="size-5" />
+              </button>
+            </div>
+
+            <ul className="mt-3 max-h-[55vh] space-y-1 overflow-y-auto px-5">
+              {sectionRows.map((row) => (
+                <li key={row.key} className="flex items-center gap-2 rounded-lg bg-slate-50 py-1.5 pr-2 pl-3">
+                  <span
+                    className={cn(
+                      "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
+                      !row.included ? "text-slate-300" : row.filled ? "bg-brand-blue-100 text-brand-blue-600" : "bg-white text-slate-500",
+                    )}
+                  >
+                    {!row.included ? "" : row.filled ? <Check className="size-3.5" /> : row.order}
+                  </span>
+                  <span className={cn("min-w-0 flex-1 truncate text-label-1", row.included ? "text-slate-700" : "text-slate-400")}>
+                    {row.label}
+                  </span>
+                  {row.fixed ? (
+                    <span className="pr-1 text-label-2 text-brand-blue-300">필수</span>
+                  ) : !row.included ? (
+                    <Button
+                      variant="outline"
+                      size="icon-xs"
+                      className="text-slate-500"
+                      aria-label={`${row.label} 담기`}
+                      onClick={() => addSectionRow(row)}
+                    >
+                      <Plus className="size-4" />
+                    </Button>
+                  ) : (
+                    <span className="flex shrink-0 items-center gap-1">
+                      <Button
+                        variant="outline"
+                        size="icon-xs"
+                        className="text-slate-500"
+                        aria-label={`${row.label} 위로`}
+                        disabled={row.navIndex === firstMovableIndex}
+                        onClick={() => moveSectionItem(row, -1)}
+                      >
+                        <ArrowUp className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon-xs"
+                        className="text-slate-500"
+                        aria-label={`${row.label} 아래로`}
+                        disabled={row.navIndex === navItems.length - 1}
+                        onClick={() => moveSectionItem(row, 1)}
+                      >
+                        <ArrowDown className="size-3.5" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon-xs"
+                        className="text-slate-500"
+                        aria-label={`${row.label} 빼기`}
+                        onClick={() => removeSectionItem(row)}
+                      >
+                        <Minus className="size-4" />
+                      </Button>
+                    </span>
+                  )}
+                </li>
+              ))}
+            </ul>
+
+            <div className="px-5 pt-4">
+              <button
+                type="button"
+                onClick={() => setSectionSheetOpen(false)}
+                className="w-full rounded-lg bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white"
+              >
+                완료
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4 print:hidden">
         <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
           <div className="min-w-48 flex-1">
@@ -1319,7 +1501,8 @@ export function ResumeEditor({
               AI 이력서 점검 받기
             </AiButton>
 
-            <div className="mt-4 border-t border-border pt-3">
+            {/* 좁은 화면에서는 위 항목 띠가 같은 목록을 보여주고, 편집은 시트로 한다. */}
+            <div className="mt-4 hidden border-t border-border pt-3 lg:block">
               <p className="px-1 text-label-2 font-semibold text-slate-400">이력서 항목 {navItems.length}/{sectionRows.length}</p>
 
               <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
@@ -1430,7 +1613,7 @@ export function ResumeEditor({
           <div className="min-w-0 flex-1 space-y-4">
             {navItems.map((item) => (
               /* 사이드바에서 누르면 이 자리로 내려온다. 헤더에 제목이 가리지 않게 여백을 둔다. */
-              <div key={item.key} id={sectionAnchorId(item.key)} className="scroll-mt-24">
+              <div key={item.key} id={sectionAnchorId(item.key)} className="scroll-mt-32 lg:scroll-mt-24">
                 {sectionCards[item.key]}
               </div>
             ))}
@@ -1455,7 +1638,7 @@ export function ResumeEditor({
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
         {/* 좁은 화면에서는 셋이 한 줄에 안 들어가 왼쪽 버튼이 잘렸다. 남는 자리를 가운데가 먹게 둔다. */}
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-6 py-3 lg:px-8">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4.5 py-3 lg:px-8">
           <Button variant="outline" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로

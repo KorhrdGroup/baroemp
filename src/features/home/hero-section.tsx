@@ -18,7 +18,7 @@ export function HeroSection() {
        * 왼쪽은 문구와 검색, 오른쪽은 일러스트.
        * lg 미만에서는 일러스트를 아래로 내리고 문구를 가운데 정렬한다.
        */}
-      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-6 pt-8 pb-10 sm:pt-12 sm:pb-12 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:pt-14 lg:pb-32">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4.5 pt-8 pb-10 sm:pt-12 sm:pb-12 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:pt-14 lg:pb-32">
         <div className="text-center lg:text-left">
           <p className="text-body-2 font-semibold text-brand-blue-600">중장년 취업지원 서비스</p>
           {/*
@@ -31,10 +31,11 @@ export function HeroSection() {
             <br />
             <span className="text-brand-blue-600">한곳에서 확인하세요</span>
           </h1>
-          <p className="mx-auto mt-5 max-w-xl text-body-2-reading text-slate-600 lg:mx-0">
-            직업진단부터 채용정보, 교육·지원금 정보까지
-            <br className="hidden sm:block" />
-            중장년의 취업 준비에 필요한 서비스를 제공합니다.
+          <p className="mx-auto mt-5 max-w-xl text-body-2-reading text-balance break-keep text-slate-600 lg:mx-0">
+            {/* 줄 나누기는 text-balance 에 맡긴다. <br> 로 자리를 못박으면 좁은 화면에서
+                반 줄짜리 꼬리가 생겨 문구가 세 토막 났다. */}
+            직업진단부터 채용정보, 교육·지원금 정보까지 중장년의 취업 준비에 필요한 서비스를
+            제공합니다.
           </p>
 
           <HeroJobSearch />

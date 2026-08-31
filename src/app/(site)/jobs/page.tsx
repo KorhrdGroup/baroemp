@@ -115,7 +115,7 @@ export default async function JobsPage({
   };
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4.5 py-10 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">일자리찾기</p>
         <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나에게 맞는 일자리를 찾아보세요</h1>

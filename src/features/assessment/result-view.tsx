@@ -108,7 +108,7 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs, jo
 
       {/* ── 하단 고정 CTA (지원금 상세와 같은 구성) ── */}
       <div className="fixed inset-x-0 bottom-0 z-40 bg-white/95 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-6 py-3 lg:px-8">
+        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4.5 py-3 lg:px-8">
           <Button variant="outline" size="sm" className="h-12 shrink-0" asChild>
             <Link href="/assessment">
               <RotateCcw className="size-4" />

@@ -19,7 +19,7 @@ const testimonials = [
 export function CtaSection() {
   return (
     // 앞 섹션과 배경색이 같아 구분이 약하므로 여백을 넉넉히 준다.
-    <section className="mx-auto max-w-7xl px-6 py-24 lg:px-8">
+    <section className="mx-auto max-w-7xl px-4.5 py-24 lg:px-8">
       <div className="grid grid-cols-1 gap-6 rounded-2xl bg-brand-navy-900 p-8 sm:p-10 lg:grid-cols-2">
         <div className="flex flex-col justify-center">
           <Logo variant="onDark" height={22} className="mb-5" />
@@ -28,7 +28,7 @@ export function CtaSection() {
           <h2 className="mt-3 text-title-2 font-extrabold tracking-tight text-white sm:text-headline-3">
             당신도 할 수 있습니다!
           </h2>
-          <p className="mt-3 max-w-md text-body-2-reading text-slate-300">
+          <p className="mt-3 max-w-md text-body-2-reading text-balance break-keep text-slate-300">
             평균 두 달 안에 새로운 시작을 함께한 회원님들의 이야기를 들어보세요.
           </p>
           <Button

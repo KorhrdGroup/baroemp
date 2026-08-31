@@ -2,7 +2,6 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { labelRegion, labelWorkType } from "@/lib/labels";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass } from "@/lib/ui-classes";
 import { splitSalary } from "@/lib/salary";
 import { JobBookmarkButton } from "./job-bookmark-button";
 import { READINESS_BADGE_CLASS, type JobReadiness } from "./job-readiness";
@@ -69,9 +68,10 @@ export function JobCard({
   return (
     // 찜 버튼은 카드 Link 안에 넣을 수 없어(버튼 중첩) 형제로 두고 위에 겹친다.
     <div className={cn("relative h-full", className)}>
+      {/* 호버 표시는 제목 밑줄 하나로 둔다. 카드 면까지 파래지면 목록에서 눈이 시끄럽다. */}
       <Link
         href={`/jobs/${job.id}`}
-        className={cn("group flex h-full flex-col rounded-xl border border-border bg-white p-5", interactiveCardClass)}
+        className="group flex h-full flex-col rounded-xl border border-border bg-white p-5"
       >
         {/*
           지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
