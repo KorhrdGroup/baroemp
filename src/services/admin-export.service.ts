@@ -1,7 +1,7 @@
 import "server-only";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getJobInterestReport } from "./job-interest-report.service";
-import { getSalesLeads, labelIncomeBand, labelInsurance, type SalesLeadRow } from "./sales-leads.service";
+import { getSalesLeads, labelIncomeBand, labelInsurance, PRIORITY_LABELS, type SalesLeadRow } from "./sales-leads.service";
 import { REGION_LABELS } from "@/lib/labels";
 import type { SheetSpec } from "@/lib/export/workbook";
 import type { Region } from "@/types";
@@ -302,6 +302,7 @@ async function leadSheets(): Promise<AnySheetSpec[]> {
       name: "영업 리드",
       rows,
       columns: [
+        { header: "전달등급", width: 10, value: (r: SalesLeadRow) => PRIORITY_LABELS[r.priority] },
         { header: "이름", width: 12, value: (r: SalesLeadRow) => r.name },
         { header: "연락처", width: 16, value: (r: SalesLeadRow) => r.phone ?? "" },
         { header: "연령대", width: 10, value: (r: SalesLeadRow) => r.ageLabel ?? "" },
@@ -309,6 +310,7 @@ async function leadSheets(): Promise<AnySheetSpec[]> {
         { header: "취업상태", width: 14, value: (r: SalesLeadRow) => r.employmentLabel ?? "" },
         { header: "추천 직업", width: 26, value: (r: SalesLeadRow) => r.topOccupation ?? "" },
         { header: "제안 과정", width: 26, value: (r: SalesLeadRow) => r.proposedCourse ?? "" },
+        { header: "상담 각도", width: 48, value: (r: SalesLeadRow) => r.salesAngle ?? "" },
         { header: "고용보험", width: 10, value: (r: SalesLeadRow) => (r.insurance ? labelInsurance(r.insurance) : "") },
         { header: "소득", width: 10, value: (r: SalesLeadRow) => (r.incomeBand ? labelIncomeBand(r.incomeBand) : "") },
         {
@@ -320,6 +322,11 @@ async function leadSheets(): Promise<AnySheetSpec[]> {
         { header: "마케팅 동의", width: 12, value: (r: SalesLeadRow) => (r.marketingConsent ? "Y" : "N") },
         { header: "가입일", width: 12, value: (r: SalesLeadRow) => r.joinedAt },
       ],
+    },
+    {
+      name: "요약 - 등급별",
+      rows: countBy(rows, (r) => PRIORITY_LABELS[r.priority]),
+      columns: COUNT_COLUMNS,
     },
     {
       name: "요약 - 태그별",
