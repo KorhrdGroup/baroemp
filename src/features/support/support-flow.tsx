@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, Clock, Coins, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { IntroHero } from "@/components/common/intro-hero";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
@@ -230,24 +230,25 @@ function StepBody({
       const years = Array.from({ length: thisYear - 18 - 1945 + 1 }, (_, i) => thisYear - 18 - i);
       return (
         <div className="flex flex-col items-center gap-3">
-          <Select
-            value={answers.birthYear ? String(answers.birthYear) : undefined}
-            onValueChange={(v) => {
-              const birthYear = Number(v);
-              onChange({ birthYear, ageGroup: birthYearToAgeGroup(birthYear, thisYear) });
-            }}
-          >
-            <SelectTrigger className="h-14 w-56 rounded-xl border-border bg-white px-4 text-body-1 font-semibold text-slate-800">
-              <SelectValue placeholder="연도 선택" />
-            </SelectTrigger>
-            <SelectContent>
+          {/* 연도는 80개 가까이 된다. OS 피커(아래에서 올라오는 휠)가 목록을 훑는 것보다 빠르다. */}
+          <div className="w-56">
+            <NativeSelect
+              className="h-14 rounded-xl border-border bg-white text-body-1 font-semibold text-slate-800"
+              value={answers.birthYear ? String(answers.birthYear) : ""}
+              onChange={(e) => {
+                if (!e.target.value) return;
+                const birthYear = Number(e.target.value);
+                onChange({ birthYear, ageGroup: birthYearToAgeGroup(birthYear, thisYear) });
+              }}
+            >
+              <option value="">연도 선택</option>
               {years.map((y) => (
-                <SelectItem key={y} value={String(y)}>
+                <option key={y} value={String(y)}>
                   {y}년생
-                </SelectItem>
+                </option>
               ))}
-            </SelectContent>
-          </Select>
+            </NativeSelect>
+          </div>
           {answers.birthYear && (
             <p className="text-label-1 text-slate-500">
               만 {new Date().getFullYear() - answers.birthYear}세 기준으로 연령 조건을 확인해 드려요.
