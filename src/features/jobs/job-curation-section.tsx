@@ -176,13 +176,18 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
             onPointerEnter={() => prefetchTab(t.key)}
             onPointerDown={() => prefetchTab(t.key)}
             onFocus={() => prefetchTab(t.key)}
-            className={cn(filterPillClass, activeTab === t.key ? filterPillOnSolidClass : filterPillOffClass)}
+            className={cn(
+              filterPillClass,
+              /*
+                그림문자의 글자 상자는 한글보다 높아서, 그냥 글 안에 두면 줄 높이를 늘려
+                글자가 위로 밀리고 아래쪽만 넓어 보인다. 칩을 flex 로 만들어 세로 가운데로 맞춘다.
+              */
+              "inline-flex items-center gap-1",
+              activeTab === t.key ? filterPillOnSolidClass : filterPillOffClass,
+            )}
           >
-            {/*
-              그림문자는 읽어줄 것이 없다. 라벨이 이미 같은 말을 하므로 화면에서만 보이게 감춘다.
-              mr 로 띄우는 이유는 gap 을 쓰면 감춘 요소에도 간격이 잡히기 때문이다.
-            */}
-            <span aria-hidden className="mr-1">
+            {/* 그림문자는 읽어줄 것이 없다. 라벨이 이미 같은 말을 하므로 화면에서만 보이게 둔다. */}
+            <span aria-hidden className="leading-none">
               {t.emoji}
             </span>
             {t.label}
