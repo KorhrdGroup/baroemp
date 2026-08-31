@@ -124,7 +124,11 @@ function applySearchFilters(query: any, filter: JobSearchFilter) {
   if (filter.occupationCode) q = q.eq("occupation_code", filter.occupationCode);
   if (filter.employmentDestinationId) q = q.eq("employment_destination_id", filter.employmentDestinationId);
   if (filter.region) q = q.eq("region", filter.region);
-  if (filter.regionSigungu) q = q.eq("region_sigungu", filter.regionSigungu);
+  if (filter.regionSigungus && filter.regionSigungus.length > 0) {
+    q = q.in("region_sigungu", filter.regionSigungus);
+  } else if (filter.regionSigungu) {
+    q = q.eq("region_sigungu", filter.regionSigungu);
+  }
   if (filter.workType) q = q.eq("work_type", filter.workType);
   if (filter.employmentTypeCode) q = q.eq("employment_type_code", filter.employmentTypeCode);
   if (filter.careerRequirement) q = q.eq("career_requirement", filter.careerRequirement);

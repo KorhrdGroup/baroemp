@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown, RotateCcw, Search, X } from "lucide-react";
+import { Check, ChevronDown, RotateCcw, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { filterPillClass, filterPillOffClass, filterPillOnClass } from "@/lib/ui-classes";
 import { REGION_LABELS } from "@/lib/labels";
@@ -12,6 +12,9 @@ import { mockJobRoles } from "@/mocks/job-roles.mock";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { trackJobFilterChangedAction, trackJobSearchAction } from "@/features/jobs/job-actions";
 import type { JobSortOrder } from "@/types";
+
+/** 한 번에 고를 수 있는 시·군·구 수. */
+const MAX_SIGUNGU = 5;
 
 const SORT_OPTIONS: { value: JobSortOrder; label: string }[] = [
   { value: "recommended", label: "추천순" },
@@ -24,8 +27,8 @@ export interface JobFiltersValue {
   keyword?: string;
   jobCategory?: string;
   region?: string;
-  /** 시·군·구 이름. 시·도를 고른 뒤에만 쓴다. */
-  regionSigungu?: string;
+  /** 시·군·구 이름. 시·도를 고른 뒤에만 쓰고, 같은 시·도 안에서 여러 개 고를 수 있다. */
+  regionSigungus?: string[];
   isBeginnerFriendly?: boolean;
   closingSoon?: boolean;
   sort?: JobSortOrder;
@@ -64,19 +67,24 @@ export function JobFiltersForm({
   const [panel, setPanel] = useState<Panel>(null);
   const [keyword, setKeyword] = useState(initial.keyword ?? "");
   const [region, setRegion] = useState(initial.region ?? "all");
-  const [sigungu, setSigungu] = useState(initial.regionSigungu ?? "");
+  const [sigungus, setSigungus] = useState<string[]>(initial.regionSigungus ?? []);
   const [jobCategory, setJobCategory] = useState(initial.jobCategory ?? "all");
   const [beginnerOnly, setBeginnerOnly] = useState(Boolean(initial.isBeginnerFriendly));
   const [closingSoon, setClosingSoon] = useState(Boolean(initial.closingSoon));
   const [sort, setSort] = useState<JobSortOrder>(initial.sort ?? "recommended");
 
   const regionActive = region !== "all";
-  /* 버튼에는 고른 데까지 적는다. "서울"만 적으면 구까지 좁힌 것이 안 보인다. */
+  /*
+    버튼에는 고른 데까지 적는다. "서울"만 적으면 구까지 좁힌 것이 안 보인다.
+    여럿이면 앞의 하나만 적고 나머지는 수로 센다 - 셋 넷을 늘어놓으면 버튼이 검색창을 밀어낸다.
+  */
   const regionLabel = !regionActive
     ? "지역 전체"
-    : sigungu
-      ? `${REGION_LABELS[region as Region]} ${sigungu}`
-      : REGION_LABELS[region as Region];
+    : sigungus.length === 0
+      ? REGION_LABELS[region as Region]
+      : sigungus.length === 1
+        ? `${REGION_LABELS[region as Region]} ${sigungus[0]}`
+        : `${sigungus[0]} 외 ${sigungus.length - 1}`;
   const jobActive = jobCategory !== "all";
   // 선택된 직종 이름: 목록에서 찾고, 없으면 서버가 넘겨준 이름을 쓴다.
   const selectedJobLabel =
@@ -86,7 +94,7 @@ export function JobFiltersForm({
     const next: JobFiltersValue = {
       keyword,
       region: region === "all" ? undefined : region,
-      regionSigungu: region === "all" || !sigungu ? undefined : sigungu,
+      regionSigungus: region === "all" || sigungus.length === 0 ? undefined : sigungus,
       jobCategory: jobCategory === "all" ? undefined : jobCategory,
       isBeginnerFriendly: beginnerOnly || undefined,
       closingSoon: closingSoon || undefined,
@@ -96,7 +104,7 @@ export function JobFiltersForm({
     const params = new URLSearchParams();
     if (next.keyword) params.set("keyword", next.keyword);
     if (next.region) params.set("region", next.region);
-    if (next.regionSigungu) params.set("sgg", next.regionSigungu);
+    if (next.regionSigungus?.length) params.set("sgg", next.regionSigungus.join(","));
     if (next.jobCategory) params.set("category", next.jobCategory);
     if (next.isBeginnerFriendly) params.set("beginner", "1");
     if (next.closingSoon) params.set("closingSoon", "1");
@@ -127,7 +135,19 @@ export function JobFiltersForm({
   /* 시·도를 바꾸면 앞서 고른 구는 그 시·도의 것이 아니라 지워야 한다. */
   function selectRegion(next: string) {
     setRegion(next);
-    setSigungu("");
+    setSigungus([]);
+  }
+
+  /*
+    구는 다섯까지만 고르게 한다. 더 담아도 버튼에 다 적지 못하고, 여섯 이상을 한 번에
+    보고 싶은 사람은 대개 시·도 전체를 보는 편이 빠르다.
+  */
+  function toggleSigungu(name: string) {
+    setSigungus((prev) => {
+      if (prev.includes(name)) return prev.filter((n) => n !== name);
+      if (prev.length >= MAX_SIGUNGU) return prev;
+      return [...prev, name];
+    });
   }
 
   const sidoClass = (selected: boolean) =>
@@ -138,9 +158,13 @@ export function JobFiltersForm({
 
   const sigunguClass = (selected: boolean) =>
     cn(
-      "block w-full px-4 py-3 text-left text-label-1 transition-colors",
+      "flex w-full items-center gap-2 px-4 py-3 text-left text-label-1 transition-colors disabled:cursor-not-allowed",
       selected ? "font-semibold text-brand-blue-600" : "font-medium text-slate-700 hover:bg-slate-50",
     );
+
+  /* 고르지 않은 줄에도 자리를 남긴다. 표시가 있고 없고로 글자가 좌우로 밀리면 목록이 흔들린다. */
+  const checkClass = (selected: boolean) =>
+    cn("size-4 shrink-0 transition-colors", selected ? "text-brand-blue-600" : "text-slate-200");
 
   /*
     좁은 화면은 아래에서 올라오는 시트로 연다. 목록이 두 칸이라 드롭다운으로 띄우면
@@ -269,13 +293,18 @@ export function JobFiltersForm({
 
             <div className="mt-4 flex h-[19rem] border-y border-border sm:h-64 sm:rounded-xl sm:border">
               {/* 왼쪽: 시·도 */}
-              <div className="w-[7.5rem] shrink-0 overflow-y-auto border-r border-border bg-slate-50 sm:w-36">
+              {/* 두 칸은 바탕색으로 갈린다. 선까지 그으면 목록 사이에 벽이 하나 더 생긴다. */}
+              <div className="w-[7.5rem] shrink-0 overflow-y-auto bg-slate-50 sm:w-36">
                 <button type="button" className={sidoClass(!regionActive)} onClick={() => selectRegion("all")}>
                   전국
                 </button>
                 {Object.entries(REGION_LABELS).map(([value, label]) => (
                   <button key={value} type="button" className={sidoClass(region === value)} onClick={() => selectRegion(value)}>
                     {label}
+                    {/* 다른 시·도를 보는 동안에도 몇 개를 골라뒀는지 남겨 둔다. */}
+                    {region === value && sigungus.length > 0 && (
+                      <span className="ml-1 font-bold text-brand-blue-600">{sigungus.length}</span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -288,18 +317,50 @@ export function JobFiltersForm({
                   </p>
                 ) : (
                   <>
-                    <button type="button" className={sigunguClass(!sigungu)} onClick={() => setSigungu("")}>
+                    <button type="button" className={sigunguClass(sigungus.length === 0)} onClick={() => setSigungus([])}>
+                      <Check className={checkClass(sigungus.length === 0)} />
                       {REGION_LABELS[region as Region]} 전체
                     </button>
-                    {SIGUNGU_BY_REGION[region as Region].map((name) => (
-                      <button key={name} type="button" className={sigunguClass(sigungu === name)} onClick={() => setSigungu(name)}>
-                        {name}
-                      </button>
-                    ))}
+                    {SIGUNGU_BY_REGION[region as Region].map((name) => {
+                      const picked = sigungus.includes(name);
+                      const full = !picked && sigungus.length >= MAX_SIGUNGU;
+                      return (
+                        <button
+                          key={name}
+                          type="button"
+                          disabled={full}
+                          className={cn(sigunguClass(picked), full && "text-slate-300")}
+                          onClick={() => toggleSigungu(name)}
+                        >
+                          <Check className={checkClass(picked)} />
+                          {name}
+                        </button>
+                      );
+                    })}
                   </>
                 )}
               </div>
             </div>
+
+            {/* 고른 것을 아래에 늘어놓는다. 목록을 훑는 동안 지금 무엇이 걸려 있는지 보여야 한다. */}
+            {sigungus.length > 0 && (
+              <div className="flex flex-wrap gap-2 px-5 pt-4 sm:px-0">
+                {sigungus.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() => toggleSigungu(name)}
+                    className="flex items-center gap-1 rounded-full bg-slate-100 py-1.5 pr-2 pl-3 text-label-2 font-medium text-slate-600 hover:bg-slate-200"
+                  >
+                    {REGION_LABELS[region as Region]} &gt; {name}
+                    <X className="size-3.5 text-slate-400" />
+                  </button>
+                ))}
+                {sigungus.length >= MAX_SIGUNGU && (
+                  <span className="self-center text-label-2 text-slate-400">최대 {MAX_SIGUNGU}개까지 고를 수 있어요</span>
+                )}
+              </div>
+            )}
 
             <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-0 sm:pt-4 sm:pb-0">
               <button
@@ -314,7 +375,7 @@ export function JobFiltersForm({
                 onClick={() =>
                   void submit({
                     region: region === "all" ? undefined : region,
-                    regionSigungu: region === "all" || !sigungu ? undefined : sigungu,
+                    regionSigungus: region === "all" || sigungus.length === 0 ? undefined : sigungus,
                   })
                 }
                 className="flex-1 rounded-full bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white hover:bg-brand-blue-600 sm:flex-none sm:px-8"

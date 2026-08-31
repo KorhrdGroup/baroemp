@@ -121,6 +121,8 @@ export interface JobSearchFilter {
   employmentDestinationId?: string;
   region?: Region;
   regionSigungu?: string;
+  /** 여러 시·군·구를 한 번에 고른 경우. 같은 시·도 안에서만 고를 수 있다. */
+  regionSigungus?: string[];
   workType?: WorkType;
   employmentTypeCode?: string;
   isBeginnerFriendly?: boolean;

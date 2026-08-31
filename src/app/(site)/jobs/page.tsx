@@ -52,7 +52,8 @@ export default async function JobsPage({
   const filter: JobSearchParams = {
     keyword: sp.keyword,
     region: sp.region as Region | undefined,
-    regionSigungu: sp.sgg,
+    /* 여러 구를 고르면 쉼표로 이어 온다. 시·군·구 이름에는 쉼표가 없다. */
+    regionSigungus: sp.sgg ? sp.sgg.split(",").filter(Boolean) : undefined,
     jobCategory: sp.category,
     isBeginnerFriendly: sp.beginner === "1" ? true : undefined,
     closingWithinDays: sp.closingSoon === "1" ? 7 : undefined,
@@ -124,7 +125,7 @@ export default async function JobsPage({
         initial={{
           keyword: sp.keyword,
           region: sp.region,
-          regionSigungu: sp.sgg,
+          regionSigungus: sp.sgg ? sp.sgg.split(",").filter(Boolean) : undefined,
           jobCategory: sp.category,
           isBeginnerFriendly: sp.beginner === "1",
           closingSoon: sp.closingSoon === "1",
