@@ -278,8 +278,10 @@ export default async function MyPage() {
           {/* 고칠 값 바로 옆에 고치는 버튼을 둔다. 머리글에 있을 때는 무엇을 고치는 건지 멀었다. */}
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-body-1 font-bold text-slate-900">내 정보</h2>
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/mypage/profile">정보 수정</Link>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/mypage/profile">
+                <Pencil /> 정보 수정
+              </Link>
             </Button>
           </div>
           <div className="space-y-4">
