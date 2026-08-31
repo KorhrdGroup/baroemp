@@ -72,7 +72,7 @@ export interface SupportProgram {
 
   organizationName?: string;
   /**
-   * 원본 "소관기관유형". 중앙행정기관 / 광역시도 / 시군구 / 교육청 / 공공기관.
+   * 원본 "소관기관유형". 시군구 / 광역시도 / 중앙행정기관 / 공공기관 / 지방출자_출연기관 / 지방공기업 / 교육청.
    * 지역을 추정할 때 "이름에 지역이 없다"와 "전국이다"를 가르는 근거로 쓴다.
    */
   organizationType?: string;
