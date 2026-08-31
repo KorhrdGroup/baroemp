@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1266,8 +1266,33 @@ export function ResumeEditor({
       */}
       <div
         ref={stripRef}
-        className="scrollbar-hidden sticky top-16 z-30 -mx-4.5 -mt-10 mb-2 flex gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur print:hidden lg:hidden"
+        className="scrollbar-hidden sticky top-16 z-30 -mx-4.5 -mt-10 mb-2 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur print:hidden lg:hidden"
       >
+        {/* 항목을 다루는 동작이라 항목 이름들 옆이 제자리다. 누르면 옮기는 목록이 펴진다. */}
+        <button
+          type="button"
+          onClick={() => {
+            setReordering((v) => {
+              if (!v) {
+                /* 목록은 접혀 있다 이제 펴지므로, 편 뒤에 그리로 데려간다. */
+                setTimeout(() => {
+                  document.getElementById("resume-section-list")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                }, 50);
+              }
+              return !v;
+            });
+          }}
+          className={cn(
+            "flex shrink-0 items-center gap-1 rounded-lg border px-2.5 py-1.5 text-label-1 whitespace-nowrap",
+            reordering
+              ? "border-brand-blue-400 bg-brand-blue-50 font-semibold text-brand-blue-600"
+              : "border-border font-medium text-slate-600",
+          )}
+        >
+          <ArrowUpDown className="size-3.5" />
+          {reordering ? "완료" : "순서"}
+        </button>
+        <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border" />
         {navItems.map((item) => (
           <button
             key={item.key}
@@ -1388,7 +1413,11 @@ export function ResumeEditor({
               AI 이력서 점검 받기
             </AiButton>
 
-            <div className="mt-4 border-t border-border pt-3">
+            {/*
+              좁은 화면에서는 위 항목 띠가 같은 목록을 이미 보여줘 여기는 겹말이다.
+              순서 변경 중에만 편다 - 옮기는 화살표가 이 목록에 있다.
+            */}
+            <div id="resume-section-list" className={cn("mt-4 border-t border-border pt-3", !reordering && "hidden lg:block")}>
               <p className="px-1 text-label-2 font-semibold text-slate-400">이력서 항목 {navItems.length}/{sectionRows.length}</p>
 
               <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
@@ -1452,7 +1481,7 @@ export function ResumeEditor({
                             disabled={row.navIndex === firstMovableIndex}
                             onClick={() => moveSectionItem(row, -1)}
                           >
-                            <ArrowUp className="size-3.5" />
+                            <ArrowUp className="size-3.5 -rotate-90 lg:rotate-0" />
                           </Button>
                           <Button
                             variant="outline"
@@ -1462,7 +1491,7 @@ export function ResumeEditor({
                             disabled={row.navIndex === navItems.length - 1}
                             onClick={() => moveSectionItem(row, 1)}
                           >
-                            <ArrowDown className="size-3.5" />
+                            <ArrowDown className="size-3.5 -rotate-90 lg:rotate-0" />
                           </Button>
                         </span>
                       ) : (
