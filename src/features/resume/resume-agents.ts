@@ -11,30 +11,41 @@ export interface ResumeAgentOption {
  * 사용자에게는 양식 선택이 아니라 맞춤형 AI 에이전트 선택으로 보여준다.
  * 프리셋에 없는 code(관리자가 추가한 양식)는 DB의 이름/설명을 그대로 쓴다.
  */
-const AGENT_PRESETS: Record<string, { name: string; tagline: string }> = {
+const AGENT_PRESETS: Record<string, { emoji: string; name: string; tagline: string }> = {
   STANDARD: {
-    name: "표준 취업 AI",
+    emoji: "📋",
+    name: "표준 취업 AI 에이전트",
     tagline: "일반 취업 기준으로 이력서 전반을 균형 있게 점검하고 문장을 다듬습니다.",
   },
   EXPERIENCED: {
-    name: "경력직 전문 AI",
+    emoji: "💼",
+    name: "경력직 전문 AI 에이전트",
     tagline: "경력요약·담당업무·성과가 먼저 읽히도록 경력 중심으로 첨삭합니다.",
   },
   MIDLIFE: {
-    name: "중장년 재취업 AI",
+    /* 직무를 바꿔 다시 방향을 잡는 쪽이라 나침반. 새싹(🌱)은 공고 배지에서 "신입가능"으로 쓰고 있다. */
+    emoji: "🧭",
+    name: "중장년 재취업 AI 에이전트",
     tagline: "기존 경력 활용과 직무전환, 장기근무 가능성이 드러나도록 첨삭합니다.",
   },
   CARE_WELFARE: {
-    name: "복지·돌봄 전문 AI",
+    emoji: "🤝",
+    name: "복지·돌봄 전문 AI 에이전트",
     tagline: "사회복지·요양 등 돌봄 직무 기준으로 자격과 현장 경험을 강조합니다.",
   },
 };
 
-/** 화면에 보여줄 에이전트 이름과 설명. 양식 이름("한평생 표준 이력서")을 그대로 쓰지 않는다. */
-export function resolveResumeAgent(agent: ResumeAgentOption): { id: string; name: string; description?: string } {
+/**
+ * 화면에 보여줄 에이전트 이름과 설명. 양식 이름("한평생 표준 이력서")을 그대로 쓰지 않는다.
+ * 관리자가 추가한 양식은 프리셋이 없어 그림문자도 없다 - 없으면 이름만 보여준다.
+ */
+export function resolveResumeAgent(
+  agent: ResumeAgentOption,
+): { id: string; emoji?: string; name: string; description?: string } {
   const preset = agent.code ? AGENT_PRESETS[agent.code] : undefined;
   return {
     id: agent.id,
+    emoji: preset?.emoji,
     name: preset?.name ?? agent.name,
     description: preset?.tagline ?? agent.description,
   };
