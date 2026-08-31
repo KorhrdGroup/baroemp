@@ -10,6 +10,7 @@ import { getUserSupportBookmarkIdsAction } from "@/features/support/support-acti
 import { getJobRepository, getSupportProgramRepository } from "@/lib/repositories";
 import { requireUser } from "@/lib/auth/session";
 import type { Job, SupportProgram } from "@/types";
+import { sectionCountClass } from "@/lib/ui-classes";
 
 export const metadata: Metadata = {
   title: "찜한 목록 | 한평생 바로취업",
@@ -53,7 +54,9 @@ export default async function BookmarksPage() {
 
       {/* 마이페이지 카드의 더보기가 각각 이 자리로 데려온다. 헤더에 가리지 않게 여백을 둔다. */}
       <section id="jobs" className="mt-10 scroll-mt-24">
-        <h2 className="mb-4 text-body-1 font-bold text-slate-900">찜한 일자리 ({bookmarkedJobs.length})</h2>
+        <h2 className="mb-4 text-body-1 font-bold text-slate-900">
+          찜한 일자리<span className={sectionCountClass}>{bookmarkedJobs.length}</span>
+        </h2>
         {bookmarkedJobs.length === 0 ? (
           <EmptyState
             icon={Briefcase}
@@ -76,7 +79,7 @@ export default async function BookmarksPage() {
 
       <section id="support" className="mt-16 scroll-mt-24">
         <h2 className="mb-4 text-body-1 font-bold text-slate-900">
-          찜한 지원제도 ({bookmarkedPrograms.length})
+          찜한 지원제도<span className={sectionCountClass}>{bookmarkedPrograms.length}</span>
         </h2>
         {bookmarkedPrograms.length === 0 ? (
           <EmptyState

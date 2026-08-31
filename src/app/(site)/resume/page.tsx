@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass } from "@/lib/ui-classes";
+import { interactiveCardClass, sectionCountClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import { FileText, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
@@ -46,7 +46,7 @@ function SectionHeader({
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="min-w-0">
         <h2 className="text-body-1 font-bold text-slate-900">
-          {title} ({count})
+          {title}<span className={sectionCountClass}>{count}</span>
         </h2>
         {description && <p className="mt-1 text-label-1 text-slate-500">{description}</p>}
       </div>
