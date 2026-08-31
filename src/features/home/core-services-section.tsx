@@ -37,7 +37,7 @@ export function CoreServicesSection() {
                 </span>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-label-1 font-bold break-keep text-slate-900 sm:text-body-2">{service.title}</p>
+                    <p className="text-body-2 font-bold break-keep text-slate-900">{service.title}</p>
                     {service.badge && (
                       <Badge
                         className={cn(
@@ -50,7 +50,7 @@ export function CoreServicesSection() {
                       </Badge>
                     )}
                   </div>
-                  <p className="mt-1 text-label-2 break-keep text-slate-500 sm:text-label-1">{service.description}</p>
+                  <p className="mt-1 text-label-1 break-keep text-slate-500">{service.description}</p>
                 </div>
               </div>
 
