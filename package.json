@@ -16,6 +16,7 @@
     "cleanup:seed-accounts": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/cleanup-seed-accounts.ts",
     "e2e:member-flow": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-member-flow.ts",
     "migrate:remote": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/apply-migrations.ts",
+    "backfill:support-region": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/backfill-support-region.ts",
     "e2e:assessment": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-assessment-flow.ts",
     "e2e:job": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-job-flow.ts",
     "sync:jobs": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/sync-jobs.ts",

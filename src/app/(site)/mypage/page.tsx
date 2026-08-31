@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { labelDesiredStartTiming, labelEmploymentStatus, labelRegion, labelWorkType } from "@/lib/labels";
+import { labelDesiredStartTiming, labelEmploymentStatus, labelOrganization, labelRegion, labelWorkType } from "@/lib/labels";
 import { formatSalary } from "@/lib/salary";
 import {
   getJobRepository,
@@ -191,7 +191,8 @@ export default async function MyPage() {
       key: "coverLetter",
       label: "자기소개서",
       value: detail.resumeSummary.coverLetterCount,
-      href: "/resume",
+      /* 이력서와 자기소개서가 한 페이지에 있어, 자기소개서 묶음 자리로 내려 보낸다. */
+      href: "/resume#cover-letters",
       icon: Pencil,
       tone: "bg-violet-50 text-violet-500",
     },
@@ -694,7 +695,7 @@ export default async function MyPage() {
                         </Badge>
                       </div>
                       <p className="mt-1 truncate text-label-2 text-slate-500">
-                        {program.organizationName ?? program.organization}
+                        {labelOrganization(program.organizationName ?? program.organization)}
                       </p>
                       <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-2">
                         {program.supportAmountText && (

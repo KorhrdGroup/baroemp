@@ -179,8 +179,11 @@ export default async function ResumeListPage() {
         )}
       </div>
 
-      {/* 이력서와 자기소개서는 별개의 묶음이라 섹션 사이를 넉넉히 띄운다. */}
-      <div className="mt-16">
+      {/*
+        이력서와 자기소개서는 별개의 묶음이라 섹션 사이를 넉넉히 띄운다.
+        마이페이지의 자기소개서 타일이 이 자리로 데려온다. 헤더에 제목이 가리지 않게 여백을 둔다.
+      */}
+      <div id="cover-letters" className="mt-16 scroll-mt-24">
         <SectionHeader
           title="내 자기소개서"
           count={coverLetters.length}

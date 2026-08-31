@@ -1,23 +1,41 @@
 import Image from "next/image";
 
 /**
- * 메인 히어로 그래픽.
- * 배너 오른쪽 절반을 채우는 일러스트 한 장만 둔다.
+ * 메인 히어로 사진.
+ *
+ * 액자에 넣지 않고 배너를 끝까지 채운다. 넓은 화면에서는 오른쪽 절반을 화면 끝까지 덮고,
+ * 좁은 화면에서는 문구 아래에 한 줄로 깔린다. 어느 쪽이든 사진의 안쪽 가장자리를 마스크로
+ * 흐려 배경으로 녹인다 - 잘라 붙인 티가 나면 배너가 두 조각으로 보인다.
  */
 export function HeroIllustration() {
   return (
-    <div className="relative mx-auto aspect-[3/2] w-full max-w-2xl select-none">
+    <div
+      className={[
+        "pointer-events-none relative h-64 w-full select-none sm:h-72",
+        /*
+          정확히 절반만 덮는다. 54% 로 두면 사진의 왼쪽 끝이 문구 칸 안으로 넘어와
+          검색창 오른쪽과 겹쳐 보인다. 절반이면 어느 넓이에서든 문구 칸 밖에서 시작한다.
+        */
+        "lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-1/2",
+        /*
+          좁은 화면은 위쪽을, 넓은 화면은 왼쪽을 흐린다.
+          중간 지점을 하나 더 찍어 길게 푼다. 두 점만 두면 흐림이 끝나는 자리에 선이 보인다.
+        */
+        "[mask-image:linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.35)_16%,#000_44%)]",
+        "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.35)_16%,#000_44%)]",
+        "lg:[mask-image:linear-gradient(to_right,transparent_0%,#000_10%)]",
+        "lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,#000_10%)]",
+      ].join(" ")}
+    >
       <Image
-        src="/images/hero-illustration.png"
-        alt="채용정보 검색 화면이 열린 노트북과 이력서, 서류가 놓인 책상"
+        src="/images/hero-consulting-wide.png"
+        alt="한평생 바로취업 상담 창구에서 상담사와 나란히 앉아 안내 책자를 보는 중년 여성"
         fill
         priority
-        sizes="(min-width: 1024px) 42rem, 100vw"
-        // 배경이 투명한 PNG라 그대로 얹으면 된다.
-        // (흰 배경 JPG 시절 쓰던 mix-blend-multiply 는 불필요해져 제거)
-        className="object-contain"
+        sizes="(min-width: 1024px) 50vw, 100vw"
+        /* 사진이 판보다 옆으로 길어 좌우가 조금씩 잘린다. 두 사람이 가운데라 가운데를 기준으로 둔다. */
+        className="object-cover object-[62%_center] lg:object-center"
       />
-
     </div>
   );
 }

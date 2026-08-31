@@ -15,6 +15,7 @@ export function normalizedSupportToSupportInput(
     title: program.title,
     organization: program.organizationName,
     organizationName: program.organizationName,
+    organizationType: program.organizationType,
     departmentName: program.departmentName,
     summary: program.summary ?? program.title,
     description: program.description ?? program.summary ?? program.title,

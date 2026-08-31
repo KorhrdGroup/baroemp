@@ -43,6 +43,8 @@ export interface NormalizedSupportProgram {
 
   title: string;
   organizationName: string;
+  /** 원본 "소관기관유형" (시군구/광역시도/중앙행정기관/공공기관/지방출자_출연기관/지방공기업/교육청) */
+  organizationType?: string;
   departmentName?: string;
 
   summary?: string;

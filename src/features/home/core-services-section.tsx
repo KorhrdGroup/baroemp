@@ -12,24 +12,32 @@ import { cn } from "@/lib/utils";
  */
 export function CoreServicesSection() {
   return (
-    <section className="relative z-10 -mt-12 pb-14 sm:-mt-16">
-      {/* 홈의 다른 섹션과 같은 max-w-7xl. 이 섹션만 5xl이라 위 히어로와 좌우 라인이 어긋났다. */}
-      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 px-4 sm:grid-cols-2 sm:px-6 lg:grid-cols-4 lg:px-8">
+    // 좁은 화면에서는 덜 겹친다. 사진이 세로로 얇게 깔려 있어 카드가 올라오면 거의 가린다.
+    <section className="relative z-10 -mt-4 pb-14 sm:-mt-16">
+      {/*
+        홈의 다른 섹션과 같은 max-w-7xl. 이 섹션만 5xl이라 위 히어로와 좌우 라인이 어긋났다.
+        좁은 화면에서도 두 칸으로 세운다. 한 칸씩 세로로 쌓으면 넉 장을 다 보려면
+        화면을 두 번 넘겨야 해서, 무엇을 할 수 있는 곳인지 한눈에 안 들어온다.
+      */}
+      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 sm:gap-4 sm:px-6 lg:grid-cols-4 lg:px-8">
         {coreServices.map((service) => {
           const Icon = service.icon;
           return (
             <div
               key={service.id}
-              className={cn("flex flex-col gap-4 rounded-xl bg-white p-5", cardBorderClass, cardShadowClass)}
+              className={cn("flex flex-col gap-3 rounded-xl bg-white p-4 sm:gap-4 sm:p-5", cardBorderClass, cardShadowClass)}
             >
-              {/* 아이콘을 왼쪽에 두고 이름·설명을 오른쪽에 쌓는다. */}
-              <div className="flex items-start gap-3">
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-brand-blue-400 text-white">
-                  <Icon className="size-6" strokeWidth={1.8} />
+              {/*
+                넓은 화면은 아이콘을 왼쪽에 두고 이름·설명을 오른쪽에 쌓는다.
+                두 칸으로 서는 좁은 화면에서는 가로 폭이 모자라 아이콘을 위로 올린다.
+              */}
+              <div className="flex flex-col items-start gap-2 sm:flex-row sm:gap-3">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-blue-400 text-white sm:size-12">
+                  <Icon className="size-5 sm:size-6" strokeWidth={1.8} />
                 </span>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-body-2 font-bold text-slate-900">{service.title}</p>
+                    <p className="text-label-1 font-bold break-keep text-slate-900 sm:text-body-2">{service.title}</p>
                     {service.badge && (
                       <Badge
                         className={cn(
@@ -42,7 +50,7 @@ export function CoreServicesSection() {
                       </Badge>
                     )}
                   </div>
-                  <p className="mt-1 text-label-1 text-slate-500">{service.description}</p>
+                  <p className="mt-1 text-label-2 break-keep text-slate-500 sm:text-label-1">{service.description}</p>
                 </div>
               </div>
 
@@ -52,7 +60,7 @@ export function CoreServicesSection() {
               */}
               <Link
                 href={service.href}
-                className="mt-auto flex h-10 items-center justify-center gap-1 rounded-lg border border-border text-label-1 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
+                className="mt-auto flex h-10 items-center justify-center gap-1 rounded-lg border border-border text-label-2 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100 sm:text-label-1"
               >
                 바로가기
                 <ChevronRight className="size-4" />

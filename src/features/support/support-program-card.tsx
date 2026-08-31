@@ -1,18 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { interactiveCardClass } from "@/lib/ui-classes";
 import { SupportBookmarkButton } from "./support-bookmark-button";
-import { REGION_LABELS } from "@/lib/labels";
+import { guessRegionFromText, labelOrganization, REGION_LABELS } from "@/lib/labels";
+import { resolveOrganizationLogo } from "@/lib/support/organization-logo";
 import type { MatchReasonDetail, SupportEligibilityGrade, SupportProgram } from "@/types";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
-
-const ORG_LOGO: Record<string, { src: string; w: number; h: number }> = {
-  고용노동부: { src: "/ministry-logo/고용노동부.svg", w: 80, h: 20 },
-  여성가족부: { src: "/ministry-logo/여성가족부-black.svg", w: 80, h: 20 },
-  "서울시 일자리희망센터": { src: "/ministry-logo/서울특별시_CI_좌우조합_서울특별시.png", w: 80, h: 20 },
-};
 
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   HIGH: "bg-emerald-50 text-emerald-700",
@@ -21,10 +15,18 @@ const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   LOW: "bg-slate-100 text-slate-500",
 };
 
-function regionLabel(program: SupportProgram): string {
-  if (!program.regionScope) return "전국";
+/**
+ * 아랫줄에 적을 지역. 새로 알려주는 것이 없으면 비운다.
+ *
+ * 기관명이 이미 그 지역이면(예: "서울특별시 광진구" - 서울) 같은 말을 두 번 하는 셈이다.
+ * 지역을 모르는 제도(regionScope 없음)를 "전국" 이라고 적던 것도 그만둔다 - 모르는 것을
+ * 전국이라고 하면, 자기 지역이 아닌 제도를 받을 수 있다고 읽게 된다.
+ */
+function regionLabel(program: SupportProgram, organization: string): string | undefined {
+  if (!program.regionScope) return undefined;
   if (program.regionScope === "national") return "전국";
-  return REGION_LABELS[program.regionScope as keyof typeof REGION_LABELS] ?? program.regionScope;
+  const label = REGION_LABELS[program.regionScope as keyof typeof REGION_LABELS] ?? program.regionScope;
+  return guessRegionFromText(organization) === program.regionScope ? undefined : label;
 }
 
 export function SupportProgramCard({
@@ -43,6 +45,10 @@ export function SupportProgramCard({
   isBookmarked?: boolean;
 }) {
   const topReason = reasons?.[0]?.label;
+  const organization = program.organizationName ?? program.organization;
+  const orgName = labelOrganization(organization);
+  const logo = resolveOrganizationLogo(organization);
+  const region = regionLabel(program, organization);
 
   return (
     // 찜 버튼은 카드 Link 안에 넣을 수 없어(버튼 중첩) 형제로 두고 위에 겹친다. 공고 카드와 같다.
@@ -63,17 +69,13 @@ export function SupportProgramCard({
         버튼 밑으로 들어간다. 기관 로고 - 등급 배지 - (빈자리) 순으로 선다.
       */}
       <div className="flex items-center justify-between gap-2 px-5 pt-5 pr-14">
-        {(() => {
-          const orgName = program.organizationName ?? program.organization;
-          const logo = ORG_LOGO[orgName];
-          return logo ? (
-            <Image src={logo.src} alt={orgName} width={logo.w} height={logo.h} className="h-5 w-auto object-contain" />
-          ) : (
-            <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-              {orgName}
-            </Badge>
-          );
-        })()}
+        {/* 로고가 없으면 일자리 카드의 회사명과 같은 글자로 둔다. 태그로 묶으면 같은 자리에
+            로고와 칩이 번갈아 나와 목록이 두 규칙으로 보인다. */}
+        {logo ? (
+          <Image src={logo} alt={orgName} width={80} height={20} className="h-5 w-auto object-contain" />
+        ) : (
+          <p className="min-w-0 truncate text-label-1 font-medium text-slate-500">{orgName}</p>
+        )}
         {grade && (
           <span className={cn("shrink-0 rounded-full px-3 py-1.5 text-label-1 font-bold", GRADE_BADGE_CLASS[grade])}>
             {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]}
@@ -98,8 +100,12 @@ export function SupportProgramCard({
             <span aria-hidden>|</span>
           </>
         )}
-        <span>{regionLabel(program)}</span>
-        <span aria-hidden>|</span>
+        {region && (
+          <>
+            <span>{region}</span>
+            <span aria-hidden>|</span>
+          </>
+        )}
         <span>{program.applicationPeriod ?? "상시"}</span>
       </div>
     </Link>

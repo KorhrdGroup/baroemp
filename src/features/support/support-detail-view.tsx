@@ -14,7 +14,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { labelEmploymentStatus, labelRegion } from "@/lib/labels";
+import { labelEmploymentStatus, labelOrganization, labelRegion } from "@/lib/labels";
+import { resolveOrganizationLogo } from "@/lib/support/organization-logo";
 import { SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 import type { CareerContent, Region, SupportEligibilityGrade, SupportProgram } from "@/types";
 import type { SupportMatchDetail } from "@/services/support-eligibility.service";
@@ -23,12 +24,6 @@ import { SupportBookmarkButton } from "./support-bookmark-button";
 import { SupportViewTracker } from "./support-view-tracker";
 import { SupportLongText } from "./support-long-text";
 import { BackButton } from "@/components/common/back-button";
-
-const ORG_LOGO: Record<string, { src: string; w: number; h: number }> = {
-  고용노동부: { src: "/ministry-logo/고용노동부.svg", w: 100, h: 24 },
-  여성가족부: { src: "/ministry-logo/여성가족부-black.svg", w: 100, h: 24 },
-  "서울시 일자리희망센터": { src: "/ministry-logo/서울특별시_CI_좌우조합_서울특별시.png", w: 100, h: 24 },
-};
 
 const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
   HIGH: "bg-emerald-50 text-emerald-700",
@@ -91,8 +86,9 @@ export function SupportDetailView({
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
 }) {
-  const orgName = program.organizationName ?? program.organization;
-  const logo = ORG_LOGO[orgName];
+  const organization = program.organizationName ?? program.organization;
+  const orgName = labelOrganization(organization);
+  const logo = resolveOrganizationLogo(organization);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -121,7 +117,7 @@ export function SupportDetailView({
 
         <div className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
           {logo ? (
-            <Image src={logo.src} alt={orgName} width={logo.w} height={logo.h} className="h-6 w-auto object-contain" />
+            <Image src={logo} alt={orgName} width={100} height={24} className="h-6 w-auto object-contain" />
           ) : (
             <>
               <Building2 className="size-4" />
