@@ -367,6 +367,15 @@
  * 스크롤 자체는 그대로라 트랙패드·키보드 조작에는 영향이 없다.
  * 접근성을 위해 키보드 포커스가 안으로 들어왔을 때(focus-within)도 함께 드러낸다.
  */
+@utility scrollbar-hidden {
+  /* 가로로 미는 줄 중에서 스크롤바까지 보일 필요가 없는 것(탭 알약 줄 등). */
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 @utility scrollbar-on-hover {
   /*
    * 스크롤바 자리는 항상 잡아두고 색만 투명 -> 회색으로 바꾼다.
