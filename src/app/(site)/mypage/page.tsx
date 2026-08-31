@@ -425,7 +425,7 @@ export default async function MyPage() {
                       </div>
                       <Progress value={summary.readinessScore} className="mt-2 h-1.5" />
                       {/* 부족 항목 이름이 무엇이든 붙는 말이라 조사를 쓰지 않는다. */}
-                      <p className="mt-2 text-label-2 text-slate-500">
+                      <p className="mt-2 text-label-1 text-slate-500">
                         {summary.topGapName ? `가장 부족한 것 · ${summary.topGapName} · ` : ""}
                         지금 지원할 수 있는 공고 {summary.currentEligibleJobCount}건
                       </p>
@@ -565,12 +565,12 @@ export default async function MyPage() {
                       >
                         {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "모집합니 / 다." 처럼 끊긴다. */}
                         <p className="line-clamp-2 break-keep font-medium text-slate-800">{job.title}</p>
-                        <p className="mt-1 truncate text-label-2 text-slate-500">
+                        <p className="mt-1 truncate text-label-1 text-slate-500">
                           {[job.companyName, job.regionSigungu ?? labelRegion(job.region)]
                             .filter(Boolean)
                             .join(" · ")}
                         </p>
-                        <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-2">
+                        <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-1">
                           <span className="font-semibold text-brand-blue-600">{formatSalary(job)}</span>
                           {job.applyDeadline && (
                             <span className="text-slate-400">마감 {job.applyDeadline.slice(5, 10).replace("-", ".")}</span>
@@ -699,10 +699,10 @@ export default async function MyPage() {
                           {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
                         </Badge>
                       </div>
-                      <p className="mt-1 truncate text-label-2 text-slate-500">
+                      <p className="mt-1 truncate text-label-1 text-slate-500">
                         {labelOrganization(program.organizationName ?? program.organization)}
                       </p>
-                      <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-2">
+                      <p className="mt-1 flex flex-wrap items-center gap-x-2 text-label-1">
                         {program.supportAmountText && (
                           <span className="font-semibold text-brand-blue-600">{program.supportAmountText}</span>
                         )}
