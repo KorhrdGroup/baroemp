@@ -28,13 +28,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import type {
   AIResumeReviewResult,
   ResumeDetail,
@@ -613,21 +607,18 @@ export function ResumeEditor({
                   아니게 돼 지역으로 걸리는 추천에서 빠진다. 목록에서 고르게 한다.
                 */}
                 <Field label="희망근무지역">
-                  <Select
-                    value={form.desiredRegion || undefined}
-                    onValueChange={(v) => setForm((f) => ({ ...f, desiredRegion: v }))}
+                  <NativeSelect
+                    className="h-10 text-label-1"
+                    value={form.desiredRegion ?? ""}
+                    onChange={(e) => setForm((f) => ({ ...f, desiredRegion: e.target.value }))}
                   >
-                    <CompactSelectTrigger>
-                      <SelectValue placeholder="선택" />
-                    </CompactSelectTrigger>
-                    <SelectContent>
-                      {Object.entries(REGION_LABELS).map(([code, label]) => (
-                        <SelectItem key={code} value={code}>
-                          {label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <option value="">선택</option>
+                    {Object.entries(REGION_LABELS).map(([code, label]) => (
+                      <option key={code} value={code}>
+                        {label}
+                      </option>
+                    ))}
+                  </NativeSelect>
                 </Field>
               </CardContent>
             </Card>
@@ -884,21 +875,18 @@ export function ResumeEditor({
                       </div>
                       <div className="grid gap-2 sm:grid-cols-6">
                         <Field label="학교구분" className="sm:col-span-2">
-                          <Select
+                          <NativeSelect
+                            className="h-10 text-label-1"
                             value={isGed ? "고등학교" : (edu.educationType ?? "")}
-                            onValueChange={(v) => updateAt(setEducations, edu._key, { educationType: v })}
+                            onChange={(e) => updateAt(setEducations, edu._key, { educationType: e.target.value })}
                           >
-                            <CompactSelectTrigger>
-                              <SelectValue placeholder="선택" />
-                            </CompactSelectTrigger>
-                            <SelectContent>
-                              {EDUCATION_TYPES.map((t) => (
-                                <SelectItem key={t} value={t}>
-                                  {t}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            <option value="">선택</option>
+                            {EDUCATION_TYPES.map((t) => (
+                              <option key={t} value={t}>
+                                {t}
+                              </option>
+                            ))}
+                          </NativeSelect>
                         </Field>
                         <Field label="학교명" className="sm:col-span-4">
                           <CompactInput
@@ -917,21 +905,18 @@ export function ResumeEditor({
                         </Field>
                         {!isGed && (
                           <Field label="졸업상태" className="sm:col-span-2">
-                            <Select
+                            <NativeSelect
+                              className="h-10 text-label-1"
                               value={edu.graduationStatus ?? ""}
-                              onValueChange={(v) => updateAt(setEducations, edu._key, { graduationStatus: v })}
+                              onChange={(e) => updateAt(setEducations, edu._key, { graduationStatus: e.target.value })}
                             >
-                              <CompactSelectTrigger>
-                                <SelectValue placeholder="선택" />
-                              </CompactSelectTrigger>
-                              <SelectContent>
-                                {GRADUATION_STATUSES.map((s) => (
-                                  <SelectItem key={s} value={s}>
-                                    {s}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                              <option value="">선택</option>
+                              {GRADUATION_STATUSES.map((s) => (
+                                <option key={s} value={s}>
+                                  {s}
+                                </option>
+                              ))}
+                            </NativeSelect>
                           </Field>
                         )}
                         {isSimpleEducation && (
@@ -1189,19 +1174,19 @@ export function ResumeEditor({
                     /* 칸마다 필요한 폭이 달라 4등분하지 않는다. 설명이 가장 길고 버튼은 제 크기면 된다. */
                     className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[9rem_1fr_1.6fr_auto]"
                   >
-                    <Select value={item.sectionType} onValueChange={(v) => updateAt(setItems, item._key, { sectionType: v as ResumeItemSectionType })}>
-                      <CompactSelectTrigger>
-                        {/* 저장된 값이 목록에 없으면 빈칸이 되어 무엇을 골라야 할지 알 수 없다. */}
-                        <SelectValue placeholder="종류 선택" />
-                      </CompactSelectTrigger>
-                      <SelectContent>
-                        {Object.entries(ITEM_SECTION_LABELS).map(([value, label]) => (
-                          <SelectItem key={value} value={value}>
-                            {label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <NativeSelect
+                      className="h-10 text-label-1"
+                      value={item.sectionType}
+                      onChange={(e) => updateAt(setItems, item._key, { sectionType: e.target.value as ResumeItemSectionType })}
+                    >
+                      {/* 저장된 값이 목록에 없으면 빈칸이 되어 무엇을 골라야 할지 알 수 없다. */}
+                      <option value="">종류 선택</option>
+                      {Object.entries(ITEM_SECTION_LABELS).map(([value, label]) => (
+                        <option key={value} value={value}>
+                          {label}
+                        </option>
+                      ))}
+                    </NativeSelect>
                     <CompactInput placeholder="제목" value={item.title} onChange={(e) => updateAt(setItems, item._key, { title: e.target.value })} />
                     <CompactInput placeholder="설명 (선택)" value={item.description ?? ""} onChange={(e) => updateAt(setItems, item._key, { description: e.target.value })} />
                     <div className="flex items-center justify-end gap-1">
@@ -1657,38 +1642,36 @@ function MonthPicker({
 
   return (
     <div className="flex gap-2">
-      <Select
-        value={year}
-        disabled={disabled}
-        onValueChange={(y) => onChange(`${y}-${month || "01"}`)}
-      >
-        <CompactSelectTrigger className="flex-1">
-          <SelectValue placeholder="연도" />
-        </CompactSelectTrigger>
-        <SelectContent>
+      <div className="flex-1">
+        <NativeSelect
+          className="h-10 text-label-1"
+          value={year}
+          disabled={disabled}
+          onChange={(e) => e.target.value && onChange(`${e.target.value}-${month || "01"}`)}
+        >
+          <option value="">연도</option>
           {years.map((y) => (
-            <SelectItem key={y} value={y}>
+            <option key={y} value={y}>
               {y}년
-            </SelectItem>
+            </option>
           ))}
-        </SelectContent>
-      </Select>
-      <Select
-        value={month}
-        disabled={disabled}
-        onValueChange={(m) => onChange(`${year || String(thisYear)}-${m}`)}
-      >
-        <CompactSelectTrigger className="w-24">
-          <SelectValue placeholder="월" />
-        </CompactSelectTrigger>
-        <SelectContent>
+        </NativeSelect>
+      </div>
+      <div className="w-24">
+        <NativeSelect
+          className="h-10 text-label-1"
+          value={month}
+          disabled={disabled}
+          onChange={(e) => e.target.value && onChange(`${year || String(thisYear)}-${e.target.value}`)}
+        >
+          <option value="">월</option>
           {Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, "0")).map((m) => (
-            <SelectItem key={m} value={m}>
+            <option key={m} value={m}>
               {Number(m)}월
-            </SelectItem>
+            </option>
           ))}
-        </SelectContent>
-      </Select>
+        </NativeSelect>
+      </div>
     </div>
   );
 }
@@ -1696,14 +1679,6 @@ function MonthPicker({
 /** 편집 폼은 짧은 값 입력칸이 많아 기본(h-12)보다 낮은 높이로 밀도를 높인다. 회색 항목 박스 위에서도 입력칸은 흰색을 유지한다. */
 function CompactInput({ className, ...props }: React.ComponentProps<typeof Input>) {
   return <Input {...props} className={cn("h-10 bg-white", className)} />;
-}
-
-/**
- * CompactInput(h-10)과 높이를 맞춘 셀렉트 트리거.
- * SelectTrigger의 기본 높이는 data-[size=default]:h-12라 plain 클래스로는 덮어써지지 않는다.
- */
-function CompactSelectTrigger({ className, ...props }: React.ComponentProps<typeof SelectTrigger>) {
-  return <SelectTrigger {...props} className={cn("w-full bg-white data-[size=default]:h-10", className)} />;
 }
 
 /** 작성이 끝난 항목을 보여주는 공용 요약 카드. 연필을 누르면 편집 폼으로 전환된다. */

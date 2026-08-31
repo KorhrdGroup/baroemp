@@ -6,13 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { NativeSelect } from "@/components/ui/native-select";
 import { trackActivityAction } from "@/features/activity/activity-actions";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 
@@ -100,17 +94,12 @@ export function ConsultingRequestForm() {
 
       <div className="space-y-2">
         <Label>상담 채널</Label>
-        <Select value={channel} onValueChange={setChannel}>
-          <SelectTrigger className="h-11 w-full">
-            <SelectValue placeholder="채널 선택" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="phone">전화 상담</SelectItem>
-            <SelectItem value="video">화상 상담</SelectItem>
-            <SelectItem value="in_person">방문 상담</SelectItem>
-            <SelectItem value="chat">채팅 상담</SelectItem>
-          </SelectContent>
-        </Select>
+        <NativeSelect className="h-11" value={channel} onChange={(e) => setChannel(e.target.value)}>
+          <option value="phone">전화 상담</option>
+          <option value="video">화상 상담</option>
+          <option value="in_person">방문 상담</option>
+          <option value="chat">채팅 상담</option>
+        </NativeSelect>
       </div>
 
       <div className="space-y-2">

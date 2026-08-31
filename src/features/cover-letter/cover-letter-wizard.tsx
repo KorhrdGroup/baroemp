@@ -239,7 +239,7 @@ export function CoverLetterWizard({
             const style = TEMPLATE_CARD_STYLES[idx % TEMPLATE_CARD_STYLES.length];
             const Icon = style.icon;
             return (
-              <div key={t.id} className={cn("flex flex-col rounded-2xl p-7 text-center", style.tone)}>
+              <div key={t.id} className={cn("flex flex-col rounded-2xl p-5 text-center sm:p-7", style.tone)}>
                 <div className="flex justify-center">
                   <Icon className={cn("size-7", style.iconTone)} />
                 </div>
@@ -250,7 +250,8 @@ export function CoverLetterWizard({
                 </p>
                 <p className="mt-3 text-label-2 text-slate-500">문항 {t.defaultQuestions.length}개</p>
                 <Button
-                  className="mt-4 h-11 self-center rounded-full px-7"
+                  /* 좁은 화면에서는 카드 폭을 채운다. 가운데 뜬 작은 알약은 손가락으로 겨누기 어렵다. */
+                  className="mt-4 h-11 self-stretch rounded-full px-7 sm:self-center"
                   onClick={() => startWithTemplate(t)}
                 >
                   시작하기

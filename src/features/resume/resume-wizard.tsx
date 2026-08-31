@@ -246,7 +246,7 @@ export function ResumeWizard({
             const style = TEMPLATE_CARD_STYLES[idx % TEMPLATE_CARD_STYLES.length];
             const Icon = style.icon;
             return (
-              <div key={t.id} className={cn("flex flex-col rounded-2xl p-6 text-center", style.tone)}>
+              <div key={t.id} className={cn("flex flex-col rounded-2xl p-5 text-center sm:p-6", style.tone)}>
                 <div className="flex justify-center">
                   <Icon className={cn("size-7", style.iconTone)} />
                 </div>
@@ -254,7 +254,8 @@ export function ResumeWizard({
                 {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "이력서입니 / 다." 처럼 끊긴다. */}
                 <p className="mt-2 flex-1 break-keep text-body-2 leading-relaxed text-slate-600">{t.description}</p>
                 <p className="mt-3 text-label-2 text-slate-500">항목 {t.sections.length}개</p>
-                <Button className="mt-4 h-11 self-center rounded-full px-7" onClick={() => startWithTemplate(t)}>
+                {/* 좁은 화면에서는 카드 폭을 채운다. 가운데 뜬 작은 알약은 손가락으로 겨누기 어렵다. */}
+                <Button className="mt-4 h-11 self-stretch rounded-full px-7 sm:self-center" onClick={() => startWithTemplate(t)}>
                   시작하기
                 </Button>
               </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +13,39 @@ import {
   WORK_TYPE_LABELS,
 } from "@/lib/labels";
 import { ChipToggle, JOB_CATEGORY_OPTIONS } from "./profile-form-fields";
+
+/*
+  고르는 칸. 창은 OS 기본 피커를 그대로 쓴다 - 모바일에서 커스텀 목록보다 그편이 낫다.
+  다만 브라우저마다 다른 기본 화살표만 사이트 화살표로 바꾼다. 상자는 위 입력칸과 같은 규격이다.
+*/
+function SelectField({
+  id,
+  name,
+  defaultValue,
+  children,
+}: {
+  id: string;
+  name: string;
+  defaultValue: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="relative">
+      <select
+        id={id}
+        name={name}
+        defaultValue={defaultValue}
+        className="h-12 w-full appearance-none rounded-lg border border-input bg-background pr-11 pl-4 text-body-2 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-label-1"
+      >
+        {children}
+      </select>
+      <ChevronDown
+        aria-hidden
+        className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-slate-400"
+      />
+    </div>
+  );
+}
 import { updateProfileAction, type ProfileEditFormState } from "./profile-actions";
 import type { CareerProfile, Profile, WorkType } from "@/types";
 
@@ -68,57 +102,42 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
             <Label htmlFor="employmentStatus" className="mb-1.5">
               취업상태
             </Label>
-            <select
-              id="employmentStatus"
-              name="employmentStatus"
-              defaultValue={careerProfile?.employmentStatus ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
-            >
+            <SelectField id="employmentStatus" name="employmentStatus" defaultValue={careerProfile?.employmentStatus ?? ""}>
               <option value="">선택 안함</option>
               {Object.entries(EMPLOYMENT_STATUS_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
                 </option>
               ))}
-            </select>
+            </SelectField>
           </div>
 
           <div>
             <Label htmlFor="region" className="mb-1.5">
               희망지역
             </Label>
-            <select
-              id="region"
-              name="region"
-              defaultValue={careerProfile?.region ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
-            >
+            <SelectField id="region" name="region" defaultValue={careerProfile?.region ?? ""}>
               <option value="">선택 안함</option>
               {Object.entries(REGION_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
                 </option>
               ))}
-            </select>
+            </SelectField>
           </div>
 
           <div>
             <Label htmlFor="desiredStartTiming" className="mb-1.5">
               희망 취업시기
             </Label>
-            <select
-              id="desiredStartTiming"
-              name="desiredStartTiming"
-              defaultValue={careerProfile?.desiredStartTiming ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
-            >
+            <SelectField id="desiredStartTiming" name="desiredStartTiming" defaultValue={careerProfile?.desiredStartTiming ?? ""}>
               <option value="">선택 안함</option>
               {Object.entries(DESIRED_START_TIMING_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
                 </option>
               ))}
-            </select>
+            </SelectField>
           </div>
 
           <div className="flex gap-2">
