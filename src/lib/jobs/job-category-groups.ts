@@ -21,6 +21,10 @@ export const JOB_CATEGORY_GROUPS: JobCategoryGroup[] = [
   { key: "logistics_driver", label: "배송·운전직", prefixes: ["62"] },
   { key: "office_admin", label: "사무·행정직", prefixes: ["02"] },
   { key: "facility_cleaning", label: "시설관리·미화", prefixes: ["561", "702"] },
+  { key: "cook", label: "조리·주방", prefixes: ["531", "532"] },
+  { key: "security", label: "경비·보안", prefixes: ["542"] },
+  { key: "nurse_assistant", label: "간호조무사·보건", prefixes: ["304", "307"] },
+  { key: "childcare", label: "보육·아동돌봄", prefixes: ["232"] },
   /* 병원동행은 워크넷 직종코드가 따로 없어 걸리는 공고가 없다. */
   { key: "hospital_companion", label: "병원동행", prefixes: [] },
 ];

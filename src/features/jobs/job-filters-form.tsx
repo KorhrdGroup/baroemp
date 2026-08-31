@@ -135,7 +135,7 @@ export function JobFiltersForm({
   /* 여러 개를 고를 수 있어 지역 목록처럼 앞에 체크를 둔다. 고르지 않은 칸에도 자리를 남긴다. */
   const cellClass = (selected: boolean) =>
     cn(
-      "flex items-center gap-1.5 rounded-lg border px-3 py-2.5 text-left text-label-1 whitespace-nowrap transition-colors",
+      "flex items-center justify-center gap-1.5 rounded-lg border px-3 py-2.5 text-center text-label-1 whitespace-nowrap transition-colors",
       selected
         ? "border-brand-blue-400 bg-brand-blue-50 font-semibold text-brand-blue-600"
         : "border-border bg-white font-medium text-slate-600 hover:border-brand-blue-200 hover:bg-brand-blue-50/40",
