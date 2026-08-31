@@ -192,11 +192,7 @@ export function JobFiltersForm({
         <button
           type="button"
           aria-label="필터 닫기"
-          /* 지역은 시트로 열리므로 좁은 화면에서 뒤를 덮어 어둡게 한다. 다른 패널은 드롭다운이라 그대로 둔다. */
-          className={cn(
-            "fixed inset-0 z-40 cursor-default",
-            panel === "region" && "bg-slate-900/30 sm:bg-transparent",
-          )}
+          className="fixed inset-0 z-40 cursor-default"
           onClick={() => setPanel(null)}
         />
       )}
@@ -279,6 +275,15 @@ export function JobFiltersForm({
             </button>
           ))}
         </div>
+
+        {/*
+          시트가 열리면 뒤가 어두워져야 한다. 위 닫기 덮개는 검색바보다 아래에 그려져 검색바만
+          훤히 남으므로, 검색바와 같은 칸 안에 그늘을 하나 더 둔다. 클릭은 위 덮개가 받는다.
+          넓은 화면은 시트가 아니라 검색바 아래 판이라 그늘을 두지 않는다.
+        */}
+        {(panel === "region" || panel === "job") && (
+          <div aria-hidden className="pointer-events-none fixed inset-0 z-40 bg-slate-900/30 sm:hidden" />
+        )}
 
         {/*
           지역 패널.
