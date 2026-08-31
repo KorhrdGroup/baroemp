@@ -315,7 +315,7 @@ export function CoverLetterWizard({
                         className={cn(
                           "flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-label-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40",
                           picked
-                            ? "border-transparent bg-brand-blue-600 font-medium text-white"
+                            ? "border-brand-blue-400 bg-brand-blue-50 font-medium text-brand-blue-700"
                             : "border-border bg-white text-slate-600 hover:border-brand-blue-200",
                         )}
                       >
