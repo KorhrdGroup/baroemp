@@ -191,7 +191,8 @@ export default async function MyPage() {
       key: "coverLetter",
       label: "자기소개서",
       value: detail.resumeSummary.coverLetterCount,
-      href: "/resume",
+      /* 이력서와 자기소개서가 한 페이지에 있어, 자기소개서 묶음 자리로 내려 보낸다. */
+      href: "/resume#cover-letters",
       icon: Pencil,
       tone: "bg-violet-50 text-violet-500",
     },
