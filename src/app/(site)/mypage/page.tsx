@@ -278,7 +278,17 @@ export default async function MyPage() {
           {/* 고칠 값 바로 옆에 고치는 버튼을 둔다. 머리글에 있을 때는 무엇을 고치는 건지 멀었다. */}
           <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-body-1 font-bold text-slate-900">내 정보</h2>
-            <Button variant="ghost" size="sm" asChild>
+            {/*
+              버튼 높이(h-10)가 제목 줄을 늘려, 옆 칸보다 첫 카드가 18px 내려앉았다.
+              세로 여백을 음수 마진으로 되돌려 줄 높이는 제목 글자 그대로 두고,
+              누르는 자리만 넉넉하게 남긴다.
+            */}
+            <Button
+              variant="ghost"
+              size="sm"
+              asChild
+              className="-my-2 h-auto py-2 text-slate-500 hover:bg-transparent hover:text-slate-700"
+            >
               <Link href="/mypage/profile">
                 <Pencil /> 정보 수정
               </Link>
