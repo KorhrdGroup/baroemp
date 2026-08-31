@@ -26,7 +26,22 @@ export interface SalesLeadRow {
   trainingWillingness?: number;
   /** 영업 태그: 훈련의향높음 / 고용보험없음 / 국민취업지원후보 등 */
   tags: string[];
+  /**
+   * 전달 등급. 1이 가장 먼저 컨택할 리드다.
+   * 1순위: 훈련의향 4점 이상 + 자격 필수 직업이 1위 + 해당 자격 미보유 → "자격증 따면 취업" 스토리 완성
+   * 2순위: 고용보험 없음 + 소득 낮음 → 국민취업지원 Ⅰ유형 안내로 시작 (내일배움카드로 교육비 부담 해소)
+   * 3: 그 외 일반 리드
+   */
+  priority: 1 | 2 | 3;
+  /** 첫 통화에서 꺼낼 상담 각도. 등급 판정 근거를 영업 멘트 형태로 풀어둔다. */
+  salesAngle?: string;
 }
+
+export const PRIORITY_LABELS: Record<SalesLeadRow["priority"], string> = {
+  1: "1순위",
+  2: "2순위",
+  3: "일반",
+};
 
 const INSURANCE_LABELS = { yes: "있음", no: "없음", unknown: "모름" } as const;
 const INCOME_LABELS = { low: "낮음", middle: "보통", high: "높음", unknown: "모름" } as const;
@@ -94,6 +109,20 @@ export async function getSalesLeads(limit = 200): Promise<SalesLeadRow[]> {
     if (missingQuals.length > 0 && occ) tags.push("자격 취득 제안 가능");
     if (p.marketing_consent) tags.push("마케팅 동의");
 
+    // 전달 등급. 두 조건을 다 만족하면 자격 스토리(1순위)로 열고 국취Ⅰ은 교육비 해소 멘트로 붙인다.
+    const qualStory = (trainingWillingness ?? 0) >= 4 && Boolean(occ) && missingQuals.length > 0;
+    const kuaCandidate = insurance === "no" && incomeBand === "low";
+    let priority: SalesLeadRow["priority"] = 3;
+    let salesAngle: string | undefined;
+    if (qualStory) {
+      priority = 1;
+      salesAngle = `${missingQuals[0]} 취득 → ${occ!.name} 취업 제안`;
+      if (kuaCandidate) salesAngle += " (교육비는 국취Ⅰ·내일배움카드로 해소)";
+    } else if (kuaCandidate) {
+      priority = 2;
+      salesAngle = "국민취업지원 Ⅰ유형 안내로 시작, 내일배움카드로 교육비 부담 해소";
+    }
+
     rows.push({
       userId: String(p.id),
       name: String(p.name ?? "이름 미입력"),
@@ -109,10 +138,14 @@ export async function getSalesLeads(limit = 200): Promise<SalesLeadRow[]> {
       incomeBand,
       trainingWillingness,
       tags,
+      priority,
+      salesAngle,
     });
     if (rows.length >= limit) break;
   }
 
-  // 영업 우선순위: 태그 많은 순 → 최근 가입 순
-  return rows.sort((a, b) => b.tags.length - a.tags.length || (a.joinedAt < b.joinedAt ? 1 : -1));
+  // 영업 우선순위: 전달 등급 → 태그 많은 순 → 최근 가입 순
+  return rows.sort(
+    (a, b) => a.priority - b.priority || b.tags.length - a.tags.length || (a.joinedAt < b.joinedAt ? 1 : -1),
+  );
 }
