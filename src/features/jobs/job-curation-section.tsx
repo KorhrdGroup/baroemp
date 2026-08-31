@@ -251,7 +251,11 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
         높이를 붙들어 둔다.
       */}
       {loadingTabs.has(activeTab) && !current && (
-        <div aria-busy="true" aria-label="불러오는 중" className="flex gap-4 overflow-hidden pb-2">
+        <div
+          aria-busy="true"
+          aria-label="불러오는 중"
+          className={cn("flex items-start gap-4 overflow-hidden", ROW_HEIGHT)}
+        >
           {[0, 1, 2, 3].map((i) => (
             <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-xl border border-border bg-white/60", CARD_HEIGHT)} />
           ))}
@@ -259,13 +263,8 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
       )}
 
       {current && current.items.length === 0 && (
-        /*
-          아래 여백 19px = 카드 줄의 pb-2(8px) + 가로 스크롤바가 차지하는 자리(11px).
-          카드 줄은 내용이 넘쳐 스크롤바 자리를 잡는데 빈 상태는 넘칠 게 없어
-          그만큼 낮아진다. scrollbar-gutter 는 가로 스크롤바에 적용되지 않아
-          실측값을 쓴다.
-        */
-        <div className="flex pb-[19px]">
+        /* 카드 줄과 같은 높이로 세워, 빈 탭으로 옮겨도 판이 들썩이지 않게 한다. */
+        <div className={cn("flex items-start", ROW_HEIGHT)}>
           <div
             className={cn(
               "flex w-full items-center justify-center rounded-xl bg-white/70 px-6 text-center text-label-1 text-slate-500",
