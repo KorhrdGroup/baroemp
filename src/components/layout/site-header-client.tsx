@@ -89,23 +89,26 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
           {user ? (
             <>
               {isAdmin && (
-                <Button variant="ghost" className="hidden text-slate-700 sm:inline-flex" asChild>
+                <Button variant="ghost" size="sm" className="hidden text-slate-700 sm:inline-flex" asChild>
                   <Link href="/admin">관리자</Link>
                 </Button>
               )}
-              {/* 로그인 상태의 주 동작. 비로그인일 때 회원가입이 맡던 자리를 그대로 잇는다. */}
-              <Button className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+              {/*
+                로그인 상태의 주 동작. 비로그인일 때 회원가입이 맡던 자리를 그대로 잇는다.
+                헤더 안에서는 기본 크기(48px)가 띠를 눌러 무겁다. 옆 버튼들과 함께 40px 로 맞춘다.
+              */}
+              <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
                 <Link href="/mypage">마이페이지</Link>
               </Button>
               <form action={signOutAction} className="hidden sm:inline-flex">
-                <Button type="submit" variant="ghost" className="text-slate-700">
+                <Button type="submit" variant="ghost" size="sm" className="text-slate-700">
                   로그아웃
                 </Button>
               </form>
             </>
           ) : (
             /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
-            <Button className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
+            <Button size="sm" className="hidden bg-brand-blue-400 hover:bg-brand-blue-600 sm:inline-flex" asChild>
               <Link href={loginHref}>로그인/회원가입</Link>
             </Button>
           )}
