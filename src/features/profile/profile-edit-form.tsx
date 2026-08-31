@@ -72,7 +72,8 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
               id="employmentStatus"
               name="employmentStatus"
               defaultValue={careerProfile?.employmentStatus ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
+              /* 고르는 창은 OS 기본 피커를 그대로 쓴다(모바일에서 그편이 낫다). 상자만 위 입력칸과 맞춘다. */
+              className="h-12 w-full rounded-lg border border-input bg-background px-4 text-body-2 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-label-1"
             >
               <option value="">선택 안함</option>
               {Object.entries(EMPLOYMENT_STATUS_LABELS).map(([code, label]) => (
@@ -91,7 +92,8 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
               id="region"
               name="region"
               defaultValue={careerProfile?.region ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
+              /* 고르는 창은 OS 기본 피커를 그대로 쓴다(모바일에서 그편이 낫다). 상자만 위 입력칸과 맞춘다. */
+              className="h-12 w-full rounded-lg border border-input bg-background px-4 text-body-2 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-label-1"
             >
               <option value="">선택 안함</option>
               {Object.entries(REGION_LABELS).map(([code, label]) => (
@@ -110,7 +112,8 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
               id="desiredStartTiming"
               name="desiredStartTiming"
               defaultValue={careerProfile?.desiredStartTiming ?? ""}
-              className="h-9 w-full rounded-lg border border-input bg-background px-3 text-label-1"
+              /* 고르는 창은 OS 기본 피커를 그대로 쓴다(모바일에서 그편이 낫다). 상자만 위 입력칸과 맞춘다. */
+              className="h-12 w-full rounded-lg border border-input bg-background px-4 text-body-2 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-label-1"
             >
               <option value="">선택 안함</option>
               {Object.entries(DESIRED_START_TIMING_LABELS).map(([code, label]) => (
