@@ -41,7 +41,9 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" aria-label={siteConfig.name} className="flex items-center">
-            <Logo height={20} priority />
+            {/* 같은 그림 한 장이라 두 번 그려도 요청은 하나다. 좁은 화면에서는 한 단계 작게. */}
+            <Logo height={18} priority className="lg:hidden" />
+            <Logo height={20} priority className="hidden lg:block" />
           </Link>
 
           <nav className="hidden h-16 items-center gap-1 lg:flex">
@@ -124,7 +126,9 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
               열려 있는 동안 회색 배경이 깔리던 것을 없앤다(ghost 의 aria-expanded 기본값).
               아이콘이 X 로 바뀌어 이미 열린 상태를 말하고 있어, 배경까지 깔면 눌린 채로 굳어 보인다.
             */
-            className="lg:hidden aria-expanded:bg-transparent"
+            /* 버튼 상자 안 여백 때문에 아이콘이 페이지 오른쪽 끝선보다 안쪽에 떠 보였다.
+               여백만큼 당겨 아이콘을 본문 끝선에 맞춘다. */
+            className="-mr-2.5 lg:hidden aria-expanded:bg-transparent"
             aria-label={mobileOpen ? "메뉴 닫기" : "메뉴 열기"}
             aria-expanded={mobileOpen}
             aria-controls="mobile-menu"
