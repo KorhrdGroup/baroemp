@@ -48,7 +48,7 @@ export default async function BookmarksPage() {
         </Link>
       </Button>
       <h1 className="mt-2 text-title-2 font-bold text-slate-900 sm:text-headline-3">찜한 목록</h1>
-      <p className="mt-2 text-body-2-reading text-slate-500">
+      <p className="mt-2 text-body-2-reading text-balance text-slate-500">
         일자리와 지원제도에서 찜해두신 것을 모두 모았어요.
       </p>
 

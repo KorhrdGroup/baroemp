@@ -56,7 +56,7 @@ export function IntroHero({
           <h1 className="mx-auto mt-6 max-w-3xl break-keep text-headline-3 font-black leading-[1.35] tracking-tight text-slate-900 sm:text-headline-2">
             {title}
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl break-keep text-body-1-reading text-slate-600">{description}</p>
+          <p className="mx-auto mt-4 max-w-2xl text-balance text-body-1-reading text-slate-600">{description}</p>
 
           {/* 그라데이션 배경 위에 글자만 떠 있으면 묻힌다. 흰 pill로 각 항목을 떼어놓는다. */}
           <div className="mt-7 flex flex-wrap justify-center gap-2">

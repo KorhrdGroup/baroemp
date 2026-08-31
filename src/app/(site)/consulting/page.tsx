@@ -31,7 +31,8 @@ export default function ConsultingPage() {
             유료 서비스
           </p>
           <h1 className="mt-2 break-keep text-title-2 font-bold text-white sm:text-headline-3">1:1 취업컨설팅</h1>
-          <p className="mt-2 max-w-xl break-keep text-body-2-reading text-brand-blue-100">
+          {/* 두 줄로 접힐 때 뒷줄에 "받아보세요." 만 남지 않게 줄 길이를 고르게 나눈다. */}
+          <p className="mt-2 max-w-xl text-balance text-body-2-reading text-brand-blue-100">
             전문가와 함께 직업·자격·채용·지원금을 연결하는 맞춤 상담을 받아보세요.
           </p>
         </div>
