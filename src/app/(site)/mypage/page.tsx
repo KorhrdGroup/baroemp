@@ -8,14 +8,12 @@ import {
   Gift,
   Pencil,
   Star,
-  Target,
   UserRound,
 } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { labelDesiredStartTiming, labelEmploymentStatus, labelOrganization, labelRegion, labelWorkType } from "@/lib/labels";
 import { formatSalary } from "@/lib/salary";
 import {
@@ -396,41 +394,6 @@ export default async function MyPage() {
                   <Button className="mt-auto w-full" asChild>
                     <Link href="/assessment?start=1">직업진단 시작</Link>
                   </Button>
-                </CardContent>
-              </Card>
-            )}
-
-            {/*
-              취업 준비도. 이력서 전체 점검을 돌리면 쌓이는 값인데, 지금까지 관리자
-              화면에서만 보였다. 회원 본인 데이터이고 "무엇이 부족한지"가 적혀 있어
-              다음에 할 일로 바로 이어진다. 분석 이력이 없으면 카드를 세우지 않는다 -
-              빈 카드를 두느니 없는 편이 낫다.
-            */}
-            {detail.careerGapSummaries.length > 0 && (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-1.5 text-body-2">
-                    <Target className="size-4" /> 취업 준비도
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3 text-label-1 text-slate-600">
-                  {detail.careerGapSummaries.map((summary) => (
-                    <div key={summary.id} className="rounded-lg bg-slate-50 px-3 py-2.5">
-                      <div className="flex items-baseline justify-between gap-2">
-                        <p className="truncate font-medium text-slate-700">
-                          {summary.occupationName ?? "희망 직업"}
-                          {summary.destinationName ? ` · ${summary.destinationName}` : ""}
-                        </p>
-                        <span className="shrink-0 font-bold text-brand-blue-600">{summary.readinessScore}점</span>
-                      </div>
-                      <Progress value={summary.readinessScore} className="mt-2 h-1.5" />
-                      {/* 부족 항목 이름이 무엇이든 붙는 말이라 조사를 쓰지 않는다. */}
-                      <p className="mt-2 text-label-1 text-slate-500">
-                        {summary.topGapName ? `가장 부족한 것 · ${summary.topGapName} · ` : ""}
-                        지금 지원할 수 있는 공고 {summary.currentEligibleJobCount}건
-                      </p>
-                    </div>
-                  ))}
                 </CardContent>
               </Card>
             )}

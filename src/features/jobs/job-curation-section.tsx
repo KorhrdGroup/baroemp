@@ -44,6 +44,13 @@ const TABS: { key: JobCurationTab; emoji: string; label: string; description?: s
  */
 const CARD_HEIGHT = "min-h-[249px]";
 
+/**
+ * 카드 줄의 높이 = 카드(249) + 가로 스크롤바(11) + 아래 여백(8).
+ * 스크롤바는 넘칠 때만 생겨, 카드가 한 장뿐인 탭은 그만큼 낮았다.
+ * scrollbar-gutter 는 세로 스크롤바에만 자리를 잡아주므로 여기서 직접 높이를 맞춘다.
+ */
+const ROW_HEIGHT = "min-h-[268px]";
+
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
   NEEDS_PROFILE: "희망직무를 설정하면 맞춤 공고를 보여드려요.",
@@ -309,11 +316,16 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
             fade.end ? "opacity-100" : "opacity-0",
           )}
         />
-        <div ref={rowRef} onScroll={syncFade} /*
-            스크롤바가 자리를 차지하면 카드가 여러 장인 탭만 11px 더 높아, 탭을 옮길 때
-            띠가 들썩였다. 좌우 흐림이 밀리는 줄임을 이미 알려주니 스크롤바는 감춘다.
-          */
-          className="scrollbar-hidden flex gap-4 overflow-x-auto pb-2">
+        {/*
+          스크롤바는 넓은 화면에서 밀리는 줄임을 알려주는 표시라 남긴다(호버하면 드러난다).
+          대신 줄 높이를 못박아 둔다 - 그러지 않으면 카드가 한 장뿐인 탭만 스크롤바가 없어
+          11px 낮아, 탭을 옮길 때마다 띠 높이가 들썩였다.
+        */}
+        <div
+          ref={rowRef}
+          onScroll={syncFade}
+          className={cn("scrollbar-on-hover flex gap-4 overflow-x-auto pb-2", ROW_HEIGHT)}
+        >
           {current.items.map((item) => {
             return (
               <div
