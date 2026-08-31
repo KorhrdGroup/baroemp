@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -19,7 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
-import type { ResumeSectionOption } from "@/lib/resume/completeness";
+import { EXTRA_SECTION_CODES, type ResumeSectionOption } from "@/lib/resume/completeness";
 import { createResumeAction } from "./resume-actions";
 
 type Step = "template" | "sections" | "prefill";
@@ -37,6 +37,11 @@ const TEMPLATE_CARD_STYLES = [
 
 /** 기본정보는 이력서가 이력서이기 위한 최소한이라 뺄 수 없다. */
 const FIXED_SECTION = "BASIC_INFO";
+
+/** 프로젝트·봉사·수상은 한 줄로 묶여 있어, 어느 코드든 그 줄의 키로 바꿔 다룬다. */
+function sectionKey(code: string): string {
+  return (EXTRA_SECTION_CODES as string[]).includes(code) ? "ACTIVITY" : code;
+}
 
 export interface WizardResumeTemplate {
   id: string;
@@ -127,6 +132,9 @@ export function ResumeWizard({
   const [error, setError] = useState<string | null>(null);
 
   const template = templates.find((t) => t.id === templateId) ?? firstTemplate;
+  /** 앞 화면의 양식 카드와 같은 아이콘·색. 카드가 차례대로 돌려 쓰므로 자리로 찾는다. */
+  const templateStyle =
+    TEMPLATE_CARD_STYLES[Math.max(0, templates.findIndex((t) => t.id === template.id)) % TEMPLATE_CARD_STYLES.length];
 
   /*
     불러올 정보는 실제로 가진 것만 보여준다. 빈 항목을 켜고 끄게 해봐야
@@ -170,11 +178,27 @@ export function ResumeWizard({
     return option.codes.some((c) => sections.includes(c));
   }
 
+  /*
+    항목의 제자리. 고른 양식이 정한 순서를 먼저 놓고, 그 양식에 없는 항목을 목록 순서로 잇는다.
+    편집 화면의 항목 목록과 같은 규칙이라, 두 화면에서 같은 항목이 같은 자리에 선다.
+  */
+  const sectionOrder = useMemo(() => {
+    const all = sectionOptions.map((o) => o.code);
+    const fromTemplate = template.sections.map(sectionKey).filter((key) => all.includes(key));
+    return [...new Set([...fromTemplate, ...all])];
+  }, [template, sectionOptions]);
+
   function toggleSection(option: ResumeSectionOption) {
     if (option.code === FIXED_SECTION) return;
-    setSections((prev) =>
-      isSectionPicked(option) ? prev.filter((c) => !option.codes.includes(c)) : [...prev, option.code],
-    );
+    setSections((prev) => {
+      if (isSectionPicked(option)) return prev.filter((c) => !option.codes.includes(c));
+      /*
+        담을 때 제자리로 넣는다. 뒤에 붙이면 뺐다가 다시 담은 항목이 목록 끝으로 가서,
+        양식이 정한 순서가 손댄 항목 하나 때문에 무너진다.
+      */
+      const next = [...prev, option.code];
+      return sectionOrder.flatMap((key) => next.filter((c) => sectionKey(c) === key));
+    });
   }
 
   function handleCreate() {
@@ -252,7 +276,11 @@ export function ResumeWizard({
   /* ── 1단계: 항목 고르기 ───────────────────────────────────────────────── */
 
   if (step === "sections") {
-    const picked = sectionOptions.filter(isSectionPicked);
+    /* 아래 미리보기는 저장될 순서 그대로 보여준다. 목록 순서로 세우면 "항목 2"라고 적힌 것이 이력서에서는 마지막에 온다. */
+    const picked = sectionOrder
+      .map((key) => sectionOptions.find((o) => o.code === key))
+      .filter((option) => option !== undefined)
+      .filter(isSectionPicked);
 
     return (
       <WizardCard>
@@ -261,16 +289,43 @@ export function ResumeWizard({
           title="항목 고르기"
           description="이력서에 담을 항목을 골라주세요. 나중에 편집 화면에서도 바꿀 수 있어요."
         />
-        {/* 앞 화면에서 고른 양식. 지금 무엇을 바탕으로 담겼는지 알아야 항목을 손볼 수 있다. */}
-        <p className="mt-4 text-center text-label-1 text-slate-500">
-          고른 양식 <span className="font-semibold text-slate-700">{template.name}</span>
-        </p>
-
         <div className="mt-10 space-y-8">
+          {/*
+            앞 화면에서 고른 양식. 지금 무엇을 바탕으로 항목이 담겼는지 알아야 손볼 수 있다.
+            가운데 뜬 한 줄로 두면 제목의 꼬리처럼 읽혀서, 아래 항목들과 같은 섹션으로 세운다.
+            아이콘은 앞 화면에서 누른 카드와 같은 것을 쓴다 - 방금 고른 그것이라는 표시다.
+          */}
+          <div>
+            <FieldLabel>고른 양식</FieldLabel>
+            <div className="flex items-center gap-3 rounded-xl border border-border bg-white px-4 py-3">
+              <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg", templateStyle.tone)}>
+                <templateStyle.icon className={cn("size-4", templateStyle.iconTone)} />
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-label-1 font-semibold text-slate-900">{template.name}</p>
+                {template.description && (
+                  <p className="mt-0.5 truncate text-label-2 text-slate-500">{template.description}</p>
+                )}
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                className="shrink-0 text-slate-600"
+                onClick={() => goToStep("template")}
+              >
+                변경하기
+              </Button>
+            </div>
+          </div>
+
           <div>
             <FieldLabel hint="뺀 항목은 이력서에 나오지 않고, 완성도에도 세지 않아요.">이력서 항목</FieldLabel>
 
-            <div className="rounded-xl bg-brand-blue-50 p-4">
+            {/*
+              고를 수 있는 항목이 여덟이라, 담긴 것을 진한 파랑으로 채우면 화면이 파랑 덩어리가 된다.
+              바탕을 흰색으로 내리고, 담김 표시는 연한 파랑 배경 + 테두리 + 글자색으로 한다.
+            */}
+            <div className="rounded-xl border border-border bg-white p-4">
               <p className="text-label-1 font-semibold text-slate-700">담을 수 있는 항목</p>
               <p className="mt-1 flex items-center gap-1 text-label-2 text-slate-500">
                 <ThumbsUp className="size-3.5" /> 표시는 고르신 이력서에서 보통 담는 항목이에요.
@@ -291,8 +346,8 @@ export function ResumeWizard({
                         "flex items-center gap-1 rounded-lg border px-3 py-1.5 text-label-1 transition-colors",
                         fixed ? "cursor-default" : "cursor-pointer",
                         isPicked
-                          ? "border-transparent bg-brand-blue-600 font-medium text-white"
-                          : "border-border bg-white text-slate-600 hover:border-brand-blue-200",
+                          ? "border-brand-blue-400 bg-brand-blue-50 font-medium text-brand-blue-700"
+                          : "border-border bg-white text-slate-600 hover:border-brand-blue-200 hover:bg-slate-50",
                       )}
                     >
                       {recommended && <ThumbsUp className="size-3.5" />}
@@ -313,7 +368,8 @@ export function ResumeWizard({
                     {!option.required && <span className="ml-2 text-label-2 text-slate-400">없어도 괜찮아요</span>}
                   </span>
                   {option.code === FIXED_SECTION ? (
-                    <span className="shrink-0 px-3 text-label-2 text-slate-400">필수</span>
+                    /* 편집 화면 항목 목록의 "필수"와 같은 색을 쓴다. */
+                    <span className="shrink-0 px-3 text-label-2 text-brand-blue-300">필수</span>
                   ) : (
                     <Button
                       variant="ghost"
