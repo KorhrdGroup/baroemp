@@ -281,17 +281,15 @@ export default async function MyPage() {
             {/*
               버튼 높이(h-10)가 제목 줄을 늘려, 옆 칸보다 첫 카드가 18px 내려앉았다.
               세로 여백을 음수 마진으로 되돌려 줄 높이는 제목 글자 그대로 두고,
-              누르는 자리만 넉넉하게 남긴다.
+              누르는 자리만 넉넉하게 남긴다. 오른쪽 여백은 지워 글자를 카드 끝에 맞춘다.
             */}
             <Button
               variant="ghost"
               size="sm"
               asChild
-              className="-my-2 h-auto py-2 text-slate-500 hover:bg-transparent hover:text-slate-700"
+              className="-my-2 h-auto py-2 pr-0 text-slate-500 hover:bg-transparent hover:text-slate-700"
             >
-              <Link href="/mypage/profile">
-                <Pencil /> 정보 수정
-              </Link>
+              <Link href="/mypage/profile">정보 수정</Link>
             </Button>
           </div>
           <div className="space-y-4">
