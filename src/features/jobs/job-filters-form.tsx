@@ -170,11 +170,20 @@ export function JobFiltersForm({
     좁은 화면은 아래에서 올라오는 시트로 연다. 목록이 두 칸이라 드롭다운으로 띄우면
     화면 가운데를 덮으면서도 아래가 잘린다.
   */
-  const regionPanelClass =
-    "fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white shadow-[0_-8px_32px_rgba(15,40,90,0.18)] sm:absolute sm:inset-x-0 sm:top-[calc(100%+12px)] sm:bottom-auto sm:rounded-2xl sm:border sm:border-border sm:p-7 sm:shadow-[0_16px_48px_rgba(15,40,90,0.14)]";
+  /*
+    좁은 화면은 아래에서 올라오는 시트, 넓은 화면은 누른 버튼 아래 떠 있는 판이다.
+    넓은 화면에서 검색바 폭을 다 쓰면 목록이 몇 줄 안 되는데 판만 넓어 허전하다.
+    내용에 맞춰 480px 로 잡고 오른쪽(버튼이 있는 쪽)에 붙인다.
+  */
+  const sheetClass =
+    "fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white shadow-[0_-8px_32px_rgba(15,40,90,0.18)] sm:absolute sm:inset-x-auto sm:right-0 sm:top-[calc(100%+12px)] sm:bottom-auto sm:w-[30rem] sm:rounded-2xl sm:border sm:border-border sm:p-6 sm:shadow-[0_16px_48px_rgba(15,40,90,0.14)]";
+  const sheetHeadClass = "flex items-center justify-between px-5 pt-5 sm:px-0 sm:pt-0";
+  const sheetFootClass = "flex items-center justify-between gap-3 px-5 py-4 sm:px-0 sm:pt-4 sm:pb-0";
+  const resetClass =
+    "flex shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2.5 text-label-1 font-medium text-slate-600 hover:bg-slate-50";
+  const applyClass =
+    "flex-1 rounded-full bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white hover:bg-brand-blue-600 sm:flex-none sm:px-8";
 
-  const panelClass =
-    "absolute inset-x-0 top-[calc(100%+12px)] z-50 rounded-2xl border border-border bg-white p-5 shadow-[0_16px_48px_rgba(15,40,90,0.14)] sm:p-7";
 
   return (
     <div>
@@ -278,8 +287,8 @@ export function JobFiltersForm({
           좁은 화면에서는 아래에서 올라오는 시트, 넓은 화면에서는 검색바 아래 판이다.
         */}
         {panel === "region" && (
-          <div className={regionPanelClass}>
-            <div className="flex items-center justify-between px-5 pt-5 sm:px-0 sm:pt-0">
+          <div className={sheetClass}>
+            <div className={sheetHeadClass}>
               <span className="text-body-2 font-bold text-slate-900">지역</span>
               <button
                 type="button"
@@ -362,12 +371,8 @@ export function JobFiltersForm({
               </div>
             )}
 
-            <div className="flex items-center justify-between gap-3 px-5 py-4 sm:px-0 sm:pt-4 sm:pb-0">
-              <button
-                type="button"
-                onClick={() => selectRegion("all")}
-                className="flex shrink-0 items-center gap-1.5 rounded-full border border-border px-4 py-2.5 text-label-1 font-medium text-slate-600 hover:bg-slate-50"
-              >
+            <div className={sheetFootClass}>
+              <button type="button" onClick={() => selectRegion("all")} className={resetClass}>
                 <RotateCcw className="size-3.5" /> 초기화
               </button>
               <button
@@ -378,7 +383,7 @@ export function JobFiltersForm({
                     regionSigungus: region === "all" || sigungus.length === 0 ? undefined : sigungus,
                   })
                 }
-                className="flex-1 rounded-full bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white hover:bg-brand-blue-600 sm:flex-none sm:px-8"
+                className={applyClass}
               >
                 적용하기
               </button>
@@ -386,45 +391,50 @@ export function JobFiltersForm({
           </div>
         )}
 
-        {/* 직종 패널 */}
+        {/* 직종 패널. 지역 패널과 같은 껍데기(제목 줄·닫기·초기화·적용하기)를 쓴다. */}
         {panel === "job" && (
-          <div className={panelClass}>
-            {/* 지역 패널과 같은 꼴. 목록이 한 화면에 다 들어와 검색칸이 필요 없다. */}
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-label-1 font-bold text-slate-900">직종 선택</span>
+          <div className={sheetClass}>
+            <div className={sheetHeadClass}>
+              <span className="text-body-2 font-bold text-slate-900">직종</span>
               <button
                 type="button"
-                onClick={() => setJobCategory("all")}
-                className="flex items-center gap-1.5 text-label-2 text-slate-400 hover:text-slate-600"
+                aria-label="직종 선택 닫기"
+                onClick={() => setPanel(null)}
+                className="-mr-2 rounded-lg p-2 text-slate-400 hover:bg-slate-50 hover:text-slate-600"
               >
-                선택 초기화 <RotateCcw className="size-3" />
+                <X className="size-5" />
               </button>
             </div>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-5">
-              <button type="button" className={cellClass(!jobActive)} onClick={() => setJobCategory("all")}>
-                직종 전체
-              </button>
-              {mockJobRoles.map((role) => (
-                <button
-                  key={role.jobCategory}
-                  type="button"
-                  className={cellClass(jobCategory === role.jobCategory)}
-                  onClick={() => setJobCategory(role.jobCategory)}
-                >
-                  {role.name}
+
+            {/* 목록이 한 화면에 다 들어와 검색칸이 필요 없다. */}
+            <div className="mt-4 max-h-[19rem] overflow-y-auto px-5 sm:max-h-none sm:px-0">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                <button type="button" className={cellClass(!jobActive)} onClick={() => setJobCategory("all")}>
+                  직종 전체
                 </button>
-              ))}
+                {mockJobRoles.map((role) => (
+                  <button
+                    key={role.jobCategory}
+                    type="button"
+                    className={cellClass(jobCategory === role.jobCategory)}
+                    onClick={() => setJobCategory(role.jobCategory)}
+                  >
+                    {role.name}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2 border-t border-slate-100 pt-4">
-              <button type="button" onClick={() => setPanel(null)} className="rounded-full border border-border px-5 py-2 text-label-1 font-medium text-slate-600">
-                닫기
+
+            <div className={sheetFootClass}>
+              <button type="button" onClick={() => setJobCategory("all")} className={resetClass}>
+                <RotateCcw className="size-3.5" /> 초기화
               </button>
               <button
                 type="button"
                 onClick={() => void submit({ jobCategory: jobCategory === "all" ? undefined : jobCategory })}
-                className="rounded-full bg-brand-blue-400 px-5 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+                className={applyClass}
               >
-                적용
+                적용하기
               </button>
             </div>
           </div>
