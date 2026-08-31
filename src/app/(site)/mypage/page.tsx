@@ -3,7 +3,6 @@ import { interactiveRowClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import {
   Briefcase,
-  ClipboardList,
   ExternalLink,
   FileText,
   Gift,
@@ -30,7 +29,7 @@ import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-sea
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { getUserCrmDetail } from "@/services/user-crm.service";
-import { requireUser, isAdminRole } from "@/lib/auth/session";
+import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
 import { SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
@@ -156,13 +155,18 @@ export default async function MyPage() {
 
   if (!detail) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
         <EmptyState icon={UserRound} title="프로필을 불러올 수 없습니다" description="잠시 후 다시 시도해주세요." />
       </div>
     );
   }
 
-  const { profile, careerProfile, lead, assessmentResults } = detail;
+  /*
+    lead(영업용 등급·점수)는 꺼내지 않는다. 회원에게 보여줄 값이 아니고, 관리자도
+    여기가 아니라 관리자 회원상세에서 본다 - 회원용 화면이 보는 사람에 따라 다른 것을
+    보여주면, 이 화면을 그대로 믿고 고칠 수 없다.
+  */
+  const { profile, careerProfile, assessmentResults } = detail;
   const latestResult = assessmentResults[0];
   const [jobData, supportData] = await Promise.all([
     loadMyPageJobData(user.id),
@@ -215,7 +219,7 @@ export default async function MyPage() {
   */
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4 pt-10 pb-20 sm:px-6 lg:px-8">
       {/* 제목을 "마이페이지"라고 적지 않는다. 메뉴에서 눌러 들어온 자리라 이미 알고 있다. */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">
@@ -231,11 +235,13 @@ export default async function MyPage() {
             </Badge>
           )}
         </div>
+        {/*
+          이 화면의 동작 버튼에는 아이콘을 붙이지 않는다. 한 줄에 선 버튼 중 하나만
+          아이콘을 갖고 있으면 글자 시작점이 어긋나고, 그 하나가 더 중요한 것처럼 읽힌다.
+          아이콘은 카드 제목에만 쓴다 - 거기서는 무엇에 대한 카드인지 가리키는 표시다.
+        */}
         <Button variant="outline" asChild>
-          <Link href="/mypage/profile">
-            <Pencil className="size-4" />
-            정보 수정
-          </Link>
+          <Link href="/mypage/profile">정보 수정</Link>
         </Button>
       </div>
 
@@ -336,15 +342,6 @@ export default async function MyPage() {
                 <p>
                   <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
                 </p>
-                {/* Lead 등급·점수는 영업용 내부 지표다. 본인 화면이라도 일반 회원에게는 노출하지 않는다. */}
-                {lead && isAdminRole(user.role) && (
-                  <p className="pt-1">
-                    <span className="text-slate-400">Lead</span> ·{" "}
-                    <Badge className="rounded-md border-0 bg-brand-blue-50 text-label-2 text-brand-blue-700">
-                      {lead.score.grade}등급 {lead.score.totalScore}점
-                    </Badge>
-                  </p>
-                )}
               </CardContent>
             </Card>
 
@@ -375,10 +372,7 @@ export default async function MyPage() {
                   </div>
                   <div className="flex gap-2">
                     <Button variant="outline" className="flex-1" asChild>
-                      <Link href={`/assessment/result/${latestResult.sessionId}`}>
-                        <ClipboardList className="size-4" />
-                        결과 다시보기
-                      </Link>
+                      <Link href={`/assessment/result/${latestResult.sessionId}`}>결과 다시보기</Link>
                     </Button>
                     <Button variant="outline" className="flex-1" asChild>
                       <Link href="/assessment?start=1">다시 검사</Link>
@@ -393,7 +387,7 @@ export default async function MyPage() {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p>아직 직업진단을 받지 않았어요. 몇 가지 질문으로 나에게 맞는 직업을 찾아드려요.</p>
-                  <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                  <Button className="mt-auto w-full" asChild>
                     <Link href="/assessment?start=1">직업진단 시작</Link>
                   </Button>
                 </CardContent>
@@ -437,35 +431,58 @@ export default async function MyPage() {
 
             {/* D-2. 이력서/자기소개서 (스펙 51번) */}
             <Card className="rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between gap-2">
                 <CardTitle className="flex items-center gap-1.5 text-body-2">
                   <FileText className="size-4" /> 이력서 · 자기소개서
                 </CardTitle>
+                {/* 찜한 일자리·지원제도 카드와 같은 자리, 같은 모양. 카드에는 대표 이력서 한 건만 담긴다. */}
+                <Link href="/resume" className="shrink-0 text-label-1 font-medium text-slate-500">
+                  전체보기 →
+                </Link>
               </CardHeader>
               <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                {detail.resumeSummary.primaryResume ? (
-                  <div className="rounded-lg bg-slate-50 px-3 py-2.5">
-                    <p className="font-medium text-slate-700">{detail.resumeSummary.primaryResume.title}</p>
-                    <p className="mt-1 text-label-1 text-slate-400">
-                      완성도 {detail.resumeSummary.primaryResume.completeness}% · 최근수정{" "}
-                      {detail.resumeSummary.primaryResume.updatedAt.slice(0, 10)}
+                {/*
+                  이력서·자기소개서를 각각 가장 최근에 손 본 것 한 건씩. 개수는 위 통계 카드에
+                  이미 있으므로, 여기서는 "이어서 할 것"을 보여주고 누르면 그 자리로 간다.
+                */}
+                {detail.resumeSummary.recentResume ? (
+                  <Link
+                    href={`/resume/${detail.resumeSummary.recentResume.id}/edit`}
+                    className={cn("block rounded-lg bg-slate-50 px-3 py-2.5", interactiveRowClass)}
+                  >
+                    <p className="font-medium text-slate-700">
+                      {detail.resumeSummary.recentResume.title || "제목 없는 이력서"}
                     </p>
-                  </div>
+                    <p className="mt-1 text-label-1 text-slate-400">
+                      이력서 · 완성도 {detail.resumeSummary.recentResume.completeness}% · 최근수정{" "}
+                      {detail.resumeSummary.recentResume.updatedAt.slice(0, 10)}
+                    </p>
+                  </Link>
                 ) : (
                   <p>아직 작성한 이력서가 없어요. 보유하신 정보를 불러와 빠르게 작성해보세요.</p>
                 )}
-                {detail.resumeSummary.coverLetterCount > 0 && (
-                  <p className="text-label-1 text-slate-400">
-                    자기소개서 {detail.resumeSummary.coverLetterCount}건 · 최근작성{" "}
-                    {detail.resumeSummary.lastCoverLetterUpdatedAt?.slice(0, 10) ?? "-"}
-                  </p>
+                {detail.resumeSummary.recentCoverLetter && (
+                  <Link
+                    href={`/cover-letter/${detail.resumeSummary.recentCoverLetter.id}/edit`}
+                    className={cn("block rounded-lg bg-slate-50 px-3 py-2.5", interactiveRowClass)}
+                  >
+                    <p className="font-medium text-slate-700">
+                      {detail.resumeSummary.recentCoverLetter.title || "제목 없는 자기소개서"}
+                    </p>
+                    <p className="mt-1 text-label-1 text-slate-400">
+                      자기소개서 · 최근수정 {detail.resumeSummary.recentCoverLetter.updatedAt.slice(0, 10)}
+                    </p>
+                  </Link>
                 )}
                 {/* 버튼이 3개라 좁은 화면에서는 세로로 쌓는다. */}
                 <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {/*
+                    "내 이력서 관리"였는데 위 전체보기와 같은 /resume 으로 가서, 한 카드 안에
+                    같은 곳으로 가는 길이 둘이 됐다. 여기서는 새로 만드는 쪽을 맡는다 -
+                    옆의 "자기소개서 작성"과도 짝이 맞는다.
+                  */}
                   <Button variant="outline" asChild>
-                    <Link href="/resume">
-                      <Pencil className="size-4" />내 이력서 관리
-                    </Link>
+                    <Link href="/resume/new">이력서 만들기</Link>
                   </Button>
                   <Button variant="outline" asChild>
                     <Link href="/cover-letter/new">자기소개서 작성</Link>
@@ -519,9 +536,9 @@ export default async function MyPage() {
                   {jobData.bookmarkCount > 0 && (
                     <Link
                       href="/mypage/bookmarks#jobs"
-                      className="shrink-0 text-label-1 font-medium text-brand-blue-600 hover:underline"
+                      className="shrink-0 text-label-1 font-medium text-slate-500"
                     >
-                      전체보기 ({jobData.bookmarkCount}) →
+                      전체보기 →
                     </Link>
                   )}
                 </CardHeader>
@@ -623,10 +640,7 @@ export default async function MyPage() {
                     </div>
                   )}
                   <Button variant="outline" className="mt-auto w-full" asChild>
-                    <Link href={`/support/result/${supportData.latestSessionId}`}>
-                      <Gift className="size-4" />
-                      지원금 결과 다시보기
-                    </Link>
+                    <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 다시보기</Link>
                   </Button>
                 </CardContent>
               </Card>
@@ -639,7 +653,7 @@ export default async function MyPage() {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p>아직 지원금 진단을 받지 않았어요. 몇 가지 조건만 입력하면 받을 수 있는 혜택을 찾아드려요.</p>
-                  <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                  <Button className="mt-auto w-full" asChild>
                     <Link href="/support?start=1">지원금 찾기 시작하기</Link>
                   </Button>
                 </CardContent>
@@ -652,9 +666,9 @@ export default async function MyPage() {
                 {supportData.bookmarkCount > 0 && (
                   <Link
                     href="/mypage/bookmarks#support"
-                    className="shrink-0 text-label-1 font-medium text-brand-blue-600 hover:underline"
+                    className="shrink-0 text-label-1 font-medium text-slate-500"
                   >
-                    전체보기 ({supportData.bookmarkCount}) →
+                    전체보기 →
                   </Link>
                 )}
               </CardHeader>

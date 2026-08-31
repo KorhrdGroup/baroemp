@@ -80,3 +80,9 @@ export const filterPillOffClass = "border-border bg-white font-medium text-slate
  * 연한 파랑(filterPillOnClass)은 파란 판 위에서 배경과 같은 색이라 켜졌는지 안 보인다.
  */
 export const filterPillOnSolidClass = "border-brand-blue-400 bg-brand-blue-400 font-semibold text-white";
+
+/**
+ * 섹션 제목 옆의 개수. "내 이력서 (6)" 처럼 괄호로 묶지 않고 숫자만 붙인다.
+ * 개수는 제목이 아니라 제목에 딸린 값이므로, 두께를 한 단계 낮추고 회색으로 물린다.
+ */
+export const sectionCountClass = "ml-2 font-semibold text-slate-500";

@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ExperienceBankItem } from "@/types";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass } from "@/lib/ui-classes";
+import { interactiveCardClass, sectionCountClass } from "@/lib/ui-classes";
 import { DocumentMenu } from "@/components/common/document-menu";
 import { ExperienceFormDialog } from "./experience-form-dialog";
 import { deleteExperienceBankItemAction } from "./experience-bank-actions";
@@ -51,11 +51,12 @@ export function ExperienceBankSection({
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
-          <h2 className={cn("font-bold text-slate-900", nested ? "text-label-1" : "text-body-1")}>
-            내 경험뱅크 ({items.length})
+          {/* 안에 들여 넣을 때도 한 단계만 낮춘다. 두 단계를 내리면 설명글이 각주처럼 작아진다. */}
+          <h2 className={cn("font-bold text-slate-900", nested ? "text-body-2" : "text-body-1")}>
+            내 경험뱅크<span className={sectionCountClass}>{items.length}</span>
           </h2>
           {nested && (
-            <p className="mt-0.5 text-label-2 text-slate-500">
+            <p className="mt-1 text-label-1 text-slate-500">
               여기 저장해둔 경험은 자기소개서 문항을 쓸 때 그대로 불러와 쓸 수 있어요.
             </p>
           )}
