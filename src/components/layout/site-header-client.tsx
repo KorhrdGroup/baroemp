@@ -178,29 +178,25 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
         })}
         <div className="mt-4 flex flex-col gap-2 border-t border-border pt-4">
           {user ? (
-            <>
-              {isAdmin && (
-                <Button variant="outline" asChild>
-                  <Link href="/admin" onClick={() => setMobileOpen(false)}>
-                    관리자
-                  </Link>
-                </Button>
-              )}
-              {/*
-                로그인 상태의 주 동작은 마이페이지다. 채운 버튼은 여기에 준다 - 전에는
-                로그아웃이 채워져 있어, 메뉴를 열면 나가는 버튼이 제일 먼저 눈에 들어왔다.
-              */}
-              <Button asChild>
+            /*
+              두 버튼은 한 줄에 나란히 둔다. 위아래로 쌓으면 메뉴 끝이 버튼 띠로 길어져,
+              정작 위의 메뉴 항목들이 밀려 올라갔다. 관리자는 넓은 화면 머리글에만 둔다.
+
+              로그인 상태의 주 동작은 마이페이지라 채운 버튼은 그쪽이다 - 전에는
+              로그아웃이 채워져 있어, 메뉴를 열면 나가는 버튼이 제일 먼저 눈에 들어왔다.
+            */
+            <div className="flex gap-2">
+              <Button asChild className="flex-1">
                 <Link href="/mypage" onClick={() => setMobileOpen(false)}>
                   마이페이지
                 </Link>
               </Button>
-              <form action={signOutAction}>
+              <form action={signOutAction} className="flex-1">
                 <Button type="submit" variant="outline" className="w-full">
                   로그아웃
                 </Button>
               </form>
-            </>
+            </div>
           ) : (
             <>
               {/*
