@@ -153,7 +153,7 @@ export default async function MyPage() {
 
   if (!detail) {
     return (
-      <div className="mx-auto max-w-6xl px-6 pt-10 pb-20 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
         <EmptyState icon={UserRound} title="프로필을 불러올 수 없습니다" description="잠시 후 다시 시도해주세요." />
       </div>
     );
@@ -218,7 +218,7 @@ export default async function MyPage() {
   */
 
   return (
-    <div className="mx-auto max-w-6xl px-6 pt-10 pb-20 lg:px-8">
+    <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
       {/* 제목을 "마이페이지"라고 적지 않는다. 메뉴에서 눌러 들어온 자리라 이미 알고 있다. */}
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2">

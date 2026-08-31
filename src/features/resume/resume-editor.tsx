@@ -1266,7 +1266,7 @@ export function ResumeEditor({
       */}
       <div
         ref={stripRef}
-        className="scrollbar-hidden sticky top-16 z-30 -mx-6 -mt-10 mb-2 flex gap-1 overflow-x-auto border-b border-border bg-white/95 px-6 py-2 backdrop-blur print:hidden lg:hidden"
+        className="scrollbar-hidden sticky top-16 z-30 -mx-4.5 -mt-10 mb-2 flex gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur print:hidden lg:hidden"
       >
         {navItems.map((item) => (
           <button
@@ -1524,7 +1524,7 @@ export function ResumeEditor({
       */}
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
         {/* 좁은 화면에서는 셋이 한 줄에 안 들어가 왼쪽 버튼이 잘렸다. 남는 자리를 가운데가 먹게 둔다. */}
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-6 py-3 lg:px-8">
+        <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4.5 py-3 lg:px-8">
           <Button variant="outline" size="sm" className="shrink-0 text-slate-500" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로

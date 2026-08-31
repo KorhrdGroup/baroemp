@@ -38,7 +38,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/70 bg-white/90 backdrop-blur">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4.5 lg:px-8">
         <div className="flex items-center gap-6">
           <Link href="/" aria-label={siteConfig.name} className="flex items-center">
             {/* 같은 그림 한 장이라 두 번 그려도 요청은 하나다. 좁은 화면에서는 한 단계 작게. */}
@@ -159,7 +159,7 @@ export function SiteHeaderClient({ user }: { user: SiteHeaderUser | null }) {
         {/* 그림자는 아래로만 드리운다. shadow-lg 는 사방으로 퍼져 바로 위 헤더 밑단을 어둡게 눌렀다. */}
         <nav
           className={cn(
-            "mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-6 py-3 shadow-[0_12px_16px_-8px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-out",
+            "mx-auto flex max-h-[80vh] max-w-7xl flex-col gap-1 overflow-y-auto border-b border-border/70 bg-white px-4.5 py-3 shadow-[0_12px_16px_-8px_rgba(15,23,42,0.18)] transition-transform duration-300 ease-out",
             mobileOpen ? "translate-y-0" : "-translate-y-full",
           )}
         >

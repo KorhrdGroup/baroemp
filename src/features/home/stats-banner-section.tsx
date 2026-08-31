@@ -121,7 +121,7 @@ export function StatsBannerSection() {
         좁은 화면은 한 줄에 다 못 들어가 두 칸씩 접히는데, 그때 선이 없어 숫자 넷이
         서로 붙어 보였다. 2×2 로 세우고 칸 사이를 가는 선으로 나눈다.
       */}
-      <div className="mx-auto grid w-fit max-w-7xl grid-cols-2 px-6 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-center sm:gap-y-6 lg:px-8">
+      <div className="mx-auto grid w-fit max-w-7xl grid-cols-2 px-4.5 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-center sm:gap-y-6 lg:px-8">
         {stats.map((stat, i) => (
           <div
             key={stat.id}

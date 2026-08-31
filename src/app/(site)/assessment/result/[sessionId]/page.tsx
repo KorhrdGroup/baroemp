@@ -57,7 +57,7 @@ export default async function AssessmentResultPage({
   return (
     // 지원금 결과 화면과 같은 뼈대: 회색 바탕 위에 흰 카드를 쌓는다.
     <div className="min-h-screen bg-slate-50">
-    <div className="mx-auto max-w-3xl px-6 pb-28 pt-10 lg:px-8">
+    <div className="mx-auto max-w-3xl px-4.5 pb-28 pt-10 lg:px-8">
       <ResultView
         sessionId={sessionId}
         result={result}
