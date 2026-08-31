@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Users, FileText, Briefcase, Award } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const stats = [
   {
@@ -65,17 +66,18 @@ function CountUpStat({ stat, started }: { stat: (typeof stats)[number]; started:
   const finalFormatted = stat.value.toLocaleString();
 
   return (
-    <div className="flex items-center gap-3 px-4 sm:px-0">
-      <stat.icon className="size-5 shrink-0 text-brand-blue-300" />
+    <div className="flex items-center gap-3">
+      {/* 어두운 남색 위라 300은 가라앉는다. 글자·아이콘 모두 한두 단계 밝게 올린다. */}
+      <stat.icon className="size-7 shrink-0 text-brand-blue-200" />
       <div>
         <p className="text-title-3 font-extrabold text-white sm:text-title-2">
           <span className="relative inline-block">
             <span className="invisible">{finalFormatted}</span>
             <span className="absolute inset-0 text-right">{count.toLocaleString()}</span>
           </span>
-          <span className="ml-0.5 text-body-2 font-semibold text-brand-blue-200">{stat.unit}</span>
+          <span className="ml-0.5 text-body-2 font-semibold text-brand-blue-100">{stat.unit}</span>
         </p>
-        <p className="text-label-2 text-brand-blue-300">{stat.label}</p>
+        <p className="text-label-2 text-brand-blue-100">{stat.label}</p>
       </div>
     </div>
   );
@@ -105,9 +107,22 @@ export function StatsBannerSection() {
 
   return (
     <section ref={ref} className="bg-brand-blue-900 py-8">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-y-6 px-4 sm:px-6 lg:px-8">
+      {/*
+        넓은 화면은 넷을 한 줄로 세우고 사이에 세로 선을 넣는다.
+        좁은 화면은 한 줄에 다 못 들어가 두 칸씩 접히는데, 그때 선이 없어 숫자 넷이
+        서로 붙어 보였다. 2×2 로 세우고 칸 사이를 가는 선으로 나눈다.
+      */}
+      <div className="mx-auto grid max-w-7xl grid-cols-2 px-4 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-y-6 sm:px-6 lg:px-8">
         {stats.map((stat, i) => (
-          <div key={stat.id} className="flex items-center">
+          <div
+            key={stat.id}
+            className={cn(
+              // 칸이 반으로 나뉘는 좁은 화면에서는 칸 가운데에 세운다. 왼쪽에 붙이면 선 쪽만 비어 보인다.
+              "flex items-center justify-center py-4 sm:justify-start sm:py-0",
+              i % 2 === 0 ? "pr-4 sm:pr-0" : "border-l border-white/15 pl-4 sm:border-l-0 sm:pl-0",
+              i >= 2 && "border-t border-white/15 sm:border-t-0",
+            )}
+          >
             {i > 0 && (
               <div className="mx-6 hidden h-10 w-px bg-white/20 sm:mx-10 sm:block lg:mx-14" />
             )}

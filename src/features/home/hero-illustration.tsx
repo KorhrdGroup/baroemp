@@ -11,15 +11,18 @@ export function HeroIllustration() {
   return (
     <div
       className={[
-        "pointer-events-none relative h-56 w-full select-none sm:h-72",
+        "pointer-events-none relative h-64 w-full select-none sm:h-72",
         /*
           정확히 절반만 덮는다. 54% 로 두면 사진의 왼쪽 끝이 문구 칸 안으로 넘어와
           검색창 오른쪽과 겹쳐 보인다. 절반이면 어느 넓이에서든 문구 칸 밖에서 시작한다.
         */
         "lg:absolute lg:inset-y-0 lg:right-0 lg:h-auto lg:w-1/2",
-        // 좁은 화면은 위쪽을, 넓은 화면은 왼쪽을 흐린다.
-        "[mask-image:linear-gradient(to_bottom,transparent_0%,#000_28%)]",
-        "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,#000_28%)]",
+        /*
+          좁은 화면은 위쪽을, 넓은 화면은 왼쪽을 흐린다.
+          중간 지점을 하나 더 찍어 길게 푼다. 두 점만 두면 흐림이 끝나는 자리에 선이 보인다.
+        */
+        "[mask-image:linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.35)_16%,#000_44%)]",
+        "[-webkit-mask-image:linear-gradient(to_bottom,transparent_0%,rgba(0,0,0,0.35)_16%,#000_44%)]",
         "lg:[mask-image:linear-gradient(to_right,transparent_0%,#000_10%)]",
         "lg:[-webkit-mask-image:linear-gradient(to_right,transparent_0%,#000_10%)]",
       ].join(" ")}
