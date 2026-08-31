@@ -185,19 +185,23 @@ export function JobFiltersForm({
     "flex-1 rounded-full bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white hover:bg-brand-blue-600 sm:flex-none sm:px-8";
 
 
+  /* 좁은 화면에서 아래에서 올라오는 시트로 여는 패널. 정렬은 작은 드롭다운이라 뺀다. */
+  const isSheet = panel === "region" || panel === "job";
+
   return (
     <div>
-      {/* 패널 밖 클릭 시 닫기 */}
+      {/* 패널 밖 클릭 시 닫기. 시트는 아래 그늘이 같은 일을 하므로 좁은 화면에서는 비켜둔다. */}
       {panel && (
         <button
           type="button"
           aria-label="필터 닫기"
-          className="fixed inset-0 z-40 cursor-default"
+          className={cn("fixed inset-0 z-40 cursor-default", isSheet && "hidden sm:block")}
           onClick={() => setPanel(null)}
         />
       )}
 
-      <div className="relative z-40">
+      {/* 시트가 열린 동안만 헤더(z-50) 위로 올라가, 그늘이 헤더까지 덮게 한다. */}
+      <div className={cn("relative", isSheet ? "z-[60] sm:z-40" : "z-40")}>
         {/* 알약형 검색바 */}
         <form
           onSubmit={(e) => {
@@ -277,12 +281,17 @@ export function JobFiltersForm({
         </div>
 
         {/*
-          시트가 열리면 뒤가 어두워져야 한다. 위 닫기 덮개는 검색바보다 아래에 그려져 검색바만
-          훤히 남으므로, 검색바와 같은 칸 안에 그늘을 하나 더 둔다. 클릭은 위 덮개가 받는다.
+          시트 뒤 그늘. 검색바와 같은 칸 안에 두어야 검색바까지 덮는다(밖에 두면 검색바가 위에
+          그려져 거기만 훤히 남는다). 밖을 누르면 닫히는 것도 이 그늘이 받는다.
           넓은 화면은 시트가 아니라 검색바 아래 판이라 그늘을 두지 않는다.
         */}
-        {(panel === "region" || panel === "job") && (
-          <div aria-hidden className="pointer-events-none fixed inset-0 z-40 bg-slate-900/30 sm:hidden" />
+        {isSheet && (
+          <button
+            type="button"
+            aria-label="필터 닫기"
+            className="fixed inset-0 z-40 cursor-default bg-slate-900/30 sm:hidden"
+            onClick={() => setPanel(null)}
+          />
         )}
 
         {/*
