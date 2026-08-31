@@ -12,14 +12,13 @@ export function HeroSection() {
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <div className="absolute inset-0 bg-[linear-gradient(160deg,#FFFFFF_0%,var(--gov-ice)_38%,var(--gov-sky)_100%)]" />
         <div className="absolute -right-32 -top-24 size-[38rem] rounded-full bg-white opacity-60 blur-3xl" />
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white" />
       </div>
 
       {/*
        * 왼쪽은 문구와 검색, 오른쪽은 일러스트.
        * lg 미만에서는 일러스트를 아래로 내리고 문구를 가운데 정렬한다.
        */}
-      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pb-20 pt-8 sm:px-6 sm:pb-28 sm:pt-12 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:pb-32 lg:pt-14">
+      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 pt-8 pb-10 sm:px-6 sm:pt-12 sm:pb-12 lg:grid-cols-2 lg:gap-8 lg:px-8 lg:pt-14 lg:pb-32">
         <div className="text-center lg:text-left">
           <p className="text-body-2 font-semibold text-brand-blue-600">중장년 취업지원 서비스</p>
           {/*
@@ -42,8 +41,14 @@ export function HeroSection() {
           <HeroPopularKeywords />
         </div>
 
-        <HeroIllustration />
+        {/* 넓은 화면에서 사진이 덮는 자리. 사진은 배너에 절대 배치라 여기서 자리만 비워둔다. */}
+        <div aria-hidden className="hidden lg:block" />
       </div>
+
+      <HeroIllustration />
+
+      {/* 아래 섹션으로 이어지는 흰 띠. 사진 위에 얹혀야 해서 사진 뒤에 둔다. */}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-white" />
     </section>
   );
 }
