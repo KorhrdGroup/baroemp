@@ -3,6 +3,7 @@ import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { getJobInterestReport } from "./job-interest-report.service";
 import { getSalesLeads, labelIncomeBand, labelInsurance, PRIORITY_LABELS, type SalesLeadRow } from "./sales-leads.service";
 import { REGION_LABELS } from "@/lib/labels";
+import { formatPhone } from "@/lib/utils/phone";
 import type { SheetSpec } from "@/lib/export/workbook";
 import type { Region } from "@/types";
 
@@ -304,7 +305,7 @@ async function leadSheets(): Promise<AnySheetSpec[]> {
       columns: [
         { header: "전달등급", width: 10, value: (r: SalesLeadRow) => PRIORITY_LABELS[r.priority] },
         { header: "이름", width: 12, value: (r: SalesLeadRow) => r.name },
-        { header: "연락처", width: 16, value: (r: SalesLeadRow) => r.phone ?? "" },
+        { header: "연락처", width: 16, value: (r: SalesLeadRow) => (r.phone ? formatPhone(r.phone) : "") },
         { header: "연령대", width: 10, value: (r: SalesLeadRow) => r.ageLabel ?? "" },
         { header: "지역", width: 10, value: (r: SalesLeadRow) => r.regionLabel ?? "" },
         { header: "취업상태", width: 14, value: (r: SalesLeadRow) => r.employmentLabel ?? "" },

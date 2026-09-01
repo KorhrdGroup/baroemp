@@ -10,6 +10,7 @@ import {
 import { AdminPageShell } from "@/features/admin/admin-page-shell";
 import { getSalesLeads, labelIncomeBand, labelInsurance, PRIORITY_LABELS } from "@/services/sales-leads.service";
 import { cn } from "@/lib/utils";
+import { formatPhone } from "@/lib/utils/phone";
 
 const PRIORITY_CLASS: Record<1 | 2 | 3, string> = {
   1: "bg-rose-50 text-rose-600",
@@ -85,7 +86,7 @@ export default async function AdminSalesLeadsPage() {
                       </span>
                     </TableCell>
                     <TableCell className="font-semibold text-slate-900">{lead.name}</TableCell>
-                    <TableCell className="whitespace-nowrap">{lead.phone ?? "-"}</TableCell>
+                    <TableCell className="whitespace-nowrap">{formatPhone(lead.phone)}</TableCell>
                     <TableCell className="whitespace-nowrap">
                       {[lead.ageLabel, lead.regionLabel].filter(Boolean).join(" · ") || "-"}
                     </TableCell>

@@ -44,8 +44,7 @@ export function ConsultingRequestForm() {
         </span>
         <h3 className="mt-5 text-title-3 font-bold text-slate-900">상담 신청이 접수되었습니다</h3>
         <p className="mt-2 max-w-md text-body-2-reading text-slate-500">
-          담당 컨설턴트가 확인 후 연락드립니다. (STEP 1 Mock — 실제 저장/결제는 다음 STEP에서
-          연결됩니다.)
+          담당 컨설턴트가 확인 후 남겨주신 연락처로 연락드립니다.
         </p>
         <Button
           className="mt-6 bg-brand-blue-400 hover:bg-brand-blue-600"
