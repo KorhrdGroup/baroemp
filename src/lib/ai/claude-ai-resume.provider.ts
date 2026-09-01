@@ -303,8 +303,9 @@ export function createClaudeAIResumeProvider(): AIResumeProvider {
     async generateCareerSummary(input: AICareerSummaryInput): Promise<AICareerSummaryResult> {
       const parsed = await ask(
         SummarySchema,
-        `${CORE_RULES}\n\n이력서 상단에 들어갈 한 줄 소개를 작성합니다. 제공된 경력·자격·스킬만 근거로 쓰세요.`,
+        `${CORE_RULES}\n\n이력서 상단에 들어갈 한 줄 소개를 작성합니다.\n- 사용자가 써 둔 초안(draft)이 있으면 그 안의 사실(경력 연차, 근무처 등)을 유지하면서 채용 담당자에게 읽히는 문장으로 다듬으세요.\n- 초안과 경력·자격·스킬에 없는 사실은 추가하지 마세요.`,
         dataBlock("profile", {
+          draft: input.draftSummary,
           experiences: input.experiences,
           qualifications: input.qualifications,
           skills: input.skills,

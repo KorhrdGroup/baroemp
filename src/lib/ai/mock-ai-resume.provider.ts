@@ -162,6 +162,13 @@ export function createMockAIResumeProvider(): AIResumeProvider {
       const basedOn: string[] = [];
       const parts: string[] = [];
 
+      // 사용자가 써 둔 초안이 있으면 그 사실을 문장 앞에 살린다. 빈손 기본 문구보다 낫다.
+      const draft = trimText(input.draftSummary);
+      if (draft) {
+        parts.push(draft.replace(/^나는\s*/, "").replace(/[.。]\s*$/, ""));
+        basedOn.push("작성해 둔 초안");
+      }
+
       if (input.careerYears && input.careerYears > 0) {
         parts.push(`총 ${input.careerYears}년의 경력`);
         basedOn.push("입력된 경력 기간");
