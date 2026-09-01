@@ -1,4 +1,5 @@
 import type { ResumeDetail, ResumeSectionCode } from "@/types";
+import { formatPhone } from "@/lib/utils/phone";
 
 /**
  * A4 인쇄 기준 이력서 Preview (스펙 45번).
@@ -72,38 +73,39 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
       case "BASIC_INFO":
         return (
           <div key={section} className="mb-8 border-b border-slate-300 pb-5">
-            <div className="flex items-start justify-between gap-4">
-              <div>
+            {/* 사진을 왼쪽에, 이름·정보를 오른쪽에. 정보는 한 줄에 두 개씩 격자로 깐다. */}
+            <div className="flex items-start gap-5">
+              {resume.photoUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={resume.photoUrl} alt="증명사진" className="h-[128px] w-[100px] shrink-0 rounded object-cover ring-1 ring-slate-300" />
+              )}
+              <div className="min-w-0 flex-1">
                 <p className="text-title-2 font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
-                <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-label-1 text-slate-600">
+                <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 text-body-2 text-slate-600">
                   {resume.birthDate && (
                     <div>
-                      <dt className="inline text-slate-400">생년월일 </dt>
+                      <dt className="inline text-slate-400">생년월일 : </dt>
                       <dd className="inline">{resume.birthDate.slice(0, 10).replaceAll("-", ". ")}</dd>
                     </div>
                   )}
                   <div>
-                    <dt className="inline text-slate-400">이메일 </dt>
+                    <dt className="inline text-slate-400">이메일 : </dt>
                     <dd className="inline">{resume.email || "-"}</dd>
                   </div>
                   <div>
-                    <dt className="inline text-slate-400">전화번호 </dt>
-                    <dd className="inline">{resume.phone || "-"}</dd>
+                    <dt className="inline text-slate-400">전화번호 : </dt>
+                    <dd className="inline">{formatPhone(resume.phone)}</dd>
                   </div>
                   <div>
-                    <dt className="inline text-slate-400">거주지역 </dt>
+                    <dt className="inline text-slate-400">거주지역 : </dt>
                     <dd className="inline">{resume.address || "-"}</dd>
                   </div>
                   <div>
-                    <dt className="inline text-slate-400">희망직무 </dt>
+                    <dt className="inline text-slate-400">희망직무 : </dt>
                     <dd className="inline">{resume.desiredJobTitle || "-"}</dd>
                   </div>
                 </dl>
               </div>
-              {resume.photoUrl && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={resume.photoUrl} alt="증명사진" className="h-[110px] w-[85px] shrink-0 rounded object-cover ring-1 ring-slate-300" />
-              )}
             </div>
           </div>
         );
