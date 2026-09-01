@@ -18,7 +18,8 @@ export const mainNavItems: NavItem[] = [
   { label: "일자리찾기", href: "/jobs" },
   { label: "지원금찾기", href: "/support" },
   { label: "이력서 첨삭", href: "/resume" }, // 푸터에서는 "이력서·자소서 첨삭" (가로 여유가 있어 전체 명칭 사용)
-  { label: "취업컨설팅", href: "/consulting" },
+  // 취업컨설팅은 공개 전이라 숨겨 둔다. 열 때 아래 주석을 풀면 된다 (푸터도 같이).
+  // { label: "취업컨설팅", href: "/consulting" },
 ];
 
 export const footerServiceLinks: NavItem[] = [
@@ -26,7 +27,7 @@ export const footerServiceLinks: NavItem[] = [
   { label: "일자리찾기", href: "/jobs" },
   { label: "지원금찾기", href: "/support" },
   { label: "이력서·자소서 첨삭", href: "/resume" },
-  { label: "취업컨설팅", href: "/consulting" },
+  // { label: "취업컨설팅", href: "/consulting" },
 ];
 
 export const footerCompanyLinks: NavItem[] = [

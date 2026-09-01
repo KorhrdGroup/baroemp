@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ResumeMarketComparisonView } from "@/types";
 import {
   trackCareerGapItemViewedAction,
-  trackCareerGapRecommendationClickedAction,
+  // 컨설팅 공개 시 복구: trackCareerGapRecommendationClickedAction,
 } from "./career-gap-actions";
 
 interface MarketComparisonCardProps {
@@ -95,6 +95,8 @@ export function MarketComparisonCard({ view, source }: MarketComparisonCardProps
                 </span>
               </p>
             )}
+            {/*
+              준비방법 확인은 취업컨설팅으로 보내는 길이라 공개 전까지 숨겨 둔다. 열 때 주석을 푼다.
             <Link
               href="/consulting"
               onClick={() => {
@@ -111,6 +113,7 @@ export function MarketComparisonCard({ view, source }: MarketComparisonCardProps
               {item.recommendedContent ? `${item.recommendedContent.title} 준비방법 확인` : "준비방법 확인"}
               <ChevronRight className="size-4" />
             </Link>
+            */}
           </div>
         ))}
       </CardContent>

@@ -58,6 +58,9 @@ export const progressSteps: ProgressStepItem[] = [
       done: "이력서를 작성하셨어요. 첨삭으로 더 다듬어보세요.",
     },
   },
+  /*
+    면접(취업컨설팅) 단계는 컨설팅 공개 전까지 숨겨 둔다. 열 때 아래 주석을 풀고
+    취업을 5단계로 되돌린다.
   {
     id: "interview",
     step: 4,
@@ -70,9 +73,10 @@ export const progressSteps: ProgressStepItem[] = [
       done: "면접 컨설팅을 신청하셨어요. 준비 상황을 이어서 확인해보세요.",
     },
   },
+  */
   {
     id: "employment",
-    step: 5,
+    step: 4,
     title: "취업",
     description: "채용공고 지원 및 취업 완료",
     href: "/jobs",
