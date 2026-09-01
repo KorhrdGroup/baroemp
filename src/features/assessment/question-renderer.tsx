@@ -128,9 +128,16 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             );
           })}
         </div>
-        <div className="mt-2 flex justify-between text-label-1 text-slate-400">
-          <span>{min}점</span>
-          <span>{max}점</span>
+        {/* 그림문자는 방향(부정→긍정)을 눈으로 잡아주는 장식이라 읽어주지 않는다. */}
+        <div className="mt-2 flex items-center justify-between text-label-1 text-slate-400">
+          <span className="flex items-center gap-1.5">
+            <span aria-hidden className="text-title-3 leading-none">😓</span>
+            {min}점
+          </span>
+          <span className="flex items-center gap-1.5">
+            {max}점
+            <span aria-hidden className="text-title-3 leading-none">😄</span>
+          </span>
         </div>
       </div>
     );
