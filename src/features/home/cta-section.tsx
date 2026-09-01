@@ -1,6 +1,6 @@
-import Link from "next/link";
-import { ArrowRight, Star } from "lucide-react";
-import { Button } from "@/components/ui/button";
+// 컨설팅 공개 시 복구: import Link from "next/link";
+import { Star } from "lucide-react"; // 컨설팅 공개 시 ArrowRight 복구
+// 컨설팅 공개 시 복구: import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
 
 const testimonials = [
@@ -31,6 +31,8 @@ export function CtaSection() {
           <p className="mt-3 max-w-md text-body-2-reading text-balance break-keep text-slate-300">
             평균 두 달 안에 새로운 시작을 함께한 회원님들의 이야기를 들어보세요.
           </p>
+          {/*
+            컨설팅 공개 전까지 버튼을 숨겨 둔다. 열 때 주석을 푼다.
           <Button
             className="mt-6 w-fit rounded-lg bg-white text-brand-navy-900 hover:bg-slate-100"
             asChild
@@ -40,6 +42,7 @@ export function CtaSection() {
               <ArrowRight className="size-4" />
             </Link>
           </Button>
+          */}
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

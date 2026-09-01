@@ -16,7 +16,9 @@ interface ResultViewProps {
   jobCounts?: Record<string, { total: number; highMatchCount: number }>;
 }
 
-export function ResultView({ sessionId, result, occupationsById, contentRecs, jobCounts }: ResultViewProps) {
+export function ResultView({ sessionId, result, occupationsById, contentRecs: allContentRecs, jobCounts }: ResultViewProps) {
+  // 취업컨설팅은 공개 전이라 그리로 보내는 추천은 걸러 둔다. 열 때 이 줄만 지우면 된다.
+  const contentRecs = allContentRecs.filter((c) => c.type !== "CONSULTING");
   const top = result.recommendations[0];
   const regionLabel = result.extractedProfile.region ? REGION_LABELS[result.extractedProfile.region] : undefined;
   const isAnonymous = !result.userId;
