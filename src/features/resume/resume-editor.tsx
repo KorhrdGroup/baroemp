@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
+import { AlertCircle, ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, CheckCircle2, ChevronDown, Eye, ListPlus, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -402,6 +402,9 @@ export function ResumeEditor({
   );
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
+  /** 보완할 부분은 처음에 3개만 보여준다. 40~60대 사용자에게 열 줄짜리 벽글은 안 읽힌다. */
+  const [showAllImprovements, setShowAllImprovements] = useState(false);
+  const reviewResultRef = useRef<HTMLDivElement>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const [isReviewing, startReview] = useTransition();
   const marketComparisonRequestRef = useRef(0);
@@ -568,6 +571,10 @@ export function ResumeEditor({
         await handleSave();
         const result = await reviewResumeAiAction(resume.id);
         setReviewResult(result);
+        setShowAllImprovements(false);
+        // 점검 버튼은 사이드바에 있고 결과는 페이지 상단에 뜬다. 결과가 뜬 줄로 데려가지
+        // 않으면 사용자는 결과가 나온 것 자체를 모른다.
+        requestAnimationFrame(() => reviewResultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
         setMarketComparison(null);
         // AI 첨삭과 독립 - 실패해도 첨삭 결과 표시에는 영향 없음 (설계 3절)
         const requestId = ++marketComparisonRequestRef.current;
@@ -1431,45 +1438,80 @@ export function ResumeEditor({
         </div>
 
         {reviewResult && (
-          <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-body-2">
-                AI 점검 결과 <Badge className="bg-brand-blue-400">{reviewResult.score}점</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-label-1">
-              {reviewResult.strengths.length > 0 && (
-                <div>
-                  <p className="font-semibold text-emerald-700">잘 작성된 부분</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.strengths.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
+          /*
+            40~60대가 읽는 화면이라 벽글 목록 대신 큰 글자 카드로 편다.
+            scroll-mt는 스크롤 이동 시 고정 헤더에 가리지 않게 하는 여유분.
+          */
+          <div ref={reviewResultRef} className="scroll-mt-24 rounded-2xl bg-brand-blue-50/50 p-5 ring-1 ring-brand-blue-200 sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-title-3 font-bold text-slate-900">AI 점검 결과</h2>
+              <p className="text-slate-500">
+                <span className="text-4xl font-bold text-brand-blue-600">{reviewResult.score}</span>
+                <span className="ml-1 text-body-2 font-medium">점 / 100점</span>
+              </p>
+            </div>
+
+            {reviewResult.strengths.length > 0 && (
+              <section className="mt-5">
+                <p className="flex items-center gap-1.5 text-body-2 font-bold text-emerald-700">
+                  <CheckCircle2 className="size-5" /> 잘하신 부분
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {reviewResult.strengths.map((s, i) => (
+                    <li key={i} className="rounded-xl bg-white px-4 py-3 text-body-2-reading break-keep text-slate-700">
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {reviewResult.improvements.length > 0 && (
+              <section className="mt-5">
+                <p className="flex items-center gap-1.5 text-body-2 font-bold text-orange-700">
+                  <AlertCircle className="size-5" /> 이렇게 고쳐보세요
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {(showAllImprovements ? reviewResult.improvements : reviewResult.improvements.slice(0, 3)).map(
+                    (s, i) => (
+                      <li key={i} className="flex gap-3 rounded-xl bg-white px-4 py-3">
+                        <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-orange-100 text-label-1 font-bold text-orange-700">
+                          {i + 1}
+                        </span>
+                        <span className="text-body-2-reading break-keep text-slate-700">{s.comment}</span>
+                      </li>
+                    ),
+                  )}
+                </ul>
+                {reviewResult.improvements.length > 3 && !showAllImprovements && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllImprovements(true)}
+                    className="mt-2 flex w-full items-center justify-center gap-1 rounded-xl border border-orange-200 bg-white py-2.5 text-body-2 font-semibold text-orange-700 hover:bg-orange-50"
+                  >
+                    나머지 {reviewResult.improvements.length - 3}개 더 보기
+                    <ChevronDown className="size-4" />
+                  </button>
+                )}
+              </section>
+            )}
+
+            {reviewResult.missingInformation.length > 0 && (
+              <section className="mt-5">
+                <p className="flex items-center gap-1.5 text-body-2 font-bold text-slate-600">
+                  <ListPlus className="size-5" /> 추가하면 좋은 정보
+                </p>
+                {/* 문장이 아니라 채울 항목의 나열이라, 카드 대신 칩으로 가볍게 깐다. */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {reviewResult.missingInformation.map((s, i) => (
+                    <span key={i} className="rounded-full bg-white px-3 py-1.5 text-body-2 break-keep text-slate-600 ring-1 ring-slate-200">
+                      {s}
+                    </span>
+                  ))}
                 </div>
-              )}
-              {reviewResult.improvements.length > 0 && (
-                <div>
-                  <p className="font-semibold text-orange-700">보완할 부분</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.improvements.map((s, i) => (
-                      <li key={i}>{s.comment}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {reviewResult.missingInformation.length > 0 && (
-                <div>
-                  <p className="font-semibold text-orange-700">누락된 정보</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.missingInformation.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </section>
+            )}
+          </div>
         )}
 
         {reviewResult && marketComparison && (

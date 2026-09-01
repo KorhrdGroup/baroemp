@@ -179,12 +179,19 @@ const ReviewIssueSchema = z.object({
 
 const ReviewSchema = z.object({
   score: z.number().describe("0~100. 지금 이대로 제출했을 때의 완성도"),
-  strengths: z.array(z.string()),
-  improvements: z.array(ReviewIssueSchema),
-  missingInformation: z.array(z.string()),
+  strengths: z.array(z.string()).describe("최대 3개. 각각 한 문장"),
+  improvements: z.array(ReviewIssueSchema).describe("중요한 순서로 최대 5개"),
+  missingInformation: z.array(z.string()).describe("최대 6개. '근무 기간(입사·퇴사 연월)'처럼 짧은 명사구"),
   factualWarnings: z.array(z.string()).describe("근거 없이 부풀려 보이는 표현이 있으면 지적"),
-  jobFitComment: z.string().nullable(),
+  jobFitComment: z.string().nullable().describe("2문장 이내"),
 });
+
+/** 점검 결과가 벽글이 되지 않게 하는 공통 출력 규칙. 화면은 40~60대가 읽는다. */
+const REVIEW_STYLE_RULES = `출력 스타일 (독자는 40~60대 구직자입니다):
+- improvements의 comment는 2문장 이내로, "무엇을 → 어떻게"만 말하세요. 고친 예시 문장 전체를 붙여넣지 마세요.
+- 원문 인용("~했어요" 같은), 화살표(→), 따옴표 인용을 쓰지 마세요.
+- ATS, 키워드 매칭 같은 전문용어 대신 일상어를 쓰세요. (예: "채용 사이트가 자동으로 거르는 기준" 대신 "채용 담당자가 찾는 단어")
+- 개수 제한을 지키세요: 잘한 점 3개, 고칠 점 5개, 추가할 정보 6개까지. 가장 중요한 것부터 담으세요.`;
 
 const RewriteSchema = z.object({
   rewrittenText: z.string().describe("원문의 사실만 유지한 채 다듬은 문장"),
@@ -249,7 +256,7 @@ export function createClaudeAIResumeProvider(): AIResumeProvider {
       const focus = input.agentStyle ? AGENT_FOCUS[input.agentStyle] : undefined;
       const parsed = await ask(
         ReviewSchema,
-        `${CORE_RULES}\n\n이력서를 첨삭합니다.${focus ? `\n${focus}` : ""}\n- improvements의 section은 SUMMARY/EXPERIENCE/EDUCATION/QUALIFICATION/SKILLS 중 하나로 적으세요.\n- 지원 목표 공고가 주어지면 jobFitComment에 공고 요건과 이력의 연결점을 적고, 없으면 null로 두세요.`,
+        `${CORE_RULES}\n\n이력서를 첨삭합니다.${focus ? `\n${focus}` : ""}\n- improvements의 section은 SUMMARY/EXPERIENCE/EDUCATION/QUALIFICATION/SKILLS 중 하나로 적으세요.\n- 지원 목표 공고가 주어지면 jobFitComment에 공고 요건과 이력의 연결점을 적고, 없으면 null로 두세요.\n\n${REVIEW_STYLE_RULES}`,
         [
           dataBlock("resume", {
             summary: input.summary,
@@ -369,7 +376,7 @@ export function createClaudeAIResumeProvider(): AIResumeProvider {
       }
       const parsed = await ask(
         ReviewSchema,
-        `${CORE_RULES}\n\n자기소개서 답변을 첨삭합니다.\n- 문항 의도에 맞는지, 상황-행동-결과가 구체적인지, 두루뭉술한 표현이 없는지 봅니다.\n- improvements의 section에는 문항 제목을 그대로 적으세요.\n- jobFitComment는 null로 두세요.`,
+        `${CORE_RULES}\n\n자기소개서 답변을 첨삭합니다.\n- 문항 의도에 맞는지, 상황-행동-결과가 구체적인지, 두루뭉술한 표현이 없는지 봅니다.\n- improvements의 section에는 문항 제목을 그대로 적으세요.\n- jobFitComment는 null로 두세요.\n\n${REVIEW_STYLE_RULES}`,
         [dataBlock("question", input.question), dataBlock("answer", content)].join("\n\n"),
       );
       return {
