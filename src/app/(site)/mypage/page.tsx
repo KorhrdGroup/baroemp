@@ -25,6 +25,7 @@ import {
 import { activityEventLogger } from "@/lib/activity/event-logger";
 import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-search.service";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
+import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { getUserCrmDetail } from "@/services/user-crm.service";
 import { requireUser } from "@/lib/auth/session";
@@ -360,16 +361,53 @@ export default async function MyPage() {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p className="text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</p>
-                  <div className="space-y-2.5">
-                    {latestResult.recommendations.slice(0, 3).map((rec, i) => (
-                      <div key={rec.occupationId} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-                        <span className="font-medium text-slate-700">
-                          TOP{i + 1} · {rec.occupationName}
-                        </span>
-                        <span className="font-bold text-brand-blue-600">{rec.totalScore}점</span>
+                  {/* 결과 화면과 같은 두 트랙. 준비 트랙 총점에는 자격 미보유 감점이 섞여 있어 성향 적합도를 쓴다. */}
+                  {(() => {
+                    const { ready, preparation } = splitRecommendationTracks(latestResult.recommendations);
+                    return (
+                      <div className="space-y-3">
+                        {ready.length > 0 && (
+                          <div>
+                            <p className="mb-1.5 text-label-2 font-semibold text-slate-400">지금 바로 지원할 수 있는 직업</p>
+                            <div className="space-y-2.5">
+                              {ready.slice(0, 3).map((rec, i) => (
+                                <div
+                                  key={rec.occupationId}
+                                  className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"
+                                >
+                                  <span className="font-medium text-slate-700">
+                                    TOP{i + 1} · {rec.occupationName}
+                                  </span>
+                                  <span className="font-bold text-brand-blue-600">{rec.totalScore}점</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {preparation.length > 0 && (
+                          <div>
+                            <p className="mb-1.5 text-label-2 font-semibold text-slate-400">준비하면 열리는 직업</p>
+                            <div className="space-y-2.5">
+                              {preparation.slice(0, 3).map((rec) => (
+                                <div
+                                  key={rec.occupationId}
+                                  className="flex items-center justify-between gap-2 rounded-lg bg-amber-50/60 px-3 py-2"
+                                >
+                                  <span className="min-w-0 truncate font-medium text-slate-700">{rec.occupationName}</span>
+                                  <span className="flex shrink-0 items-center gap-2">
+                                    <span className="rounded-full bg-amber-50 px-2 py-0.5 text-label-2 font-semibold text-amber-700">
+                                      자격 취득 시 가능
+                                    </span>
+                                    <span className="font-bold text-brand-blue-600">{rec.dimensionFitScore}점</span>
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })()}
                   <div className="flex gap-2">
                     <Button variant="outline" className="flex-1" asChild>
                       <Link href={`/assessment/result/${latestResult.sessionId}`}>결과 다시보기</Link>
