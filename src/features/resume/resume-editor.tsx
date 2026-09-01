@@ -498,12 +498,25 @@ export function ResumeEditor({
           const payload = buildSavePayload();
           const saved = await saveResumeAction(payload);
           setDetail(saved);
-          setEducations(withKeys(saved.educations, "edu"));
-          setExperiences(withKeys(saved.experiences, "exp"));
-          setQualifications(withKeys(saved.qualifications, "qual"));
-          setTrainings(withKeys(saved.trainings, "train"));
-          setSkills(withKeys(saved.skills, "skill"));
-          setItems(withKeys(saved.items, "item"));
+          /*
+            _key 를 새로 발급하지 않고 보내기 전 배열의 키를 자리 순서대로 이어받는다.
+            키가 갈리면 "편집 중" 표시(editingEntries)와 AI 다듬기 패널(rewritePending)이
+            옛 키를 들고 있다가 저장 직후 전부 접혀버린다. 서버는 보낸 순서대로 돌려준다.
+          */
+          const rekey = <T,>(savedList: T[], prevList: { _key: string }[], prefix: string) =>
+            savedList.map((item, i) => ({ ...item, _key: prevList[i]?._key ?? nextKey(prefix) }));
+          const nextEducations = rekey(saved.educations, educations, "edu");
+          const nextExperiences = rekey(saved.experiences, experiences, "exp");
+          const nextQualifications = rekey(saved.qualifications, qualifications, "qual");
+          const nextTrainings = rekey(saved.trainings, trainings, "train");
+          const nextSkills = rekey(saved.skills, skills, "skill");
+          const nextItems = rekey(saved.items, items, "item");
+          setEducations(nextEducations);
+          setExperiences(nextExperiences);
+          setQualifications(nextQualifications);
+          setTrainings(nextTrainings);
+          setSkills(nextSkills);
+          setItems(nextItems);
           /*
             기준점은 화면 상태가 아니라 서버가 돌려준 값으로 잡는다. 이 시점에는
             위 setState 들이 아직 반영되기 전이라, 화면 상태로 찍으면 서버가 새로
@@ -515,12 +528,12 @@ export function ResumeEditor({
                 id: saved.resume.id,
                 form: { ...form, title: saved.resume.title },
                 sectionCodes: saved.resume.sectionCodes ?? sectionCodes,
-                educations: withKeys(saved.educations, "edu"),
-                experiences: withKeys(saved.experiences, "exp"),
-                qualifications: withKeys(saved.qualifications, "qual"),
-                trainings: withKeys(saved.trainings, "train"),
-                skills: withKeys(saved.skills, "skill"),
-                items: withKeys(saved.items, "item"),
+                educations: nextEducations,
+                experiences: nextExperiences,
+                qualifications: nextQualifications,
+                trainings: nextTrainings,
+                skills: nextSkills,
+                items: nextItems,
               }),
             ),
           );
