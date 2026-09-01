@@ -27,7 +27,7 @@ export function HeroPopularKeywords() {
           key={keyword}
           href={`/jobs?keyword=${encodeURIComponent(keyword)}`}
           className={cn(
-            "shrink-0 rounded-full bg-white px-3 py-1.5 text-label-1 text-slate-700 shadow-[0_0_12px_rgba(15,40,90,0.10)] transition-colors hover:bg-brand-blue-50 hover:text-brand-blue-700",
+            "shrink-0 rounded-full bg-white px-3 py-1.5 text-label-1 text-slate-700 shadow-[0_0_6px_rgba(15,40,90,0.12)] transition-colors hover:bg-brand-blue-50 hover:text-brand-blue-700",
             REVEAL_AT[i],
           )}
         >
