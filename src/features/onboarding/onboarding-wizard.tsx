@@ -191,7 +191,11 @@ export function OnboardingWizard({
   function segmentFill(i: number) {
     if (onContactStep || i < groupIndex) return 100;
     if (i > groupIndex) return 0;
-    return groupSteps.length > 0 ? (posInGroup / groupSteps.length) * 100 : 0;
+    /*
+     * 지금 밟고 있는 문항까지 채운다. posInGroup만 세면 그룹의 첫 문항에서 칸이 0%라
+     * 세 번째 그룹에 들어와 있는데도 아직 두 번째 단계처럼 읽혔다.
+     */
+    return groupSteps.length > 0 ? ((posInGroup + 1) / groupSteps.length) * 100 : 0;
   }
 
   function update(patch: Partial<Answers>) {
