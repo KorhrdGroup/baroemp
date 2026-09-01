@@ -313,7 +313,7 @@ export default async function MyPage() {
               </p>
             </CardContent>
 
-            <div className="border-t border-slate-100" />
+            <div className="mx-4 border-t border-slate-100" />
 
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
@@ -370,16 +370,21 @@ export default async function MyPage() {
                           <div>
                             <p className="mb-1.5 text-label-2 font-semibold text-slate-400">지금 바로 지원할 수 있는 직업</p>
                             <div className="space-y-2.5">
+                              {/* 행을 누르면 결과 화면에서 그 직업 카드가 열린 채로 보인다. */}
                               {ready.slice(0, 3).map((rec, i) => (
-                                <div
+                                <Link
                                   key={rec.occupationId}
-                                  className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2"
+                                  href={`/assessment/result/${latestResult.sessionId}?focus=${rec.occupationId}#occupation-${rec.occupationId}`}
+                                  className={cn(
+                                    "flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2",
+                                    interactiveRowClass,
+                                  )}
                                 >
                                   <span className="font-medium text-slate-700">
                                     TOP{i + 1} · {rec.occupationName}
                                   </span>
                                   <span className="font-bold text-brand-blue-600">{rec.totalScore}점</span>
-                                </div>
+                                </Link>
                               ))}
                             </div>
                           </div>
@@ -389,9 +394,13 @@ export default async function MyPage() {
                             <p className="mb-1.5 text-label-2 font-semibold text-slate-400">준비하면 열리는 직업</p>
                             <div className="space-y-2.5">
                               {preparation.slice(0, 3).map((rec) => (
-                                <div
+                                <Link
                                   key={rec.occupationId}
-                                  className="flex items-center justify-between gap-2 rounded-lg bg-amber-50/60 px-3 py-2"
+                                  href={`/assessment/result/${latestResult.sessionId}?focus=${rec.occupationId}#occupation-${rec.occupationId}`}
+                                  className={cn(
+                                    "flex items-center justify-between gap-2 rounded-lg bg-amber-50/60 px-3 py-2",
+                                    interactiveRowClass,
+                                  )}
                                 >
                                   <span className="min-w-0 truncate font-medium text-slate-700">{rec.occupationName}</span>
                                   <span className="flex shrink-0 items-center gap-2">
@@ -400,7 +409,7 @@ export default async function MyPage() {
                                     </span>
                                     <span className="font-bold text-brand-blue-600">{rec.dimensionFitScore}점</span>
                                   </span>
-                                </div>
+                                </Link>
                               ))}
                             </div>
                           </div>

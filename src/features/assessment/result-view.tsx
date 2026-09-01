@@ -18,6 +18,8 @@ interface ResultViewProps {
   contentUrlById?: Record<string, string>;
   /** 외부 페이지가 등록된 취득 과정 목록. 자격 요건 칩을 과정 페이지로 잇는 데 쓴다. */
   externalCourses?: ExternalCourseLink[];
+  /** 마이페이지 등에서 특정 직업을 보러 온 경우, 그 카드를 열어서 보여준다. */
+  focusOccupationId?: string;
   jobCounts?: Record<string, { total: number; highMatchCount: number }>;
 }
 
@@ -28,8 +30,12 @@ export function ResultView({
   contentRecs: allContentRecs,
   contentUrlById = {},
   externalCourses = [],
+  focusOccupationId,
   jobCounts,
 }: ResultViewProps) {
+  /** 지목된 카드가 있으면 그 카드만, 없으면 첫 카드를 열어둔다. */
+  const isCardOpen = (occupationId: string, isFirstDefault: boolean) =>
+    focusOccupationId ? focusOccupationId === occupationId : isFirstDefault;
   /** 추천 취득 과정 중 외부 페이지가 등록된 첫 콘텐츠의 URL. */
   const prepareUrlFor = (rec: OccupationRecommendation) =>
     [...(rec.readinessProjection?.map((p) => p.contentId) ?? []), ...(rec.recommendedContentIds ?? [])]
@@ -81,19 +87,21 @@ export function ResultView({
             </div>
           )}
           {readyRecs.map((rec, i) => (
-            <OccupationRecommendationCard
-              key={rec.occupationId}
-              rank={i + 1}
-              rec={rec}
-              occupation={occupationsById.get(rec.occupationId)}
-              sessionId={sessionId}
-              userId={result.userId}
-              anonymousId={result.anonymousId}
-              defaultOpen={i === 0}
-              regionLabel={regionLabel}
-              jobCount={jobCounts?.[rec.occupationId]}
-              externalCourses={externalCourses}
-            />
+            /* 마이페이지에서 특정 직업으로 들어올 때 앵커로 쓴다. scroll-mt는 상단 고정 헤더 높이만큼. */
+            <div key={rec.occupationId} id={`occupation-${rec.occupationId}`} className="scroll-mt-24">
+              <OccupationRecommendationCard
+                rank={i + 1}
+                rec={rec}
+                occupation={occupationsById.get(rec.occupationId)}
+                sessionId={sessionId}
+                userId={result.userId}
+                anonymousId={result.anonymousId}
+                defaultOpen={isCardOpen(rec.occupationId, i === 0)}
+                regionLabel={regionLabel}
+                jobCount={jobCounts?.[rec.occupationId]}
+                externalCourses={externalCourses}
+              />
+            </div>
           ))}
         </div>
       )}
@@ -107,21 +115,22 @@ export function ResultView({
             </p>
           </div>
           {preparationRecs.map((rec, i) => (
-            <OccupationRecommendationCard
-              key={rec.occupationId}
-              rank={i + 1}
-              rec={rec}
-              variant="preparation"
-              occupation={occupationsById.get(rec.occupationId)}
-              sessionId={sessionId}
-              userId={result.userId}
-              anonymousId={result.anonymousId}
-              defaultOpen={readyRecs.length === 0 && i === 0}
-              regionLabel={regionLabel}
-              jobCount={jobCounts?.[rec.occupationId]}
-              prepareUrl={prepareUrlFor(rec)}
-              externalCourses={externalCourses}
-            />
+            <div key={rec.occupationId} id={`occupation-${rec.occupationId}`} className="scroll-mt-24">
+              <OccupationRecommendationCard
+                rank={i + 1}
+                rec={rec}
+                variant="preparation"
+                occupation={occupationsById.get(rec.occupationId)}
+                sessionId={sessionId}
+                userId={result.userId}
+                anonymousId={result.anonymousId}
+                defaultOpen={isCardOpen(rec.occupationId, readyRecs.length === 0 && i === 0)}
+                regionLabel={regionLabel}
+                jobCount={jobCounts?.[rec.occupationId]}
+                prepareUrl={prepareUrlFor(rec)}
+                externalCourses={externalCourses}
+              />
+            </div>
           ))}
         </div>
       )}
