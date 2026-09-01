@@ -288,6 +288,45 @@ export function CoverLetterEditor({
 
   return (
     <div className="space-y-4">
+      {/*
+        좁은 화면용 문항 띠. 문항 목록 상자는 위로 올라가 본문을 쓰는 동안 사라져,
+        다음 문항으로 건너갈 길이 없었다. 이력서 편집과 같은 자리(헤더 밑)에 붙인다.
+        본문은 한 문항씩 갈아끼우는 방식이라 누르면 그 문항으로 바뀐다.
+      */}
+      <div className="scrollbar-hidden sticky top-16 z-30 -mx-4.5 -mt-10 mb-2 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur lg:hidden">
+        {sections.map((section, idx) => {
+          const written = Boolean(section.content?.trim());
+          const isActive = section._key === active?._key;
+          return (
+            <button
+              key={section._key}
+              type="button"
+              data-strip-key={section._key}
+              onClick={() => setActiveKey(section._key)}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-label-1 whitespace-nowrap transition-colors",
+                isActive ? "bg-brand-blue-50 font-semibold text-brand-blue-600" : "font-medium text-slate-500",
+              )}
+            >
+              {written ? (
+                <Check className="size-3.5 text-brand-blue-600" />
+              ) : (
+                <span className="text-label-2 font-bold text-slate-400">{idx + 1}</span>
+              )}
+              {questionHeading(section.questionType, section.question)}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={addSection}
+          aria-label="문항 추가"
+          className="flex shrink-0 items-center rounded-lg border border-border p-2 text-slate-500"
+        >
+          <Plus className="size-4" />
+        </button>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
         <div className="min-w-48 flex-1">
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
@@ -306,7 +345,7 @@ export function CoverLetterEditor({
         좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
       */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <nav className="rounded-xl bg-white p-3 lg:sticky lg:top-24 lg:w-60 lg:shrink-0">
+        <nav className="hidden rounded-xl bg-white p-3 lg:sticky lg:top-24 lg:block lg:w-60 lg:shrink-0">
           <p className="px-2 pb-2 text-label-2 font-semibold text-slate-400">문항 {sections.length}개</p>
           <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
             {sections.map((section, idx) => {
