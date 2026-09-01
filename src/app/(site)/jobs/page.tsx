@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Briefcase, Sparkles } from "lucide-react";
+import { Briefcase, KeyRound } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { compareUserToJobsRequirements } from "@/services/job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
@@ -90,7 +90,7 @@ export default async function JobsPage({
     공고 원문에서 필수 요건을 뽑아 회원 준비 상태와 맞춰본다. 요건 사전이 필요해
     카드 안에서는 못 만들고, 여기서 이 페이지에 그릴 공고만 한 번에 계산해 넘긴다.
   */
-  const badgeJobs = [...result.items, ...(recommendation?.ready?.jobs ?? [])];
+  const badgeJobs = [...result.items, ...(recommendation?.preparation?.jobs ?? [])];
   const readinessMap = currentUser
     ? new Map(
         [...(await compareUserToJobsRequirements(currentUser.id, badgeJobs))].map(([jobId, items]) => [
@@ -148,24 +148,28 @@ export default async function JobsPage({
         눈에 잡히지 않아서 - 맞춤 공고는 촘촘한 행, 준비 트랙은 노란 띠 가로 줄,
         큐레이션은 파란 띠, 전체 공고는 표준 카드 그리드로 리듬을 나눈다.
       */}
-      {recommendation?.ready && recommendation.ready.jobs.length > 0 && (
+      {/* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */}
+      {recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2">
-            <Sparkles className="size-5 text-brand-blue-600" />
+            <KeyRound className="size-5 text-amber-600" />
             <h2 className="text-body-1 font-bold text-slate-900">
-              검사 결과 기반 &ldquo;{recommendation.ready.occupationName}&rdquo; 맞춤 공고
+              자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
             </h2>
           </div>
-          <p className="mt-1 text-label-1 text-slate-500">직업진단에서 성향이 잘 맞았던 직업의 최신 공고예요.</p>
+          <p className="mt-1 text-label-1 text-slate-500">
+            진단에서 성향이 잘 맞았던 직업이에요.
+            {recommendation.preparation.missingQualifications?.length
+              ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
+              : ""}
+          </p>
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {recommendation.ready.jobs.map((job) => (
-              <JobRowCompact key={`rec-${job.id}`} job={job} readiness={readinessMap.get(job.id)} />
+            {recommendation.preparation.jobs.map((job) => (
+              <JobRowCompact key={`prep-${job.id}`} job={job} readiness={readinessMap.get(job.id)} />
             ))}
           </div>
         </div>
       )}
-
-      {/* 진단 준비 트랙("자격 따면 열리는") 공고는 큐레이션의 같은 이름 탭이 담당한다 - job-curation.service. */}
 
       <div className="mt-8">
         <JobCurationSection

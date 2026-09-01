@@ -30,7 +30,7 @@ export async function getJobCuration(userId: string, tab: JobCurationTab): Promi
       case "closing_soon":
         return withBadges({ tab, ...(await getCommonTab("closing_soon")) });
       case "matched":
-        return withBadges({ tab, ...(await getMatchedTab(await loadPersonalContext(userId))) });
+        return withBadges({ tab, ...(await getMatchedTab(userId, await loadPersonalContext(userId))) });
       case "ready_to_apply":
         return withBadges({ tab, ...(await getReadyToApplyTab(userId, await loadPersonalContext(userId))) });
       case "unlockable":
@@ -83,7 +83,7 @@ export async function getAllJobCurations(userId: string): Promise<JobCurationRes
     const [newTab, closingSoon, matched, readyToApply, unlockable] = await Promise.all([
       getCommonTab("new"),
       getCommonTab("closing_soon"),
-      getMatchedTab(ctx),
+      getMatchedTab(userId, ctx),
       getReadyToApplyTab(userId, ctx),
       getUnlockableTab(userId, ctx),
     ]);
@@ -177,10 +177,23 @@ async function loadPersonalContext(
 
 type PersonalContext = Awaited<ReturnType<typeof loadPersonalContext>>;
 
-async function getMatchedTab(ctx: PersonalContext) {
-  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
-  const items = ctx.scored.slice(0, TAB_LIMIT);
-  return { state: items.length > 0 ? ("READY" as const) : ("EMPTY" as const), items };
+async function getMatchedTab(userId: string, ctx: PersonalContext) {
+  /*
+    검사 기반 "맞춤 공고"도 이 탭이 담당한다 (일자리 화면 상단의 별도 섹션이었다가 합쳐짐).
+    진단 추천 직업의 최신 공고를 앞에 두고, 프로필 조건 점수순 후보를 뒤에 잇는다.
+  */
+  const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT).catch(() => null);
+  const ready = assessment?.ready;
+  const assessmentItems: JobCurationItem[] = (ready?.jobs ?? []).map((job) => ({
+    job,
+    matchReasonLabel: `진단 추천 "${ready?.occupationName}"`,
+  }));
+  const seen = new Set(assessmentItems.map((i) => i.job.id));
+  const scored = (ctx?.scored ?? []).filter((i) => !seen.has(i.job.id));
+  const items = [...assessmentItems, ...scored].slice(0, TAB_LIMIT);
+
+  if (items.length > 0) return { state: "READY" as const, items };
+  return ctx ? { state: "EMPTY" as const, items: [] } : { state: "NEEDS_PROFILE" as const, items: [] };
 }
 
 async function getReadyToApplyTab(userId: string, ctx: PersonalContext) {
@@ -264,24 +277,9 @@ async function getUnlockableTab(userId: string, ctx: PersonalContext) {
       (c) => c.userStatus === "NOT_SATISFIED" || c.userStatus === "UNKNOWN",
     );
 
-  if (best) return { state: "READY" as const, items: best.items.slice(0, TAB_LIMIT) };
-
-  /*
-    희망 직종 후보군에 자격이 걸리는 공고가 없으면 탭이 비는데, 정작 직업진단은
-    "성향은 맞는데 자격이 필요한 직업"을 알고 있다. 그 준비 트랙 직업의 공고로 채운다.
-    바로 위 진단 섹션과 겹칠 수 있지만, 빈 탭보다 겹치는 탭이 낫다.
-  */
-  const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT);
-  const preparation = assessment?.preparation;
-  if (preparation && preparation.jobs.length > 0) {
-    const unlockRequirementName = preparation.missingQualifications?.[0];
-    return {
-      state: "READY" as const,
-      items: preparation.jobs.map((job) => ({ job, unlockRequirementName })),
-    };
-  }
-
-  return { state: "EMPTY" as const, items: [] };
+  /* 진단 준비 트랙("자격 따면 열리는") 공고는 일자리 화면 상단의 전용 섹션이 담당한다 - jobs/page.tsx. */
+  if (!best) return { state: "EMPTY" as const, items: [] };
+  return { state: "READY" as const, items: best.items.slice(0, TAB_LIMIT) };
 }
 
 function scoreCandidates(profile: CareerProfile, jobs: Job[]): JobCurationItem[] {

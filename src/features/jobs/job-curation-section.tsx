@@ -25,7 +25,7 @@ const TABS: { key: JobCurationTab; emoji: string; label: string; description?: s
     key: "matched",
     emoji: "🎯",
     label: "맞춤 추천",
-    description: "희망 직종·지역을 기준으로 잘 맞는 순서로 골랐어요.",
+    description: "직업진단 결과와 희망 직종·지역을 기준으로 골랐어요.",
   },
   {
     key: "ready_to_apply",
