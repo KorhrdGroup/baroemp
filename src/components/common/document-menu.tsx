@@ -72,7 +72,11 @@ export function DocumentMenu({
 
   return (
     <div onClick={stop}>
-      <DropdownMenu>
+      {/*
+        modal(기본값)은 여는 순간 body 스크롤을 잠그며 스크롤바를 없애서
+        페이지 전체가 옆으로 덜컹인다. 작은 메뉴라 스크롤을 잠글 이유가 없다.
+      */}
+      <DropdownMenu modal={false}>
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
