@@ -550,9 +550,9 @@ function SupportIntro({
         latestResultSessionId && (
           <Link
             href={`/support/result/${latestResultSessionId}`}
-            className="inline-flex items-center gap-1 text-label-1 font-medium text-slate-500 hover:text-brand-blue-600"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-4 py-2.5 text-label-1 font-semibold text-slate-700 shadow-[0_2px_8px_rgba(15,40,90,0.06)] transition-colors hover:border-brand-blue-200 hover:text-brand-blue-600"
           >
-            이미 진단을 받으셨어요. 지난 결과 보기
+            이미 진단을 받으셨어요 · 지난 결과 보기
             <ArrowRight className="size-3.5" />
           </Link>
         )
