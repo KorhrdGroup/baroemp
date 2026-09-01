@@ -9,7 +9,7 @@ import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { JobCurationSection } from "@/features/jobs/job-curation-section";
 import { Pagination } from "@/components/common/pagination";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
-import { searchJobs, getRecommendedJobsForAnonymous, type JobSearchParams } from "@/services/job-search.service";
+import { searchJobs, getRecommendedJobsFromAssessment, type JobSearchParams } from "@/services/job-search.service";
 import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { getOccupationRepository } from "@/lib/repositories";
@@ -68,7 +68,7 @@ export default async function JobsPage({
 
   const [result, recommendation, currentUser, bookmarkedIds, initialCuration] = await Promise.all([
     searchJobs(filter),
-    getRecommendedJobsForAnonymous(anonymousId),
+    getRecommendedJobsFromAssessment({ userId: user.id, anonymousId }),
     getCurrentUser(),
     getUserJobBookmarkIdsAction(),
     getJobCuration(user.id, "new"),
@@ -149,6 +149,7 @@ export default async function JobsPage({
               검사 결과 기반 &ldquo;{recommendation.occupationName}&rdquo; 맞춤 공고
             </h2>
           </div>
+          <p className="mt-1 text-label-1 text-slate-500">직업진단에서 성향이 잘 맞았던 직업의 최신 공고예요.</p>
           <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
             {recommendation.jobs.map((job) => (
               <JobCard

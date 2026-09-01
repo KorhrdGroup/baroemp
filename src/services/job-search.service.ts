@@ -1,4 +1,5 @@
 import { findCareerProfileByUserId, getAssessmentResultRepository, getJobRepository } from "@/lib/repositories";
+import { toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 import { evaluateJobFit, type JobMatchDetail } from "./job-match.service";
 import { getCandidateJobsForUser } from "./job-curation.service";
 import type { CareerProfile, Job, JobSearchFilter, JobSearchResult } from "@/types";
@@ -67,7 +68,7 @@ export async function getRecommendedJobsForUser(userId: string | undefined, limi
   return scored.slice(0, limit).map(({ job, match }) => ({ ...job, match }));
 }
 
-export interface AnonymousRecommendation {
+export interface AssessmentJobRecommendation {
   occupationName: string;
   jobCategoryCode: string;
   jobs: Job[];
@@ -94,28 +95,39 @@ export async function getAnonymousCareerSignal(anonymousId: string | undefined):
 }
 
 /**
- * 비회원 "맞춤 채용공고" 영역용. 로그인 없이도 최근 완료한 검사 세션(anonymousId)이 있으면
- * 검사 TOP1 추천 직업과 관련된 공고를 보여준다 (Career Profile이 없어 매칭 점수는 계산하지 않는다).
+ * "검사 결과 기반 맞춤 공고" 영역용. 최근 완료한 진단의 추천 직업(직종코드가 있는 최상위)과
+ * 관련된 공고를 보여준다.
+ *
+ * 회원(userId) 결과를 먼저 보고, 없으면 비회원(anonymousId) 결과로 넘어간다.
+ * 예전에는 anonymousId 전용이어서, 가입하면서 결과가 회원 소유로 넘어간 사람은
+ * 로그인 필수인 /jobs에서 이 영역을 영영 볼 수 없었다.
  */
-export async function getRecommendedJobsForAnonymous(
-  anonymousId: string | undefined,
+export async function getRecommendedJobsFromAssessment(
+  params: { userId?: string; anonymousId?: string },
   limit = 6,
-): Promise<AnonymousRecommendation | null> {
-  if (!anonymousId) return null;
-  const results = await getAssessmentResultRepository().findAll({ anonymousId });
-  if (results.length === 0) return null;
+): Promise<AssessmentJobRecommendation | null> {
+  const repo = getAssessmentResultRepository();
+  const results = params.userId ? await repo.findAll({ userId: params.userId }) : [];
+  const fallback = results.length === 0 && params.anonymousId ? await repo.findAll({ anonymousId: params.anonymousId }) : [];
+  const all = results.length > 0 ? results : fallback;
+  if (all.length === 0) return null;
 
-  const latest = [...results].sort((a, b) => (a.completedAt < b.completedAt ? 1 : -1))[0];
-  const top = latest.recommendations[0];
+  const latest = [...all].sort((a, b) => (a.completedAt < b.completedAt ? 1 : -1))[0];
+  // 직종코드가 없는 직업(코드 미등록 occupation)은 공고와 이을 수 없으므로 다음 순위로 넘어간다.
+  const top = latest.recommendations.find((rec) => rec.jobCategoryCode);
   if (!top?.jobCategoryCode) return null;
 
-  const jobs = await getJobRepository().findAll({
-    jobCategory: top.jobCategoryCode,
+  // occupation의 직종 값에는 6자리 코드와 'social_worker' 같은 묶음 key가 섞여 있어 변환을 거친다.
+  const { items } = await getJobRepository().search({
+    jobCategoryPatterns: toJobCategoryPatterns([top.jobCategoryCode]),
     activeOnly: true,
+    sort: "latest",
+    page: 1,
+    pageSize: limit,
   } as JobSearchFilter);
-  if (jobs.length === 0) return null;
+  if (items.length === 0) return null;
 
-  return { occupationName: top.occupationName, jobCategoryCode: top.jobCategoryCode, jobs: jobs.slice(0, limit) };
+  return { occupationName: top.occupationName, jobCategoryCode: top.jobCategoryCode, jobs: items };
 }
 
 /**
