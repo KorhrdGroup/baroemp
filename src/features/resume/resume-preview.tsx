@@ -76,6 +76,12 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
               <div>
                 <p className="text-title-2 font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
                 <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-label-1 text-slate-600">
+                  {resume.birthDate && (
+                    <div>
+                      <dt className="inline text-slate-400">생년월일 </dt>
+                      <dd className="inline">{resume.birthDate.slice(0, 10).replaceAll("-", ". ")}</dd>
+                    </div>
+                  )}
                   <div>
                     <dt className="inline text-slate-400">이메일 </dt>
                     <dd className="inline">{resume.email || "-"}</dd>

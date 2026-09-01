@@ -49,6 +49,7 @@ import {
   rewriteResumeSectionAiAction,
   saveResumeAction,
   trackResumeExportedAction,
+  uploadResumePhotoAction,
 } from "./resume-actions";
 import { calculateResumeCompleteness } from "@/lib/resume/completeness";
 import { ResumePreview } from "./resume-preview";
@@ -146,6 +147,8 @@ interface ResumeFormState {
   email: string;
   phone: string;
   address: string;
+  birthDate: string;
+  photoUrl: string;
   portfolioUrl: string;
   hasNoWorkExperience: boolean;
 }
@@ -346,6 +349,8 @@ export function ResumeEditor({
         email: initialDetail.resume.email ?? "",
         phone: initialDetail.resume.phone ?? "",
         address: initialDetail.resume.address ?? "",
+        birthDate: initialDetail.resume.birthDate ?? "",
+        photoUrl: initialDetail.resume.photoUrl ?? "",
         portfolioUrl: initialDetail.resume.portfolioUrl ?? "",
         hasNoWorkExperience: initialDetail.resume.hasNoWorkExperience ?? false,
       },
@@ -405,6 +410,8 @@ export function ResumeEditor({
   /** 보완할 부분은 처음에 3개만 보여준다. 40~60대 사용자에게 열 줄짜리 벽글은 안 읽힌다. */
   const [showAllImprovements, setShowAllImprovements] = useState(false);
   const reviewResultRef = useRef<HTMLDivElement>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const [isReviewing, startReview] = useTransition();
   const marketComparisonRequestRef = useRef(0);
@@ -630,6 +637,22 @@ export function ResumeEditor({
     });
   }
 
+  async function handlePhotoChange(file: File | undefined) {
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const { url } = await uploadResumePhotoAction(resume.id, fd);
+      setForm((f) => ({ ...f, photoUrl: url }));
+      setSaveMessage("사진을 올렸어요. 저장을 누르면 이력서에 반영됩니다.");
+    } catch (err) {
+      setSaveMessage(err instanceof Error ? err.message : "사진 업로드 중 오류가 발생했습니다.");
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
   function handlePrint() {
     void trackResumeExportedAction(resume.id, "pdf");
     window.print();
@@ -652,8 +675,62 @@ export function ResumeEditor({
                 <CardTitle className="text-body-1 font-semibold">기본정보</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
+                {/* 증명사진. 두 칸을 가로질러 위에 둔다 - 인쇄물에서도 기본정보 옆에 나온다. */}
+                <div className="flex items-center gap-4 sm:col-span-2">
+                  {form.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={form.photoUrl} alt="증명사진" className="h-[110px] w-[85px] rounded object-cover ring-1 ring-slate-200" />
+                  ) : (
+                    <div className="flex h-[110px] w-[85px] items-center justify-center rounded bg-slate-100 text-label-2 text-slate-400 ring-1 ring-slate-200">
+                      사진
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        void handlePhotoChange(e.target.files?.[0]);
+                        e.target.value = "";
+                      }}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingPhoto}
+                        onClick={() => photoInputRef.current?.click()}
+                      >
+                        {uploadingPhoto ? <Loader2 className="size-4 animate-spin" /> : null}
+                        {form.photoUrl ? "사진 바꾸기" : "사진 올리기"}
+                      </Button>
+                      {form.photoUrl && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-slate-500"
+                          onClick={() => setForm((f) => ({ ...f, photoUrl: "" }))}
+                        >
+                          사진 빼기
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-label-2 text-slate-400">JPG·PNG, 5MB 이하. 없어도 괜찮아요.</p>
+                  </div>
+                </div>
                 <Field label="이름" required>
                   <CompactInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+                </Field>
+                <Field label="생년월일">
+                  <CompactInput
+                    type="date"
+                    value={form.birthDate}
+                    onChange={(e) => setForm((f) => ({ ...f, birthDate: e.target.value }))}
+                  />
                 </Field>
                 <Field label="이메일" required>
                   <CompactInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />

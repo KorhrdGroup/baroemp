@@ -71,6 +71,8 @@ export interface Resume {
   email?: string;
   phone?: string;
   address?: string;
+  /** 생년월일 (YYYY-MM-DD) */
+  birthDate?: string;
   photoUrl?: string;
   portfolioUrl?: string;
 
