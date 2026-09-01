@@ -268,7 +268,11 @@ export function CoverLetterEditor({
     } as CoverLetterDetail;
   }
 
-  /** 팝업 오버레이가 인쇄물에 끼지 않도록 닫힘 애니메이션이 끝난 뒤 인쇄한다. */
+  /**
+   * 팝업 오버레이가 인쇄물에 끼지 않도록 닫힘 애니메이션이 끝난 뒤 인쇄한다.
+   * 인쇄되는 문서는 팝업 속 미리보기가 아니라 아래에 늘 숨겨둔 인쇄 전용 사본이다
+   * (이력서와 같은 방식) - 팝업을 닫아도 인쇄물이 비지 않는 이유.
+   */
   function handlePopupPrint() {
     setPreviewOpen(false);
     setTimeout(() => window.print(), 200);
@@ -616,6 +620,11 @@ export function CoverLetterEditor({
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* 인쇄 전용 사본. 평소엔 숨겨두고 인쇄할 때만 이것이 출력된다 (이력서와 동일). */}
+      <div className="hidden print:block">
+        <CoverLetterPreview detail={currentPreviewDetail()} applicantName={applicantName} />
       </div>
 
       {/* 이력서와 같은 방식. 입력 폭을 좁히지 않도록 팝업으로 띄우고 인쇄로 PDF 저장한다. */}
