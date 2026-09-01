@@ -432,7 +432,11 @@ export function CoverLetterEditor({
                 value={active.question}
                 onChange={(e) => updateSection(active._key, { question: e.target.value })}
                 rows={1}
-                className="mt-1 min-h-0 resize-none break-keep rounded-none border-0 bg-transparent p-0 text-body-1 font-semibold shadow-none focus-visible:ring-0 md:text-body-1"
+                /*
+                  좁은 화면에서는 두 줄로 접히는 일이 잦아 한 단계 줄인다(16px -> 넓은 화면 18px).
+                  답 칸과 사이도 좀 벌린다 - 접힌 제목과 붙으면 한 덩어리로 읽힌다.
+                */
+                className="mt-1 mb-2 min-h-0 resize-none break-keep rounded-none border-0 bg-transparent p-0 text-body-2 font-semibold shadow-none focus-visible:ring-0 md:mb-0 md:text-body-1"
               />
 
               {/*
