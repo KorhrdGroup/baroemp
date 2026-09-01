@@ -193,7 +193,9 @@ export function CoverLetterEditor({
 
   async function handleGenerateDraft(section: EditableSection) {
     const experienceIds = experienceIdsFor(section);
-    if (experienceIds.length === 0) {
+    // 경험뱅크에 담긴 게 있는데 이 문항에서 전부 뺀 경우에만 막는다.
+    // 애초에 비어 있으면(대부분의 사용자) 서버가 이력서 경력을 재료로 대신 쓴다.
+    if (experiencePool.length > 0 && experienceIds.length === 0) {
       setSuggestions((prev) => ({
         ...prev,
         [section._key]: { text: "", prompts: ["초안을 쓰려면 아래에서 이 문항에 쓸 경험을 하나 이상 골라주세요."] },
@@ -516,7 +518,7 @@ export function CoverLetterEditor({
                   <p className="mt-0.5 text-label-2 text-slate-500">
                     {experiencePool.length > 0
                       ? "고른 경험을 재료로 AI가 초안을 씁니다. 이 문항과 안 맞는 것은 빼주세요."
-                      : "정리해둔 경험이 없어 AI가 쓸 재료가 없어요."}
+                      : "따로 정리한 경험이 없으면 이력서에 쓰신 경력을 재료로 초안을 만들어드려요."}
                   </p>
                 </div>
                 <Link
