@@ -38,7 +38,7 @@ export const mockAssessmentResultsSeed: AssessmentResult[] = [
     userId: "user-1001",
     dimensionScores: { care_orientation: 92, people_interaction: 84, administrative_skill: 60, physical_activity: 70, education_willingness: 88 },
     extractedProfile: { employmentStatus: "career_break", desiredStartTiming: "within_3_months", region: "seoul", canDrive: true, isOpenToTraining: true },
-    generatedTags: ["#3개월내취업", "#재취업", "#복지관심", "#교육의향높음", "#중장년"],
+    generatedTags: ["3개월내취업", "재취업", "복지관심", "교육의향높음", "중장년"],
     recommendations: [
       rec({
         occupationId: "occ-social-worker",
@@ -76,7 +76,7 @@ export const mockAssessmentResultsSeed: AssessmentResult[] = [
     userId: "user-1004",
     dimensionScores: { administrative_skill: 88, computer_skill: 82, people_interaction: 40, education_willingness: 60 },
     extractedProfile: { employmentStatus: "unemployed", desiredStartTiming: "within_1_month", region: "incheon", isOpenToTraining: true },
-    generatedTags: ["#3개월내취업", "#대인업무선호", "#중장년"],
+    generatedTags: ["3개월내취업", "대인업무선호", "중장년"],
     recommendations: [
       rec({
         occupationId: "occ-office-admin",
@@ -114,7 +114,7 @@ export const mockAssessmentResultsSeed: AssessmentResult[] = [
     userId: "user-1009",
     dimensionScores: { care_orientation: 95, physical_activity: 80, people_interaction: 70, education_willingness: 92 },
     extractedProfile: { employmentStatus: "career_break", desiredStartTiming: "within_1_month", region: "daegu", isOpenToTraining: true },
-    generatedTags: ["#3개월내취업", "#재취업", "#복지관심", "#교육의향높음"],
+    generatedTags: ["3개월내취업", "재취업", "복지관심", "교육의향높음"],
     recommendations: [
       rec({
         occupationId: "occ-care-worker",
@@ -140,7 +140,7 @@ export const mockAssessmentResultsSeed: AssessmentResult[] = [
     userId: "user-1012",
     dimensionScores: { driving: 96, physical_activity: 78, schedule_flexibility: 85 },
     extractedProfile: { employmentStatus: "career_break", desiredStartTiming: "within_3_months", region: "chungnam", canDrive: true },
-    generatedTags: ["#3개월내취업", "#운전가능", "#재취업"],
+    generatedTags: ["3개월내취업", "운전가능", "재취업"],
     recommendations: [
       rec({
         occupationId: "occ-delivery",
@@ -166,7 +166,7 @@ export const mockAssessmentResultsSeed: AssessmentResult[] = [
     userId: "user-1017",
     dimensionScores: { care_orientation: 88, people_interaction: 82, education_willingness: 95 },
     extractedProfile: { employmentStatus: "career_break", desiredStartTiming: "within_1_month", region: "jeonnam", isOpenToTraining: true },
-    generatedTags: ["#3개월내취업", "#재취업", "#복지관심", "#교육의향높음", "#대인업무선호"],
+    generatedTags: ["3개월내취업", "재취업", "복지관심", "교육의향높음", "대인업무선호"],
     recommendations: [
       rec({
         occupationId: "occ-social-worker",
@@ -192,7 +192,7 @@ export const mockAssessmentResultsSeed: AssessmentResult[] = [
     userId: "user-1008",
     dimensionScores: { people_interaction: 90, stress_response: 85, teamwork: 75 },
     extractedProfile: { employmentStatus: "unemployed", desiredStartTiming: "within_3_months", region: "gwangju" },
-    generatedTags: ["#3개월내취업", "#대인업무선호"],
+    generatedTags: ["3개월내취업", "대인업무선호"],
     recommendations: [
       rec({
         occupationId: "occ-customer-service",

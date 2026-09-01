@@ -47,7 +47,8 @@ export function parseJobCategories(value: string | undefined): string[] {
  */
 export function toJobCategoryPatterns(tokens: string[]): string[] {
   if (tokens.length === 0) return [];
-  const patterns = tokens.flatMap((t) => BY_KEY.get(t)?.prefixes ?? [t]);
+  // 빈 문자열은 앞자리 매칭에서 모든 코드에 걸리므로 걸러낸다.
+  const patterns = tokens.filter(Boolean).flatMap((t) => BY_KEY.get(t)?.prefixes ?? [t]);
   return patterns.length > 0 ? patterns : ["__none__"];
 }
 

@@ -55,5 +55,10 @@ export function generateAssessmentTags(input: TagGeneratorInput): string[] {
     tags.add("중장년");
   }
 
-  return [...tags].map((tag) => (tag.startsWith("#") ? tag : `#${tag}`));
+  /*
+   * 저장 표기는 # 없이 통일한다. 공고 태그(jobs.tags)와 행동 기반 승격 태그가 모두
+   * '운전배송'처럼 접두사가 없어서, 여기만 '#운전가능'으로 저장하면 관심 태그
+   * 가산점(evaluateJobFit)이 영영 발동하지 않는다. #는 화면에서 붙인다.
+   */
+  return [...tags].map((tag) => tag.replace(/^#/, ""));
 }

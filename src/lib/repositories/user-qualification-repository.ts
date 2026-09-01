@@ -28,6 +28,11 @@ export interface UserQualificationRepository {
     expiresAt?: string;
     sourceResumeId: string;
   }): Promise<UserQualificationRecord>;
+  /**
+   * 직업진단 답변에서 온 보유 자격을 등록한다. 카탈로그는 find-or-create 하되,
+   * 이미 보유로 등록된 자격(이력서 등)은 취득일 같은 더 풍부한 정보를 지우지 않도록 그대로 둔다.
+   */
+  upsertFromAssessment(params: { userId: string; name: string }): Promise<UserQualificationRecord>;
 }
 
 function createMockUserQualificationRepository(): UserQualificationRepository {
@@ -63,6 +68,24 @@ function createMockUserQualificationRepository(): UserQualificationRepository {
       };
       userQualifications.push(created);
       void sourceResumeId;
+      return created;
+    },
+    async upsertFromAssessment({ userId, name }) {
+      let qualification = [...qualifications.values()].find((q) => q.name === name);
+      if (!qualification) {
+        qualification = { id: `qualification-${Date.now()}-${seq++}`, name };
+        qualifications.set(qualification.id, qualification);
+      }
+      const existing = userQualifications.find((q) => q.userId === userId && q.qualificationId === qualification!.id);
+      if (existing) return existing;
+      const created: UserQualificationRecord = {
+        id: `user-qualification-${Date.now()}-${seq++}`,
+        userId,
+        qualificationId: qualification.id,
+        name: qualification.name,
+        source: "ASSESSMENT",
+      };
+      userQualifications.push(created);
       return created;
     },
   };

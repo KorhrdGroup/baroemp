@@ -25,7 +25,8 @@ function mapRow(row: Record<string, unknown>): CareerProfile {
     interestedQualifications: [],
     isOpenToTraining: (row.education_willingness as boolean | null) ?? undefined,
     employmentBarriers: (row.employment_barriers as string[] | null) ?? [],
-    interestTags: (row.interest_tags as string[] | null) ?? [],
+    // 예전 진단이 '#운전가능' 표기로 저장한 행이 남아 있으므로 읽을 때 접두사를 벗겨 통일한다.
+    interestTags: ((row.interest_tags as string[] | null) ?? []).map((tag) => tag.replace(/^#/, "")),
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
   };

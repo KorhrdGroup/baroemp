@@ -1,4 +1,4 @@
-import { findCareerProfileByUserId, getCareerProfileRepository } from "@/lib/repositories";
+import { findCareerProfileByUserId, getCareerProfileRepository, getUserQualificationRepository } from "@/lib/repositories";
 import type { CareerProfile, CareerProfileInput } from "@/types";
 
 const UNION_ARRAY_FIELDS = ["heldQualifications", "interestedQualifications", "desiredJobCategories"] as const;
@@ -37,6 +37,21 @@ export function applyCareerProfileUpdatePolicy(
   }
 
   return merged;
+}
+
+/**
+ * 진단에서 답한 보유 자격을 Career DB(user_qualifications)로 승격한다.
+ *
+ * career_profiles에는 heldQualifications 컬럼이 없어서(조인 테이블 구조), 여기로 승격하지
+ * 않으면 진단 답변이 assessment_results JSON에만 남는다. 공고 자격 배지·"지금 지원가능" 판정은
+ * user_qualifications를 읽으므로, 이 승격이 있어야 진단에서 밝힌 자격이 매칭에 반영된다.
+ */
+export async function promoteAssessmentQualifications(userId: string, names: string[]): Promise<void> {
+  const repo = getUserQualificationRepository();
+  const unique = [...new Set(names.map((n) => n.trim()).filter(Boolean))];
+  for (const name of unique) {
+    await repo.upsertFromAssessment({ userId, name });
+  }
 }
 
 export async function mergeCareerProfileFromAssessment(

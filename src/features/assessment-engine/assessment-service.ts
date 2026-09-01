@@ -11,7 +11,7 @@ import {
   listActiveOccupations,
 } from "@/lib/repositories";
 import { listContents } from "@/services/content.service";
-import { mergeCareerProfileFromAssessment } from "@/services/career-profile-merge.service";
+import { mergeCareerProfileFromAssessment, promoteAssessmentQualifications } from "@/services/career-profile-merge.service";
 import { recalculateLeadScore } from "@/services/lead-score.service";
 import type {
   Assessment,
@@ -233,6 +233,7 @@ export async function completeAssessmentSession(sessionId: string): Promise<Asse
       ...result.extractedProfile,
       interestTags: result.generatedTags,
     });
+    await promoteAssessmentQualifications(session.userId, result.extractedProfile.heldQualifications ?? []);
   }
 
   await activityEventLogger.log({
@@ -290,7 +291,7 @@ export async function getContentRecommendationsForResult(result: AssessmentResul
     createdAt: result.completedAt,
     updatedAt: result.completedAt,
     ...result.extractedProfile,
-    interestTags: result.generatedTags.map((t) => t.replace(/^#/, "")),
+    interestTags: result.generatedTags,
   };
   const matches = matchingEngine.matchContentsForProfile(pseudoProfile, contents, limit);
   const byId = new Map(contents.map((c) => [c.id, c]));

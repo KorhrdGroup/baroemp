@@ -13,7 +13,8 @@ function mapRow(row: Record<string, unknown>): AssessmentResult {
     anonymousId: (row.anonymous_id as string | null) ?? undefined,
     dimensionScores: (row.dimension_scores as Record<string, number>) ?? {},
     extractedProfile: (row.extracted_profile as AssessmentResult["extractedProfile"]) ?? {},
-    generatedTags: (row.generated_tags as string[]) ?? [],
+    // 예전 결과는 '#재취업' 표기로 저장되어 있으므로 읽을 때 접두사를 벗겨 통일한다 (#는 화면에서 붙인다).
+    generatedTags: ((row.generated_tags as string[]) ?? []).map((tag) => tag.replace(/^#/, "")),
     recommendations: (row.recommended_occupations as AssessmentResult["recommendations"]) ?? [],
     summary: String(row.summary ?? ""),
     engineVersion: String(row.engine_version ?? "CAREER_ASSESSMENT_V1"),

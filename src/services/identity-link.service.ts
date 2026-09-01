@@ -8,6 +8,7 @@ import {
   getMatchResultRepository,
 } from "@/lib/repositories";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { promoteAssessmentQualifications } from "@/services/career-profile-merge.service";
 
 export interface IdentityLinkSummary {
   linkedSessions: number;
@@ -109,6 +110,20 @@ export async function linkAnonymousCareerDataToUser(
   const summary = isSupabaseMode()
     ? await linkViaSupabaseRpc(anonymousId, userId)
     : await linkViaRepositories(anonymousId, userId);
+
+  /*
+   * 비회원으로 진단을 마친 뒤 가입한 경우, 진단에서 답한 보유 자격은 이 시점에야 회원 소유가 된다.
+   * 승격은 보조 기능이므로 실패해도 링크 결과 자체는 유지한다.
+   */
+  if (summary.linkedResults > 0) {
+    try {
+      const results = await getAssessmentResultRepository().findAll({ userId });
+      const heldNames = results.flatMap((r) => r.extractedProfile.heldQualifications ?? []);
+      await promoteAssessmentQualifications(userId, heldNames);
+    } catch (err) {
+      console.error("[linkAnonymousCareerDataToUser] 진단 보유 자격 승격 실패:", err);
+    }
+  }
 
   await activityEventLogger.log({
     userId,

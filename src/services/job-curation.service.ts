@@ -1,6 +1,7 @@
 import { findCareerProfileByUserId, getJobRepository } from "@/lib/repositories";
 import type { CareerProfile, Job, JobCurationItem, JobCurationResult, JobCurationTab, JobSearchFilter } from "@/types";
 import { evaluateJobFit } from "./job-match.service";
+import { toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 import { compareUserToJobsRequirements, type JobRequirementComparisonItem } from "./job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
 
@@ -105,7 +106,12 @@ export async function getCandidateJobsForUser(userId: string, limit = CANDIDATE_
   const repo = getJobRepository();
   const filters: JobSearchFilter[] = [];
   for (const category of (profile.desiredJobCategories ?? []).slice(0, 5)) {
-    filters.push({ jobCategory: category, activeOnly: true, page: 1, pageSize: 250 });
+    /*
+     * 프로필의 직종 값은 묶음 key('care_worker')거나 6자리 코드인데 jobs.job_category는
+     * 워크넷 6자리 코드라, eq 비교로는 아무 공고도 걸리지 않았다. /jobs 검색과 같이
+     * 코드 앞자리 like 매칭으로 바꾼다.
+     */
+    filters.push({ jobCategoryPatterns: toJobCategoryPatterns([category]), activeOnly: true, page: 1, pageSize: 250 });
   }
   if (profile.region) {
     filters.push({ region: profile.region, activeOnly: true, page: 1, pageSize: 250 });
