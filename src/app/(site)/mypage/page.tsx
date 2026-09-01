@@ -290,66 +290,62 @@ export default async function MyPage() {
               <Link href="/mypage/profile">정보 수정</Link>
             </Button>
           </div>
-          <div className="space-y-4">
-            {/* A. 내 정보 */}
-            <Card className="rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
-                  <UserRound className="size-4" /> 기본 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-label-1 text-slate-600">
-                <p>
-                  <span className="text-slate-400">이름</span> · {profile.name ?? "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">이메일</span> · {profile.email ?? "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">휴대전화번호</span> · {formatPhone(profile.phone)}
-                </p>
-                <p>
-                  <span className="text-slate-400">가입일</span> · {profile.createdAt.slice(0, 10)}
-                </p>
-              </CardContent>
-            </Card>
+          {/* 기본 정보와 취업 프로필은 모두 "나"에 대한 내용이라 한 카드에 담고 구분선으로만 가른다. */}
+          <Card className="rounded-xl border-0 ring-1 ring-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
+                <UserRound className="size-4" /> 기본 정보
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-label-1 text-slate-600">
+              <p>
+                <span className="text-slate-400">이름</span> · {profile.name ?? "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">이메일</span> · {profile.email ?? "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">휴대전화번호</span> · {formatPhone(profile.phone)}
+              </p>
+              <p>
+                <span className="text-slate-400">가입일</span> · {profile.createdAt.slice(0, 10)}
+              </p>
+            </CardContent>
 
-            {/* B. 취업 프로필 */}
-            <Card className="rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
-                  <Briefcase className="size-4" /> 취업 프로필
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-label-1 text-slate-600">
-                <p>
-                  <span className="text-slate-400">취업상태</span> · {labelEmploymentStatus(careerProfile?.employmentStatus)}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망지역</span> · {labelRegion(careerProfile?.region)}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망근무형태</span> ·{" "}
-                  {careerProfile?.desiredWorkTypes && careerProfile.desiredWorkTypes.length > 0
-                    ? careerProfile.desiredWorkTypes.map((t) => labelWorkType(t)).join(", ")
-                    : "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망급여</span> ·{" "}
-                  {careerProfile?.desiredSalaryMin || careerProfile?.desiredSalaryMax
-                    ? `${careerProfile?.desiredSalaryMin ?? "-"} ~ ${careerProfile?.desiredSalaryMax ?? "-"}만원`
-                    : "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망 취업시기</span> · {labelDesiredStartTiming(careerProfile?.desiredStartTiming)}
-                </p>
-                <p>
-                  <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
-                </p>
-              </CardContent>
-            </Card>
+            <div className="border-t border-slate-100" />
 
-          </div>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
+                <Briefcase className="size-4" /> 취업 프로필
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-label-1 text-slate-600">
+              <p>
+                <span className="text-slate-400">취업상태</span> · {labelEmploymentStatus(careerProfile?.employmentStatus)}
+              </p>
+              <p>
+                <span className="text-slate-400">희망지역</span> · {labelRegion(careerProfile?.region)}
+              </p>
+              <p>
+                <span className="text-slate-400">희망근무형태</span> ·{" "}
+                {careerProfile?.desiredWorkTypes && careerProfile.desiredWorkTypes.length > 0
+                  ? careerProfile.desiredWorkTypes.map((t) => labelWorkType(t)).join(", ")
+                  : "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">희망급여</span> ·{" "}
+                {careerProfile?.desiredSalaryMin || careerProfile?.desiredSalaryMax
+                  ? `${careerProfile?.desiredSalaryMin ?? "-"} ~ ${careerProfile?.desiredSalaryMax ?? "-"}만원`
+                  : "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">희망 취업시기</span> · {labelDesiredStartTiming(careerProfile?.desiredStartTiming)}
+              </p>
+              <p>
+                <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
+              </p>
+            </CardContent>
+          </Card>
         </aside>
 
         <div className="min-w-0 flex-1 space-y-10">
