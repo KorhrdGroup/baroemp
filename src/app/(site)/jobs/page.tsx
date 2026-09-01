@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Briefcase, Sparkles } from "lucide-react";
+import { Briefcase, KeyRound, Sparkles } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { compareUserToJobsRequirements } from "@/services/job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
@@ -88,7 +88,11 @@ export default async function JobsPage({
     공고 원문에서 필수 요건을 뽑아 회원 준비 상태와 맞춰본다. 요건 사전이 필요해
     카드 안에서는 못 만들고, 여기서 이 페이지에 그릴 공고만 한 번에 계산해 넘긴다.
   */
-  const badgeJobs = [...result.items, ...(recommendation?.jobs ?? [])];
+  const badgeJobs = [
+    ...result.items,
+    ...(recommendation?.ready?.jobs ?? []),
+    ...(recommendation?.preparation?.jobs ?? []),
+  ];
   const readinessMap = currentUser
     ? new Map(
         [...(await compareUserToJobsRequirements(currentUser.id, badgeJobs))].map(([jobId, items]) => [
@@ -141,19 +145,48 @@ export default async function JobsPage({
           </p>
         }
       >
-      {recommendation && recommendation.jobs.length > 0 && (
+      {recommendation?.ready && recommendation.ready.jobs.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2">
             <Sparkles className="size-5 text-brand-blue-600" />
             <h2 className="text-body-1 font-bold text-slate-900">
-              검사 결과 기반 &ldquo;{recommendation.occupationName}&rdquo; 맞춤 공고
+              검사 결과 기반 &ldquo;{recommendation.ready.occupationName}&rdquo; 맞춤 공고
             </h2>
           </div>
           <p className="mt-1 text-label-1 text-slate-500">직업진단에서 성향이 잘 맞았던 직업의 최신 공고예요.</p>
           <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {recommendation.jobs.map((job) => (
+            {recommendation.ready.jobs.map((job) => (
               <JobCard
                 key={`rec-${job.id}`}
+                job={job}
+                isAuthenticated={isAuthenticated}
+                isBookmarked={bookmarkedSet.has(job.id)}
+                readiness={readinessMap.get(job.id)}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 진단 준비 트랙: 성향은 맞는데 자격이 필요한 직업의 공고. "이만큼 열린다"를 보여준다. */}
+      {recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center gap-2">
+            <KeyRound className="size-5 text-amber-600" />
+            <h2 className="text-body-1 font-bold text-slate-900">
+              자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
+            </h2>
+          </div>
+          <p className="mt-1 text-label-1 text-slate-500">
+            진단에서 성향이 잘 맞았던 직업이에요.
+            {recommendation.preparation.missingQualifications?.length
+              ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
+              : ""}
+          </p>
+          <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {recommendation.preparation.jobs.map((job) => (
+              <JobCard
+                key={`prep-${job.id}`}
                 job={job}
                 isAuthenticated={isAuthenticated}
                 isBookmarked={bookmarkedSet.has(job.id)}
