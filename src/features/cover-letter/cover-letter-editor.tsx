@@ -424,14 +424,15 @@ export function CoverLetterEditor({
                 </div>
               </div>
 
-              <Input
+              {/*
+                문항이 길면 접혀야 한다. Input 은 한 줄이라 좁은 화면에서 끝이 잘렸다.
+                Textarea 는 field-sizing-content 라 내용만큼 늘어난다.
+              */}
+              <Textarea
                 value={active.question}
                 onChange={(e) => updateSection(active._key, { question: e.target.value })}
-                /*
-                  Input 기본 클래스에 md:text-label-1 이 있어 넓은 화면에서는
-                  그쪽이 이긴다. 반응형 단계까지 함께 지정해야 크기가 적용된다.
-                */
-                className="mt-1 h-11 border-0 bg-transparent px-0 text-body-1 font-semibold shadow-none focus-visible:ring-0 md:text-body-1"
+                rows={1}
+                className="mt-1 min-h-0 resize-none break-keep rounded-none border-0 bg-transparent p-0 text-body-1 font-semibold shadow-none focus-visible:ring-0 md:text-body-1"
               />
 
               {/*
