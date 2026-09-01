@@ -275,12 +275,16 @@ let provider: AIResumeProvider | null = null;
 
 /**
  * 실제 Provider 연결 여부와 무관하게 항상 이 함수를 통해 Provider를 얻어야 한다.
- * STEP 7.5에서 실제 OpenAI Provider를 붙일 때는 AI_PROVIDER=openai 등의 환경변수로
- * 분기만 추가하면 되고, 호출부(services/*.ts)는 수정할 필요가 없다.
+ * ANTHROPIC_API_KEY가 있으면 Claude(claude-opus-5), 없으면 Mock으로 동작한다.
+ * 키 없는 로컬·프리뷰 환경에서도 빌더 화면이 죽지 않게 하려는 분기다.
  */
 export function getAIResumeProvider(): AIResumeProvider {
   if (!provider) {
-    provider = createMockAIResumeProvider();
+    provider = process.env.ANTHROPIC_API_KEY
+      ? // 지연 로드: Mock만 쓰는 환경에서 SDK 모듈을 불러올 필요가 없다.
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
+        (require("./claude-ai-resume.provider") as typeof import("./claude-ai-resume.provider")).createClaudeAIResumeProvider()
+      : createMockAIResumeProvider();
   }
   return provider;
 }
