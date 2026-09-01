@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { compareUserToJobsRequirements } from "@/services/job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
 import { JobCard } from "@/features/jobs/job-card";
+import { JobRowCompact } from "@/features/jobs/job-row-compact";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { JobCurationSection } from "@/features/jobs/job-curation-section";
 import { Pagination } from "@/components/common/pagination";
@@ -145,6 +146,11 @@ export default async function JobsPage({
           </p>
         }
       >
+      {/*
+        섹션마다 다른 판을 쓴다. 전부 같은 큰 카드 그리드면 어디까지가 한 묶음인지
+        눈에 잡히지 않아서 - 맞춤 공고는 촘촘한 행, 준비 트랙은 노란 띠 가로 줄,
+        큐레이션은 파란 띠, 전체 공고는 표준 카드 그리드로 리듬을 나눈다.
+      */}
       {recommendation?.ready && recommendation.ready.jobs.length > 0 && (
         <div className="mt-8">
           <div className="flex items-center gap-2">
@@ -154,15 +160,9 @@ export default async function JobsPage({
             </h2>
           </div>
           <p className="mt-1 text-label-1 text-slate-500">직업진단에서 성향이 잘 맞았던 직업의 최신 공고예요.</p>
-          <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             {recommendation.ready.jobs.map((job) => (
-              <JobCard
-                key={`rec-${job.id}`}
-                job={job}
-                isAuthenticated={isAuthenticated}
-                isBookmarked={bookmarkedSet.has(job.id)}
-                readiness={readinessMap.get(job.id)}
-              />
+              <JobRowCompact key={`rec-${job.id}`} job={job} readiness={readinessMap.get(job.id)} />
             ))}
           </div>
         </div>
@@ -170,28 +170,30 @@ export default async function JobsPage({
 
       {/* 진단 준비 트랙: 성향은 맞는데 자격이 필요한 직업의 공고. "이만큼 열린다"를 보여준다. */}
       {recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
-        <div className="mt-8">
+        <div className="mt-8 rounded-2xl bg-amber-50/80 p-5 sm:p-6">
           <div className="flex items-center gap-2">
             <KeyRound className="size-5 text-amber-600" />
             <h2 className="text-body-1 font-bold text-slate-900">
               자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
             </h2>
           </div>
-          <p className="mt-1 text-label-1 text-slate-500">
+          <p className="mt-1 text-label-1 text-slate-600">
             진단에서 성향이 잘 맞았던 직업이에요.
             {recommendation.preparation.missingQualifications?.length
               ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
               : ""}
           </p>
-          <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
+          {/* 큐레이션 띠와 같은 가로 줄. 세로로 쌓으면 검색 결과보다 준비 트랙이 먼저 길게 자리를 차지한다. */}
+          <div className="mt-4 flex gap-4 overflow-x-auto pb-1">
             {recommendation.preparation.jobs.map((job) => (
-              <JobCard
-                key={`prep-${job.id}`}
-                job={job}
-                isAuthenticated={isAuthenticated}
-                isBookmarked={bookmarkedSet.has(job.id)}
-                readiness={readinessMap.get(job.id)}
-              />
+              <div key={`prep-${job.id}`} className="w-80 shrink-0">
+                <JobCard
+                  job={job}
+                  isAuthenticated={isAuthenticated}
+                  isBookmarked={bookmarkedSet.has(job.id)}
+                  readiness={readinessMap.get(job.id)}
+                />
+              </div>
             ))}
           </div>
         </div>
@@ -205,7 +207,11 @@ export default async function JobsPage({
       </div>
       </JobFiltersForm>
 
-      <div className="mt-4">
+      <div className="mt-8">
+        <h2 className="text-body-1 font-bold text-slate-900">
+          전체 공고 <span className="font-semibold text-brand-blue-600">{result.total.toLocaleString()}</span>
+          <span className="ml-0.5 text-body-2 font-medium text-slate-500">건</span>
+        </h2>
         {result.items.length === 0 ? (
           <EmptyState
             icon={Briefcase}
