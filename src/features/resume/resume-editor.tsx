@@ -611,6 +611,8 @@ export function ResumeEditor({
           resumeId: resume.id,
           sectionLabel: `${exp?.companyName ?? ""} ${field === "responsibilities" ? "담당업무" : "성과"}`,
           originalText: text,
+          // 직무 맥락을 알아야 통상 업무로 살을 붙일 수 있다.
+          roleContext: [exp?.companyName, exp?.position].filter(Boolean).join(" "),
         });
         setRewriteTarget({ key, field, text: result.rewrittenText });
       } catch {
