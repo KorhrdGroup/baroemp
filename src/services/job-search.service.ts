@@ -134,17 +134,54 @@ export async function getRecommendedJobsForAnonymous(
  */
 const FIT_SCAN_LIMIT = 200;
 
+/**
+ * 같은 직업의 건수를 잠깐 기억해 둔다.
+ *
+ * 결과 화면 한 장이 추천 직업 다섯을 세는데, 새로고침하거나 다른 회원이 같은 직업을
+ * 보면 같은 질문을 또 던진다. 공고는 하루 한 번 동기화되므로 몇 분 묵은 값이어도
+ * 화면에 적는 "관련 채용공고 N건"으로는 충분하다.
+ *
+ * 적합도는 회원 조건에 따라 달라지므로 조건까지 열쇠에 넣는다.
+ */
+const COUNT_TTL_MS = 5 * 60 * 1000;
+const countCache = new Map<string, { at: number; value: { total: number; highMatchCount: number } }>();
+
+function fitKey(occupationName: string, profile?: CareerProfile): string {
+  if (!profile) return `${occupationName}|-`;
+  return [
+    occupationName,
+    profile.region ?? "",
+    profile.desiredSalaryMin ?? "",
+    profile.desiredSalaryMax ?? "",
+    (profile.desiredJobCategories ?? []).join(","),
+    (profile.desiredWorkTypes ?? []).join(","),
+    (profile.heldQualifications ?? []).join(","),
+    profile.employmentStatus ?? "",
+    profile.careerYears ?? "",
+    profile.canDrive ?? "",
+    profile.ageGroup ?? "",
+    (profile.interestTags ?? []).join(","),
+  ].join("|");
+}
+
 export async function countJobsForOccupation(
   occupationName: string | undefined,
   profile?: CareerProfile,
 ): Promise<{ total: number; highMatchCount: number }> {
   if (!occupationName) return { total: 0, highMatchCount: 0 };
+
+  const key = fitKey(occupationName, profile);
+  const hit = countCache.get(key);
+  if (hit && Date.now() - hit.at < COUNT_TTL_MS) return hit.value;
+
   const filter = { keyword: occupationName, activeOnly: true } as JobSearchFilter;
 
   // 총 건수는 행을 받아오지 않고 DB 가 센 값을 그대로 쓴다.
   if (!profile) {
     const { total } = await getJobRepository().search({ ...filter, page: 1, pageSize: 1 });
-    return { total, highMatchCount: 0 };
+    const value = { total, highMatchCount: 0 };
+    countCache.set(key, { at: Date.now(), value });
+    return value;
   }
 
   const { items, total } = await getJobRepository().search({
@@ -154,5 +191,7 @@ export async function countJobsForOccupation(
     sort: "recommended",
   });
   const highMatchCount = items.filter((job) => (evaluateJobFit(profile, job)?.score ?? 0) >= 70).length;
-  return { total, highMatchCount };
+  const value = { total, highMatchCount };
+  countCache.set(key, { at: Date.now(), value });
+  return value;
 }

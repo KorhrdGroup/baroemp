@@ -27,7 +27,11 @@ export default async function AssessmentResultPage({
   if (!found) notFound();
   const { result } = found;
 
-  await logAssessmentResultViewed(sessionId, result.userId, result.anonymousId);
+  /*
+    조회 기록은 화면을 그리는 데 필요한 값이 아니다. 기다리면 그만큼 화면이 늦게 뜬다.
+    쓰기를 걸어만 두고 넘어간다 - 실패해도 결과 화면은 보여야 한다.
+  */
+  void logAssessmentResultViewed(sessionId, result.userId, result.anonymousId).catch(() => {});
 
   const [occupations, contentRecs] = await Promise.all([
     getOccupationRepository().findAll(),
