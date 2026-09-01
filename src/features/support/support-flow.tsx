@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Clock, Coins, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -519,7 +520,15 @@ const INFO_ITEMS = [
 
 const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지역 지원제도", "지원 가능성 등급", "신청 방법과 서류"];
 
-function SupportIntro({ onStart, loading }: { onStart: () => void; loading: boolean }) {
+function SupportIntro({
+  onStart,
+  loading,
+  latestResultSessionId,
+}: {
+  onStart: () => void;
+  loading: boolean;
+  latestResultSessionId?: string;
+}) {
   return (
     <IntroHero
       icon={Coins}
@@ -535,21 +544,32 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
       ctaHeadline="2~3분이면 진단이 끝납니다"
       ctaDescription="지금 시작하면 받을 수 있는 지원제도를 바로 확인할 수 있어요."
       cta={
-        <Button
-          size="lg"
-          onClick={onStart}
-          disabled={loading}
-          className="h-14 w-full rounded-lg bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
-        >
-          {loading ? (
-            <Loader2 className="size-5 animate-spin" />
-          ) : (
-            <>
-              지원금 찾기
-              <ArrowRight className="size-5" />
-            </>
+        /* 이미 결과가 있으면 두 버튼을 나란히 세운다. 카드 밖 작은 글줄로는 눈에 띄지 않았다. */
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {latestResultSessionId && (
+            <Link
+              href={`/support/result/${latestResultSessionId}`}
+              className="flex h-14 items-center justify-center gap-1.5 rounded-lg bg-brand-blue-50 px-6 text-body-2 font-bold text-brand-blue-700 transition-colors hover:bg-brand-blue-100/60"
+            >
+              지난 결과 보기
+            </Link>
           )}
-        </Button>
+          <Button
+            size="lg"
+            onClick={onStart}
+            disabled={loading}
+            className="h-14 w-full rounded-lg bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
+          >
+            {loading ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <>
+                지원금 찾기
+                <ArrowRight className="size-5" />
+              </>
+            )}
+          </Button>
+        </div>
       }
       highlightTitle="이 진단으로 확인할 수 있는 것"
       highlights={RESULT_ITEMS}
@@ -575,9 +595,12 @@ const ANALYZING_STEPS = [
 export function SupportFlow({
   autoStart = false,
   isLoggedIn = true,
+  latestResultSessionId,
 }: {
   autoStart?: boolean;
   isLoggedIn?: boolean;
+  /** 이미 받은 진단이 있으면 그 결과 세션. 소개 화면에서 지난 결과로 가는 길을 보여준다. */
+  latestResultSessionId?: string;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");
@@ -679,7 +702,7 @@ export function SupportFlow({
     }
     return (
       <>
-        <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} />
+        <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} latestResultSessionId={latestResultSessionId} />
         <ResumeSessionDialog
           open={Boolean(resumable)}
           onOpenChange={(open) => {
