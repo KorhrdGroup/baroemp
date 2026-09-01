@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollMoreHint } from "@/components/common/scroll-more-hint";
+import { AnalyzingScreen } from "@/components/common/analyzing-screen";
 import type { AssessmentQuestion, AssessmentSection } from "@/types";
 import {
   completeAssessmentSessionAction,
@@ -47,6 +49,33 @@ interface AssessmentWizardProps {
   skippedCount?: number;
 }
 
+/**
+ * 이 개수부터 "아래에 더 있어요" 힌트를 붙인다.
+ *
+ * 문항 앞머리(진행률·질문·설명)를 빼면 세로 목록은 한 화면에 여섯 개까지 들어간다.
+ * 연령대(6개)는 다 보이고 자격증(7개)은 잘리므로 경계는 7이다.
+ * 화면 높이를 재서 판단하면 기기마다 결과가 갈려 고정값으로 둔다.
+ */
+const SCROLL_HINT_MIN_OPTIONS = 7;
+
+/**
+ * 답변 유형은 보지 않고 선택지 개수만 센다.
+ * 유형을 나열하면 QUALIFICATION_MULTI처럼 나중에 늘어난 유형이 조용히 빠진다.
+ * 척도·숫자·지역 등 목록이 아닌 유형은 옵션이 0개라 자연히 걸러진다.
+ */
+function needsScrollHint(question: AssessmentQuestion): boolean {
+  return (question.options?.length ?? 0) >= SCROLL_HINT_MIN_OPTIONS;
+}
+
+/** 결과 화면으로 넘어가기 전 분석 화면을 보여줄 최소 시간. */
+const ANALYZING_MS = 2500;
+const ANALYZING_STEPS = [
+  "답변을 정리하고 있어요",
+  "적합한 직업을 찾고 있어요",
+  "채용공고와 맞춰보고 있어요",
+  "결과를 준비하고 있어요",
+];
+
 export function AssessmentWizard({
   sessionId,
   sections,
@@ -67,6 +96,8 @@ export function AssessmentWizard({
   const question = questions[currentIndex];
   const value = answers[question.id] ?? createEmptyAnswerValue(question);
   const isLast = currentIndex === questions.length - 1;
+  // 결과 계산은 1초 안에 끝나 화면이 번쩍 지나간다. 무엇을 하는지 보여주는 최소 노출 시간을 둔다.
+  const [analyzing, setAnalyzing] = useState(false);
 
   // 대분류(섹션)를 주 단계로, 분류 안의 문항 순서를 보조 정보로 보여준다.
   const { sectionIndex, section, posInSection, sectionTotal } = useMemo(() => {
@@ -111,7 +142,12 @@ export function AssessmentWizard({
         ...toRawAnswerInput(value),
       });
       if (isLast) {
-        await completeAssessmentSessionAction(sessionId);
+        setAnalyzing(true);
+        // 계산과 최소 노출 시간을 함께 기다린다 (둘 중 늦은 쪽 기준).
+        await Promise.all([
+          completeAssessmentSessionAction(sessionId),
+          new Promise((resolve) => setTimeout(resolve, ANALYZING_MS)),
+        ]);
         router.push(`/assessment/result/${sessionId}`);
         return;
       }
@@ -120,6 +156,7 @@ export function AssessmentWizard({
       setFurthestIndex((f) => Math.max(f, next));
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
+      setAnalyzing(false);
       setError("답변을 저장하는 중 문제가 발생했어요. 다시 시도해주세요.");
     } finally {
       setSubmitting(false);
@@ -130,6 +167,14 @@ export function AssessmentWizard({
     setError(null);
     setCurrentIndex((i) => Math.max(i - 1, 0));
     window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  if (analyzing) {
+    return (
+      <div data-wizard="true">
+        <AnalyzingScreen steps={ANALYZING_STEPS} durationMs={ANALYZING_MS} />
+      </div>
+    );
   }
 
   return (
@@ -209,6 +254,9 @@ export function AssessmentWizard({
         </div>
 
         {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
+
+        {/* 선택지가 긴 문항에서만 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
+        {needsScrollHint(question) && <ScrollMoreHint key={question.id} />}
       </div>
 
       {/* 하단 고정 CTA */}

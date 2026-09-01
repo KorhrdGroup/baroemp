@@ -20,6 +20,7 @@
     "e2e:assessment": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-assessment-flow.ts",
     "e2e:job": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-job-flow.ts",
     "sync:jobs": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/sync-jobs.ts",
+    "sync:job-category-names": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/sync-job-category-names.ts",
     "map:occupation-codes": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/map-occupation-codes.ts",
     "e2e:support": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-support-flow.ts",
     "e2e:support:public": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-support-flow-public.ts",
@@ -27,22 +28,28 @@
     "e2e:career-gap": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/e2e-career-gap-flow.ts",
     "check:env-presence": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/check-env-presence.ts",
     "test:public-service-api": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/test-public-service-api.ts",
-    "sync:support": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/run-real-sync.ts"
+    "sync:support": "tsx --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/run-real-sync.ts",
+    "check:admin-export": "tsx --conditions react-server --env-file-if-exists=.env.local --env-file-if-exists=.env scripts/check-admin-export.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.122.0",
     "@supabase/ssr": "^0.12.4",
     "@supabase/supabase-js": "^2.112.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "exceljs": "^4.4.0",
     "fast-xml-parser": "^5.10.1",
     "lucide-react": "^1.31.0",
     "next": "16.3.0",
     "radix-ui": "^1.6.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "recharts": "^3.10.1",
+    "server-only": "^0.0.1",
     "shadcn": "^4.16.2",
     "tailwind-merge": "^3.6.0",
-    "tw-animate-css": "^1.4.0"
+    "tw-animate-css": "^1.4.0",
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

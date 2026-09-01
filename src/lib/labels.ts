@@ -4,6 +4,7 @@ import type { Lead } from "@/types";
 import { guessRegionFromSigungu } from "@/lib/regions/sigungu";
 
 export const AGE_GROUP_LABELS: Record<AgeGroup, string> = {
+  "10s": "10대",
   "20s": "20대",
   "30s": "30대",
   "40s": "40대",

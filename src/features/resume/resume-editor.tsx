@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
+import { AlertCircle, ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, CheckCircle2, ChevronDown, Eye, ListPlus, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,6 +49,7 @@ import {
   rewriteResumeSectionAiAction,
   saveResumeAction,
   trackResumeExportedAction,
+  uploadResumePhotoAction,
 } from "./resume-actions";
 import { calculateResumeCompleteness } from "@/lib/resume/completeness";
 import { ResumePreview } from "./resume-preview";
@@ -146,6 +147,8 @@ interface ResumeFormState {
   email: string;
   phone: string;
   address: string;
+  birthDate: string;
+  photoUrl: string;
   portfolioUrl: string;
   hasNoWorkExperience: boolean;
 }
@@ -346,6 +349,8 @@ export function ResumeEditor({
         email: initialDetail.resume.email ?? "",
         phone: initialDetail.resume.phone ?? "",
         address: initialDetail.resume.address ?? "",
+        birthDate: initialDetail.resume.birthDate ?? "",
+        photoUrl: initialDetail.resume.photoUrl ?? "",
         portfolioUrl: initialDetail.resume.portfolioUrl ?? "",
         hasNoWorkExperience: initialDetail.resume.hasNoWorkExperience ?? false,
       },
@@ -402,6 +407,11 @@ export function ResumeEditor({
   );
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
+  /** 보완할 부분은 처음에 3개만 보여준다. 40~60대 사용자에게 열 줄짜리 벽글은 안 읽힌다. */
+  const [showAllImprovements, setShowAllImprovements] = useState(false);
+  const reviewResultRef = useRef<HTMLDivElement>(null);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
   const [isReviewing, startReview] = useTransition();
   const marketComparisonRequestRef = useRef(0);
@@ -498,12 +508,25 @@ export function ResumeEditor({
           const payload = buildSavePayload();
           const saved = await saveResumeAction(payload);
           setDetail(saved);
-          setEducations(withKeys(saved.educations, "edu"));
-          setExperiences(withKeys(saved.experiences, "exp"));
-          setQualifications(withKeys(saved.qualifications, "qual"));
-          setTrainings(withKeys(saved.trainings, "train"));
-          setSkills(withKeys(saved.skills, "skill"));
-          setItems(withKeys(saved.items, "item"));
+          /*
+            _key 를 새로 발급하지 않고 보내기 전 배열의 키를 자리 순서대로 이어받는다.
+            키가 갈리면 "편집 중" 표시(editingEntries)와 AI 다듬기 패널(rewritePending)이
+            옛 키를 들고 있다가 저장 직후 전부 접혀버린다. 서버는 보낸 순서대로 돌려준다.
+          */
+          const rekey = <T,>(savedList: T[], prevList: { _key: string }[], prefix: string) =>
+            savedList.map((item, i) => ({ ...item, _key: prevList[i]?._key ?? nextKey(prefix) }));
+          const nextEducations = rekey(saved.educations, educations, "edu");
+          const nextExperiences = rekey(saved.experiences, experiences, "exp");
+          const nextQualifications = rekey(saved.qualifications, qualifications, "qual");
+          const nextTrainings = rekey(saved.trainings, trainings, "train");
+          const nextSkills = rekey(saved.skills, skills, "skill");
+          const nextItems = rekey(saved.items, items, "item");
+          setEducations(nextEducations);
+          setExperiences(nextExperiences);
+          setQualifications(nextQualifications);
+          setTrainings(nextTrainings);
+          setSkills(nextSkills);
+          setItems(nextItems);
           /*
             기준점은 화면 상태가 아니라 서버가 돌려준 값으로 잡는다. 이 시점에는
             위 setState 들이 아직 반영되기 전이라, 화면 상태로 찍으면 서버가 새로
@@ -515,12 +538,12 @@ export function ResumeEditor({
                 id: saved.resume.id,
                 form: { ...form, title: saved.resume.title },
                 sectionCodes: saved.resume.sectionCodes ?? sectionCodes,
-                educations: withKeys(saved.educations, "edu"),
-                experiences: withKeys(saved.experiences, "exp"),
-                qualifications: withKeys(saved.qualifications, "qual"),
-                trainings: withKeys(saved.trainings, "train"),
-                skills: withKeys(saved.skills, "skill"),
-                items: withKeys(saved.items, "item"),
+                educations: nextEducations,
+                experiences: nextExperiences,
+                qualifications: nextQualifications,
+                trainings: nextTrainings,
+                skills: nextSkills,
+                items: nextItems,
               }),
             ),
           );
@@ -555,6 +578,10 @@ export function ResumeEditor({
         await handleSave();
         const result = await reviewResumeAiAction(resume.id);
         setReviewResult(result);
+        setShowAllImprovements(false);
+        // 점검 버튼은 사이드바에 있고 결과는 페이지 상단에 뜬다. 결과가 뜬 줄로 데려가지
+        // 않으면 사용자는 결과가 나온 것 자체를 모른다.
+        requestAnimationFrame(() => reviewResultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
         setMarketComparison(null);
         // AI 첨삭과 독립 - 실패해도 첨삭 결과 표시에는 영향 없음 (설계 3절)
         const requestId = ++marketComparisonRequestRef.current;
@@ -598,6 +625,8 @@ export function ResumeEditor({
           resumeId: resume.id,
           sectionLabel: `${exp?.companyName ?? ""} ${field === "responsibilities" ? "담당업무" : "성과"}`,
           originalText: text,
+          // 직무 맥락을 알아야 통상 업무로 살을 붙일 수 있다.
+          roleContext: [exp?.companyName, exp?.position].filter(Boolean).join(" "),
         });
         setRewriteTarget({ key, field, text: result.rewrittenText });
       } catch {
@@ -606,6 +635,22 @@ export function ResumeEditor({
         setRewritePending(null);
       }
     });
+  }
+
+  async function handlePhotoChange(file: File | undefined) {
+    if (!file) return;
+    setUploadingPhoto(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const { url } = await uploadResumePhotoAction(resume.id, fd);
+      setForm((f) => ({ ...f, photoUrl: url }));
+      setSaveMessage("사진을 올렸어요. 저장을 누르면 이력서에 반영됩니다.");
+    } catch (err) {
+      setSaveMessage(err instanceof Error ? err.message : "사진 업로드 중 오류가 발생했습니다.");
+    } finally {
+      setUploadingPhoto(false);
+    }
   }
 
   function handlePrint() {
@@ -630,8 +675,62 @@ export function ResumeEditor({
                 <CardTitle className="text-body-1 font-semibold">기본정보</CardTitle>
               </CardHeader>
               <CardContent className="grid gap-3 sm:grid-cols-2">
+                {/* 증명사진. 두 칸을 가로질러 위에 둔다 - 인쇄물에서도 기본정보 옆에 나온다. */}
+                <div className="flex items-center gap-4 sm:col-span-2">
+                  {form.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={form.photoUrl} alt="증명사진" className="h-[110px] w-[85px] rounded object-cover ring-1 ring-slate-200" />
+                  ) : (
+                    <div className="flex h-[110px] w-[85px] items-center justify-center rounded bg-slate-100 text-label-2 text-slate-400 ring-1 ring-slate-200">
+                      사진
+                    </div>
+                  )}
+                  <div className="space-y-2">
+                    <input
+                      ref={photoInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      className="hidden"
+                      onChange={(e) => {
+                        void handlePhotoChange(e.target.files?.[0]);
+                        e.target.value = "";
+                      }}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingPhoto}
+                        onClick={() => photoInputRef.current?.click()}
+                      >
+                        {uploadingPhoto ? <Loader2 className="size-4 animate-spin" /> : null}
+                        {form.photoUrl ? "사진 바꾸기" : "사진 올리기"}
+                      </Button>
+                      {form.photoUrl && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-slate-500"
+                          onClick={() => setForm((f) => ({ ...f, photoUrl: "" }))}
+                        >
+                          사진 빼기
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-label-2 text-slate-400">JPG·PNG, 5MB 이하. 없어도 괜찮아요.</p>
+                  </div>
+                </div>
                 <Field label="이름" required>
                   <CompactInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
+                </Field>
+                <Field label="생년월일">
+                  <CompactInput
+                    type="date"
+                    value={form.birthDate}
+                    onChange={(e) => setForm((f) => ({ ...f, birthDate: e.target.value }))}
+                  />
                 </Field>
                 <Field label="이메일" required>
                   <CompactInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
@@ -1416,45 +1515,80 @@ export function ResumeEditor({
         </div>
 
         {reviewResult && (
-          <Card className="rounded-xl border-0 ring-1 ring-brand-blue-200 bg-brand-blue-50/40">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-body-2">
-                AI 점검 결과 <Badge className="bg-brand-blue-400">{reviewResult.score}점</Badge>
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-2 text-label-1">
-              {reviewResult.strengths.length > 0 && (
-                <div>
-                  <p className="font-semibold text-emerald-700">잘 작성된 부분</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.strengths.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
+          /*
+            40~60대가 읽는 화면이라 벽글 목록 대신 큰 글자 카드로 편다.
+            scroll-mt는 스크롤 이동 시 고정 헤더에 가리지 않게 하는 여유분.
+          */
+          <div ref={reviewResultRef} className="scroll-mt-24 rounded-2xl bg-brand-blue-50/50 p-5 ring-1 ring-brand-blue-200 sm:p-6">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-title-3 font-bold text-slate-900">AI 점검 결과</h2>
+              <p className="text-slate-500">
+                <span className="text-4xl font-bold text-brand-blue-600">{reviewResult.score}</span>
+                <span className="ml-1 text-body-2 font-medium">점 / 100점</span>
+              </p>
+            </div>
+
+            {reviewResult.strengths.length > 0 && (
+              <section className="mt-5">
+                <p className="flex items-center gap-1.5 text-body-2 font-bold text-emerald-700">
+                  <CheckCircle2 className="size-5" /> 잘하신 부분
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {reviewResult.strengths.map((s, i) => (
+                    <li key={i} className="rounded-xl bg-white px-4 py-3 text-body-2-reading break-keep text-slate-700">
+                      {s}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {reviewResult.improvements.length > 0 && (
+              <section className="mt-5">
+                <p className="flex items-center gap-1.5 text-body-2 font-bold text-orange-700">
+                  <AlertCircle className="size-5" /> 이렇게 고쳐보세요
+                </p>
+                <ul className="mt-2 space-y-2">
+                  {(showAllImprovements ? reviewResult.improvements : reviewResult.improvements.slice(0, 3)).map(
+                    (s, i) => (
+                      <li key={i} className="flex gap-3 rounded-xl bg-white px-4 py-3">
+                        <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-orange-100 text-label-1 font-bold text-orange-700">
+                          {i + 1}
+                        </span>
+                        <span className="text-body-2-reading break-keep text-slate-700">{s.comment}</span>
+                      </li>
+                    ),
+                  )}
+                </ul>
+                {reviewResult.improvements.length > 3 && !showAllImprovements && (
+                  <button
+                    type="button"
+                    onClick={() => setShowAllImprovements(true)}
+                    className="mt-2 flex w-full items-center justify-center gap-1 rounded-xl border border-orange-200 bg-white py-2.5 text-body-2 font-semibold text-orange-700 hover:bg-orange-50"
+                  >
+                    나머지 {reviewResult.improvements.length - 3}개 더 보기
+                    <ChevronDown className="size-4" />
+                  </button>
+                )}
+              </section>
+            )}
+
+            {reviewResult.missingInformation.length > 0 && (
+              <section className="mt-5">
+                <p className="flex items-center gap-1.5 text-body-2 font-bold text-slate-600">
+                  <ListPlus className="size-5" /> 추가하면 좋은 정보
+                </p>
+                {/* 문장이 아니라 채울 항목의 나열이라, 카드 대신 칩으로 가볍게 깐다. */}
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {reviewResult.missingInformation.map((s, i) => (
+                    <span key={i} className="rounded-full bg-white px-3 py-1.5 text-body-2 break-keep text-slate-600 ring-1 ring-slate-200">
+                      {s}
+                    </span>
+                  ))}
                 </div>
-              )}
-              {reviewResult.improvements.length > 0 && (
-                <div>
-                  <p className="font-semibold text-orange-700">보완할 부분</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.improvements.map((s, i) => (
-                      <li key={i}>{s.comment}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {reviewResult.missingInformation.length > 0 && (
-                <div>
-                  <p className="font-semibold text-orange-700">누락된 정보</p>
-                  <ul className="ml-4 list-disc text-slate-600">
-                    {reviewResult.missingInformation.map((s, i) => (
-                      <li key={i}>{s}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              </section>
+            )}
+          </div>
         )}
 
         {reviewResult && marketComparison && (

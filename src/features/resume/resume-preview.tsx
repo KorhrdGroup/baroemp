@@ -76,6 +76,12 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
               <div>
                 <p className="text-title-2 font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
                 <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-1 text-label-1 text-slate-600">
+                  {resume.birthDate && (
+                    <div>
+                      <dt className="inline text-slate-400">생년월일 </dt>
+                      <dd className="inline">{resume.birthDate.slice(0, 10).replaceAll("-", ". ")}</dd>
+                    </div>
+                  )}
                   <div>
                     <dt className="inline text-slate-400">이메일 </dt>
                     <dd className="inline">{resume.email || "-"}</dd>
@@ -246,7 +252,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
   }
 
   return (
-    <div id="resume-print-area" className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-0">
+    <div id="resume-print-area" className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-[12mm]">
       {sectionOrder.map((section) => renderSection(section))}
       {resume.portfolioUrl && (
         <p className="mt-4 text-label-1 text-slate-400">포트폴리오: {resume.portfolioUrl}</p>

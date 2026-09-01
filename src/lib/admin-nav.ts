@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { LayoutDashboard, Coins, ClipboardList, Briefcase, FileText } from "lucide-react";
+import { LayoutDashboard, BarChart3, Coins, ClipboardList, Briefcase, FileText, Users, Target, MessageSquare } from "lucide-react";
 
 export interface AdminNavItem {
   label: string;
@@ -13,15 +13,24 @@ export interface AdminNavItem {
  */
 export const adminNavItems: AdminNavItem[] = [
   { label: "대시보드", href: "/admin", icon: LayoutDashboard },
+  { label: "회원 관리", href: "/admin/users", icon: Users },
   { label: "내게 맞는 직업찾기", href: "/admin/assessments", icon: ClipboardList },
   { label: "전국 채용공고", href: "/admin/jobs", icon: Briefcase },
   { label: "지원금찾기", href: "/admin/support", icon: Coins },
   { label: "이력서·자소서 첨삭", href: "/admin/resumes", icon: FileText },
+  { label: "취업 컨설팅", href: "/admin/consultations", icon: MessageSquare },
+  // 각 서비스 관리 메뉴를 다 지난 뒤에 둔다. 앞의 메뉴들을 가로질러 보는 화면이라 순서상 마지막이다.
+  { label: "영업 리드", href: "/admin/sales-leads", icon: Target },
+  { label: "통계", href: "/admin/stats", icon: BarChart3 },
 ];
 
 export const adminTopNavItems = [
+  { label: "회원", href: "/admin/users" },
   { label: "직업찾기", href: "/admin/assessments" },
   { label: "채용공고", href: "/admin/jobs" },
   { label: "지원금", href: "/admin/support" },
   { label: "이력서", href: "/admin/resumes" },
+  { label: "컨설팅", href: "/admin/consultations" },
+  { label: "영업 리드", href: "/admin/sales-leads" },
+  { label: "통계", href: "/admin/stats" },
 ];

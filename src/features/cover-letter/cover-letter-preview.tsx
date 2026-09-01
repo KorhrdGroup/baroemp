@@ -24,7 +24,7 @@ export function CoverLetterPreview({
   const ordered = [...sections].sort((a, b) => a.orderIndex - b.orderIndex);
 
   return (
-    <div className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-0">
+    <div className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-[12mm]">
       {/*
         머리글에는 선을 두지 않는다. 아래 문항마다 밑줄이 있어 선이 겹치면
         문서가 표처럼 보인다. 제목과 이름은 크기 차이로 이미 구분된다.

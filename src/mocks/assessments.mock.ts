@@ -21,6 +21,26 @@ function q(
  */
 const questions: AssessmentQuestion[] = [
   // A. 기본 취업조건 =====================================================
+  // 연령대는 직종 매칭(중장년 우대 직종)과 관리자 통계 모두에서 쓰이므로 가장 먼저 묻는다.
+  // orderIndex 0을 쓰면 뒤 문항 번호를 전부 바꾸지 않고도 맨 앞에 놓을 수 있다.
+  // 지원금찾기 등에서 이미 연령대가 채워진 회원에게는 question-skipper가 이 문항을 건너뛴다.
+  q({
+    id: "aq-age",
+    section: "basic",
+    questionText: "연령대를 선택해주세요",
+    answerType: "SINGLE",
+    orderIndex: 0,
+    required: true,
+    profileField: "ageGroup",
+    options: [
+      { id: "aq-age-o1", optionText: "10대", value: "10s", profileValue: "10s", sortOrder: 1 },
+      { id: "aq-age-o2", optionText: "20대", value: "20s", profileValue: "20s", sortOrder: 2 },
+      { id: "aq-age-o3", optionText: "30대", value: "30s", profileValue: "30s", sortOrder: 3 },
+      { id: "aq-age-o4", optionText: "40대", value: "40s", profileValue: "40s", sortOrder: 4 },
+      { id: "aq-age-o5", optionText: "50대", value: "50s", profileValue: "50s", sortOrder: 5 },
+      { id: "aq-age-o6", optionText: "60대", value: "60s", profileValue: "60s", sortOrder: 6 },
+    ],
+  }),
   q({
     id: "aq-1",
     section: "basic",

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { AdminPageShell } from "@/features/admin/admin-page-shell";
+import { AdminFilterBar } from "@/features/admin/admin-filter-bar";
 import { JobSyncButton } from "@/features/admin/job-sync-button";
 import { JobActiveToggleButton } from "@/features/admin/job-active-toggle-button";
 import { labelRegion } from "@/lib/labels";
@@ -131,6 +132,11 @@ export default async function AdminJobsPage({
               현재 Provider · <span className="font-semibold text-slate-800">{syncOverview.providerName}</span>
               {syncOverview.isMock && <span className="ml-1.5 text-rose-600">(Mock Provider - WORK24_API_KEY 미설정)</span>}
             </p>
+            {/* 아래 "최근 동기화"는 그 회차의 실적일 뿐이라, 실제 보유 건수를 먼저 보여준다. */}
+            <p className="mt-1">
+              보유 공고 <span className="font-semibold text-slate-800">{syncOverview.totalJobCount.toLocaleString()}건</span>
+              <span className="text-slate-400"> · 노출중 {syncOverview.activeJobCount.toLocaleString()}건</span>
+            </p>
             {syncOverview.latestRun ? (
               <p className="mt-1 text-slate-500">
                 최근 동기화 · {syncOverview.latestRun.completedAt?.slice(0, 16).replace("T", " ") ?? "진행중"} ·{" "}
@@ -152,46 +158,46 @@ export default async function AdminJobsPage({
           <SegmentTopCard title="취업상태별 많이 본 직종" groups={segment.topJobCategoriesByEmploymentStatus} />
         </div>
 
-        <div className="flex flex-wrap gap-2 text-label-2">
-          <span className="text-slate-400">Provider:</span>
-          <Link href={buildHref({ provider: "all" })} className={!sp.provider ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
-            전체
-          </Link>
-          {providers.map((p) => (
-            <Link
-              key={p}
-              href={buildHref({ provider: p })}
-              className={sp.provider === p ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {p}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">지역:</span>
-          <Link href={buildHref({ region: "all" })} className={!sp.region ? "font-semibold text-brand-blue-600" : "text-slate-500"}>
-            전체
-          </Link>
-          {regions.map((r) => (
-            <Link
-              key={r}
-              href={buildHref({ region: r })}
-              className={sp.region === r ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {labelRegion(r)}
-            </Link>
-          ))}
-          <span className="mx-2 text-slate-300">|</span>
-          <span className="text-slate-400">상태:</span>
-          {(["all", "active", "inactive"] as const).map((s) => (
-            <Link
-              key={s}
-              href={buildHref({ status: s })}
-              className={(sp.status ?? "all") === s ? "font-semibold text-brand-blue-600" : "text-slate-500"}
-            >
-              {s === "all" ? "전체" : s === "active" ? "노출중" : "비활성"}
-            </Link>
-          ))}
-        </div>
+        <AdminFilterBar
+          groups={[
+            {
+              label: "Provider",
+              options: [
+                { label: "전체", href: buildHref({ provider: "all" }), selected: !sp.provider },
+                ...providers.map((p) => ({
+                  label: p,
+                  href: buildHref({ provider: p }),
+                  selected: sp.provider === p,
+                })),
+              ],
+            },
+            {
+              label: "지역",
+              options: [
+                { label: "전체", href: buildHref({ region: "all" }), selected: !sp.region },
+                ...regions.map((r) => ({
+                  label: labelRegion(r),
+                  href: buildHref({ region: r }),
+                  selected: sp.region === r,
+                })),
+              ],
+            },
+            {
+              label: "상태",
+              options: (["all", "active", "inactive"] as const).map((st) => ({
+                label: st === "all" ? "전체" : st === "active" ? "노출중" : "비활성",
+                href: buildHref({ status: st }),
+                selected: (sp.status ?? "all") === st,
+              })),
+            },
+          ]}
+        />
+
+        {/* 목록은 최신 500건만 불러온다(6만+건 전체 조회는 타임아웃). 전체 건수는 상단에 표시한다. */}
+        <p className="text-label-2 text-slate-400">
+          최신 {jobs.length.toLocaleString()}건 표시 (필터 적용 {filtered.length.toLocaleString()}건) · 전체{" "}
+          {syncOverview.totalJobCount.toLocaleString()}건
+        </p>
 
         <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
           <div className="overflow-x-auto">

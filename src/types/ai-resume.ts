@@ -66,11 +66,15 @@ export interface AIResumeReviewInput {
 export interface AISectionRewriteInput {
   sectionLabel: string;
   originalText: string;
+  /** 회사명·직책 등 직무 맥락. 통상 업무 확장의 근거로 쓴다. */
+  roleContext?: string;
   /** 선택한 AI 에이전트(ResumeTemplate.code). */
   agentStyle?: string;
 }
 
 export interface AICareerSummaryInput {
+  /** 사용자가 한 줄 소개 칸에 직접 써 둔 초안. 있으면 이 사실을 우선 재료로 쓴다. */
+  draftSummary?: string;
   experiences: { companyName: string; jobTitle?: string; responsibilities?: string }[];
   qualifications: string[];
   skills: string[];

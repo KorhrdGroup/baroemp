@@ -51,12 +51,27 @@ export interface JobSyncOverview {
   isMock: boolean;
   latestRun: JobSyncRun | null;
   recentRuns: JobSyncRun[];
+  /** DB에 실제로 보유한 공고 수. 최근 동기화 실적(신규/업데이트)과 혼동되지 않도록 함께 보여준다. */
+  totalJobCount: number;
+  activeJobCount: number;
 }
 
 /** /admin/jobs 상단 Provider Sync Analytics 영역용. */
 export async function getJobSyncOverview(): Promise<JobSyncOverview> {
   const providerName = getJobProvider().getProviderName();
   const isMock = isUsingMockJobProvider();
-  const recentRuns = await getJobSyncRunRepository().findAll(10);
-  return { providerName, isMock, latestRun: recentRuns[0] ?? null, recentRuns };
+  // search는 count: exact 로 전체 건수를 돌려주므로 목록을 받아오지 않고 총계만 싸게 얻는다.
+  const [recentRuns, totalPage, activePage] = await Promise.all([
+    getJobSyncRunRepository().findAll(10),
+    getJobRepository().search({ activeOnly: false, page: 1, pageSize: 1 }),
+    getJobRepository().search({ activeOnly: true, page: 1, pageSize: 1 }),
+  ]);
+  return {
+    providerName,
+    isMock,
+    latestRun: recentRuns[0] ?? null,
+    recentRuns,
+    totalJobCount: totalPage.total,
+    activeJobCount: activePage.total,
+  };
 }

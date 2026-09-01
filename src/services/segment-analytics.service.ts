@@ -1,6 +1,7 @@
 import { activityEventLogger } from "@/lib/activity/event-logger";
 import { getCareerProfileRepository, getOccupationRepository } from "@/lib/repositories";
 import { labelAgeGroup, labelEmploymentStatus } from "@/lib/labels";
+import { getJobCategoryNameMap, labelJobCategory } from "./job-category-name.service";
 import type { AgeGroup, EmploymentStatus } from "@/types";
 
 function topN(items: string[], n: number): { key: string; count: number }[] {
@@ -64,6 +65,8 @@ export async function getSegmentAnalyticsSnapshot(): Promise<SegmentAnalyticsSna
     statusByUser.set(cp.userId, cp.employmentStatus);
   }
   const occupationNameById = new Map(occupations.map((o) => [o.id, o.name]));
+  // 직종코드를 그대로 보여주면 624102 처럼 읽을 수 없어, 이름 표를 미리 받아 라벨로 바꾼다.
+  const jobCategoryNames = await getJobCategoryNameMap();
 
   const ANON = "비로그인";
   const UNKNOWN = "미입력";
@@ -130,10 +133,10 @@ export async function getSegmentAnalyticsSnapshot(): Promise<SegmentAnalyticsSna
     ageGroupActivity: buildActivityRows(ageSegment),
     employmentStatusActivity: buildActivityRows(statusSegment),
     topJobCategoriesByAgeGroup: buildSegmentTop(jobViewEvents, ageSegment, (e) =>
-      typeof e.metadata?.jobCategory === "string" ? e.metadata.jobCategory : "",
+      typeof e.metadata?.jobCategory === "string" ? labelJobCategory(jobCategoryNames, e.metadata.jobCategory) : "",
     ),
     topJobCategoriesByEmploymentStatus: buildSegmentTop(jobViewEvents, statusSegment, (e) =>
-      typeof e.metadata?.jobCategory === "string" ? e.metadata.jobCategory : "",
+      typeof e.metadata?.jobCategory === "string" ? labelJobCategory(jobCategoryNames, e.metadata.jobCategory) : "",
     ),
     topSupportProgramsByAgeGroup: buildSegmentTop(supportViewEvents, ageSegment, (e) =>
       typeof e.metadata?.title === "string" ? e.metadata.title : "",

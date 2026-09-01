@@ -38,6 +38,32 @@ export interface StartSessionParams {
   assessmentId?: string;
 }
 
+/**
+ * 하다 만 검사 세션 중 이어서 진행할 수 있는 가장 최근 1건.
+ *
+ * 시작 버튼은 항상 새 세션을 만들기 때문에, 이 함수가 없으면 중간에 나간 사람은
+ * 매번 1번 문항부터 다시 시작하고 이전 답변은 그대로 버려진다.
+ */
+export async function findResumableSession(params: {
+  userId?: string;
+  anonymousId?: string;
+}): Promise<AssessmentSession | null> {
+  if (!params.userId && !params.anonymousId) return null;
+
+  const repo = getAssessmentSessionRepository();
+  const sessions = await repo.findAll(
+    params.userId ? { userId: params.userId } : { anonymousId: params.anonymousId },
+  );
+
+  // 답을 하나도 안 한 'started'까지 이어하기로 안내하면 "이어서 하기"가 무의미하므로
+  // 실제로 진행한(in_progress) 세션만 대상으로 한다.
+  return (
+    sessions
+      .filter((s) => s.status === "in_progress")
+      .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))[0] ?? null
+  );
+}
+
 export async function startAssessmentSession(
   params: StartSessionParams,
 ): Promise<{ session: AssessmentSession; assessment: Assessment }> {

@@ -40,6 +40,7 @@ function createMockResumeRepository(): ResumeRepository {
         email: input.email,
         phone: input.phone,
         address: input.address,
+        birthDate: input.birthDate,
         photoUrl: input.photoUrl,
         portfolioUrl: input.portfolioUrl,
         createdAt: now,

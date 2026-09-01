@@ -193,7 +193,9 @@ export function CoverLetterEditor({
 
   async function handleGenerateDraft(section: EditableSection) {
     const experienceIds = experienceIdsFor(section);
-    if (experienceIds.length === 0) {
+    // 경험뱅크에 담긴 게 있는데 이 문항에서 전부 뺀 경우에만 막는다.
+    // 애초에 비어 있으면(대부분의 사용자) 서버가 이력서 경력을 재료로 대신 쓴다.
+    if (experiencePool.length > 0 && experienceIds.length === 0) {
       setSuggestions((prev) => ({
         ...prev,
         [section._key]: { text: "", prompts: ["초안을 쓰려면 아래에서 이 문항에 쓸 경험을 하나 이상 골라주세요."] },
@@ -266,7 +268,11 @@ export function CoverLetterEditor({
     } as CoverLetterDetail;
   }
 
-  /** 팝업 오버레이가 인쇄물에 끼지 않도록 닫힘 애니메이션이 끝난 뒤 인쇄한다. */
+  /**
+   * 팝업 오버레이가 인쇄물에 끼지 않도록 닫힘 애니메이션이 끝난 뒤 인쇄한다.
+   * 인쇄되는 문서는 팝업 속 미리보기가 아니라 아래에 늘 숨겨둔 인쇄 전용 사본이다
+   * (이력서와 같은 방식) - 팝업을 닫아도 인쇄물이 비지 않는 이유.
+   */
   function handlePopupPrint() {
     setPreviewOpen(false);
     setTimeout(() => window.print(), 200);
@@ -516,7 +522,7 @@ export function CoverLetterEditor({
                   <p className="mt-0.5 text-label-2 text-slate-500">
                     {experiencePool.length > 0
                       ? "고른 경험을 재료로 AI가 초안을 씁니다. 이 문항과 안 맞는 것은 빼주세요."
-                      : "정리해둔 경험이 없어 AI가 쓸 재료가 없어요."}
+                      : "따로 정리한 경험이 없으면 이력서에 쓰신 경력을 재료로 초안을 만들어드려요."}
                   </p>
                 </div>
                 <Link
@@ -614,6 +620,11 @@ export function CoverLetterEditor({
             </Button>
           </div>
         </div>
+      </div>
+
+      {/* 인쇄 전용 사본. 평소엔 숨겨두고 인쇄할 때만 이것이 출력된다 (이력서와 동일). */}
+      <div className="hidden print:block">
+        <CoverLetterPreview detail={currentPreviewDetail()} applicantName={applicantName} />
       </div>
 
       {/* 이력서와 같은 방식. 입력 폭을 좁히지 않도록 팝업으로 띄우고 인쇄로 PDF 저장한다. */}

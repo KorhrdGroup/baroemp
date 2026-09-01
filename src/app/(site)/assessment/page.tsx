@@ -35,6 +35,7 @@ export default async function AssessmentPage({
     ? (await getAssessmentResultRepository().findAll({ userId: user.id }))[0]
     : undefined;
 
+  // 이어하기 여부는 시작 버튼을 누르는 순간 팝업으로 묻는다 (StartAssessmentButton).
   // 히어로가 화면 폭을 꽉 채우므로 페이지에서 폭을 제한하지 않는다.
   return <AssessmentIntro isLoggedIn={Boolean(user)} latestResultSessionId={latestResult?.sessionId} />;
 }
