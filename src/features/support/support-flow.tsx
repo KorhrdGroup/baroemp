@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowLeft, ArrowRight, Check, Clock, Coins, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
@@ -505,7 +506,15 @@ const INFO_ITEMS = [
 
 const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지역 지원제도", "지원 가능성 등급", "신청 방법과 서류"];
 
-function SupportIntro({ onStart, loading }: { onStart: () => void; loading: boolean }) {
+function SupportIntro({
+  onStart,
+  loading,
+  latestResultSessionId,
+}: {
+  onStart: () => void;
+  loading: boolean;
+  latestResultSessionId?: string;
+}) {
   return (
     <IntroHero
       icon={Coins}
@@ -537,6 +546,17 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
           )}
         </Button>
       }
+      resultHint={
+        latestResultSessionId && (
+          <Link
+            href={`/support/result/${latestResultSessionId}`}
+            className="inline-flex items-center gap-1 text-label-1 font-medium text-slate-500 hover:text-brand-blue-600"
+          >
+            이미 진단을 받으셨어요. 지난 결과 보기
+            <ArrowRight className="size-3.5" />
+          </Link>
+        )
+      }
       highlightTitle="이 진단으로 확인할 수 있는 것"
       highlights={RESULT_ITEMS}
       note={
@@ -552,9 +572,12 @@ function SupportIntro({ onStart, loading }: { onStart: () => void; loading: bool
 export function SupportFlow({
   autoStart = false,
   isLoggedIn = true,
+  latestResultSessionId,
 }: {
   autoStart?: boolean;
   isLoggedIn?: boolean;
+  /** 이미 받은 진단이 있으면 그 결과 세션. 소개 화면에서 지난 결과로 가는 길을 보여준다. */
+  latestResultSessionId?: string;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");
@@ -607,7 +630,7 @@ export function SupportFlow({
         </div>
       );
     }
-    return <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} />;
+    return <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} latestResultSessionId={latestResultSessionId} />;
   }
 
   const step = STEPS[stepIndex];
