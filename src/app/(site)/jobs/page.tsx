@@ -22,7 +22,9 @@ export const metadata: Metadata = {
   title: "일자리 찾기 | 한평생 바로취업",
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
+/** "자격 따면 열리는" 섹션을 전체 공고 몇 개 뒤에 끼울지. */
+const INTERLEAVE_AFTER = 6;
 
 interface JobsPageSearchParams {
   keyword?: string;
@@ -143,34 +145,7 @@ export default async function JobsPage({
           </p>
         }
       >
-      {/*
-        섹션마다 다른 판을 쓴다. 전부 같은 큰 카드 그리드면 어디까지가 한 묶음인지
-        눈에 잡히지 않아서 - 맞춤 공고는 촘촘한 행, 준비 트랙은 노란 띠 가로 줄,
-        큐레이션은 파란 띠, 전체 공고는 표준 카드 그리드로 리듬을 나눈다.
-      */}
       {/* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */}
-      {recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
-        <div className="mt-8">
-          <div className="flex items-center gap-2">
-            <KeyRound className="size-5 text-amber-600" />
-            <h2 className="text-body-1 font-bold text-slate-900">
-              자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
-            </h2>
-          </div>
-          <p className="mt-1 text-label-1 text-slate-500">
-            진단에서 성향이 잘 맞았던 직업이에요.
-            {recommendation.preparation.missingQualifications?.length
-              ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
-              : ""}
-          </p>
-          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {recommendation.preparation.jobs.map((job) => (
-              <JobRowCompact key={`prep-${job.id}`} job={job} readiness={readinessMap.get(job.id)} />
-            ))}
-          </div>
-        </div>
-      )}
-
       <div className="mt-8">
         <JobCurationSection
           initialNew={initialCuration}
@@ -194,7 +169,7 @@ export default async function JobsPage({
         ) : (
           <>
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {result.items.map((job) => (
+              {result.items.slice(0, INTERLEAVE_AFTER).map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
@@ -205,6 +180,48 @@ export default async function JobsPage({
                 />
               ))}
             </div>
+
+            {/*
+              진단 준비 트랙("자격 따면 열리는") 섹션은 목록 사이에 끼운다.
+              맨 위에 두면 검색 결과가 밀리고, 맨 아래면 아무도 못 본다.
+              페이지를 넘길 때마다 또 나오면 광고처럼 읽혀 첫 페이지에만 둔다.
+            */}
+            {page === 1 && recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
+              <div className="mt-6 rounded-2xl bg-amber-50/70 p-5 sm:p-6">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="size-5 text-amber-600" />
+                  <h2 className="text-body-1 font-bold text-slate-900">
+                    자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
+                  </h2>
+                </div>
+                <p className="mt-1 text-label-1 text-slate-600">
+                  진단에서 성향이 잘 맞았던 직업이에요.
+                  {recommendation.preparation.missingQualifications?.length
+                    ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
+                    : ""}
+                </p>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {recommendation.preparation.jobs.map((job) => (
+                    <JobRowCompact key={`prep-${job.id}`} job={job} readiness={readinessMap.get(job.id)} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {result.items.length > INTERLEAVE_AFTER && (
+              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {result.items.slice(INTERLEAVE_AFTER).map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    matchReasonLabel={job.match?.reasons[0]?.label}
+                    isAuthenticated={isAuthenticated}
+                    isBookmarked={bookmarkedSet.has(job.id)}
+                    readiness={readinessMap.get(job.id)}
+                  />
+                ))}
+              </div>
+            )}
 
             <Pagination page={page} totalPages={totalPages} buildHref={buildPageHref} className="mt-8" />
           </>

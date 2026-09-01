@@ -257,29 +257,45 @@ function pickUnlockRequirement(
 }
 
 async function getUnlockableTab(userId: string, ctx: PersonalContext) {
-  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
-
-  const top = ctx.scored.slice(0, READY_CHECK_LIMIT);
-  const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
-
   /*
-    1차는 미충족이 확인된 자격만 본다.
-    비면 아직 모르는 자격(UNKNOWN)까지 넓힌다. 자격을 한 건도 등록하지 않은 회원은
-    모든 자격이 UNKNOWN 이라 1차에서 늘 빈 화면이 나왔는데, 그런 회원일수록
-    "이거 하나 따면 이만큼 열려요"를 봐야 할 사람이다.
-    후보군 자체가 희망 직종·지역에서 나오므로 관심 분야를 벗어나지 않는다.
+    맞춤 추천 탭과 같은 구성: 진단 준비 트랙(성향은 맞는데 자격이 필요한 직업)의 공고를
+    앞에 두고, 요건 사전 기반으로 찾은 "하나만 채우면 열리는" 공고를 뒤에 잇는다.
+    상단 전용 섹션과 일부 겹칠 수 있지만, 탭만 보는 사람도 같은 추천을 받아야 한다.
   */
-  const best =
-    pickUnlockRequirement(top, comparisons, (c) => c.userStatus === "NOT_SATISFIED") ??
-    pickUnlockRequirement(
-      top,
-      comparisons,
-      (c) => c.userStatus === "NOT_SATISFIED" || c.userStatus === "UNKNOWN",
-    );
+  const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT).catch(() => null);
+  const preparation = assessment?.preparation;
+  const assessmentItems: JobCurationItem[] = (preparation?.jobs ?? []).map((job) => ({
+    job,
+    unlockRequirementName: preparation?.missingQualifications?.[0],
+  }));
 
-  /* 진단 준비 트랙("자격 따면 열리는") 공고는 일자리 화면 상단의 전용 섹션이 담당한다 - jobs/page.tsx. */
-  if (!best) return { state: "EMPTY" as const, items: [] };
-  return { state: "READY" as const, items: best.items.slice(0, TAB_LIMIT) };
+  let requirementItems: JobCurationItem[] = [];
+  if (ctx) {
+    const top = ctx.scored.slice(0, READY_CHECK_LIMIT);
+    const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
+
+    /*
+      1차는 미충족이 확인된 자격만 본다.
+      비면 아직 모르는 자격(UNKNOWN)까지 넓힌다. 자격을 한 건도 등록하지 않은 회원은
+      모든 자격이 UNKNOWN 이라 1차에서 늘 빈 화면이 나왔는데, 그런 회원일수록
+      "이거 하나 따면 이만큼 열려요"를 봐야 할 사람이다.
+      후보군 자체가 희망 직종·지역에서 나오므로 관심 분야를 벗어나지 않는다.
+    */
+    const best =
+      pickUnlockRequirement(top, comparisons, (c) => c.userStatus === "NOT_SATISFIED") ??
+      pickUnlockRequirement(
+        top,
+        comparisons,
+        (c) => c.userStatus === "NOT_SATISFIED" || c.userStatus === "UNKNOWN",
+      );
+    requirementItems = best?.items ?? [];
+  }
+
+  const seen = new Set(assessmentItems.map((i) => i.job.id));
+  const items = [...assessmentItems, ...requirementItems.filter((i) => !seen.has(i.job.id))].slice(0, TAB_LIMIT);
+
+  if (items.length > 0) return { state: "READY" as const, items };
+  return ctx ? { state: "EMPTY" as const, items: [] } : { state: "NEEDS_PROFILE" as const, items: [] };
 }
 
 function scoreCandidates(profile: CareerProfile, jobs: Job[]): JobCurationItem[] {
