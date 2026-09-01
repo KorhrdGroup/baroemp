@@ -121,6 +121,7 @@ export async function rewriteResumeSectionAiAction(input: {
   resumeId: string;
   sectionLabel: string;
   originalText: string;
+  roleContext?: string;
 }): Promise<AISectionRewriteResult> {
   await requireOwnResume(input.resumeId);
   return rewriteResumeSectionWithAI(input);

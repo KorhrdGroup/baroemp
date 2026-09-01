@@ -56,6 +56,7 @@ export async function rewriteResumeSectionWithAI(params: {
   resumeId: string;
   sectionLabel: string;
   originalText: string;
+  roleContext?: string;
 }): Promise<AISectionRewriteResult> {
   const detail = await getResumeDetail(params.resumeId);
   if (!detail) throw new Error("이력서를 찾을 수 없습니다.");
@@ -63,6 +64,7 @@ export async function rewriteResumeSectionWithAI(params: {
   const result = await getAIResumeProvider().rewriteResumeSection({
     sectionLabel: params.sectionLabel,
     originalText: params.originalText,
+    roleContext: params.roleContext,
     agentStyle: detail.template?.code,
   });
 

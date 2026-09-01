@@ -289,14 +289,25 @@ export function createClaudeAIResumeProvider(): AIResumeProvider {
       const focus = input.agentStyle ? AGENT_FOCUS[input.agentStyle] : undefined;
       const parsed = await ask(
         RewriteSchema,
-        `${CORE_RULES}\n\n이력서의 "${input.sectionLabel}" 항목 문장을 다듬습니다.${focus ? `\n${focus}` : ""}\n원문에 있는 사실만 사용해 더 읽기 좋은 문장으로 고치세요. 분량은 원문과 비슷하게 유지합니다.`,
-        dataBlock("original_text", original),
+        `${CORE_RULES}\n\n이력서의 "${input.sectionLabel}" 항목 문장을 다듬고 확장합니다.${focus ? `\n${focus}` : ""}
+
+이 요청에 한해 다음 확장이 허용됩니다 (사실 왜곡 금지 원칙의 예외가 아니라 적용 방식입니다):
+- 사용자는 40~60대 구직자로, 한 줄만 쓰고 문장으로 풀어내기 어려워하는 경우가 많습니다. 원문이 짧아도 그 직무라면 통상적으로 수반되는 업무 서술을 보태 2~4문장의 담당업무 문단으로 확장하세요. (예: 요양보호사 → 일상생활 지원, 식사·위생 보조, 정서 지원, 안전 관리 / 사무직 → 문서 작성, 자료 정리, 유선 응대)
+- 단, 검증 가능한 구체 사실은 여전히 창작 금지입니다: 숫자(인원·기간·매출·실적), 기관·회사명, 직책, 자격증, 특정 프로젝트나 수상은 원문에 없으면 절대 추가하지 마세요.
+- "놀았다", "도와줬다" 같은 일상어는 직무 용어로 바꾸세요. (예: 어르신들과 어울려 놀았다 → 어르신들의 정서 지원과 여가 활동을 함께했다)
+- 통상 업무를 보탰다면 factsPreserved를 false로 하고, note에 어떤 부분을 보탰는지 밝히면서 "실제로 하지 않은 업무가 있다면 지워달라"고 안내하세요.`,
+        [
+          input.roleContext ? dataBlock("role", input.roleContext) : "",
+          dataBlock("original_text", original),
+        ]
+          .filter(Boolean)
+          .join("\n\n"),
       );
       return {
         originalText: original,
         rewrittenText: parsed.rewrittenText,
         factsPreserved: parsed.factsPreserved,
-        note: parsed.note ?? "AI는 입력하신 내용만 문장을 다듬었습니다. 사실과 다르면 자유롭게 수정해주세요.",
+        note: parsed.note ?? "AI가 직무상 일반적인 업무 표현을 보탰을 수 있습니다. 실제와 다른 부분은 지워주세요.",
       };
     },
 
@@ -326,7 +337,7 @@ export function createClaudeAIResumeProvider(): AIResumeProvider {
       }
       const parsed = await ask(
         DraftSchema,
-        `${CORE_RULES}\n\n자기소개서 문항의 답변 초안을 작성합니다.\n- 제공된 경험(상황/역할/행동/결과)만 사용하고, 경험에 없는 성과나 수치를 지어내지 마세요.\n- 문항 의도에 맞게 경험을 이야기 흐름으로 엮으세요.${input.characterLimit ? `\n- ${input.characterLimit}자 이내로 작성하세요.` : ""}`,
+        `${CORE_RULES}\n\n자기소개서 문항의 답변 초안을 작성합니다.\n- 제공된 경험(상황/역할/행동/결과)을 뼈대로 쓰되, 경험이 한두 줄로 짧으면 그 직무에서 통상적으로 수반되는 서술을 보태 자연스러운 문단으로 확장하세요. 40~60대 사용자는 한 줄만 쓰는 경우가 많습니다.\n- 단, 검증 가능한 구체 사실(숫자·기관명·직책·자격증·특정 성과)은 경험에 없으면 지어내지 마세요.\n- 문항 의도에 맞게 경험을 이야기 흐름으로 엮으세요.${input.characterLimit ? `\n- ${input.characterLimit}자 이내로 작성하세요.` : ""}`,
         [
           dataBlock("question", { question: input.question, type: input.questionType }),
           dataBlock("experiences", input.candidateExperiences),
