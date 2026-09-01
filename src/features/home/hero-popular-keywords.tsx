@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 /**
  * 히어로 검색창 아래 인기 검색어 줄.
  * 바로 위 검색창과 같은 곳(/jobs 키워드 검색)으로 보내야 "검색어"로 읽힌다.
- * 실제 등록 직종(mockJobRoles) 기준의 말만 걸어 첫 클릭이 빈 결과로 끝나지 않게 한다.
+ * 공고가 실제로 넉넉한 말만 건다. 병원동행은 직종코드가 없어 제목 걸리는 게 넷뿐이라 뺐다.
  */
-const KEYWORDS = ["요양보호사", "사회복지사", "사무·행정", "병원동행"];
+const KEYWORDS = ["요양보호사", "사회복지사", "사무·행정", "조리"];
 
 /**
  * 화면이 넓어지는 대로 하나씩 더 보여준다. 줄이 접히면 하나가 아랫줄에 홀로 남아
@@ -27,7 +27,7 @@ export function HeroPopularKeywords() {
           key={keyword}
           href={`/jobs?keyword=${encodeURIComponent(keyword)}`}
           className={cn(
-            "shrink-0 rounded-full bg-brand-blue-100/70 px-3 py-1.5 text-label-1 text-brand-blue-700 transition-colors hover:bg-brand-blue-100",
+            "shrink-0 rounded-full bg-white px-3 py-1.5 text-label-1 text-slate-700 shadow-[0_0_6px_rgba(15,40,90,0.12)] transition-colors hover:bg-brand-blue-50 hover:text-brand-blue-700",
             REVEAL_AT[i],
           )}
         >

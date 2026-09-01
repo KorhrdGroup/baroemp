@@ -288,6 +288,45 @@ export function CoverLetterEditor({
 
   return (
     <div className="space-y-4">
+      {/*
+        좁은 화면용 문항 띠. 문항 목록 상자는 위로 올라가 본문을 쓰는 동안 사라져,
+        다음 문항으로 건너갈 길이 없었다. 이력서 편집과 같은 자리(헤더 밑)에 붙인다.
+        본문은 한 문항씩 갈아끼우는 방식이라 누르면 그 문항으로 바뀐다.
+      */}
+      <div className="scrollbar-hidden sticky top-16 z-30 -mx-4.5 -mt-10 mb-2 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur lg:hidden">
+        {sections.map((section, idx) => {
+          const written = Boolean(section.content?.trim());
+          const isActive = section._key === active?._key;
+          return (
+            <button
+              key={section._key}
+              type="button"
+              data-strip-key={section._key}
+              onClick={() => setActiveKey(section._key)}
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-label-1 whitespace-nowrap transition-colors",
+                isActive ? "bg-brand-blue-50 font-semibold text-brand-blue-600" : "font-medium text-slate-500",
+              )}
+            >
+              {written ? (
+                <Check className="size-3.5 text-brand-blue-600" />
+              ) : (
+                <span className="text-label-2 font-bold text-slate-400">{idx + 1}</span>
+              )}
+              {questionHeading(section.questionType, section.question)}
+            </button>
+          );
+        })}
+        <button
+          type="button"
+          onClick={addSection}
+          aria-label="문항 추가"
+          className="flex shrink-0 items-center rounded-lg border border-border p-2 text-slate-500"
+        >
+          <Plus className="size-4" />
+        </button>
+      </div>
+
       <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
         <div className="min-w-48 flex-1">
           <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
@@ -306,7 +345,7 @@ export function CoverLetterEditor({
         좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
       */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <nav className="rounded-xl bg-white p-3 lg:sticky lg:top-24 lg:w-60 lg:shrink-0">
+        <nav className="hidden rounded-xl bg-white p-3 lg:sticky lg:top-24 lg:block lg:w-60 lg:shrink-0">
           <p className="px-2 pb-2 text-label-2 font-semibold text-slate-400">문항 {sections.length}개</p>
           <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
             {sections.map((section, idx) => {
@@ -385,14 +424,19 @@ export function CoverLetterEditor({
                 </div>
               </div>
 
-              <Input
+              {/*
+                문항이 길면 접혀야 한다. Input 은 한 줄이라 좁은 화면에서 끝이 잘렸다.
+                Textarea 는 field-sizing-content 라 내용만큼 늘어난다.
+              */}
+              <Textarea
                 value={active.question}
                 onChange={(e) => updateSection(active._key, { question: e.target.value })}
+                rows={1}
                 /*
-                  Input 기본 클래스에 md:text-label-1 이 있어 넓은 화면에서는
-                  그쪽이 이긴다. 반응형 단계까지 함께 지정해야 크기가 적용된다.
+                  좁은 화면에서는 두 줄로 접히는 일이 잦아 한 단계 줄인다(16px -> 넓은 화면 18px).
+                  답 칸과 사이도 좀 벌린다 - 접힌 제목과 붙으면 한 덩어리로 읽힌다.
                 */
-                className="mt-1 h-11 border-0 bg-transparent px-0 text-body-1 font-semibold shadow-none focus-visible:ring-0 md:text-body-1"
+                className="mt-1 mb-2 min-h-0 resize-none break-keep rounded-none border-0 bg-transparent p-0 text-body-2 font-semibold shadow-none focus-visible:ring-0 md:mb-0 md:text-body-1"
               />
 
               {/*
