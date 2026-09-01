@@ -1,5 +1,29 @@
-import type { ResumeDetail, ResumeSectionCode } from "@/types";
+import type { Region, ResumeDetail, ResumeSectionCode } from "@/types";
 import { formatPhone } from "@/lib/utils/phone";
+import { labelRegion } from "@/lib/labels";
+
+/** 만 나이. 생일이 아직 안 지났으면 한 살 뺀다. */
+function koreanAge(birthDate: string): number {
+  const birth = new Date(birthDate);
+  const now = new Date();
+  let age = now.getFullYear() - birth.getFullYear();
+  const beforeBirthday =
+    now.getMonth() < birth.getMonth() || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate());
+  if (beforeBirthday) age -= 1;
+  return Math.max(0, age);
+}
+
+/** "라벨 | 값" 연락처 줄. 라벨 폭을 맞추고 얇은 세로선으로 나눈다. */
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    // h-full + items-center: 옆 칸 값이 두 줄로 접혀 행이 높아져도(긴 주소 등)
+    // 같은 행의 짧은 항목이 위에 붙지 않고 세로 가운데에 선다.
+    <div className="flex h-full items-center">
+      <dt className="w-16 shrink-0 text-slate-500">{label}</dt>
+      <dd className="min-w-0 border-l border-slate-200 pl-3 break-keep text-slate-600">{value}</dd>
+    </div>
+  );
+}
 
 /**
  * A4 인쇄 기준 이력서 Preview (스펙 45번).
@@ -72,38 +96,36 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
     switch (section) {
       case "BASIC_INFO":
         return (
-          <div key={section} className="mb-8 border-b border-slate-300 pb-5">
-            {/* 사진을 왼쪽에, 이름·정보를 오른쪽에. 정보는 한 줄에 두 개씩 격자로 깐다. */}
-            <div className="flex items-start gap-5">
+          <div key={section} className="mb-8 border-b border-slate-300 pb-6">
+            {/*
+              구인 사이트 이력서 헤더 관례를 따른다: 사진 왼쪽, 이름 줄에 성별·출생연도·만 나이,
+              아래에 "라벨 | 값" 형식의 연락처 줄. 채용 담당자가 눈에 익은 배치다.
+            */}
+            <div className="flex items-start gap-6">
               {resume.photoUrl && (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={resume.photoUrl} alt="증명사진" className="h-[128px] w-[100px] shrink-0 rounded object-cover ring-1 ring-slate-300" />
+                <img src={resume.photoUrl} alt="증명사진" className="h-[150px] w-[118px] shrink-0 rounded object-cover ring-1 ring-slate-300" />
               )}
-              <div className="min-w-0 flex-1">
-                <p className="text-title-2 font-bold text-slate-900">{resume.name || "이름 미입력"}</p>
-                <dl className="mt-2 grid grid-cols-2 gap-x-6 gap-y-1.5 text-body-2 text-slate-600">
+              <div className="min-w-0 flex-1 pt-1">
+                <p className="flex flex-wrap items-baseline gap-x-2">
+                  <span className="text-title-2 font-bold text-slate-900">{resume.name || "이름 미입력"}</span>
+                  {resume.gender && <span className="text-body-2 text-slate-500">{resume.gender === "male" ? "남" : "여"}</span>}
                   {resume.birthDate && (
-                    <div>
-                      <dt className="inline text-slate-400">생년월일 : </dt>
-                      <dd className="inline">{resume.birthDate.slice(0, 10).replaceAll("-", ". ")}</dd>
-                    </div>
+                    <span className="text-body-2 text-slate-500">
+                      {resume.birthDate.slice(0, 4)}년 (만 {koreanAge(resume.birthDate)}세)
+                    </span>
                   )}
-                  <div>
-                    <dt className="inline text-slate-400">이메일 : </dt>
-                    <dd className="inline">{resume.email || "-"}</dd>
+                </p>
+                <dl className="mt-4 grid gap-y-2.5 text-body-2 sm:grid-cols-2 sm:gap-x-10">
+                  <InfoRow label="휴대폰" value={formatPhone(resume.phone)} />
+                  <InfoRow label="Email" value={resume.email || "-"} />
+                  <InfoRow label="성별" value={resume.gender ? (resume.gender === "male" ? "남" : "여") : "-"} />
+                  <InfoRow label="희망지역" value={resume.desiredRegion ? labelRegion(resume.desiredRegion as Region) : "-"} />
+                  {/* 주소는 길어서 반 칸에 넣으면 두 줄로 접힌다. 한 줄 전체를 쓴다. */}
+                  <div className="sm:col-span-2">
+                    <InfoRow label="주소" value={[resume.address, resume.addressDetail].filter(Boolean).join(" ") || "-"} />
                   </div>
-                  <div>
-                    <dt className="inline text-slate-400">전화번호 : </dt>
-                    <dd className="inline">{formatPhone(resume.phone)}</dd>
-                  </div>
-                  <div>
-                    <dt className="inline text-slate-400">거주지역 : </dt>
-                    <dd className="inline">{resume.address || "-"}</dd>
-                  </div>
-                  <div>
-                    <dt className="inline text-slate-400">희망직무 : </dt>
-                    <dd className="inline">{resume.desiredJobTitle || "-"}</dd>
-                  </div>
+                  <InfoRow label="희망직무" value={resume.desiredJobTitle || "-"} />
                 </dl>
               </div>
             </div>
