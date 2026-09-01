@@ -81,7 +81,16 @@ export function SignupView({ next }: { next: string }) {
 
   return (
     <AuthShell>
-      <PageTitle title="회원가입" desc="가입 후 직업진단, 채용공고, 지원제도를 이용할 수 있습니다." />
+      <PageTitle
+        title="회원가입"
+        desc={
+          <>
+            가입해두시면 회원님께 맞는 일자리와 안내를
+            <br />
+            놓치지 않게 무료로 챙겨드릴게요.
+          </>
+        }
+      />
 
       <form action={formAction} className="flex flex-col gap-4">
         <input type="hidden" name="next" value={next} />

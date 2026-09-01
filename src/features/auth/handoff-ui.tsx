@@ -41,7 +41,7 @@ export function PageTitle({
   desc,
 }: {
   title: string;
-  desc?: string;
+  desc?: React.ReactNode;
 }) {
   return (
     <div className="mb-7 sm:mb-8">

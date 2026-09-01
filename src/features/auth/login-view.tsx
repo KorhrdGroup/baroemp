@@ -27,7 +27,16 @@ export function LoginView({ next }: { next: string }) {
 
   return (
     <AuthShell>
-      <PageTitle title="로그인" desc="이메일 아이디로 로그인하세요." />
+      <PageTitle
+        title="로그인"
+        desc={
+          <>
+            회원님께 맞는 일자리와 안내를
+            <br />
+            챙겨드리는 회원 전용 무료 서비스예요.
+          </>
+        }
+      />
 
       <form action={formAction}>
         <input type="hidden" name="next" value={next} />
