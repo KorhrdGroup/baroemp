@@ -4,7 +4,8 @@ import { interactiveCardClass } from "@/lib/ui-classes";
 import { RotateCcw, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { REGION_LABELS } from "@/lib/labels";
-import type { AssessmentResult, CareerContent, Occupation } from "@/types";
+import { isPreferredQualification } from "@/lib/qualification";
+import type { AssessmentResult, CareerContent, Occupation, OccupationRecommendation } from "@/types";
 import { OccupationRecommendationCard } from "./occupation-recommendation-card";
 import { TrackedLink } from "./tracked-link";
 
@@ -16,10 +17,25 @@ interface ResultViewProps {
   jobCounts?: Record<string, { total: number; highMatchCount: number }>;
 }
 
+/** 필수 자격(우대 제외)이 비어 있어 "준비하면 열리는" 트랙으로 가르는 기준. 카드의 걸림돌 판정과 같다. */
+function missesRequiredQualification(rec: OccupationRecommendation): boolean {
+  return rec.requiredQualifications.some((q) => !isPreferredQualification(q) && rec.missingConditions.includes(q));
+}
+
 export function ResultView({ sessionId, result, occupationsById, contentRecs: allContentRecs, jobCounts }: ResultViewProps) {
   // 취업컨설팅은 공개 전이라 그리로 보내는 추천은 걸러 둔다. 열 때 이 줄만 지우면 된다.
   const contentRecs = allContentRecs.filter((c) => c.type !== "CONSULTING");
   const top = result.recommendations[0];
+
+  /*
+   * 두 트랙으로 가른다: 지금 조건으로 지원 가능한 직업 vs 자격을 갖추면 열리는 직업.
+   * 자격 미보유를 순위 감점으로만 보여주면 "안 되는 이유"가 되지만,
+   * 따로 모아 보여주면 "이것만 채우면 가능하다"는 로드맵이 된다.
+   */
+  const readyRecs = result.recommendations.filter((rec) => !missesRequiredQualification(rec));
+  const preparationRecs = result.recommendations
+    .filter(missesRequiredQualification)
+    .sort((a, b) => b.dimensionFitScore - a.dimensionFitScore);
   const regionLabel = result.extractedProfile.region ? REGION_LABELS[result.extractedProfile.region] : undefined;
   const isAnonymous = !result.userId;
 
@@ -39,34 +55,70 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs: al
           <div className="mt-5 flex flex-wrap gap-2">
             {result.generatedTags.map((tag) => (
               <span key={tag} className="rounded-full bg-white px-3 py-1 text-label-1 font-medium text-slate-700">
-                {tag}
+                #{tag}
               </span>
             ))}
           </div>
         )}
       </div>
 
-      <div className="space-y-4">
-        {result.recommendations.map((rec, i) => (
-          <OccupationRecommendationCard
-            key={rec.occupationId}
-            rank={i + 1}
-            rec={rec}
-            occupation={occupationsById.get(rec.occupationId)}
-            sessionId={sessionId}
-            userId={result.userId}
-            anonymousId={result.anonymousId}
-            defaultOpen={i === 0}
-            regionLabel={regionLabel}
-            jobCount={jobCounts?.[rec.occupationId]}
-          />
-        ))}
-        {result.recommendations.length === 0 && (
-          <div className="rounded-xl bg-white p-10 text-center text-slate-500">
-            조건에 맞는 추천 직업을 찾지 못했어요. 답변을 조금 더 넓혀서 다시 시도해보세요.
+      {readyRecs.length > 0 && (
+        <div className="space-y-4">
+          {/* 준비 트랙이 없으면 화면 전체가 한 목록이므로 굳이 머리말로 가르지 않는다. */}
+          {preparationRecs.length > 0 && (
+            <div className="pt-2">
+              <h2 className="text-body-1 font-bold text-slate-900">지금 바로 지원할 수 있는 직업</h2>
+              <p className="mt-1 text-label-1 text-slate-500">현재 조건 그대로 도전할 수 있는 직업이에요.</p>
+            </div>
+          )}
+          {readyRecs.map((rec, i) => (
+            <OccupationRecommendationCard
+              key={rec.occupationId}
+              rank={i + 1}
+              rec={rec}
+              occupation={occupationsById.get(rec.occupationId)}
+              sessionId={sessionId}
+              userId={result.userId}
+              anonymousId={result.anonymousId}
+              defaultOpen={i === 0}
+              regionLabel={regionLabel}
+              jobCount={jobCounts?.[rec.occupationId]}
+            />
+          ))}
+        </div>
+      )}
+
+      {preparationRecs.length > 0 && (
+        <div className="space-y-4">
+          <div className="pt-2">
+            <h2 className="text-body-1 font-bold text-slate-900">준비하면 열리는 직업</h2>
+            <p className="mt-1 text-label-1 text-slate-500">
+              성향은 잘 맞지만 자격이 필요한 직업이에요. 자격을 갖추면 지원할 수 있는 범위가 넓어져요.
+            </p>
           </div>
-        )}
-      </div>
+          {preparationRecs.map((rec, i) => (
+            <OccupationRecommendationCard
+              key={rec.occupationId}
+              rank={i + 1}
+              rec={rec}
+              variant="preparation"
+              occupation={occupationsById.get(rec.occupationId)}
+              sessionId={sessionId}
+              userId={result.userId}
+              anonymousId={result.anonymousId}
+              defaultOpen={readyRecs.length === 0 && i === 0}
+              regionLabel={regionLabel}
+              jobCount={jobCounts?.[rec.occupationId]}
+            />
+          ))}
+        </div>
+      )}
+
+      {result.recommendations.length === 0 && (
+        <div className="rounded-xl bg-white p-10 text-center text-slate-500">
+          조건에 맞는 추천 직업을 찾지 못했어요. 답변을 조금 더 넓혀서 다시 시도해보세요.
+        </div>
+      )}
 
       {contentRecs.length > 0 && (
         <div className="rounded-xl bg-white p-6 sm:p-8">
