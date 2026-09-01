@@ -339,7 +339,9 @@ export function createClaudeAIResumeProvider(): AIResumeProvider {
         return {
           draft: "",
           usedExperienceIds: [],
-          missingInformationPrompts: ["이 질문에 사용할 경험을 Experience Bank에서 선택하거나 새로 입력해주세요."],
+          missingInformationPrompts: [
+            "재료로 쓸 경력이 없어요. 이력서 첨삭 화면에서 경력을 한 줄이라도 적어주시면, 그걸 바탕으로 초안을 만들어드립니다.",
+          ],
         };
       }
       const parsed = await ask(

@@ -8,7 +8,7 @@ import type {
 import { getAIResumeProvider } from "@/lib/ai/mock-ai-resume.provider";
 import { getJobRepository } from "@/lib/repositories";
 import { logActivityEvent } from "@/lib/activity/event-logger";
-import { getResumeDetail } from "./resume.service";
+import { getResumeDetail, listResumesForUser } from "./resume.service";
 import { getCoverLetterDetail } from "./cover-letter.service";
 
 /**
@@ -126,11 +126,29 @@ export async function generateCoverLetterDraftWithAI(params: {
 
   const job = detail.coverLetter.targetJobId ? await getJobRepository().findById(detail.coverLetter.targetJobId) : null;
 
+  /*
+   * 경험뱅크가 비어 있으면 이력서 경력을 재료로 쓴다.
+   * 40~60대 사용자 대부분은 경험뱅크를 따로 정리하지 않는다. 그때마다 "경험을 골라달라"며
+   * 막아 세우면 초안 기능을 한 번도 못 쓰고 나간다. 이력서에 이미 쓴 경력이면 충분한 재료다.
+   */
+  let candidateExperiences = params.candidateExperiences;
+  if (candidateExperiences.length === 0) {
+    const resumes = await listResumesForUser(detail.coverLetter.userId);
+    const primary = resumes[0];
+    const resumeDetail = primary ? await getResumeDetail(primary.id) : null;
+    candidateExperiences = (resumeDetail?.experiences ?? []).map((e) => ({
+      title: [e.companyName, e.position].filter(Boolean).join(" "),
+      situation: [e.companyName, e.position].filter(Boolean).join(" ") + "에서 근무",
+      action: e.responsibilities,
+      result: e.achievements,
+    }));
+  }
+
   const result = await getAIResumeProvider().generateCoverLetterDraft({
     question: params.question,
     questionType: params.questionType,
     characterLimit: params.characterLimit,
-    candidateExperiences: params.candidateExperiences,
+    candidateExperiences,
     targetJobTitle: job?.title,
     targetJobDescription: job?.description,
   });
