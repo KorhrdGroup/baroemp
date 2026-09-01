@@ -125,13 +125,34 @@ export async function getRecommendedJobsForAnonymous(
  * 링크는 직업 이름으로 검색해 넘기므로 여기서도 이름으로 센다.
  * (직종 코드로 세면 표시된 건수와 눌러서 도착한 목록의 건수가 어긋난다)
  */
+/**
+ * 적합도를 따져 볼 공고 수의 상한.
+ *
+ * "운전"처럼 흔한 말은 6천 건 넘게 걸린다. 전부 내려받아 세면 결과 화면 한 장에
+ * 십수 초가 걸려, 눌러도 아무 일이 없는 것처럼 보였다. 건수 자체는 DB 가 세 주므로
+ * 정확하고, 적합도는 추천순 위쪽 이만큼만 따져 본다.
+ */
+const FIT_SCAN_LIMIT = 200;
+
 export async function countJobsForOccupation(
   occupationName: string | undefined,
   profile?: CareerProfile,
 ): Promise<{ total: number; highMatchCount: number }> {
   if (!occupationName) return { total: 0, highMatchCount: 0 };
-  const jobs = await getJobRepository().findAll({ keyword: occupationName, activeOnly: true } as JobSearchFilter);
-  if (!profile) return { total: jobs.length, highMatchCount: 0 };
-  const highMatchCount = jobs.filter((job) => (evaluateJobFit(profile, job)?.score ?? 0) >= 70).length;
-  return { total: jobs.length, highMatchCount };
+  const filter = { keyword: occupationName, activeOnly: true } as JobSearchFilter;
+
+  // 총 건수는 행을 받아오지 않고 DB 가 센 값을 그대로 쓴다.
+  if (!profile) {
+    const { total } = await getJobRepository().search({ ...filter, page: 1, pageSize: 1 });
+    return { total, highMatchCount: 0 };
+  }
+
+  const { items, total } = await getJobRepository().search({
+    ...filter,
+    page: 1,
+    pageSize: FIT_SCAN_LIMIT,
+    sort: "recommended",
+  });
+  const highMatchCount = items.filter((job) => (evaluateJobFit(profile, job)?.score ?? 0) >= 70).length;
+  return { total, highMatchCount };
 }
