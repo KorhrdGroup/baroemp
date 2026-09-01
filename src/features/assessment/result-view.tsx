@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { interactiveCardClass } from "@/lib/ui-classes";
-import { RotateCcw, UserPlus } from "lucide-react";
+import { ExternalLink, RotateCcw, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { REGION_LABELS } from "@/lib/labels";
-import { isPreferredQualification } from "@/lib/qualification";
+import { splitRecommendationTracks } from "./recommendation-tracks";
 import type { AssessmentResult, CareerContent, Occupation, OccupationRecommendation } from "@/types";
-import { OccupationRecommendationCard } from "./occupation-recommendation-card";
+import { OccupationRecommendationCard, type ExternalCourseLink } from "./occupation-recommendation-card";
 import { TrackedLink } from "./tracked-link";
 
 interface ResultViewProps {
@@ -14,15 +14,27 @@ interface ResultViewProps {
   result: AssessmentResult;
   occupationsById: Map<string, Occupation>;
   contentRecs: CareerContent[];
+  /** 콘텐츠 id → 외부 신청/안내 페이지 URL. "준비하러 가기" 연결에 쓴다. */
+  contentUrlById?: Record<string, string>;
+  /** 외부 페이지가 등록된 취득 과정 목록. 자격 요건 칩을 과정 페이지로 잇는 데 쓴다. */
+  externalCourses?: ExternalCourseLink[];
   jobCounts?: Record<string, { total: number; highMatchCount: number }>;
 }
 
-/** 필수 자격(우대 제외)이 비어 있어 "준비하면 열리는" 트랙으로 가르는 기준. 카드의 걸림돌 판정과 같다. */
-function missesRequiredQualification(rec: OccupationRecommendation): boolean {
-  return rec.requiredQualifications.some((q) => !isPreferredQualification(q) && rec.missingConditions.includes(q));
-}
-
-export function ResultView({ sessionId, result, occupationsById, contentRecs: allContentRecs, jobCounts }: ResultViewProps) {
+export function ResultView({
+  sessionId,
+  result,
+  occupationsById,
+  contentRecs: allContentRecs,
+  contentUrlById = {},
+  externalCourses = [],
+  jobCounts,
+}: ResultViewProps) {
+  /** 추천 취득 과정 중 외부 페이지가 등록된 첫 콘텐츠의 URL. */
+  const prepareUrlFor = (rec: OccupationRecommendation) =>
+    [...(rec.readinessProjection?.map((p) => p.contentId) ?? []), ...(rec.recommendedContentIds ?? [])]
+      .map((id) => contentUrlById[id])
+      .find(Boolean);
   // 취업컨설팅은 공개 전이라 그리로 보내는 추천은 걸러 둔다. 열 때 이 줄만 지우면 된다.
   const contentRecs = allContentRecs.filter((c) => c.type !== "CONSULTING");
   const top = result.recommendations[0];
@@ -32,10 +44,7 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs: al
    * 자격 미보유를 순위 감점으로만 보여주면 "안 되는 이유"가 되지만,
    * 따로 모아 보여주면 "이것만 채우면 가능하다"는 로드맵이 된다.
    */
-  const readyRecs = result.recommendations.filter((rec) => !missesRequiredQualification(rec));
-  const preparationRecs = result.recommendations
-    .filter(missesRequiredQualification)
-    .sort((a, b) => b.dimensionFitScore - a.dimensionFitScore);
+  const { ready: readyRecs, preparation: preparationRecs } = splitRecommendationTracks(result.recommendations);
   const regionLabel = result.extractedProfile.region ? REGION_LABELS[result.extractedProfile.region] : undefined;
   const isAnonymous = !result.userId;
 
@@ -83,6 +92,7 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs: al
               defaultOpen={i === 0}
               regionLabel={regionLabel}
               jobCount={jobCounts?.[rec.occupationId]}
+              externalCourses={externalCourses}
             />
           ))}
         </div>
@@ -109,6 +119,8 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs: al
               defaultOpen={readyRecs.length === 0 && i === 0}
               regionLabel={regionLabel}
               jobCount={jobCounts?.[rec.occupationId]}
+              prepareUrl={prepareUrlFor(rec)}
+              externalCourses={externalCourses}
             />
           ))}
         </div>
@@ -133,16 +145,23 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs: al
                 targetId={content.id}
                 userId={result.userId}
                 anonymousId={result.anonymousId}
+                /* 외부 신청 페이지가 등록된 과정은 그리로 바로 보낸다. 없으면 기존 안내 화면 폴백. */
                 href={
-                  content.type === "SUPPORT_PROGRAM"
+                  content.externalUrl ??
+                  (content.type === "SUPPORT_PROGRAM"
                     ? "/support"
                     : content.type === "CONSULTING"
                       ? "/consulting"
-                      : "/resume"
+                      : "/resume")
                 }
+                target={content.externalUrl ? "_blank" : undefined}
+                rel={content.externalUrl ? "noopener noreferrer" : undefined}
                 className={cn("rounded-xl bg-slate-50 p-4", interactiveCardClass)}
               >
-                <p className="text-body-2 font-semibold text-slate-800">{content.title}</p>
+                <p className="flex items-center gap-1.5 text-body-2 font-semibold text-slate-800">
+                  {content.title}
+                  {content.externalUrl && <ExternalLink className="size-3.5 shrink-0 text-slate-400" />}
+                </p>
                 <p className="mt-1 text-label-1 text-slate-500">{content.summary ?? content.shortDescription}</p>
               </TrackedLink>
             ))}

@@ -128,6 +128,21 @@ export function ContentForm({ content }: ContentFormProps) {
         </div>
 
         <div className="space-y-2 md:col-span-2">
+          <Label htmlFor="externalUrl">외부 신청/안내 페이지 URL</Label>
+          <Input
+            id="externalUrl"
+            name="externalUrl"
+            type="url"
+            placeholder="https://..."
+            defaultValue={content?.externalUrl ?? ""}
+            className="h-11"
+          />
+          <p className="text-label-2 text-slate-400">
+            입력하면 진단 결과의 &ldquo;준비하러 가기&rdquo;와 추천 카드가 이 주소로 새 탭 연결됩니다.
+          </p>
+        </div>
+
+        <div className="space-y-2 md:col-span-2">
           <Label htmlFor="tags">태그 (쉼표 구분)</Label>
           <Input
             id="tags"

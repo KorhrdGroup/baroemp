@@ -8,6 +8,7 @@ import {
 } from "@/features/assessment-engine/assessment-service";
 import { ResultView } from "@/features/assessment/result-view";
 import { getOccupationRepository } from "@/lib/repositories";
+import { listContents } from "@/services/content.service";
 import { countJobsForOccupation } from "@/services/job-search.service";
 import type { CareerProfile } from "@/types";
 
@@ -33,11 +34,19 @@ export default async function AssessmentResultPage({
   */
   void logAssessmentResultViewed(sessionId, result.userId, result.anonymousId).catch(() => {});
 
-  const [occupations, contentRecs] = await Promise.all([
+  const [occupations, contentRecs, publishedContents] = await Promise.all([
     getOccupationRepository().findAll(),
     getContentRecommendationsForResult(result),
+    listContents({ status: "published" }),
   ]);
   const occupationsById = new Map(occupations.map((o) => [o.id, o]));
+  // "준비하러 가기" 버튼·자격 요건 칩 링크용. 외부 페이지가 등록된 콘텐츠만 추린다.
+  const contentUrlById = Object.fromEntries(
+    publishedContents.filter((c) => c.externalUrl).map((c) => [c.id, c.externalUrl as string]),
+  );
+  const externalCourses = publishedContents
+    .filter((c) => c.externalUrl)
+    .map((c) => ({ contentId: c.id, title: c.title, url: c.externalUrl as string }));
 
   // extractedProfile을 CareerProfile 모양으로 감싸 매칭 건수(highMatchCount) 계산에 재사용한다.
   const now = new Date().toISOString();
@@ -67,6 +76,8 @@ export default async function AssessmentResultPage({
         result={result}
         occupationsById={occupationsById}
         contentRecs={contentRecs}
+        contentUrlById={contentUrlById}
+        externalCourses={externalCourses}
         jobCounts={jobCounts}
       />
     </div>

@@ -73,6 +73,8 @@ export interface CareerContent {
   provider?: string;
   /** 콘텐츠 대표 이미지 경로. 없으면 UI에서 CSS 플레이스홀더 사용 */
   thumbnailUrl?: string;
+  /** 외부 신청/안내 페이지 URL. 있으면 추천 카드·"준비하러 가기"가 이 주소로 새 탭 연결된다. */
+  externalUrl?: string;
   metadata?: Record<string, unknown>;
 
   createdAt: ISODateString;
