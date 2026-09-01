@@ -347,9 +347,13 @@
     width: 210mm;
     margin: 0 auto;
   }
+  /*
+   * 여백을 0으로 두면 브라우저가 여백에 찍는 머리글/바닥글(날짜·페이지 제목·URL)이
+   * 함께 사라진다. 문서 여백은 대신 .print-document 안쪽 패딩(print:p-[12mm])으로 잡는다.
+   */
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 0;
   }
 }
 

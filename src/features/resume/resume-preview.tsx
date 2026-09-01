@@ -246,7 +246,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
   }
 
   return (
-    <div id="resume-print-area" className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-0">
+    <div id="resume-print-area" className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-[12mm]">
       {sectionOrder.map((section) => renderSection(section))}
       {resume.portfolioUrl && (
         <p className="mt-4 text-label-1 text-slate-400">포트폴리오: {resume.portfolioUrl}</p>
