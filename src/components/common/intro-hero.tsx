@@ -19,8 +19,6 @@ export interface IntroHeroProps {
   highlightTitle: string;
   highlights: string[];
   note: ReactNode;
-  /** 이미 결과가 있는 회원에게 지난 결과로 가는 길. 진단을 또 하라고만 권하면 결과를 잃은 줄 안다. */
-  resultHint?: ReactNode;
 }
 
 export function IntroHero({
@@ -34,7 +32,6 @@ export function IntroHero({
   highlightTitle,
   highlights,
   note,
-  resultHint,
 }: IntroHeroProps) {
   return (
     <>
@@ -95,7 +92,6 @@ export function IntroHero({
           </div>
           <div className="shrink-0">{cta}</div>
         </div>
-        {resultHint && <div className="mt-3 text-center">{resultHint}</div>}
       </div>
 
       <section className="bg-white pb-16 pt-20">
