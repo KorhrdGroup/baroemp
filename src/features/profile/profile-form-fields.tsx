@@ -16,6 +16,20 @@ export const JOB_CATEGORY_OPTIONS: { code: string; label: string }[] = [
   { code: "other", label: "기타" },
 ];
 
+/**
+ * 보유 자격 선택지. 직업진단 자격증 문항(0017 시드)과 같은 목록이며, 이름이 곧 저장 값이다.
+ * 진단 문항에 선택지를 추가하면 여기도 같이 맞춘다.
+ */
+export const QUALIFICATION_OPTIONS: string[] = [
+  "요양보호사",
+  "사회복지사 2급",
+  "컴퓨터활용능력",
+  "1종 보통 운전면허",
+  "평생교육사 2급",
+  "경비지도사",
+  "직업상담사 2급",
+];
+
 export function ChipToggle({
   selected,
   onClick,

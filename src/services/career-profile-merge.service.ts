@@ -46,11 +46,15 @@ export function applyCareerProfileUpdatePolicy(
  * 않으면 진단 답변이 assessment_results JSON에만 남는다. 공고 자격 배지·"지금 지원가능" 판정은
  * user_qualifications를 읽으므로, 이 승격이 있어야 진단에서 밝힌 자격이 매칭에 반영된다.
  */
-export async function promoteAssessmentQualifications(userId: string, names: string[]): Promise<void> {
+export async function promoteAssessmentQualifications(
+  userId: string,
+  names: string[],
+  source: "ASSESSMENT" | "ONBOARDING" = "ASSESSMENT",
+): Promise<void> {
   const repo = getUserQualificationRepository();
   const unique = [...new Set(names.map((n) => n.trim()).filter(Boolean))];
   for (const name of unique) {
-    await repo.upsertFromAssessment({ userId, name });
+    await repo.upsertFromAssessment({ userId, name, source });
   }
 }
 

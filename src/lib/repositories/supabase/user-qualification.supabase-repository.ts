@@ -78,7 +78,7 @@ export function createSupabaseUserQualificationRepository(): UserQualificationRe
         expiresAt: (row.expires_at as string | null) ?? undefined,
       };
     },
-    async upsertFromAssessment({ userId, name }) {
+    async upsertFromAssessment({ userId, name, source = "ASSESSMENT" }) {
       const trimmedName = name.trim();
       const qualificationId = await findOrCreateQualification(trimmedName, "assessment_added");
 
@@ -97,7 +97,7 @@ export function createSupabaseUserQualificationRepository(): UserQualificationRe
       } else {
         const { data, error } = await client
           .from("user_qualifications")
-          .insert({ user_id: userId, qualification_id: qualificationId, status: "held", source: "ASSESSMENT" })
+          .insert({ user_id: userId, qualification_id: qualificationId, status: "held", source })
           .select("id, user_id, qualification_id, source, acquired_at, expires_at")
           .single();
         if (error || !data)

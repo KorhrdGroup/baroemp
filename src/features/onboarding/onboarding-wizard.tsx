@@ -13,7 +13,7 @@ import {
   REGION_LABELS,
   WORK_TYPE_LABELS,
 } from "@/lib/labels";
-import { JOB_CATEGORY_OPTIONS } from "@/features/profile/profile-form-fields";
+import { JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "@/features/profile/profile-form-fields";
 import { saveOnboardingProfileAction, skipOnboardingProfileAction } from "./onboarding-actions";
 import type { CareerProfile, WorkType } from "@/types";
 
@@ -24,6 +24,7 @@ type StepId =
   | "desiredSalary"
   | "desiredWorkTypes"
   | "desiredJobCategories"
+  | "heldQualifications"
   | "isOpenToTraining"
   | "contact";
 
@@ -66,6 +67,12 @@ const STEPS: StepConfig[] = [
     title: "관심 있는 직종을 골라주세요",
     description: "복수 선택 가능해요.",
   },
+  {
+    id: "heldQualifications",
+    group: "target",
+    title: "보유하고 있는 자격증이 있다면 선택해주세요",
+    description: "선택사항이에요. 해당하는 항목이 없다면 그대로 넘어가주세요.",
+  },
   { id: "isOpenToTraining", group: "target", title: "직업훈련·교육 과정에 참여할 의향이 있으신가요?" },
   {
     id: "contact",
@@ -83,6 +90,7 @@ interface Answers {
   desiredSalaryMax?: number;
   desiredWorkTypes: WorkType[];
   desiredJobCategories: string[];
+  heldQualifications: string[];
   isOpenToTraining?: boolean;
   phone: string;
   marketingConsent: boolean;
@@ -144,6 +152,7 @@ export function OnboardingWizard({
   next,
   needsPhone,
   needsMarketingConsent,
+  heldQualificationNames = [],
 }: {
   careerProfile: CareerProfile | null;
   next: string;
@@ -151,6 +160,8 @@ export function OnboardingWizard({
   needsPhone: boolean;
   /** 가입 때 수신동의를 하지 않은 사용자에게만 묻는다. */
   needsMarketingConsent: boolean;
+  /** Career DB(user_qualifications)에 이미 등록된 보유 자격. 자격 스텝을 미리 채운다. */
+  heldQualificationNames?: string[];
 }) {
   // 연락처도 동의도 이미 받은 사용자에게는 알림 단계 자체를 만들지 않는다.
   const askContact = needsPhone || needsMarketingConsent;
@@ -166,6 +177,7 @@ export function OnboardingWizard({
     desiredSalaryMax: careerProfile?.desiredSalaryMax,
     desiredWorkTypes: careerProfile?.desiredWorkTypes ?? [],
     desiredJobCategories: careerProfile?.desiredJobCategories ?? [],
+    heldQualifications: heldQualificationNames.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
     isOpenToTraining: careerProfile?.isOpenToTraining,
     phone: "",
     marketingConsent: false,
@@ -228,6 +240,7 @@ export function OnboardingWizard({
         desiredSalaryMax: answers.desiredSalaryMax,
         desiredWorkTypes: answers.desiredWorkTypes,
         desiredJobCategories: answers.desiredJobCategories,
+        heldQualifications: answers.heldQualifications,
         isOpenToTraining: answers.isOpenToTraining,
         phone: askContact ? answers.phone : undefined,
         marketingConsent: needsMarketingConsent ? answers.marketingConsent : undefined,
@@ -498,6 +511,31 @@ function StepBody({
                 }
               >
                 {opt.label}
+              </ChipButton>
+            );
+          })}
+        </div>
+      );
+
+    case "heldQualifications":
+      return (
+        <div className="flex flex-col gap-2">
+          {QUALIFICATION_OPTIONS.map((name) => {
+            const selected = answers.heldQualifications.includes(name);
+            return (
+              <ChipButton
+                key={name}
+                indicator="check"
+                selected={selected}
+                onClick={() =>
+                  onChange({
+                    heldQualifications: selected
+                      ? answers.heldQualifications.filter((v) => v !== name)
+                      : [...answers.heldQualifications, name],
+                  })
+                }
+              >
+                {name}
               </ChipButton>
             );
           })}

@@ -21,6 +21,7 @@ import {
   getMatchResultRepository,
   getSupportAssessmentSessionRepository,
   getSupportProgramRepository,
+  getUserQualificationRepository,
 } from "@/lib/repositories";
 import { activityEventLogger } from "@/lib/activity/event-logger";
 import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-search.service";
@@ -167,10 +168,15 @@ export default async function MyPage() {
   */
   const { profile, careerProfile, assessmentResults } = detail;
   const latestResult = assessmentResults[0];
-  const [jobData, supportData] = await Promise.all([
+  const [jobData, supportData, heldQualifications] = await Promise.all([
     loadMyPageJobData(user.id),
     loadMyPageSupportData(user.id),
+    // 보유 자격은 career_profiles가 아니라 Career DB(user_qualifications)가 원본이다.
+    getUserQualificationRepository()
+      .findByUserId(user.id)
+      .catch(() => []),
   ]);
+  const heldQualificationNames = [...new Set(heldQualifications.map((q) => q.name))];
 
   /*
     맨 위 요약 줄. 지금 내가 어디까지 해뒀는지를 숫자로 먼저 보여주고, 각 숫자는
@@ -344,6 +350,10 @@ export default async function MyPage() {
               </p>
               <p>
                 <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">보유 자격증</span> ·{" "}
+                {heldQualificationNames.length > 0 ? heldQualificationNames.join(", ") : "-"}
               </p>
             </CardContent>
           </Card>

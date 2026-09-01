@@ -7,6 +7,7 @@ import { logActivityEvent } from "@/lib/activity/event-logger";
 import { getProfileRepository, type ProfileUpdateInput } from "@/lib/repositories/profile-repository";
 import { getCareerProfileRepository, findCareerProfileByUserId } from "@/lib/repositories";
 import { recalculateLeadScore } from "@/services/lead-score.service";
+import { promoteAssessmentQualifications } from "@/services/career-profile-merge.service";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { normalizePhone, isValidKoreanPhone } from "@/lib/utils/phone";
 import type { DesiredStartTiming, EmploymentStatus, Region, WorkType } from "@/types";
@@ -20,6 +21,8 @@ export interface OnboardingProfileInput {
   desiredSalaryMax?: number;
   desiredWorkTypes?: string[];
   desiredJobCategories?: string[];
+  /** 보유 자격증 이름 목록 (선택 스텝). Career DB(user_qualifications)로 승격된다. */
+  heldQualifications?: string[];
   isOpenToTraining?: boolean;
   phone?: string;
   /** 연락처·동의를 물어본 경우에만 넘어온다. 안 물어본 사용자의 기존 동의를 끄지 않기 위함. */
@@ -81,6 +84,11 @@ export async function saveOnboardingProfileAction(
     await getCareerProfileRepository().update(existing.id, careerPatch);
   } else {
     await getCareerProfileRepository().create({ userId: user.id, ...careerPatch });
+  }
+
+  // 보유 자격은 career_profiles가 아니라 Career DB(user_qualifications)가 원본이다 - 진단·이력서와 같은 곳.
+  if (input.heldQualifications?.length) {
+    await promoteAssessmentQualifications(user.id, input.heldQualifications, "ONBOARDING");
   }
 
   await logActivityEvent({
