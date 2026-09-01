@@ -1,10 +1,7 @@
 import { findCareerProfileByUserId, getAssessmentResultRepository, getJobRepository } from "@/lib/repositories";
-import { toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
-import { isPreferredQualification, qualificationName } from "@/lib/qualification";
-import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
 import { evaluateJobFit, type JobMatchDetail } from "./job-match.service";
 import { getCandidateJobsForUser } from "./job-curation.service";
-import type { CareerProfile, Job, JobSearchFilter, JobSearchResult, OccupationRecommendation } from "@/types";
+import type { CareerProfile, Job, JobSearchFilter, JobSearchResult } from "@/types";
 
 export interface JobWithMatch extends Job {
   match?: JobMatchDetail | null;
@@ -70,21 +67,6 @@ export async function getRecommendedJobsForUser(userId: string | undefined, limi
   return scored.slice(0, limit).map(({ job, match }) => ({ ...job, match }));
 }
 
-export interface AssessmentJobRecommendation {
-  occupationName: string;
-  jobCategoryCode: string;
-  jobs: Job[];
-  /** 준비 트랙일 때, 지원을 막고 있는 필수 자격 이름들. */
-  missingQualifications?: string[];
-}
-
-export interface AssessmentJobSections {
-  /** 지금 조건으로 지원 가능한 상위 직업의 공고 */
-  ready: AssessmentJobRecommendation | null;
-  /** 성향은 맞지만 자격이 필요한 상위 직업의 공고 ("자격 따면 열리는") */
-  preparation: AssessmentJobRecommendation | null;
-}
-
 /**
  * 비회원의 최근 검사 결과(extractedProfile)를 evaluateJobFit이 읽을 수 있는 CareerProfile 모양으로 감싼다.
  * 실제 career_profiles row가 아니라 즉석에서 만든 값이므로 id/userId는 placeholder다.
@@ -105,59 +87,6 @@ export async function getAnonymousCareerSignal(anonymousId: string | undefined):
   } as CareerProfile;
 }
 
-/** 직종코드가 있는 추천 직업의 최신 공고를 찾는다. 코드 미등록 직업은 공고와 이을 수 없어 건너뛴다. */
-async function findJobsForTopRecommendation(
-  recommendations: OccupationRecommendation[],
-  limit: number,
-): Promise<AssessmentJobRecommendation | null> {
-  const top = recommendations.find((rec) => rec.jobCategoryCode);
-  if (!top?.jobCategoryCode) return null;
-
-  // occupation의 직종 값에는 6자리 코드와 'social_worker' 같은 묶음 key가 섞여 있어 변환을 거친다.
-  const { items } = await getJobRepository().search({
-    jobCategoryPatterns: toJobCategoryPatterns([top.jobCategoryCode]),
-    activeOnly: true,
-    sort: "latest",
-    page: 1,
-    pageSize: limit,
-  } as JobSearchFilter);
-  if (items.length === 0) return null;
-
-  const missingQualifications = top.requiredQualifications
-    .filter((q) => !isPreferredQualification(q) && top.missingConditions.includes(q))
-    .map(qualificationName);
-
-  return { occupationName: top.occupationName, jobCategoryCode: top.jobCategoryCode, jobs: items, missingQualifications };
-}
-
-/**
- * "검사 결과 기반 맞춤 공고" 영역용. 최근 완료한 진단의 추천을 두 트랙으로 나눠,
- * 각 트랙 상위 직업의 공고를 보여준다 - 지금 지원 가능한 직업과 "자격 따면 열리는" 직업.
- *
- * 회원(userId) 결과를 먼저 보고, 없으면 비회원(anonymousId) 결과로 넘어간다.
- * 예전에는 anonymousId 전용이어서, 가입하면서 결과가 회원 소유로 넘어간 사람은
- * 로그인 필수인 /jobs에서 이 영역을 영영 볼 수 없었다.
- */
-export async function getRecommendedJobsFromAssessment(
-  params: { userId?: string; anonymousId?: string },
-  limit = 6,
-): Promise<AssessmentJobSections | null> {
-  const repo = getAssessmentResultRepository();
-  const results = params.userId ? await repo.findAll({ userId: params.userId }) : [];
-  const fallback = results.length === 0 && params.anonymousId ? await repo.findAll({ anonymousId: params.anonymousId }) : [];
-  const all = results.length > 0 ? results : fallback;
-  if (all.length === 0) return null;
-
-  const latest = [...all].sort((a, b) => (a.completedAt < b.completedAt ? 1 : -1))[0];
-  const { ready, preparation } = splitRecommendationTracks(latest.recommendations);
-  const [readySection, preparationSection] = await Promise.all([
-    findJobsForTopRecommendation(ready, limit),
-    findJobsForTopRecommendation(preparation, Math.min(limit, 4)),
-  ]);
-  if (!readySection && !preparationSection) return null;
-
-  return { ready: readySection, preparation: preparationSection };
-}
 
 /**
  * Assessment 결과 화면에서 "현재 관련 채용공고 N건 / 회원님의 조건과 높은 일치 M건" 표시에 사용한다.

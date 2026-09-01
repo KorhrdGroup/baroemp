@@ -1,6 +1,7 @@
 import { findCareerProfileByUserId, getJobRepository } from "@/lib/repositories";
 import type { CareerProfile, Job, JobCurationItem, JobCurationResult, JobCurationTab, JobSearchFilter } from "@/types";
 import { evaluateJobFit } from "./job-match.service";
+import { getRecommendedJobsFromAssessment } from "./assessment-job.service";
 import { toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 import { compareUserToJobsRequirements, type JobRequirementComparisonItem } from "./job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
@@ -263,8 +264,24 @@ async function getUnlockableTab(userId: string, ctx: PersonalContext) {
       (c) => c.userStatus === "NOT_SATISFIED" || c.userStatus === "UNKNOWN",
     );
 
-  if (!best) return { state: "EMPTY" as const, items: [] };
-  return { state: "READY" as const, items: best.items.slice(0, TAB_LIMIT) };
+  if (best) return { state: "READY" as const, items: best.items.slice(0, TAB_LIMIT) };
+
+  /*
+    희망 직종 후보군에 자격이 걸리는 공고가 없으면 탭이 비는데, 정작 직업진단은
+    "성향은 맞는데 자격이 필요한 직업"을 알고 있다. 그 준비 트랙 직업의 공고로 채운다.
+    바로 위 진단 섹션과 겹칠 수 있지만, 빈 탭보다 겹치는 탭이 낫다.
+  */
+  const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT);
+  const preparation = assessment?.preparation;
+  if (preparation && preparation.jobs.length > 0) {
+    const unlockRequirementName = preparation.missingQualifications?.[0];
+    return {
+      state: "READY" as const,
+      items: preparation.jobs.map((job) => ({ job, unlockRequirementName })),
+    };
+  }
+
+  return { state: "EMPTY" as const, items: [] };
 }
 
 function scoreCandidates(profile: CareerProfile, jobs: Job[]): JobCurationItem[] {
