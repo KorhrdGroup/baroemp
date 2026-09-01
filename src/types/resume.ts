@@ -71,8 +71,11 @@ export interface Resume {
   email?: string;
   phone?: string;
   address?: string;
+  /** 상세주소 (동·호수). 기본 주소는 검색으로, 상세는 직접 입력 */
+  addressDetail?: string;
   /** 생년월일 (YYYY-MM-DD) */
   birthDate?: string;
+  gender?: "male" | "female";
   photoUrl?: string;
   portfolioUrl?: string;
 

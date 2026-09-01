@@ -147,7 +147,9 @@ interface ResumeFormState {
   email: string;
   phone: string;
   address: string;
+  addressDetail: string;
   birthDate: string;
+  gender: string;
   photoUrl: string;
   portfolioUrl: string;
   hasNoWorkExperience: boolean;
@@ -165,7 +167,13 @@ function buildResumeSavePayload(source: {
   items: EditableItem[];
 }) {
   return {
-    resume: { id: source.id, ...source.form, sectionCodes: source.sectionCodes },
+    resume: {
+      id: source.id,
+      ...source.form,
+      // 폼에서는 셀렉트 값이라 string인데, 저장 타입은 union이다. 빈 값은 "선택 안 함".
+      gender: (source.form.gender || undefined) as "male" | "female" | undefined,
+      sectionCodes: source.sectionCodes,
+    },
     educations: source.educations.map((e) => ({
       ...stripKey(e),
       admissionDate: toDbDate(e.admissionDate),
@@ -349,7 +357,9 @@ export function ResumeEditor({
         email: initialDetail.resume.email ?? "",
         phone: initialDetail.resume.phone ?? "",
         address: initialDetail.resume.address ?? "",
+        addressDetail: initialDetail.resume.addressDetail ?? "",
         birthDate: initialDetail.resume.birthDate ?? "",
+        gender: initialDetail.resume.gender ?? "",
         photoUrl: initialDetail.resume.photoUrl ?? "",
         portfolioUrl: initialDetail.resume.portfolioUrl ?? "",
         hasNoWorkExperience: initialDetail.resume.hasNoWorkExperience ?? false,
@@ -674,54 +684,60 @@ export function ResumeEditor({
               <CardHeader>
                 <CardTitle className="text-body-1 font-semibold">기본정보</CardTitle>
               </CardHeader>
-              <CardContent className="grid gap-3 sm:grid-cols-2">
-                {/* 증명사진. 두 칸을 가로질러 위에 둔다 - 인쇄물에서도 기본정보 옆에 나온다. */}
-                <div className="flex items-center gap-4 sm:col-span-2">
+              {/*
+                실제 이력서 헤더와 같은 골격으로 배치한다: 사진은 왼쪽 세로 블록,
+                필드는 오른쪽 두 칸 격자. 짝이 안 맞아 생기는 빈칸이 없도록
+                이름·생년월일 / 성별·전화번호 / 이메일(한 줄) 순으로 짠다.
+              */}
+              <CardContent className="flex flex-col gap-5 sm:flex-row">
+                <div className="flex shrink-0 flex-col items-center gap-2 sm:w-[118px]">
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={(e) => {
+                      void handlePhotoChange(e.target.files?.[0]);
+                      e.target.value = "";
+                    }}
+                  />
+                  {/* 사진 자체를 누르면 올리기/바꾸기. 버튼을 따로 두는 것보다 자리 차지가 없다. */}
+                  <button
+                    type="button"
+                    onClick={() => photoInputRef.current?.click()}
+                    disabled={uploadingPhoto}
+                    className="group relative overflow-hidden rounded-lg ring-1 ring-slate-200"
+                    aria-label={form.photoUrl ? "사진 바꾸기" : "사진 올리기"}
+                  >
+                    {form.photoUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={form.photoUrl} alt="증명사진" className="h-[150px] w-[118px] object-cover" />
+                    ) : (
+                      <div className="flex h-[150px] w-[118px] flex-col items-center justify-center gap-1.5 bg-slate-50 text-label-2 text-slate-400">
+                        {uploadingPhoto ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
+                        사진 올리기
+                      </div>
+                    )}
+                    {form.photoUrl && (
+                      <span className="absolute inset-x-0 bottom-0 bg-slate-900/60 py-1 text-center text-label-2 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                        {uploadingPhoto ? "올리는 중…" : "사진 바꾸기"}
+                      </span>
+                    )}
+                  </button>
                   {form.photoUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={form.photoUrl} alt="증명사진" className="h-[110px] w-[85px] rounded object-cover ring-1 ring-slate-200" />
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, photoUrl: "" }))}
+                      className="text-label-2 text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline"
+                    >
+                      사진 빼기
+                    </button>
                   ) : (
-                    <div className="flex h-[110px] w-[85px] items-center justify-center rounded bg-slate-100 text-label-2 text-slate-400 ring-1 ring-slate-200">
-                      사진
-                    </div>
+                    <p className="text-center text-label-2 leading-snug text-slate-400">JPG·PNG 5MB 이하</p>
                   )}
-                  <div className="space-y-2">
-                    <input
-                      ref={photoInputRef}
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp"
-                      className="hidden"
-                      onChange={(e) => {
-                        void handlePhotoChange(e.target.files?.[0]);
-                        e.target.value = "";
-                      }}
-                    />
-                    <div className="flex gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        disabled={uploadingPhoto}
-                        onClick={() => photoInputRef.current?.click()}
-                      >
-                        {uploadingPhoto ? <Loader2 className="size-4 animate-spin" /> : null}
-                        {form.photoUrl ? "사진 바꾸기" : "사진 올리기"}
-                      </Button>
-                      {form.photoUrl && (
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          className="text-slate-500"
-                          onClick={() => setForm((f) => ({ ...f, photoUrl: "" }))}
-                        >
-                          사진 빼기
-                        </Button>
-                      )}
-                    </div>
-                    <p className="text-label-2 text-slate-400">JPG·PNG, 5MB 이하. 없어도 괜찮아요.</p>
-                  </div>
                 </div>
+
+                <div className="grid min-w-0 flex-1 content-start gap-3 sm:grid-cols-2">
                 <Field label="이름" required>
                   <CompactInput value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
                 </Field>
@@ -732,14 +748,49 @@ export function ResumeEditor({
                     onChange={(e) => setForm((f) => ({ ...f, birthDate: e.target.value }))}
                   />
                 </Field>
-                <Field label="이메일" required>
-                  <CompactInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                <Field label="성별">
+                  <NativeSelect
+                    className="h-10 text-label-1"
+                    value={form.gender}
+                    onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value }))}
+                  >
+                    <option value="">선택 안 함</option>
+                    <option value="male">남</option>
+                    <option value="female">여</option>
+                  </NativeSelect>
                 </Field>
                 <Field label="전화번호" required>
                   <CompactInput value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
                 </Field>
-                <Field label="주소/거주지역">
-                  <CompactInput value={form.address} onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))} />
+                <Field label="이메일" required className="sm:col-span-2">
+                  <CompactInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                </Field>
+                {/* 주소는 길다. 반 칸에 두면 잘려 보여 한 줄 전체를 쓴다. */}
+                <Field label="주소/거주지역" className="sm:col-span-2">
+                  {/* 첫 줄: 기본주소(검색으로 채움) + 검색 버튼. 둘째 줄: 상세주소 직접 입력. */}
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <CompactInput
+                        className="flex-1"
+                        placeholder="검색 버튼으로 주소를 찾아주세요"
+                        value={form.address}
+                        onChange={(e) => setForm((f) => ({ ...f, address: e.target.value }))}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-10 shrink-0"
+                        onClick={() => openPostcodeSearch((address) => setForm((f) => ({ ...f, address })))}
+                      >
+                        주소 검색
+                      </Button>
+                    </div>
+                    <CompactInput
+                      placeholder="상세주소 (동·호수 등)"
+                      value={form.addressDetail}
+                      onChange={(e) => setForm((f) => ({ ...f, addressDetail: e.target.value }))}
+                    />
+                  </div>
                 </Field>
                 <Field label="희망직무">
                   <CompactInput value={form.desiredJobTitle} onChange={(e) => setForm((f) => ({ ...f, desiredJobTitle: e.target.value }))} />
@@ -763,6 +814,7 @@ export function ResumeEditor({
                     ))}
                   </NativeSelect>
                 </Field>
+                </div>
               </CardContent>
             </Card>
     ),
@@ -1996,6 +2048,36 @@ function MonthPicker({
 /** 편집 폼은 짧은 값 입력칸이 많아 기본(h-12)보다 낮은 높이로 밀도를 높인다. 회색 항목 박스 위에서도 입력칸은 흰색을 유지한다. */
 function CompactInput({ className, ...props }: React.ComponentProps<typeof Input>) {
   return <Input {...props} className={cn("h-10 bg-white", className)} />;
+}
+
+/** 카카오(다음) 우편번호 서비스. 키 없이 스크립트만 얹으면 되는 공개 위젯이다. */
+declare global {
+  interface Window {
+    daum?: {
+      Postcode: new (opts: {
+        oncomplete: (data: { roadAddress: string; jibunAddress: string; buildingName?: string }) => void;
+      }) => { open: () => void };
+    };
+  }
+}
+
+function openPostcodeSearch(onPicked: (address: string) => void) {
+  const launch = () => {
+    new window.daum!.Postcode({
+      oncomplete: (data) => {
+        const base = data.roadAddress || data.jibunAddress;
+        onPicked(data.buildingName ? `${base} (${data.buildingName})` : base);
+      },
+    }).open();
+  };
+  if (window.daum?.Postcode) {
+    launch();
+    return;
+  }
+  const script = document.createElement("script");
+  script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+  script.onload = launch;
+  document.body.appendChild(script);
 }
 
 /** 작성이 끝난 항목을 보여주는 공용 요약 카드. 연필을 누르면 편집 폼으로 전환된다. */

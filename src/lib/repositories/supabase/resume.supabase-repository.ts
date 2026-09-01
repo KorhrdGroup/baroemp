@@ -24,7 +24,9 @@ function mapRow(row: Record<string, unknown>): Resume {
     email: (row.email as string | null) ?? undefined,
     phone: (row.phone as string | null) ?? undefined,
     address: (row.address as string | null) ?? undefined,
+    addressDetail: (row.address_detail as string | null) ?? undefined,
     birthDate: (row.birth_date as string | null) ?? undefined,
+    gender: (row.gender as "male" | "female" | null) ?? undefined,
     photoUrl: (row.photo_url as string | null) ?? undefined,
     portfolioUrl: (row.portfolio_url as string | null) ?? undefined,
     hasNoWorkExperience: Boolean(row.has_no_work_experience),
@@ -50,7 +52,9 @@ function toRow(input: Partial<ResumeInput>): Record<string, unknown> {
   if (input.email !== undefined) row.email = input.email;
   if (input.phone !== undefined) row.phone = input.phone;
   if (input.address !== undefined) row.address = input.address;
+  if (input.addressDetail !== undefined) row.address_detail = input.addressDetail || null;
   if (input.birthDate !== undefined) row.birth_date = input.birthDate || null;
+  if (input.gender !== undefined) row.gender = input.gender || null;
   if (input.photoUrl !== undefined) row.photo_url = input.photoUrl || null;
   if (input.portfolioUrl !== undefined) row.portfolio_url = input.portfolioUrl;
   if (input.hasNoWorkExperience !== undefined) row.has_no_work_experience = input.hasNoWorkExperience;
