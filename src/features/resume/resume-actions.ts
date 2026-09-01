@@ -44,6 +44,37 @@ import { getResumeMarketComparison } from "@/services/resume-market-comparison.s
  * Repository는 Service Role(Admin Client)로 동작해 RLS를 우회하므로,
  * "본인 데이터만 CRUD" 라는 경계는 이 Server Action 계층에서 반드시 강제해야 한다.
  */
+/**
+ * 증명사진 업로드. 공개 버킷(resume-photos)에 올리고 공개 URL을 돌려준다.
+ * URL은 클라이언트가 폼 상태에 넣고 저장 시 resumes.photo_url로 함께 저장된다.
+ */
+export async function uploadResumePhotoAction(resumeId: string, formData: FormData): Promise<{ url: string }> {
+  await requireOwnResume(resumeId);
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) throw new Error("업로드할 파일이 없습니다.");
+  if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+    throw new Error("JPG, PNG 형식의 사진만 올릴 수 있습니다.");
+  }
+  if (file.size > 5 * 1024 * 1024) throw new Error("사진은 5MB 이하로 올려주세요.");
+
+  const { createAdminSupabaseClient } = await import("@/lib/supabase/admin");
+  const admin = createAdminSupabaseClient();
+  if (!admin) throw new Error("저장소 설정이 없어 사진을 올릴 수 없습니다.");
+
+  const ext = file.type === "image/png" ? "png" : file.type === "image/webp" ? "webp" : "jpg";
+  // 같은 이력서에 다시 올리면 이전 파일을 덮어써 찌꺼기가 쌓이지 않게 한다.
+  const path = `${resumeId}/photo.${ext}`;
+  const { error } = await admin.storage
+    .from("resume-photos")
+    .upload(path, Buffer.from(await file.arrayBuffer()), { contentType: file.type, upsert: true });
+  if (error) throw new Error(`사진 업로드에 실패했습니다: ${error.message}`);
+
+  const { data } = admin.storage.from("resume-photos").getPublicUrl(path);
+  // 같은 경로를 덮어쓰므로 브라우저 캐시를 피하려면 버전 쿼리를 붙인다.
+  return { url: `${data.publicUrl}?v=${Date.now()}` };
+}
+
 async function requireOwnResume(resumeId: string): Promise<Resume> {
   const user = await requireSessionUser();
   const resume = await getResumeRepository().findById(resumeId);
