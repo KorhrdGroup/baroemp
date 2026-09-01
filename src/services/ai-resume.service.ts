@@ -82,6 +82,7 @@ export async function generateCareerSummaryWithAI(resumeId: string): Promise<AIC
   if (!detail) throw new Error("이력서를 찾을 수 없습니다.");
 
   return getAIResumeProvider().generateCareerSummary({
+    draftSummary: detail.resume.summary,
     experiences: detail.experiences.map((e) => ({ companyName: e.companyName, jobTitle: e.jobTitle, responsibilities: e.responsibilities })),
     qualifications: detail.qualifications.map((q) => q.name),
     skills: detail.skills.map((s) => s.name),
