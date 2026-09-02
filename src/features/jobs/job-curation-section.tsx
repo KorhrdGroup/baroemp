@@ -25,7 +25,13 @@ const TABS: { key: JobCurationTab; emoji: string; label: string; description?: s
     key: "matched",
     emoji: "🎯",
     label: "맞춤 추천",
-    description: "직업진단 결과와 희망 직종·지역을 기준으로 골랐어요.",
+    description: "희망 직종·지역을 기준으로 잘 맞는 순서로 골랐어요.",
+  },
+  {
+    key: "assessment_matched",
+    emoji: "🧭",
+    label: "진단 맞춤 공고",
+    description: "직업진단에서 성향이 잘 맞았던 직업의 최신 공고예요.",
   },
   {
     key: "ready_to_apply",

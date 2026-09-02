@@ -173,7 +173,7 @@ export interface JobRoleSummary {
 }
 
 /** 채용공고 큐레이션 섹션의 탭 종류 (설계: docs/superpowers/specs/2026-08-27-job-curation-section-design.md). */
-export type JobCurationTab = "new" | "closing_soon" | "matched" | "ready_to_apply" | "unlockable";
+export type JobCurationTab = "new" | "closing_soon" | "matched" | "assessment_matched" | "ready_to_apply" | "unlockable";
 
 /**
  * 큐레이션 탭 상태.

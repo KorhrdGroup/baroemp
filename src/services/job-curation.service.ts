@@ -30,7 +30,9 @@ export async function getJobCuration(userId: string, tab: JobCurationTab): Promi
       case "closing_soon":
         return withBadges({ tab, ...(await getCommonTab("closing_soon")) });
       case "matched":
-        return withBadges({ tab, ...(await getMatchedTab(userId, await loadPersonalContext(userId))) });
+        return withBadges({ tab, ...(await getMatchedTab(await loadPersonalContext(userId))) });
+      case "assessment_matched":
+        return withBadges({ tab, ...(await getAssessmentMatchedTab(userId)) });
       case "ready_to_apply":
         return withBadges({ tab, ...(await getReadyToApplyTab(userId, await loadPersonalContext(userId))) });
       case "unlockable":
@@ -80,10 +82,11 @@ async function attachReadiness(userId: string, results: JobCurationResult[]): Pr
 export async function getAllJobCurations(userId: string): Promise<JobCurationResult[]> {
   try {
     const ctx = await loadPersonalContext(userId);
-    const [newTab, closingSoon, matched, readyToApply, unlockable] = await Promise.all([
+    const [newTab, closingSoon, matched, assessmentMatched, readyToApply, unlockable] = await Promise.all([
       getCommonTab("new"),
       getCommonTab("closing_soon"),
-      getMatchedTab(userId, ctx),
+      getMatchedTab(ctx),
+      getAssessmentMatchedTab(userId),
       getReadyToApplyTab(userId, ctx),
       getUnlockableTab(userId, ctx),
     ]);
@@ -91,6 +94,7 @@ export async function getAllJobCurations(userId: string): Promise<JobCurationRes
       { tab: "new", ...newTab },
       { tab: "closing_soon", ...closingSoon },
       { tab: "matched", ...matched },
+      { tab: "assessment_matched", ...assessmentMatched },
       { tab: "ready_to_apply", ...readyToApply },
       { tab: "unlockable", ...unlockable },
     ]);
@@ -177,23 +181,21 @@ async function loadPersonalContext(
 
 type PersonalContext = Awaited<ReturnType<typeof loadPersonalContext>>;
 
-async function getMatchedTab(userId: string, ctx: PersonalContext) {
-  /*
-    검사 기반 "맞춤 공고"도 이 탭이 담당한다 (일자리 화면 상단의 별도 섹션이었다가 합쳐짐).
-    진단 추천 직업의 최신 공고를 앞에 두고, 프로필 조건 점수순 후보를 뒤에 잇는다.
-  */
+async function getMatchedTab(ctx: PersonalContext) {
+  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
+  const items = ctx.scored.slice(0, TAB_LIMIT);
+  return { state: items.length > 0 ? ("READY" as const) : ("EMPTY" as const), items };
+}
+
+/** "진단 맞춤 공고" 탭: 직업진단에서 성향이 잘 맞았던(바로 지원 트랙) 직업의 최신 공고. */
+async function getAssessmentMatchedTab(userId: string) {
   const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT).catch(() => null);
   const ready = assessment?.ready;
-  const assessmentItems: JobCurationItem[] = (ready?.jobs ?? []).map((job) => ({
-    job,
-    matchReasonLabel: `진단 추천 "${ready?.occupationName}"`,
-  }));
-  const seen = new Set(assessmentItems.map((i) => i.job.id));
-  const scored = (ctx?.scored ?? []).filter((i) => !seen.has(i.job.id));
-  const items = [...assessmentItems, ...scored].slice(0, TAB_LIMIT);
-
-  if (items.length > 0) return { state: "READY" as const, items };
-  return ctx ? { state: "EMPTY" as const, items: [] } : { state: "NEEDS_PROFILE" as const, items: [] };
+  if (!ready || ready.jobs.length === 0) return { state: "EMPTY" as const, items: [] };
+  return {
+    state: "READY" as const,
+    items: ready.jobs.map((job) => ({ job, matchReasonLabel: `진단 추천 "${ready.occupationName}"` })),
+  };
 }
 
 async function getReadyToApplyTab(userId: string, ctx: PersonalContext) {
