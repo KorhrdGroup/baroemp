@@ -33,10 +33,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const result = await signInWithSocialProfile(profile);
   if (!result) return loginWithError(request, "social_signin_failed", { provider });
 
-  // 취업 정보가 비어 있으면(신규 가입 포함) 온보딩부터. 신규 가입에만 환영 문구와 알림톡 동의를 함께 띄운다.
-  const target = result.needsOnboarding
-    ? `/onboarding/profile?${result.isNewUser ? "welcome=1&consent=1&" : ""}next=/mypage`
-    : "/mypage";
+  // 로그인 성공은 늘 마이페이지로. 가입한 그때만 온보딩을 한 번 권한다 (알림톡 동의도 그 앞에서 함께 묻는다).
+  const target = result.isNewUser ? "/onboarding/profile?welcome=1&consent=1&next=/mypage" : "/mypage";
 
   const response = NextResponse.redirect(new URL(target, request.url));
   response.cookies.delete(`social_state_${provider}`);
