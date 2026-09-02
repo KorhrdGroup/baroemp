@@ -188,13 +188,17 @@ async function getMatchedTab(ctx: PersonalContext) {
 }
 
 /** "진단 맞춤 공고" 탭: 직업진단에서 성향이 잘 맞았던(바로 지원 트랙) 직업의 최신 공고. */
+/**
+ * 진단을 안 한 회원에게 "조건에 맞는 공고가 없다"고 하면 왜 비었는지 알 수 없다.
+ * 진단 결과가 아예 없는 경우를 따로 갈라 진단으로 안내한다 (진단 맞춤 탭·자격 탭 공용).
+ */
+async function hasAssessmentResults(userId: string) {
+  const results = await getAssessmentResultRepository().findAll({ userId }).catch(() => []);
+  return results.length > 0;
+}
+
 async function getAssessmentMatchedTab(userId: string) {
-  /*
-    진단을 안 한 회원에게 "조건에 맞는 공고가 없다"고 하면 왜 비었는지 알 수 없다.
-    진단 결과가 아예 없는 경우를 따로 갈라 진단으로 안내한다.
-  */
-  const hasAssessment = (await getAssessmentResultRepository().findAll({ userId }).catch(() => [])).length > 0;
-  if (!hasAssessment) return { state: "NEEDS_ASSESSMENT" as const, items: [] };
+  if (!(await hasAssessmentResults(userId))) return { state: "NEEDS_ASSESSMENT" as const, items: [] };
 
   const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT).catch(() => null);
   const ready = assessment?.ready;
@@ -304,6 +308,11 @@ async function getUnlockableTab(userId: string, ctx: PersonalContext) {
   const items = [...assessmentItems, ...requirementItems.filter((i) => !seen.has(i.job.id))].slice(0, TAB_LIMIT);
 
   if (items.length > 0) return { state: "READY" as const, items };
+  /*
+    비었을 때 채우는 가장 빠른 길은 진단이다. 진단 준비 트랙이 이 탭의 앞자리를 채우고,
+    요건 사전 경로는 희망 직종 후보군에 자격 요건이 있는 공고가 있어야만 걸린다.
+  */
+  if (!(await hasAssessmentResults(userId))) return { state: "NEEDS_ASSESSMENT" as const, items: [] };
   return ctx ? { state: "EMPTY" as const, items: [] } : { state: "NEEDS_PROFILE" as const, items: [] };
 }
 

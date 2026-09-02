@@ -13,34 +13,14 @@ import {
   trackCurationTabViewedAction,
 } from "./job-actions";
 
-/**
- * description 은 각 탭이 무엇을 고른 결과인지 한 줄로 알려준다.
- * 문구는 job-curation.service 의 실제 기준과 맞춰야 한다
- * (신규 3일 · 마감임박 7일 · 개인화 탭은 희망 직종/지역 후보군).
- * "자격 따면 열리는 공고"만 조건 이름이 회원마다 달라 화면에서 만든다.
- */
-const TABS: { key: JobCurationTab; emoji: string; label: string; description?: string }[] = [
-  {
-    key: "matched",
-    emoji: "🎯",
-    label: "맞춤 추천",
-    description: "희망 직종·지역을 기준으로 잘 맞는 순서로 골랐어요.",
-  },
-  {
-    key: "assessment_matched",
-    emoji: "🧭",
-    label: "진단 맞춤 공고",
-    description: "직업진단에서 성향이 잘 맞았던 직업의 최신 공고예요.",
-  },
-  {
-    key: "ready_to_apply",
-    emoji: "✅",
-    label: "지금 지원가능",
-    description: "지금 갖춘 조건만으로 지원할 수 있는 공고예요.",
-  },
+/** 탭 순서. 기준은 job-curation.service (신규 3일 · 마감임박 7일 · 개인화 탭은 희망 직종/지역 후보군). */
+const TABS: { key: JobCurationTab; emoji: string; label: string }[] = [
+  { key: "matched", emoji: "🎯", label: "맞춤 추천" },
+  { key: "assessment_matched", emoji: "🧭", label: "진단 맞춤 공고" },
+  { key: "ready_to_apply", emoji: "✅", label: "지금 지원가능" },
   { key: "unlockable", emoji: "🔑", label: "자격 따면 열리는 공고" },
-  { key: "new", emoji: "✨", label: "신규 일자리", description: "최근 3일 안에 올라온 공고예요." },
-  { key: "closing_soon", emoji: "⏰", label: "마감임박", description: "일주일 안에 마감되는 공고예요." },
+  { key: "new", emoji: "✨", label: "신규 일자리" },
+  { key: "closing_soon", emoji: "⏰", label: "마감임박" },
 ];
 
 
@@ -50,10 +30,12 @@ const TABS: { key: JobCurationTab; emoji: string; label: string; description?: s
  * 내용이 가장 긴 카드가 249.2px 남짓이라, 조금 위에서 못박아야 어느 탭이든 같은 높이가 된다.
  * 최소높이를 내용보다 낮게 잡으면 내용 짧은 카드만 최소높이로 잘려 소수점만큼 덜컹인다.
  * JobCard 안쪽 여백이 바뀌면 이 값도 함께 맞춰야 한다.
+ * 카드 줄 아래에 있던 탭 설명 한 줄(19.6px + 여백 16px)을 걷어내고 그만큼 카드 줄에 얹었다.
+ * 탭 라벨이 이미 무엇을 고른 결과인지 말하고, 자격 조건은 카드 배지에 적혀 있어 겹쳤다.
  */
-const CARD_HEIGHT = "min-h-[250px]";
+const CARD_HEIGHT = "min-h-[286px]";
 /** 위 클래스와 같은 값. 줄 높이를 계산할 때 쓴다. */
-const CARD_HEIGHT_PX = 250;
+const CARD_HEIGHT_PX = 286;
 
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
@@ -208,7 +190,6 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
   }
 
   const current = results[activeTab];
-  const unlockRequirementName = current?.items[0]?.unlockRequirementName;
 
   return (
     /*
@@ -295,7 +276,12 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
               CARD_HEIGHT,
             )}
           >
-            <p>{EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}</p>
+            <p>
+              {/* 자격 탭은 "성향에 맞는 공고"가 아니라 "자격 하나로 열리는 공고"를 찾는 자리라 문구를 따로 쓴다. */}
+              {current.state === "NEEDS_ASSESSMENT" && activeTab === "unlockable"
+                ? "직업진단을 받으면 자격 하나만 채우면 열리는 공고를 찾아드려요."
+                : (EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY)}
+            </p>
             {/* 왜 비었는지만 말하고 끝내면 갈 곳이 없다. 채울 수 있는 행동으로 바로 잇는다. */}
             {current.state === "NEEDS_ASSESSMENT" && (
               <Link
@@ -316,35 +302,6 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
           </div>
         </div>
       )}
-
-      {/*
-        어떤 조건이 이 목록을 열어주는지는 공고마다 같으므로 줄 위에 한 번만 쓴다.
-        카드마다 캡션을 얹으면 카드 윗변이 어긋난다.
-
-        탭마다 무엇을 고른 결과인지 한 줄로 알려준다. 자리를 늘 잡아 두어
-        (19.6px = label-1 한 줄) 탭을 옮겨도 판이 튀지 않는다.
-
-        위아래 여백을 16px 로 맞추고, 왼쪽은 8px 들여 쓴다. 이 줄만 상자가 없어
-        글자가 판 끝(0px)에 붙는데, 위 알약 글자는 17px·아래 카드 글자는 21px 에서
-        시작해 혼자 튀어나와 보였다. 알약에 딱 맞추기보다 살짝만 들여 둔다.
-
-        문구에 "자격"을 넣지 않는다. 조건 이름이 "요양보호사 자격"이면
-        "자격 자격을"이 되고, "운전 가능"처럼 자격이 아닌 조건도 온다.
-      */}
-      {/*
-        탭마다 문구 길이가 달라, 좁은 화면에서는 한 줄짜리와 두 줄짜리가 섞인다.
-        그대로 두면 탭을 옮길 때 판이 19px 씩 오르내려, 좁은 화면에서는 두 줄을 미리 잡아 둔다.
-      */}
-      <p className="mb-4 min-h-[39.2px] pl-2 text-label-1 text-slate-600 sm:min-h-[19.6px]">
-        {unlockRequirementName ? (
-          <>
-            <strong className="font-semibold text-brand-blue-700">{unlockRequirementName}</strong>
-            {" "}하나만 채우면 지원할 수 있는 공고예요.
-          </>
-        ) : (
-          TABS.find((t) => t.key === activeTab)?.description
-        )}
-      </p>
 
       {current && current.items.length > 0 && (
         /* 높이는 바깥 칸이 잡는다. 안쪽 스크롤 줄에 걸면 카드까지 늘어나, 스크롤바가 없는
