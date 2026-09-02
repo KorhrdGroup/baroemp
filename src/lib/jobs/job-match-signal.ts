@@ -47,3 +47,19 @@ export function scoreJobBySignal(signal: JobMatchSignal, job: Job): number {
   }
   return Math.max(0, Math.min(100, score));
 }
+
+/** 점수에 들어갈 재료가 하나라도 있는지. 없으면 모든 공고가 0점이라 정렬할 의미가 없다. */
+export function hasMatchSignal(signal: JobMatchSignal): boolean {
+  return (
+    signal.desiredCategoryPrefixes.length > 0 ||
+    Boolean(signal.region) ||
+    signal.desiredSalaryMin !== undefined ||
+    signal.desiredSalaryMax !== undefined ||
+    signal.desiredWorkTypes.length > 0 ||
+    signal.isCareerOpen ||
+    signal.canDrive ||
+    signal.interestTags.length > 0 ||
+    signal.isMidlifeAge ||
+    signal.heldQualifications.length > 0
+  );
+}

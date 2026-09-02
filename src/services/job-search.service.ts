@@ -1,7 +1,7 @@
 import { findCareerProfileByUserId, getAssessmentResultRepository, getJobRepository } from "@/lib/repositories";
 import { evaluateJobFit, type JobMatchDetail } from "./job-match.service";
 import { getCandidateJobsForUser } from "./job-curation.service";
-import { toJobMatchSignal } from "@/lib/jobs/job-match-signal";
+import { hasMatchSignal, toJobMatchSignal } from "@/lib/jobs/job-match-signal";
 import type { CareerProfile, Job, JobSearchFilter, JobSearchResult } from "@/types";
 
 export interface JobWithMatch extends Job {
@@ -43,8 +43,12 @@ export async function searchJobs(params: JobSearchParams): Promise<JobSearchView
     공고 자체의 중장년 추천도만 높은 다른 지역 공고가 왔다.
   */
   const wantsRanked = params.sort === "recommended" || !params.sort;
+  const signal = profile ? toJobMatchSignal(profile) : null;
+  /* 온보딩을 건너뛰어 조건이 하나도 없는 프로필은 점수가 전부 0이다. 7만 건을 세울 이유가 없다. */
   const result: JobSearchResult =
-    wantsRanked && profile ? await repo.searchRanked(params, toJobMatchSignal(profile)) : await repo.search(params);
+    wantsRanked && signal && hasMatchSignal(signal)
+      ? await repo.searchRanked(params, signal)
+      : await repo.search(params);
 
   const items: JobWithMatch[] = result.items.map((job) => ({
     ...job,

@@ -36,7 +36,7 @@ import { splitRecommendationTracks } from "@/features/assessment/recommendation-
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { GRADE_BADGE_CLASS } from "@/features/support/grade-badge";
 import { JourneySteps, type JourneyStep } from "@/features/mypage/journey-steps";
-import { getUserCrmDetail } from "@/services/user-crm.service";
+import { getMyPageDetail } from "@/services/user-crm.service";
 import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
@@ -201,8 +201,8 @@ function StepHeading({
 /**
  * 실회원 마이페이지 (스펙 22번). mock userId(user-1001) 의존을 완전히 제거하고
  * 현재 로그인한 auth user(requireUser)의 실제 데이터만 조회한다.
- * 데이터 원천: getUserCrmDetail() - 관리자 CRM 상세와 동일한 서비스를 재사용해
- * "회원이 보는 자기 데이터"와 "관리자가 보는 회원 데이터"가 항상 일치하도록 한다.
+ * 데이터 원천: getMyPageDetail() - 관리자 CRM 상세(getUserCrmDetail)와 같은 저장소를 읽되,
+ * 회원 화면에 안 쓰는 리드·지원제도 전체·추천 매칭은 빼서 가볍게 간다.
  *
  * 화면은 취업까지의 다섯 단계 순서로 세운다 (프로필 → 진단·지원금 → 공고 → 서류 → 지원).
  * 주 이용층인 5060 이 가입한 뒤 "그다음 뭘 하지"를 고민하지 않게, 맨 위 절차 띠가
@@ -211,7 +211,7 @@ function StepHeading({
 export default async function MyPage() {
   const user = await requireUser("/mypage");
   // 프로필 행이 아직 없어도(가입 직후, Mock 로그인 등) 인증 정보로 최소 프로필을 만들어 화면을 연다.
-  const detail = await getUserCrmDetail(user.id, {
+  const detail = await getMyPageDetail(user.id, {
     id: user.id,
     name: user.name,
     email: user.email,
