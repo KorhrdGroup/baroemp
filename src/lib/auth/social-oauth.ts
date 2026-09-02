@@ -23,6 +23,8 @@ export interface SocialProfile {
   providerId: string;
   name?: string;
   phone?: string;
+  /** 제공자가 이메일 동의항목을 켜 둔 경우에만 온다. 없으면 합성 주소로 계정을 만들고 프로필 이메일은 비워 둔다. */
+  email?: string;
 }
 
 export function isSocialProvider(value: string): value is SocialProvider {
@@ -125,7 +127,7 @@ async function fetchSocialProfile(provider: SocialProvider, accessToken: string)
     });
     const json = (await res.json()) as {
       resultcode?: string;
-      response?: { id?: string; name?: string; mobile?: string };
+      response?: { id?: string; name?: string; mobile?: string; email?: string };
     };
     if (json.resultcode !== "00" || !json.response?.id) return null;
     return {
@@ -133,6 +135,7 @@ async function fetchSocialProfile(provider: SocialProvider, accessToken: string)
       providerId: json.response.id,
       name: json.response.name,
       phone: normalizePhone(json.response.mobile),
+      email: normalizeEmail(json.response.email),
     };
   }
   const res = await fetch("https://kapi.kakao.com/v2/user/me", {
@@ -143,7 +146,7 @@ async function fetchSocialProfile(provider: SocialProvider, accessToken: string)
     id?: number;
     msg?: string;
     code?: number;
-    kakao_account?: { name?: string; phone_number?: string; profile?: { nickname?: string } };
+    kakao_account?: { name?: string; phone_number?: string; email?: string; profile?: { nickname?: string } };
   };
   if (!json.id) {
     console.error("[social-oauth] kakao profile fetch failed", {
@@ -160,7 +163,18 @@ async function fetchSocialProfile(provider: SocialProvider, accessToken: string)
     providerId: String(json.id),
     name: json.kakao_account?.name ?? json.kakao_account?.profile?.nickname,
     phone: normalizePhone(rawPhone),
+    email: normalizeEmail(json.kakao_account?.email),
   };
+}
+
+function normalizeEmail(value: string | undefined): string | undefined {
+  const v = value?.trim().toLowerCase();
+  return v && v.includes("@") ? v : undefined;
+}
+
+/** 합성 계정 주소(소셜/전화 가입). 회원에게 보여줄 이메일이 아니다. */
+export function isSyntheticEmail(email: string | null | undefined): boolean {
+  return Boolean(email && /@(social|member)\.baroemp\.app$/i.test(email));
 }
 
 export interface SocialProfileResolution {
@@ -190,7 +204,9 @@ function socialAccountEmail(profile: SocialProfile): string {
  * 소셜 프로필로 회원을 확보하고 현재 요청에 세션 쿠키를 발급한다.
  * @returns isNewUser - 이번에 새로 가입된 회원인지 (온보딩 이동 판단용)
  */
-export async function signInWithSocialProfile(profile: SocialProfile): Promise<{ isNewUser: boolean } | null> {
+export async function signInWithSocialProfile(
+  profile: SocialProfile,
+): Promise<{ isNewUser: boolean; needsOnboarding: boolean } | null> {
   const admin = createAdminSupabaseClient();
   const supabase = await createServerSupabaseClient();
   if (!admin || !supabase) return null;
@@ -232,7 +248,21 @@ export async function signInWithSocialProfile(profile: SocialProfile): Promise<{
     userId,
     name: profile.name,
     phone: profile.phone,
+    email: profile.email,
   });
+
+  /*
+    프로필 이메일 정리. 가입 트리거가 auth 이메일(합성 주소)을 그대로 복사하므로,
+    제공자가 실제 이메일을 줬으면 그걸로 덮고, 없으면 합성 주소는 비워 둔다.
+    빈 칸이어야 온보딩·마이페이지에서 회원이 직접 채울 수 있다.
+  */
+  const { data: existingProfile } = await admin.from("profiles").select("email").eq("id", userId).maybeSingle();
+  const currentEmail = (existingProfile?.email as string | null) ?? null;
+  if (profile.email && currentEmail !== profile.email && (!currentEmail || isSyntheticEmail(currentEmail))) {
+    await admin.from("profiles").update({ email: profile.email }).eq("id", userId);
+  } else if (!profile.email && isSyntheticEmail(currentEmail)) {
+    await admin.from("profiles").update({ email: null }).eq("id", userId);
+  }
 
   await logActivityEvent({
     userId,
@@ -241,5 +271,17 @@ export async function signInWithSocialProfile(profile: SocialProfile): Promise<{
     metadata: { socialProvider: profile.provider, hasPhone: Boolean(profile.phone) },
   });
 
-  return { isNewUser };
+  /*
+    온보딩은 "이번에 가입했는가"가 아니라 "취업 정보가 비어 있는가"로 정한다.
+    auth 계정만 남고 프로필·취업정보가 지워진 회원(테스트 정리 등)이 다시 로그인하면
+    isNewUser=false 라 온보딩을 건너뛰고 빈 마이페이지로 떨어졌다.
+  */
+  const { data: career } = await admin
+    .from("career_profiles")
+    .select("region, employment_status")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const needsOnboarding = isNewUser || !career || (!career.region && !career.employment_status);
+
+  return { isNewUser, needsOnboarding };
 }

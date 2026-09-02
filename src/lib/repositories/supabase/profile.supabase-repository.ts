@@ -37,6 +37,7 @@ export function createSupabaseProfileRepository(): ProfileRepository | null {
       const payload: Record<string, unknown> = {};
       if (patch.name !== undefined) payload.name = patch.name;
       if (patch.phone !== undefined) payload.phone = patch.phone;
+      if (patch.email !== undefined) payload.email = patch.email;
       if (patch.marketingConsent !== undefined) {
         payload.marketing_consent = patch.marketingConsent;
         payload.marketing_consent_at = patch.marketingConsentAt ?? null;
