@@ -4,14 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { setMarketingConsentAction } from "@/features/profile/marketing-consent-actions";
 
 /**
@@ -37,35 +30,42 @@ export function MarketingConsentDialog() {
 
   return (
     <Dialog open={open} onOpenChange={(next) => !pending && setOpen(next)}>
-      <DialogContent className="max-w-md" showCloseButton={false}>
-        <DialogHeader className="items-center text-center sm:text-center">
-          <span className="mb-2 flex size-12 items-center justify-center rounded-full bg-brand-blue-50 text-brand-blue-600">
+      {/* 아래 여백은 기본보다 줄인다. 버튼 둘 아래에 판이 길게 남았다. */}
+      <DialogContent className="max-w-md gap-6 px-5 pb-4 pt-6" showCloseButton={false}>
+        <DialogHeader className="items-center gap-3 text-center sm:text-center">
+          <span className="mb-1 flex size-12 items-center justify-center rounded-full bg-brand-blue-50 text-brand-blue-600">
             <BellRing className="size-6" />
           </span>
           <DialogTitle className="text-title-3 font-bold text-slate-900">맞춤 정보를 알림톡으로 받아보시겠어요?</DialogTitle>
-          <DialogDescription className="break-keep text-body-2 leading-relaxed text-slate-600">
-            동의하시면 내 조건에 맞는 새 채용공고와 받을 수 있는 지원금 소식을 카카오 알림톡으로 보내드려요.
+          <DialogDescription className="break-keep text-body-2 leading-relaxed text-slate-500">
+            내 조건에 맞는 새 공고와 지원금 소식을
             <br />
-            무료이니 한번 받아보세요. 나중에 마이페이지 정보 수정에서 언제든 철회할 수 있어요.
-            <br />
-            <a
-              href="/marketing-consent"
-              target="_blank"
-              rel="noopener"
-              className="mt-1 inline-block text-label-1 text-slate-500 underline underline-offset-2 hover:text-slate-700"
-            >
-              동의 내용 자세히 보기
-            </a>
+            카카오 알림톡으로 보내드려요.
+            {/* 부가 설명은 한 단계 작고 옅게. 본문과 같은 크기면 세 줄이 한 덩어리로 읽힌다. */}
+            {/* 부가 설명과 동의 내용 링크는 한 줄. 작고 옅게 두어 본문 두 줄이 주인공으로 남게. */}
+            <span className="mt-3 block text-label-2 text-slate-400">
+              마이페이지에서 언제든 끌 수 있어요 ·{" "}
+              <a
+                href="/marketing-consent"
+                target="_blank"
+                rel="noopener"
+                className="underline underline-offset-2 hover:text-slate-600"
+              >
+                동의 내용 자세히 보기
+              </a>
+            </span>
           </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-col gap-2 sm:flex-col">
-          <Button size="lg" className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" onClick={agree} disabled={pending}>
+        {/* DialogFooter 의 회색 띠·윗선을 쓰지 않는다. 창 하나가 흰 판 하나로 읽히게. */}
+        <div className="flex flex-col gap-1">
+          <Button size="lg" className="w-full bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" onClick={agree} disabled={pending}>
             {pending ? "저장 중..." : "네, 받아볼게요"}
           </Button>
-          <Button size="lg" variant="ghost" className="w-full text-slate-500" onClick={() => setOpen(false)} disabled={pending}>
+          {/* 보조 버튼은 주 버튼만큼 높을 이유가 없다. 위아래를 줄여 주 버튼에 붙인다. */}
+          <Button variant="ghost" className="h-10 w-full text-slate-500" onClick={() => setOpen(false)} disabled={pending}>
             나중에 할게요
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );
