@@ -198,7 +198,8 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
 export async function signInAction(_prev: AuthFormState, formData: FormData): Promise<AuthFormState> {
   const identifier = String(formData.get("email") ?? "").trim().toLowerCase();
   const password = String(formData.get("password") ?? "");
-  const next = sanitizeNextPath(String(formData.get("next") ?? ""), "/mypage");
+  // 로그인 성공 후에는 늘 마이페이지로 보낸다. next 로 원래 있던 화면에 되돌려 보내면 회원이
+  // 자기 상태(진행 절차·프로필)를 못 보고 넘어가서, 아직 안 한 다음 할 일을 놓친다.
 
   if (!identifier || !password) {
     return { error: "이메일(또는 휴대전화번호)과 비밀번호를 입력해주세요." };
@@ -227,7 +228,7 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
     // Mock Mode: Supabase 미설정 시 아무 이메일/비밀번호로나 가짜 세션을 만들어 로그인시킨다.
     const { createMockSession } = await import("@/lib/auth/mock-session");
     await createMockSession(email);
-    redirect(next);
+    redirect("/mypage");
   }
 
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -251,7 +252,7 @@ export async function signInAction(_prev: AuthFormState, formData: FormData): Pr
 
   await afterAuthSuccess(data.user.id);
 
-  redirect(next);
+  redirect("/mypage");
 }
 
 export async function signOutAction(): Promise<void> {
