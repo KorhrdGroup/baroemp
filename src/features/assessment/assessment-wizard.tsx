@@ -15,6 +15,7 @@ import {
   QuestionRenderer,
   createEmptyAnswerValue,
   isAnswerValueFilled,
+  parseScaleEndpointLabels,
   type AnswerValue,
 } from "./question-renderer";
 
@@ -229,13 +230,22 @@ export function AssessmentWizard({
         <p className="text-center text-body-2 font-bold text-slate-900">
           {posInSection + 1}/{sectionTotal}
         </p>
-        <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">
+        {/*
+          질문은 두 줄이 되기 쉽다. break-keep 은 한글 어절 중간에서 잘리지 않게,
+          text-balance 는 두 줄 길이를 맞춰 마지막 줄에 한 단어만 남는 걸 막고,
+          leading-[1.4] 는 기본 line-height(1.2)에서 살짝 여유를 준다.
+        */}
+        <h2 className="mt-3 text-center text-title-2 leading-[1.4] font-bold break-keep text-balance text-slate-900">
           {question.questionText}
           {!question.required && (
             <span className="ml-2 text-label-1 font-normal text-slate-400">(선택)</span>
           )}
         </h2>
-        {question.description && (
+        {/*
+          척도 문항의 "1(부담스럽다) ~ 5(자신있다)" 설명은 척도 하단 라벨로 옮겼으므로 여기서는 감춘다.
+          그 외 문항 설명은 그대로 문항 아래에 남긴다.
+        */}
+        {question.description && !parseScaleEndpointLabels(question.description) && (
           <p className="mt-3 text-center text-body-2-reading text-slate-500">{question.description}</p>
         )}
 

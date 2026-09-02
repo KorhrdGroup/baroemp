@@ -848,7 +848,8 @@ export function SupportFlow({
         <p className="text-center text-body-2 font-bold text-slate-900">
           {posInGroup + 1}/{groupSteps.length}
         </p>
-        <h2 className="mt-3 text-center text-title-2 font-bold text-slate-900">{step.title}</h2>
+        {/* 진단·온보딩 위저드와 같은 규칙: 어절 중간 잘림 방지 + 두 줄 길이 균형 + 살짝 여유 있는 줄간격. */}
+        <h2 className="mt-3 text-center text-title-2 leading-[1.4] font-bold break-keep text-balance text-slate-900">{step.title}</h2>
         {step.description && (
           <p className="mt-3 text-center text-body-2-reading text-slate-500">{step.description}</p>
         )}

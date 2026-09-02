@@ -336,9 +336,10 @@ export function OnboardingWizard({
             {posInGroup + 1}/{groupSteps.length}
           </p>
         )}
+        {/* 진단·지원금 위저드와 같은 규칙: 어절 중간 잘림 방지 + 두 줄 길이 균형 + 살짝 여유 있는 줄간격. */}
         <h2
           className={cn(
-            "text-center text-title-2 font-bold break-keep text-slate-900",
+            "text-center text-title-2 leading-[1.4] font-bold break-keep text-balance text-slate-900",
             groupSteps.length > 1 && "mt-3",
           )}
         >
