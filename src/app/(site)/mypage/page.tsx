@@ -104,7 +104,8 @@ async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData>
     const supportRepo = getSupportProgramRepository();
     const applyEvents = events.filter((e) => e.eventType === "support_apply_clicked" && e.entityId).slice(0, 4);
 
-    const topMatchRows = [...matches].sort((a, b) => b.score - a.score).slice(0, 3);
+    // 화면에서는 옆 직업진단 카드 높이에 맞춰 3~6건을 보여준다. 넉넉히 6건까지 받아 둔다.
+    const topMatchRows = [...matches].sort((a, b) => b.score - a.score).slice(0, 6);
 
     const [bookmarked, applyPrograms, topPrograms] = await Promise.all([
       Promise.all(bookmarkIds.slice(0, 6).map((id) => supportRepo.findById(id))),
@@ -350,6 +351,19 @@ export default async function MyPage() {
     },
   ];
   const stepDone = Object.fromEntries(steps.map((s) => [s.id, s.done]));
+
+  /*
+    2단계의 두 카드는 나란히 선다. 직업진단 카드가 두 트랙으로 길어지면 옆 지원금 카드 아래가 비어
+    보였다. 서버는 높이를 못 재니, 직업진단 카드의 줄 수(준비 트랙은 두 줄짜리라 1.5로 침)에 맞춰
+    지원금 결과를 3~6건 보여준다.
+  */
+  const tracks = latestResult ? splitRecommendationTracks(latestResult.recommendations) : null;
+  const readyRows = tracks ? Math.min(3, tracks.ready.length) : 0;
+  const prepRows = tracks ? Math.min(3, tracks.preparation.length) : 0;
+  const supportLimit = Math.min(
+    6,
+    Math.max(3, readyRows + Math.round(prepRows * 1.5) + (readyRows > 0 && prepRows > 0 ? 1 : 0)),
+  );
   const readySteps = steps.slice(0, 4);
   const allReady = readySteps.every((s) => s.done);
   const nextReadyStep = readySteps.find((s) => !s.done);
@@ -491,7 +505,7 @@ export default async function MyPage() {
                     행은 회색 상자 없이 구분선으로만 가르고, 순위·트랙은 왼쪽 동그란 배지로 읽힌다.
                   */}
                   {(() => {
-                    const { ready, preparation } = splitRecommendationTracks(latestResult.recommendations);
+                    const { ready, preparation } = tracks!;
                     return (
                       <div className="space-y-4">
                         {ready.length > 0 && (
@@ -598,7 +612,7 @@ export default async function MyPage() {
                   {/* 검사일과 버튼만 있으면 무엇이 나왔는지 다시 들어가 봐야 안다. 직업진단처럼 상위 몇 건을 적는다. */}
                   {supportData.topMatches.length > 0 && (
                     <div>
-                      {supportData.topMatches.map(({ program, grade }) => (
+                      {supportData.topMatches.slice(0, supportLimit).map(({ program, grade }) => (
                         <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
                           <span className="truncate text-body-2 font-semibold text-slate-800">{program.title}</span>
                           <span className="flex shrink-0 items-center gap-2">
