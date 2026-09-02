@@ -283,8 +283,8 @@ export default async function MyPage() {
     hiredCount > 0
       ? "취업 성공"
       : hasApplied
-        ? `지원 ${applications.length}건${interviewCount > 0 ? ` · 면접 ${interviewCount}` : ""}`
-        : "아직 지원 전";
+        ? `지원 ${applications.length}건${interviewCount > 0 ? ` · 면접 ${interviewCount}회` : ""}`
+        : "아직 지원 안 함";
 
   /*
     완료 판정은 이미 쌓이는 데이터로 역산한다 (별도 진행률 테이블 없음).
@@ -295,7 +295,7 @@ export default async function MyPage() {
       id: "profile",
       step: 1,
       title: "취업 프로필",
-      detail: hasCareerProfile ? "입력 완료" : "아직 안 채움",
+      detail: hasCareerProfile ? "다 채웠어요" : "아직 못 채웠어요",
       done: hasCareerProfile,
       href: hasCareerProfile ? "/mypage/profile" : "/onboarding/profile",
       actionLabel: "취업 프로필 채우기",
@@ -306,7 +306,7 @@ export default async function MyPage() {
       id: "diagnosis",
       step: 2,
       title: "직업진단 · 지원금",
-      detail: [latestResult ? "직업진단 완료" : "직업진단 전", supportData.latestSessionId ? "지원금 완료" : "지원금 전"].join(
+      detail: [latestResult ? "직업진단 완료" : "직업진단 아직", supportData.latestSessionId ? "지원금 완료" : "지원금 아직"].join(
         " · ",
       ),
       done: Boolean(latestResult),
@@ -319,7 +319,7 @@ export default async function MyPage() {
       id: "jobs",
       step: 3,
       title: "일자리 알아보기",
-      detail: `찜한 일자리 ${jobData.bookmarkCount} · 지원제도 ${supportData.bookmarkCount}`,
+      detail: `찜한 일자리 ${jobData.bookmarkCount}개 · 지원제도 ${supportData.bookmarkCount}개`,
       /* 카드에 보이는 것(찜)만 근거로 삼는다. 보이지 않는 클릭 기록으로 완료가 되면 "값이 없는데 왜 찼지"가 된다. */
       done: jobData.bookmarkCount > 0 || supportData.bookmarkCount > 0,
       href: "/jobs",
@@ -331,7 +331,7 @@ export default async function MyPage() {
       id: "documents",
       step: 4,
       title: "이력서 · 자소서",
-      detail: `이력서 ${resumeCount} · 자기소개서 ${coverLetterCount}`,
+      detail: `이력서 ${resumeCount}개 · 자기소개서 ${coverLetterCount}개`,
       done: resumeCount > 0,
       href: "/resume/new",
       actionLabel: "이력서 만들기",
@@ -426,17 +426,17 @@ export default async function MyPage() {
                   <InfoRow label="가입일" value={profile.createdAt.slice(0, 10)} />
                 </dl>
               </div>
-              <div>
+              <div className="flex flex-col">
                 <h3 className="mb-3 flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
                   <Briefcase className="size-4" /> 취업 프로필
                 </h3>
                 {!hasCareerProfile ? (
-                  /* "-" 줄 대신 왜 비었는지와 채우러 갈 길을 둔다. */
-                  <div className="space-y-3">
+                  /* "-" 줄 대신 왜 비었는지와 채우러 갈 길을 둔다. 버튼은 카드 아래에 붙여 옆 칸과 높이를 맞춘다. */
+                  <div className="flex flex-1 flex-col gap-3">
                     <p className="text-label-1 leading-relaxed text-slate-500">
                       아직 취업 프로필을 설정하지 않았어요. 희망 직종·지역을 알려주시면 맞춤 공고를 골라드려요.
                     </p>
-                    <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                    <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                       <Link href="/onboarding/profile">취업 프로필 채우기</Link>
                     </Button>
                   </div>
