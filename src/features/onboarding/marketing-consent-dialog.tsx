@@ -43,7 +43,7 @@ export function MarketingConsentDialog() {
             카카오 알림톡으로 보내드려요.
             {/* 부가 설명은 한 단계 작고 옅게. 본문과 같은 크기면 세 줄이 한 덩어리로 읽힌다. */}
             {/* 부가 설명과 동의 내용 링크는 한 줄. 작고 옅게 두어 본문 두 줄이 주인공으로 남게. */}
-            <span className="mt-3 block text-label-1 text-slate-400">
+            <span className="mt-3 block text-label-2 text-slate-400">
               마이페이지에서 언제든 끌 수 있어요 ·{" "}
               <a
                 href="/marketing-consent"
