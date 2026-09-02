@@ -393,6 +393,18 @@ export default async function MyPage() {
   );
 
   /* 트랙 하나를 그린다. 희망지역 공고가 하나도 없으면 줄마다 붙이는 대신 한 줄로 알린다. */
+  /*
+    카드에서 본 것과 같은 조건으로 일자리찾기 목록을 여는 주소.
+    직종·지역은 검색바의 필터 값이라, 눌러 간 목록의 필터가 그대로 켜져 있다.
+  */
+  const jobsListHref = (category?: string, region?: string) => {
+    const params = new URLSearchParams();
+    if (category) params.set("category", category);
+    if (region) params.set("region", region);
+    const query = params.toString();
+    return `/jobs${query ? `?${query}` : ""}`;
+  };
+
   const assessmentTrack = (track: { jobs: Job[]; outsideRegionJobIds?: string[] }) => {
     const outside = new Set(track.outsideRegionJobIds ?? []);
     const allOutside = track.jobs.length > 0 && track.jobs.every((j) => outside.has(j.id));
@@ -794,23 +806,54 @@ export default async function MyPage() {
                 <CardContent className="flex flex-1 flex-col justify-between space-y-7 text-label-1 text-slate-600">
                   {assessmentJobs.ready && (
                     <div>
-                      <p className="mb-1.5 text-label-1 font-semibold text-slate-500">
-                        지금 바로 지원 · {assessmentJobs.ready.occupationName}
-                      </p>
+                      <div className="mb-1.5 flex items-center justify-between gap-2">
+                        <p className="min-w-0 truncate text-label-1 font-semibold text-slate-500">
+                          지금 바로 지원 · {assessmentJobs.ready.occupationName}
+                        </p>
+                        {/* 지역은 이 트랙이 희망지역 공고로 채워졌을 때만 건다. 아니면 눌러도 0건이다. */}
+                        <Link
+                          href={jobsListHref(
+                            assessmentJobs.ready.jobCategoryCode,
+                            assessmentJobs.ready.jobs.every((j) =>
+                              (assessmentJobs.ready?.outsideRegionJobIds ?? []).includes(j.id),
+                            )
+                              ? undefined
+                              : careerProfile?.region,
+                          )}
+                          className="shrink-0 text-label-1 font-medium text-slate-500"
+                        >
+                          더보기 →
+                        </Link>
+                      </div>
                       {assessmentTrack(assessmentJobs.ready)}
                     </div>
                   )}
                   {assessmentJobs.preparation && (
                     <div>
-                      <p className="mb-1.5 flex flex-wrap items-center gap-x-1.5 text-label-1 font-semibold text-slate-500">
-                        <KeyRound className="size-3.5 text-amber-600" />
-                        자격 따면 열리는 · {assessmentJobs.preparation.occupationName}
-                        {assessmentJobs.preparation.missingQualifications?.length ? (
-                          <span className="font-medium text-amber-700">
-                            ({assessmentJobs.preparation.missingQualifications.join(", ")} 취득 시)
-                          </span>
-                        ) : null}
-                      </p>
+                      <div className="mb-1.5 flex items-start justify-between gap-2">
+                        <p className="flex min-w-0 flex-wrap items-center gap-x-1.5 text-label-1 font-semibold text-slate-500">
+                          <KeyRound className="size-3.5 text-amber-600" />
+                          자격 따면 열리는 · {assessmentJobs.preparation.occupationName}
+                          {assessmentJobs.preparation.missingQualifications?.length ? (
+                            <span className="font-medium text-amber-700">
+                              ({assessmentJobs.preparation.missingQualifications.join(", ")} 취득 시)
+                            </span>
+                          ) : null}
+                        </p>
+                        <Link
+                          href={jobsListHref(
+                            assessmentJobs.preparation.jobCategoryCode,
+                            assessmentJobs.preparation.jobs.every((j) =>
+                              (assessmentJobs.preparation?.outsideRegionJobIds ?? []).includes(j.id),
+                            )
+                              ? undefined
+                              : careerProfile?.region,
+                          )}
+                          className="shrink-0 text-label-1 font-medium text-slate-500"
+                        >
+                          더보기 →
+                        </Link>
+                      </div>
                       {assessmentTrack(assessmentJobs.preparation)}
                     </div>
                   )}
@@ -822,10 +865,20 @@ export default async function MyPage() {
             <div className="flex flex-col gap-4">
             {jobData.recommended.length > 0 && (
               <Card className={myPageCardClass}>
-                <CardHeader>
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
                     <Sparkles className="size-4" /> 맞춤 일자리
                   </CardTitle>
+                  {/* 맞춤의 근거인 희망 직종·지역을 그대로 필터로 걸어 목록을 연다. */}
+                  <Link
+                    href={jobsListHref(
+                      (careerProfile?.desiredJobCategories ?? []).join(","),
+                      careerProfile?.region,
+                    )}
+                    className="shrink-0 text-label-1 font-medium text-slate-500"
+                  >
+                    더보기 →
+                  </Link>
                 </CardHeader>
                 <CardContent className="text-label-1 text-slate-600">
                   {jobData.recommended.map((job) => (
