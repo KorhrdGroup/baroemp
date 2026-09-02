@@ -49,12 +49,38 @@ export function applyCareerProfileUpdatePolicy(
 export async function promoteAssessmentQualifications(
   userId: string,
   names: string[],
-  source: "ASSESSMENT" | "ONBOARDING" = "ASSESSMENT",
+  source: "ASSESSMENT" | "ONBOARDING" | "MANUAL" = "ASSESSMENT",
 ): Promise<void> {
   const repo = getUserQualificationRepository();
   const unique = [...new Set(names.map((n) => n.trim()).filter(Boolean))];
   for (const name of unique) {
     await repo.upsertFromAssessment({ userId, name, source });
+  }
+}
+
+/**
+ * 내 정보 수정에서 고른 보유 자격을 Career DB에 맞춘다.
+ *
+ * 체크한 것은 추가하고, 체크를 푼 것은 지운다 - 단 지우는 건 화면에서 고를 수 있는 항목
+ * (editableNames)에 한한다. 이력서에서 올라온 "한식조리기능사"처럼 목록에 없는 자격은
+ * 화면에 체크박스가 없어서 "풀었다"고 볼 수 없으므로 그대로 둔다.
+ */
+export async function syncHeldQualifications(
+  userId: string,
+  selectedNames: string[],
+  editableNames: string[],
+): Promise<void> {
+  const repo = getUserQualificationRepository();
+  const current = await repo.findByUserId(userId);
+  const selected = new Set(selectedNames.map((n) => n.trim()).filter(Boolean));
+  const editable = new Set(editableNames);
+
+  const currentNames = new Set(current.map((q) => q.name));
+  for (const name of selected) {
+    if (!currentNames.has(name)) await repo.upsertFromAssessment({ userId, name, source: "MANUAL" });
+  }
+  for (const record of current) {
+    if (editable.has(record.name) && !selected.has(record.name)) await repo.remove({ userId, id: record.id });
   }
 }
 

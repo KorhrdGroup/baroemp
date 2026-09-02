@@ -115,5 +115,15 @@ export function createSupabaseUserQualificationRepository(): UserQualificationRe
         expiresAt: (row.expires_at as string | null) ?? undefined,
       };
     },
+    async remove({ userId, id }) {
+      // user_id 를 함께 걸어 남의 기록을 지우지 못하게 한다.
+      const { error, count } = await client
+        .from("user_qualifications")
+        .delete({ count: "exact" })
+        .eq("id", id)
+        .eq("user_id", userId);
+      if (error) throwDataSourceError("UserQualificationRepository.remove", error);
+      return (count ?? 0) > 0;
+    },
   };
 }

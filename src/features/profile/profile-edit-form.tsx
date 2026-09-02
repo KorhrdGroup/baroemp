@@ -12,7 +12,7 @@ import {
   REGION_LABELS,
   WORK_TYPE_LABELS,
 } from "@/lib/labels";
-import { ChipToggle, JOB_CATEGORY_OPTIONS } from "./profile-form-fields";
+import { ChipToggle, JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "./profile-form-fields";
 
 /*
   고르는 칸. 창은 OS 기본 피커를 그대로 쓴다 - 모바일에서 커스텀 목록보다 그편이 낫다.
@@ -51,10 +51,24 @@ import type { CareerProfile, Profile, WorkType } from "@/types";
 
 const initialState: ProfileEditFormState = {};
 
-export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; careerProfile: CareerProfile | null }) {
+export function ProfileEditForm({
+  profile,
+  careerProfile,
+  heldQualificationNames = [],
+}: {
+  profile: Profile;
+  careerProfile: CareerProfile | null;
+  /** Career DB(user_qualifications)에 등록된 보유 자격. 선택지에 있는 것만 체크 상태로 보인다. */
+  heldQualificationNames?: string[];
+}) {
   const [state, formAction, pending] = useActionState(updateProfileAction, initialState);
   const [jobCategories, setJobCategories] = useState<string[]>(careerProfile?.desiredJobCategories ?? []);
   const [workTypes, setWorkTypes] = useState<WorkType[]>(careerProfile?.desiredWorkTypes ?? []);
+  const [qualifications, setQualifications] = useState<string[]>(
+    heldQualificationNames.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
+  );
+  // 목록에 없는 자격(이력서에서 올라온 것 등)은 여기서 고칠 수 없으니, 있다는 것만 알려준다.
+  const otherQualifications = heldQualificationNames.filter((n) => !QUALIFICATION_OPTIONS.includes(n));
 
   return (
     <form action={formAction} className="space-y-8">
@@ -73,21 +87,21 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
         <h2 className="text-body-2 font-bold text-slate-900">내 정보</h2>
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="name" className="mb-1.5">
+            <Label htmlFor="name" className="mb-1.5 text-slate-700">
               이름
             </Label>
             <Input id="name" name="name" defaultValue={profile.name} required />
             {state.fieldErrors?.name && <p className="mt-1 text-label-2 text-red-600">{state.fieldErrors.name}</p>}
           </div>
           <div>
-            <Label htmlFor="phone" className="mb-1.5">
+            <Label htmlFor="phone" className="mb-1.5 text-slate-700">
               휴대전화번호
             </Label>
             <Input id="phone" name="phone" type="tel" defaultValue={profile.phone} placeholder="010-1234-5678" />
             {state.fieldErrors?.phone && <p className="mt-1 text-label-2 text-red-600">{state.fieldErrors.phone}</p>}
           </div>
           <div>
-            <Label className="mb-1.5">이메일</Label>
+            <Label className="mb-1.5 text-slate-700">이메일</Label>
             <Input value={profile.email ?? ""} disabled />
             <p className="mt-1 text-label-2 text-slate-400">이메일은 변경할 수 없습니다.</p>
           </div>
@@ -99,7 +113,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="employmentStatus" className="mb-1.5">
+            <Label htmlFor="employmentStatus" className="mb-1.5 text-slate-700">
               취업상태
             </Label>
             <SelectField id="employmentStatus" name="employmentStatus" defaultValue={careerProfile?.employmentStatus ?? ""}>
@@ -113,7 +127,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
           </div>
 
           <div>
-            <Label htmlFor="region" className="mb-1.5">
+            <Label htmlFor="region" className="mb-1.5 text-slate-700">
               희망지역
             </Label>
             <SelectField id="region" name="region" defaultValue={careerProfile?.region ?? ""}>
@@ -127,7 +141,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
           </div>
 
           <div>
-            <Label htmlFor="desiredStartTiming" className="mb-1.5">
+            <Label htmlFor="desiredStartTiming" className="mb-1.5 text-slate-700">
               희망 취업시기
             </Label>
             <SelectField id="desiredStartTiming" name="desiredStartTiming" defaultValue={careerProfile?.desiredStartTiming ?? ""}>
@@ -142,7 +156,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
 
           <div className="flex gap-2">
             <div className="flex-1">
-              <Label htmlFor="desiredSalaryMin" className="mb-1.5">
+              <Label htmlFor="desiredSalaryMin" className="mb-1.5 text-slate-700">
                 희망급여(만원, 최소)
               </Label>
               <Input
@@ -154,7 +168,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
               />
             </div>
             <div className="flex-1">
-              <Label htmlFor="desiredSalaryMax" className="mb-1.5">
+              <Label htmlFor="desiredSalaryMax" className="mb-1.5 text-slate-700">
                 최대
               </Label>
               <Input
@@ -169,7 +183,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
         </div>
 
         <div>
-          <Label className="mb-2">희망 근무형태</Label>
+          <Label className="mb-2 text-slate-700">희망 근무형태</Label>
           <div className="flex flex-wrap gap-2">
             {Object.entries(WORK_TYPE_LABELS).map(([code, label]) => {
               const value = code as WorkType;
@@ -193,7 +207,7 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
         </div>
 
         <div>
-          <Label className="mb-2">희망 직종</Label>
+          <Label className="mb-2 text-slate-700">희망 직종</Label>
           <div className="flex flex-wrap gap-2">
             {JOB_CATEGORY_OPTIONS.map((opt) => {
               const selected = jobCategories.includes(opt.code);
@@ -215,6 +229,34 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
           {jobCategories.map((v) => (
             <input key={v} type="hidden" name="desiredJobCategories" value={v} />
           ))}
+        </div>
+
+        <div>
+          <Label className="mb-2 text-slate-700">보유 자격증</Label>
+          <div className="flex flex-wrap gap-2">
+            {QUALIFICATION_OPTIONS.map((name) => {
+              const selected = qualifications.includes(name);
+              return (
+                <ChipToggle
+                  key={name}
+                  selected={selected}
+                  onClick={() =>
+                    setQualifications((prev) => (selected ? prev.filter((v) => v !== name) : [...prev, name]))
+                  }
+                >
+                  {name}
+                </ChipToggle>
+              );
+            })}
+          </div>
+          {qualifications.map((v) => (
+            <input key={v} type="hidden" name="heldQualifications" value={v} />
+          ))}
+          {otherQualifications.length > 0 && (
+            <p className="mt-2 text-label-2 text-slate-400">
+              이력서 등에서 등록된 자격: {otherQualifications.join(", ")} (이력서에서 수정할 수 있어요)
+            </p>
+          )}
         </div>
 
         <label className="flex items-center gap-2 text-label-1 text-slate-700">

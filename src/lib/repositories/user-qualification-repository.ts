@@ -33,6 +33,8 @@ export interface UserQualificationRepository {
    * 이미 보유로 등록된 자격(이력서 등)은 취득일 같은 더 풍부한 정보를 지우지 않도록 그대로 둔다.
    */
   upsertFromAssessment(params: { userId: string; name: string; source?: string }): Promise<UserQualificationRecord>;
+  /** 보유 기록 한 건을 지운다 (내 정보 수정에서 자격을 해제할 때). 카탈로그(qualifications)는 건드리지 않는다. */
+  remove(params: { userId: string; id: string }): Promise<boolean>;
 }
 
 function createMockUserQualificationRepository(): UserQualificationRepository {
@@ -87,6 +89,12 @@ function createMockUserQualificationRepository(): UserQualificationRepository {
       };
       userQualifications.push(created);
       return created;
+    },
+    async remove({ userId, id }) {
+      const idx = userQualifications.findIndex((q) => q.userId === userId && q.id === id);
+      if (idx < 0) return false;
+      userQualifications.splice(idx, 1);
+      return true;
     },
   };
 }
