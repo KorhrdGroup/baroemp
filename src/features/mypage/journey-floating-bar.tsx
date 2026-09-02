@@ -42,7 +42,12 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
       띠가 갱신되지 않았다. 재는 일이 rect 몇 개뿐이라 그냥 매번 잰다 (React 가 같은 값이면 안 그린다).
     */
     const measure = () => {
-      if (sentinel) setVisible(sentinel.getBoundingClientRect().bottom < 0);
+      /*
+        기준선은 화면 맨 위가 아니라 고정 헤더의 아래 끝이다. 1단계 카드로 점프하면 절차 판 아래 끝이
+        헤더 뒤(0~64px)에 걸려 눈에는 안 보이는데 "아직 화면 안"으로 쳐서 띠가 사라졌다.
+      */
+      const headerBottom = document.querySelector("header")?.getBoundingClientRect().bottom ?? 0;
+      if (sentinel) setVisible(sentinel.getBoundingClientRect().bottom < headerBottom);
       const line = window.innerHeight * 0.35;
       let current: string | null = null;
       for (const t of targets) if (t.el.getBoundingClientRect().top <= line) current = t.anchor;
