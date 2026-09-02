@@ -1,4 +1,4 @@
-import { findCareerProfileByUserId, getJobRepository } from "@/lib/repositories";
+import { findCareerProfileByUserId, getAssessmentResultRepository, getJobRepository } from "@/lib/repositories";
 import type { CareerProfile, Job, JobCurationItem, JobCurationResult, JobCurationTab, JobSearchFilter } from "@/types";
 import { evaluateJobFit } from "./job-match.service";
 import { getRecommendedJobsFromAssessment } from "./assessment-job.service";
@@ -189,6 +189,13 @@ async function getMatchedTab(ctx: PersonalContext) {
 
 /** "진단 맞춤 공고" 탭: 직업진단에서 성향이 잘 맞았던(바로 지원 트랙) 직업의 최신 공고. */
 async function getAssessmentMatchedTab(userId: string) {
+  /*
+    진단을 안 한 회원에게 "조건에 맞는 공고가 없다"고 하면 왜 비었는지 알 수 없다.
+    진단 결과가 아예 없는 경우를 따로 갈라 진단으로 안내한다.
+  */
+  const hasAssessment = (await getAssessmentResultRepository().findAll({ userId }).catch(() => [])).length > 0;
+  if (!hasAssessment) return { state: "NEEDS_ASSESSMENT" as const, items: [] };
+
   const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT).catch(() => null);
   const ready = assessment?.ready;
   if (!ready || ready.jobs.length === 0) return { state: "EMPTY" as const, items: [] };

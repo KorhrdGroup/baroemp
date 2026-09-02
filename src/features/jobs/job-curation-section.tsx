@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import type { JobCurationResult, JobCurationTab } from "@/types";
 import { cn } from "@/lib/utils";
 import { filterPillClass, filterPillOffClass, filterPillOnSolidClass } from "@/lib/ui-classes";
@@ -57,6 +58,7 @@ const CARD_HEIGHT_PX = 250;
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
   NEEDS_PROFILE: "희망직무를 설정하면 맞춤 공고를 보여드려요.",
+  NEEDS_ASSESSMENT: "직업진단을 받으면 성향에 맞는 직업의 공고를 보여드려요.",
 };
 
 /** 서버에서 먼저 받아 오는 탭. TABS 배열의 첫 항목과 짝을 맞춘다. */
@@ -289,11 +291,28 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
         <div className="flex min-h-[var(--curation-row-h,250px)] items-start">
           <div
             className={cn(
-              "flex w-full items-center justify-center rounded-xl bg-white/70 px-6 text-center text-label-1 text-slate-500",
+              "flex w-full flex-col items-center justify-center gap-3 rounded-xl bg-white/70 px-6 text-center text-label-1 text-slate-500",
               CARD_HEIGHT,
             )}
           >
-            {EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}
+            <p>{EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}</p>
+            {/* 왜 비었는지만 말하고 끝내면 갈 곳이 없다. 채울 수 있는 행동으로 바로 잇는다. */}
+            {current.state === "NEEDS_ASSESSMENT" && (
+              <Link
+                href="/assessment?start=1"
+                className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+              >
+                직업진단 시작하기
+              </Link>
+            )}
+            {current.state === "NEEDS_PROFILE" && (
+              <Link
+                href="/mypage/profile"
+                className="rounded-lg border border-border bg-white px-4 py-2 text-label-1 font-semibold text-slate-700 hover:bg-slate-50"
+              >
+                희망직무 설정하기
+              </Link>
+            )}
           </div>
         </div>
       )}
