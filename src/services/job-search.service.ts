@@ -1,6 +1,7 @@
 import { findCareerProfileByUserId, getAssessmentResultRepository, getJobRepository } from "@/lib/repositories";
 import { evaluateJobFit, type JobMatchDetail } from "./job-match.service";
 import { getCandidateJobsForUser } from "./job-curation.service";
+import { toJobMatchSignal } from "@/lib/jobs/job-match-signal";
 import type { CareerProfile, Job, JobSearchFilter, JobSearchResult } from "@/types";
 
 export interface JobWithMatch extends Job {
@@ -28,7 +29,6 @@ export interface JobSearchView {
  */
 export async function searchJobs(params: JobSearchParams): Promise<JobSearchView> {
   const repo = getJobRepository();
-  const result: JobSearchResult = await repo.search(params);
 
   let profile: CareerProfile | undefined;
   if (params.userId) {
@@ -37,14 +37,19 @@ export async function searchJobs(params: JobSearchParams): Promise<JobSearchView
     profile = await getAnonymousCareerSignal(params.anonymousId);
   }
 
-  let items: JobWithMatch[] = result.items.map((job) => ({
+  /*
+    추천순은 전체 결과를 회원 점수로 세운 뒤 페이지를 자른다(searchRanked).
+    전에는 한 페이지를 먼저 자르고 그 20건 안에서만 다시 세워, 서울 희망 회원의 첫 줄에
+    공고 자체의 중장년 추천도만 높은 다른 지역 공고가 왔다.
+  */
+  const wantsRanked = params.sort === "recommended" || !params.sort;
+  const result: JobSearchResult =
+    wantsRanked && profile ? await repo.searchRanked(params, toJobMatchSignal(profile)) : await repo.search(params);
+
+  const items: JobWithMatch[] = result.items.map((job) => ({
     ...job,
     match: profile ? evaluateJobFit(profile, job) : null,
   }));
-
-  if ((params.sort === "recommended" || !params.sort) && profile) {
-    items = [...items].sort((a, b) => (b.match?.score ?? 0) - (a.match?.score ?? 0));
-  }
 
   return { items, total: result.total, page: result.page, pageSize: result.pageSize };
 }
