@@ -1,4 +1,4 @@
-import type { Job, JobInput, JobSearchFilter, JobSearchResult } from "@/types";
+import type { Job, JobInput, JobMatchSignal, JobSearchFilter, JobSearchResult } from "@/types";
 import type { JobRepository } from "../job-repository";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { throwDataSourceError } from "@/lib/data/errors";
@@ -157,6 +157,27 @@ function applySearchFilters(query: any, filter: JobSearchFilter) {
   return q;
 }
 
+/** search_jobs_scored 의 p_profile 모양 (0068 마이그레이션 머리말 참고). */
+function toProfileParam(signal: JobMatchSignal) {
+  return {
+    desired_prefixes: signal.desiredCategoryPrefixes,
+    region: signal.region ?? null,
+    salary_min: signal.desiredSalaryMin ?? null,
+    salary_max: signal.desiredSalaryMax ?? null,
+    work_types: signal.desiredWorkTypes,
+    career_open: signal.isCareerOpen,
+    can_drive: signal.canDrive,
+    interest_tags: signal.interestTags,
+    midlife_age: signal.isMidlifeAge,
+    held_qualifications: signal.heldQualifications,
+  };
+}
+
+/** count(*) over () 는 bigint 라 PostgREST 가 문자열로 줄 수 있다. */
+function row0Total(row: { total_count: number | string }): number {
+  return Number(row.total_count);
+}
+
 export function createSupabaseJobRepository(): JobRepository | null {
   const client = createAdminSupabaseClient();
   if (!client) return null;
@@ -239,6 +260,52 @@ export function createSupabaseJobRepository(): JobRepository | null {
       return {
         items: rows.map((row) => mapRow(row)),
         total: result.count ?? rows.length,
+        page,
+        pageSize,
+      } satisfies JobSearchResult;
+    },
+    async searchRanked(filter, signal) {
+      /*
+        DB 함수(search_jobs_scored)는 /jobs 검색바가 쓰는 조건만 안다.
+        그 밖의 조건(직종 eq·고용형태·급여 범위·태그 등)이 오면 예전 방식으로 물러난다.
+        조용히 조건을 빠뜨리고 정렬만 하는 것보다, 정렬을 포기하는 쪽이 결과가 틀리지 않는다.
+      */
+      const unsupported =
+        filter.jobCategory !== undefined ||
+        filter.occupationCode !== undefined ||
+        filter.employmentDestinationId !== undefined ||
+        filter.regionSigungu !== undefined ||
+        filter.workType !== undefined ||
+        filter.employmentTypeCode !== undefined ||
+        filter.careerRequirement !== undefined ||
+        filter.isBeginnerFriendly === false ||
+        filter.salaryMin !== undefined ||
+        filter.salaryMax !== undefined ||
+        (filter.preferentialCodes?.length ?? 0) > 0 ||
+        (filter.tags?.length ?? 0) > 0;
+      if (unsupported) return this.search({ ...filter, sort: "recommended" });
+
+      const page = Math.max(1, filter.page ?? 1);
+      const pageSize = Math.min(500, Math.max(1, filter.pageSize ?? 20));
+      const result = await client.rpc("search_jobs_scored", {
+        p_profile: toProfileParam(signal),
+        p_filter: {
+          active_only: filter.activeOnly !== false,
+          region: filter.region ?? null,
+          sigungus: filter.regionSigungus ?? [],
+          category_prefixes: filter.jobCategoryPatterns ?? [],
+          beginner_only: filter.isBeginnerFriendly === true,
+          closing_within_days: filter.closingWithinDays ?? null,
+          keyword: filter.keyword?.trim() || null,
+        },
+        p_limit: pageSize,
+        p_offset: (page - 1) * pageSize,
+      });
+      if (result.error) throwDataSourceError("JobRepository.searchRanked", result.error);
+      const rows = (result.data ?? []) as { job: Record<string, unknown>; match_score: number; total_count: number }[];
+      return {
+        items: rows.map((row) => mapRow(row.job)),
+        total: rows[0] ? Number(row0Total(rows[0])) : 0,
         page,
         pageSize,
       } satisfies JobSearchResult;

@@ -32,6 +32,9 @@ function toGrade(score: number): JobMatchGrade {
  *
  * 비회원(anonymous)은 career_profiles에 저장된 프로필이 없으므로 profile이 undefined일 수 있다.
  * 이 경우 null을 반환해 호출부가 "매칭 점수 없음"으로 처리하게 한다.
+ *
+ * 가중치는 추천순 정렬(lib/jobs/job-match-signal.ts · DB 함수 search_jobs_scored)과 같아야 한다.
+ * 여기서 점수를 바꾸면 그 둘도 함께 바꾼다. 안 그러면 목록 순서와 카드의 이유가 어긋난다.
  */
 export function evaluateJobFit(profile: CareerProfile | undefined | null, job: Job): JobMatchDetail | null {
   if (!profile) return null;

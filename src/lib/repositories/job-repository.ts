@@ -1,6 +1,7 @@
 import type { CrudRepository } from "./types";
-import type { Job, JobInput, JobSearchFilter, JobSearchResult } from "@/types";
+import type { Job, JobInput, JobMatchSignal, JobSearchFilter, JobSearchResult } from "@/types";
 import { mockJobs } from "@/mocks/jobs.mock";
+import { scoreJobBySignal } from "@/lib/jobs/job-match-signal";
 import { resolveRepository } from "@/lib/data/resolve-repository";
 import { createSupabaseJobRepository } from "./supabase/job.supabase-repository";
 
@@ -14,6 +15,12 @@ import { createSupabaseJobRepository } from "./supabase/job.supabase-repository"
  */
 export interface JobRepository extends CrudRepository<Job, JobInput, JobSearchFilter> {
   search(filter: JobSearchFilter): Promise<JobSearchResult>;
+  /**
+   * 추천순: 회원 조건(signal)으로 매긴 점수 순으로 전체 결과를 정렬한 뒤 페이지를 자른다.
+   * search() 로 한 페이지를 자른 뒤 그 안에서만 다시 세우면 페이지 바깥의 더 잘 맞는 공고가 앞에 못 온다.
+   * 점수 규칙은 lib/jobs/job-match-signal.ts (mock) · search_jobs_scored (Supabase) 가 같게 유지한다.
+   */
+  searchRanked(filter: JobSearchFilter, signal: JobMatchSignal): Promise<JobSearchResult>;
   findByExternalId(externalSource: string, externalId: string): Promise<Job | null>;
   upsertExternal(input: JobInput & { externalSource: string; externalId: string }): Promise<{ job: Job; isNew: boolean }>;
   /**
@@ -153,6 +160,22 @@ function createMockJobRepository(): JobRepository {
         page,
         pageSize,
       };
+    },
+    async searchRanked(filter, signal) {
+      const page = Math.max(1, filter.page ?? 1);
+      const pageSize = Math.min(500, Math.max(1, filter.pageSize ?? 20));
+      const ranked = items
+        .filter((item) => matchesFilter(item, filter))
+        .map((job) => ({ job, score: scoreJobBySignal(signal, job) }))
+        .sort(
+          (a, b) =>
+            b.score - a.score ||
+            (b.job.midlifeRecommendationScore ?? 0) - (a.job.midlifeRecommendationScore ?? 0) ||
+            (a.job.createdAt < b.job.createdAt ? 1 : -1),
+        )
+        .map(({ job }) => job);
+      const start = (page - 1) * pageSize;
+      return { items: ranked.slice(start, start + pageSize), total: ranked.length, page, pageSize };
     },
     async findByExternalId(externalSource, externalId) {
       return items.find((item) => item.externalSource === externalSource && item.externalId === externalId) ?? null;
