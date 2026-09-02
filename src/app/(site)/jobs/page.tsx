@@ -75,7 +75,8 @@ export default async function JobsPage({
     getRecommendedJobsFromAssessment({ userId: user.id, anonymousId }),
     getCurrentUser(),
     getUserJobBookmarkIdsAction(),
-    getJobCuration(user.id, "new"),
+    // 큐레이션 섹션의 첫 화면에 뜨는 탭 (JobCurationSection 의 INITIAL_TAB 과 짝을 맞춰야 한다).
+    getJobCuration(user.id, "matched"),
   ]);
   const isAuthenticated = Boolean(currentUser);
 
@@ -148,7 +149,7 @@ export default async function JobsPage({
       {/* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */}
       <div className="mt-8">
         <JobCurationSection
-          initialNew={initialCuration}
+          initialActive={initialCuration}
           bookmarkedIds={bookmarkedIds}
         />
       </div>

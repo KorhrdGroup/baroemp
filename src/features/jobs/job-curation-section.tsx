@@ -19,8 +19,6 @@ import {
  * "자격 따면 열리는 공고"만 조건 이름이 회원마다 달라 화면에서 만든다.
  */
 const TABS: { key: JobCurationTab; emoji: string; label: string; description?: string }[] = [
-  { key: "new", emoji: "✨", label: "신규 일자리", description: "최근 3일 안에 올라온 공고예요." },
-  { key: "closing_soon", emoji: "⏰", label: "마감임박", description: "일주일 안에 마감되는 공고예요." },
   {
     key: "matched",
     emoji: "🎯",
@@ -40,6 +38,8 @@ const TABS: { key: JobCurationTab; emoji: string; label: string; description?: s
     description: "지금 갖춘 조건만으로 지원할 수 있는 공고예요.",
   },
   { key: "unlockable", emoji: "🔑", label: "자격 따면 열리는 공고" },
+  { key: "new", emoji: "✨", label: "신규 일자리", description: "최근 3일 안에 올라온 공고예요." },
+  { key: "closing_soon", emoji: "⏰", label: "마감임박", description: "일주일 안에 마감되는 공고예요." },
 ];
 
 
@@ -59,14 +59,17 @@ const EMPTY_MESSAGES: Record<string, string> = {
   NEEDS_PROFILE: "희망직무를 설정하면 맞춤 공고를 보여드려요.",
 };
 
+/** 서버에서 먼저 받아 오는 탭. TABS 배열의 첫 항목과 짝을 맞춘다. */
+const INITIAL_TAB: JobCurationTab = "matched";
+
 interface JobCurationSectionProps {
-  initialNew: JobCurationResult;
+  initialActive: JobCurationResult;
   bookmarkedIds: string[];
 }
 
-export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSectionProps) {
-  const [activeTab, setActiveTab] = useState<JobCurationTab>("new");
-  const [results, setResults] = useState<Partial<Record<JobCurationTab, JobCurationResult>>>({ new: initialNew });
+export function JobCurationSection({ initialActive, bookmarkedIds }: JobCurationSectionProps) {
+  const [activeTab, setActiveTab] = useState<JobCurationTab>(INITIAL_TAB);
+  const [results, setResults] = useState<Partial<Record<JobCurationTab, JobCurationResult>>>({ [INITIAL_TAB]: initialActive });
   const [loadingTabs, setLoadingTabs] = useState<Set<JobCurationTab>>(new Set());
 
   /*
@@ -124,17 +127,17 @@ export function JobCurationSection({ initialNew, bookmarkedIds }: JobCurationSec
     window.addEventListener("resize", sync);
     return () => window.removeEventListener("resize", sync);
   }, []);
-  const trackedTabs = useRef(new Set<JobCurationTab>(["new"]));
+  const trackedTabs = useRef(new Set<JobCurationTab>([INITIAL_TAB]));
   const inflight = useRef(new Set<JobCurationTab>());
 
   useEffect(() => {
-    void trackCurationTabViewedAction({ tab: "new" }).catch(() => {});
+    void trackCurationTabViewedAction({ tab: INITIAL_TAB }).catch(() => {});
   }, []);
 
   /*
-    첫 화면은 신규 탭만 서버에서 받아 온다. 나머지 넷을 탭 누를 때 받으면 매번 0.5초를
+    첫 화면은 활성 탭(INITIAL_TAB)만 서버에서 받아 온다. 나머지를 탭 누를 때 받으면 매번 0.5초를
     기다리는데, 호버 예열은 버튼에 머무는 시간이 그보다 짧아 잘 먹지 않았다.
-    화면이 한가해진 뒤 한 요청으로 다섯 탭을 미리 받아 둔다.
+    화면이 한가해진 뒤 한 요청으로 모든 탭을 미리 받아 둔다.
     서버가 프로필·후보군을 한 벌만 조회하므로 탭 하나를 받는 비용과 비슷하다.
   */
   useEffect(() => {
