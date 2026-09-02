@@ -192,6 +192,16 @@ const ReviewIssueSchema = z.object({
   gain: z
     .number()
     .describe("이 항목을 고치면 오를 예상 점수. 중요할수록 크게, 모든 항목의 합이 (100-score)를 넘지 않게"),
+  autoFix: z
+    .object({
+      target: z.enum(["summary", "experience_responsibilities", "experience_achievements"]),
+      experienceIndex: z.number().nullable().describe("experience_* 일 때 experiences 배열 순서(0부터). summary면 null"),
+      text: z.string().describe("그 칸에 그대로 넣을 완성 문장"),
+    })
+    .nullable()
+    .describe(
+      "사용자가 이미 적은 사실만으로 바로 고쳐 넣을 수 있는 항목(한 줄 소개 재작성, 담당업무·성과 문장 다듬기)이면 완성 문장을 담고, 근무 기간·자격증·학력·스킬처럼 사용자만 아는 정보가 필요하면 null",
+    ),
 });
 
 const ReviewSchema = z.object({
@@ -208,7 +218,8 @@ const REVIEW_STYLE_RULES = `출력 스타일 (독자는 40~60대 구직자입니
 - improvements의 comment는 2문장 이내로, "무엇을 → 어떻게"만 말하세요. 고친 예시 문장 전체를 붙여넣지 마세요.
 - 원문 인용("~했어요" 같은), 화살표(→), 따옴표 인용을 쓰지 마세요.
 - ATS, 키워드 매칭 같은 전문용어 대신 일상어를 쓰세요. (예: "채용 사이트가 자동으로 거르는 기준" 대신 "채용 담당자가 찾는 단어")
-- 개수 제한을 지키세요: 잘한 점 3개, 고칠 점 5개, 추가할 정보 6개까지. 가장 중요한 것부터 담으세요.`;
+- 개수 제한을 지키세요: 잘한 점 3개, 고칠 점 5개, 추가할 정보 6개까지. 가장 중요한 것부터 담으세요.
+- autoFix: 한 줄 소개 재작성이나 담당업무·성과 문장 다듬기처럼 입력된 사실만으로 완성할 수 있으면 완성 문장을 넣으세요. 한 줄 소개는 경력·자격·스킬 중 하나라도 있으면 그것만으로 2문장 이내로 써서 반드시 autoFix(target=summary)를 제공하세요. 담당업무가 짧거나 일상어면 그 직무의 통상 업무로 2~4문장으로 확장한 문장을 autoFix에 넣으세요. 이때도 없는 수치·기관명·자격은 만들지 마세요. 근무 기간·자격증·학력·스킬처럼 사용자만 아는 항목은 null.`;
 
 const RewriteSchema = z.object({
   rewrittenText: z.string().describe("원문의 사실만 유지한 채 다듬은 문장"),

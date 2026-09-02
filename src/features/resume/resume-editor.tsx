@@ -617,6 +617,7 @@ export function ResumeEditor({
             gain: Math.max(1, Math.round(imp.gain ?? (imp.severity === "critical" ? 10 : 5))),
             severity: imp.severity === "critical" ? "required" : "recommended",
             done: false,
+            fix: imp.autoFix ?? undefined,
           };
         });
         setRailItems(items);
@@ -689,6 +690,24 @@ export function ResumeEditor({
     setRailItems((prev) => prev.map((i) => (i.id === id ? { ...i, done: !i.done } : i)));
     const next = railItems.find((i) => !i.done && i.id !== id);
     if (next) selectRailItem(next.id);
+  }
+
+  /** AI가 준 완성 문장을 해당 칸에 넣고 완료 처리한다. 넣은 뒤엔 칸에서 자유롭게 고칠 수 있다. */
+  function applyRailFix(id: string) {
+    const item = railItems.find((i) => i.id === id);
+    const fix = item?.fix;
+    if (!fix) return;
+    if (fix.target === "summary") {
+      setForm((f) => ({ ...f, summary: fix.text }));
+    } else {
+      const target = experiences[fix.experienceIndex ?? 0];
+      if (!target) return;
+      const field = fix.target === "experience_responsibilities" ? "responsibilities" : "achievements";
+      updateAt(setExperiences, target._key, { [field]: fix.text });
+      setEntryEditing(target._key, true);
+    }
+    setSaveMessage("AI 제안을 적용했어요. 내용을 확인하고 저장해주세요.");
+    toggleRailDone(id);
   }
 
   function goNextRailItem() {
@@ -1797,6 +1816,7 @@ export function ResumeEditor({
             strengths={reviewResult.strengths}
             onSelectItem={selectRailItem}
             onToggleDone={toggleRailDone}
+            onApplyFix={applyRailFix}
             onNext={goNextRailItem}
             onRecheck={() => void handleReview()}
             onClose={() => setRailOpen(false)}
