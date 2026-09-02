@@ -131,7 +131,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
           "이쪽이 부정, 저쪽이 긍정"임을 확인하게 되어 척도 해석이 늦어졌다.
           그림문자는 방향(부정→긍정)을 눈으로 잡아주는 장식이라 읽어주지 않는다.
         */}
-        <div className="mb-3 flex items-start justify-between gap-3 text-label-1 text-slate-500">
+        <div className="mb-3 flex items-start justify-between gap-3 text-label-1 font-medium text-slate-700">
           <span className="flex items-center gap-1.5 break-keep">
             <span aria-hidden className="text-title-3 leading-none">😓</span>
             {endpointLabels?.min ?? `${min}점`}
