@@ -13,7 +13,6 @@ import {
   UserRound,
 } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { labelDesiredStartTiming, labelEmploymentStatus, labelOrganization, labelRegion, labelWorkType } from "@/lib/labels";
@@ -32,14 +31,13 @@ import { getRecommendedJobsFromAssessment } from "@/services/assessment-job.serv
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
-import { GRADE_BADGE_CLASS } from "@/features/support/grade-badge";
 import { JourneySteps, type JourneyStep } from "@/features/mypage/journey-steps";
 import { getMyPageDetail } from "@/services/user-crm.service";
 import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
-import { SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
-import type { Job, JobApplication, MatchResult, SupportEligibilityGrade, SupportProgram } from "@/types";
+
+import type { Job, JobApplication, MatchResult, SupportProgram } from "@/types";
 
 interface MyPageJobData {
   bookmarked: Job[];
@@ -306,9 +304,10 @@ export default async function MyPage() {
       id: "diagnosis",
       step: 2,
       title: "직업진단 · 지원금",
-      detail: [latestResult ? "직업진단 완료" : "직업진단 아직", supportData.latestSessionId ? "지원금 완료" : "지원금 아직"].join(
-        " · ",
-      ),
+      /* 두 축이 다 안 되어 있으면 문장으로, 아니면 각 축 상태를 따로 적는다. */
+      detail: !latestResult && !supportData.latestSessionId
+        ? "아직 찾아보지 않았어요"
+        : `${latestResult ? "직업진단 완료" : "직업진단 아직"} · ${supportData.latestSessionId ? "지원금 완료" : "지원금 아직"}`,
       done: Boolean(latestResult),
       href: "/assessment?start=1",
       actionLabel: "직업진단 시작하기",
@@ -352,18 +351,7 @@ export default async function MyPage() {
   ];
   const stepDone = Object.fromEntries(steps.map((s) => [s.id, s.done]));
 
-  /*
-    2단계의 두 카드는 나란히 선다. 직업진단 카드가 두 트랙으로 길어지면 옆 지원금 카드 아래가 비어
-    보였다. 서버는 높이를 못 재니, 직업진단 카드의 줄 수(준비 트랙은 두 줄짜리라 1.5로 침)에 맞춰
-    지원금 결과를 3~6건 보여준다.
-  */
   const tracks = latestResult ? splitRecommendationTracks(latestResult.recommendations) : null;
-  const readyRows = tracks ? Math.min(3, tracks.ready.length) : 0;
-  const prepRows = tracks ? Math.min(3, tracks.preparation.length) : 0;
-  const supportLimit = Math.min(
-    6,
-    Math.max(3, readyRows + Math.round(prepRows * 1.5) + (readyRows > 0 && prepRows > 0 ? 1 : 0)),
-  );
   const readySteps = steps.slice(0, 4);
   const allReady = readySteps.every((s) => s.done);
   const nextReadyStep = readySteps.find((s) => !s.done);
@@ -596,7 +584,62 @@ export default async function MyPage() {
               </Card>
             )}
 
-            {supportData.latestSessionId ? (
+            {!supportData.latestSessionId ? (
+              /* 진단 전: 시작하기 하나만. */
+              <Card className={myPageCardClass}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
+                    <Gift className="size-4" /> 지원금 찾기
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
+                  <p>아직 지원금 진단을 받지 않았어요. 몇 가지 조건만 입력하면 받을 수 있는 혜택을 찾아드려요.</p>
+                  <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                    <Link href="/support?start=1">지원금 찾기 시작하기</Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : supportData.bookmarked.length > 0 ? (
+              /* 진단 O + 찜 O: 찜한 것 몇 건 + 결과 다시보기 + 다시 진단하기 */
+              <Card className={myPageCardClass}>
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
+                  <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
+                    <Star className="size-4" /> 찜한 지원제도
+                  </CardTitle>
+                  {supportData.bookmarkCount > 1 && (
+                    <Link href="/mypage/bookmarks#support" className="shrink-0 text-label-1 font-medium text-slate-500">
+                      전체보기 →
+                    </Link>
+                  )}
+                </CardHeader>
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
+                  <div>
+                    {supportData.bookmarked.slice(0, 3).map((program) => (
+                      <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
+                        <span className="min-w-0">
+                          <span className="line-clamp-2 break-keep text-body-2 font-semibold text-slate-800">{program.title}</span>
+                          <span className="mt-1 block truncate text-label-2 text-slate-400">
+                            {labelOrganization(program.organizationName ?? program.organization)}
+                          </span>
+                        </span>
+                        {program.supportAmountText && (
+                          <span className="shrink-0 text-body-2 font-bold text-brand-blue-600">{program.supportAmountText}</span>
+                        )}
+                      </Link>
+                    ))}
+                  </div>
+                  <div className="mt-auto flex gap-2 pt-1">
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 다시보기</Link>
+                    </Button>
+                    <Button variant="outline" className="flex-1" asChild>
+                      <Link href="/support?start=1">다시 진단하기</Link>
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              /* 진단 O + 찜 X: 결과 보러 가서 찜하도록 유도 + 다시 진단하기 */
               <Card className={myPageCardClass}>
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
@@ -609,47 +652,15 @@ export default async function MyPage() {
                   )}
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                  {/* 검사일과 버튼만 있으면 무엇이 나왔는지 다시 들어가 봐야 안다. 직업진단처럼 상위 몇 건을 적는다. */}
-                  {supportData.topMatches.length > 0 && (
-                    <div>
-                      {supportData.topMatches.slice(0, supportLimit).map(({ program, grade }) => (
-                        <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
-                          <span className="truncate text-body-2 font-semibold text-slate-800">{program.title}</span>
-                          <span className="flex shrink-0 items-center gap-2">
-                            {/* 지원금 목록 카드와 같은 등급 색을 쓴다 - 여기서만 회색이면 다른 등급처럼 읽힌다. */}
-                            {grade && (
-                              <Badge
-                                className={cn(
-                                  "rounded-full border-0 text-label-2 font-semibold",
-                                  GRADE_BADGE_CLASS[grade as SupportEligibilityGrade] ?? "bg-slate-100 text-slate-500",
-                                )}
-                              >
-                                {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade as SupportEligibilityGrade] ?? grade}
-                              </Badge>
-                            )}
-                            <ChevronRight className="size-4 text-slate-300" />
-                          </span>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                  <Button variant="outline" className="mt-auto w-full" asChild>
-                    <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 다시보기</Link>
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className={myPageCardClass}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
-                    <Gift className="size-4" /> 지원금 찾기
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                  <p>아직 지원금 진단을 받지 않았어요. 몇 가지 조건만 입력하면 받을 수 있는 혜택을 찾아드려요.</p>
-                  <Button variant="outline" className="mt-auto w-full text-brand-blue-600 hover:bg-brand-blue-50" asChild>
-                    <Link href="/support?start=1">지원금 찾기 시작하기</Link>
-                  </Button>
+                  <p>지원금 진단 결과를 확인하고 마음에 드는 것을 찜해 두세요. 여기서 이어서 볼 수 있어요.</p>
+                  <div className="mt-auto flex flex-col gap-2 pt-1">
+                    <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                      <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 보러가기</Link>
+                    </Button>
+                    <Button variant="outline" className="w-full" asChild>
+                      <Link href="/support?start=1">다시 진단하기</Link>
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -738,9 +749,8 @@ export default async function MyPage() {
               </Card>
             )}
 
-            {/* 찜한 것이 없어도 카드를 둔다. 없으면 없다고 적고 찾으러 갈 길을 연다. */}
-            <div className="grid gap-4 lg:grid-cols-2">
-              <Card id="bookmarked-jobs" className={cn("scroll-mt-24", myPageCardClass)}>
+            {/* 찜한 것이 없어도 카드를 둔다. 없으면 없다고 적고 찾으러 갈 길을 연다. 찜한 지원제도는 2단계 카드로 옮겼다. */}
+            <Card id="bookmarked-jobs" className={cn("scroll-mt-24", myPageCardClass)}>
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
                     <Star className="size-4" /> 찜한 일자리
@@ -784,50 +794,6 @@ export default async function MyPage() {
                   )}
                 </CardContent>
               </Card>
-
-              <Card id="bookmarked-support" className={cn("scroll-mt-24", myPageCardClass)}>
-                <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
-                    <Star className="size-4" /> 찜한 지원제도
-                  </CardTitle>
-                  {supportData.bookmarkCount > 0 && (
-                    <Link href="/mypage/bookmarks#support" className="shrink-0 text-label-1 font-medium text-slate-500">
-                      전체보기 →
-                    </Link>
-                  )}
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                  {supportData.bookmarked.length === 0 ? (
-                    <>
-                      <p>아직 찜한 지원제도가 없어요. 받을 수 있는 교육·훈련 지원을 찾아 찜해 두세요.</p>
-                      <Button variant="outline" className="mt-auto w-full text-brand-blue-600 hover:bg-brand-blue-50" asChild>
-                        <Link href="/support">지원금 찾아보기</Link>
-                      </Button>
-                    </>
-                  ) : (
-                    supportData.bookmarked.map((program) => (
-                      <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
-                        <span className="min-w-0">
-                          <span className="line-clamp-2 break-keep text-body-2 font-semibold text-slate-800">{program.title}</span>
-                          <span className="mt-1 block truncate text-label-2 text-slate-400">
-                            {labelOrganization(program.organizationName ?? program.organization)} · 신청{" "}
-                            {program.applicationPeriod ?? "상시"}
-                          </span>
-                        </span>
-                        <span className="flex shrink-0 flex-col items-end gap-1">
-                          {program.supportAmountText && (
-                            <span className="text-body-2 font-bold text-brand-blue-600">{program.supportAmountText}</span>
-                          )}
-                          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-                            {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
-                          </Badge>
-                        </span>
-                      </Link>
-                    ))
-                  )}
-                </CardContent>
-              </Card>
-            </div>
           </div>
         </section>
 
