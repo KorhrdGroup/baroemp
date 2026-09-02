@@ -4,6 +4,7 @@ export * from "./content-catalog";
 export * from "./recommendation-rule";
 export * from "./job";
 export * from "./job-bookmark";
+export * from "./job-application";
 export * from "./job-sync";
 export * from "./support-program";
 export * from "./support-sync";

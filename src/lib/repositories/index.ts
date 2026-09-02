@@ -12,6 +12,7 @@ export * from "./job-interest-repository";
 export * from "./match-result-repository";
 export * from "./profile-repository";
 export * from "./job-bookmark-repository";
+export * from "./job-application-repository";
 export * from "./job-sync-run-repository";
 export * from "./support-sync-run-repository";
 export * from "./support-bookmark-repository";

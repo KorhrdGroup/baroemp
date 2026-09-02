@@ -20,6 +20,8 @@ export const KNOWN_ACTIVITY_EVENT_TYPES = [
   "job_bookmarked",
   "job_unbookmarked",
   "job_apply_clicked",
+  // 회원이 직접 표시한 지원·면접·취업 (외부 지원이라 실제 여부는 확인 불가)
+  "job_application_reported",
   "job_recommendation_viewed",
   "job_recommendation_clicked",
   "support_program_checked",
