@@ -27,13 +27,61 @@ export interface AssessmentJobSections {
   preparation: AssessmentJobRecommendation | null;
 }
 
-/** 직종코드가 있는 추천 직업의 최신 공고를 찾는다. 코드 미등록 직업은 공고와 이을 수 없어 건너뛴다. */
+/**
+ * "정사서(준사서)"·"사회복지사 2급" 같은 자격 이름을 공고 원문에서 찾을 검색어들로 편다.
+ * 공고는 "사회복지사 자격증 소지자"처럼 급수 없이 쓰는 일이 많아 급수를 뗀 기본형도 넣는다.
+ */
+function qualificationKeywords(name: string): string[] {
+  const compact = name.replace(/\s+/g, "");
+  const withoutGrade = compact.replace(/\d+급$/, "");
+  const parts = compact.split(/[()·,/]/).filter((p) => p.length >= 2);
+  return [...new Set([compact, withoutGrade, ...parts].filter((p) => p.length >= 2))];
+}
+
+/** 공고 원문(제목·설명·자격요건)이 해당 자격들 중 하나라도 언급하는지. 공백 차이는 무시한다. */
+function jobMentionsAnyQualification(job: Job, qualificationNames: string[]): boolean {
+  const haystack = [job.title, job.description, job.qualificationRequirements, job.requirements]
+    .filter(Boolean)
+    .join(" ")
+    .replace(/\s+/g, "");
+  return qualificationNames.some((name) => qualificationKeywords(name).some((kw) => haystack.includes(kw)));
+}
+
+/** 자격 언급 필터를 걸 때, 최신순으로 몇 건까지 훑어볼지. */
+const QUALIFICATION_SCAN_POOL = 60;
+
+/**
+ * 추천 직업들의 공고를 순위대로 찾아, 공고가 실제로 있는 첫 직업을 쓴다.
+ * 코드 미등록 직업과 (준비 트랙에서) 자격을 요구하는 공고가 없는 직업은 건너뛴다.
+ */
 async function findJobsForTopRecommendation(
   recommendations: OccupationRecommendation[],
   limit: number,
 ): Promise<AssessmentJobRecommendation | null> {
-  const top = recommendations.find((rec) => rec.jobCategoryCode);
-  if (!top?.jobCategoryCode) return null;
+  for (const top of recommendations) {
+    if (!top.jobCategoryCode) continue;
+    const found = await findJobsForRecommendation(top, limit);
+    if (found) return found;
+  }
+  return null;
+}
+
+async function findJobsForRecommendation(
+  top: OccupationRecommendation,
+  limit: number,
+): Promise<AssessmentJobRecommendation | null> {
+  if (!top.jobCategoryCode) return null;
+
+  const missingQualifications = top.requiredQualifications
+    .filter((q) => !isPreferredQualification(q) && top.missingConditions.includes(q))
+    .map(qualificationName);
+
+  /*
+    준비 트랙(미보유 필수 자격이 있는 직업)은 그 자격을 실제로 요구하는 공고만 남긴다.
+    직종 코드로만 가져오면 자격이 필요 없는 공고까지 "자격 따면 열리는"에 섞여서,
+    카드의 "자격 요건 없음" 배지와 섹션 제목이 서로 다른 말을 했다.
+  */
+  const needsQualificationFilter = missingQualifications.length > 0;
 
   // occupation의 직종 값에는 6자리 코드와 'social_worker' 같은 묶음 key가 섞여 있어 변환을 거친다.
   const { items } = await getJobRepository().search({
@@ -41,15 +89,15 @@ async function findJobsForTopRecommendation(
     activeOnly: true,
     sort: "latest",
     page: 1,
-    pageSize: limit,
+    pageSize: needsQualificationFilter ? QUALIFICATION_SCAN_POOL : limit,
   } as JobSearchFilter);
-  if (items.length === 0) return null;
 
-  const missingQualifications = top.requiredQualifications
-    .filter((q) => !isPreferredQualification(q) && top.missingConditions.includes(q))
-    .map(qualificationName);
+  const jobs = needsQualificationFilter
+    ? items.filter((job) => jobMentionsAnyQualification(job, missingQualifications)).slice(0, limit)
+    : items;
+  if (jobs.length === 0) return null;
 
-  return { occupationName: top.occupationName, jobCategoryCode: top.jobCategoryCode, jobs: items, missingQualifications };
+  return { occupationName: top.occupationName, jobCategoryCode: top.jobCategoryCode, jobs, missingQualifications };
 }
 
 /**
