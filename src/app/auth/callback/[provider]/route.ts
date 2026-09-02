@@ -33,7 +33,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!result) return loginWithError(request, "social_signin_failed");
 
   const next = sanitizeNextPath(request.cookies.get(`social_next_${provider}`)?.value ?? "", "/mypage");
-  const target = result.isNewUser ? `/onboarding/profile?next=${encodeURIComponent(next)}` : next;
+  // 신규 소셜 가입은 가입 화면의 [선택] 알림톡 동의를 거치지 않으므로, 온보딩 앞에서 한 번 묻는다 (consent=1).
+  const target = result.isNewUser ? `/onboarding/profile?next=${encodeURIComponent(next)}&consent=1` : next;
 
   const response = NextResponse.redirect(new URL(target, request.url));
   response.cookies.delete(`social_state_${provider}`);

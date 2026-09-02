@@ -43,6 +43,7 @@ export async function updateProfileAction(
   const desiredWorkTypes = formData.getAll("desiredWorkTypes").map(String).filter(Boolean) as WorkType[];
   const isOpenToTraining = formData.get("isOpenToTraining") === "on";
   const heldQualifications = formData.getAll("heldQualifications").map(String).filter(Boolean);
+  const marketingConsent = formData.get("marketingConsent") === "on";
 
   const fieldErrors: Record<string, string> = {};
   if (!name || name.length < 2) fieldErrors.name = "이름을 2자 이상 입력해주세요.";
@@ -52,6 +53,7 @@ export async function updateProfileAction(
   const phone = normalizePhone(phoneRaw);
 
   await getProfileRepository().update(user.id, { name, phone });
+  await applyMarketingConsent(user.id, marketingConsent);
 
   const existing = await findCareerProfileByUserId(user.id);
   const careerPatch = {
@@ -86,4 +88,34 @@ export async function updateProfileAction(
   revalidatePath("/mypage");
   revalidatePath("/mypage/profile");
   return { success: true };
+}
+
+/**
+ * 알림톡(마케팅) 수신 동의를 회원 뜻대로 켜고 끈다.
+ * 켤 때만 동의 시각을 새로 적고, 이미 같은 값이면 아무것도 안 한다 (동의 시각이 매번 갱신되지 않게).
+ */
+async function applyMarketingConsent(userId: string, consent: boolean): Promise<boolean> {
+  const profile = await getProfileRepository().findById(userId);
+  if (!profile || profile.marketingConsent === consent) return false;
+  await getProfileRepository().update(userId, {
+    marketingConsent: consent,
+    marketingConsentAt: consent ? new Date().toISOString() : undefined,
+  });
+  await logActivityEvent({
+    userId,
+    eventType: "marketing_consent_changed",
+    entityType: "career_profile",
+    metadata: { consent },
+  }).catch(() => {});
+  return true;
+}
+
+/** 소셜 가입 직후 안내 창 등에서 동의만 따로 저장할 때. */
+export async function setMarketingConsentAction(input: { consent: boolean }): Promise<{ consent: boolean }> {
+  const user = await requireSessionUser();
+  await applyMarketingConsent(user.id, input.consent);
+  revalidatePath("/mypage");
+  revalidatePath("/mypage/profile");
+  revalidatePath("/onboarding/profile");
+  return { consent: input.consent };
 }
