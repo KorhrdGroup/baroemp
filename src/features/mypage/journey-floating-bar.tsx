@@ -91,7 +91,7 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
                   href={s.anchor}
                   tabIndex={visible ? 0 : -1}
                   aria-label={`${s.step}단계 ${s.title}${s.done ? " (완료)" : isNext ? " (다음 할 일)" : ""}`}
-                  className="group flex min-w-0 items-center gap-2 rounded-full pr-1 transition-colors hover:bg-slate-50"
+                  className="group flex min-w-0 items-center gap-2 pr-1 transition-colors"
                 >
                   <span
                     className={cn(
@@ -104,7 +104,8 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
                         : isNext
                           ? "bg-brand-blue-100 text-brand-blue-700"
                           : "bg-slate-100 text-slate-500",
-                      isActive ? "size-10 sm:size-11" : "size-9 sm:size-10",
+                      /* 활성/비활성 크기 차이를 확 벌려 스크롤 위치가 한눈에 잡히게. */
+                      isActive ? "size-11 sm:size-12" : "size-8 sm:size-9",
                     )}
                   >
                     {s.done ? <Check className="size-4 sm:size-5" /> : s.step}
