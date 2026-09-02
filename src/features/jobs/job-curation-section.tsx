@@ -47,7 +47,12 @@ const EMPTY_MESSAGES: Record<string, string> = {
 /** 서버에서 먼저 받아 오는 탭. TABS 배열의 첫 항목과 짝을 맞춘다. */
 const INITIAL_TAB: JobCurationTab = "matched";
 
-/** 회원 조건 없이 계산되는 탭. 비로그인에게는 이 둘만 보여준다. */
+/**
+ * 회원 조건 없이 계산되는 탭. 비로그인에게 실제로 열리는 건 이 둘뿐이다.
+ *
+ * 나머지 탭도 버튼은 그대로 보여준다 - 가입하면 무엇이 더 생기는지는
+ * 목록에서 지워버리면 알 길이 없다. 누르면 가입 안내 창이 뜬다.
+ */
 const PUBLIC_TABS: readonly JobCurationTab[] = ["new", "closing_soon"];
 const PUBLIC_INITIAL_TAB: JobCurationTab = "new";
 
@@ -59,7 +64,8 @@ interface JobCurationSectionProps {
 }
 
 export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticated = true }: JobCurationSectionProps) {
-  const tabs = isAuthenticated ? TABS : TABS.filter((t) => PUBLIC_TABS.includes(t.key));
+  /** 비로그인에게 잠긴 탭인지. 눌러도 열리지 않고 가입 안내 창으로 이어진다. */
+  const isLocked = (tab: JobCurationTab) => !isAuthenticated && !PUBLIC_TABS.includes(tab);
   const initialTab = isAuthenticated ? INITIAL_TAB : PUBLIC_INITIAL_TAB;
   const [activeTab, setActiveTab] = useState<JobCurationTab>(initialTab);
   const [results, setResults] = useState<Partial<Record<JobCurationTab, JobCurationResult>>>({ [initialTab]: initialActive });
@@ -173,6 +179,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
    * 않을 탭까지 매 방문마다 조회하게 되기 때문이다.
    */
   function prefetchTab(tab: JobCurationTab) {
+    if (isLocked(tab)) return;
     if (results[tab] || inflight.current.has(tab)) return;
     inflight.current.add(tab);
     setLoadingTabs((prev) => new Set(prev).add(tab));
@@ -239,10 +246,12 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
           )}
         />
         <div ref={tabRowRef} onScroll={syncTabFade} className="scrollbar-hidden flex gap-2 overflow-x-auto pb-1 pl-2">
-        {tabs.map((t) => (
+        {TABS.map((t) => (
           <button
             key={t.key}
             type="button"
+            /* 문지기(GuestGate)가 캡처 단계에서 이 표시를 보고 가로챈다. */
+            data-guest-gated={isLocked(t.key) ? "" : undefined}
             onClick={() => handleTab(t.key)}
             onPointerEnter={() => prefetchTab(t.key)}
             onPointerDown={() => prefetchTab(t.key)}
