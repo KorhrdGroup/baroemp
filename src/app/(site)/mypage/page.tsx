@@ -497,20 +497,8 @@ export default async function MyPage() {
                     <InfoRow
                       wide
                       label="보유 자격"
-                      value={
-                        heldQualificationNames.length > 0 ? (
-                          /* 자격은 여러 개라 쉼표로 이으면 한 덩어리로 읽힌다. 칩으로 갈라 세어지게 한다. */
-                          <span className="flex flex-wrap gap-1.5">
-                            {heldQualificationNames.map((name) => (
-                              <span key={name} className="rounded-full bg-slate-100 px-3 py-1 text-label-1 font-medium text-slate-700">
-                                {name}
-                              </span>
-                            ))}
-                          </span>
-                        ) : (
-                          "-"
-                        )
-                      }
+                      /* 이 표의 다른 줄은 모두 글자다. 자격만 칩으로 두니 혼자 튀어 표가 아니라 딴 칸처럼 읽혔다. */
+                      value={heldQualificationNames.length > 0 ? heldQualificationNames.join(", ") : "-"}
                     />
                   </dl>
                 )}
