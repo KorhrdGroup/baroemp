@@ -28,9 +28,11 @@ export interface JourneyStep {
 interface JourneyStepsProps {
   steps: JourneyStep[];
   userName: string;
+  /** 다섯 단계를 다 마쳤을 때 제목. 취업까지 표시했으면 축하로 바꾼다. */
+  completedTitle?: string;
 }
 
-export function JourneySteps({ steps, userName }: JourneyStepsProps) {
+export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsProps) {
   const next = steps.find((s) => !s.done) ?? null;
   const doneCount = steps.filter((s) => s.done).length;
 
@@ -38,7 +40,7 @@ export function JourneySteps({ steps, userName }: JourneyStepsProps) {
     <section aria-label="취업 절차" className="rounded-2xl bg-brand-blue-50 p-5 sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <h2 className="text-body-1 font-bold text-slate-900">
-          {next ? `${userName}님, 이제 ${next.step}단계 차례예요` : `${userName}님, 준비를 모두 마치셨어요`}
+          {next ? `${userName}님, 이제 ${next.step}단계 차례예요` : `${userName}님, ${completedTitle ?? "준비를 모두 마치셨어요"}`}
         </h2>
         <p className="text-label-1 font-semibold text-brand-blue-700">
           {doneCount} / {steps.length} 단계 완료
