@@ -4,11 +4,13 @@ import Link from "next/link";
 import {
   Briefcase,
   ChevronRight,
+  Compass,
   ExternalLink,
   FileText,
   Gift,
   KeyRound,
   Pencil,
+  Sparkles,
   Star,
   UserRound,
 } from "lucide-react";
@@ -145,6 +147,19 @@ export const metadata: Metadata = {
  * 붙어 꽉 찬 느낌이라, 여기서만 24px 로 키운다. 헤더·본문 좌우와 카드 위아래에 함께 먹는다.
  */
 const myPageCardClass = "rounded-xl border-0 ring-1 ring-border [--card-spacing:--spacing(6)]";
+
+/**
+ * 내 정보 카드의 한 줄. "라벨 · 값"을 한 문장으로 붙이면 전부 같은 회색이라 무엇이 값인지
+ * 눈에 안 잡혔다. 라벨은 옅게 고정폭으로, 값은 진하게 나머지 폭을 쓰게 갈라 표처럼 읽힌다.
+ */
+function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-3">
+      <dt className="w-20 shrink-0 text-label-1 text-slate-400">{label}</dt>
+      <dd className="min-w-0 flex-1 break-keep text-label-1 font-medium text-slate-800">{value}</dd>
+    </div>
+  );
+}
 
 /**
  * 실회원 마이페이지 (스펙 22번). mock userId(user-1001) 의존을 완전히 제거하고
@@ -313,19 +328,13 @@ export default async function MyPage() {
                 <UserRound className="size-4" /> 기본 정보
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-label-1 text-slate-600">
-              <p>
-                <span className="text-slate-400">이름</span> · {profile.name ?? "-"}
-              </p>
-              <p>
-                <span className="text-slate-400">이메일</span> · {profile.email ?? "-"}
-              </p>
-              <p>
-                <span className="text-slate-400">휴대전화번호</span> · {formatPhone(profile.phone)}
-              </p>
-              <p>
-                <span className="text-slate-400">가입일</span> · {profile.createdAt.slice(0, 10)}
-              </p>
+            <CardContent>
+              <dl className="space-y-2.5">
+                <InfoRow label="이름" value={profile.name ?? "-"} />
+                <InfoRow label="이메일" value={profile.email ?? "-"} />
+                <InfoRow label="휴대전화" value={formatPhone(profile.phone)} />
+                <InfoRow label="가입일" value={profile.createdAt.slice(0, 10)} />
+              </dl>
             </CardContent>
 
             {/* 구분선 좌우 여백은 카드 안쪽 여백(--card-spacing 24px)과 같게 맞춘다. */}
@@ -336,35 +345,46 @@ export default async function MyPage() {
                 <Briefcase className="size-4" /> 취업 프로필
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-label-1 text-slate-600">
-              <p>
-                <span className="text-slate-400">취업상태</span> · {labelEmploymentStatus(careerProfile?.employmentStatus)}
-              </p>
-              <p>
-                <span className="text-slate-400">희망지역</span> · {labelRegion(careerProfile?.region)}
-              </p>
-              <p>
-                <span className="text-slate-400">희망근무형태</span> ·{" "}
-                {careerProfile?.desiredWorkTypes && careerProfile.desiredWorkTypes.length > 0
-                  ? careerProfile.desiredWorkTypes.map((t) => labelWorkType(t)).join(", ")
-                  : "-"}
-              </p>
-              <p>
-                <span className="text-slate-400">희망급여</span> ·{" "}
-                {careerProfile?.desiredSalaryMin || careerProfile?.desiredSalaryMax
-                  ? `${careerProfile?.desiredSalaryMin ?? "-"} ~ ${careerProfile?.desiredSalaryMax ?? "-"}만원`
-                  : "-"}
-              </p>
-              <p>
-                <span className="text-slate-400">희망 취업시기</span> · {labelDesiredStartTiming(careerProfile?.desiredStartTiming)}
-              </p>
-              <p>
-                <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
-              </p>
-              <p>
-                <span className="text-slate-400">보유 자격증</span> ·{" "}
-                {heldQualificationNames.length > 0 ? heldQualificationNames.join(", ") : "-"}
-              </p>
+            <CardContent>
+              <dl className="space-y-2.5">
+                <InfoRow label="취업상태" value={labelEmploymentStatus(careerProfile?.employmentStatus)} />
+                <InfoRow label="희망지역" value={labelRegion(careerProfile?.region)} />
+                <InfoRow
+                  label="근무형태"
+                  value={
+                    careerProfile?.desiredWorkTypes && careerProfile.desiredWorkTypes.length > 0
+                      ? careerProfile.desiredWorkTypes.map((t) => labelWorkType(t)).join(", ")
+                      : "-"
+                  }
+                />
+                <InfoRow
+                  label="희망급여"
+                  value={
+                    careerProfile?.desiredSalaryMin || careerProfile?.desiredSalaryMax
+                      ? `${careerProfile?.desiredSalaryMin ?? "-"} ~ ${careerProfile?.desiredSalaryMax ?? "-"}만원`
+                      : "-"
+                  }
+                />
+                <InfoRow label="취업시기" value={labelDesiredStartTiming(careerProfile?.desiredStartTiming)} />
+                <InfoRow label="교육의향" value={careerProfile?.isOpenToTraining ? "있음" : "-"} />
+                <InfoRow
+                  label="보유 자격"
+                  value={
+                    heldQualificationNames.length > 0 ? (
+                      /* 자격은 여러 개라 쉼표로 이으면 한 덩어리로 읽힌다. 칩으로 갈라 세어지게 한다. */
+                      <span className="flex flex-wrap gap-1">
+                        {heldQualificationNames.map((name) => (
+                          <span key={name} className="rounded-full bg-slate-100 px-2 py-0.5 text-label-2 font-medium text-slate-700">
+                            {name}
+                          </span>
+                        ))}
+                      </span>
+                    ) : (
+                      "-"
+                    )
+                  }
+                />
+              </dl>
             </CardContent>
           </Card>
         </aside>
@@ -378,7 +398,9 @@ export default async function MyPage() {
               <Card className={myPageCardClass}>
                 {/* 검사일은 제목의 부가 정보라 "전체보기"와 같은 자리(오른쪽 위)에 둔다. 본문 첫 줄을 차지하지 않게. */}
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle className="text-body-2">최근 직업진단 결과</CardTitle>
+                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                    <Compass className="size-4" /> 최근 직업진단 결과
+                  </CardTitle>
                   <span className="shrink-0 text-label-1 text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</span>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
@@ -465,7 +487,9 @@ export default async function MyPage() {
             ) : (
               <Card className={myPageCardClass}>
                 <CardHeader>
-                  <CardTitle className="text-body-2">직업진단</CardTitle>
+                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                    <Compass className="size-4" /> 직업진단
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p>아직 직업진단을 받지 않았어요. 몇 가지 질문으로 나에게 맞는 직업을 찾아드려요.</p>
@@ -563,7 +587,9 @@ export default async function MyPage() {
               {jobData.recommended.length > 0 && (
                 <Card className={myPageCardClass}>
                   <CardHeader>
-                    <CardTitle className="text-body-2">맞춤 일자리</CardTitle>
+                    <CardTitle className="flex items-center gap-1.5 text-body-2">
+                      <Sparkles className="size-4" /> 맞춤 일자리
+                    </CardTitle>
                   </CardHeader>
                   {/* 카드가 반 칸이 되어 2열로 나누면 공고 제목이 심하게 잘린다. 다른 목록 카드와 같이 한 열로 둔다. */}
                   <CardContent className="text-label-1 text-slate-600">
@@ -591,7 +617,9 @@ export default async function MyPage() {
               */}
               <Card id="bookmarked-jobs" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle className="text-body-2">찜한 일자리</CardTitle>
+                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                    <Star className="size-4" /> 찜한 일자리
+                  </CardTitle>
                   {/*
                     카드에는 앞의 몇 건만 담긴다. 넘칠 때만 길을 열면 그 전에는 전체 목록이
                     있다는 것조차 모른다. 하나라도 있으면 항상 둔다.
@@ -725,7 +753,9 @@ export default async function MyPage() {
 
             <Card id="bookmarked-support" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
               <CardHeader className="flex flex-row items-center justify-between gap-2">
-                <CardTitle className="text-body-2">찜한 지원제도</CardTitle>
+                <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <Star className="size-4" /> 찜한 지원제도
+                </CardTitle>
                 {supportData.bookmarkCount > 0 && (
                   <Link
                     href="/mypage/bookmarks#support"
