@@ -94,6 +94,7 @@ interface Answers {
   heldQualifications: string[];
   isOpenToTraining?: boolean;
   phone: string;
+  email: string;
   marketingConsent: boolean;
 }
 
@@ -152,6 +153,8 @@ export function OnboardingWizard({
   careerProfile,
   next,
   needsPhone,
+  needsEmail,
+  initialEmail,
   needsMarketingConsent,
   heldQualificationNames = [],
 }: {
@@ -159,13 +162,17 @@ export function OnboardingWizard({
   next: string;
   /** 가입 때 연락처를 비워둔 사용자에게만 묻는다. */
   needsPhone: boolean;
+  /** 이메일이 비어 있으면(소셜 가입 등) 연락처 단계에서 함께 묻는다. 선택 입력. */
+  needsEmail: boolean;
+  /** 소셜 제공자가 준 이메일 등 미리 채울 값. */
+  initialEmail?: string;
   /** 가입 때 수신동의를 하지 않은 사용자에게만 묻는다. */
   needsMarketingConsent: boolean;
   /** Career DB(user_qualifications)에 이미 등록된 보유 자격. 자격 스텝을 미리 채운다. */
   heldQualificationNames?: string[];
 }) {
   // 연락처도 동의도 이미 받은 사용자에게는 알림 단계 자체를 만들지 않는다.
-  const askContact = needsPhone || needsMarketingConsent;
+  const askContact = needsPhone || needsEmail || needsMarketingConsent;
   const steps = askContact ? STEPS : STEPS.filter((s) => s.id !== "contact");
   const groups = GROUPS.filter((g) => steps.some((s) => s.group === g.key));
 
@@ -182,6 +189,7 @@ export function OnboardingWizard({
     heldQualifications: heldQualificationNames,
     isOpenToTraining: careerProfile?.isOpenToTraining,
     phone: "",
+    email: initialEmail ?? "",
     marketingConsent: false,
   });
   const [submitting, setSubmitting] = useState(false);
@@ -245,6 +253,7 @@ export function OnboardingWizard({
         heldQualifications: answers.heldQualifications,
         isOpenToTraining: answers.isOpenToTraining,
         phone: askContact ? answers.phone : undefined,
+        email: needsEmail ? answers.email : undefined,
         marketingConsent: needsMarketingConsent ? answers.marketingConsent : undefined,
       });
       // 성공하면 서버에서 redirect하므로 여기로 돌아오지 않는다.
@@ -352,7 +361,7 @@ export function OnboardingWizard({
         )}
 
         <div className="mt-10">
-          <StepBody answers={answers} step={step} needsPhone={needsPhone} needsMarketingConsent={needsMarketingConsent} onChange={update} />
+          <StepBody answers={answers} step={step} needsPhone={needsPhone} needsEmail={needsEmail} needsMarketingConsent={needsMarketingConsent} onChange={update} />
         </div>
 
         {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
@@ -377,12 +386,17 @@ function StepBody({
   step,
   answers,
   needsPhone,
+  needsEmail,
   needsMarketingConsent,
   onChange,
 }: {
   step: StepConfig;
   answers: Answers;
   needsPhone: boolean;
+  /** 이메일이 비어 있으면(소셜 가입 등) 연락처 단계에서 함께 묻는다. 선택 입력. */
+  needsEmail: boolean;
+  /** 소셜 제공자가 준 이메일 등 미리 채울 값. */
+  initialEmail?: string;
   needsMarketingConsent: boolean;
   onChange: (patch: Partial<Answers>) => void;
 }) {
@@ -592,6 +606,21 @@ function StepBody({
               className="h-14 w-full rounded-xl border border-border bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
               placeholder="010-1234-5678"
             />
+          )}
+          {needsEmail && (
+            <div>
+              <input
+                type="email"
+                autoComplete="email"
+                inputMode="email"
+                aria-label="이메일"
+                value={answers.email}
+                onChange={(e) => onChange({ email: e.target.value })}
+                className="h-14 w-full rounded-xl border border-border bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+                placeholder="이메일 (선택)"
+              />
+              <p className="mt-1.5 text-center text-label-2 text-slate-400">이력서에 적히는 연락용 이메일이에요. 나중에 채워도 괜찮아요.</p>
+            </div>
           )}
           {needsMarketingConsent && (
             <label className="flex items-start gap-2.5 rounded-xl border border-border bg-white px-4 py-3.5 text-label-1 break-keep text-slate-700">

@@ -4,6 +4,7 @@ import { getProfileRepository } from "@/lib/repositories/profile-repository";
 import { findCareerProfileByUserId, getUserQualificationRepository } from "@/lib/repositories";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { OnboardingWizard } from "@/features/onboarding/onboarding-wizard";
+import { isSyntheticEmail } from "@/lib/auth/social-oauth";
 import { MarketingConsentDialog } from "@/features/onboarding/marketing-consent-dialog";
 
 export const metadata: Metadata = { title: "취업 프로필 입력 | 한평생 바로취업" };
@@ -36,6 +37,9 @@ export default async function OnboardingProfilePage({
       careerProfile={careerProfile}
       next={next}
       needsPhone={!profile?.phone}
+      /* 소셜 가입은 이메일이 비어 있거나 합성 주소라, 연락처 단계에서 (선택으로) 함께 묻는다. */
+      needsEmail={!profile?.email || isSyntheticEmail(profile.email)}
+      initialEmail={profile?.email && !isSyntheticEmail(profile.email) ? profile.email : undefined}
       needsMarketingConsent={!profile?.marketingConsent}
       heldQualificationNames={heldQualifications.map((q) => q.name)}
     />
