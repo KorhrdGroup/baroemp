@@ -4,7 +4,6 @@ import {
   resolveSocialProfile,
   signInWithSocialProfile,
 } from "@/lib/auth/social-oauth";
-import { sanitizeNextPath } from "@/lib/auth/redirect";
 
 function loginWithError(request: NextRequest, code: string, detail?: { provider?: string; reason?: string }): NextResponse {
   const url = new URL("/login", request.url);
@@ -34,9 +33,8 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const result = await signInWithSocialProfile(profile);
   if (!result) return loginWithError(request, "social_signin_failed", { provider });
 
-  const next = sanitizeNextPath(request.cookies.get(`social_next_${provider}`)?.value ?? "", "/mypage");
-  // 신규 소셜 가입은 가입 화면의 [선택] 알림톡 동의를 거치지 않으므로, 온보딩 앞에서 한 번 묻는다 (consent=1).
-  const target = result.isNewUser ? `/onboarding/profile?next=${encodeURIComponent(next)}&consent=1` : next;
+  // 로그인 성공은 늘 마이페이지로. 신규 가입만 온보딩을 먼저 거친다 (알림톡 동의도 그 앞에서 한 번 묻는다).
+  const target = result.isNewUser ? "/onboarding/profile?next=/mypage&consent=1" : "/mypage";
 
   const response = NextResponse.redirect(new URL(target, request.url));
   response.cookies.delete(`social_state_${provider}`);

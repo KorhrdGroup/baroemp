@@ -62,7 +62,13 @@ export function MarketingConsentDialog() {
             {pending ? "저장 중..." : "네, 받아볼게요"}
           </Button>
           {/* 보조 버튼은 주 버튼만큼 높을 이유가 없다. 위아래를 줄여 주 버튼에 붙인다. */}
-          <Button variant="ghost" className="h-10 w-full text-slate-500" onClick={() => setOpen(false)} disabled={pending}>
+          {/* 보조 버튼은 강조가 필요 없다. 호버 배경도 없앤다. */}
+          <Button
+            variant="ghost"
+            className="h-10 w-full text-slate-500 hover:bg-transparent hover:text-slate-600"
+            onClick={() => setOpen(false)}
+            disabled={pending}
+          >
             나중에 할게요
           </Button>
         </div>
