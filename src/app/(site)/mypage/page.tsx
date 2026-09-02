@@ -16,6 +16,8 @@ import { EmptyState } from "@/components/common/empty-state";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { labelDesiredStartTiming, labelEmploymentStatus, labelOrganization, labelRegion, labelWorkType } from "@/lib/labels";
+import { Badge } from "@/components/ui/badge";
+import { GRADE_BADGE_CLASS } from "@/features/support/grade-badge";
 import { formatSalary } from "@/lib/salary";
 import {
   getJobApplicationRepository,
@@ -37,7 +39,8 @@ import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
 
-import type { Job, JobApplication, MatchResult, SupportProgram } from "@/types";
+import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
+import type { Job, JobApplication, MatchResult, SupportEligibilityGrade, SupportProgram } from "@/types";
 
 interface MyPageJobData {
   bookmarked: Job[];
@@ -639,30 +642,68 @@ export default async function MyPage() {
                 </CardContent>
               </Card>
             ) : (
-              /* 진단 O + 찜 X: 결과 보러 가서 찜하도록 유도 + 다시 진단하기 */
-              <Card className={myPageCardClass}>
-                <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
-                    <Gift className="size-4" /> 지원금 진단 결과
-                  </CardTitle>
-                  {supportData.latestCompletedAt && (
-                    <span className="shrink-0 text-label-1 text-slate-400">
-                      검사일 · {supportData.latestCompletedAt.slice(0, 10)}
-                    </span>
-                  )}
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                  <p>지원금 진단 결과를 확인하고 마음에 드는 것을 찜해 두세요. 여기서 이어서 볼 수 있어요.</p>
-                  <div className="mt-auto flex flex-col gap-2 pt-1">
-                    <Button className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-                      <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 보러가기</Link>
-                    </Button>
-                    <Button variant="outline" className="w-full" asChild>
-                      <Link href="/support?start=1">다시 진단하기</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              /*
+                진단 O + 찜 X: 결과에서 "높은 가능성" 위주로 3건을 미리 보여준다. 안내 문구만 있으면
+                결과 화면까지 들어가야 무엇이 나왔는지 알 수 있어 찜하러 갈 동기가 약했다.
+              */
+              (() => {
+                const rank = (g?: SupportEligibilityGrade) =>
+                  g === "HIGH" ? 0 : g === "MEDIUM" ? 1 : g === "CHECK_REQUIRED" ? 2 : 3;
+                const preview = [...supportData.topMatches]
+                  .sort((a, b) => rank(a.grade as SupportEligibilityGrade) - rank(b.grade as SupportEligibilityGrade))
+                  .slice(0, 3);
+                return (
+                  <Card className={myPageCardClass}>
+                    <CardHeader className="flex flex-row items-center justify-between gap-2">
+                      <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
+                        <Gift className="size-4" /> 지원금 진단 결과
+                      </CardTitle>
+                      {supportData.latestCompletedAt && (
+                        <span className="shrink-0 text-label-1 text-slate-400">
+                          검사일 · {supportData.latestCompletedAt.slice(0, 10)}
+                        </span>
+                      )}
+                    </CardHeader>
+                    <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
+                      {preview.length > 0 ? (
+                        <>
+                          <p>내 조건에 맞을 가능성이 높은 지원금이에요. 마음에 드는 것을 찜해 두세요.</p>
+                          <div>
+                            {preview.map(({ program, grade }) => (
+                              <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
+                                <span className="truncate text-body-2 font-semibold text-slate-800">{program.title}</span>
+                                <span className="flex shrink-0 items-center gap-2">
+                                  {grade && (
+                                    <Badge
+                                      className={cn(
+                                        "rounded-full border-0 text-label-2 font-semibold",
+                                        GRADE_BADGE_CLASS[grade as SupportEligibilityGrade] ?? "bg-slate-100 text-slate-500",
+                                      )}
+                                    >
+                                      {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade as SupportEligibilityGrade] ?? grade}
+                                    </Badge>
+                                  )}
+                                  <ChevronRight className="size-4 text-slate-300" />
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        </>
+                      ) : (
+                        <p>지원금 진단 결과를 확인하고 마음에 드는 것을 찜해 두세요. 여기서 이어서 볼 수 있어요.</p>
+                      )}
+                      <div className="mt-auto flex flex-col gap-2 pt-1 sm:flex-row">
+                        <Button className="flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                          <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 보러가기</Link>
+                        </Button>
+                        <Button variant="outline" className="flex-1" asChild>
+                          <Link href="/support?start=1">다시 진단하기</Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()
             )}
           </div>
         </section>
