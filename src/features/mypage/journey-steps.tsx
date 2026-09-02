@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { JourneyFloatingBar } from "./journey-floating-bar";
 
 /**
  * 마이페이지 취업 절차 한 단계.
@@ -36,8 +37,11 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
   const next = steps.find((s) => !s.done) ?? null;
   const doneCount = steps.filter((s) => s.done).length;
 
+  const sentinelId = "journey-steps";
+
   return (
-    <section aria-label="취업 절차" className="rounded-2xl bg-brand-blue-50 p-5 sm:p-8">
+    <>
+    <section id={sentinelId} aria-label="취업 절차" className="rounded-2xl bg-brand-blue-50 p-5 sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-2">
         <h2 className="text-body-1 font-bold text-slate-900">
           {next ? `${userName}님, 이제 ${next.step}단계 차례예요` : `${userName}님, ${completedTitle ?? "준비를 모두 마치셨어요"}`}
@@ -98,5 +102,8 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
         </div>
       )}
     </section>
+    {/* 판이 화면 밖으로 나가면 아래에 작은 띠로 단계를 이어 보여준다. */}
+    <JourneyFloatingBar steps={steps} sentinelId={sentinelId} />
+    </>
   );
 }

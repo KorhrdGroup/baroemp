@@ -385,8 +385,9 @@ export default async function MyPage() {
     </Link>
   );
 
+  // 아래 여백(pb-32)은 떠 있는 절차 띠 높이만큼 더 준다. 마지막 카드가 띠에 가리지 않게.
   return (
-    <div className="mx-auto max-w-5xl px-4.5 pt-10 pb-20 lg:px-8">
+    <div className="mx-auto max-w-5xl px-4.5 pt-10 pb-32 lg:px-8">
       {/* 제목을 "마이페이지"라고 적지 않는다. 메뉴에서 눌러 들어온 자리라 이미 알고 있다. */}
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">{userName}님</h1>
