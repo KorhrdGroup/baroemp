@@ -203,7 +203,19 @@ export function SignupView({ next }: { next: string }) {
           >
             [필수] 개인정보 수집·이용 동의
           </Checkbox>
-          <Checkbox checked={agreeMarketing} onChange={setAgreeMarketing}>
+          <Checkbox
+            checked={agreeMarketing}
+            onChange={setAgreeMarketing}
+            right={
+              <button
+                type="button"
+                onClick={() => openTermsPopup("/marketing-consent")}
+                className="text-[12px] text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline"
+              >
+                보기
+              </button>
+            }
+          >
             [선택] 마케팅 정보·알림톡 수신 동의
           </Checkbox>
           <p className="-mt-1 pl-7 text-[12px] leading-relaxed break-keep text-slate-500">

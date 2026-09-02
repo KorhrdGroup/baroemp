@@ -47,6 +47,15 @@ export function MarketingConsentDialog() {
             동의하시면 내 조건에 맞는 새 채용공고와 받을 수 있는 지원금 소식을 카카오 알림톡으로 보내드려요.
             <br />
             무료이니 한번 받아보세요. 나중에 마이페이지 정보 수정에서 언제든 철회할 수 있어요.
+            <br />
+            <a
+              href="/marketing-consent"
+              target="_blank"
+              rel="noopener"
+              className="mt-1 inline-block text-label-1 text-slate-500 underline underline-offset-2 hover:text-slate-700"
+            >
+              동의 내용 자세히 보기
+            </a>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex-col gap-2 sm:flex-col">

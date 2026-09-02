@@ -120,7 +120,15 @@ export function ProfileEditForm({
               무료이며 언제든 해제할 수 있어요.
               {profile.marketingConsent && profile.marketingConsentAt
                 ? ` 동의일 ${profile.marketingConsentAt.slice(0, 10)}`
-                : ""}
+                : ""}{" "}
+              <a
+                href="/marketing-consent"
+                target="_blank"
+                rel="noopener"
+                className="underline underline-offset-2 hover:text-slate-700"
+              >
+                동의 내용 보기
+              </a>
             </span>
           </span>
         </label>
