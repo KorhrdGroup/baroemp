@@ -609,7 +609,12 @@ export default async function MyPage() {
                           </span>
                         </span>
                         <span className="flex shrink-0 items-center gap-2">
-                          {job.match && <span className="text-body-2 font-bold text-brand-blue-600">{job.match.score}점</span>}
+                          {/* 점수 숫자는 회원에게 뜻이 없다. 가장 크게 맞은 조건(희망 직종 일치 등)을 대신 보여준다. */}
+                          {job.match?.reasons[0] && (
+                            <span className="rounded-full bg-brand-blue-50 px-2.5 py-1 text-label-2 font-semibold text-brand-blue-700">
+                              {job.match.reasons[0].label}
+                            </span>
+                          )}
                           <ChevronRight className="size-4 text-slate-300" />
                         </span>
                       </Link>
