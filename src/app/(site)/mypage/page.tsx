@@ -421,7 +421,7 @@ export default async function MyPage() {
                       <div className="space-y-4">
                         {ready.length > 0 && (
                           <div>
-                            <p className="mb-1 text-label-2 font-semibold text-slate-400">지금 바로 지원할 수 있는 직업</p>
+                            <p className="mb-1.5 text-label-1 font-semibold text-slate-500">지금 바로 지원할 수 있는 직업</p>
                             <div>
                               {/* 행을 누르면 결과 화면에서 그 직업 카드가 열린 채로 보인다. */}
                               {ready.slice(0, 3).map((rec, i) => (
@@ -452,7 +452,7 @@ export default async function MyPage() {
                         )}
                         {preparation.length > 0 && (
                           <div>
-                            <p className="mb-1 text-label-2 font-semibold text-slate-400">준비하면 열리는 직업</p>
+                            <p className="mb-1.5 text-label-1 font-semibold text-slate-500">준비하면 열리는 직업</p>
                             <div>
                               {preparation.slice(0, 3).map((rec) => (
                                 <Link
@@ -466,7 +466,7 @@ export default async function MyPage() {
                                     </span>
                                     <span className="min-w-0">
                                       <span className="block truncate text-body-2 font-semibold text-slate-800">{rec.occupationName}</span>
-                                      <span className="block text-label-2 text-amber-700">자격 취득 시 가능</span>
+                                      <span className="mt-1 block text-label-2 text-amber-700">자격 취득 시 가능</span>
                                     </span>
                                   </span>
                                   <span className="flex shrink-0 items-center gap-2">
@@ -534,7 +534,7 @@ export default async function MyPage() {
                           <span className="block truncate text-body-2 font-semibold text-slate-800">
                             {detail.resumeSummary.recentResume.title || "제목 없는 이력서"}
                           </span>
-                          <span className="block text-label-2 text-slate-400">
+                          <span className="mt-1 block text-label-2 text-slate-400">
                             이력서 · 완성도 {detail.resumeSummary.recentResume.completeness}% · 최근수정{" "}
                             {detail.resumeSummary.recentResume.updatedAt.slice(0, 10)}
                           </span>
@@ -555,7 +555,7 @@ export default async function MyPage() {
                           <span className="block truncate text-body-2 font-semibold text-slate-800">
                             {detail.resumeSummary.recentCoverLetter.title || "제목 없는 자기소개서"}
                           </span>
-                          <span className="block text-label-2 text-slate-400">
+                          <span className="mt-1 block text-label-2 text-slate-400">
                             자기소개서 · 최근수정 {detail.resumeSummary.recentCoverLetter.updatedAt.slice(0, 10)}
                           </span>
                         </span>
@@ -604,7 +604,7 @@ export default async function MyPage() {
                       <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
                         <span className="min-w-0">
                           <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
-                          <span className="block truncate text-label-2 text-slate-400">
+                          <span className="mt-1 block truncate text-label-2 text-slate-400">
                             {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
                           </span>
                         </span>
@@ -635,7 +635,7 @@ export default async function MyPage() {
                   <CardContent className="space-y-4 text-label-1 text-slate-600">
                     {assessmentJobs.ready && (
                       <div>
-                        <p className="mb-1 text-label-2 font-semibold text-slate-400">
+                        <p className="mb-1.5 text-label-1 font-semibold text-slate-500">
                           지금 바로 지원 · {assessmentJobs.ready.occupationName}
                         </p>
                         <div>
@@ -643,7 +643,7 @@ export default async function MyPage() {
                             <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
                               <span className="min-w-0">
                                 <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
-                                <span className="block truncate text-label-2 text-slate-400">
+                                <span className="mt-1 block truncate text-label-2 text-slate-400">
                                   {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
                                 </span>
                               </span>
@@ -655,7 +655,7 @@ export default async function MyPage() {
                     )}
                     {assessmentJobs.preparation && (
                       <div>
-                        <p className="mb-1 flex flex-wrap items-center gap-x-1.5 text-label-2 font-semibold text-slate-400">
+                        <p className="mb-1.5 flex flex-wrap items-center gap-x-1.5 text-label-1 font-semibold text-slate-500">
                           <KeyRound className="size-3.5 text-amber-600" />
                           자격 따면 열리는 · {assessmentJobs.preparation.occupationName}
                           {assessmentJobs.preparation.missingQualifications?.length ? (
@@ -669,7 +669,7 @@ export default async function MyPage() {
                             <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
                               <span className="min-w-0">
                                 <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
-                                <span className="block truncate text-label-2 text-slate-400">
+                                <span className="mt-1 block truncate text-label-2 text-slate-400">
                                   {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
                                 </span>
                               </span>
@@ -719,7 +719,7 @@ export default async function MyPage() {
                         <span className="min-w-0">
                           {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "모집합니 / 다." 처럼 끊긴다. */}
                           <span className="line-clamp-2 break-keep text-body-2 font-semibold text-slate-800">{job.title}</span>
-                          <span className="mt-0.5 block truncate text-label-2 text-slate-400">
+                          <span className="mt-1 block truncate text-label-2 text-slate-400">
                             {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
                           </span>
                         </span>
@@ -856,7 +856,7 @@ export default async function MyPage() {
                     <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
                       <span className="min-w-0">
                         <span className="line-clamp-2 break-keep text-body-2 font-semibold text-slate-800">{program.title}</span>
-                        <span className="mt-0.5 block truncate text-label-2 text-slate-400">
+                        <span className="mt-1 block truncate text-label-2 text-slate-400">
                           {labelOrganization(program.organizationName ?? program.organization)} · 신청{" "}
                           {program.applicationPeriod ?? "상시"}
                         </span>
