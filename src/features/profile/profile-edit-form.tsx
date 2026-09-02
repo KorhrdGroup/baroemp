@@ -14,6 +14,7 @@ import {
 } from "@/lib/labels";
 import { ChipToggle, JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "./profile-form-fields";
 import { CustomQualificationInput } from "./custom-qualification-input";
+import { WithdrawButton } from "./withdraw-button";
 
 /*
   고르는 칸. 창은 OS 기본 피커를 그대로 쓴다 - 모바일에서 커스텀 목록보다 그편이 낫다.
@@ -65,7 +66,6 @@ export function ProfileEditForm({
   const [state, formAction, pending] = useActionState(updateProfileAction, initialState);
   const [jobCategories, setJobCategories] = useState<string[]>(careerProfile?.desiredJobCategories ?? []);
   const [workTypes, setWorkTypes] = useState<WorkType[]>(careerProfile?.desiredWorkTypes ?? []);
-  const [marketingConsent, setMarketingConsent] = useState<boolean>(Boolean(profile.marketingConsent));
   const [qualifications, setQualifications] = useState<string[]>(
     heldQualificationNames.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
   );
@@ -110,32 +110,6 @@ export function ProfileEditForm({
             <p className="mt-1 text-label-2 text-slate-400">이메일은 변경할 수 없습니다.</p>
           </div>
         </div>
-        {/* 알림톡 수신 동의. 가입·온보딩에서 켠 것을 여기서 끌 수 있어야 "언제든 철회"가 말이 된다. */}
-        <label className="flex items-start gap-2.5 rounded-xl border border-border bg-white px-4 py-3.5 text-label-1 break-keep text-slate-700">
-          <Checkbox
-            className="mt-0.5"
-            checked={marketingConsent}
-            onCheckedChange={(v) => setMarketingConsent(v === true)}
-          />
-          <span>
-            <span className="block font-medium text-slate-800">맞춤 채용공고·지원금 소식을 카카오 알림톡으로 받기</span>
-            <span className="mt-0.5 block text-label-2 text-slate-500">
-              무료이며 언제든 해제할 수 있어요.
-              {profile.marketingConsent && profile.marketingConsentAt
-                ? ` 동의일 ${profile.marketingConsentAt.slice(0, 10)}`
-                : ""}{" "}
-              <a
-                href="/marketing-consent"
-                target="_blank"
-                rel="noopener"
-                className="underline underline-offset-2 hover:text-slate-700"
-              >
-                동의 내용 보기
-              </a>
-            </span>
-          </span>
-        </label>
-        <input type="hidden" name="marketingConsent" value={marketingConsent ? "on" : ""} />
       </section>
 
       <section className="space-y-4 border-t border-slate-100 pt-6">
@@ -297,9 +271,16 @@ export function ProfileEditForm({
         </label>
       </section>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600 sm:w-auto">
-        {pending ? "저장 중..." : "저장하기"}
-      </Button>
+      {/*
+        저장은 오른쪽 끝, 탈퇴는 왼쪽 끝. 같은 줄에 두되 서로 멀리 떼어 놓아야
+        되돌릴 수 없는 쪽이 손에 잘못 걸리지 않는다.
+      */}
+      <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-6">
+        <WithdrawButton />
+        <Button type="submit" disabled={pending} className="bg-brand-blue-400 hover:bg-brand-blue-600">
+          {pending ? "저장 중..." : "저장하기"}
+        </Button>
+      </div>
     </form>
   );
 }

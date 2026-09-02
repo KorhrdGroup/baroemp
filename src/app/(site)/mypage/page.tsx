@@ -522,7 +522,7 @@ export default async function MyPage() {
           </Card>
 
           {/* 거주지 근처 공고 알림. 켜는 것이 알림톡 수신 동의라 프로필 바로 아래, 눈에 띄는 자리에 둔다. */}
-          <Card id="job-alerts" className={cn("scroll-mt-24", myPageCardClass)}>
+          <Card id="job-alerts" className={cn("mt-4 scroll-mt-24", myPageCardClass)}>
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
                 <BellRing className="size-4" /> 공고 알림

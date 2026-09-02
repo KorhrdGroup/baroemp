@@ -47,6 +47,7 @@ export const KNOWN_ACTIVITY_EVENT_TYPES = [
   "signup_completed",
   "login_completed",
   "logout",
+  "account_withdrawn",
   "profile_updated",
   "marketing_consent_changed",
   "password_reset_requested",

@@ -206,7 +206,7 @@ function socialAccountEmail(profile: SocialProfile): string {
  */
 export async function signInWithSocialProfile(
   profile: SocialProfile,
-): Promise<{ isNewUser: boolean; needsOnboarding: boolean } | null> {
+): Promise<{ isNewUser: boolean } | null> {
   const admin = createAdminSupabaseClient();
   const supabase = await createServerSupabaseClient();
   if (!admin || !supabase) return null;
@@ -272,16 +272,9 @@ export async function signInWithSocialProfile(
   });
 
   /*
-    온보딩은 "이번에 가입했는가"가 아니라 "취업 정보가 비어 있는가"로 정한다.
-    auth 계정만 남고 프로필·취업정보가 지워진 회원(테스트 정리 등)이 다시 로그인하면
-    isNewUser=false 라 온보딩을 건너뛰고 빈 마이페이지로 떨어졌다.
+    온보딩은 가입한 그때 한 번만 권한다. 취업 정보가 비어 있다고 로그인마다 문항으로 보내면,
+    채우지 않기로 한 회원은 들어올 때마다 같은 길을 막고 서 있는 셈이다.
+    나중에 채우고 싶으면 마이페이지 1단계에서 이어서 할 수 있다.
   */
-  const { data: career } = await admin
-    .from("career_profiles")
-    .select("region, employment_status")
-    .eq("user_id", userId)
-    .maybeSingle();
-  const needsOnboarding = isNewUser || !career || (!career.region && !career.employment_status);
-
-  return { isNewUser, needsOnboarding };
+  return { isNewUser };
 }
