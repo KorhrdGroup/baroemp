@@ -591,8 +591,9 @@ export default async function MyPage() {
                       </div>
                     );
                   })()}
-                  <div className="mt-auto flex gap-2 pt-1">
-                    <Button variant="outline" className="flex-1" asChild>
+                  {/* 옆 지원금 카드와 같은 짝: 결과로 가는 쪽이 주 동작(파랑), 다시 하는 쪽은 보조다. */}
+                  <div className="mt-auto flex flex-col gap-2 pt-1 sm:flex-row">
+                    <Button className="flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                       <Link href={`/assessment/result/${latestResult.sessionId}`}>결과 다시보기</Link>
                     </Button>
                     <Button variant="outline" className="flex-1" asChild>
@@ -717,11 +718,16 @@ export default async function MyPage() {
                         ) : (
                           /* 빈 줄 대신 회색 면으로 자리를 잡아, 아직 아무것도 고르지 않았음이 한눈에 보이게 한다. */
                           <div className="rounded-lg bg-slate-50 px-4 py-5 text-center">
+                            {/* 두 문장이 어절 중간에서 갈리지 않게 문장 사이에서만 접는다. */}
                             <p className="break-keep text-label-1 text-slate-500">
-                              아직 찜한 지원제도가 없어요. 마음에 드는 것을 찜해 두면 여기 모입니다.
+                              아직 찜한 지원제도가 없어요.
+                              <br />
+                              마음에 드는 것을 찜해 두면 여기 모입니다.
                             </p>
                             <Button variant="outline" size="sm" className="mt-3 bg-white" asChild>
-                              <Link href={`/support/result/${supportData.latestSessionId}`}>찜하러 가기</Link>
+                              <Link href={`/support/result/${supportData.latestSessionId}`}>
+                                <Star className="size-3.5" /> 찜하러 가기
+                              </Link>
                             </Button>
                           </div>
                         )}
