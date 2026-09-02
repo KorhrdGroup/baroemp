@@ -44,9 +44,11 @@ export function MarketingConsentDialog() {
           </span>
           <DialogTitle className="text-title-3 font-bold text-slate-900">맞춤 정보를 알림톡으로 받아보시겠어요?</DialogTitle>
           <DialogDescription className="break-keep text-body-2 leading-relaxed text-slate-600">
-            동의하시면 내 조건에 맞는 새 채용공고와 받을 수 있는 지원금 소식을 카카오 알림톡으로 보내드려요.
+            내 조건에 맞는 새 공고와 지원금 소식을
             <br />
-            무료이니 한번 받아보세요. 나중에 마이페이지 정보 수정에서 언제든 철회할 수 있어요.
+            카카오 알림톡으로 보내드려요.
+            <br />
+            무료이고, 마이페이지에서 언제든 끌 수 있어요.
             <br />
             <a
               href="/marketing-consent"
