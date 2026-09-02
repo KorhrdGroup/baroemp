@@ -239,10 +239,15 @@ export function AssessmentWizard({
           <p className="mt-3 text-center text-body-2-reading text-slate-500">{question.description}</p>
         )}
 
-        {/* 미리 채워진 답이 있다는 것을 첫 문항에서 한 번 알려준다. 고치는 건 각 문항에서 바로 하면 된다. */}
+        {/*
+          미리 채워진 답이 있다는 것을 첫 문항에서 한 번 알려준다. 고치는 건 각 문항에서 바로 하면 된다.
+          break-keep 은 한글이 어절 중간에서 잘리지 않게 한다. 좁은 화면에서 "확인하면서" 뒤가 아니라
+          문장 사이에서 나뉘도록 두 문장을 <span block> 으로 갈라 각자 한 덩어리로 접히게 한다.
+        */}
         {prefilledCount > 0 && currentIndex === 0 && (
-          <p className="mt-4 text-center text-label-1 text-slate-400">
-            이미 알려주신 정보 {prefilledCount}개는 미리 채워뒀어요. 확인하면서 넘어가주세요.
+          <p className="mt-4 text-center text-label-1 break-keep text-slate-400">
+            <span className="inline-block">이미 알려주신 정보 {prefilledCount}개는 미리 채워뒀어요.</span>{" "}
+            <span className="inline-block">확인하면서 넘어가주세요.</span>
           </p>
         )}
 
