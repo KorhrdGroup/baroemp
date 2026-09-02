@@ -185,7 +185,8 @@ function StepHeading({
       <h2 className="flex items-center gap-2.5 text-title-3 font-bold text-slate-900">
         <span
           className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-full text-body-2 font-bold",
+            /* leading-none: 줄 높이가 남으면 글자 상자가 원 가운데보다 살짝 위에 앉는다. */
+            "flex size-8 shrink-0 items-center justify-center rounded-full text-body-2 font-bold leading-none",
             done ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-500",
           )}
         >
@@ -337,7 +338,8 @@ export default async function MyPage() {
       step: 3,
       title: "공고 알아보기",
       detail: `찜한 일자리 ${jobData.bookmarkCount} · 지원제도 ${supportData.bookmarkCount}`,
-      done: jobData.bookmarkCount > 0 || jobData.applyCount > 0,
+      /* 카드에 보이는 것(찜)만 근거로 삼는다. 보이지 않는 클릭 기록으로 완료가 되면 "값이 없는데 왜 찼지"가 된다. */
+      done: jobData.bookmarkCount > 0 || supportData.bookmarkCount > 0,
       href: "/jobs",
       actionLabel: "맞춤 공고 보러 가기",
       todoMessage: "내 조건에 맞는 공고를 둘러보고 마음에 드는 곳을 찜해 두세요.",

@@ -65,7 +65,7 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
                 href={s.anchor}
                 aria-label={`${s.step}단계 ${s.title}${s.done ? " (완료)" : isNext ? " (다음 할 일)" : ""}`}
                 className={cn(
-                  "relative z-10 flex size-10 items-center justify-center rounded-full text-body-2 font-bold transition-colors sm:size-12 sm:text-body-1",
+                  "relative z-10 flex size-10 items-center justify-center rounded-full text-body-2 font-bold leading-none transition-colors sm:size-12 sm:text-body-1",
                   s.done
                     ? "bg-brand-blue-400 text-white"
                     : isNext

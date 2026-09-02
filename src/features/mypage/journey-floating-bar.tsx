@@ -25,35 +25,40 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
   const [activeId, setActiveId] = useState<string | null>(null);
   const next = steps.find((s) => !s.done) ?? null;
 
+  /*
+    처음에는 IntersectionObserver 를 썼는데, 탭이 숨겨진 채(백그라운드) 페이지가 열리면 관찰 콜백이
+    한 번도 안 울려 띠가 영영 안 떴다. 스크롤 위치를 직접 재는 편이 단순하고 어디서나 같다.
+    - 띠: 절차 판(sentinel)의 아래 끝이 화면 위로 올라가면 띄운다.
+    - 밝은 원: 화면 위에서 35% 지점을 지난 마지막 단계 카드가 "보고 있는 단계"다.
+  */
   useEffect(() => {
     const sentinel = document.getElementById(sentinelId);
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(([entry]) => setVisible(!entry.isIntersecting), {
-      threshold: 0,
-    });
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [sentinelId]);
-
-  useEffect(() => {
-    /*
-      단계 카드들이 화면 가운데 띠(위 35% ~ 아래 55%)에 들어올 때 그 단계를 "보고 있는 단계"로 친다.
-      카드 높이가 제각각이라 "가장 많이 보이는 것"보다 이 편이 덜 튄다.
-    */
     const targets = steps
-      .map((s) => document.getElementById(s.anchor.replace(/^#/, "")))
-      .filter((el): el is HTMLElement => Boolean(el));
-    if (targets.length === 0) return;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const hit = entries.filter((e) => e.isIntersecting).sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
-        if (hit) setActiveId(`#${hit.target.id}`);
-      },
-      { rootMargin: "-35% 0px -55% 0px", threshold: 0 },
-    );
-    targets.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
-  }, [steps]);
+      .map((s) => ({ anchor: s.anchor, el: document.getElementById(s.anchor.replace(/^#/, "")) }))
+      .filter((t): t is { anchor: string; el: HTMLElement } => Boolean(t.el));
+
+    /*
+      requestAnimationFrame 으로 묶지 않는다. 탭이 숨겨져 있으면 프레임이 안 돌아 스크롤을 해도
+      띠가 갱신되지 않았다. 재는 일이 rect 몇 개뿐이라 그냥 매번 잰다 (React 가 같은 값이면 안 그린다).
+    */
+    const measure = () => {
+      if (sentinel) setVisible(sentinel.getBoundingClientRect().bottom < 0);
+      const line = window.innerHeight * 0.35;
+      let current: string | null = null;
+      for (const t of targets) if (t.el.getBoundingClientRect().top <= line) current = t.anchor;
+      setActiveId(current);
+    };
+
+    measure();
+    window.addEventListener("scroll", measure, { passive: true });
+    window.addEventListener("resize", measure);
+    document.addEventListener("visibilitychange", measure);
+    return () => {
+      window.removeEventListener("scroll", measure);
+      window.removeEventListener("resize", measure);
+      document.removeEventListener("visibilitychange", measure);
+    };
+  }, [sentinelId, steps]);
 
   return (
     <div
@@ -81,7 +86,7 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
                   tabIndex={visible ? 0 : -1}
                   aria-label={`${s.step}단계 ${s.title}${s.done ? " (완료)" : isNext ? " (다음 할 일)" : ""}`}
                   className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-full text-label-1 font-bold transition-colors sm:size-10",
+                    "flex size-9 shrink-0 items-center justify-center rounded-full text-label-1 font-bold leading-none transition-colors sm:size-10",
                     s.done
                       ? "bg-brand-blue-400 text-white"
                       : isNext
