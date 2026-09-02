@@ -177,6 +177,7 @@ export default async function JobsPage({
                   isAuthenticated={isAuthenticated}
                   isBookmarked={bookmarkedSet.has(job.id)}
                   readiness={readinessMap.get(job.id)}
+                  hoverTint
                 />
               ))}
             </div>
@@ -218,6 +219,7 @@ export default async function JobsPage({
                     isAuthenticated={isAuthenticated}
                     isBookmarked={bookmarkedSet.has(job.id)}
                     readiness={readinessMap.get(job.id)}
+                    hoverTint
                   />
                 ))}
               </div>

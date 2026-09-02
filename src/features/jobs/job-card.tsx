@@ -44,6 +44,8 @@ export interface JobCardProps {
    * 카드 안에서 만들 수 없다. 없으면 배지를 띄우지 않는다.
    */
   readiness?: JobReadiness;
+  /** 호버 시 카드 면을 연파랑으로. 전체 공고 목록처럼 카드가 큰 자리에서만 켠다 (큐레이션 띠는 끔). */
+  hoverTint?: boolean;
 }
 
 /**
@@ -58,6 +60,7 @@ export function JobCard({
   isAuthenticated,
   isBookmarked,
   readiness,
+  hoverTint,
 }: JobCardProps) {
   const salary = splitSalary(job);
   const dday = ddayLabel(job);
@@ -68,10 +71,13 @@ export function JobCard({
   return (
     // 찜 버튼은 카드 Link 안에 넣을 수 없어(버튼 중첩) 형제로 두고 위에 겹친다.
     <div className={cn("relative h-full", className)}>
-      {/* 호버 표시는 제목 밑줄 하나로 둔다. 카드 면까지 파래지면 목록에서 눈이 시끄럽다. */}
+      {/* 기본 호버 표시는 제목 밑줄 하나. 촘촘한 띠(큐레이션)에서 면까지 파래지면 눈이 시끄럽다. */}
       <Link
         href={`/jobs/${job.id}`}
-        className="group flex h-full flex-col rounded-xl border border-border bg-white p-5"
+        className={cn(
+          "group flex h-full flex-col rounded-xl border border-border bg-white p-5",
+          hoverTint && "transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/40",
+        )}
       >
         {/*
           지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
