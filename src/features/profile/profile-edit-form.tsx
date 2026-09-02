@@ -14,6 +14,7 @@ import {
 } from "@/lib/labels";
 import { ChipToggle, JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "./profile-form-fields";
 import { CustomQualificationInput } from "./custom-qualification-input";
+import { WithdrawButton } from "./withdraw-button";
 
 /*
   고르는 칸. 창은 OS 기본 피커를 그대로 쓴다 - 모바일에서 커스텀 목록보다 그편이 낫다.
@@ -270,9 +271,16 @@ export function ProfileEditForm({
         </label>
       </section>
 
-      <Button type="submit" disabled={pending} className="w-full bg-brand-blue-400 hover:bg-brand-blue-600 sm:w-auto">
-        {pending ? "저장 중..." : "저장하기"}
-      </Button>
+      {/*
+        저장은 오른쪽 끝, 탈퇴는 왼쪽 끝. 같은 줄에 두되 서로 멀리 떼어 놓아야
+        되돌릴 수 없는 쪽이 손에 잘못 걸리지 않는다.
+      */}
+      <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-6">
+        <WithdrawButton />
+        <Button type="submit" disabled={pending} className="bg-brand-blue-400 hover:bg-brand-blue-600">
+          {pending ? "저장 중..." : "저장하기"}
+        </Button>
+      </div>
     </form>
   );
 }
