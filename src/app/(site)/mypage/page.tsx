@@ -787,8 +787,12 @@ export default async function MyPage() {
                     <Compass className="size-4" /> 진단 기반 공고
                   </CardTitle>
                 </CardHeader>
-                {/* 두 트랙은 성격이 달라(지금 지원 / 자격 따면) 사이를 넉넉히 띄워 갈라 놓는다. */}
-                <CardContent className="space-y-7 text-label-1 text-slate-600">
+                {/*
+                  두 트랙은 성격이 달라(지금 지원 / 자격 따면) 사이를 넉넉히 띄워 갈라 놓는다.
+                  옆 열에 맞춰 카드가 늘어날 때 남는 높이는 트랙 사이로 흘려보낸다.
+                  그냥 두면 남는 만큼이 마지막 줄 아래에 고여, 카드 위아래 여백이 달라 보였다.
+                */}
+                <CardContent className="flex flex-1 flex-col justify-between space-y-7 text-label-1 text-slate-600">
                   {assessmentJobs.ready && (
                     <div>
                       <p className="mb-1.5 text-label-1 font-semibold text-slate-500">
