@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
 
 /**
@@ -15,19 +15,35 @@ import { createBrowserSupabaseClient } from "@/lib/supabase/browser";
  * 레이아웃에서 서버가 본 상태(serverHasUser)를 받아, 브라우저 세션과 다르면 router.refresh() 로
  * 레이아웃까지 다시 그린다. 새로 그려진 레이아웃이 다시 이 컴포넌트를 마운트하며 값이 맞춰진다.
  */
+
+/**
+ * 내비게이션이 주소 정리까지 끝낸 뒤에 refresh 를 건다.
+ * 리다이렉트 직후 곧바로 걸면 라우터가 아직 정리 중이던 내부 주소(_rsc=…)가 주소창에 남았다.
+ */
+const SETTLE_MS = 300;
+
 export function SessionSync({ serverHasUser }: { serverHasUser: boolean }) {
   const router = useRouter();
+  // 경로가 바뀔 때마다 다시 확인한다. 세션이 끊긴 채 페이지를 옮겨 다니는 경우를 잡는다.
+  const pathname = usePathname();
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
     if (!supabase) return; // Mock Mode: 가짜 세션 쿠키라 브라우저에서 확인할 것이 없다.
 
     let cancelled = false;
+    let pending: number | undefined;
     const syncIfChanged = (hasSession: boolean) => {
-      if (!cancelled && hasSession !== serverHasUser) router.refresh();
+      if (hasSession === serverHasUser) return;
+      window.clearTimeout(pending);
+      pending = window.setTimeout(() => {
+        if (!cancelled) router.refresh();
+      }, SETTLE_MS);
     };
 
-    void supabase.auth.getSession().then(({ data }) => syncIfChanged(Boolean(data.session)));
+    const initial = window.setTimeout(() => {
+      void supabase.auth.getSession().then(({ data }) => syncIfChanged(Boolean(data.session)));
+    }, SETTLE_MS);
 
     // 다른 탭에서 로그인·로그아웃하거나 세션이 끊긴 순간도 잡는다.
     const {
@@ -38,9 +54,11 @@ export function SessionSync({ serverHasUser }: { serverHasUser: boolean }) {
 
     return () => {
       cancelled = true;
+      window.clearTimeout(initial);
+      window.clearTimeout(pending);
       subscription.unsubscribe();
     };
-  }, [router, serverHasUser]);
+  }, [router, serverHasUser, pathname]);
 
   return null;
 }
