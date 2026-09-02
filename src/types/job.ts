@@ -179,7 +179,8 @@ export type JobCurationTab = "new" | "closing_soon" | "matched" | "assessment_ma
  * 큐레이션 탭 상태.
  * READY: 정상 결과 있음, NEEDS_PROFILE: 커리어 프로필 미입력, EMPTY: 조건 만족 공고 없음.
  */
-export type JobCurationState = "READY" | "NEEDS_PROFILE" | "EMPTY";
+/** NEEDS_ASSESSMENT: 직업진단을 아직 안 해서 진단 기반 탭을 채울 수 없는 상태. 빈 결과(EMPTY)와 구분해 진단으로 안내한다. */
+export type JobCurationState = "READY" | "NEEDS_PROFILE" | "NEEDS_ASSESSMENT" | "EMPTY";
 
 /** 공고의 필수 자격 대비 회원의 준비 상태. 계산은 features/jobs/job-readiness. */
 export type JobReadinessLevel = "no_requirement" | "satisfied" | "preferred" | "near" | "gap";
