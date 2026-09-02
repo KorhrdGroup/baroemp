@@ -331,7 +331,7 @@ export default async function MyPage() {
           */}
           <Card className={cn(myPageCardClass, "gap-3")}>
             <CardHeader>
-              <CardTitle className="flex items-center gap-1.5 text-body-2">
+              <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                 <UserRound className="size-4" /> 기본 정보
               </CardTitle>
             </CardHeader>
@@ -348,7 +348,7 @@ export default async function MyPage() {
             <div className="mx-6 my-2 border-t border-slate-100" />
 
             <CardHeader>
-              <CardTitle className="flex items-center gap-1.5 text-body-2">
+              <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                 <Briefcase className="size-4" /> 취업 프로필
               </CardTitle>
             </CardHeader>
@@ -405,7 +405,7 @@ export default async function MyPage() {
               <Card className={myPageCardClass}>
                 {/* 검사일은 제목의 부가 정보라 "전체보기"와 같은 자리(오른쪽 위)에 둔다. 본문 첫 줄을 차지하지 않게. */}
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                     <Compass className="size-4" /> 최근 직업진단 결과
                   </CardTitle>
                   <span className="shrink-0 text-label-1 text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</span>
@@ -494,7 +494,7 @@ export default async function MyPage() {
             ) : (
               <Card className={myPageCardClass}>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                     <Compass className="size-4" /> 직업진단
                   </CardTitle>
                 </CardHeader>
@@ -510,7 +510,7 @@ export default async function MyPage() {
             {/* D-2. 이력서/자기소개서 (스펙 51번) */}
             <Card className={myPageCardClass}>
               <CardHeader className="flex flex-row items-center justify-between gap-2">
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
+                <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                   <FileText className="size-4" /> 이력서 · 자기소개서
                 </CardTitle>
                 {/* 찜한 일자리·지원제도 카드와 같은 자리, 같은 모양. 카드에는 대표 이력서 한 건만 담긴다. */}
@@ -594,7 +594,7 @@ export default async function MyPage() {
               {jobData.recommended.length > 0 && (
                 <Card className={myPageCardClass}>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-1.5 text-body-2">
+                    <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                       <Sparkles className="size-4" /> 맞춤 일자리
                     </CardTitle>
                   </CardHeader>
@@ -625,7 +625,7 @@ export default async function MyPage() {
               {assessmentJobs && (assessmentJobs.ready || assessmentJobs.preparation) && (
                 <Card className={myPageCardClass}>
                   <CardHeader className="flex flex-row items-center justify-between gap-2">
-                    <CardTitle className="flex items-center gap-1.5 text-body-2">
+                    <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                       <Compass className="size-4" /> 진단 기반 공고
                     </CardTitle>
                     <Link href="/jobs" className="shrink-0 text-label-1 font-medium text-slate-500">
@@ -689,7 +689,7 @@ export default async function MyPage() {
               */}
               <Card id="bookmarked-jobs" className={cn("scroll-mt-24", myPageCardClass)}>
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                     <Star className="size-4" /> 찜한 일자리
                   </CardTitle>
                   {/*
@@ -740,7 +740,7 @@ export default async function MyPage() {
               {jobData.applyHistory.length > 0 && (
                 <Card id="apply-history" className={cn("scroll-mt-24", myPageCardClass)}>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-1.5 text-body-2">
+                    <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                       <Briefcase className="size-4" /> 지원 페이지로 이동한 일자리
                     </CardTitle>
                   </CardHeader>
@@ -774,7 +774,7 @@ export default async function MyPage() {
             {supportData.latestSessionId ? (
               <Card className={myPageCardClass}>
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                     <Gift className="size-4" /> 지원금 진단 결과
                   </CardTitle>
                   {supportData.latestCompletedAt && (
@@ -816,7 +816,7 @@ export default async function MyPage() {
             ) : (
               <Card className={myPageCardClass}>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                     <Gift className="size-4" /> 지원금 찾기
                   </CardTitle>
                 </CardHeader>
@@ -831,7 +831,7 @@ export default async function MyPage() {
 
             <Card id="bookmarked-support" className={cn("scroll-mt-24", myPageCardClass)}>
               <CardHeader className="flex flex-row items-center justify-between gap-2">
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
+                <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                   <Star className="size-4" /> 찜한 지원제도
                 </CardTitle>
                 {supportData.bookmarkCount > 0 && (
@@ -878,7 +878,7 @@ export default async function MyPage() {
             {supportData.applyHistory.length > 0 && (
               <Card className={myPageCardClass}>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-1.5 text-body-2">
+                  <CardTitle className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
                     <Gift className="size-4" /> 신청 페이지로 이동한 지원제도
                   </CardTitle>
                 </CardHeader>
