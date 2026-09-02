@@ -4,36 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { Users, FileText, Briefcase, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/**
+ * 등록 채용공고 수치는 실제 활성 공고 수(서버에서 매일 갱신)로 채운다. 나머지 지표는 아직
+ * 대시보드로 집계할 값이 없어 임시 상수로 둔다 - 실값이 준비되면 이 파일에서만 갈아끼우면 된다.
+ */
 const stats = [
-  {
-    id: "users",
-    icon: Users,
-    value: 12480,
-    unit: "명",
-    label: "누적 회원 수",
-  },
-  {
-    id: "resume",
-    icon: FileText,
-    value: 8320,
-    unit: "건",
-    label: "이력서·자소서 첨삭",
-  },
-  {
-    id: "jobs",
-    icon: Briefcase,
-    value: 34500,
-    unit: "건",
-    label: "등록 채용공고",
-  },
-  {
-    id: "success",
-    icon: Award,
-    value: 2150,
-    unit: "명",
-    label: "취업 성공",
-  },
-];
+  { id: "users", icon: Users, value: 12480, unit: "명", label: "누적 회원 수" },
+  { id: "resume", icon: FileText, value: 8320, unit: "건", label: "이력서·자소서 첨삭" },
+  { id: "jobs", icon: Briefcase, value: 34500, unit: "건", label: "등록 채용공고" },
+  { id: "success", icon: Award, value: 2150, unit: "명", label: "취업 성공" },
+] as const;
 
 function useCountUp(target: number, started: boolean) {
   const [count, setCount] = useState(0);
@@ -60,7 +40,15 @@ function useCountUp(target: number, started: boolean) {
   return count;
 }
 
-function CountUpStat({ stat, started }: { stat: (typeof stats)[number]; started: boolean }) {
+interface StatItem {
+  id: string;
+  icon: typeof Users;
+  value: number;
+  unit: string;
+  label: string;
+}
+
+function CountUpStat({ stat, started }: { stat: StatItem; started: boolean }) {
   const count = useCountUp(stat.value, started);
 
   const finalFormatted = stat.value.toLocaleString();
@@ -92,9 +80,12 @@ function CountUpStat({ stat, started }: { stat: (typeof stats)[number]; started:
   );
 }
 
-export function StatsBannerSection() {
+export function StatsBannerSection({ jobCount }: { jobCount?: number }) {
   const ref = useRef<HTMLElement>(null);
   const [started, setStarted] = useState(false);
+
+  // 넘어온 실값이 있으면 등록 채용공고 자리만 갈아끼운다. 나머지는 상수 유지.
+  const displayStats: StatItem[] = stats.map((s) => (s.id === "jobs" && typeof jobCount === "number" ? { ...s, value: jobCount } : s));
 
   useEffect(() => {
     const el = ref.current;
@@ -122,7 +113,7 @@ export function StatsBannerSection() {
         서로 붙어 보였다. 2×2 로 세우고 칸 사이를 가는 선으로 나눈다.
       */}
       <div className="mx-auto grid w-fit max-w-7xl grid-cols-2 px-4.5 sm:flex sm:w-auto sm:flex-wrap sm:items-center sm:justify-center sm:gap-y-6 lg:px-8">
-        {stats.map((stat, i) => (
+        {displayStats.map((stat, i) => (
           <div
             key={stat.id}
             className={cn(

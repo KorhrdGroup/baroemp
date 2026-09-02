@@ -24,15 +24,15 @@ export const coreServices: CoreServiceItem[] = [
   },
   {
     id: "jobs",
-    title: "전국 채용공고",
-    description: "실시간 채용정보 확인",
+    title: "전국 일자리",
+    description: "실시간 일자리 정보 확인",
     href: "/jobs",
     icon: Briefcase,
   },
   {
     id: "support",
     title: "지원금 찾기",
-    description: "받을 수 있는 취업·훈련 지원 확인",
+    description: "받을 수 있는 취업·훈련 지원",
     href: "/support",
     icon: Coins,
   },
