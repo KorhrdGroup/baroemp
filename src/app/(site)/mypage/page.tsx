@@ -721,46 +721,19 @@ export default async function MyPage() {
             }
           />
           {/*
-            카드 3장이 세로로만 쌓이면 넓은 화면 오른쪽이 크게 빈다. CSS multi-column 으로 두 줄에 나누고
-            각 카드는 열 안에서 잘리지 않게 break-inside-avoid. 좁은 화면(< lg)에서는 한 줄로 자연스럽게 쌓인다.
+            카드 3장을 넓은 화면에서 두 열로 명시 배치한다. columns-2 는 브라우저가 맞춤(짧음) 하나만
+            왼쪽에 두고 진단·찜을 오른쪽으로 몰아 왼쪽 아래가 텅 비었다. 진단 기반 공고는 두 트랙으로
+            길어서 왼쪽에 세로로 크게 두고, 오른쪽에 맞춤·찜을 위아래로 배치해 균형을 맞춘다.
+            대신 진단이 없는 회원(맞춤·찜만) 은 자연스럽게 오른쪽 두 카드만 그리드에 남는다.
           */}
-          <div className="space-y-4 lg:columns-2 lg:gap-4 lg:space-y-0 [&>*]:lg:mb-4 [&>*]:lg:break-inside-avoid">
-            {jobData.recommended.length > 0 && (
-              <Card className={myPageCardClass}>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
-                    <Sparkles className="size-4" /> 맞춤 일자리
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="text-label-1 text-slate-600">
-                  {jobData.recommended.map((job) => (
-                    <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
-                      <span className="min-w-0">
-                        <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
-                        <span className="mt-1 block truncate text-label-2 text-slate-400">
-                          {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
-                        </span>
-                      </span>
-                      <span className="flex shrink-0 items-center gap-2">
-                        {/* 점수 숫자는 회원에게 뜻이 없다. 가장 크게 맞은 조건(희망 직종 일치 등)을 대신 보여준다. */}
-                        {job.match?.reasons[0] && (
-                          <span className="rounded-full bg-brand-blue-50 px-2.5 py-1 text-label-2 font-semibold text-brand-blue-700">
-                            {job.match.reasons[0].label}
-                          </span>
-                        )}
-                        <ChevronRight className="size-4 text-slate-300" />
-                      </span>
-                    </Link>
-                  ))}
-                </CardContent>
-              </Card>
-            )}
-
+          <div className={cn("grid gap-4 lg:items-start", assessmentJobs && (assessmentJobs.ready || assessmentJobs.preparation) ? "lg:grid-cols-2" : "")}>
             {/*
-              진단 기반 공고. 위 "최근 직업진단 결과"가 직업을 보여줬다면 여기는 그 직업의 실제 공고다.
-              바로 지원 트랙과 자격 따면 열리는 트랙을 결과 카드와 같은 두 묶음으로 둔다.
+              왼쪽 열: 진단 기반 공고 (두 트랙이라 가장 김) - 오른쪽 열: 맞춤 일자리 + 찜한 일자리 (위아래).
+              진단이 없는 회원은 왼쪽 wrapper 가 안 그려져 오른쪽 두 카드만 남는다. 좁은 화면에서는
+              wrapper 두 개가 순서대로 세로로 쌓여 진단 → 맞춤 → 찜 순으로 자연스럽게 보인다.
             */}
-            {assessmentJobs && (assessmentJobs.ready || assessmentJobs.preparation) && (
+            {(assessmentJobs?.ready || assessmentJobs?.preparation) && (
+              <div className="space-y-4">
               <Card className={myPageCardClass}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
@@ -790,6 +763,39 @@ export default async function MyPage() {
                       <div>{assessmentJobs.preparation.jobs.map(jobRow)}</div>
                     </div>
                   )}
+                </CardContent>
+              </Card>
+              </div>
+            )}
+
+            <div className="space-y-4">
+            {jobData.recommended.length > 0 && (
+              <Card className={myPageCardClass}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
+                    <Sparkles className="size-4" /> 맞춤 일자리
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="text-label-1 text-slate-600">
+                  {jobData.recommended.map((job) => (
+                    <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
+                      <span className="min-w-0">
+                        <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
+                        <span className="mt-1 block truncate text-label-2 text-slate-400">
+                          {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
+                        </span>
+                      </span>
+                      <span className="flex shrink-0 items-center gap-2">
+                        {/* 점수 숫자는 회원에게 뜻이 없다. 가장 크게 맞은 조건(희망 직종 일치 등)을 대신 보여준다. */}
+                        {job.match?.reasons[0] && (
+                          <span className="rounded-full bg-brand-blue-50 px-2.5 py-1 text-label-2 font-semibold text-brand-blue-700">
+                            {job.match.reasons[0].label}
+                          </span>
+                        )}
+                        <ChevronRight className="size-4 text-slate-300" />
+                      </span>
+                    </Link>
+                  ))}
                 </CardContent>
               </Card>
             )}
@@ -839,6 +845,7 @@ export default async function MyPage() {
                   )}
                 </CardContent>
               </Card>
+            </div>
           </div>
         </section>
 
