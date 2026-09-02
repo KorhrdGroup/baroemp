@@ -6,7 +6,7 @@ import { getCurrentUser, requireSessionUser } from "@/lib/auth/session";
 import { getJobBookmarkRepository, getJobRepository } from "@/lib/repositories";
 import { recalculateLeadScore } from "@/services/lead-score.service";
 import { recordJobInterestSignal } from "@/services/job-interest.service";
-import { getAllJobCurations, getJobCuration } from "@/services/job-curation.service";
+import { getAllJobCurations, getJobCuration, getPublicJobCuration } from "@/services/job-curation.service";
 import type { Job, JobSearchFilter, JobCurationTab, JobCurationResult } from "@/types";
 
 /** 활동 로그용 userId/anonymousId를 결정한다. 클라이언트가 넘긴 userId는 신뢰하지 않고 항상 세션을 우선한다. */
@@ -265,6 +265,12 @@ export async function getJobCurationAction(tab: JobCurationTab): Promise<JobCura
   assertValidCurationTab(tab);
   const user = await requireSessionUser();
   return getJobCuration(user.id, tab);
+}
+
+/** 비로그인 화면용. 회원 조건이 필요 없는 공통 탭만 열어 둔다 (로그인 요구 없음). */
+export async function getPublicJobCurationAction(tab: JobCurationTab): Promise<JobCurationResult> {
+  if (tab !== "new" && tab !== "closing_soon") return { tab, state: "EMPTY", items: [] };
+  return getPublicJobCuration(tab);
 }
 
 /** 큐레이션 다섯 탭을 한 번에 받는다. 탭을 눌렀을 때 기다리지 않도록 화면이 뜬 뒤 미리 부른다. */

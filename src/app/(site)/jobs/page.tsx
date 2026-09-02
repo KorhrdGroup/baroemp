@@ -6,13 +6,14 @@ import { compareUserToJobsRequirements } from "@/services/job-requirement-compar
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
 import { JobCard } from "@/features/jobs/job-card";
 import { JobRowCompact } from "@/features/jobs/job-row-compact";
+import { GuestGate } from "@/features/jobs/guest-gate";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { JobCurationSection } from "@/features/jobs/job-curation-section";
 import { Pagination } from "@/components/common/pagination";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { searchJobs, type JobSearchParams } from "@/services/job-search.service";
 import { getRecommendedJobsFromAssessment } from "@/services/assessment-job.service";
-import { getJobCuration } from "@/services/job-curation.service";
+import { getJobCuration, getPublicJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { findCareerProfileByUserId, getOccupationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
@@ -44,13 +45,20 @@ export default async function JobsPage({
   searchParams: Promise<JobsPageSearchParams>;
 }) {
   const sp = await searchParams;
-  // 로그인해야 이용할 수 있는 화면이다. 로그인 후 보던 조건 그대로 돌아오도록 쿼리까지 next에 싣는다.
+  // 로그인 화면으로 보낼 때 보던 조건 그대로 돌아오도록 쿼리까지 next에 싣는다.
   const query = new URLSearchParams(
     Object.entries(sp).filter(([, v]) => typeof v === "string" && v !== "") as [string, string][],
   ).toString();
-  const user = await requireUser(`/jobs${query ? `?${query}` : ""}`);
+  const nextPath = `/jobs${query ? `?${query}` : ""}`;
 
   const page = Math.max(1, Number(sp.page) || 1);
+
+  /*
+    첫 쪽은 로그인 없이 보여준다 - 어떤 공고가 있는지 못 보면 가입할 이유도 생기지 않는다.
+    두 번째 쪽부터는 로그인을 요구한다. 회원용 값(맞춤 정렬·찜·자격 배지·큐레이션)은
+    로그인한 경우에만 얹는다.
+  */
+  const user = page > 1 ? await requireUser(nextPath) : await getCurrentUser();
 
   const anonymousId = (await cookies()).get("baro_anonymous_id")?.value;
 
@@ -59,7 +67,7 @@ export default async function JobsPage({
     지역을 고르지 않았으면 취업 프로필의 희망지역을 기본으로 건다. 회원이 "지역 전체"를 고르면
     검색바가 region=all 을 실어 보내 기본값을 되살리지 않는다 (job-filters-form.buildParams).
   */
-  const careerProfile = await findCareerProfileByUserId(user.id).catch(() => null);
+  const careerProfile = user ? await findCareerProfileByUserId(user.id).catch(() => null) : null;
   const region: Region | undefined =
     sp.region === "all" ? undefined : ((sp.region as Region | undefined) ?? careerProfile?.region);
 
@@ -77,18 +85,19 @@ export default async function JobsPage({
     page,
     pageSize: PAGE_SIZE,
     /* userId 가 빠져 있어 로그인 회원도 프로필 없는 셈으로 검색됐다 - 추천순이 회원 점수를 한 번도 안 탔던 이유. */
-    userId: user.id,
+    userId: user?.id,
     anonymousId,
   };
 
-  const [result, recommendation, currentUser, bookmarkedIds, initialCuration] = await Promise.all([
+  const [result, recommendation, bookmarkedIds, initialCuration] = await Promise.all([
     searchJobs(filter),
-    getRecommendedJobsFromAssessment({ userId: user.id, anonymousId }),
-    getCurrentUser(),
+    user ? getRecommendedJobsFromAssessment({ userId: user.id, anonymousId }) : null,
     getUserJobBookmarkIdsAction(),
     // 큐레이션 섹션의 첫 화면에 뜨는 탭 (JobCurationSection 의 INITIAL_TAB 과 짝을 맞춰야 한다).
-    getJobCuration(user.id, "matched"),
+    // 비로그인에게도 띠는 보여준다 - 회원 조건이 필요 없는 신규 탭으로 연다.
+    user ? getJobCuration(user.id, "matched") : getPublicJobCuration("new"),
   ]);
+  const currentUser = user;
   const isAuthenticated = Boolean(currentUser);
 
   /*
@@ -131,6 +140,11 @@ export default async function JobsPage({
   };
 
   return (
+    /*
+      비로그인은 첫 화면을 둘러볼 수 있지만, 공고를 열거나 조건을 바꾸는 순간 회원이 되어야 한다.
+      바로 로그인 화면으로 밀지 않고 가입 안내 창을 띄운다 - 보던 것이 사라지면 대부분 떠난다.
+    */
+    <GuestGate active={!isAuthenticated}>
     <div className="mx-auto max-w-6xl px-4.5 py-10 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">일자리찾기</p>
@@ -163,6 +177,7 @@ export default async function JobsPage({
         <JobCurationSection
           initialActive={initialCuration}
           bookmarkedIds={bookmarkedIds}
+          isAuthenticated={isAuthenticated}
         />
       </div>
       </JobFiltersForm>
@@ -248,5 +263,6 @@ export default async function JobsPage({
         )}
       </div>
     </div>
+    </GuestGate>
   );
 }

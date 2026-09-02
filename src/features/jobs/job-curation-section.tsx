@@ -9,6 +9,7 @@ import { JobCard } from "./job-card";
 import {
   getAllJobCurationsAction,
   getJobCurationAction,
+  getPublicJobCurationAction,
   trackCurationJobClickedAction,
   trackCurationTabViewedAction,
 } from "./job-actions";
@@ -46,14 +47,22 @@ const EMPTY_MESSAGES: Record<string, string> = {
 /** 서버에서 먼저 받아 오는 탭. TABS 배열의 첫 항목과 짝을 맞춘다. */
 const INITIAL_TAB: JobCurationTab = "matched";
 
+/** 회원 조건 없이 계산되는 탭. 비로그인에게는 이 둘만 보여준다. */
+const PUBLIC_TABS: readonly JobCurationTab[] = ["new", "closing_soon"];
+const PUBLIC_INITIAL_TAB: JobCurationTab = "new";
+
 interface JobCurationSectionProps {
   initialActive: JobCurationResult;
   bookmarkedIds: string[];
+  /** 비로그인이면 공통 탭만 열고, 맞춤은 가입하면 볼 수 있다고 알린다. */
+  isAuthenticated?: boolean;
 }
 
-export function JobCurationSection({ initialActive, bookmarkedIds }: JobCurationSectionProps) {
-  const [activeTab, setActiveTab] = useState<JobCurationTab>(INITIAL_TAB);
-  const [results, setResults] = useState<Partial<Record<JobCurationTab, JobCurationResult>>>({ [INITIAL_TAB]: initialActive });
+export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticated = true }: JobCurationSectionProps) {
+  const tabs = isAuthenticated ? TABS : TABS.filter((t) => PUBLIC_TABS.includes(t.key));
+  const initialTab = isAuthenticated ? INITIAL_TAB : PUBLIC_INITIAL_TAB;
+  const [activeTab, setActiveTab] = useState<JobCurationTab>(initialTab);
+  const [results, setResults] = useState<Partial<Record<JobCurationTab, JobCurationResult>>>({ [initialTab]: initialActive });
   const [loadingTabs, setLoadingTabs] = useState<Set<JobCurationTab>>(new Set());
 
   /*
@@ -111,12 +120,12 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
     window.addEventListener("resize", sync);
     return () => window.removeEventListener("resize", sync);
   }, []);
-  const trackedTabs = useRef(new Set<JobCurationTab>([INITIAL_TAB]));
+  const trackedTabs = useRef(new Set<JobCurationTab>([initialTab]));
   const inflight = useRef(new Set<JobCurationTab>());
 
   useEffect(() => {
-    void trackCurationTabViewedAction({ tab: INITIAL_TAB }).catch(() => {});
-  }, []);
+    if (isAuthenticated) void trackCurationTabViewedAction({ tab: initialTab }).catch(() => {});
+  }, [isAuthenticated, initialTab]);
 
   /*
     첫 화면은 활성 탭(INITIAL_TAB)만 서버에서 받아 온다. 나머지를 탭 누를 때 받으면 매번 0.5초를
@@ -130,7 +139,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
         ? window.requestIdleCallback
         : (cb: () => void) => window.setTimeout(cb, 200);
     const handle = idle(() => {
-      getAllJobCurationsAction()
+      (isAuthenticated ? getAllJobCurationsAction() : Promise.all(PUBLIC_TABS.map(getPublicJobCurationAction)))
         .then((all) => {
           if (all.length === 0) return;
           setResults((prev) => {
@@ -147,7 +156,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
         window.cancelIdleCallback(handle);
       }
     };
-  }, []);
+  }, [isAuthenticated]);
 
   // 탭이 바뀌면 목록이 통째로 갈리므로 스크롤 위치 기준을 다시 잡는다.
   const currentItemCount = results[activeTab]?.items.length ?? 0;
@@ -167,7 +176,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
     if (results[tab] || inflight.current.has(tab)) return;
     inflight.current.add(tab);
     setLoadingTabs((prev) => new Set(prev).add(tab));
-    getJobCurationAction(tab)
+    (isAuthenticated ? getJobCurationAction(tab) : getPublicJobCurationAction(tab))
       .then((r) => setResults((prev) => ({ ...prev, [tab]: r })))
       .catch(() => setResults((prev) => ({ ...prev, [tab]: { tab, state: "EMPTY", items: [] } })))
       .finally(() => {
@@ -184,7 +193,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
     setActiveTab(tab);
     if (!trackedTabs.current.has(tab)) {
       trackedTabs.current.add(tab);
-      void trackCurationTabViewedAction({ tab }).catch(() => {});
+      if (isAuthenticated) void trackCurationTabViewedAction({ tab }).catch(() => {});
     }
     prefetchTab(tab);
   }
@@ -204,7 +213,15 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
         모두 상자가 없는 요소라 판 끝(0px)에 그대로 붙으면 카드보다
         튀어나와 보인다. 제목은 글자가 굵어 더 튀므로 한 단계 덜 준다.
       */}
-      <h2 className="mb-3 pl-1 text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 pl-1">
+        <h2 className="text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
+        {/* 비로그인에게는 지금 보는 것이 전부가 아니라는 것과, 무엇을 더 볼 수 있는지 알린다. */}
+        {!isAuthenticated && (
+          <p className="text-label-1 text-slate-600">
+            로그인하시면 내 조건에 맞는 맞춤 공고를 보여드려요.
+          </p>
+        )}
+      </div>
       {/* 카드 줄과 같은 방식. 좌우 끝을 판 색으로 흐려 잘린 것이 아니라 이어진다고 보이게 한다. */}
       <div className="relative mb-4">
         <div
@@ -222,7 +239,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
           )}
         />
         <div ref={tabRowRef} onScroll={syncTabFade} className="scrollbar-hidden flex gap-2 overflow-x-auto pb-1 pl-2">
-        {TABS.map((t) => (
+        {tabs.map((t) => (
           <button
             key={t.key}
             type="button"
