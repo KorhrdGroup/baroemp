@@ -66,12 +66,16 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
                 href={s.anchor}
                 aria-label={`${s.step}단계 ${s.title}${s.done ? " (완료)" : isNext ? " (다음 할 일)" : ""}`}
                 className={cn(
+                  /*
+                    링을 쓰지 않는다. 완료(진한 파랑 채움) > 다음 할 일(연한 파랑 채움 + 진한 파란 글자) >
+                    아직(회색) 세 톤으로 상태를 갈라 두면 링 없이도 다음 할 일이 확 잡힌다.
+                  */
                   "relative z-10 flex size-10 items-center justify-center rounded-full text-body-2 font-bold leading-none transition-colors sm:size-12 sm:text-body-1",
                   s.done
                     ? "bg-brand-blue-400 text-white"
                     : isNext
-                      ? "bg-white text-brand-blue-600 ring-2 ring-brand-blue-400 ring-offset-2 ring-offset-brand-blue-50"
-                      : "bg-white text-slate-400 ring-1 ring-brand-blue-200",
+                      ? "bg-brand-blue-100 text-brand-blue-700"
+                      : "bg-slate-100 text-slate-400",
                 )}
               >
                 {s.done ? <Check className="size-5 sm:size-6" /> : s.step}

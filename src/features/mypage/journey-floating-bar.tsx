@@ -95,13 +95,16 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
                 >
                   <span
                     className={cn(
-                      "flex size-9 shrink-0 items-center justify-center rounded-full text-label-1 font-bold leading-none transition-colors sm:size-10",
+                      /*
+                        절차 판과 같은 톤 계층. 링은 쓰지 않고, "지금 보고 있는 단계"는 원을 한 단계 키워 표현.
+                      */
+                      "flex shrink-0 items-center justify-center rounded-full text-label-1 font-bold leading-none transition-all",
                       s.done
                         ? "bg-brand-blue-400 text-white"
                         : isNext
-                          ? "bg-brand-blue-50 text-brand-blue-600 ring-2 ring-brand-blue-400"
+                          ? "bg-brand-blue-100 text-brand-blue-700"
                           : "bg-slate-100 text-slate-500",
-                      isActive && "ring-2 ring-offset-2 ring-brand-blue-600",
+                      isActive ? "size-10 sm:size-11" : "size-9 sm:size-10",
                     )}
                   >
                     {s.done ? <Check className="size-4 sm:size-5" /> : s.step}
