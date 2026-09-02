@@ -21,6 +21,18 @@ export interface AIReviewIssue {
   title?: string;
   /** 이 항목을 고치면 오를 것으로 예상되는 점수 */
   gain?: number;
+  /**
+   * 사용자가 이미 입력한 사실만으로 AI가 바로 고쳐 넣을 수 있을 때의 완성 문장.
+   * 근무 기간·자격증처럼 사용자만 아는 정보가 필요한 항목은 null.
+   */
+  autoFix?: AIReviewAutoFix | null;
+}
+
+export interface AIReviewAutoFix {
+  target: "summary" | "experience_responsibilities" | "experience_achievements";
+  /** target이 experience_* 일 때, 입력된 경력 배열에서의 순서(0부터) */
+  experienceIndex: number | null;
+  text: string;
 }
 
 /** 이력서/자소서 첨삭 결과 구조 (스펙 54번 예시를 그대로 따른다). */

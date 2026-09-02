@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { X } from "lucide-react";
+import { Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import type { AIReviewAutoFix } from "@/types";
 
 /**
  * AI 점검 결과 플로팅 패널.
@@ -19,6 +20,8 @@ export interface RailItem {
   gain: number;
   severity: "required" | "recommended";
   done: boolean;
+  /** AI가 완성 문장까지 준 항목. 있으면 '적용하기' 한 번으로 칸에 들어간다. */
+  fix?: AIReviewAutoFix;
 }
 
 export function useRailSummary(items: RailItem[], score: number) {
@@ -58,12 +61,14 @@ function RailItemRow({
   active,
   onSelect,
   onToggleDone,
+  onApplyFix,
 }: {
   item: RailItem;
   index: number;
   active: boolean;
   onSelect: () => void;
   onToggleDone: () => void;
+  onApplyFix: () => void;
 }) {
   return (
     <div
@@ -108,13 +113,42 @@ function RailItemRow({
       {active && !item.done && (
         <div className="px-2.5 pb-3 pl-[38px]">
           <p className="text-label-1 leading-relaxed break-keep text-slate-600">{item.hint}</p>
-          <button
-            type="button"
-            onClick={onToggleDone}
-            className="mt-2 h-8 rounded-lg border border-emerald-200 bg-white px-3 text-label-1 font-semibold text-emerald-700 hover:bg-emerald-50"
-          >
-            고쳤어요 ✓
-          </button>
+          {item.fix ? (
+            /*
+              AI가 완성 문장까지 준 항목. 문장을 미리 보여주고 '적용하기'로 칸에 넣는다.
+              적용 후에도 칸에서 자유롭게 고칠 수 있으니 여기서는 확인만 시킨다.
+            */
+            <div className="mt-2 rounded-lg border border-brand-blue-100 bg-white p-2.5">
+              <p className="flex items-center gap-1 text-label-2 font-bold text-brand-blue-600">
+                <Sparkles className="size-3.5" /> AI가 이렇게 고쳐드릴게요
+              </p>
+              <p className="mt-1 line-clamp-4 text-label-1 leading-relaxed break-keep text-slate-700">{item.fix.text}</p>
+              <div className="mt-2 flex gap-2">
+                <button
+                  type="button"
+                  onClick={onApplyFix}
+                  className="h-8 rounded-lg bg-brand-blue-600 px-3 text-label-1 font-semibold text-white hover:bg-brand-blue-700"
+                >
+                  적용하기
+                </button>
+                <button
+                  type="button"
+                  onClick={onToggleDone}
+                  className="h-8 rounded-lg border border-slate-200 bg-white px-3 text-label-1 font-semibold text-slate-500 hover:bg-slate-50"
+                >
+                  직접 고쳤어요
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onToggleDone}
+              className="mt-2 h-8 rounded-lg border border-emerald-200 bg-white px-3 text-label-1 font-semibold text-emerald-700 hover:bg-emerald-50"
+            >
+              고쳤어요 ✓
+            </button>
+          )}
         </div>
       )}
     </div>
@@ -128,6 +162,7 @@ export function ReviewRail({
   strengths,
   onSelectItem,
   onToggleDone,
+  onApplyFix,
   onNext,
   onRecheck,
   onClose,
@@ -139,6 +174,7 @@ export function ReviewRail({
   strengths: string[];
   onSelectItem: (id: string) => void;
   onToggleDone: (id: string) => void;
+  onApplyFix: (id: string) => void;
   onNext: () => void;
   onRecheck: () => void;
   onClose: () => void;
@@ -207,7 +243,7 @@ export function ReviewRail({
             <span className="flex size-[17px] items-center justify-center rounded-[5px] bg-orange-500 text-[10px] font-extrabold text-white">
               !
             </span>
-            <span className="text-label-1 font-bold text-slate-900">누르면 그 칸으로 이동해요</span>
+            <span className="text-label-1 font-bold text-slate-900">누르면 바로 고칠 수 있어요</span>
             <span className="ml-auto text-[11px] text-slate-400">점수 영향 순</span>
           </div>
         )}
@@ -221,6 +257,7 @@ export function ReviewRail({
                 active={item.id === activeItemId}
                 onSelect={() => onSelectItem(item.id)}
                 onToggleDone={() => onToggleDone(item.id)}
+                onApplyFix={() => onApplyFix(item.id)}
               />
             </li>
           ))}
