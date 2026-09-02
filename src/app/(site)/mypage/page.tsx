@@ -787,7 +787,8 @@ export default async function MyPage() {
                     <Compass className="size-4" /> 진단 기반 공고
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 text-label-1 text-slate-600">
+                {/* 두 트랙은 성격이 달라(지금 지원 / 자격 따면) 사이를 넉넉히 띄워 갈라 놓는다. */}
+                <CardContent className="space-y-7 text-label-1 text-slate-600">
                   {assessmentJobs.ready && (
                     <div>
                       <p className="mb-1.5 text-label-1 font-semibold text-slate-500">
