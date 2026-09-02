@@ -11,6 +11,7 @@ import { createSupabaseProfileRepository } from "./supabase/profile.supabase-rep
  * "이미 존재하는 프로필을 읽는" 용도는 지금 필요하므로 read 전용으로 먼저 만든다.
  */
 export interface ProfileUpdateInput {
+  email?: string;
   name?: string;
   phone?: string;
   /**

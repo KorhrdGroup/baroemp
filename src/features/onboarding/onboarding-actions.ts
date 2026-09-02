@@ -25,6 +25,8 @@ export interface OnboardingProfileInput {
   heldQualifications?: string[];
   isOpenToTraining?: boolean;
   phone?: string;
+  /** 이메일이 비어 있던 사용자(소셜 가입 등)에게만 묻는다. 선택 입력. */
+  email?: string;
   /** 연락처·동의를 물어본 경우에만 넘어온다. 안 물어본 사용자의 기존 동의를 끄지 않기 위함. */
   marketingConsent?: boolean;
 }
@@ -55,8 +57,14 @@ export async function saveOnboardingProfileAction(
     return { phoneError: "휴대전화번호 형식을 확인해주세요." };
   }
 
+  const emailRaw = input.email?.trim().toLowerCase() ?? "";
+  if (emailRaw && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailRaw)) {
+    return { error: "이메일 형식을 확인해주세요." };
+  }
+
   const profilePatch: ProfileUpdateInput = {};
   if (phoneRaw) profilePatch.phone = normalizePhone(phoneRaw);
+  if (emailRaw) profilePatch.email = emailRaw;
   if (input.marketingConsent) {
     profilePatch.marketingConsent = true;
     profilePatch.marketingConsentAt = new Date().toISOString();
