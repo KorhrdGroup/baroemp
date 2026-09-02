@@ -51,6 +51,12 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
       const line = window.innerHeight * 0.35;
       let current: string | null = null;
       for (const t of targets) if (t.el.getBoundingClientRect().top <= line) current = t.anchor;
+      /*
+        마지막 카드(5단계)는 페이지 아래 여백이 부족해 화면 위 35% 지점까지 못 올라간다.
+        스크롤이 사실상 맨 아래에 닿았다면 마지막 카드를 활성으로 강제한다 - 안 그러면 아무리 내려도 4단계가 활성인 채로 남았다.
+      */
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8;
+      if (atBottom && targets.length > 0) current = targets[targets.length - 1].anchor;
       setActiveId(current);
     };
 

@@ -318,12 +318,12 @@ export default async function MyPage() {
     {
       id: "jobs",
       step: 3,
-      title: "공고 알아보기",
+      title: "일자리 알아보기",
       detail: `찜한 일자리 ${jobData.bookmarkCount} · 지원제도 ${supportData.bookmarkCount}`,
       /* 카드에 보이는 것(찜)만 근거로 삼는다. 보이지 않는 클릭 기록으로 완료가 되면 "값이 없는데 왜 찼지"가 된다. */
       done: jobData.bookmarkCount > 0 || supportData.bookmarkCount > 0,
       href: "/jobs",
-      actionLabel: "맞춤 공고 보러 가기",
+      actionLabel: "맞춤 일자리 보러 가기",
       todoMessage: "내 조건에 맞는 공고를 둘러보고 마음에 드는 곳을 찜해 두세요.",
       anchor: "#step-jobs",
     },
@@ -656,11 +656,11 @@ export default async function MyPage() {
           </div>
         </section>
 
-        {/* ③ 공고 알아보기 */}
+        {/* ③ 일자리 알아보기 */}
         <section id="step-jobs" className="scroll-mt-24">
           <StepHeading
             step={3}
-            title="공고 알아보기"
+            title="일자리 알아보기"
             done={stepDone.jobs}
             action={
               <Link href="/jobs" className="text-label-1 font-medium text-slate-500">
