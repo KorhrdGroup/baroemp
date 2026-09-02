@@ -6,13 +6,14 @@ import { compareUserToJobsRequirements } from "@/services/job-requirement-compar
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
 import { JobCard } from "@/features/jobs/job-card";
 import { JobRowCompact } from "@/features/jobs/job-row-compact";
+import { GuestGate } from "@/features/jobs/guest-gate";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { JobCurationSection } from "@/features/jobs/job-curation-section";
 import { Pagination } from "@/components/common/pagination";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { searchJobs, type JobSearchParams } from "@/services/job-search.service";
 import { getRecommendedJobsFromAssessment } from "@/services/assessment-job.service";
-import { getJobCuration } from "@/services/job-curation.service";
+import { getJobCuration, getPublicJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { findCareerProfileByUserId, getOccupationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
@@ -93,7 +94,8 @@ export default async function JobsPage({
     user ? getRecommendedJobsFromAssessment({ userId: user.id, anonymousId }) : null,
     getUserJobBookmarkIdsAction(),
     // 큐레이션 섹션의 첫 화면에 뜨는 탭 (JobCurationSection 의 INITIAL_TAB 과 짝을 맞춰야 한다).
-    user ? getJobCuration(user.id, "matched") : null,
+    // 비로그인에게도 띠는 보여준다 - 회원 조건이 필요 없는 신규 탭으로 연다.
+    user ? getJobCuration(user.id, "matched") : getPublicJobCuration("new"),
   ]);
   const currentUser = user;
   const isAuthenticated = Boolean(currentUser);
@@ -138,6 +140,11 @@ export default async function JobsPage({
   };
 
   return (
+    /*
+      비로그인은 첫 화면을 둘러볼 수 있지만, 공고를 열거나 조건을 바꾸는 순간 회원이 되어야 한다.
+      바로 로그인 화면으로 밀지 않고 가입 안내 창을 띄운다 - 보던 것이 사라지면 대부분 떠난다.
+    */
+    <GuestGate active={!isAuthenticated}>
     <div className="mx-auto max-w-6xl px-4.5 py-10 lg:px-8">
       <div className="mb-8">
         <p className="text-label-1 font-semibold text-brand-blue-600">일자리찾기</p>
@@ -166,15 +173,13 @@ export default async function JobsPage({
         }
       >
       {/* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */}
-      {/* 회원 조건으로 고른 묶음이라 로그인했을 때만 그린다. */}
-      {initialCuration && (
-        <div className="mt-8">
-          <JobCurationSection
-            initialActive={initialCuration}
-            bookmarkedIds={bookmarkedIds}
-          />
-        </div>
-      )}
+      <div className="mt-8">
+        <JobCurationSection
+          initialActive={initialCuration}
+          bookmarkedIds={bookmarkedIds}
+          isAuthenticated={isAuthenticated}
+        />
+      </div>
       </JobFiltersForm>
 
       <div className="mt-8">
@@ -258,5 +263,6 @@ export default async function JobsPage({
         )}
       </div>
     </div>
+    </GuestGate>
   );
 }

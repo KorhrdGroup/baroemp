@@ -47,6 +47,19 @@ export async function getJobCuration(userId: string, tab: JobCurationTab): Promi
 }
 
 /**
+ * 비로그인용 큐레이션. 회원 조건이 필요 없는 공통 탭(신규·마감임박)만 계산한다.
+ * 자격 배지는 회원마다 달라 붙이지 않는다.
+ */
+export async function getPublicJobCuration(tab: "new" | "closing_soon"): Promise<JobCurationResult> {
+  try {
+    return { tab, ...(await getCommonTab(tab)) };
+  } catch (error) {
+    console.error(`[job-curation] 공개 ${tab} 탭 계산 실패`, error);
+    return { tab, state: "EMPTY", items: [] };
+  }
+}
+
+/**
  * 개인화 탭 공용 후보군: 희망 직종코드별 최신 공고 + 희망 지역 최신 공고를 합쳐
  * 최신순 상한 limit건. 6만+건 전체 스캔을 막는 성능 경계다.
  */
