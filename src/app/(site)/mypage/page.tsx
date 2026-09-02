@@ -185,7 +185,8 @@ function StepHeading({
       <h2 className="flex items-center gap-2.5 text-title-3 font-bold text-slate-900">
         <span
           className={cn(
-            "flex size-8 shrink-0 items-center justify-center rounded-full text-body-2 font-bold",
+            /* leading-none: 줄 높이가 남으면 글자 상자가 원 가운데보다 살짝 위에 앉는다. */
+            "flex size-8 shrink-0 items-center justify-center rounded-full text-body-2 font-bold leading-none",
             done ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-500",
           )}
         >
@@ -337,7 +338,8 @@ export default async function MyPage() {
       step: 3,
       title: "공고 알아보기",
       detail: `찜한 일자리 ${jobData.bookmarkCount} · 지원제도 ${supportData.bookmarkCount}`,
-      done: jobData.bookmarkCount > 0 || jobData.applyCount > 0,
+      /* 카드에 보이는 것(찜)만 근거로 삼는다. 보이지 않는 클릭 기록으로 완료가 되면 "값이 없는데 왜 찼지"가 된다. */
+      done: jobData.bookmarkCount > 0 || supportData.bookmarkCount > 0,
       href: "/jobs",
       actionLabel: "맞춤 공고 보러 가기",
       todoMessage: "내 조건에 맞는 공고를 둘러보고 마음에 드는 곳을 찜해 두세요.",
@@ -388,17 +390,10 @@ export default async function MyPage() {
   // 아래 여백(pb-32)은 떠 있는 절차 띠 높이만큼 더 준다. 마지막 카드가 띠에 가리지 않게.
   return (
     <div className="mx-auto max-w-5xl px-4.5 pt-10 pb-32 lg:px-8">
-      {/* 제목을 "마이페이지"라고 적지 않는다. 메뉴에서 눌러 들어온 자리라 이미 알고 있다. */}
-      <div className="mb-6 flex flex-wrap items-center gap-2">
-        <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">{userName}님</h1>
-        {/* 온보딩을 건너뛴 회원은 값이 없어 "-" 배지만 달랑 남는다. 그때는 안 그린다. */}
-        {careerProfile?.employmentStatus && (
-          <Badge variant="outline" className="rounded-full text-label-1 text-slate-600">
-            {labelEmploymentStatus(careerProfile.employmentStatus)}
-          </Badge>
-        )}
-      </div>
-
+      {/*
+        이름 제목은 따로 두지 않는다. 바로 아래 절차 판이 "하려선님, 이제 1단계 차례예요"로 이름을 부르므로
+        같은 이름이 두 줄 연달아 나왔다. 취업 상태 배지는 1단계 카드의 취업 프로필에 있다.
+      */}
       {/* 취업까지의 다섯 단계. 다음 할 일 하나를 크게 짚어 준다. */}
       <JourneySteps steps={steps} userName={userName} completedTitle={hiredCount > 0 ? "취업을 축하드려요!" : undefined} />
 
@@ -763,14 +758,15 @@ export default async function MyPage() {
                     </Link>
                   )}
                 </CardHeader>
-                <CardContent className="text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   {jobData.bookmarked.length === 0 ? (
-                    <p className="py-1 text-slate-400">
-                      아직 찜한 일자리가 없어요.{" "}
-                      <Link href="/jobs" className="font-semibold text-brand-blue-600 hover:underline">
-                        일자리 찾아보기 →
-                      </Link>
-                    </p>
+                    /* 2단계 카드와 같은 모양: 안내 한 줄 + 아래 꽉 찬 버튼. 글자 링크는 카드 안에서 누를 곳으로 안 보였다. */
+                    <>
+                      <p>아직 찜한 일자리가 없어요. 내 조건에 맞는 공고를 둘러보고 마음에 드는 곳을 찜해 두세요.</p>
+                      <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                        <Link href="/jobs">일자리 찾아보기</Link>
+                      </Button>
+                    </>
                   ) : (
                     jobData.bookmarked.map((job) => (
                       <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
@@ -806,14 +802,14 @@ export default async function MyPage() {
                     </Link>
                   )}
                 </CardHeader>
-                <CardContent className="text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   {supportData.bookmarked.length === 0 ? (
-                    <p className="py-1 text-slate-400">
-                      아직 찜한 지원제도가 없어요.{" "}
-                      <Link href="/support" className="font-semibold text-brand-blue-600 hover:underline">
-                        지원금 찾아보기 →
-                      </Link>
-                    </p>
+                    <>
+                      <p>아직 찜한 지원제도가 없어요. 받을 수 있는 교육·훈련 지원을 찾아 찜해 두세요.</p>
+                      <Button variant="outline" className="mt-auto w-full text-brand-blue-600 hover:bg-brand-blue-50" asChild>
+                        <Link href="/support">지원금 찾아보기</Link>
+                      </Button>
+                    </>
                   ) : (
                     supportData.bookmarked.map((program) => (
                       <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>

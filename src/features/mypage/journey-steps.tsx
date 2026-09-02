@@ -43,7 +43,8 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
     <>
     <section id={sentinelId} aria-label="취업 절차" className="rounded-2xl bg-brand-blue-50 p-5 sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-2">
-        <h2 className="text-body-1 font-bold text-slate-900">
+        {/* 이 줄이 화면의 제목이다 (위에 이름 제목을 따로 두지 않는다). 제목 크기로 키운다. */}
+        <h2 className="text-title-3 font-bold text-slate-900 sm:text-title-2">
           {next ? `${userName}님, 이제 ${next.step}단계 차례예요` : `${userName}님, ${completedTitle ?? "준비를 모두 마치셨어요"}`}
         </h2>
         <p className="text-label-1 font-semibold text-brand-blue-700">
@@ -65,7 +66,7 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
                 href={s.anchor}
                 aria-label={`${s.step}단계 ${s.title}${s.done ? " (완료)" : isNext ? " (다음 할 일)" : ""}`}
                 className={cn(
-                  "relative z-10 flex size-10 items-center justify-center rounded-full text-body-2 font-bold transition-colors sm:size-12 sm:text-body-1",
+                  "relative z-10 flex size-10 items-center justify-center rounded-full text-body-2 font-bold leading-none transition-colors sm:size-12 sm:text-body-1",
                   s.done
                     ? "bg-brand-blue-400 text-white"
                     : isNext
@@ -91,7 +92,7 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
 
       {/* 다음 할 일 하나만 크게. 다섯 개를 다 권하면 하나도 안 하게 된다. */}
       {next && (
-        <div className="mt-6 flex flex-col gap-3 rounded-xl bg-white p-4 ring-1 ring-brand-blue-100 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="mt-6 flex flex-col gap-3 rounded-xl bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <p className="break-keep text-body-2 text-slate-700">{next.todoMessage}</p>
           <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" size="lg" asChild>
             <Link href={next.href}>

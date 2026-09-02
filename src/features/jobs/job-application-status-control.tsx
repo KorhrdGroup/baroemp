@@ -70,45 +70,45 @@ export function JobApplicationStatusControl({
   }
 
   const reached = JOB_APPLICATION_STATUS_ORDER.indexOf(status);
+  /* 사이트의 다른 버튼과 같은 Button 을 쓴다. 알약 묶음은 옆의 "지원했어요"·2단계 버튼들과 결이 달랐다. */
   return (
-    <div className="flex shrink-0 flex-wrap items-center gap-2">
-      <div role="radiogroup" aria-label="지원 상태" className="flex rounded-full bg-slate-100 p-0.5">
-        {JOB_APPLICATION_STATUS_ORDER.map((value, i) => {
-          const active = value === status;
-          const passed = i < reached;
-          return (
-            <button
-              key={value}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              disabled={pending}
-              onClick={() => report(value)}
-              className={cn(
-                "inline-flex items-center gap-1 rounded-full px-3 py-1 text-label-2 font-semibold transition-colors",
-                active
-                  ? value === "hired"
-                    ? "bg-emerald-500 text-white"
-                    : "bg-brand-blue-400 text-white"
-                  : passed
-                    ? "text-slate-700"
-                    : "text-slate-500 hover:text-slate-700",
-              )}
-            >
-              {(active || passed) && <Check className="size-3" />}
-              {JOB_APPLICATION_STATUS_LABELS[value]}
-            </button>
-          );
-        })}
-      </div>
-      <button
+    <div role="radiogroup" aria-label="지원 상태" className="flex shrink-0 flex-wrap items-center gap-1.5">
+      {JOB_APPLICATION_STATUS_ORDER.map((value, i) => {
+        const active = value === status;
+        const passed = i < reached;
+        return (
+          <Button
+            key={value}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            size="sm"
+            variant={active ? "default" : "outline"}
+            disabled={pending}
+            onClick={() => report(value)}
+            className={cn(
+              active
+                ? "bg-brand-blue-400 hover:bg-brand-blue-600"
+                : passed
+                  ? "text-brand-blue-600 hover:bg-brand-blue-50"
+                  : "text-slate-600 hover:bg-slate-50",
+            )}
+          >
+            {(active || passed) && <Check className="size-3.5" />}
+            {JOB_APPLICATION_STATUS_LABELS[value]}
+          </Button>
+        );
+      })}
+      <Button
         type="button"
+        size="sm"
+        variant="ghost"
         disabled={pending}
         onClick={clear}
-        className="text-label-2 text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline"
+        className="text-slate-400 hover:bg-transparent hover:text-slate-600"
       >
         표시 취소
-      </button>
+      </Button>
     </div>
   );
 }
