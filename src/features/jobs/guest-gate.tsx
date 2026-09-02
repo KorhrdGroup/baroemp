@@ -27,9 +27,10 @@ export function GuestGate({ active, children }: { active: boolean; children: Rea
       const href = link.getAttribute("href") ?? "";
       return /^\/jobs\/[^/]/.test(href) || href.includes("page=");
     }
-    // 검색·적용하기(조건을 걸어 목록을 다시 부르는 것), 찜하기
+    // 검색·적용하기(조건을 걸어 목록을 다시 부르는 것), 찜하기, 회원에게만 열리는 탭
     const button = target.closest("button");
     if (!button) return false;
+    if (button.hasAttribute("data-guest-gated")) return true;
     if (button.type === "submit") return true;
     const label = button.textContent?.trim() ?? "";
     return label === "적용하기" || button.getAttribute("aria-label") === "찜하기";
