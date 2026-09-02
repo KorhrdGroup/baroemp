@@ -203,9 +203,24 @@ export function SignupView({ next }: { next: string }) {
           >
             [필수] 개인정보 수집·이용 동의
           </Checkbox>
-          <Checkbox checked={agreeMarketing} onChange={setAgreeMarketing}>
-            [선택] 마케팅 정보 수신 동의
+          <Checkbox
+            checked={agreeMarketing}
+            onChange={setAgreeMarketing}
+            right={
+              <button
+                type="button"
+                onClick={() => openTermsPopup("/marketing-consent")}
+                className="text-[12px] text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline"
+              >
+                보기
+              </button>
+            }
+          >
+            [선택] 마케팅 정보·알림톡 수신 동의
           </Checkbox>
+          <p className="-mt-1 pl-7 text-[12px] leading-relaxed break-keep text-slate-500">
+            내 조건에 맞는 채용공고·지원금 소식을 카카오 알림톡으로 보내드려요. 무료이며 마이페이지에서 언제든 철회할 수 있어요.
+          </p>
           {/* 서버 액션이 checkbox 값을 formData에서 읽으므로 실제 name 속성이 붙은 hidden input으로 동기화한다. */}
           <input type="hidden" name="privacyConsent" value={agreeRequired ? "on" : ""} />
           <input type="hidden" name="marketingConsent" value={agreeMarketing ? "on" : ""} />

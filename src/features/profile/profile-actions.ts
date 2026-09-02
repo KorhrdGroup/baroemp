@@ -7,6 +7,7 @@ import { getProfileRepository } from "@/lib/repositories/profile-repository";
 import { getCareerProfileRepository, findCareerProfileByUserId } from "@/lib/repositories";
 import { recalculateLeadScore } from "@/services/lead-score.service";
 import { syncHeldQualifications } from "@/services/career-profile-merge.service";
+import { applyMarketingConsent } from "./marketing-consent";
 import { normalizePhone, isValidKoreanPhone } from "@/lib/utils/phone";
 import type { DesiredStartTiming, EmploymentStatus, Region, WorkType } from "@/types";
 
@@ -42,6 +43,7 @@ export async function updateProfileAction(
   const desiredWorkTypes = formData.getAll("desiredWorkTypes").map(String).filter(Boolean) as WorkType[];
   const isOpenToTraining = formData.get("isOpenToTraining") === "on";
   const heldQualifications = formData.getAll("heldQualifications").map(String).filter(Boolean);
+  const marketingConsent = formData.get("marketingConsent") === "on";
 
   const fieldErrors: Record<string, string> = {};
   if (!name || name.length < 2) fieldErrors.name = "이름을 2자 이상 입력해주세요.";
@@ -51,6 +53,7 @@ export async function updateProfileAction(
   const phone = normalizePhone(phoneRaw);
 
   await getProfileRepository().update(user.id, { name, phone });
+  await applyMarketingConsent(user.id, marketingConsent);
 
   const existing = await findCareerProfileByUserId(user.id);
   const careerPatch = {
