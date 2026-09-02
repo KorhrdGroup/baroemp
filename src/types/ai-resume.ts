@@ -17,6 +17,10 @@ export interface AIReviewIssue {
   section: ResumeSectionCode | CoverLetterQuestionType | string;
   severity: "info" | "suggestion" | "critical";
   comment: string;
+  /** 점검 패널에 보이는 짧은 제목 (예: "근무 기간·직책 시점") */
+  title?: string;
+  /** 이 항목을 고치면 오를 것으로 예상되는 점수 */
+  gain?: number;
 }
 
 /** 이력서/자소서 첨삭 결과 구조 (스펙 54번 예시를 그대로 따른다). */

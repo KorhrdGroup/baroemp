@@ -118,14 +118,16 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
                 </p>
                 <dl className="mt-4 grid gap-y-2.5 text-body-2 sm:grid-cols-2 sm:gap-x-10">
                   <InfoRow label="휴대폰" value={formatPhone(resume.phone)} />
-                  <InfoRow label="Email" value={resume.email || "-"} />
+                  <InfoRow label="희망직무" value={resume.desiredJobTitle || "-"} />
                   <InfoRow label="성별" value={resume.gender ? (resume.gender === "male" ? "남" : "여") : "-"} />
                   <InfoRow label="희망지역" value={resume.desiredRegion ? labelRegion(resume.desiredRegion as Region) : "-"} />
-                  {/* 주소는 길어서 반 칸에 넣으면 두 줄로 접힌다. 한 줄 전체를 쓴다. */}
+                  {/* 주소·이메일은 길어서 반 칸에 넣으면 두 줄로 접힌다. 한 줄 전체를 쓴다. */}
                   <div className="sm:col-span-2">
                     <InfoRow label="주소" value={[resume.address, resume.addressDetail].filter(Boolean).join(" ") || "-"} />
                   </div>
-                  <InfoRow label="희망직무" value={resume.desiredJobTitle || "-"} />
+                  <div className="sm:col-span-2">
+                    <InfoRow label="이메일" value={resume.email || "-"} />
+                  </div>
                 </dl>
               </div>
             </div>
@@ -276,7 +278,7 @@ export function ResumePreview({ detail }: { detail: ResumeDetail }) {
   }
 
   return (
-    <div id="resume-print-area" className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:p-[12mm]">
+    <div id="resume-print-area" className="print-document mx-auto min-h-[297mm] w-full max-w-[210mm] bg-white p-8 text-slate-900 print:min-h-0 print:p-[12mm]">
       {sectionOrder.map((section) => renderSection(section))}
       {resume.portfolioUrl && (
         <p className="mt-4 text-label-1 text-slate-400">포트폴리오: {resume.portfolioUrl}</p>

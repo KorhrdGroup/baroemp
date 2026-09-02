@@ -275,7 +275,12 @@ export function CoverLetterEditor({
    */
   function handlePopupPrint() {
     setPreviewOpen(false);
-    setTimeout(() => window.print(), 200);
+    setTimeout(() => {
+      window.print();
+      // 인쇄 대화상자가 화면을 동기로 얼리는 동안 팝업 닫힘 정리가 씹히면
+      // body에 pointer-events:none이 남아 화면이 먹통이 된다. 직접 풀어준다.
+      document.body.style.pointerEvents = "";
+    }, 300);
   }
 
   // 진행률은 답을 쓴 문항 수로 센다. 화면에서 바로 세어지는 값이라 설명이 필요 없다.
@@ -293,7 +298,9 @@ export function CoverLetterEditor({
   const suggestion = active ? suggestions[active._key] : undefined;
 
   return (
-    <div className="space-y-4">
+    <>
+    {/* 인쇄 시 편집 화면은 display:none. 눈에만 숨기면(visibility) 높이가 남아 PDF가 빈 장으로 늘어난다. */}
+    <div className="space-y-4 print:hidden">
       {/*
         좁은 화면용 문항 띠. 문항 목록 상자는 위로 올라가 본문을 쓰는 동안 사라져,
         다음 문항으로 건너갈 길이 없었다. 이력서 편집과 같은 자리(헤더 밑)에 붙인다.
@@ -629,7 +636,7 @@ export function CoverLetterEditor({
 
       {/* 이력서와 같은 방식. 입력 폭을 좁히지 않도록 팝업으로 띄우고 인쇄로 PDF 저장한다. */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="print:hidden sm:max-w-3xl">
+        <DialogContent className="print:hidden sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>미리보기</DialogTitle>
           </DialogHeader>
@@ -695,5 +702,11 @@ export function CoverLetterEditor({
         onConfirm={() => confirmingDeleteKey && deleteSection(confirmingDeleteKey)}
       />
     </div>
+
+      {/* 인쇄 전용 사본. print:hidden 루트 밖에 두어 인쇄 때만 홀로 흐름에 존재한다. */}
+      <div className="hidden print:block">
+        <CoverLetterPreview detail={currentPreviewDetail()} applicantName={applicantName} />
+      </div>
+    </>
   );
 }
