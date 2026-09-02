@@ -36,7 +36,7 @@ export function WithdrawButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-label-1 font-medium text-slate-400 underline underline-offset-4 hover:text-slate-600"
+        className="text-label-1 font-medium text-slate-400 underline underline-offset-4"
       >
         탈퇴하기
       </button>
