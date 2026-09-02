@@ -4,6 +4,7 @@ import type {
   CareerProfileInput,
 } from "@/types";
 import { getSelectedOption, getSelectedOptions } from "./answer-lookup";
+import { readCustomQualifications } from "./answer-normalizer";
 
 export interface ExtractedAssessmentSignal {
   /** Career Profile에 반영을 시도할 값들 */
@@ -17,10 +18,17 @@ function resolveRawValue(question: AssessmentQuestion, answer: AssessmentAnswerR
     case "SINGLE":
       return getSelectedOption(question, answer)?.profileValue;
     case "MULTI":
-    case "QUALIFICATION_MULTI":
       return getSelectedOptions(question, answer)
         .map((o) => o.profileValue ?? o.optionText)
         .filter((v) => v !== undefined && v !== null);
+    case "QUALIFICATION_MULTI":
+      // 고른 선택지 + 직접 적은 자격. 둘 다 보유 자격 이름으로 올라간다.
+      return [
+        ...getSelectedOptions(question, answer)
+          .map((o) => o.profileValue ?? o.optionText)
+          .filter((v) => v !== undefined && v !== null),
+        ...readCustomQualifications(answer.rawValue),
+      ];
     default:
       return answer.rawValue;
   }

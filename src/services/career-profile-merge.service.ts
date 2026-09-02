@@ -68,12 +68,13 @@ export async function promoteAssessmentQualifications(
 export async function syncHeldQualifications(
   userId: string,
   selectedNames: string[],
-  editableNames: string[],
+  /** 화면이 고칠 수 있는 이름들. 비우면 등록된 자격 전부를 고칠 수 있는 것으로 본다. */
+  editableNames?: string[],
 ): Promise<void> {
   const repo = getUserQualificationRepository();
   const current = await repo.findByUserId(userId);
   const selected = new Set(selectedNames.map((n) => n.trim()).filter(Boolean));
-  const editable = new Set(editableNames);
+  const editable = new Set(editableNames ?? current.map((q) => q.name));
 
   const currentNames = new Set(current.map((q) => q.name));
   for (const name of selected) {

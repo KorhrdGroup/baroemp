@@ -8,7 +8,6 @@ import { getCareerProfileRepository, findCareerProfileByUserId } from "@/lib/rep
 import { recalculateLeadScore } from "@/services/lead-score.service";
 import { syncHeldQualifications } from "@/services/career-profile-merge.service";
 import { normalizePhone, isValidKoreanPhone } from "@/lib/utils/phone";
-import { QUALIFICATION_OPTIONS } from "./qualification-options";
 import type { DesiredStartTiming, EmploymentStatus, Region, WorkType } from "@/types";
 
 export interface ProfileEditFormState {
@@ -72,7 +71,8 @@ export async function updateProfileAction(
   }
 
   // 보유 자격은 career_profiles 가 아니라 Career DB(user_qualifications)가 원본이다 - 온보딩·진단과 같은 곳.
-  await syncHeldQualifications(user.id, heldQualifications, QUALIFICATION_OPTIONS);
+  // 화면이 보유 자격 전부(목록 + 직접 적은 것)를 칩으로 보여주고 고치게 하므로, 전부 편집 대상이다.
+  await syncHeldQualifications(user.id, heldQualifications);
 
   await logActivityEvent({
     userId: user.id,
