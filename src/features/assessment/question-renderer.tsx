@@ -126,6 +126,21 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
     const endpointLabels = parseScaleEndpointLabels(question.description);
     return (
       <div>
+        {/*
+          방향을 알려주는 라벨은 척도 위에 둔다. 버튼 아래에 있으면 답을 고른 뒤에야
+          "이쪽이 부정, 저쪽이 긍정"임을 확인하게 되어 척도 해석이 늦어졌다.
+          그림문자는 방향(부정→긍정)을 눈으로 잡아주는 장식이라 읽어주지 않는다.
+        */}
+        <div className="mb-3 flex items-start justify-between gap-3 text-label-1 text-slate-500">
+          <span className="flex items-center gap-1.5 break-keep">
+            <span aria-hidden className="text-title-3 leading-none">😓</span>
+            {endpointLabels?.min ?? `${min}점`}
+          </span>
+          <span className="flex items-center gap-1.5 break-keep text-right">
+            {endpointLabels?.max ?? `${max}점`}
+            <span aria-hidden className="text-title-3 leading-none">😄</span>
+          </span>
+        </div>
         <div className="grid grid-cols-5 gap-2 sm:gap-3">
           {scaleValues.map((n) => {
             const selected = current === n;
@@ -145,17 +160,6 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               </button>
             );
           })}
-        </div>
-        {/* 그림문자는 방향(부정→긍정)을 눈으로 잡아주는 장식이라 읽어주지 않는다. */}
-        <div className="mt-2 flex items-start justify-between gap-3 text-label-1 text-slate-500">
-          <span className="flex items-center gap-1.5 break-keep">
-            <span aria-hidden className="text-title-3 leading-none">😓</span>
-            {endpointLabels?.min ?? `${min}점`}
-          </span>
-          <span className="flex items-center gap-1.5 break-keep text-right">
-            {endpointLabels?.max ?? `${max}점`}
-            <span aria-hidden className="text-title-3 leading-none">😄</span>
-          </span>
         </div>
       </div>
     );
