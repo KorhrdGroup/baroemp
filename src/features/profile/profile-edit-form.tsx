@@ -13,6 +13,7 @@ import {
   WORK_TYPE_LABELS,
 } from "@/lib/labels";
 import { ChipToggle, JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "./profile-form-fields";
+import { CustomQualificationInput } from "./custom-qualification-input";
 
 /*
   고르는 칸. 창은 OS 기본 피커를 그대로 쓴다 - 모바일에서 커스텀 목록보다 그편이 낫다.
@@ -67,8 +68,10 @@ export function ProfileEditForm({
   const [qualifications, setQualifications] = useState<string[]>(
     heldQualificationNames.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
   );
-  // 목록에 없는 자격(이력서에서 올라온 것 등)은 여기서 고칠 수 없으니, 있다는 것만 알려준다.
-  const otherQualifications = heldQualificationNames.filter((n) => !QUALIFICATION_OPTIONS.includes(n));
+  // 목록에 없는 자격(직접 적은 것, 이력서에서 올라온 것)은 직접 입력 칸에서 고친다.
+  const [customQualifications, setCustomQualifications] = useState<string[]>(
+    heldQualificationNames.filter((n) => !QUALIFICATION_OPTIONS.includes(n)),
+  );
 
   return (
     <form action={formAction} className="space-y-8">
@@ -249,14 +252,16 @@ export function ProfileEditForm({
               );
             })}
           </div>
-          {qualifications.map((v) => (
+          {/* 목록에 없는 자격은 직접 적는다. 적은 것도 같은 이름(heldQualifications)으로 함께 보낸다. */}
+          <CustomQualificationInput
+            className="mt-3"
+            values={customQualifications}
+            onChange={setCustomQualifications}
+            reserved={QUALIFICATION_OPTIONS}
+          />
+          {[...qualifications, ...customQualifications].map((v) => (
             <input key={v} type="hidden" name="heldQualifications" value={v} />
           ))}
-          {otherQualifications.length > 0 && (
-            <p className="mt-2 text-label-2 text-slate-400">
-              이력서 등에서 등록된 자격: {otherQualifications.join(", ")} (이력서에서 수정할 수 있어요)
-            </p>
-          )}
         </div>
 
         <label className="flex items-center gap-2 text-label-1 text-slate-700">

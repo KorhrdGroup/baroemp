@@ -18,6 +18,26 @@ export interface SalaryRangeValue {
   max?: number;
 }
 
+const CUSTOM_QUALIFICATION_MAX_LENGTH = 40;
+const CUSTOM_QUALIFICATION_MAX_COUNT = 10;
+
+/** 자격 문항의 직접 입력값을 꺼낸다. 모양이 다르면 빈 배열. */
+export function readCustomQualifications(rawValue: unknown): string[] {
+  const list = (rawValue as { custom?: unknown } | undefined)?.custom;
+  if (!Array.isArray(list)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of list) {
+    if (typeof item !== "string") continue;
+    const name = item.replace(/\s+/g, " ").trim().slice(0, CUSTOM_QUALIFICATION_MAX_LENGTH);
+    if (!name || seen.has(name)) continue;
+    seen.add(name);
+    out.push(name);
+    if (out.length >= CUSTOM_QUALIFICATION_MAX_COUNT) break;
+  }
+  return out;
+}
+
 function clampScale(value: unknown, min: number, max: number): number {
   const n = Number(value);
   if (Number.isNaN(n)) return min;
@@ -38,9 +58,18 @@ export function normalizeAnswer(
     case "SINGLE": {
       return { sessionId, questionId: question.id, optionId: raw.optionId };
     }
-    case "MULTI":
-    case "QUALIFICATION_MULTI": {
+    case "MULTI": {
       return { sessionId, questionId: question.id, optionIds: raw.optionIds ?? [] };
+    }
+    case "QUALIFICATION_MULTI": {
+      // 목록에 없는 자격을 직접 적은 것. 자유 입력이라 길이·개수를 잘라 둔다.
+      const custom = readCustomQualifications(raw.rawValue);
+      return {
+        sessionId,
+        questionId: question.id,
+        optionIds: raw.optionIds ?? [],
+        rawValue: custom.length > 0 ? { custom } : undefined,
+      };
     }
     case "SCALE": {
       const min = question.minScale ?? 1;

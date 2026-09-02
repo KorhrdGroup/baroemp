@@ -70,6 +70,11 @@ export function buildPrefilledAnswers(
       case "heldQualifications": {
         // 자격은 career_profiles가 아니라 user_qualifications(Career DB)가 원본이다.
         if (heldQualificationNames.length === 0) break;
+        const matchesOption = (held: string) =>
+          (question.options ?? []).some((o) => {
+            const candidates = [o.profileValue, o.optionText].filter((v): v is string => typeof v === "string");
+            return candidates.some((name) => held === name || held.includes(name) || name.includes(held));
+          });
         const optionIds = (question.options ?? [])
           .filter((o) => {
             const candidates = [o.profileValue, o.optionText].filter((v): v is string => typeof v === "string");
@@ -78,7 +83,11 @@ export function buildPrefilledAnswers(
             );
           })
           .map((o) => o.id);
-        if (optionIds.length > 0) prefilled[question.id] = { type: "MULTI", optionIds };
+        // 선택지에 없는 보유 자격은 직접 입력 칩으로 미리 채운다.
+        const customTexts = heldQualificationNames.filter((held) => !matchesOption(held));
+        if (optionIds.length > 0 || customTexts.length > 0) {
+          prefilled[question.id] = { type: "MULTI", optionIds, customTexts };
+        }
         break;
       }
       default:

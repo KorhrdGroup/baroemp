@@ -14,6 +14,7 @@ import {
   WORK_TYPE_LABELS,
 } from "@/lib/labels";
 import { JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "@/features/profile/profile-form-fields";
+import { CustomQualificationInput } from "@/features/profile/custom-qualification-input";
 import { saveOnboardingProfileAction, skipOnboardingProfileAction } from "./onboarding-actions";
 import type { CareerProfile, WorkType } from "@/types";
 
@@ -177,7 +178,8 @@ export function OnboardingWizard({
     desiredSalaryMax: careerProfile?.desiredSalaryMax,
     desiredWorkTypes: careerProfile?.desiredWorkTypes ?? [],
     desiredJobCategories: careerProfile?.desiredJobCategories ?? [],
-    heldQualifications: heldQualificationNames.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
+    // 목록에 없는 이름은 직접 입력 칩으로 보인다.
+    heldQualifications: heldQualificationNames,
     isOpenToTraining: careerProfile?.isOpenToTraining,
     phone: "",
     marketingConsent: false,
@@ -521,6 +523,20 @@ function StepBody({
     case "heldQualifications":
       return (
         <div className="flex flex-col gap-2">
+          {/* 목록에 없는 자격은 아래 칸에 직접 적는다. 적은 것도 같은 배열에 들어간다. */}
+          <CustomQualificationInput
+            className="mb-2"
+            values={answers.heldQualifications.filter((n) => !QUALIFICATION_OPTIONS.includes(n))}
+            reserved={QUALIFICATION_OPTIONS}
+            onChange={(custom) =>
+              onChange({
+                heldQualifications: [
+                  ...answers.heldQualifications.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
+                  ...custom,
+                ],
+              })
+            }
+          />
           {QUALIFICATION_OPTIONS.map((name) => {
             const selected = answers.heldQualifications.includes(name);
             return (

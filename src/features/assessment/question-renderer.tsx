@@ -4,10 +4,12 @@ import { Check } from "lucide-react";
 import { REGION_LABELS } from "@/lib/labels";
 import { cn } from "@/lib/utils";
 import type { AssessmentQuestion } from "@/types";
+import { CustomQualificationInput } from "@/features/profile/custom-qualification-input";
 
 export type AnswerValue =
   | { type: "SINGLE"; optionId?: string }
-  | { type: "MULTI"; optionIds: string[] }
+  /** customTexts: 자격 문항(QUALIFICATION_MULTI)에서 목록에 없어 직접 적은 이름 */
+  | { type: "MULTI"; optionIds: string[]; customTexts?: string[] }
   | { type: "SCALE"; value?: number }
   | { type: "NUMBER"; value?: number }
   | { type: "TEXT"; value?: string }
@@ -78,6 +80,8 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
 
   if (question.answerType === "MULTI" || question.answerType === "QUALIFICATION_MULTI") {
     const current = value.type === "MULTI" ? value.optionIds : [];
+    const customTexts = value.type === "MULTI" ? (value.customTexts ?? []) : [];
+    const isQualification = question.answerType === "QUALIFICATION_MULTI";
     return (
       <div className="flex flex-col gap-2">
         {question.options?.map((option) => {
@@ -88,7 +92,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               type="button"
               onClick={() => {
                 const next = selected ? current.filter((id) => id !== option.id) : [...current, option.id];
-                onChange({ type: "MULTI", optionIds: next });
+                onChange({ type: "MULTI", optionIds: next, customTexts });
               }}
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
@@ -109,6 +113,15 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             </button>
           );
         })}
+        {/* 자격 문항은 목록에 없는 자격을 직접 적을 수 있다. 적은 이름은 결과의 보유 자격에 그대로 올라간다. */}
+        {isQualification && (
+          <CustomQualificationInput
+            className="mt-2"
+            values={customTexts}
+            reserved={(question.options ?? []).map((o) => o.optionText)}
+            onChange={(next) => onChange({ type: "MULTI", optionIds: current, customTexts: next })}
+          />
+        )}
         <p className="mt-2 text-center text-label-1 text-slate-400">해당하는 항목이 없다면 선택하지 않고 다음으로 넘어가셔도 됩니다.</p>
       </div>
     );
@@ -288,7 +301,7 @@ export function isAnswerValueFilled(value: AnswerValue): boolean {
     case "SINGLE":
       return Boolean(value.optionId);
     case "MULTI":
-      return value.optionIds.length > 0;
+      return value.optionIds.length > 0 || (value.customTexts?.length ?? 0) > 0;
     case "SCALE":
       return typeof value.value === "number";
     case "NUMBER":
