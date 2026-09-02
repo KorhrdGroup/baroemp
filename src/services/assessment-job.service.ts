@@ -1,8 +1,8 @@
-import { getAssessmentResultRepository, getJobRepository } from "@/lib/repositories";
+import { findCareerProfileByUserId, getAssessmentResultRepository, getJobRepository } from "@/lib/repositories";
 import { toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 import { isPreferredQualification, qualificationName } from "@/lib/qualification";
 import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
-import type { Job, JobSearchFilter, OccupationRecommendation } from "@/types";
+import type { Job, JobSearchFilter, OccupationRecommendation, Region } from "@/types";
 
 /**
  * 직업진단 결과 → 채용공고 연결 서비스.
@@ -57,10 +57,11 @@ const QUALIFICATION_SCAN_POOL = 60;
 async function findJobsForTopRecommendation(
   recommendations: OccupationRecommendation[],
   limit: number,
+  region?: Region,
 ): Promise<AssessmentJobRecommendation | null> {
   for (const top of recommendations) {
     if (!top.jobCategoryCode) continue;
-    const found = await findJobsForRecommendation(top, limit);
+    const found = await findJobsForRecommendation(top, limit, region);
     if (found) return found;
   }
   return null;
@@ -69,6 +70,7 @@ async function findJobsForTopRecommendation(
 async function findJobsForRecommendation(
   top: OccupationRecommendation,
   limit: number,
+  region?: Region,
 ): Promise<AssessmentJobRecommendation | null> {
   if (!top.jobCategoryCode) return null;
 
@@ -84,17 +86,28 @@ async function findJobsForRecommendation(
   const needsQualificationFilter = missingQualifications.length > 0;
 
   // occupation의 직종 값에는 6자리 코드와 'social_worker' 같은 묶음 key가 섞여 있어 변환을 거친다.
-  const { items } = await getJobRepository().search({
-    jobCategoryPatterns: toJobCategoryPatterns([top.jobCategoryCode]),
-    activeOnly: true,
-    sort: "latest",
-    page: 1,
-    pageSize: needsQualificationFilter ? QUALIFICATION_SCAN_POOL : limit,
-  } as JobSearchFilter);
+  const fetchJobs = async (searchRegion?: Region): Promise<Job[]> => {
+    const { items } = await getJobRepository().search({
+      jobCategoryPatterns: toJobCategoryPatterns([top.jobCategoryCode as string]),
+      region: searchRegion,
+      activeOnly: true,
+      sort: "latest",
+      page: 1,
+      pageSize: needsQualificationFilter ? QUALIFICATION_SCAN_POOL : limit,
+    } as JobSearchFilter);
+    return needsQualificationFilter
+      ? items.filter((job) => jobMentionsAnyQualification(job, missingQualifications))
+      : items;
+  };
 
-  const jobs = needsQualificationFilter
-    ? items.filter((job) => jobMentionsAnyQualification(job, missingQualifications)).slice(0, limit)
-    : items;
+  // 희망 지역 공고를 먼저 채우고, 모자라면 전국 공고로 뒤를 잇는다 (중복 제거).
+  const regional = region ? await fetchJobs(region) : [];
+  let jobs = regional.slice(0, limit);
+  if (jobs.length < limit) {
+    const seen = new Set(jobs.map((j) => j.id));
+    const nationwide = (await fetchJobs()).filter((j) => !seen.has(j.id));
+    jobs = [...jobs, ...nationwide].slice(0, limit);
+  }
   if (jobs.length === 0) return null;
 
   return { occupationName: top.occupationName, jobCategoryCode: top.jobCategoryCode, jobs, missingQualifications };
@@ -120,9 +133,14 @@ export async function getRecommendedJobsFromAssessment(
 
   const latest = [...all].sort((a, b) => (a.completedAt < b.completedAt ? 1 : -1))[0];
   const { ready, preparation } = splitRecommendationTracks(latest.recommendations);
+
+  // 직종만 맞추면 강원·경북 공고가 충남 회원에게 온다. 희망 지역(프로필 우선, 없으면 진단 답변)을 함께 맞춘다.
+  const careerProfile = params.userId ? await findCareerProfileByUserId(params.userId) : null;
+  const region = careerProfile?.region ?? latest.extractedProfile.region;
+
   const [readySection, preparationSection] = await Promise.all([
-    findJobsForTopRecommendation(ready, limit),
-    findJobsForTopRecommendation(preparation, Math.min(limit, 4)),
+    findJobsForTopRecommendation(ready, limit, region),
+    findJobsForTopRecommendation(preparation, Math.min(limit, 4), region),
   ]);
   if (!readySection && !preparationSection) return null;
 
