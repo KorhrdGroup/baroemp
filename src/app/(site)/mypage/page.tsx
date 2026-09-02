@@ -720,7 +720,11 @@ export default async function MyPage() {
               </Link>
             }
           />
-          <div className="space-y-4">
+          {/*
+            카드 3장이 세로로만 쌓이면 넓은 화면 오른쪽이 크게 빈다. CSS multi-column 으로 두 줄에 나누고
+            각 카드는 열 안에서 잘리지 않게 break-inside-avoid. 좁은 화면(< lg)에서는 한 줄로 자연스럽게 쌓인다.
+          */}
+          <div className="space-y-4 lg:columns-2 lg:gap-4 lg:space-y-0 [&>*]:lg:mb-4 [&>*]:lg:break-inside-avoid">
             {jobData.recommended.length > 0 && (
               <Card className={myPageCardClass}>
                 <CardHeader>
