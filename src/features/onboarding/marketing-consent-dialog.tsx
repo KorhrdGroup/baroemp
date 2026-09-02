@@ -12,7 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { setMarketingConsentAction } from "@/features/profile/profile-actions";
+import { setMarketingConsentAction } from "@/features/profile/marketing-consent-actions";
 
 /**
  * 소셜 로그인으로 가입한 회원에게 온보딩에 앞서 한 번 묻는 알림톡 수신 동의.
