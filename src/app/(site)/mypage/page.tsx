@@ -11,6 +11,7 @@ import {
   Sparkles,
   Star,
   UserRound,
+  BellRing,
 } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { Button } from "@/components/ui/button";
@@ -38,9 +39,10 @@ import { getMyPageDetail } from "@/services/user-crm.service";
 import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
-
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 import type { Job, JobApplication, MatchResult, SupportEligibilityGrade, SupportProgram } from "@/types";
+import { getJobAlertSettings } from "@/services/job-alert.service";
+import { JobAlertSettingsForm } from "@/features/mypage/job-alert-settings-form";
 
 interface MyPageJobData {
   bookmarked: Job[];
@@ -220,6 +222,7 @@ function StepHeading({
  */
 export default async function MyPage() {
   const user = await requireUser("/mypage");
+  const jobAlertSettings = await getJobAlertSettings(user.id);
   // 프로필 행이 아직 없어도(가입 직후, Mock 로그인 등) 인증 정보로 최소 프로필을 만들어 화면을 연다.
   const detail = await getMyPageDetail(user.id, {
     id: user.id,
@@ -515,6 +518,18 @@ export default async function MyPage() {
                   </dl>
                 )}
               </div>
+            </CardContent>
+          </Card>
+
+          {/* 거주지 근처 공고 알림. 켜는 것이 알림톡 수신 동의라 프로필 바로 아래, 눈에 띄는 자리에 둔다. */}
+          <Card id="job-alerts" className={cn("scroll-mt-24", myPageCardClass)}>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
+                <BellRing className="size-4" /> 공고 알림
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <JobAlertSettingsForm initial={jobAlertSettings} phone={profile.phone ? formatPhone(profile.phone) : undefined} />
             </CardContent>
           </Card>
         </section>

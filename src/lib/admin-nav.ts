@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { LayoutDashboard, BarChart3, Coins, ClipboardList, Briefcase, FileText, Users, Target, MessageSquare } from "lucide-react";
+import { LayoutDashboard, BarChart3, Coins, ClipboardList, Briefcase, FileText, Users, Target, MessageSquare, BellRing } from "lucide-react";
 
 export interface AdminNavItem {
   label: string;
@@ -19,6 +19,7 @@ export const adminNavItems: AdminNavItem[] = [
   { label: "지원금찾기", href: "/admin/support", icon: Coins },
   { label: "이력서·자소서 첨삭", href: "/admin/resumes", icon: FileText },
   { label: "취업 컨설팅", href: "/admin/consultations", icon: MessageSquare },
+  { label: "공고 알림", href: "/admin/job-alerts", icon: BellRing },
   // 각 서비스 관리 메뉴를 다 지난 뒤에 둔다. 앞의 메뉴들을 가로질러 보는 화면이라 순서상 마지막이다.
   { label: "영업 리드", href: "/admin/sales-leads", icon: Target },
   { label: "통계", href: "/admin/stats", icon: BarChart3 },
@@ -31,6 +32,7 @@ export const adminTopNavItems = [
   { label: "지원금", href: "/admin/support" },
   { label: "이력서", href: "/admin/resumes" },
   { label: "컨설팅", href: "/admin/consultations" },
+  { label: "공고 알림", href: "/admin/job-alerts" },
   { label: "영업 리드", href: "/admin/sales-leads" },
   { label: "통계", href: "/admin/stats" },
 ];
