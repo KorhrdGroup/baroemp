@@ -30,6 +30,17 @@ export const interactiveRowClass =
   "transition-colors duration-200 ease-in-out hover:bg-slate-100 active:bg-slate-200";
 
 /**
+ * 흰 카드 안에 구분선으로만 가른 목록 행.
+ *
+ * 회색 상자를 겹쳐 넣으면 "카드 위의 카드"가 되어 답답하다. 행은 투명하게 두고
+ * 아래 구분선으로만 가르며, 호버는 카드와 같은 옅은 파랑을 쓴다.
+ * 좌우 여백은 음수 마진으로 카드 안쪽 여백까지 번지게 해, 호버 면이 글자에 딱 붙지 않는다.
+ */
+export const listRowClass =
+  "-mx-2 flex items-center justify-between gap-3 rounded-lg border-b border-slate-100 px-2 py-3 last:border-b-0 " +
+  interactiveCardClass;
+
+/**
  * 테두리 대신 그림자로 띄우는 카드.
  *
  * x·y 를 0 으로 두어 어느 방향으로도 치우치지 않게 하고, 음수 spread 로

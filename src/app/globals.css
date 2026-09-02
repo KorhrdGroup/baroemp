@@ -297,7 +297,12 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-medium;
+    /*
+     * 기본 굵기는 500(medium). Pretendard 400 은 흰 바탕 위 회색 보조 글자에서 너무 얇게
+     * 보여, 굵기 클래스가 없는 부제·메타 줄이 전부 흐릿했다. 굵기를 따로 정한 곳
+     * (font-semibold·font-bold 등)은 그대로고, 안 정한 곳만 한 단계 올라간다.
+     */
     /*
      * 한글은 낱말 가운데서 끊으면 안 읽힌다. 기본이 그렇게 끊는 규칙이라, 화면마다
      * break-keep 을 붙여 막아 왔는데 빠뜨린 곳이 계속 나왔다(푸터 소개글, 페이지 설명 등).

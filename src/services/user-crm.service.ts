@@ -130,6 +130,32 @@ export interface FallbackIdentity {
   role: AppRole;
 }
 
+/** 마이페이지가 쓰는 부분만. 관리자 상세(getUserCrmDetail)의 리드·지원제도 전체·추천 매칭은 회원 화면에 안 쓴다. */
+export type MyPageDetail = Pick<UserCrmDetail, "profile" | "careerProfile" | "assessmentResults" | "resumeSummary">;
+
+/**
+ * 마이페이지용 회원 상세.
+ * getUserCrmDetail 은 관리자 CRM 용이라 리드 전체·지원제도 전체·후보 공고 500건·매칭 엔진까지 돌린다
+ * (0.7초). 회원 화면은 프로필·취업 프로필·진단 결과·이력서 요약만 쓰므로 그것만 병렬로 읽는다.
+ */
+export async function getMyPageDetail(userId: string, fallbackIdentity?: FallbackIdentity): Promise<MyPageDetail | null> {
+  const [profileRow, careerProfile, assessmentResults, activities] = await Promise.all([
+    getProfileRepository().findById(userId),
+    findCareerProfileByUserId(userId),
+    getAssessmentResultRepository().findAll({ userId }),
+    activityEventLogger.getEventsByUser(userId),
+  ]);
+  const profile = profileRow ?? buildFallbackProfile(fallbackIdentity);
+  if (!profile) return null;
+  const resumeSummary = await buildUserResumeSummary(userId, activities);
+  return {
+    profile,
+    careerProfile: careerProfile ?? undefined,
+    assessmentResults: [...assessmentResults].sort((a, b) => (a.completedAt < b.completedAt ? 1 : -1)),
+    resumeSummary,
+  };
+}
+
 export async function getUserCrmDetail(
   userId: string,
   fallbackIdentity?: FallbackIdentity,

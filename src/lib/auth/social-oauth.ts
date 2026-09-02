@@ -51,12 +51,18 @@ export function buildAuthorizeUrl(provider: SocialProvider, redirectUri: string,
   return url.toString();
 }
 
+/** 토큰 교환 결과. 실패하면 provider 가 준 오류 코드(KOE010 등)를 함께 돌려 화면·로그에 쓴다. */
+interface TokenExchange {
+  token: string | null;
+  reason?: string;
+}
+
 async function exchangeCodeForToken(
   provider: SocialProvider,
   code: string,
   redirectUri: string,
   state: string,
-): Promise<string | null> {
+): Promise<TokenExchange> {
   if (provider === "naver") {
     const url = new URL("https://nid.naver.com/oauth2.0/token");
     url.searchParams.set("grant_type", "authorization_code");
@@ -65,8 +71,15 @@ async function exchangeCodeForToken(
     url.searchParams.set("code", code);
     url.searchParams.set("state", state);
     const res = await fetch(url, { cache: "no-store" });
-    const json = (await res.json()) as { access_token?: string };
-    return json.access_token ?? null;
+    const json = (await res.json()) as { access_token?: string; error?: string; error_description?: string };
+    if (!json.access_token) {
+      console.error("[social-oauth] naver token exchange failed", {
+        status: res.status,
+        error: json.error,
+        description: json.error_description,
+      });
+    }
+    return { token: json.access_token ?? null, reason: json.error };
   }
   const body = new URLSearchParams({
     grant_type: "authorization_code",
@@ -81,19 +94,27 @@ async function exchangeCodeForToken(
     body,
     cache: "no-store",
   });
-  const json = (await res.json()) as { access_token?: string; error?: string; error_description?: string };
+  const json = (await res.json()) as {
+    access_token?: string;
+    error?: string;
+    error_description?: string;
+    error_code?: string;
+  };
   if (!json.access_token) {
     // 실패 이유를 버리면 콜백은 social_profile_failed 한 줄만 남아 원인을 알 수 없다.
     // access_token은 찍지 않는다 - 실패 응답에는 애초에 없다.
     console.error("[social-oauth] kakao token exchange failed", {
       status: res.status,
       error: json.error,
+      errorCode: json.error_code,
       description: json.error_description,
       redirectUri,
       hasClientSecret: Boolean(process.env.KAKAO_CLIENT_SECRET),
     });
   }
-  return json.access_token ?? null;
+  // KOE010(Bad client credentials): 카카오 앱에 Client Secret 이 켜져 있는데 서버에 KAKAO_CLIENT_SECRET 이 없거나 REST 키가 틀림.
+  // KOE303: redirect_uri 가 카카오 콘솔에 등록된 것과 다름. KOE320: code 만료·재사용.
+  return { token: json.access_token ?? null, reason: json.error_code ?? json.error };
 }
 
 async function fetchSocialProfile(provider: SocialProvider, accessToken: string): Promise<SocialProfile | null> {
@@ -142,15 +163,22 @@ async function fetchSocialProfile(provider: SocialProvider, accessToken: string)
   };
 }
 
+export interface SocialProfileResolution {
+  profile: SocialProfile | null;
+  /** 실패했을 때 provider 오류 코드. 화면에 "(오류 코드 KOE010)" 처럼 붙여 원인을 찾게 한다. */
+  reason?: string;
+}
+
 export async function resolveSocialProfile(
   provider: SocialProvider,
   code: string,
   redirectUri: string,
   state: string,
-): Promise<SocialProfile | null> {
-  const token = await exchangeCodeForToken(provider, code, redirectUri, state);
-  if (!token) return null;
-  return fetchSocialProfile(provider, token);
+): Promise<SocialProfileResolution> {
+  const { token, reason } = await exchangeCodeForToken(provider, code, redirectUri, state);
+  if (!token) return { profile: null, reason: reason ?? "token" };
+  const profile = await fetchSocialProfile(provider, token);
+  return { profile, reason: profile ? undefined : "profile" };
 }
 
 function socialAccountEmail(profile: SocialProfile): string {

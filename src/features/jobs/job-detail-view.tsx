@@ -20,9 +20,10 @@ import { cn } from "@/lib/utils";
 import { formatSalary } from "@/lib/salary";
 import { labelCareerRequirement, labelQualification, labelRegion, labelWorkType } from "@/lib/labels";
 import { JobApplyButton } from "./job-apply-button";
+import { JobApplicationStatusControl } from "./job-application-status-control";
 import { JobBookmarkButton } from "./job-bookmark-button";
 import { JobViewTracker } from "./job-view-tracker";
-import type { CareerContent, Job } from "@/types";
+import type { CareerContent, Job, JobApplicationStatus } from "@/types";
 import type { JobMatchDetail } from "@/services/job-match.service";
 import type { JobRequirementComparisonItem } from "@/services/job-requirement-comparison.service";
 import { BackButton } from "@/components/common/back-button";
@@ -126,6 +127,7 @@ export function JobDetailView({
   isAuthenticated,
   isBookmarked,
   requirementComparison,
+  applicationStatus = null,
 }: {
   job: Job;
   match: JobMatchDetail | null;
@@ -134,6 +136,8 @@ export function JobDetailView({
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
   requirementComparison?: JobRequirementComparisonItem[];
+  /** 회원이 이 공고에 표시한 지원 상태. 로그인 회원에게만 표시 줄을 그린다. */
+  applicationStatus?: JobApplicationStatus | null;
 }) {
   const showRequirements = Boolean(isAuthenticated && requirementComparison && requirementComparison.length > 0);
 
@@ -352,6 +356,20 @@ export function JobDetailView({
         <p className="mt-6 text-center text-label-2 text-slate-400">
           이 공고는 {job.externalSource === "work24" ? "고용24" : "외부"}에서 제공한 정보입니다. 지원 시 원본 페이지로 이동합니다.
         </p>
+      )}
+
+      {/*
+        지원은 외부 사이트에서 이뤄져 우리가 알 수 없다. 지원하고 돌아온 회원이 여기서 직접 표시하면
+        마이페이지 5단계가 완료로 바뀐다. 목록을 늘어놓는 대신 공고마다 이 한 줄이 기록 자리다.
+      */}
+      {isAuthenticated && (
+        <section className="mt-6 flex flex-col gap-3 rounded-xl bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-body-2 font-semibold text-slate-800">이 공고에 지원하셨나요?</p>
+            <p className="mt-0.5 text-label-2 text-slate-500">표시해 두면 마이페이지 취업 절차에 기록돼요. 면접·취업까지 이어지면 단계를 올려 주세요.</p>
+          </div>
+          <JobApplicationStatusControl jobId={job.id} status={applicationStatus} />
+        </section>
       )}
 
       {/* 하단 고정 CTA가 마지막 내용을 가리지 않도록 비워둔다. */}

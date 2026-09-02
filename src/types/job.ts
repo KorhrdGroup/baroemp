@@ -154,6 +154,27 @@ export interface JobSearchResult {
 }
 
 /**
+ * 추천순 정렬에 쓰는 회원 조건. 프로필 전체 대신 점수에 들어가는 값만 추려
+ * DB 함수(search_jobs_scored)와 mock 저장소가 같은 재료로 같은 순서를 낸다.
+ * 만드는 쪽: lib/jobs/job-match-signal.ts
+ */
+export interface JobMatchSignal {
+  /** 희망 직종 코드 앞자리 (묶음 key·6자리 코드를 toJobCategoryPatterns 로 푼 것) */
+  desiredCategoryPrefixes: string[];
+  region?: Region;
+  desiredSalaryMin?: number;
+  desiredSalaryMax?: number;
+  desiredWorkTypes: WorkType[];
+  /** 경력단절·구직 중이면 신입가능 공고에 가점 */
+  isCareerOpen: boolean;
+  canDrive: boolean;
+  interestTags: string[];
+  /** 50·60대면 (준)고령자 우대 공고에 가점 */
+  isMidlifeAge: boolean;
+  heldQualifications: string[];
+}
+
+/**
  * Job Role: 개별 채용공고(Job)가 아닌 "직업/직종" 단위의 요약 정보.
  * 홈페이지 "인기 직업" 섹션 등에서 사용하며, jobCategory 코드로 Job/Content와 연결된다.
  * 특정 직업을 코드에 하드코딩하지 않기 위해 항상 배열(mock) 기반으로 렌더링한다.
@@ -179,7 +200,8 @@ export type JobCurationTab = "new" | "closing_soon" | "matched" | "assessment_ma
  * 큐레이션 탭 상태.
  * READY: 정상 결과 있음, NEEDS_PROFILE: 커리어 프로필 미입력, EMPTY: 조건 만족 공고 없음.
  */
-export type JobCurationState = "READY" | "NEEDS_PROFILE" | "EMPTY";
+/** NEEDS_ASSESSMENT: 직업진단을 아직 안 해서 진단 기반 탭을 채울 수 없는 상태. 빈 결과(EMPTY)와 구분해 진단으로 안내한다. */
+export type JobCurationState = "READY" | "NEEDS_PROFILE" | "NEEDS_ASSESSMENT" | "EMPTY";
 
 /** 공고의 필수 자격 대비 회원의 준비 상태. 계산은 features/jobs/job-readiness. */
 export type JobReadinessLevel = "no_requirement" | "satisfied" | "preferred" | "near" | "gap";

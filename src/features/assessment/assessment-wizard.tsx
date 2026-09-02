@@ -24,7 +24,11 @@ function toRawAnswerInput(value: AnswerValue): { optionId?: string; optionIds?: 
     case "SINGLE":
       return { optionId: value.optionId };
     case "MULTI":
-      return { optionIds: value.optionIds };
+      // 직접 적은 자격은 옵션 id 가 없어 rawValue 에 실어 보낸다 (answer-normalizer 가 다듬는다).
+      return {
+        optionIds: value.optionIds,
+        rawValue: value.customTexts && value.customTexts.length > 0 ? { custom: value.customTexts } : undefined,
+      };
     case "SCALE":
       return { rawValue: value.value };
     case "NUMBER":

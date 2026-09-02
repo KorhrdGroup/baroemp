@@ -54,7 +54,8 @@ export async function ProgressStepsSection() {
                   <p className="mt-2 text-body-2 font-bold text-slate-900">{recommended.title}</p>
                   <p className="mt-1 text-label-1 text-slate-500">
                     {recommended.companyName}
-                    {recommended.match && ` · 적합도 ${recommended.match.score}점`}
+                    {/* 점수 숫자는 회원에게 뜻이 없다. 가장 크게 맞은 조건을 대신 적는다 (마이페이지·일자리와 같은 원칙). */}
+                    {recommended.match?.reasons[0] && ` · ${recommended.match.reasons[0].label}`}
                   </p>
                 </div>
                 {/* 패널 하단 액션. 텍스트 링크는 카드 안에서 눌 수 있는 곳으로 보이지 않아 테두리 버튼으로 둔다. */}

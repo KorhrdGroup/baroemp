@@ -3,16 +3,19 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
 import { getProfileRepository } from "@/lib/repositories/profile-repository";
-import { findCareerProfileByUserId } from "@/lib/repositories";
+import { findCareerProfileByUserId, getUserQualificationRepository } from "@/lib/repositories";
 import { ProfileEditForm } from "@/features/profile/profile-edit-form";
 
 export const metadata: Metadata = { title: "내 정보 수정 | 한평생 바로취업" };
 
 export default async function MyPageProfileEditPage() {
   const user = await requireUser("/mypage/profile");
-  const [profile, careerProfile] = await Promise.all([
+  const [profile, careerProfile, heldQualifications] = await Promise.all([
     getProfileRepository().findById(user.id),
     findCareerProfileByUserId(user.id),
+    getUserQualificationRepository()
+      .findByUserId(user.id)
+      .catch(() => []),
   ]);
 
   if (!profile) {
@@ -36,7 +39,11 @@ export default async function MyPageProfileEditPage() {
       </p>
 
       <div className="mt-8 rounded-2xl border border-border bg-white p-6 sm:p-8">
-        <ProfileEditForm profile={profile} careerProfile={careerProfile} />
+        <ProfileEditForm
+          profile={profile}
+          careerProfile={careerProfile}
+          heldQualificationNames={heldQualifications.map((q) => q.name)}
+        />
       </div>
     </div>
   );

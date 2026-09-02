@@ -16,29 +16,8 @@ export const JOB_CATEGORY_OPTIONS: { code: string; label: string }[] = [
   { code: "other", label: "기타" },
 ];
 
-/**
- * 보유 자격 선택지. 이름은 요건 사전(career_requirements, 0066)에 등록된 것과 맞춰
- * 온보딩 → 자격 승격 → 공고 배지·진단 프리필까지 같은 이름으로 흐르게 한다.
- * 성격별로 묶어 두었다 (돌봄·복지 → 교육·상담 → 실무). 편입·학위 같은 자격 아닌 항목은 뺀다.
- */
-export const QUALIFICATION_OPTIONS: string[] = [
-  // 돌봄·복지
-  "요양보호사",
-  "사회복지사 2급",
-  "보육교사 2급",
-  "장애영유아보육교사",
-  // 교육·상담
-  "평생교육사 2급",
-  "청소년지도사 2급",
-  "직업상담사 2급",
-  "심리상담사",
-  "정사서(준사서)",
-  // 실무·기타
-  "컴퓨터활용능력",
-  "종합미용면허",
-  "경비지도사",
-  "1종 보통 운전면허",
-];
+/** 보유 자격 선택지. 서버 액션도 읽어야 해서 qualification-options.ts 에 두고 여기서는 다시 내보낸다. */
+export { QUALIFICATION_OPTIONS } from "./qualification-options";
 
 export function ChipToggle({
   selected,

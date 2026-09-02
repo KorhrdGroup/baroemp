@@ -14,13 +14,22 @@ import { getJobRepository } from "@/lib/repositories";
 */
 export const revalidate = 21600;
 
+/*
+  레이아웃이 세션 쿠키를 읽어 이 라우트는 늘 동적으로 그려진다. 그래서 위 revalidate 는 페이지를
+  통째로 캐시해 주지 못했고, 7만 건 count 가 방문마다 0.3초씩 들었다. 수치만 프로세스 안에 6시간 기억한다.
+*/
+const JOB_COUNT_TTL_MS = 6 * 60 * 60 * 1000;
+let jobCountCache: { at: number; value: number } | null = null;
+
 async function loadActiveJobCount(): Promise<number | undefined> {
+  if (jobCountCache && Date.now() - jobCountCache.at < JOB_COUNT_TTL_MS) return jobCountCache.value;
   try {
     const { total } = await getJobRepository().search({ activeOnly: true, page: 1, pageSize: 1 });
+    jobCountCache = { at: Date.now(), value: total };
     return total;
   } catch (err) {
     console.error("[home] 활성 공고 수치 조회 실패", err);
-    return undefined;
+    return jobCountCache?.value;
   }
 }
 

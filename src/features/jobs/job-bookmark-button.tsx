@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState, useSyncExternalStore, useTransition } from "react";
-import { Bookmark } from "lucide-react";
+import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
@@ -74,7 +74,7 @@ export function JobBookmarkButton({
           둘이 되어 어느 것이 주 동작인지 흐려진다. 흰 버튼으로 두고 찜한 상태만
           책갈피를 파랗게 채워 알린다.
         */}
-        <Bookmark
+        <Star
           className={cn("size-4", bookmarked ? "fill-brand-blue-400 text-brand-blue-400" : "text-slate-400")}
         />
         {bookmarked ? "찜 완료" : "찜하기"}
@@ -97,7 +97,7 @@ export function JobBookmarkButton({
         className,
       )}
     >
-      <Bookmark className={cn("size-[18px]", bookmarked && "fill-current")} />
+      <Star className={cn("size-[18px]", bookmarked && "fill-current")} />
     </button>
   );
 }

@@ -18,6 +18,12 @@ export interface AssessmentJobRecommendation {
   jobs: Job[];
   /** 준비 트랙일 때, 지원을 막고 있는 필수 자격 이름들. */
   missingQualifications?: string[];
+  /**
+   * 희망지역 공고가 모자라 다른 지역에서 채워 온 공고의 id.
+   * 화면에서 "희망지역 공고가 아니다"라고 알려 주기 위한 값이다.
+   * 아무 표시 없이 섞으면 회원은 집 근처 공고인 줄 알고 들어간다.
+   */
+  outsideRegionJobIds?: string[];
 }
 
 export interface AssessmentJobSections {
@@ -103,14 +109,24 @@ async function findJobsForRecommendation(
   // 희망 지역 공고를 먼저 채우고, 모자라면 전국 공고로 뒤를 잇는다 (중복 제거).
   const regional = region ? await fetchJobs(region) : [];
   let jobs = regional.slice(0, limit);
+  const outsideRegionJobIds: string[] = [];
   if (jobs.length < limit) {
     const seen = new Set(jobs.map((j) => j.id));
     const nationwide = (await fetchJobs()).filter((j) => !seen.has(j.id));
-    jobs = [...jobs, ...nationwide].slice(0, limit);
+    const filler = nationwide.slice(0, limit - jobs.length);
+    // 희망지역을 모르면 애초에 전국이 기준이라 "지역 밖"이라고 할 것이 없다.
+    if (region) outsideRegionJobIds.push(...filler.filter((j) => j.region !== region).map((j) => j.id));
+    jobs = [...jobs, ...filler];
   }
   if (jobs.length === 0) return null;
 
-  return { occupationName: top.occupationName, jobCategoryCode: top.jobCategoryCode, jobs, missingQualifications };
+  return {
+    occupationName: top.occupationName,
+    jobCategoryCode: top.jobCategoryCode,
+    jobs,
+    missingQualifications,
+    outsideRegionJobIds,
+  };
 }
 
 /**

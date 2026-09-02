@@ -4,11 +4,12 @@ import {
   resolveSocialProfile,
   signInWithSocialProfile,
 } from "@/lib/auth/social-oauth";
-import { sanitizeNextPath } from "@/lib/auth/redirect";
 
-function loginWithError(request: NextRequest, code: string): NextResponse {
+function loginWithError(request: NextRequest, code: string, detail?: { provider?: string; reason?: string }): NextResponse {
   const url = new URL("/login", request.url);
   url.searchParams.set("error", code);
+  if (detail?.provider) url.searchParams.set("provider", detail.provider);
+  if (detail?.reason) url.searchParams.set("reason", detail.reason);
   return NextResponse.redirect(url);
 }
 
@@ -20,20 +21,20 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const code = request.nextUrl.searchParams.get("code");
   const state = request.nextUrl.searchParams.get("state") ?? "";
   const providerError = request.nextUrl.searchParams.get("error");
-  if (providerError || !code) return loginWithError(request, "social_cancelled");
+  if (providerError || !code) return loginWithError(request, "social_cancelled", { provider });
 
   const savedState = request.cookies.get(`social_state_${provider}`)?.value;
-  if (!savedState || savedState !== state) return loginWithError(request, "social_state_mismatch");
+  if (!savedState || savedState !== state) return loginWithError(request, "social_state_mismatch", { provider });
 
   const redirectUri = `${request.nextUrl.origin}/auth/callback/${provider}`;
-  const profile = await resolveSocialProfile(provider, code, redirectUri, state);
-  if (!profile) return loginWithError(request, "social_profile_failed");
+  const { profile, reason } = await resolveSocialProfile(provider, code, redirectUri, state);
+  if (!profile) return loginWithError(request, "social_profile_failed", { provider, reason });
 
   const result = await signInWithSocialProfile(profile);
-  if (!result) return loginWithError(request, "social_signin_failed");
+  if (!result) return loginWithError(request, "social_signin_failed", { provider });
 
-  const next = sanitizeNextPath(request.cookies.get(`social_next_${provider}`)?.value ?? "", "/mypage");
-  const target = result.isNewUser ? `/onboarding/profile?next=${encodeURIComponent(next)}` : next;
+  // 로그인 성공은 늘 마이페이지로. 신규 가입만 온보딩을 먼저 거친다 (알림톡 동의도 그 앞에서 한 번 묻는다).
+  const target = result.isNewUser ? "/onboarding/profile?next=/mypage&consent=1" : "/mypage";
 
   const response = NextResponse.redirect(new URL(target, request.url));
   response.cookies.delete(`social_state_${provider}`);
