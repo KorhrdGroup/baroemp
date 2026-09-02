@@ -11,9 +11,9 @@ export const metadata: Metadata = { title: "취업 프로필 입력 | 한평생 
 export default async function OnboardingProfilePage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string; consent?: string }>;
+  searchParams: Promise<{ next?: string; consent?: string; welcome?: string }>;
 }) {
-  const { next: nextParam, consent } = await searchParams;
+  const { next: nextParam, consent, welcome } = await searchParams;
   const next = sanitizeNextPath(nextParam, "/mypage");
   const user = await requireUser(`/onboarding/profile?next=${encodeURIComponent(next)}`);
 
@@ -35,6 +35,8 @@ export default async function OnboardingProfilePage({
     <OnboardingWizard
       careerProfile={careerProfile}
       next={next}
+      /* 가입 직후로 들어왔을 때만 "가입이 완료되었어요"를 붙인다. 마이페이지에서 이어 할 때는 이미 회원이다. */
+      justSignedUp={welcome === "1"}
       needsPhone={!profile?.phone}
       needsMarketingConsent={!profile?.marketingConsent}
       heldQualificationNames={heldQualifications.map((q) => q.name)}

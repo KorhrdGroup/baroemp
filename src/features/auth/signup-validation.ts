@@ -26,8 +26,9 @@ export function validateSignup(values: SignupValues): SignupFieldErrors {
   const phone = values.phone.trim();
 
   if (!name || name.length < 2) errors.name = "이름을 2자 이상 입력해주세요.";
-  // 이메일은 선택 항목 - 입력했을 때만 형식을 본다.
-  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "올바른 이메일 형식이 아닙니다.";
+  // 이메일은 로그인 아이디라 반드시 받는다.
+  if (!email) errors.email = "이메일을 입력해주세요.";
+  else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "올바른 이메일 형식이 아닙니다.";
   if (values.password.length < 8 || !/[a-zA-Z]/.test(values.password) || !/[0-9]/.test(values.password)) {
     errors.password = "비밀번호는 영문/숫자를 포함해 8자 이상이어야 합니다.";
   }

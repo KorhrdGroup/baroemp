@@ -111,7 +111,7 @@ export function SignupView({ next }: { next: string }) {
         </div>
 
         <div>
-          <Label htmlFor="su-email">이메일 (선택)</Label>
+          <Label htmlFor="su-email">이메일</Label>
           <InputWithAction
             action={emailChecking ? "확인 중..." : "중복확인"}
             onAction={handleCheckEmail}

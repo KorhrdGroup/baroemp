@@ -102,7 +102,8 @@ export async function signUpAction(_prev: SignUpFormState, formData: FormData): 
 
   // 가입 직후에는 취업 프로필 입력을 한 번 보여주고, 저장하거나 건너뛰면 원래 목적지로 보낸다.
   // 이메일 인증이 필요한 경우에도 인증 링크가 이 경로로 돌아오도록 emailRedirectTo에 함께 넣는다.
-  const afterSignUp = `/onboarding/profile?next=${encodeURIComponent(next)}`;
+  // welcome=1: 가입 직후로 들어온 표시. 나중에 마이페이지에서 이어서 할 때는 붙지 않는다.
+  const afterSignUp = `/onboarding/profile?welcome=1&next=${encodeURIComponent(next)}`;
 
   const supabase = await createServerSupabaseClient();
   if (!supabase) {

@@ -154,9 +154,12 @@ export function OnboardingWizard({
   needsPhone,
   needsMarketingConsent,
   heldQualificationNames = [],
+  justSignedUp = false,
 }: {
   careerProfile: CareerProfile | null;
   next: string;
+  /** 가입 직후 진입인지. 마이페이지에서 이어서 할 때는 축하 문구를 빼고 이어하기로 말한다. */
+  justSignedUp?: boolean;
   /** 가입 때 연락처를 비워둔 사용자에게만 묻는다. */
   needsPhone: boolean;
   /** 가입 때 수신동의를 하지 않은 사용자에게만 묻는다. */
@@ -325,7 +328,7 @@ export function OnboardingWizard({
           <div className="mb-7 rounded-xl border border-brand-blue-200 bg-white px-4 py-3.5 text-center">
             <p className="flex items-center justify-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
               <CheckCircle2 className="size-4 shrink-0" />
-              가입이 완료되었어요
+              {justSignedUp ? "가입이 완료되었어요" : "취업 프로필 채우기"}
             </p>
             <p className="mt-1.5 text-label-1 break-keep text-slate-500">
               몇 가지만 알려주시면 맞춤 채용공고와 받을 수 있는 지원금을 찾아드려요. 지금 넘어가셔도 괜찮아요.
