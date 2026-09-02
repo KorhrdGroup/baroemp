@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AlertTriangle, Download } from "lucide-react";
 import { getAdminStatsTrend } from "@/services/admin-stats.service";
 import { getMemberComposition } from "@/services/member-composition.service";
+import { getWithdrawStats, type WithdrawStats } from "@/services/withdraw-stats.service";
 import { getAssessmentStats } from "@/services/assessment-stats.service";
 import { getJobStats, getResumeStats, getSupportStats } from "@/services/service-stats.service";
 import { EXPORT_DOMAINS, EXPORT_LABELS } from "@/services/admin-export.service";
@@ -11,7 +12,7 @@ import { MemberCompositionView } from "@/features/admin/member-composition-view"
 import { AssessmentStatsView } from "@/features/admin/assessment-stats-view";
 import { JobStatsView } from "@/features/admin/job-stats-view";
 import { ResumeStatsView, SupportStatsView } from "@/features/admin/support-resume-stats-view";
-import { CardHead, StatsCard } from "@/features/admin/stats-primitives";
+import { CardHead, CountBreakdown, EmptyLine, StatsCard } from "@/features/admin/stats-primitives";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
@@ -71,9 +72,10 @@ function LoadError({ message }: { message: string }) {
 
 /** 통합 개요. 추이 → 분포 → 퍼널 순으로, 넓게 보다가 좁혀 들어가는 순서다. */
 async function MembersTab({ days }: { days: number }) {
-  const [trend, composition] = await Promise.all([
+  const [trend, composition, withdraw] = await Promise.all([
     getAdminStatsTrend(days),
     getMemberComposition(days),
+    getWithdrawStats(days),
   ]);
 
   return (
@@ -90,6 +92,43 @@ async function MembersTab({ days }: { days: number }) {
       ) : (
         <MemberCompositionView data={composition} days={days} />
       )}
+
+      {/*
+        떠난 사람은 회원 표에 남지 않아 다른 집계에서는 보이지 않는다.
+        무엇을 고쳐야 하는지가 여기서만 나오므로 회원 구성 맨 아래에 둔다.
+      */}
+      {withdraw.error ? <LoadError message={withdraw.error} /> : <WithdrawBlock data={withdraw} days={days} />}
+    </div>
+  );
+}
+
+/** 탈퇴 사유: 이유별 건수 + 최근 자유 의견. */
+function WithdrawBlock({ data, days }: { data: WithdrawStats; days: number }) {
+  return (
+    <div className="grid gap-4 lg:grid-cols-2">
+      <CountBreakdown
+        title="탈퇴 사유"
+        meta={`최근 ${days}일 · 총 ${data.total}건${data.truncated ? " (1000건까지만 셈)" : ""}`}
+        rows={data.reasons}
+      />
+      <StatsCard>
+        <CardHead title="탈퇴하며 남긴 말" meta={`최근 ${data.comments.length}건`} />
+        {data.comments.length === 0 ? (
+          <EmptyLine text="남긴 말이 아직 없습니다." />
+        ) : (
+          <ul className="mt-4 flex flex-col gap-3">
+            {data.comments.map((c) => (
+              <li key={`${c.occurredAt}-${c.detail}`} className="rounded-lg bg-slate-50 px-3 py-2.5">
+                <p className="break-keep text-label-1 text-slate-700">{c.detail}</p>
+                <p className="mt-1 text-label-2 text-slate-400">
+                  {c.occurredAt.slice(0, 10)}
+                  {c.reason ? ` · ${c.reason}` : ""}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+      </StatsCard>
     </div>
   );
 }
