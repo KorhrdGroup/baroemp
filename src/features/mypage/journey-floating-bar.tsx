@@ -51,6 +51,12 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
       const line = window.innerHeight * 0.35;
       let current: string | null = null;
       for (const t of targets) if (t.el.getBoundingClientRect().top <= line) current = t.anchor;
+      /*
+        마지막 카드(5단계)는 페이지 아래 여백이 부족해 화면 위 35% 지점까지 못 올라간다.
+        스크롤이 사실상 맨 아래에 닿았다면 마지막 카드를 활성으로 강제한다 - 안 그러면 아무리 내려도 4단계가 활성인 채로 남았다.
+      */
+      const atBottom = window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 8;
+      if (atBottom && targets.length > 0) current = targets[targets.length - 1].anchor;
       setActiveId(current);
     };
 
@@ -91,17 +97,21 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
                   href={s.anchor}
                   tabIndex={visible ? 0 : -1}
                   aria-label={`${s.step}단계 ${s.title}${s.done ? " (완료)" : isNext ? " (다음 할 일)" : ""}`}
-                  className="group flex min-w-0 items-center gap-2 rounded-full pr-1 transition-colors hover:bg-slate-50"
+                  className="group flex min-w-0 items-center gap-2 pr-1 transition-colors"
                 >
                   <span
                     className={cn(
-                      "flex size-9 shrink-0 items-center justify-center rounded-full text-label-1 font-bold leading-none transition-colors sm:size-10",
+                      /*
+                        절차 판과 같은 톤 계층. 링은 쓰지 않고, "지금 보고 있는 단계"는 원을 한 단계 키워 표현.
+                      */
+                      "flex shrink-0 items-center justify-center rounded-full text-label-1 font-bold leading-none transition-all",
                       s.done
                         ? "bg-brand-blue-400 text-white"
                         : isNext
-                          ? "bg-brand-blue-50 text-brand-blue-600 ring-2 ring-brand-blue-400"
+                          ? "bg-brand-blue-100 text-brand-blue-700"
                           : "bg-slate-100 text-slate-500",
-                      isActive && "ring-2 ring-offset-2 ring-brand-blue-600",
+                      /* 활성/비활성 크기 차이를 확 벌려 스크롤 위치가 한눈에 잡히게. */
+                      isActive ? "size-11 sm:size-12" : "size-8 sm:size-9",
                     )}
                   >
                     {s.done ? <Check className="size-4 sm:size-5" /> : s.step}
