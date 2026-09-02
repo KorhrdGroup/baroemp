@@ -363,7 +363,7 @@ export function JobDetailView({
         마이페이지 5단계가 완료로 바뀐다. 목록을 늘어놓는 대신 공고마다 이 한 줄이 기록 자리다.
       */}
       {isAuthenticated && (
-        <section className="mt-6 flex flex-col gap-3 rounded-xl bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <section className="mt-6 flex flex-col gap-3 rounded-xl bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <p className="text-body-2 font-semibold text-slate-800">이 공고에 지원하셨나요?</p>
             <p className="mt-0.5 text-label-2 text-slate-500">표시해 두면 마이페이지 취업 절차에 기록돼요. 면접·취업까지 이어지면 단계를 올려 주세요.</p>
