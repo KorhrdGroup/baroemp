@@ -276,7 +276,12 @@ export function JobCurationSection({ initialActive, bookmarkedIds }: JobCuration
               CARD_HEIGHT,
             )}
           >
-            <p>{EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY}</p>
+            <p>
+              {/* 자격 탭은 "성향에 맞는 공고"가 아니라 "자격 하나로 열리는 공고"를 찾는 자리라 문구를 따로 쓴다. */}
+              {current.state === "NEEDS_ASSESSMENT" && activeTab === "unlockable"
+                ? "직업진단을 받으면 자격 하나만 채우면 열리는 공고를 찾아드려요."
+                : (EMPTY_MESSAGES[current.state] ?? EMPTY_MESSAGES.EMPTY)}
+            </p>
             {/* 왜 비었는지만 말하고 끝내면 갈 곳이 없다. 채울 수 있는 행동으로 바로 잇는다. */}
             {current.state === "NEEDS_ASSESSMENT" && (
               <Link

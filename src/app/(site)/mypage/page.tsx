@@ -205,6 +205,25 @@ export default async function MyPage() {
     getRecommendedJobsFromAssessment({ userId: user.id }, 3).catch(() => null),
   ]);
   const heldQualificationNames = [...new Set(heldQualifications.map((q) => q.name))];
+  function labelAccountEmail(email?: string | null) {
+    if (!email) return "-";
+    if (!email.endsWith("@social.baroemp.app")) return email;
+    return email.startsWith("nv") ? "네이버 계정으로 가입" : "카카오 계정으로 가입";
+  }
+  /*
+    가입 때 career_profiles 행은 빈 값으로 먼저 생긴다. 온보딩을 건너뛰면 행은 있지만 알맹이가 없어
+    "-" 일곱 줄만 나왔다. 값이 하나라도 있어야 채운 것으로 본다.
+  */
+  const hasCareerProfile = Boolean(
+    careerProfile &&
+      (careerProfile.employmentStatus ||
+        careerProfile.region ||
+        careerProfile.desiredJobCategories?.length ||
+        careerProfile.desiredWorkTypes?.length ||
+        careerProfile.desiredSalaryMin ||
+        careerProfile.desiredSalaryMax ||
+        careerProfile.desiredStartTiming),
+  );
 
   /*
     맨 위 요약 줄. 지금 내가 어디까지 해뒀는지를 숫자로 먼저 보여주고, 각 숫자는
@@ -260,9 +279,12 @@ export default async function MyPage() {
           <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">
             {profile.name ?? "회원"}님
           </h1>
-          <Badge variant="outline" className="rounded-full text-label-1 text-slate-600">
-            {labelEmploymentStatus(careerProfile?.employmentStatus)}
-          </Badge>
+          {/* 온보딩을 건너뛴 회원은 값이 없어 "-" 배지만 달랑 남는다. 그때는 안 그린다. */}
+          {careerProfile?.employmentStatus && (
+            <Badge variant="outline" className="rounded-full text-label-1 text-slate-600">
+              {labelEmploymentStatus(careerProfile.employmentStatus)}
+            </Badge>
+          )}
           {detail.resumeSummary.primaryResume && (
             <Badge className="rounded-full border-0 bg-brand-blue-50 text-label-1 text-brand-blue-700">
               이력서 완성도 {detail.resumeSummary.primaryResume.completeness}%
@@ -338,7 +360,11 @@ export default async function MyPage() {
             <CardContent>
               <dl className="space-y-2.5">
                 <InfoRow label="이름" value={profile.name ?? "-"} />
-                <InfoRow label="이메일" value={profile.email ?? "-"} />
+                {/*
+                  소셜 가입은 nv{id}@social.baroemp.app 식의 합성 주소라 회원이 알아볼 이메일이 아니다.
+                  글자 단위로 네 줄 꺾여 보이던 자리에 어느 계정으로 가입했는지를 적는다 (social-oauth.ts 의 접두어 규칙).
+                */}
+                <InfoRow label="이메일" value={labelAccountEmail(profile.email)} />
                 <InfoRow label="휴대전화" value={formatPhone(profile.phone)} />
                 <InfoRow label="가입일" value={profile.createdAt.slice(0, 10)} />
               </dl>
@@ -352,6 +378,17 @@ export default async function MyPage() {
                 <Briefcase className="size-4" /> 취업 프로필
               </CardTitle>
             </CardHeader>
+            {!hasCareerProfile ? (
+              /* "-" 줄 대신 왜 비었는지와 채우러 갈 길을 둔다. 진단 카드가 "직업진단 시작"으로 이끄는 것과 같은 방식. */
+              <CardContent className="space-y-3">
+                <p className="text-label-1 leading-relaxed text-slate-500">
+                  아직 취업 프로필을 설정하지 않았어요. 희망 직종·지역을 알려주시면 맞춤 공고를 골라드려요.
+                </p>
+                <Button variant="outline" className="w-full text-brand-blue-600 hover:bg-brand-blue-50" asChild>
+                  <Link href="/onboarding/profile">취업 프로필 설정</Link>
+                </Button>
+              </CardContent>
+            ) : (
             <CardContent>
               <dl className="space-y-2.5">
                 <InfoRow label="취업상태" value={labelEmploymentStatus(careerProfile?.employmentStatus)} />
@@ -393,6 +430,7 @@ export default async function MyPage() {
                 />
               </dl>
             </CardContent>
+            )}
           </Card>
         </aside>
 
