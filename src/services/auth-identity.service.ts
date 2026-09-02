@@ -33,7 +33,7 @@ export async function ensureUserProfile(input: EnsureUserProfileInput): Promise<
 
   if (!existing) {
     // 트리거가 어떤 이유로든 동작하지 않은 경우의 안전망 - 최소 프로필을 생성한다.
-    await client.from("profiles").insert({
+    const { error: insertError } = await client.from("profiles").insert({
       id: input.userId,
       name: input.name,
       phone: input.phone,
@@ -43,6 +43,11 @@ export async function ensureUserProfile(input: EnsureUserProfileInput): Promise<
       marketing_consent_at: input.marketingConsent ? new Date().toISOString() : null,
       privacy_consent_at: input.privacyConsentAt ?? new Date().toISOString(),
     });
+    // 조용히 넘어가면 "로그인은 되는데 프로필이 없는" 회원이 생긴다. 원인이 로그에 남게 한다.
+    if (insertError) {
+      console.error("[ensureUserProfile] profiles insert failed", { userId: input.userId, message: insertError.message });
+      throw new Error(`프로필 생성 실패: ${insertError.message}`);
+    }
     await client.from("user_roles").upsert({ user_id: input.userId, role: "USER" }, { onConflict: "user_id,role" });
     await client.from("career_profiles").upsert({ user_id: input.userId }, { onConflict: "user_id" });
     await client.from("user_acquisition").upsert({ user_id: input.userId }, { onConflict: "user_id" });
