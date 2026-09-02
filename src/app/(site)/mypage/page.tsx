@@ -140,6 +140,13 @@ export const metadata: Metadata = {
 };
 
 /**
+ * 마이페이지 카드 공통 틀.
+ * Card 기본 여백(--card-spacing 16px)은 목록이 여러 줄 들어가는 이 화면에서 글자가 테두리에
+ * 붙어 꽉 찬 느낌이라, 여기서만 24px 로 키운다. 헤더·본문 좌우와 카드 위아래에 함께 먹는다.
+ */
+const myPageCardClass = "rounded-xl border-0 ring-1 ring-border [--card-spacing:--spacing(6)]";
+
+/**
  * 실회원 마이페이지 (스펙 22번). mock userId(user-1001) 의존을 완전히 제거하고
  * 현재 로그인한 auth user(requireUser)의 실제 데이터만 조회한다.
  * 데이터 원천: getUserCrmDetail() - 관리자 CRM 상세와 동일한 서비스를 재사용해
@@ -300,7 +307,7 @@ export default async function MyPage() {
             </Button>
           </div>
           {/* 기본 정보와 취업 프로필은 모두 "나"에 대한 내용이라 한 카드에 담고 구분선으로만 가른다. */}
-          <Card className="rounded-xl border-0 ring-1 ring-border">
+          <Card className={myPageCardClass}>
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <UserRound className="size-4" /> 기본 정보
@@ -321,7 +328,8 @@ export default async function MyPage() {
               </p>
             </CardContent>
 
-            <div className="mx-4 border-t border-slate-100" />
+            {/* 구분선 좌우 여백은 카드 안쪽 여백(--card-spacing 24px)과 같게 맞춘다. */}
+            <div className="mx-6 border-t border-slate-100" />
 
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
@@ -367,12 +375,13 @@ export default async function MyPage() {
           <div className="space-y-4">
             {/* C. 직업진단 */}
             {latestResult ? (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
-                <CardHeader>
+              <Card className={myPageCardClass}>
+                {/* 검사일은 제목의 부가 정보라 "전체보기"와 같은 자리(오른쪽 위)에 둔다. 본문 첫 줄을 차지하지 않게. */}
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <CardTitle className="text-body-2">최근 직업진단 결과</CardTitle>
+                  <span className="shrink-0 text-label-1 text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</span>
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                  <p className="text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</p>
                   {/*
                     결과 화면과 같은 두 트랙. 준비 트랙 총점에는 자격 미보유 감점이 섞여 있어 성향 적합도를 쓴다.
                     행은 회색 상자 없이 구분선으로만 가르고, 순위·트랙은 왼쪽 동그란 배지로 읽힌다.
@@ -454,7 +463,7 @@ export default async function MyPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
+              <Card className={myPageCardClass}>
                 <CardHeader>
                   <CardTitle className="text-body-2">직업진단</CardTitle>
                 </CardHeader>
@@ -468,7 +477,7 @@ export default async function MyPage() {
             )}
 
             {/* D-2. 이력서/자기소개서 (스펙 51번) */}
-            <Card className="rounded-xl border-0 ring-1 ring-border">
+            <Card className={myPageCardClass}>
               <CardHeader className="flex flex-row items-center justify-between gap-2">
                 <CardTitle className="flex items-center gap-1.5 text-body-2">
                   <FileText className="size-4" /> 이력서 · 자기소개서
@@ -552,7 +561,7 @@ export default async function MyPage() {
             <div className="space-y-4">
               {/* D. 채용공고 */}
               {jobData.recommended.length > 0 && (
-                <Card className="rounded-xl border-0 ring-1 ring-border">
+                <Card className={myPageCardClass}>
                   <CardHeader>
                     <CardTitle className="text-body-2">맞춤 일자리</CardTitle>
                   </CardHeader>
@@ -663,16 +672,18 @@ export default async function MyPage() {
           <div className="space-y-4">
             {/* E. 지원제도 */}
             {supportData.latestSessionId ? (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
-                <CardHeader>
+              <Card className={myPageCardClass}>
+                <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-1.5 text-body-2">
                     <Gift className="size-4" /> 지원금 진단 결과
                   </CardTitle>
+                  {supportData.latestCompletedAt && (
+                    <span className="shrink-0 text-label-1 text-slate-400">
+                      검사일 · {supportData.latestCompletedAt.slice(0, 10)}
+                    </span>
+                  )}
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                  {supportData.latestCompletedAt && (
-                    <p className="text-slate-400">검사일 · {supportData.latestCompletedAt.slice(0, 10)}</p>
-                  )}
                   {/* 검사일과 버튼만 있으면 무엇이 나왔는지 다시 들어가 봐야 안다. 직업진단처럼 상위 몇 건을 적는다. */}
                   {supportData.topMatches.length > 0 && (
                     <div>
@@ -697,7 +708,7 @@ export default async function MyPage() {
                 </CardContent>
               </Card>
             ) : (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
+              <Card className={myPageCardClass}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-1.5 text-body-2">
                     <Gift className="size-4" /> 지원금 찾기
@@ -757,7 +768,7 @@ export default async function MyPage() {
             </Card>
 
             {supportData.applyHistory.length > 0 && (
-              <Card className="rounded-xl border-0 ring-1 ring-border">
+              <Card className={myPageCardClass}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-1.5 text-body-2">
                     <Gift className="size-4" /> 신청 페이지로 이동한 지원제도
