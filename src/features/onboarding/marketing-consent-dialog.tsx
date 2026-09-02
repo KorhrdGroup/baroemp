@@ -54,11 +54,12 @@ export function MarketingConsentDialog() {
           </DialogDescription>
         </DialogHeader>
         {/* DialogFooter 의 회색 띠·윗선을 쓰지 않는다. 창 하나가 흰 판 하나로 읽히게. */}
-        <div className="flex flex-col gap-1.5">
+        <div className="flex flex-col gap-1">
           <Button size="lg" className="w-full bg-brand-blue-400 hover:bg-brand-blue-600" onClick={agree} disabled={pending}>
             {pending ? "저장 중..." : "네, 받아볼게요"}
           </Button>
-          <Button size="lg" variant="ghost" className="w-full text-slate-500" onClick={() => setOpen(false)} disabled={pending}>
+          {/* 보조 버튼은 주 버튼만큼 높을 이유가 없다. 위아래를 줄여 주 버튼에 붙인다. */}
+          <Button variant="ghost" className="h-10 w-full text-slate-500" onClick={() => setOpen(false)} disabled={pending}>
             나중에 할게요
           </Button>
         </div>
