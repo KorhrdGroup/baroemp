@@ -156,9 +156,18 @@ const myPageCardClass = "rounded-xl border-0 ring-1 ring-border [--card-spacing:
  * 내 정보 카드의 한 줄. "라벨 · 값"을 한 문장으로 붙이면 전부 같은 회색이라 무엇이 값인지
  * 눈에 안 잡혔다. 라벨은 옅게 고정폭으로, 값은 진하게 나머지 폭을 쓰게 갈라 표처럼 읽힌다.
  */
-function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
+function InfoRow({
+  label,
+  value,
+  wide = false,
+}: {
+  label: string;
+  value: React.ReactNode;
+  /** 값이 길거나 여러 개인 줄(보유 자격 등)은 넓은 화면에서도 한 줄을 다 쓴다. */
+  wide?: boolean;
+}) {
   return (
-    <div className="flex items-start gap-3">
+    <div className={cn("flex items-start gap-3", wide && "lg:col-span-2")}>
       <dt className="w-20 shrink-0 text-label-1 leading-6 text-slate-400">{label}</dt>
       <dd className="min-w-0 flex-1 break-keep text-label-1 leading-6 font-medium text-slate-800">{value}</dd>
     </div>
@@ -360,17 +369,44 @@ export default async function MyPage() {
   const nextReadyStep = readySteps.find((s) => !s.done);
 
   /* 카드 안 공고 한 줄. 여러 카드가 같은 모양을 써서 한 곳에 둔다. */
-  const jobRow = (job: Job) => (
+  /*
+    희망지역 공고가 모자라면 다른 지역 공고로 뒤를 채운다. 그대로 두면 집 근처인 줄 알고
+    들어가므로, 채워 온 줄에는 "희망지역 밖"이라고 적어 둔다.
+  */
+  const jobRow = (job: Job, outsideRegion = false) => (
     <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
       <span className="min-w-0">
         <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
-        <span className="mt-1 block truncate text-label-2 text-slate-400">
-          {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
+        <span className="mt-1 flex min-w-0 items-center gap-1.5 text-label-2 text-slate-400">
+          <span className="truncate">
+            {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
+          </span>
+          {outsideRegion && (
+            <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-label-2 font-semibold text-amber-700">
+              희망지역 밖
+            </span>
+          )}
         </span>
       </span>
       <ChevronRight className="size-4 shrink-0 text-slate-300" />
     </Link>
   );
+
+  /* 트랙 하나를 그린다. 희망지역 공고가 하나도 없으면 줄마다 붙이는 대신 한 줄로 알린다. */
+  const assessmentTrack = (track: { jobs: Job[]; outsideRegionJobIds?: string[] }) => {
+    const outside = new Set(track.outsideRegionJobIds ?? []);
+    const allOutside = track.jobs.length > 0 && track.jobs.every((j) => outside.has(j.id));
+    return (
+      <>
+        {allOutside && (
+          <p className="mb-1.5 break-keep text-label-2 text-amber-700">
+            희망지역 {labelRegion(careerProfile?.region)}에는 아직 이 직종 공고가 없어 다른 지역 공고를 보여드려요.
+          </p>
+        )}
+        <div>{track.jobs.map((job) => jobRow(job, !allOutside && outside.has(job.id)))}</div>
+      </>
+    );
+  };
 
   // 아래 여백(pb-32)은 떠 있는 절차 띠 높이만큼 더 준다. 마지막 카드가 띠에 가리지 않게.
   return (
@@ -406,14 +442,19 @@ export default async function MyPage() {
                 <h3 className="mb-3 flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
                   <UserRound className="size-4" /> 기본 정보
                 </h3>
-                <dl className="space-y-2.5">
+                {/* 넓은 화면에서는 두 항목씩 나란히 둔다. 한 줄에 하나면 값 오른쪽이 통째로 비었다. */}
+                <dl className="grid gap-x-6 gap-y-2.5 lg:grid-cols-2">
                   <InfoRow label="이름" value={profile.name ?? "-"} />
+                  <InfoRow label="휴대전화" value={formatPhone(profile.phone)} />
                   {/*
                     소셜 가입은 nv{id}@social.baroemp.app 식의 합성 주소라 회원이 알아볼 이메일이 아니다.
                     어느 계정으로 가입했는지를 적는다 (social-oauth.ts 의 접두어 규칙).
+
+                    이메일은 반 칸에 넣으면 주소가 가운데서 잘려 두 줄이 된다. 한 줄을 다 쓴다.
+                    자리도 셋째로 옮긴다 - 넷 중 하나가 한 줄을 다 쓰면 반 칸 하나가 남는데,
+                    이 순서라야 그 빈 자리가 맨 끝으로 간다.
                   */}
-                  <InfoRow label="이메일" value={labelAccountEmail(profile.email)} />
-                  <InfoRow label="휴대전화" value={formatPhone(profile.phone)} />
+                  <InfoRow wide label="이메일" value={labelAccountEmail(profile.email)} />
                   <InfoRow label="가입일" value={profile.createdAt.slice(0, 10)} />
                 </dl>
               </div>
@@ -432,7 +473,7 @@ export default async function MyPage() {
                     </Button>
                   </div>
                 ) : (
-                  <dl className="space-y-2.5">
+                  <dl className="grid gap-x-6 gap-y-2.5 lg:grid-cols-2">
                     <InfoRow label="취업상태" value={labelEmploymentStatus(careerProfile?.employmentStatus)} />
                     <InfoRow label="희망지역" value={labelRegion(careerProfile?.region)} />
                     <InfoRow
@@ -454,6 +495,7 @@ export default async function MyPage() {
                     <InfoRow label="취업시기" value={labelDesiredStartTiming(careerProfile?.desiredStartTiming)} />
                     <InfoRow label="교육의향" value={careerProfile?.isOpenToTraining ? "있음" : "-"} />
                     <InfoRow
+                      wide
                       label="보유 자격"
                       value={
                         heldQualificationNames.length > 0 ? (
@@ -751,7 +793,7 @@ export default async function MyPage() {
                       <p className="mb-1.5 text-label-1 font-semibold text-slate-500">
                         지금 바로 지원 · {assessmentJobs.ready.occupationName}
                       </p>
-                      <div>{assessmentJobs.ready.jobs.map(jobRow)}</div>
+                      {assessmentTrack(assessmentJobs.ready)}
                     </div>
                   )}
                   {assessmentJobs.preparation && (
@@ -765,7 +807,7 @@ export default async function MyPage() {
                           </span>
                         ) : null}
                       </p>
-                      <div>{assessmentJobs.preparation.jobs.map(jobRow)}</div>
+                      {assessmentTrack(assessmentJobs.preparation)}
                     </div>
                   )}
                 </CardContent>
