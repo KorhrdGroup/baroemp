@@ -726,15 +726,20 @@ export default async function MyPage() {
             길어서 왼쪽에 세로로 크게 두고, 오른쪽에 맞춤·찜을 위아래로 배치해 균형을 맞춘다.
             대신 진단이 없는 회원(맞춤·찜만) 은 자연스럽게 오른쪽 두 카드만 그리드에 남는다.
           */}
-          <div className={cn("grid gap-4 lg:items-start", assessmentJobs && (assessmentJobs.ready || assessmentJobs.preparation) ? "lg:grid-cols-2" : "")}>
+          <div className={cn("grid gap-4", assessmentJobs && (assessmentJobs.ready || assessmentJobs.preparation) ? "lg:grid-cols-2" : "")}>
             {/*
               왼쪽 열: 진단 기반 공고 (두 트랙이라 가장 김) - 오른쪽 열: 맞춤 일자리 + 찜한 일자리 (위아래).
               진단이 없는 회원은 왼쪽 wrapper 가 안 그려져 오른쪽 두 카드만 남는다. 좁은 화면에서는
               wrapper 두 개가 순서대로 세로로 쌓여 진단 → 맞춤 → 찜 순으로 자연스럽게 보인다.
             */}
             {(assessmentJobs?.ready || assessmentJobs?.preparation) && (
-              <div className="space-y-4">
-              <Card className={myPageCardClass}>
+              /*
+                두 열의 아래 끝을 맞춘다. 열마다 카드 수가 달라 그냥 두면 짧은 쪽 아래가 텅 빈 채
+                끝나 두 열이 어긋나 보였다. 열을 flex 로 세우고 마지막 카드가 남는 높이를 먹게 한다.
+                좁은 화면은 한 열로 쌓여 늘릴 높이가 없으므로 넓은 화면에서만 건다.
+              */
+              <div className="flex flex-col gap-4">
+              <Card className={cn(myPageCardClass, "lg:flex-1")}>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
                     <Compass className="size-4" /> 진단 기반 공고
@@ -768,7 +773,7 @@ export default async function MyPage() {
               </div>
             )}
 
-            <div className="space-y-4">
+            <div className="flex flex-col gap-4">
             {jobData.recommended.length > 0 && (
               <Card className={myPageCardClass}>
                 <CardHeader>
@@ -801,7 +806,7 @@ export default async function MyPage() {
             )}
 
             {/* 찜한 것이 없어도 카드를 둔다. 없으면 없다고 적고 찾으러 갈 길을 연다. 찜한 지원제도는 2단계 카드로 옮겼다. */}
-            <Card id="bookmarked-jobs" className={cn("scroll-mt-24", myPageCardClass)}>
+            <Card id="bookmarked-jobs" className={cn("scroll-mt-24 lg:flex-1", myPageCardClass)}>
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
                     <Star className="size-4" /> 찜한 일자리
