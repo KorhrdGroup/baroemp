@@ -20,17 +20,24 @@ export interface WithdrawState {
  *
  * 지우기 전에 탈퇴 사실만 한 줄 남긴다 - 이 기록도 회원 열이 비워진 채 통계로만 남는다.
  */
-export async function withdrawAction(): Promise<WithdrawState> {
+export async function withdrawAction(input?: { reason?: string; detail?: string }): Promise<WithdrawState> {
   const user = await requireSessionUser();
 
   const admin = createAdminSupabaseClient();
   if (!admin) return { error: "지금은 탈퇴를 처리할 수 없어요. 잠시 후 다시 시도해주세요." };
 
+  /*
+    떠나는 이유는 계정과 함께 사라지면 안 된다 - 무엇을 고쳐야 하는지가 여기서만 나온다.
+    활동 로그는 회원 열이 비워진 채(SET NULL) 남으므로, 누구인지는 지워지고 이유만 통계로 남는다.
+  */
   await logActivityEvent({
     userId: user.id,
     eventType: "account_withdrawn",
     entityType: "career_profile",
-    metadata: {},
+    metadata: {
+      ...(input?.reason ? { reason: input.reason } : {}),
+      ...(input?.detail ? { detail: input.detail.slice(0, 300) } : {}),
+    },
   }).catch(() => {});
 
   const { error } = await admin.auth.admin.deleteUser(user.id);
