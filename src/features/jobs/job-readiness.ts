@@ -21,18 +21,19 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
   const preferred = items.filter((i) => i.jobLevel === "PREFERRED");
 
   // 지원을 막는 것이 가장 먼저다.
-  // "○○ 필요"는 안 되는 이유로 읽히지만, "○○만 갖추면"은 다음 행동이 된다. 같은 사실을 가능성 쪽으로 말한다.
+  // 공고가 요구하는 사실을 그대로 적는다. "○○만 갖추면 지원 가능"은 전체 목록에서 회원이 아무것도 안 했는데
+  // 추천받은 것처럼 읽혔다. 가능성을 여는 말은 큐레이션 "자격 따면 열리는 공고" 탭이 맡는다.
   const missing = required.filter((i) => i.userStatus === "NOT_SATISFIED");
-  if (missing.length === 1) return { level: "near", label: `${missing[0].requirementName}만 갖추면 지원 가능` };
-  if (missing.length > 1) return { level: "gap", label: `자격 ${missing.length}개 갖추면 지원 가능` };
+  if (missing.length === 1) return { level: "near", label: `${missing[0].requirementName} 필수` };
+  if (missing.length > 1) return { level: "gap", label: `자격 ${missing.length}개 필수` };
 
   if (required.length > 0) {
     // 모름(UNKNOWN)은 부족으로 세지 않는다. 회원이 자격을 안 적었을 뿐인데
-    // "부족"을 붙이면 지원할 수 있는 자리를 단념시킨다.
+    // "부족"을 붙이면 지원할 수 있는 자리를 단념시킨다. 공고가 요구한다는 사실만 적는다.
     const met = required.find((i) => i.userStatus === "SATISFIED");
     return met
       ? { level: "satisfied", label: `${met.requirementName} 충족` }
-      : { level: "near", label: `${required[0].requirementName} 필요` };
+      : { level: "near", label: `${required[0].requirementName} 필수` };
   }
 
   // 필수가 없으면 우대를 알려준다. 예전에는 이 경우도 "자격 요건 없음"이라
@@ -57,7 +58,7 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
  * "운전 가능 우대 충족"). 갖췄다는 사실은 같으므로 색을 나누면
  * 초록이 두 가지가 되어 오히려 읽기 어렵다.
  *   파랑    있으면 유리      ○○ 우대
- *   주황    지원을 막음      ○○만 갖추면 지원 가능 · ○○ 필요
+ *   주황    지원을 막음      ○○ 필수 · 자격 N개 필수
  */
 export const READINESS_BADGE_CLASS: Record<JobReadinessLevel, string> = {
   // 무채색: 지원에 지장이 없다. 요건이 아예 없거나, 우대라 없어도 그만이다.

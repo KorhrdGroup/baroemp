@@ -14,7 +14,7 @@ import { searchJobs, type JobSearchParams } from "@/services/job-search.service"
 import { getRecommendedJobsFromAssessment } from "@/services/assessment-job.service";
 import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
-import { getOccupationRepository } from "@/lib/repositories";
+import { findCareerProfileByUserId, getOccupationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
 import { parseJobCategories, toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 
@@ -54,9 +54,18 @@ export default async function JobsPage({
 
   const anonymousId = (await cookies()).get("baro_anonymous_id")?.value;
 
+  /*
+    전체 목록은 회원 조건을 안 보고 7만 건을 그대로 늘어놓아, 서울 희망인 회원에게 안성·부산 공고가 첫 줄에 왔다.
+    지역을 고르지 않았으면 취업 프로필의 희망지역을 기본으로 건다. 회원이 "지역 전체"를 고르면
+    검색바가 region=all 을 실어 보내 기본값을 되살리지 않는다 (job-filters-form.buildParams).
+  */
+  const careerProfile = await findCareerProfileByUserId(user.id).catch(() => null);
+  const region: Region | undefined =
+    sp.region === "all" ? undefined : ((sp.region as Region | undefined) ?? careerProfile?.region);
+
   const filter: JobSearchParams = {
     keyword: sp.keyword,
-    region: sp.region as Region | undefined,
+    region,
     /* 여러 구를 고르면 쉼표로 이어 온다. 시·군·구 이름에는 쉼표가 없다. */
     regionSigungus: sp.sgg ? sp.sgg.split(",").filter(Boolean) : undefined,
     /* 직종은 여러 개를 쉼표로 이어 온다. 묶음 이름은 코드 앞자리로, 6자리 코드는 그대로 쓴다. */
@@ -132,7 +141,7 @@ export default async function JobsPage({
       <JobFiltersForm
         initial={{
           keyword: sp.keyword,
-          region: sp.region,
+          region,
           regionSigungus: sp.sgg ? sp.sgg.split(",").filter(Boolean) : undefined,
           jobCategories: parseJobCategories(sp.category),
           isBeginnerFriendly: sp.beginner === "1",
@@ -140,6 +149,7 @@ export default async function JobsPage({
           sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
         }}
         jobCategoryLabel={jobCategoryLabel}
+        profileRegion={careerProfile?.region}
         summary={
           <p className="text-body-2 text-slate-500">
             총 <span className="font-bold text-brand-blue-600">{result.total.toLocaleString()}건</span>

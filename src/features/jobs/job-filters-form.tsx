@@ -47,6 +47,7 @@ export function JobFiltersForm({
   children,
   summary,
   jobCategoryLabel,
+  profileRegion,
 }: {
   initial: JobFiltersValue;
   /** 결과 건수처럼 토글 줄 왼쪽에 함께 놓을 요약 문구. */
@@ -57,6 +58,12 @@ export function JobFiltersForm({
    * 버튼에 "직종"만 떠 무엇으로 좁혀졌는지 알 수 없었다.
    */
   jobCategoryLabel?: string;
+  /**
+   * 취업 프로필의 희망지역. 서버(/jobs)가 지역을 안 고른 회원에게 이 값을 기본 필터로 건다.
+   * 그래서 회원이 "지역 전체"를 고를 때는 region 을 비우는 대신 region=all 을 실어야
+   * 서버가 기본값을 다시 걸지 않는다.
+   */
+  profileRegion?: string;
   /**
    * 검색바 위에 들어갈 내용(큐레이션 섹션 등).
    * 검색바는 아래 목록을 좁히는 도구라 목록에 붙어 있어야 하고, 둘러보라고 권하는 띠는
@@ -112,6 +119,7 @@ export function JobFiltersForm({
     const params = new URLSearchParams();
     if (next.keyword) params.set("keyword", next.keyword);
     if (next.region) params.set("region", next.region);
+    else if (profileRegion) params.set("region", "all");
     if (next.regionSigungus?.length) params.set("sgg", next.regionSigungus.join(","));
     if (next.jobCategories?.length) params.set("category", next.jobCategories.join(","));
     if (next.isBeginnerFriendly) params.set("beginner", "1");
