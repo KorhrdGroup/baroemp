@@ -204,7 +204,9 @@ function socialAccountEmail(profile: SocialProfile): string {
  * 소셜 프로필로 회원을 확보하고 현재 요청에 세션 쿠키를 발급한다.
  * @returns isNewUser - 이번에 새로 가입된 회원인지 (온보딩 이동 판단용)
  */
-export async function signInWithSocialProfile(profile: SocialProfile): Promise<{ isNewUser: boolean } | null> {
+export async function signInWithSocialProfile(
+  profile: SocialProfile,
+): Promise<{ isNewUser: boolean; needsOnboarding: boolean } | null> {
   const admin = createAdminSupabaseClient();
   const supabase = await createServerSupabaseClient();
   if (!admin || !supabase) return null;
@@ -269,5 +271,17 @@ export async function signInWithSocialProfile(profile: SocialProfile): Promise<{
     metadata: { socialProvider: profile.provider, hasPhone: Boolean(profile.phone) },
   });
 
-  return { isNewUser };
+  /*
+    온보딩은 "이번에 가입했는가"가 아니라 "취업 정보가 비어 있는가"로 정한다.
+    auth 계정만 남고 프로필·취업정보가 지워진 회원(테스트 정리 등)이 다시 로그인하면
+    isNewUser=false 라 온보딩을 건너뛰고 빈 마이페이지로 떨어졌다.
+  */
+  const { data: career } = await admin
+    .from("career_profiles")
+    .select("region, employment_status")
+    .eq("user_id", userId)
+    .maybeSingle();
+  const needsOnboarding = isNewUser || !career || (!career.region && !career.employment_status);
+
+  return { isNewUser, needsOnboarding };
 }
