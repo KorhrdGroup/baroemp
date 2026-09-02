@@ -17,7 +17,7 @@ import { signInAction, type AuthFormState } from "./auth-actions";
 
 const initialState: AuthFormState = {};
 
-export function LoginView({ next }: { next: string }) {
+export function LoginView({ next, notice }: { next: string; notice?: string | null }) {
   const [state, formAction, pending] = useActionState(signInAction, initialState);
   const [id, setId] = React.useState("");
   const [pw, setPw] = React.useState("");
@@ -41,6 +41,8 @@ export function LoginView({ next }: { next: string }) {
       <form action={formAction}>
         <input type="hidden" name="next" value={next} />
         {state.error ? <HelpText tone="error">{state.error}</HelpText> : null}
+        {/* 소셜 로그인에서 돌아온 이유. 폼 오류가 있으면 그쪽이 더 최근이라 그것만 보여준다. */}
+        {!state.error && notice ? <HelpText tone="error">{notice}</HelpText> : null}
 
         <Label htmlFor="login-id">아이디 (이메일)</Label>
         <Input
