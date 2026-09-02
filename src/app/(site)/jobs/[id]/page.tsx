@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { getJobApplicationRepository, getJobRepository } from "@/lib/repositories";
+import { findCareerProfileByUserId, getJobApplicationRepository, getJobRepository } from "@/lib/repositories";
+import { hasMatchSignal, toJobMatchSignal } from "@/lib/jobs/job-match-signal";
 import { getAnonymousCareerSignal } from "@/services/job-search.service";
 import { evaluateJobFit } from "@/services/job-match.service";
 import { findContentForMissingQualifications } from "@/services/job-content-recommendation.service";
@@ -28,10 +29,15 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
   if (!job) notFound();
 
   const anonymousId = (await cookies()).get("baro_anonymous_id")?.value;
-  const [profileSignal, currentUser] = await Promise.all([
-    getAnonymousCareerSignal(anonymousId),
-    getCurrentUser(),
-  ]);
+  const [anonymousSignal, currentUser] = await Promise.all([getAnonymousCareerSignal(anonymousId), getCurrentUser()]);
+  /*
+    로그인 회원은 취업 프로필(온보딩·진단으로 채운 값)로 비교한다. 전에는 비회원용 익명 진단 신호만 봐서,
+    진단을 마친 회원에게도 "직업진단을 받으면 비교해볼 수 있어요"가 떴다.
+    프로필 행은 있어도 값이 비어 있으면(온보딩 건너뜀) 신호 없음으로 치고 익명 신호로 물러난다.
+  */
+  const memberProfile = currentUser ? ((await findCareerProfileByUserId(currentUser.id)) ?? undefined) : undefined;
+  const profileSignal =
+    memberProfile && hasMatchSignal(toJobMatchSignal(memberProfile)) ? memberProfile : anonymousSignal;
   const match = evaluateJobFit(profileSignal, job);
   const [isBookmarked, requirementComparison, applications] = await Promise.all([
     currentUser ? isJobBookmarkedAction(job.id) : Promise.resolve(false),
