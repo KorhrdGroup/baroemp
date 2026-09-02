@@ -7,13 +7,7 @@ import { guessRegionFromText, labelOrganization, REGION_LABELS } from "@/lib/lab
 import { resolveOrganizationLogo } from "@/lib/support/organization-logo";
 import type { MatchReasonDetail, SupportEligibilityGrade, SupportProgram } from "@/types";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
-
-const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
-  HIGH: "bg-emerald-50 text-emerald-700",
-  MEDIUM: "bg-brand-blue-50 text-brand-blue-700",
-  CHECK_REQUIRED: "bg-orange-50 text-orange-700",
-  LOW: "bg-slate-100 text-slate-500",
-};
+import { GRADE_BADGE_CLASS } from "./grade-badge";
 
 /**
  * 아랫줄에 적을 지역. 새로 알려주는 것이 없으면 비운다.

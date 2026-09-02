@@ -32,6 +32,7 @@ import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-sea
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
+import { GRADE_BADGE_CLASS } from "@/features/support/grade-badge";
 import { getUserCrmDetail } from "@/services/user-crm.service";
 import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
@@ -155,8 +156,8 @@ const myPageCardClass = "rounded-xl border-0 ring-1 ring-border [--card-spacing:
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3">
-      <dt className="w-20 shrink-0 text-label-1 text-slate-400">{label}</dt>
-      <dd className="min-w-0 flex-1 break-keep text-label-1 font-medium text-slate-800">{value}</dd>
+      <dt className="w-20 shrink-0 text-label-1 leading-6 text-slate-400">{label}</dt>
+      <dd className="min-w-0 flex-1 break-keep text-label-1 leading-6 font-medium text-slate-800">{value}</dd>
     </div>
   );
 }
@@ -321,8 +322,11 @@ export default async function MyPage() {
               <Link href="/mypage/profile">정보 수정</Link>
             </Button>
           </div>
-          {/* 기본 정보와 취업 프로필은 모두 "나"에 대한 내용이라 한 카드에 담고 구분선으로만 가른다. */}
-          <Card className={myPageCardClass}>
+          {/*
+            기본 정보와 취업 프로필은 모두 "나"에 대한 내용이라 한 카드에 담고 구분선으로만 가른다.
+            제목과 표 사이는 카드 기본 간격(24px)이 너무 벌어져 보여 12px 로 붙인다.
+          */}
+          <Card className={cn(myPageCardClass, "gap-3")}>
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
                 <UserRound className="size-4" /> 기본 정보
@@ -337,8 +341,8 @@ export default async function MyPage() {
               </dl>
             </CardContent>
 
-            {/* 구분선 좌우 여백은 카드 안쪽 여백(--card-spacing 24px)과 같게 맞춘다. */}
-            <div className="mx-6 border-t border-slate-100" />
+            {/* 구분선 좌우 여백은 카드 안쪽 여백(--card-spacing 24px)과 같게 맞추고, 위아래는 두 묶음이 붙지 않게 벌린다. */}
+            <div className="mx-6 my-2 border-t border-slate-100" />
 
             <CardHeader>
               <CardTitle className="flex items-center gap-1.5 text-body-2">
@@ -719,8 +723,14 @@ export default async function MyPage() {
                         <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
                           <span className="truncate text-body-2 font-semibold text-slate-800">{program.title}</span>
                           <span className="flex shrink-0 items-center gap-2">
+                            {/* 지원금 목록 카드와 같은 등급 색을 쓴다 - 여기서만 회색이면 다른 등급처럼 읽힌다. */}
                             {grade && (
-                              <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
+                              <Badge
+                                className={cn(
+                                  "rounded-full border-0 text-label-2 font-semibold",
+                                  GRADE_BADGE_CLASS[grade as SupportEligibilityGrade] ?? "bg-slate-100 text-slate-500",
+                                )}
+                              >
                                 {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade as SupportEligibilityGrade] ?? grade}
                               </Badge>
                             )}

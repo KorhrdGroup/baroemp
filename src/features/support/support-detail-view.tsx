@@ -25,12 +25,7 @@ import { SupportViewTracker } from "./support-view-tracker";
 import { SupportLongText } from "./support-long-text";
 import { BackButton } from "@/components/common/back-button";
 
-const GRADE_BADGE_CLASS: Record<SupportEligibilityGrade, string> = {
-  HIGH: "bg-emerald-50 text-emerald-700",
-  MEDIUM: "bg-brand-blue-50 text-brand-blue-700",
-  CHECK_REQUIRED: "bg-orange-50 text-orange-700",
-  LOW: "bg-slate-100 text-slate-500",
-};
+import { GRADE_BADGE_CLASS } from "./grade-badge";
 
 function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value?: string }) {
   if (!value) return null;
