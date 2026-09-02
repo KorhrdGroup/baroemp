@@ -85,32 +85,37 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
             const isNext = next?.id === s.id;
             const isActive = activeId === s.anchor;
             return (
-              <li key={s.id} className="flex min-w-0 items-center gap-2">
+              <li key={s.id} className="flex min-w-0 items-center">
+                {/* 원만 누르게 두면 글자를 눌렀을 때 아무 일도 없다. 원과 제목을 한 링크로 묶는다. */}
                 <Link
                   href={s.anchor}
                   tabIndex={visible ? 0 : -1}
                   aria-label={`${s.step}단계 ${s.title}${s.done ? " (완료)" : isNext ? " (다음 할 일)" : ""}`}
-                  className={cn(
-                    "flex size-9 shrink-0 items-center justify-center rounded-full text-label-1 font-bold leading-none transition-colors sm:size-10",
-                    s.done
-                      ? "bg-brand-blue-400 text-white"
-                      : isNext
-                        ? "bg-brand-blue-50 text-brand-blue-600 ring-2 ring-brand-blue-400"
-                        : "bg-slate-100 text-slate-500",
-                    isActive && "ring-2 ring-offset-2 ring-brand-blue-600",
-                  )}
+                  className="group flex min-w-0 items-center gap-2 rounded-full pr-1 transition-colors hover:bg-slate-50"
                 >
-                  {s.done ? <Check className="size-4 sm:size-5" /> : s.step}
+                  <span
+                    className={cn(
+                      "flex size-9 shrink-0 items-center justify-center rounded-full text-label-1 font-bold leading-none transition-colors sm:size-10",
+                      s.done
+                        ? "bg-brand-blue-400 text-white"
+                        : isNext
+                          ? "bg-brand-blue-50 text-brand-blue-600 ring-2 ring-brand-blue-400"
+                          : "bg-slate-100 text-slate-500",
+                      isActive && "ring-2 ring-offset-2 ring-brand-blue-600",
+                    )}
+                  >
+                    {s.done ? <Check className="size-4 sm:size-5" /> : s.step}
+                  </span>
+                  {/* 좁은 화면에서는 원만 남긴다. 제목 다섯 개까지 넣으면 버튼이 밀려난다. */}
+                  <span
+                    className={cn(
+                      "hidden truncate text-label-1 font-semibold group-hover:text-slate-900 md:inline",
+                      s.done || isNext || isActive ? "text-slate-800" : "text-slate-500",
+                    )}
+                  >
+                    {s.title}
+                  </span>
                 </Link>
-                {/* 좁은 화면에서는 원만 남긴다. 제목 다섯 개까지 넣으면 버튼이 밀려난다. */}
-                <span
-                  className={cn(
-                    "hidden truncate text-label-1 font-semibold md:inline",
-                    s.done || isNext || isActive ? "text-slate-800" : "text-slate-500",
-                  )}
-                >
-                  {s.title}
-                </span>
               </li>
             );
           })}

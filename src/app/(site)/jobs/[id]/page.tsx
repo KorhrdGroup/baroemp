@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { cookies } from "next/headers";
-import { getJobRepository } from "@/lib/repositories";
+import { getJobApplicationRepository, getJobRepository } from "@/lib/repositories";
 import { getAnonymousCareerSignal } from "@/services/job-search.service";
 import { evaluateJobFit } from "@/services/job-match.service";
 import { findContentForMissingQualifications } from "@/services/job-content-recommendation.service";
@@ -33,8 +33,13 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
     getCurrentUser(),
   ]);
   const match = evaluateJobFit(profileSignal, job);
-  const isBookmarked = currentUser ? await isJobBookmarkedAction(job.id) : false;
-  const requirementComparison = currentUser ? await compareUserToJobRequirements(currentUser.id, job) : [];
+  const [isBookmarked, requirementComparison, applications] = await Promise.all([
+    currentUser ? isJobBookmarkedAction(job.id) : Promise.resolve(false),
+    currentUser ? compareUserToJobRequirements(currentUser.id, job) : Promise.resolve([]),
+    // 회원이 이 공고에 "지원했어요"를 표시했는지. 마이페이지 5단계의 근거가 된다.
+    currentUser ? getJobApplicationRepository().findAllByUser(currentUser.id).catch(() => []) : Promise.resolve([]),
+  ]);
+  const applicationStatus = applications.find((a) => a.jobId === job.id)?.status ?? null;
 
   const heldQualifications = new Set(profileSignal?.heldQualifications ?? []);
   const missingQualCodes = job.preferredQualifications.filter((code) => !heldQualifications.has(code));
@@ -49,6 +54,7 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       isAuthenticated={Boolean(currentUser)}
       isBookmarked={isBookmarked}
       requirementComparison={requirementComparison}
+      applicationStatus={applicationStatus}
     />
   );
 }

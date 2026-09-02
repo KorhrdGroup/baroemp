@@ -5,7 +5,6 @@ import {
   Briefcase,
   ChevronRight,
   Compass,
-  ExternalLink,
   FileText,
   Gift,
   KeyRound,
@@ -31,7 +30,6 @@ import { activityEventLogger } from "@/lib/activity/event-logger";
 import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-search.service";
 import { getRecommendedJobsFromAssessment } from "@/services/assessment-job.service";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
-import { JobApplicationStatusControl } from "@/features/jobs/job-application-status-control";
 import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { GRADE_BADGE_CLASS } from "@/features/support/grade-badge";
@@ -40,7 +38,7 @@ import { getMyPageDetail } from "@/services/user-crm.service";
 import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
-import { JOB_APPLICATION_STATUS_LABELS, SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
+import { SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 import type { Job, JobApplication, MatchResult, SupportEligibilityGrade, SupportProgram } from "@/types";
 
 interface MyPageJobData {
@@ -274,34 +272,17 @@ export default async function MyPage() {
   const coverLetterCount = detail.resumeSummary.coverLetterCount;
 
   /*
-    5단계 "지원하기" 줄: 지원 페이지로 이동한 공고 + 회원이 직접 표시한 공고를 합친다.
-    "이동"은 우리가 아는 것, "지원했어요"는 회원이 알려준 것이다. 완료 판정은 후자만 쓴다 -
-    외부 사이트에서 실제로 지원했는지는 우리가 확인할 수 없다.
+    5단계 "지원하기"의 근거는 회원이 공고 상세에서 직접 표시한 값(job_applications)뿐이다.
+    "지원 페이지로 이동" 기록은 여기 늘어놓지 않는다 - 공고 목록이 또 하나 생겨 화면이 무거워졌다.
   */
-  const applicationByJob = new Map(applications.map((a) => [a.jobId, a]));
-  const movedJobs = new Map<string, { job: Job; occurredAt: string }>();
-  for (const row of jobData.applyHistory) if (!movedJobs.has(row.job.id)) movedJobs.set(row.job.id, row);
-  const reportedOnlyJobs = (
-    await Promise.all(
-      applications
-        .filter((a) => !movedJobs.has(a.jobId))
-        .map((a) => getJobRepository().findById(a.jobId).catch(() => null)),
-    )
-  ).filter((j): j is Job => Boolean(j));
-  const applyRows = [
-    ...[...movedJobs.values()].map(({ job, occurredAt }) => ({ job, at: applicationByJob.get(job.id)?.reportedAt ?? occurredAt })),
-    ...reportedOnlyJobs.map((job) => ({ job, at: applicationByJob.get(job.id)!.reportedAt })),
-  ].sort((a, b) => (a.at < b.at ? 1 : -1));
-
   const hiredCount = applications.filter((a) => a.status === "hired").length;
   const interviewCount = applications.filter((a) => a.status === "interview" || a.status === "hired").length;
   const hasApplied = applications.length > 0;
-  const applyDetail = hiredCount > 0
-    ? "취업 성공"
-    : hasApplied
-      ? `지원 ${applications.length}건${interviewCount > 0 ? ` · 면접 ${interviewCount}` : ""}`
-      : movedJobs.size > 0
-        ? `이동 ${movedJobs.size}건 · 표시 전`
+  const applyDetail =
+    hiredCount > 0
+      ? "취업 성공"
+      : hasApplied
+        ? `지원 ${applications.length}건${interviewCount > 0 ? ` · 면접 ${interviewCount}` : ""}`
         : "아직 지원 전";
 
   /*
@@ -362,17 +343,16 @@ export default async function MyPage() {
       title: "지원하기",
       detail: applyDetail,
       done: hasApplied,
-      /* 이동한 공고가 있으면 "지원했어요"를 표시하러 5단계 카드로, 없으면 공고를 찾으러. */
-      href: movedJobs.size > 0 ? "#step-apply" : jobData.bookmarkCount > 0 ? "/mypage/bookmarks#jobs" : "/jobs",
-      actionLabel: movedJobs.size > 0 ? "지원 여부 표시하기" : jobData.bookmarkCount > 0 ? "찜한 공고에 지원하기" : "공고에 지원하기",
-      todoMessage:
-        movedJobs.size > 0
-          ? "지원 페이지로 이동한 공고가 있어요. 지원하셨다면 표시해 주세요."
-          : "준비가 끝났어요. 마음에 든 공고부터 지원해 보세요.",
+      href: jobData.bookmarkCount > 0 ? "/mypage/bookmarks#jobs" : "/jobs",
+      actionLabel: jobData.bookmarkCount > 0 ? "찜한 공고에 지원하기" : "공고에 지원하기",
+      todoMessage: "준비가 끝났어요. 마음에 든 공고부터 지원해 보세요. 지원한 뒤에는 공고 화면에서 표시해 주세요.",
       anchor: "#step-apply",
     },
   ];
   const stepDone = Object.fromEntries(steps.map((s) => [s.id, s.done]));
+  const readySteps = steps.slice(0, 4);
+  const allReady = readySteps.every((s) => s.done);
+  const nextReadyStep = readySteps.find((s) => !s.done);
 
   /* 카드 안 공고 한 줄. 여러 카드가 같은 모양을 써서 한 곳에 둔다. */
   const jobRow = (job: Job) => (
@@ -917,90 +897,58 @@ export default async function MyPage() {
           </Card>
         </section>
 
-        {/* ⑤ 지원하기 */}
+        {/* ⑤ 지원하기 - 공고 목록을 또 늘어놓지 않는다. 준비가 끝났는지와 응원 한마디, 갈 곳 하나면 된다. */}
         <section id="step-apply" className="scroll-mt-24">
           <StepHeading step={5} title="지원하기" done={stepDone.apply} />
           <Card className={myPageCardClass}>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
-                <Briefcase className="size-4" /> 지원한 공고
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-label-1 text-slate-600">
-              {/*
-                지원은 워크넷 같은 외부 사이트에서 이뤄져 우리는 "지원 페이지로 이동"까지만 안다.
-                그래서 회원이 직접 표시한다. 표시한 값이 곧 5단계 완료이고, 관리자도 이 값을 "회원이 알려준 것"으로 본다.
-              */}
-              <p className="text-label-2 text-slate-400">
-                지원 페이지로 이동한 공고예요. 지원하셨다면 <strong className="font-semibold text-slate-600">지원했어요</strong>를 눌러
-                표시해 주세요. 면접·취업까지 이어지면 단계를 올려 주세요.
-              </p>
-              {applyRows.length === 0 ? (
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="break-keep">
-                    아직 지원한 곳이 없어요.{" "}
-                    {jobData.bookmarkCount > 0 ? "찜해 둔 공고부터 지원해 보세요." : "마음에 드는 공고를 찾아 지원해 보세요."}
-                  </p>
-                  <Button variant="outline" className="shrink-0 text-brand-blue-600 hover:bg-brand-blue-50" asChild>
-                    <Link href={jobData.bookmarkCount > 0 ? "/mypage/bookmarks#jobs" : "/jobs"}>
-                      {jobData.bookmarkCount > 0 ? "찜한 공고 보기" : "공고 찾아보기"}
-                    </Link>
-                  </Button>
-                </div>
+            <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="min-w-0 space-y-1">
+                {hiredCount > 0 ? (
+                  <>
+                    <p className="text-body-1 font-bold text-slate-900">취업을 축하드려요! 🎉</p>
+                    <p className="break-keep text-label-1 text-slate-600">
+                      새로운 시작을 응원합니다. 다음 기회를 위해 공고는 계속 둘러보실 수 있어요.
+                    </p>
+                  </>
+                ) : hasApplied ? (
+                  <>
+                    <p className="text-body-1 font-bold text-slate-900">지원하셨군요, 좋은 소식을 기다릴게요.</p>
+                    <p className="break-keep text-label-1 text-slate-600">
+                      {applyDetail}. 면접이나 합격 소식이 있으면 공고 화면에서 단계를 올려 주세요.
+                    </p>
+                  </>
+                ) : allReady ? (
+                  <>
+                    <p className="text-body-1 font-bold text-slate-900">준비가 끝났어요. 이제 지원할 차례예요!</p>
+                    <p className="break-keep text-label-1 text-slate-600">
+                      마음에 드는 공고에 지원해 보세요. 지원한 뒤 공고 화면에서 <strong className="font-semibold text-slate-700">지원했어요</strong>를
+                      누르면 여기에 기록돼요. 한평생 바로취업이 응원합니다.
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-body-1 font-bold text-slate-900">1~4단계를 마치면 지원할 준비가 끝나요.</p>
+                    <p className="break-keep text-label-1 text-slate-600">
+                      지금은 {nextReadyStep?.step}단계 {nextReadyStep?.title}부터 이어가 보세요. 차근차근 하면 돼요.
+                    </p>
+                  </>
+                )}
+              </div>
+              {allReady || hasApplied ? (
+                <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                  <Link href={jobData.bookmarkCount > 0 ? "/mypage/bookmarks#jobs" : "/jobs"}>
+                    {jobData.bookmarkCount > 0 ? "찜한 공고 보기" : "공고 찾아보기"}
+                  </Link>
+                </Button>
               ) : (
-                <div>
-                  {applyRows.map(({ job, at }) => {
-                    const application = applicationByJob.get(job.id);
-                    return (
-                      <div
-                        key={job.id}
-                        className="-mx-2 flex flex-col gap-2 border-b border-slate-100 px-2 py-3 last:border-b-0 sm:flex-row sm:items-center sm:justify-between sm:gap-3"
-                      >
-                        <Link href={`/jobs/${job.id}`} className="min-w-0 hover:underline">
-                          <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
-                          <span className="mt-1 block truncate text-label-2 text-slate-400">
-                            {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")} ·{" "}
-                            {application
-                              ? `${JOB_APPLICATION_STATUS_LABELS[application.status]} 표시 ${at.slice(0, 10)}`
-                              : `지원 페이지 이동 ${at.slice(0, 10)}`}
-                          </span>
-                        </Link>
-                        <JobApplicationStatusControl jobId={job.id} status={application?.status ?? null} />
-                      </div>
-                    );
-                  })}
-                </div>
+                nextReadyStep && (
+                  <Button variant="outline" className="shrink-0 text-brand-blue-600 hover:bg-brand-blue-50" asChild>
+                    <Link href={nextReadyStep.anchor}>{nextReadyStep.step}단계로 가기</Link>
+                  </Button>
+                )
               )}
             </CardContent>
           </Card>
-
-          {supportData.applyHistory.length > 0 && (
-            <Card className={cn("mt-4", myPageCardClass)}>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
-                  <Gift className="size-4" /> 신청 페이지로 이동한 지원제도
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-label-1 text-slate-600">
-                <p className="mb-2 text-label-2 text-slate-400">
-                  신청 페이지로 이동한 이력입니다. 실제 신청 완료 여부는 운영기관에서 확인해주세요.
-                </p>
-                <div>
-                  {supportData.applyHistory.map(({ program, occurredAt }) => (
-                    <Link key={`${program.id}-${occurredAt}`} href={`/support/${program.id}`} className={listRowClass}>
-                      <span className="flex min-w-0 items-center gap-3">
-                        <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-                          <ExternalLink className="size-3.5" />
-                        </span>
-                        <span className="truncate text-body-2 font-semibold text-slate-800">{program.title}</span>
-                      </span>
-                      <span className="shrink-0 text-label-2 text-slate-400">{occurredAt.slice(0, 10)}</span>
-                    </Link>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </section>
       </div>
     </div>
