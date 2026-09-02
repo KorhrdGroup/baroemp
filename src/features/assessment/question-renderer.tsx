@@ -16,6 +16,19 @@ export type AnswerValue =
 
 const REGION_OPTIONS = Object.entries(REGION_LABELS);
 
+/**
+ * "1(부담스럽다) ~ 5(자신있다)" 같은 척도 설명에서 양끝 라벨을 뽑는다.
+ * 이 라벨이 있으면 문항 설명은 감추고, 척도 하단에 이모지와 함께 라벨을 노출한다.
+ * 형식이 안 맞으면 null - 이 경우 기존 "1점/5점" 표기가 그대로 나온다.
+ */
+const SCALE_LABEL_PATTERN = /^\s*\d+\s*\(([^)]+)\)\s*[~\-–]\s*\d+\s*\(([^)]+)\)\s*$/;
+export function parseScaleEndpointLabels(description?: string | null): { min: string; max: string } | null {
+  if (!description) return null;
+  const match = description.match(SCALE_LABEL_PATTERN);
+  if (!match) return null;
+  return { min: match[1].trim(), max: match[2].trim() };
+}
+
 interface QuestionRendererProps {
   question: AssessmentQuestion;
   value: AnswerValue;
@@ -106,6 +119,11 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
     const max = question.maxScale ?? 5;
     const current = value.type === "SCALE" ? value.value : undefined;
     const scaleValues = Array.from({ length: max - min + 1 }, (_, i) => min + i);
+    /*
+      문항 설명(description)이 "1(부담스럽다) ~ 5(자신있다)" 형식이면 그 라벨을 여기로 옮긴다.
+      위쪽 서브텍스트는 wizard에서 숨겨, 같은 정보가 두 번 나오지 않게 한다.
+    */
+    const endpointLabels = parseScaleEndpointLabels(question.description);
     return (
       <div>
         <div className="grid grid-cols-5 gap-2 sm:gap-3">
@@ -129,13 +147,13 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
           })}
         </div>
         {/* 그림문자는 방향(부정→긍정)을 눈으로 잡아주는 장식이라 읽어주지 않는다. */}
-        <div className="mt-2 flex items-center justify-between text-label-1 text-slate-400">
-          <span className="flex items-center gap-1.5">
+        <div className="mt-2 flex items-start justify-between gap-3 text-label-1 text-slate-500">
+          <span className="flex items-center gap-1.5 break-keep">
             <span aria-hidden className="text-title-3 leading-none">😓</span>
-            {min}점
+            {endpointLabels?.min ?? `${min}점`}
           </span>
-          <span className="flex items-center gap-1.5">
-            {max}점
+          <span className="flex items-center gap-1.5 break-keep text-right">
+            {endpointLabels?.max ?? `${max}점`}
             <span aria-hidden className="text-title-3 leading-none">😄</span>
           </span>
         </div>

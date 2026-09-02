@@ -15,6 +15,7 @@ import {
   QuestionRenderer,
   createEmptyAnswerValue,
   isAnswerValueFilled,
+  parseScaleEndpointLabels,
   type AnswerValue,
 } from "./question-renderer";
 
@@ -235,7 +236,11 @@ export function AssessmentWizard({
             <span className="ml-2 text-label-1 font-normal text-slate-400">(선택)</span>
           )}
         </h2>
-        {question.description && (
+        {/*
+          척도 문항의 "1(부담스럽다) ~ 5(자신있다)" 설명은 척도 하단 라벨로 옮겼으므로 여기서는 감춘다.
+          그 외 문항 설명은 그대로 문항 아래에 남긴다.
+        */}
+        {question.description && !parseScaleEndpointLabels(question.description) && (
           <p className="mt-3 text-center text-body-2-reading text-slate-500">{question.description}</p>
         )}
 
