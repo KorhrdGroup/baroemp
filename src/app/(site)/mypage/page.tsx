@@ -615,7 +615,7 @@ export default async function MyPage() {
                 찜한 것이 없다고 카드를 통째로 감추면, 맨 위 요약에서 "찜한 공고 0"을 보고
                 내려온 사람이 그 자리에서 아무것도 못 찾는다. 없으면 없다고 적어준다.
               */}
-              <Card id="bookmarked-jobs" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
+              <Card id="bookmarked-jobs" className={cn("scroll-mt-24", myPageCardClass)}>
                 <CardHeader className="flex flex-row items-center justify-between gap-2">
                   <CardTitle className="flex items-center gap-1.5 text-body-2">
                     <Star className="size-4" /> 찜한 일자리
@@ -666,7 +666,7 @@ export default async function MyPage() {
               </Card>
 
               {jobData.applyHistory.length > 0 && (
-                <Card id="apply-history" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
+                <Card id="apply-history" className={cn("scroll-mt-24", myPageCardClass)}>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-1.5 text-body-2">
                       <Briefcase className="size-4" /> 지원 페이지로 이동한 일자리
@@ -751,7 +751,7 @@ export default async function MyPage() {
               </Card>
             )}
 
-            <Card id="bookmarked-support" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
+            <Card id="bookmarked-support" className={cn("scroll-mt-24", myPageCardClass)}>
               <CardHeader className="flex flex-row items-center justify-between gap-2">
                 <CardTitle className="flex items-center gap-1.5 text-body-2">
                   <Star className="size-4" /> 찜한 지원제도
