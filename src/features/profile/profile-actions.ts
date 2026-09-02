@@ -43,7 +43,11 @@ export async function updateProfileAction(
   const desiredWorkTypes = formData.getAll("desiredWorkTypes").map(String).filter(Boolean) as WorkType[];
   const isOpenToTraining = formData.get("isOpenToTraining") === "on";
   const heldQualifications = formData.getAll("heldQualifications").map(String).filter(Boolean);
-  const marketingConsent = formData.get("marketingConsent") === "on";
+  /*
+    알림톡 수신 동의는 마이페이지의 공고 알림 카드가 대신 다룬다. 이 폼에는 그 칸이 없다.
+    칸이 없는 것을 "해제"로 읽으면 프로필을 저장할 때마다 동의가 꺼지므로, 들어온 경우에만 반영한다.
+  */
+  const marketingConsentRaw = formData.get("marketingConsent");
 
   const fieldErrors: Record<string, string> = {};
   if (!name || name.length < 2) fieldErrors.name = "이름을 2자 이상 입력해주세요.";
@@ -53,7 +57,7 @@ export async function updateProfileAction(
   const phone = normalizePhone(phoneRaw);
 
   await getProfileRepository().update(user.id, { name, phone });
-  await applyMarketingConsent(user.id, marketingConsent);
+  if (marketingConsentRaw !== null) await applyMarketingConsent(user.id, marketingConsentRaw === "on");
 
   const existing = await findCareerProfileByUserId(user.id);
   const careerPatch = {
