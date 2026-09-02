@@ -497,20 +497,8 @@ export default async function MyPage() {
                     <InfoRow
                       wide
                       label="보유 자격"
-                      value={
-                        heldQualificationNames.length > 0 ? (
-                          /* 자격은 여러 개라 쉼표로 이으면 한 덩어리로 읽힌다. 칩으로 갈라 세어지게 한다. */
-                          <span className="flex flex-wrap gap-1.5">
-                            {heldQualificationNames.map((name) => (
-                              <span key={name} className="rounded-full bg-slate-100 px-3 py-1 text-label-1 font-medium text-slate-700">
-                                {name}
-                              </span>
-                            ))}
-                          </span>
-                        ) : (
-                          "-"
-                        )
-                      }
+                      /* 이 표의 다른 줄은 모두 글자다. 자격만 칩으로 두니 혼자 튀어 표가 아니라 딴 칸처럼 읽혔다. */
+                      value={heldQualificationNames.length > 0 ? heldQualificationNames.join(", ") : "-"}
                     />
                   </dl>
                 )}
@@ -644,49 +632,11 @@ export default async function MyPage() {
                   </Button>
                 </CardContent>
               </Card>
-            ) : supportData.bookmarked.length > 0 ? (
-              /* 진단 O + 찜 O: 찜한 것 몇 건 + 결과 다시보기 + 다시 진단하기 */
-              <Card className={myPageCardClass}>
-                <CardHeader className="flex flex-row items-center justify-between gap-2">
-                  <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
-                    <Star className="size-4" /> 찜한 지원제도
-                  </CardTitle>
-                  {supportData.bookmarkCount > 1 && (
-                    <Link href="/mypage/bookmarks#support" className="shrink-0 text-label-1 font-medium text-slate-500">
-                      전체보기 →
-                    </Link>
-                  )}
-                </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                  <div>
-                    {supportData.bookmarked.slice(0, 3).map((program) => (
-                      <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
-                        <span className="min-w-0">
-                          <span className="line-clamp-2 break-keep text-body-2 font-semibold text-slate-800">{program.title}</span>
-                          <span className="mt-1 block truncate text-label-2 text-slate-400">
-                            {labelOrganization(program.organizationName ?? program.organization)}
-                          </span>
-                        </span>
-                        {program.supportAmountText && (
-                          <span className="shrink-0 text-body-2 font-bold text-brand-blue-600">{program.supportAmountText}</span>
-                        )}
-                      </Link>
-                    ))}
-                  </div>
-                  <div className="mt-auto flex gap-2 pt-1">
-                    <Button variant="outline" className="flex-1" asChild>
-                      <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 다시보기</Link>
-                    </Button>
-                    <Button variant="outline" className="flex-1" asChild>
-                      <Link href="/support?start=1">다시 진단하기</Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
             ) : (
               /*
-                진단 O + 찜 X: 결과에서 "높은 가능성" 위주로 3건을 미리 보여준다. 안내 문구만 있으면
-                결과 화면까지 들어가야 무엇이 나왔는지 알 수 있어 찜하러 갈 동기가 약했다.
+                진단 O: 결과에서 고른 상위 3건과 찜한 3건을 한 카드에 함께 둔다.
+                전에는 찜 여부로 카드가 통째로 갈려, 찜이 없으면 결과만·찜이 있으면 찜만 보였다.
+                둘은 "골라 둔 것"과 "추천"이라 나란히 있어야 다음에 할 일이 읽힌다.
               */
               (() => {
                 const rank = (g?: SupportEligibilityGrade) =>
@@ -706,10 +656,10 @@ export default async function MyPage() {
                         </span>
                       )}
                     </CardHeader>
-                    <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
-                      {preview.length > 0 ? (
-                        <>
-                          <p>내 조건에 맞을 가능성이 높은 지원금이에요. 마음에 드는 것을 찜해 두세요.</p>
+                    <CardContent className="flex flex-1 flex-col space-y-5 text-label-1 text-slate-600">
+                      <div>
+                        <p className="mb-1.5 text-label-1 font-semibold text-slate-500">가능성이 높은 지원금</p>
+                        {preview.length > 0 ? (
                           <div>
                             {preview.map(({ program, grade }) => (
                               <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
@@ -730,10 +680,53 @@ export default async function MyPage() {
                               </Link>
                             ))}
                           </div>
-                        </>
-                      ) : (
-                        <p>지원금 진단 결과를 확인하고 마음에 드는 것을 찜해 두세요. 여기서 이어서 볼 수 있어요.</p>
-                      )}
+                        ) : (
+                          <p>결과 화면에서 받을 수 있는 지원금을 확인해 보세요.</p>
+                        )}
+                      </div>
+
+                      <div>
+                        <div className="mb-1.5 flex items-center justify-between gap-2">
+                          <p className="text-label-1 font-semibold text-slate-500">찜한 지원제도</p>
+                          {supportData.bookmarkCount > 3 && (
+                            <Link href="/mypage/bookmarks#support" className="shrink-0 text-label-1 font-medium text-slate-500">
+                              전체보기 →
+                            </Link>
+                          )}
+                        </div>
+                        {supportData.bookmarked.length > 0 ? (
+                          <div>
+                            {supportData.bookmarked.slice(0, 3).map((program) => (
+                              <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
+                                <span className="min-w-0">
+                                  <span className="line-clamp-2 break-keep text-body-2 font-semibold text-slate-800">
+                                    {program.title}
+                                  </span>
+                                  <span className="mt-1 block truncate text-label-2 text-slate-400">
+                                    {labelOrganization(program.organizationName ?? program.organization)}
+                                  </span>
+                                </span>
+                                {program.supportAmountText && (
+                                  <span className="shrink-0 text-body-2 font-bold text-brand-blue-600">
+                                    {program.supportAmountText}
+                                  </span>
+                                )}
+                              </Link>
+                            ))}
+                          </div>
+                        ) : (
+                          /* 빈 줄 대신 회색 면으로 자리를 잡아, 아직 아무것도 고르지 않았음이 한눈에 보이게 한다. */
+                          <div className="rounded-lg bg-slate-50 px-4 py-5 text-center">
+                            <p className="break-keep text-label-1 text-slate-500">
+                              아직 찜한 지원제도가 없어요. 마음에 드는 것을 찜해 두면 여기 모입니다.
+                            </p>
+                            <Button variant="outline" size="sm" className="mt-3 bg-white" asChild>
+                              <Link href={`/support/result/${supportData.latestSessionId}`}>찜하러 가기</Link>
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
                       <div className="mt-auto flex flex-col gap-2 pt-1 sm:flex-row">
                         <Button className="flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
                           <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 보러가기</Link>
@@ -787,7 +780,12 @@ export default async function MyPage() {
                     <Compass className="size-4" /> 진단 기반 공고
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4 text-label-1 text-slate-600">
+                {/*
+                  두 트랙은 성격이 달라(지금 지원 / 자격 따면) 사이를 넉넉히 띄워 갈라 놓는다.
+                  옆 열에 맞춰 카드가 늘어날 때 남는 높이는 트랙 사이로 흘려보낸다.
+                  그냥 두면 남는 만큼이 마지막 줄 아래에 고여, 카드 위아래 여백이 달라 보였다.
+                */}
+                <CardContent className="flex flex-1 flex-col justify-between space-y-7 text-label-1 text-slate-600">
                   {assessmentJobs.ready && (
                     <div>
                       <p className="mb-1.5 text-label-1 font-semibold text-slate-500">
