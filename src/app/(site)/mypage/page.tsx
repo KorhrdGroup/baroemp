@@ -29,6 +29,7 @@ import {
 } from "@/lib/repositories";
 import { activityEventLogger } from "@/lib/activity/event-logger";
 import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-search.service";
+import { getRecommendedJobsFromAssessment } from "@/services/assessment-job.service";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
@@ -193,13 +194,15 @@ export default async function MyPage() {
   */
   const { profile, careerProfile, assessmentResults } = detail;
   const latestResult = assessmentResults[0];
-  const [jobData, supportData, heldQualifications] = await Promise.all([
+  const [jobData, supportData, heldQualifications, assessmentJobs] = await Promise.all([
     loadMyPageJobData(user.id),
     loadMyPageSupportData(user.id),
     // 보유 자격은 career_profiles가 아니라 Career DB(user_qualifications)가 원본이다.
     getUserQualificationRepository()
       .findByUserId(user.id)
       .catch(() => []),
+    // 일자리 화면과 같은 진단 기반 공고(바로 지원 트랙·자격 따면 열리는 트랙). 없거나 실패하면 카드를 안 그린다.
+    getRecommendedJobsFromAssessment({ userId: user.id }, 3).catch(() => null),
   ]);
   const heldQualificationNames = [...new Set(heldQualifications.map((q) => q.name))];
 
@@ -611,6 +614,71 @@ export default async function MyPage() {
                         </span>
                       </Link>
                     ))}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/*
+                진단 기반 공고. 위 "최근 직업진단 결과"가 직업을 보여줬다면 여기는 그 직업의 실제 공고다.
+                바로 지원 트랙과 자격 따면 열리는 트랙을 결과 카드와 같은 두 묶음으로 둔다.
+              */}
+              {assessmentJobs && (assessmentJobs.ready || assessmentJobs.preparation) && (
+                <Card className={myPageCardClass}>
+                  <CardHeader className="flex flex-row items-center justify-between gap-2">
+                    <CardTitle className="flex items-center gap-1.5 text-body-2">
+                      <Compass className="size-4" /> 진단 기반 공고
+                    </CardTitle>
+                    <Link href="/jobs" className="shrink-0 text-label-1 font-medium text-slate-500">
+                      일자리 찾기 →
+                    </Link>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-label-1 text-slate-600">
+                    {assessmentJobs.ready && (
+                      <div>
+                        <p className="mb-1 text-label-2 font-semibold text-slate-400">
+                          지금 바로 지원 · {assessmentJobs.ready.occupationName}
+                        </p>
+                        <div>
+                          {assessmentJobs.ready.jobs.map((job) => (
+                            <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
+                              <span className="min-w-0">
+                                <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
+                                <span className="block truncate text-label-2 text-slate-400">
+                                  {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
+                                </span>
+                              </span>
+                              <ChevronRight className="size-4 shrink-0 text-slate-300" />
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {assessmentJobs.preparation && (
+                      <div>
+                        <p className="mb-1 flex flex-wrap items-center gap-x-1.5 text-label-2 font-semibold text-slate-400">
+                          <KeyRound className="size-3.5 text-amber-600" />
+                          자격 따면 열리는 · {assessmentJobs.preparation.occupationName}
+                          {assessmentJobs.preparation.missingQualifications?.length ? (
+                            <span className="font-medium text-amber-700">
+                              ({assessmentJobs.preparation.missingQualifications.join(", ")} 취득 시)
+                            </span>
+                          ) : null}
+                        </p>
+                        <div>
+                          {assessmentJobs.preparation.jobs.map((job) => (
+                            <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
+                              <span className="min-w-0">
+                                <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
+                                <span className="block truncate text-label-2 text-slate-400">
+                                  {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
+                                </span>
+                              </span>
+                              <ChevronRight className="size-4 shrink-0 text-slate-300" />
+                            </Link>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}
