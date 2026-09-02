@@ -76,7 +76,7 @@ export function JobCard({
         href={`/jobs/${job.id}`}
         className={cn(
           "group flex h-full flex-col rounded-xl border border-border bg-white p-5",
-          hoverTint && "transition-colors hover:border-brand-blue-300 hover:bg-brand-blue-50/40",
+          hoverTint && "transition-colors hover:bg-brand-blue-50/40",
         )}
       >
         {/*
