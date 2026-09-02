@@ -44,13 +44,20 @@ export default async function JobsPage({
   searchParams: Promise<JobsPageSearchParams>;
 }) {
   const sp = await searchParams;
-  // 로그인해야 이용할 수 있는 화면이다. 로그인 후 보던 조건 그대로 돌아오도록 쿼리까지 next에 싣는다.
+  // 로그인 화면으로 보낼 때 보던 조건 그대로 돌아오도록 쿼리까지 next에 싣는다.
   const query = new URLSearchParams(
     Object.entries(sp).filter(([, v]) => typeof v === "string" && v !== "") as [string, string][],
   ).toString();
-  const user = await requireUser(`/jobs${query ? `?${query}` : ""}`);
+  const nextPath = `/jobs${query ? `?${query}` : ""}`;
 
   const page = Math.max(1, Number(sp.page) || 1);
+
+  /*
+    첫 쪽은 로그인 없이 보여준다 - 어떤 공고가 있는지 못 보면 가입할 이유도 생기지 않는다.
+    두 번째 쪽부터는 로그인을 요구한다. 회원용 값(맞춤 정렬·찜·자격 배지·큐레이션)은
+    로그인한 경우에만 얹는다.
+  */
+  const user = page > 1 ? await requireUser(nextPath) : await getCurrentUser();
 
   const anonymousId = (await cookies()).get("baro_anonymous_id")?.value;
 
@@ -59,7 +66,7 @@ export default async function JobsPage({
     지역을 고르지 않았으면 취업 프로필의 희망지역을 기본으로 건다. 회원이 "지역 전체"를 고르면
     검색바가 region=all 을 실어 보내 기본값을 되살리지 않는다 (job-filters-form.buildParams).
   */
-  const careerProfile = await findCareerProfileByUserId(user.id).catch(() => null);
+  const careerProfile = user ? await findCareerProfileByUserId(user.id).catch(() => null) : null;
   const region: Region | undefined =
     sp.region === "all" ? undefined : ((sp.region as Region | undefined) ?? careerProfile?.region);
 
@@ -77,18 +84,18 @@ export default async function JobsPage({
     page,
     pageSize: PAGE_SIZE,
     /* userId 가 빠져 있어 로그인 회원도 프로필 없는 셈으로 검색됐다 - 추천순이 회원 점수를 한 번도 안 탔던 이유. */
-    userId: user.id,
+    userId: user?.id,
     anonymousId,
   };
 
-  const [result, recommendation, currentUser, bookmarkedIds, initialCuration] = await Promise.all([
+  const [result, recommendation, bookmarkedIds, initialCuration] = await Promise.all([
     searchJobs(filter),
-    getRecommendedJobsFromAssessment({ userId: user.id, anonymousId }),
-    getCurrentUser(),
+    user ? getRecommendedJobsFromAssessment({ userId: user.id, anonymousId }) : null,
     getUserJobBookmarkIdsAction(),
     // 큐레이션 섹션의 첫 화면에 뜨는 탭 (JobCurationSection 의 INITIAL_TAB 과 짝을 맞춰야 한다).
-    getJobCuration(user.id, "matched"),
+    user ? getJobCuration(user.id, "matched") : null,
   ]);
+  const currentUser = user;
   const isAuthenticated = Boolean(currentUser);
 
   /*
@@ -159,12 +166,15 @@ export default async function JobsPage({
         }
       >
       {/* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */}
-      <div className="mt-8">
-        <JobCurationSection
-          initialActive={initialCuration}
-          bookmarkedIds={bookmarkedIds}
-        />
-      </div>
+      {/* 회원 조건으로 고른 묶음이라 로그인했을 때만 그린다. */}
+      {initialCuration && (
+        <div className="mt-8">
+          <JobCurationSection
+            initialActive={initialCuration}
+            bookmarkedIds={bookmarkedIds}
+          />
+        </div>
+      )}
       </JobFiltersForm>
 
       <div className="mt-8">

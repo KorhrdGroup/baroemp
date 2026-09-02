@@ -49,8 +49,11 @@ export const AUTH_ROUTE_PATHS = ["/login", "/signup", "/find-id", "/find-passwor
  * 보호 접두사에 속하지만 비로그인도 볼 수 있는 경로.
  * 소개 화면까지 막으면 서비스가 무엇인지 확인할 방법이 없어 유입이 끊긴다.
  * 실제 시작(세션 생성)은 각 페이지에서 여전히 로그인을 요구한다.
+ *
+ * /jobs 는 목록 첫 화면까지 열어 둔다 - 어떤 공고가 있는지 못 보면 가입할 이유도 생기지 않는다.
+ * 공고 상세(/jobs/{id})와 두 번째 쪽부터는 페이지에서 다시 로그인을 요구한다.
  */
-const PUBLIC_LANDING_PATHS: readonly string[] = ["/assessment", "/support"];
+const PUBLIC_LANDING_PATHS: readonly string[] = ["/assessment", "/support", "/jobs"];
 
 export function isProtectedPath(pathname: string): boolean {
   if (PUBLIC_LANDING_PATHS.includes(pathname)) return false;
