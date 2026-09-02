@@ -43,7 +43,8 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
     <>
     <section id={sentinelId} aria-label="취업 절차" className="rounded-2xl bg-brand-blue-50 p-5 sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-2">
-        <h2 className="text-body-1 font-bold text-slate-900">
+        {/* 이 줄이 화면의 제목이다 (위에 이름 제목을 따로 두지 않는다). 제목 크기로 키운다. */}
+        <h2 className="text-title-3 font-bold text-slate-900 sm:text-title-2">
           {next ? `${userName}님, 이제 ${next.step}단계 차례예요` : `${userName}님, ${completedTitle ?? "준비를 모두 마치셨어요"}`}
         </h2>
         <p className="text-label-1 font-semibold text-brand-blue-700">

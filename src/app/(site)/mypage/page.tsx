@@ -390,17 +390,10 @@ export default async function MyPage() {
   // 아래 여백(pb-32)은 떠 있는 절차 띠 높이만큼 더 준다. 마지막 카드가 띠에 가리지 않게.
   return (
     <div className="mx-auto max-w-5xl px-4.5 pt-10 pb-32 lg:px-8">
-      {/* 제목을 "마이페이지"라고 적지 않는다. 메뉴에서 눌러 들어온 자리라 이미 알고 있다. */}
-      <div className="mb-6 flex flex-wrap items-center gap-2">
-        <h1 className="text-title-2 font-bold text-slate-900 sm:text-headline-3">{userName}님</h1>
-        {/* 온보딩을 건너뛴 회원은 값이 없어 "-" 배지만 달랑 남는다. 그때는 안 그린다. */}
-        {careerProfile?.employmentStatus && (
-          <Badge variant="outline" className="rounded-full text-label-1 text-slate-600">
-            {labelEmploymentStatus(careerProfile.employmentStatus)}
-          </Badge>
-        )}
-      </div>
-
+      {/*
+        이름 제목은 따로 두지 않는다. 바로 아래 절차 판이 "하려선님, 이제 1단계 차례예요"로 이름을 부르므로
+        같은 이름이 두 줄 연달아 나왔다. 취업 상태 배지는 1단계 카드의 취업 프로필에 있다.
+      */}
       {/* 취업까지의 다섯 단계. 다음 할 일 하나를 크게 짚어 준다. */}
       <JourneySteps steps={steps} userName={userName} completedTitle={hiredCount > 0 ? "취업을 축하드려요!" : undefined} />
 
