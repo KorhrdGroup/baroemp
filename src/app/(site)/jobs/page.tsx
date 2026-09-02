@@ -216,7 +216,12 @@ export default async function JobsPage({
                 </p>
                 <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
                   {recommendation.preparation.jobs.map((job) => (
-                    <JobRowCompact key={`prep-${job.id}`} job={job} readiness={readinessMap.get(job.id)} />
+                    <JobRowCompact
+                      key={`prep-${job.id}`}
+                      job={job}
+                      readiness={readinessMap.get(job.id)}
+                      outsideRegion={recommendation.preparation?.outsideRegionJobIds?.includes(job.id)}
+                    />
                   ))}
                 </div>
               </div>

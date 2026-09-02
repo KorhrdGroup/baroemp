@@ -16,10 +16,13 @@ import type { Job } from "@/types";
 export function JobRowCompact({
   job,
   readiness,
+  outsideRegion = false,
   className,
 }: {
   job: Job;
   readiness?: JobReadiness;
+  /** 희망지역 공고가 모자라 다른 지역에서 채워 온 줄. 아무 말 없이 섞으면 집 근처인 줄 안다. */
+  outsideRegion?: boolean;
   className?: string;
 }) {
   const salary = splitSalary(job);
@@ -43,6 +46,9 @@ export function JobRowCompact({
             {salary.amount}
           </span>
           {location && <span className="truncate">{location}</span>}
+          {outsideRegion && (
+            <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700">희망지역 밖</span>
+          )}
         </p>
       </div>
       {readiness && (
