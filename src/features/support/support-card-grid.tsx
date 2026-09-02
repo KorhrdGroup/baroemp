@@ -88,7 +88,6 @@ function CollapsibleSection({
             key={program.id}
             program={program}
             grade={(matchResult.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade}
-            score={matchResult.score}
             reasons={matchResult.reasons}
             isAuthenticated
             isBookmarked={bookmarkedSet.has(program.id)}

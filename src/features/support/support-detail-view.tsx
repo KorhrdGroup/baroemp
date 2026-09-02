@@ -105,10 +105,10 @@ export function SupportDetailView({
           <span className="rounded-full bg-slate-100 px-3 py-1.5 text-label-1 font-semibold text-slate-600">
             {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
           </span>
+          {/* 목록 카드와 같은 이유로 내부 매칭 점수는 숨기고 등급 라벨만 보여준다. */}
           {match && (
             <span className={cn("rounded-full px-3 py-1.5 text-label-1 font-bold", GRADE_BADGE_CLASS[match.grade])}>
               {SUPPORT_ELIGIBILITY_GRADE_LABELS[match.grade]}
-              <span className="ml-1 font-medium opacity-70">{match.score}점</span>
             </span>
           )}
         </div>

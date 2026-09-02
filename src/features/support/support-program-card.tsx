@@ -32,14 +32,12 @@ function regionLabel(program: SupportProgram, organization: string): string | un
 export function SupportProgramCard({
   program,
   grade,
-  score,
   reasons,
   isAuthenticated = false,
   isBookmarked = false,
 }: {
   program: SupportProgram;
   grade?: SupportEligibilityGrade;
-  score?: number;
   reasons?: MatchReasonDetail[];
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
@@ -76,10 +74,10 @@ export function SupportProgramCard({
         ) : (
           <p className="min-w-0 truncate text-label-1 font-medium text-slate-500">{orgName}</p>
         )}
+        {/* 내부 매칭 점수는 회원에게 의미가 없는 숫자라 등급 라벨만 보여준다. */}
         {grade && (
           <span className={cn("shrink-0 rounded-full px-3 py-1.5 text-label-1 font-bold", GRADE_BADGE_CLASS[grade])}>
             {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]}
-            {typeof score === "number" && <span className="ml-1 font-medium opacity-70">{score}점</span>}
           </span>
         )}
       </div>

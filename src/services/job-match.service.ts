@@ -1,4 +1,5 @@
 import type { CareerProfile, Job, MatchReasonDetail } from "@/types";
+import { toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 
 export type JobMatchGrade = "A" | "B" | "C" | "D";
 
@@ -40,7 +41,13 @@ export function evaluateJobFit(profile: CareerProfile | undefined | null, job: J
   const needsCheck: string[] = [];
   const lacking: string[] = [];
 
-  if (profile.desiredJobCategories?.includes(job.jobCategory)) {
+  /*
+   * 프로필의 희망 직종은 'care_worker' 같은 묶음 key(온보딩)이거나 6자리 직종코드(진단)인데,
+   * job.jobCategory는 워크넷 6자리 코드다. 그대로 비교하면 절대 일치하지 않으므로
+   * /jobs 검색과 같은 방식으로 코드 앞자리로 바꿔 훑는다.
+   */
+  const desiredCategoryPrefixes = toJobCategoryPatterns(profile.desiredJobCategories ?? []);
+  if (desiredCategoryPrefixes.some((prefix) => job.jobCategory.startsWith(prefix))) {
     reasons.push({ ruleKey: "job_category", label: "희망 직종 일치", score: 30 });
     fulfilled.push("희망 직종");
   }

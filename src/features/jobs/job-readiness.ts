@@ -21,9 +21,10 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
   const preferred = items.filter((i) => i.jobLevel === "PREFERRED");
 
   // 지원을 막는 것이 가장 먼저다.
+  // "○○ 필요"는 안 되는 이유로 읽히지만, "○○만 갖추면"은 다음 행동이 된다. 같은 사실을 가능성 쪽으로 말한다.
   const missing = required.filter((i) => i.userStatus === "NOT_SATISFIED");
-  if (missing.length === 1) return { level: "near", label: `${missing[0].requirementName} 필요` };
-  if (missing.length > 1) return { level: "gap", label: `자격 ${missing.length}개 필요` };
+  if (missing.length === 1) return { level: "near", label: `${missing[0].requirementName}만 갖추면 지원 가능` };
+  if (missing.length > 1) return { level: "gap", label: `자격 ${missing.length}개 갖추면 지원 가능` };
 
   if (required.length > 0) {
     // 모름(UNKNOWN)은 부족으로 세지 않는다. 회원이 자격을 안 적었을 뿐인데
@@ -56,7 +57,7 @@ export function readinessFromComparison(items: JobRequirementComparisonItem[]): 
  * "운전 가능 우대 충족"). 갖췄다는 사실은 같으므로 색을 나누면
  * 초록이 두 가지가 되어 오히려 읽기 어렵다.
  *   파랑    있으면 유리      ○○ 우대
- *   주황    지원을 막음      ○○ 필요 · 자격 N개 필요
+ *   주황    지원을 막음      ○○만 갖추면 지원 가능 · ○○ 필요
  */
 export const READINESS_BADGE_CLASS: Record<JobReadinessLevel, string> = {
   // 무채색: 지원에 지장이 없다. 요건이 아예 없거나, 우대라 없어도 그만이다.

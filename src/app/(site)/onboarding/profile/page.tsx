@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
 import { getProfileRepository } from "@/lib/repositories/profile-repository";
-import { findCareerProfileByUserId } from "@/lib/repositories";
+import { findCareerProfileByUserId, getUserQualificationRepository } from "@/lib/repositories";
 import { sanitizeNextPath } from "@/lib/auth/redirect";
 import { OnboardingWizard } from "@/features/onboarding/onboarding-wizard";
 
@@ -16,9 +16,10 @@ export default async function OnboardingProfilePage({
   const next = sanitizeNextPath(nextParam, "/mypage");
   const user = await requireUser(`/onboarding/profile?next=${encodeURIComponent(next)}`);
 
-  const [profile, careerProfile] = await Promise.all([
+  const [profile, careerProfile, heldQualifications] = await Promise.all([
     getProfileRepository().findById(user.id),
     findCareerProfileByUserId(user.id),
+    getUserQualificationRepository().findByUserId(user.id),
   ]);
 
   return (
@@ -27,6 +28,7 @@ export default async function OnboardingProfilePage({
       next={next}
       needsPhone={!profile?.phone}
       needsMarketingConsent={!profile?.marketingConsent}
+      heldQualificationNames={heldQualifications.map((q) => q.name)}
     />
   );
 }

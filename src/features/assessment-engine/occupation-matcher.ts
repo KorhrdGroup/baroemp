@@ -237,5 +237,22 @@ export function matchOccupations(input: OccupationMatchInput, limit = 5): Occupa
     });
   }
 
-  return results.sort((a, b) => b.totalScore - a.totalScore).slice(0, limit);
+  const sorted = results.sort((a, b) => b.totalScore - a.totalScore);
+  const main = sorted.slice(0, limit);
+
+  /*
+   * "준비하면 열리는 직업" 트랙: 성향(직무 적합도)은 높은데 필수 자격이 없어
+   * 총점 순위에서 밀려난 직업. 자격 미보유를 감점으로만 두면 성향이 가장 잘 맞는
+   * 직업이 결과에서 아예 사라지므로, 순위 밖에서 최대 3건을 덧붙여 결과 화면이
+   * "이 자격을 갖추면 여기까지 가능하다"를 보여줄 수 있게 한다.
+   * (결과 화면은 필수 자격 미보유 여부로 두 트랙을 가른다 - result-view.tsx)
+   */
+  const mainIds = new Set(main.map((r) => r.occupationId));
+  const preparation = sorted
+    .filter((r) => !mainIds.has(r.occupationId))
+    .filter((r) => r.dimensionFitScore >= 70 && r.risks.includes(NO_REQUIRED_QUALIFICATION_RISK))
+    .sort((a, b) => b.dimensionFitScore - a.dimensionFitScore)
+    .slice(0, 3);
+
+  return [...main, ...preparation];
 }

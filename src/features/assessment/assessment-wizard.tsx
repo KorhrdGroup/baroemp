@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,8 +44,8 @@ interface AssessmentWizardProps {
   sections: AssessmentSection[];
   questions: AssessmentQuestion[];
   initialStep: number;
-  /** 취업 프로필에 이미 있어 묻지 않은 문항 수. 0이면 안내하지 않는다. */
-  skippedCount?: number;
+  /** 취업 프로필에 이미 있는 정보로 미리 채워둔 답 (문항 id → 답). 비어 있으면 안내하지 않는다. */
+  initialAnswers?: Record<string, AnswerValue>;
 }
 
 /**
@@ -81,15 +80,16 @@ export function AssessmentWizard({
   sections,
   questions,
   initialStep,
-  skippedCount = 0,
+  initialAnswers,
 }: AssessmentWizardProps) {
   const router = useRouter();
+  const prefilledCount = Object.keys(initialAnswers ?? {}).length;
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.min(Math.max(initialStep, 0), questions.length - 1),
   );
   // 되돌아온 뒤 다시 앞으로 갈 수 있게, 지금까지 가장 멀리 간 문항을 기억한다.
   const [furthestIndex, setFurthestIndex] = useState(currentIndex);
-  const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
+  const [answers, setAnswers] = useState<Record<string, AnswerValue>>(initialAnswers ?? {});
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -239,13 +239,15 @@ export function AssessmentWizard({
           <p className="mt-3 text-center text-body-2-reading text-slate-500">{question.description}</p>
         )}
 
-        {/* 왜 문항이 짧아졌는지 알려주고, 저장된 값이 틀렸으면 고칠 경로를 준다. */}
-        {skippedCount > 0 && currentIndex === 0 && (
-          <p className="mt-4 text-center text-label-1 text-slate-400">
-            이미 알려주신 정보 {skippedCount}개는 건너뛰었어요.{" "}
-            <Link href="/mypage/profile" className="font-medium text-brand-blue-600 underline underline-offset-2">
-              수정하기
-            </Link>
+        {/*
+          미리 채워진 답이 있다는 것을 첫 문항에서 한 번 알려준다. 고치는 건 각 문항에서 바로 하면 된다.
+          break-keep 은 한글이 어절 중간에서 잘리지 않게 한다. 좁은 화면에서 "확인하면서" 뒤가 아니라
+          문장 사이에서 나뉘도록 두 문장을 <span block> 으로 갈라 각자 한 덩어리로 접히게 한다.
+        */}
+        {prefilledCount > 0 && currentIndex === 0 && (
+          <p className="mt-4 text-center text-label-1 break-keep text-slate-400">
+            <span className="inline-block">이미 알려주신 정보 {prefilledCount}개는 미리 채워뒀어요.</span>{" "}
+            <span className="inline-block">확인하면서 넘어가주세요.</span>
           </p>
         )}
 

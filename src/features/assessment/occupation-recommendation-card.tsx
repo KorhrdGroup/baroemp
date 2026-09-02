@@ -1,5 +1,16 @@
 import Link from "next/link";
-import { AlertTriangle, CheckCircle2, ChevronDown, ChevronRight, ListChecks, MapPin, Plus, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink as ExternalLinkIcon,
+  KeyRound,
+  ListChecks,
+  MapPin,
+  Plus,
+  Sparkles,
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import type { Occupation, OccupationRecommendation } from "@/types";
 import { cn } from "@/lib/utils";
@@ -46,6 +57,29 @@ interface OccupationRecommendationCardProps {
   regionLabel?: string;
   /** 실제 jobs DB 기준 채용건수 (STEP 4). 아직 계산 전이거나 jobCategoryCode가 없으면 undefined. */
   jobCount?: { total: number; highMatchCount: number };
+  /**
+   * "준비하면 열리는 직업" 트랙 표시. 총점은 자격 미보유 감점이 섞여 있어 낮게 보이므로,
+   * 이 변형에서는 성향(직무 적합도)을 앞세우고 "자격 취득 시 가능" 신호를 함께 보여준다.
+   */
+  variant?: "ready" | "preparation";
+  /** 추천 취득 과정의 외부 신청/안내 페이지. 있으면 "준비하러 가기" 버튼으로 연결한다. */
+  prepareUrl?: string;
+  /** 외부 페이지가 등록된 취득 과정 목록. 미보유 자격 칩을 과정 페이지로 잇는 데 쓴다. */
+  externalCourses?: ExternalCourseLink[];
+}
+
+export interface ExternalCourseLink {
+  contentId: string;
+  title: string;
+  url: string;
+}
+
+/**
+ * 자격 이름으로 취득 과정을 찾는다. 콘텐츠에 자격 연결 필드가 따로 없어서
+ * 과정 제목에 자격 이름이 들어 있는지로 잇는다 (예: "사회복지사 2급" ↔ "사회복지사 2급 학점은행 과정").
+ */
+function findCourseForQualification(courses: ExternalCourseLink[], name: string): ExternalCourseLink | undefined {
+  return courses.find((c) => c.title.includes(name) || name.includes(c.title));
 }
 
 export function OccupationRecommendationCard({
@@ -58,8 +92,12 @@ export function OccupationRecommendationCard({
   defaultOpen,
   regionLabel,
   jobCount,
+  variant = "ready",
+  prepareUrl,
+  externalCourses = [],
 }: OccupationRecommendationCardProps) {
   const postingCount = jobCount?.total ?? 0;
+  const isPreparation = variant === "preparation";
 
   /*
    * 이미 저장된 진단 결과에는 우대 자격만 없어도 "자격 없음"이 걸림돌로 들어가 있다.
@@ -71,6 +109,18 @@ export function OccupationRecommendationCard({
   const risks = missesRequiredQualification
     ? rec.risks
     : rec.risks.filter((risk) => risk !== NO_REQUIRED_QUALIFICATION_RISK);
+
+  const missingRequiredNames = rec.requiredQualifications
+    .filter((q) => !isPreferredQualification(q) && rec.missingConditions.includes(q))
+    .map(qualificationName);
+  const recommendedCourse = rec.readinessProjection?.[0];
+
+  // "상담받기"가 데려갈 과정: 없는 필수 자격과 이름이 맞는 과정을 먼저, 없으면 추천 취득 과정을 쓴다.
+  const consultCourse =
+    missingRequiredNames.map((name) => findCourseForQualification(externalCourses, name)).find(Boolean) ??
+    (prepareUrl && recommendedCourse
+      ? { contentId: recommendedCourse.contentId, title: recommendedCourse.contentTitle, url: prepareUrl }
+      : undefined);
 
   return (
     <details
@@ -85,10 +135,11 @@ export function OccupationRecommendationCard({
           <span
             className={cn(
               "flex size-10 shrink-0 items-center justify-center rounded-xl text-body-2 font-bold",
-              rank === 1 ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-500",
+              // 준비 트랙은 순위 경쟁이 아니라 "열리는 가능성" 목록이므로 1위 강조를 하지 않는다.
+              !isPreparation && rank === 1 ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-500",
             )}
           >
-            {rank}
+            {isPreparation ? <KeyRound className="size-4.5" /> : rank}
           </span>
           <div>
             <p className="text-body-1 font-bold text-slate-900 sm:text-title-3">{rec.occupationName}</p>
@@ -96,24 +147,69 @@ export function OccupationRecommendationCard({
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className={cn("hidden rounded-full px-3 py-1 text-label-1 font-semibold sm:inline-flex", GRADE_STYLE[rec.grade])}>
-            {rec.grade}
+          <span
+            className={cn(
+              "hidden rounded-full px-3 py-1 text-label-1 font-semibold sm:inline-flex",
+              isPreparation ? "bg-amber-50 text-amber-700" : GRADE_STYLE[rec.grade],
+            )}
+          >
+            {isPreparation ? "자격 취득 시 가능" : rec.grade}
           </span>
+          {/* 준비 트랙의 총점에는 자격 미보유 감점이 섞여 있어, 여기서는 성향 적합도를 앞세운다. */}
           <div className="text-right">
-            <p className={cn("text-title-2 font-extrabold", GRADE_SCORE_STYLE[rec.grade])}>{rec.totalScore}</p>
-            <p className="text-label-2 text-slate-400">적합도</p>
+            <p className={cn("text-title-2 font-extrabold", isPreparation ? "text-brand-blue-600" : GRADE_SCORE_STYLE[rec.grade])}>
+              {isPreparation ? rec.dimensionFitScore : rec.totalScore}
+            </p>
+            <p className="text-label-2 text-slate-400">{isPreparation ? "성향 적합도" : "적합도"}</p>
           </div>
           <ChevronDown className="size-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
         </div>
       </summary>
 
       <div className="border-t border-slate-100 px-5 py-6 sm:px-7">
-        <span className={cn("inline-flex rounded-full px-3 py-1 text-label-1 font-semibold ring-1 sm:hidden", GRADE_STYLE[rec.grade])}>
-          {rec.grade}
+        <span
+          className={cn(
+            "inline-flex rounded-full px-3 py-1 text-label-1 font-semibold ring-1 sm:hidden",
+            isPreparation ? "bg-amber-50 text-amber-700" : GRADE_STYLE[rec.grade],
+          )}
+        >
+          {isPreparation ? "자격 취득 시 가능" : rec.grade}
         </span>
 
         {occupation?.description && (
           <p className="mt-3 text-body-2-reading text-slate-600">{occupation.description}</p>
+        )}
+
+        {/* 준비 트랙: 무엇을 채우면 열리는지 짚고, 갈 곳이 있으면 상담으로 보낸다. */}
+        {isPreparation && missingRequiredNames.length > 0 && (
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-amber-50/70 p-4">
+            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-amber-800">
+              <KeyRound className="size-4" /> {missingRequiredNames.join(", ")} 취득 시 지원할 수 있어요
+            </p>
+            {consultCourse ? (
+              <TrackedLink
+                sessionId={sessionId}
+                kind="content"
+                targetId={consultCourse.contentId}
+                userId={userId}
+                anonymousId={anonymousId}
+                href={consultCourse.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-white px-4 text-label-1 font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
+              >
+                상담받기
+                <ExternalLinkIcon className="size-3.5 text-slate-400" />
+              </TrackedLink>
+            ) : (
+              recommendedCourse && (
+                <p className="w-full text-label-1 text-amber-700">
+                  추천 취득 과정: {recommendedCourse.contentTitle} — 아래 &quot;도움이 되는 자격 취득 과정&quot;에서
+                  확인해보세요.
+                </p>
+              )
+            )}
+          </div>
         )}
 
         {/* 세부 적합도 */}
@@ -254,7 +350,7 @@ export function OccupationRecommendationCard({
         <div className="mt-3 flex flex-wrap justify-end gap-4">
           <Link
             href={`/resume/new?occupation=${rec.occupationId}&title=${encodeURIComponent(rec.occupationName)}`}
-            className="flex h-10 items-center gap-1 rounded-lg border border-border px-4 text-label-1 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
+            className="flex h-10 items-center gap-1 rounded-lg px-4 text-label-1 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
           >
             {rec.occupationName} 취업용 이력서 준비하기
             <ChevronRight className="size-4" />

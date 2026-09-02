@@ -1,6 +1,8 @@
 import { findCareerProfileByUserId, getJobRepository } from "@/lib/repositories";
 import type { CareerProfile, Job, JobCurationItem, JobCurationResult, JobCurationTab, JobSearchFilter } from "@/types";
 import { evaluateJobFit } from "./job-match.service";
+import { getRecommendedJobsFromAssessment } from "./assessment-job.service";
+import { toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 import { compareUserToJobsRequirements, type JobRequirementComparisonItem } from "./job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
 
@@ -29,6 +31,8 @@ export async function getJobCuration(userId: string, tab: JobCurationTab): Promi
         return withBadges({ tab, ...(await getCommonTab("closing_soon")) });
       case "matched":
         return withBadges({ tab, ...(await getMatchedTab(await loadPersonalContext(userId))) });
+      case "assessment_matched":
+        return withBadges({ tab, ...(await getAssessmentMatchedTab(userId)) });
       case "ready_to_apply":
         return withBadges({ tab, ...(await getReadyToApplyTab(userId, await loadPersonalContext(userId))) });
       case "unlockable":
@@ -78,10 +82,11 @@ async function attachReadiness(userId: string, results: JobCurationResult[]): Pr
 export async function getAllJobCurations(userId: string): Promise<JobCurationResult[]> {
   try {
     const ctx = await loadPersonalContext(userId);
-    const [newTab, closingSoon, matched, readyToApply, unlockable] = await Promise.all([
+    const [newTab, closingSoon, matched, assessmentMatched, readyToApply, unlockable] = await Promise.all([
       getCommonTab("new"),
       getCommonTab("closing_soon"),
       getMatchedTab(ctx),
+      getAssessmentMatchedTab(userId),
       getReadyToApplyTab(userId, ctx),
       getUnlockableTab(userId, ctx),
     ]);
@@ -89,6 +94,7 @@ export async function getAllJobCurations(userId: string): Promise<JobCurationRes
       { tab: "new", ...newTab },
       { tab: "closing_soon", ...closingSoon },
       { tab: "matched", ...matched },
+      { tab: "assessment_matched", ...assessmentMatched },
       { tab: "ready_to_apply", ...readyToApply },
       { tab: "unlockable", ...unlockable },
     ]);
@@ -105,7 +111,12 @@ export async function getCandidateJobsForUser(userId: string, limit = CANDIDATE_
   const repo = getJobRepository();
   const filters: JobSearchFilter[] = [];
   for (const category of (profile.desiredJobCategories ?? []).slice(0, 5)) {
-    filters.push({ jobCategory: category, activeOnly: true, page: 1, pageSize: 250 });
+    /*
+     * 프로필의 직종 값은 묶음 key('care_worker')거나 6자리 코드인데 jobs.job_category는
+     * 워크넷 6자리 코드라, eq 비교로는 아무 공고도 걸리지 않았다. /jobs 검색과 같이
+     * 코드 앞자리 like 매칭으로 바꾼다.
+     */
+    filters.push({ jobCategoryPatterns: toJobCategoryPatterns([category]), activeOnly: true, page: 1, pageSize: 250 });
   }
   if (profile.region) {
     filters.push({ region: profile.region, activeOnly: true, page: 1, pageSize: 250 });
@@ -176,6 +187,17 @@ async function getMatchedTab(ctx: PersonalContext) {
   return { state: items.length > 0 ? ("READY" as const) : ("EMPTY" as const), items };
 }
 
+/** "진단 맞춤 공고" 탭: 직업진단에서 성향이 잘 맞았던(바로 지원 트랙) 직업의 최신 공고. */
+async function getAssessmentMatchedTab(userId: string) {
+  const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT).catch(() => null);
+  const ready = assessment?.ready;
+  if (!ready || ready.jobs.length === 0) return { state: "EMPTY" as const, items: [] };
+  return {
+    state: "READY" as const,
+    items: ready.jobs.map((job) => ({ job, matchReasonLabel: `진단 추천 "${ready.occupationName}"` })),
+  };
+}
+
 async function getReadyToApplyTab(userId: string, ctx: PersonalContext) {
   if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
 
@@ -237,28 +259,45 @@ function pickUnlockRequirement(
 }
 
 async function getUnlockableTab(userId: string, ctx: PersonalContext) {
-  if (!ctx) return { state: "NEEDS_PROFILE" as const, items: [] };
-
-  const top = ctx.scored.slice(0, READY_CHECK_LIMIT);
-  const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
-
   /*
-    1차는 미충족이 확인된 자격만 본다.
-    비면 아직 모르는 자격(UNKNOWN)까지 넓힌다. 자격을 한 건도 등록하지 않은 회원은
-    모든 자격이 UNKNOWN 이라 1차에서 늘 빈 화면이 나왔는데, 그런 회원일수록
-    "이거 하나 따면 이만큼 열려요"를 봐야 할 사람이다.
-    후보군 자체가 희망 직종·지역에서 나오므로 관심 분야를 벗어나지 않는다.
+    맞춤 추천 탭과 같은 구성: 진단 준비 트랙(성향은 맞는데 자격이 필요한 직업)의 공고를
+    앞에 두고, 요건 사전 기반으로 찾은 "하나만 채우면 열리는" 공고를 뒤에 잇는다.
+    상단 전용 섹션과 일부 겹칠 수 있지만, 탭만 보는 사람도 같은 추천을 받아야 한다.
   */
-  const best =
-    pickUnlockRequirement(top, comparisons, (c) => c.userStatus === "NOT_SATISFIED") ??
-    pickUnlockRequirement(
-      top,
-      comparisons,
-      (c) => c.userStatus === "NOT_SATISFIED" || c.userStatus === "UNKNOWN",
-    );
+  const assessment = await getRecommendedJobsFromAssessment({ userId }, TAB_LIMIT).catch(() => null);
+  const preparation = assessment?.preparation;
+  const assessmentItems: JobCurationItem[] = (preparation?.jobs ?? []).map((job) => ({
+    job,
+    unlockRequirementName: preparation?.missingQualifications?.[0],
+  }));
 
-  if (!best) return { state: "EMPTY" as const, items: [] };
-  return { state: "READY" as const, items: best.items.slice(0, TAB_LIMIT) };
+  let requirementItems: JobCurationItem[] = [];
+  if (ctx) {
+    const top = ctx.scored.slice(0, READY_CHECK_LIMIT);
+    const comparisons = await compareUserToJobsRequirements(userId, top.map((item) => item.job));
+
+    /*
+      1차는 미충족이 확인된 자격만 본다.
+      비면 아직 모르는 자격(UNKNOWN)까지 넓힌다. 자격을 한 건도 등록하지 않은 회원은
+      모든 자격이 UNKNOWN 이라 1차에서 늘 빈 화면이 나왔는데, 그런 회원일수록
+      "이거 하나 따면 이만큼 열려요"를 봐야 할 사람이다.
+      후보군 자체가 희망 직종·지역에서 나오므로 관심 분야를 벗어나지 않는다.
+    */
+    const best =
+      pickUnlockRequirement(top, comparisons, (c) => c.userStatus === "NOT_SATISFIED") ??
+      pickUnlockRequirement(
+        top,
+        comparisons,
+        (c) => c.userStatus === "NOT_SATISFIED" || c.userStatus === "UNKNOWN",
+      );
+    requirementItems = best?.items ?? [];
+  }
+
+  const seen = new Set(assessmentItems.map((i) => i.job.id));
+  const items = [...assessmentItems, ...requirementItems.filter((i) => !seen.has(i.job.id))].slice(0, TAB_LIMIT);
+
+  if (items.length > 0) return { state: "READY" as const, items };
+  return ctx ? { state: "EMPTY" as const, items: [] } : { state: "NEEDS_PROFILE" as const, items: [] };
 }
 
 function scoreCandidates(profile: CareerProfile, jobs: Job[]): JobCurationItem[] {

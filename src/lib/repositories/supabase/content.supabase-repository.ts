@@ -25,6 +25,7 @@ function mapRow(row: Record<string, unknown>): CareerContent {
     status: row.status as CareerContent["status"],
     provider: (row.provider as string | undefined) ?? undefined,
     thumbnailUrl: (row.thumbnail_url as string | undefined) ?? undefined,
+    externalUrl: (row.external_url as string | undefined) ?? undefined,
     metadata: (row.metadata as Record<string, unknown> | undefined) ?? undefined,
     createdAt: String(row.created_at),
     updatedAt: String(row.updated_at),
@@ -73,6 +74,7 @@ export function createSupabaseContentRepository(): ContentRepository | null {
           target_conditions: input.targetConditions ?? [],
           required_qualifications: input.requiredQualifications ?? [],
           recommendation_rules: input.recommendationRules ?? {},
+          external_url: input.externalUrl ?? null,
           created_at: now,
           updated_at: now,
         })
@@ -101,6 +103,7 @@ export function createSupabaseContentRepository(): ContentRepository | null {
           target_conditions: input.targetConditions,
           required_qualifications: input.requiredQualifications,
           recommendation_rules: input.recommendationRules,
+          external_url: input.externalUrl,
           updated_at: new Date().toISOString(),
         })
         .eq("id", id)

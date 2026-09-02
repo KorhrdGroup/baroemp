@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { interactiveCardClass } from "@/lib/ui-classes";
-import { RotateCcw, UserPlus } from "lucide-react";
+import { ExternalLink, RotateCcw, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { REGION_LABELS } from "@/lib/labels";
-import type { AssessmentResult, CareerContent, Occupation } from "@/types";
-import { OccupationRecommendationCard } from "./occupation-recommendation-card";
+import { splitRecommendationTracks } from "./recommendation-tracks";
+import type { AssessmentResult, CareerContent, Occupation, OccupationRecommendation } from "@/types";
+import { OccupationRecommendationCard, type ExternalCourseLink } from "./occupation-recommendation-card";
 import { TrackedLink } from "./tracked-link";
 
 interface ResultViewProps {
@@ -13,13 +14,43 @@ interface ResultViewProps {
   result: AssessmentResult;
   occupationsById: Map<string, Occupation>;
   contentRecs: CareerContent[];
+  /** 콘텐츠 id → 외부 신청/안내 페이지 URL. "준비하러 가기" 연결에 쓴다. */
+  contentUrlById?: Record<string, string>;
+  /** 외부 페이지가 등록된 취득 과정 목록. 자격 요건 칩을 과정 페이지로 잇는 데 쓴다. */
+  externalCourses?: ExternalCourseLink[];
+  /** 마이페이지 등에서 특정 직업을 보러 온 경우, 그 카드를 열어서 보여준다. */
+  focusOccupationId?: string;
   jobCounts?: Record<string, { total: number; highMatchCount: number }>;
 }
 
-export function ResultView({ sessionId, result, occupationsById, contentRecs: allContentRecs, jobCounts }: ResultViewProps) {
+export function ResultView({
+  sessionId,
+  result,
+  occupationsById,
+  contentRecs: allContentRecs,
+  contentUrlById = {},
+  externalCourses = [],
+  focusOccupationId,
+  jobCounts,
+}: ResultViewProps) {
+  /** 지목된 카드가 있으면 그 카드만, 없으면 첫 카드를 열어둔다. */
+  const isCardOpen = (occupationId: string, isFirstDefault: boolean) =>
+    focusOccupationId ? focusOccupationId === occupationId : isFirstDefault;
+  /** 추천 취득 과정 중 외부 페이지가 등록된 첫 콘텐츠의 URL. */
+  const prepareUrlFor = (rec: OccupationRecommendation) =>
+    [...(rec.readinessProjection?.map((p) => p.contentId) ?? []), ...(rec.recommendedContentIds ?? [])]
+      .map((id) => contentUrlById[id])
+      .find(Boolean);
   // 취업컨설팅은 공개 전이라 그리로 보내는 추천은 걸러 둔다. 열 때 이 줄만 지우면 된다.
   const contentRecs = allContentRecs.filter((c) => c.type !== "CONSULTING");
   const top = result.recommendations[0];
+
+  /*
+   * 두 트랙으로 가른다: 지금 조건으로 지원 가능한 직업 vs 자격을 갖추면 열리는 직업.
+   * 자격 미보유를 순위 감점으로만 보여주면 "안 되는 이유"가 되지만,
+   * 따로 모아 보여주면 "이것만 채우면 가능하다"는 로드맵이 된다.
+   */
+  const { ready: readyRecs, preparation: preparationRecs } = splitRecommendationTracks(result.recommendations);
   const regionLabel = result.extractedProfile.region ? REGION_LABELS[result.extractedProfile.region] : undefined;
   const isAnonymous = !result.userId;
 
@@ -39,34 +70,76 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs: al
           <div className="mt-5 flex flex-wrap gap-2">
             {result.generatedTags.map((tag) => (
               <span key={tag} className="rounded-full bg-white px-3 py-1 text-label-1 font-medium text-slate-700">
-                {tag}
+                #{tag}
               </span>
             ))}
           </div>
         )}
       </div>
 
-      <div className="space-y-4">
-        {result.recommendations.map((rec, i) => (
-          <OccupationRecommendationCard
-            key={rec.occupationId}
-            rank={i + 1}
-            rec={rec}
-            occupation={occupationsById.get(rec.occupationId)}
-            sessionId={sessionId}
-            userId={result.userId}
-            anonymousId={result.anonymousId}
-            defaultOpen={i === 0}
-            regionLabel={regionLabel}
-            jobCount={jobCounts?.[rec.occupationId]}
-          />
-        ))}
-        {result.recommendations.length === 0 && (
-          <div className="rounded-xl bg-white p-10 text-center text-slate-500">
-            조건에 맞는 추천 직업을 찾지 못했어요. 답변을 조금 더 넓혀서 다시 시도해보세요.
+      {readyRecs.length > 0 && (
+        <div className="space-y-4">
+          {/* 준비 트랙이 없으면 화면 전체가 한 목록이므로 굳이 머리말로 가르지 않는다. */}
+          {preparationRecs.length > 0 && (
+            <div className="pt-2">
+              <h2 className="text-body-1 font-bold text-slate-900">지금 바로 지원할 수 있는 직업</h2>
+              <p className="mt-1 text-label-1 text-slate-500">현재 조건 그대로 도전할 수 있는 직업이에요.</p>
+            </div>
+          )}
+          {readyRecs.map((rec, i) => (
+            /* 마이페이지에서 특정 직업으로 들어올 때 앵커로 쓴다. scroll-mt는 상단 고정 헤더 높이만큼. */
+            <div key={rec.occupationId} id={`occupation-${rec.occupationId}`} className="scroll-mt-24">
+              <OccupationRecommendationCard
+                rank={i + 1}
+                rec={rec}
+                occupation={occupationsById.get(rec.occupationId)}
+                sessionId={sessionId}
+                userId={result.userId}
+                anonymousId={result.anonymousId}
+                defaultOpen={isCardOpen(rec.occupationId, i === 0)}
+                regionLabel={regionLabel}
+                jobCount={jobCounts?.[rec.occupationId]}
+                externalCourses={externalCourses}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {preparationRecs.length > 0 && (
+        <div className="space-y-4">
+          <div className="pt-2">
+            <h2 className="text-body-1 font-bold text-slate-900">준비하면 열리는 직업</h2>
+            <p className="mt-1 text-label-1 text-slate-500">
+              성향은 잘 맞지만 자격이 필요한 직업이에요. 자격을 갖추면 지원할 수 있는 범위가 넓어져요.
+            </p>
           </div>
-        )}
-      </div>
+          {preparationRecs.map((rec, i) => (
+            <div key={rec.occupationId} id={`occupation-${rec.occupationId}`} className="scroll-mt-24">
+              <OccupationRecommendationCard
+                rank={i + 1}
+                rec={rec}
+                variant="preparation"
+                occupation={occupationsById.get(rec.occupationId)}
+                sessionId={sessionId}
+                userId={result.userId}
+                anonymousId={result.anonymousId}
+                defaultOpen={isCardOpen(rec.occupationId, readyRecs.length === 0 && i === 0)}
+                regionLabel={regionLabel}
+                jobCount={jobCounts?.[rec.occupationId]}
+                prepareUrl={prepareUrlFor(rec)}
+                externalCourses={externalCourses}
+              />
+            </div>
+          ))}
+        </div>
+      )}
+
+      {result.recommendations.length === 0 && (
+        <div className="rounded-xl bg-white p-10 text-center text-slate-500">
+          조건에 맞는 추천 직업을 찾지 못했어요. 답변을 조금 더 넓혀서 다시 시도해보세요.
+        </div>
+      )}
 
       {contentRecs.length > 0 && (
         <div className="rounded-xl bg-white p-6 sm:p-8">
@@ -81,16 +154,23 @@ export function ResultView({ sessionId, result, occupationsById, contentRecs: al
                 targetId={content.id}
                 userId={result.userId}
                 anonymousId={result.anonymousId}
+                /* 외부 신청 페이지가 등록된 과정은 그리로 바로 보낸다. 없으면 기존 안내 화면 폴백. */
                 href={
-                  content.type === "SUPPORT_PROGRAM"
+                  content.externalUrl ??
+                  (content.type === "SUPPORT_PROGRAM"
                     ? "/support"
                     : content.type === "CONSULTING"
                       ? "/consulting"
-                      : "/resume"
+                      : "/resume")
                 }
+                target={content.externalUrl ? "_blank" : undefined}
+                rel={content.externalUrl ? "noopener noreferrer" : undefined}
                 className={cn("rounded-xl bg-slate-50 p-4", interactiveCardClass)}
               >
-                <p className="text-body-2 font-semibold text-slate-800">{content.title}</p>
+                <p className="flex items-center gap-1.5 text-body-2 font-semibold text-slate-800">
+                  {content.title}
+                  {content.externalUrl && <ExternalLink className="size-3.5 shrink-0 text-slate-400" />}
+                </p>
                 <p className="mt-1 text-label-1 text-slate-500">{content.summary ?? content.shortDescription}</p>
               </TrackedLink>
             ))}

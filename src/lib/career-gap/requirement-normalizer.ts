@@ -72,6 +72,8 @@ export function detectRequirementLevel(haystack: { full: string; structured: str
 const OCCUPATION_CODE_REQUIREMENTS: { prefix: string; requirementKey: string; label: string }[] = [
   { prefix: "5501", requirementKey: "care_worker_certificate", label: "요양보호사 직종(고용24 5501xx)" },
   { prefix: "2311", requirementKey: "social_worker_level_2", label: "사회복지사 직종(고용24 2311xx)" },
+  { prefix: "2321", requirementKey: "childcare_teacher_level_2", label: "보육교사 직종(고용24 2321xx)" },
+  { prefix: "2123", requirementKey: "librarian_certificate", label: "사서 직종(고용24 2123xx)" },
 ];
 
 /** 이 공고의 직종코드가 해당 자격을 전제로 하는지. */

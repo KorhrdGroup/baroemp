@@ -21,10 +21,12 @@ import {
   getMatchResultRepository,
   getSupportAssessmentSessionRepository,
   getSupportProgramRepository,
+  getUserQualificationRepository,
 } from "@/lib/repositories";
 import { activityEventLogger } from "@/lib/activity/event-logger";
 import { getRecommendedJobsForUser, type JobWithMatch } from "@/services/job-search.service";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
+import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { getUserCrmDetail } from "@/services/user-crm.service";
 import { requireUser } from "@/lib/auth/session";
@@ -166,10 +168,15 @@ export default async function MyPage() {
   */
   const { profile, careerProfile, assessmentResults } = detail;
   const latestResult = assessmentResults[0];
-  const [jobData, supportData] = await Promise.all([
+  const [jobData, supportData, heldQualifications] = await Promise.all([
     loadMyPageJobData(user.id),
     loadMyPageSupportData(user.id),
+    // 보유 자격은 career_profiles가 아니라 Career DB(user_qualifications)가 원본이다.
+    getUserQualificationRepository()
+      .findByUserId(user.id)
+      .catch(() => []),
   ]);
+  const heldQualificationNames = [...new Set(heldQualifications.map((q) => q.name))];
 
   /*
     맨 위 요약 줄. 지금 내가 어디까지 해뒀는지를 숫자로 먼저 보여주고, 각 숫자는
@@ -290,66 +297,66 @@ export default async function MyPage() {
               <Link href="/mypage/profile">정보 수정</Link>
             </Button>
           </div>
-          <div className="space-y-4">
-            {/* A. 내 정보 */}
-            <Card className="rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
-                  <UserRound className="size-4" /> 기본 정보
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-label-1 text-slate-600">
-                <p>
-                  <span className="text-slate-400">이름</span> · {profile.name ?? "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">이메일</span> · {profile.email ?? "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">휴대전화번호</span> · {formatPhone(profile.phone)}
-                </p>
-                <p>
-                  <span className="text-slate-400">가입일</span> · {profile.createdAt.slice(0, 10)}
-                </p>
-              </CardContent>
-            </Card>
+          {/* 기본 정보와 취업 프로필은 모두 "나"에 대한 내용이라 한 카드에 담고 구분선으로만 가른다. */}
+          <Card className="rounded-xl border-0 ring-1 ring-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
+                <UserRound className="size-4" /> 기본 정보
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-label-1 text-slate-600">
+              <p>
+                <span className="text-slate-400">이름</span> · {profile.name ?? "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">이메일</span> · {profile.email ?? "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">휴대전화번호</span> · {formatPhone(profile.phone)}
+              </p>
+              <p>
+                <span className="text-slate-400">가입일</span> · {profile.createdAt.slice(0, 10)}
+              </p>
+            </CardContent>
 
-            {/* B. 취업 프로필 */}
-            <Card className="rounded-xl border-0 ring-1 ring-border">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-1.5 text-body-2">
-                  <Briefcase className="size-4" /> 취업 프로필
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2 text-label-1 text-slate-600">
-                <p>
-                  <span className="text-slate-400">취업상태</span> · {labelEmploymentStatus(careerProfile?.employmentStatus)}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망지역</span> · {labelRegion(careerProfile?.region)}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망근무형태</span> ·{" "}
-                  {careerProfile?.desiredWorkTypes && careerProfile.desiredWorkTypes.length > 0
-                    ? careerProfile.desiredWorkTypes.map((t) => labelWorkType(t)).join(", ")
-                    : "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망급여</span> ·{" "}
-                  {careerProfile?.desiredSalaryMin || careerProfile?.desiredSalaryMax
-                    ? `${careerProfile?.desiredSalaryMin ?? "-"} ~ ${careerProfile?.desiredSalaryMax ?? "-"}만원`
-                    : "-"}
-                </p>
-                <p>
-                  <span className="text-slate-400">희망 취업시기</span> · {labelDesiredStartTiming(careerProfile?.desiredStartTiming)}
-                </p>
-                <p>
-                  <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
-                </p>
-              </CardContent>
-            </Card>
+            <div className="mx-4 border-t border-slate-100" />
 
-          </div>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
+                <Briefcase className="size-4" /> 취업 프로필
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-2 text-label-1 text-slate-600">
+              <p>
+                <span className="text-slate-400">취업상태</span> · {labelEmploymentStatus(careerProfile?.employmentStatus)}
+              </p>
+              <p>
+                <span className="text-slate-400">희망지역</span> · {labelRegion(careerProfile?.region)}
+              </p>
+              <p>
+                <span className="text-slate-400">희망근무형태</span> ·{" "}
+                {careerProfile?.desiredWorkTypes && careerProfile.desiredWorkTypes.length > 0
+                  ? careerProfile.desiredWorkTypes.map((t) => labelWorkType(t)).join(", ")
+                  : "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">희망급여</span> ·{" "}
+                {careerProfile?.desiredSalaryMin || careerProfile?.desiredSalaryMax
+                  ? `${careerProfile?.desiredSalaryMin ?? "-"} ~ ${careerProfile?.desiredSalaryMax ?? "-"}만원`
+                  : "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">희망 취업시기</span> · {labelDesiredStartTiming(careerProfile?.desiredStartTiming)}
+              </p>
+              <p>
+                <span className="text-slate-400">교육의향</span> · {careerProfile?.isOpenToTraining ? "있음" : "-"}
+              </p>
+              <p>
+                <span className="text-slate-400">보유 자격증</span> ·{" "}
+                {heldQualificationNames.length > 0 ? heldQualificationNames.join(", ") : "-"}
+              </p>
+            </CardContent>
+          </Card>
         </aside>
 
         <div className="min-w-0 flex-1 space-y-10">
@@ -364,16 +371,62 @@ export default async function MyPage() {
                 </CardHeader>
                 <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   <p className="text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</p>
-                  <div className="space-y-2.5">
-                    {latestResult.recommendations.slice(0, 3).map((rec, i) => (
-                      <div key={rec.occupationId} className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
-                        <span className="font-medium text-slate-700">
-                          TOP{i + 1} · {rec.occupationName}
-                        </span>
-                        <span className="font-bold text-brand-blue-600">{rec.totalScore}점</span>
+                  {/* 결과 화면과 같은 두 트랙. 준비 트랙 총점에는 자격 미보유 감점이 섞여 있어 성향 적합도를 쓴다. */}
+                  {(() => {
+                    const { ready, preparation } = splitRecommendationTracks(latestResult.recommendations);
+                    return (
+                      <div className="space-y-3">
+                        {ready.length > 0 && (
+                          <div>
+                            <p className="mb-1.5 text-label-2 font-semibold text-slate-400">지금 바로 지원할 수 있는 직업</p>
+                            <div className="space-y-2.5">
+                              {/* 행을 누르면 결과 화면에서 그 직업 카드가 열린 채로 보인다. */}
+                              {ready.slice(0, 3).map((rec, i) => (
+                                <Link
+                                  key={rec.occupationId}
+                                  href={`/assessment/result/${latestResult.sessionId}?focus=${rec.occupationId}#occupation-${rec.occupationId}`}
+                                  className={cn(
+                                    "flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2",
+                                    interactiveRowClass,
+                                  )}
+                                >
+                                  <span className="font-medium text-slate-700">
+                                    TOP{i + 1} · {rec.occupationName}
+                                  </span>
+                                  <span className="font-bold text-brand-blue-600">{rec.totalScore}점</span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        {preparation.length > 0 && (
+                          <div>
+                            <p className="mb-1.5 text-label-2 font-semibold text-slate-400">준비하면 열리는 직업</p>
+                            <div className="space-y-2.5">
+                              {preparation.slice(0, 3).map((rec) => (
+                                <Link
+                                  key={rec.occupationId}
+                                  href={`/assessment/result/${latestResult.sessionId}?focus=${rec.occupationId}#occupation-${rec.occupationId}`}
+                                  className={cn(
+                                    "flex items-center justify-between gap-2 rounded-lg bg-amber-50/60 px-3 py-2",
+                                    interactiveRowClass,
+                                  )}
+                                >
+                                  <span className="min-w-0 truncate font-medium text-slate-700">{rec.occupationName}</span>
+                                  <span className="flex shrink-0 items-center gap-2">
+                                    <span className="rounded-full bg-amber-50 px-2 py-0.5 text-label-2 font-semibold text-amber-700">
+                                      자격 취득 시 가능
+                                    </span>
+                                    <span className="font-bold text-brand-blue-600">{rec.dimensionFitScore}점</span>
+                                  </span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })()}
                   <div className="flex gap-2">
                     <Button variant="outline" className="flex-1" asChild>
                       <Link href={`/assessment/result/${latestResult.sessionId}`}>결과 다시보기</Link>

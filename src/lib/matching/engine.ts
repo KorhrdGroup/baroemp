@@ -7,6 +7,7 @@ import type {
   SupportProgram,
 } from "@/types";
 import { evaluateRecommendationRuleRows } from "./rule-evaluator";
+import { toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 
 /**
  * Matching Engine 인터페이스.
@@ -133,7 +134,8 @@ export class SimpleRuleBasedMatchingEngine implements MatchingEngine {
       .map((job) => {
         const reasons: MatchReasonDetail[] = [];
 
-        if (profile.desiredJobCategories?.includes(job.jobCategory)) {
+        // 희망 직종은 묶음 key/6자리 코드가 섞여 있으므로 코드 앞자리로 비교한다 (evaluateJobFit과 동일).
+        if (toJobCategoryPatterns(profile.desiredJobCategories ?? []).some((prefix) => job.jobCategory.startsWith(prefix))) {
           reasons.push({ ruleKey: "job_category", label: "희망 직종 일치", score: 35 });
         }
         if (profile.region && profile.region === job.region) {

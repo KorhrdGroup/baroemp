@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
-import { Briefcase, Sparkles } from "lucide-react";
+import { Briefcase, KeyRound } from "lucide-react";
 import { EmptyState } from "@/components/common/empty-state";
 import { compareUserToJobsRequirements } from "@/services/job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
 import { JobCard } from "@/features/jobs/job-card";
+import { JobRowCompact } from "@/features/jobs/job-row-compact";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { JobCurationSection } from "@/features/jobs/job-curation-section";
 import { Pagination } from "@/components/common/pagination";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
-import { searchJobs, getRecommendedJobsForAnonymous, type JobSearchParams } from "@/services/job-search.service";
+import { searchJobs, type JobSearchParams } from "@/services/job-search.service";
+import { getRecommendedJobsFromAssessment } from "@/services/assessment-job.service";
 import { getJobCuration } from "@/services/job-curation.service";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { getOccupationRepository } from "@/lib/repositories";
@@ -20,7 +22,9 @@ export const metadata: Metadata = {
   title: "일자리 찾기 | 한평생 바로취업",
 };
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
+/** "자격 따면 열리는" 섹션을 전체 공고 몇 개 뒤에 끼울지. */
+const INTERLEAVE_AFTER = 6;
 
 interface JobsPageSearchParams {
   keyword?: string;
@@ -68,10 +72,11 @@ export default async function JobsPage({
 
   const [result, recommendation, currentUser, bookmarkedIds, initialCuration] = await Promise.all([
     searchJobs(filter),
-    getRecommendedJobsForAnonymous(anonymousId),
+    getRecommendedJobsFromAssessment({ userId: user.id, anonymousId }),
     getCurrentUser(),
     getUserJobBookmarkIdsAction(),
-    getJobCuration(user.id, "new"),
+    // 큐레이션 섹션의 첫 화면에 뜨는 탭 (JobCurationSection 의 INITIAL_TAB 과 짝을 맞춰야 한다).
+    getJobCuration(user.id, "matched"),
   ]);
   const isAuthenticated = Boolean(currentUser);
 
@@ -88,7 +93,7 @@ export default async function JobsPage({
     공고 원문에서 필수 요건을 뽑아 회원 준비 상태와 맞춰본다. 요건 사전이 필요해
     카드 안에서는 못 만들고, 여기서 이 페이지에 그릴 공고만 한 번에 계산해 넘긴다.
   */
-  const badgeJobs = [...result.items, ...(recommendation?.jobs ?? [])];
+  const badgeJobs = [...result.items, ...(recommendation?.preparation?.jobs ?? [])];
   const readinessMap = currentUser
     ? new Map(
         [...(await compareUserToJobsRequirements(currentUser.id, badgeJobs))].map(([jobId, items]) => [
@@ -141,37 +146,20 @@ export default async function JobsPage({
           </p>
         }
       >
-      {recommendation && recommendation.jobs.length > 0 && (
-        <div className="mt-8">
-          <div className="flex items-center gap-2">
-            <Sparkles className="size-5 text-brand-blue-600" />
-            <h2 className="text-body-1 font-bold text-slate-900">
-              검사 결과 기반 &ldquo;{recommendation.occupationName}&rdquo; 맞춤 공고
-            </h2>
-          </div>
-          <div className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {recommendation.jobs.map((job) => (
-              <JobCard
-                key={`rec-${job.id}`}
-                job={job}
-                isAuthenticated={isAuthenticated}
-                isBookmarked={bookmarkedSet.has(job.id)}
-                readiness={readinessMap.get(job.id)}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
+      {/* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */}
       <div className="mt-8">
         <JobCurationSection
-          initialNew={initialCuration}
+          initialActive={initialCuration}
           bookmarkedIds={bookmarkedIds}
         />
       </div>
       </JobFiltersForm>
 
-      <div className="mt-4">
+      <div className="mt-8">
+        <h2 className="text-body-1 font-bold text-slate-900">
+          전체 공고 <span className="font-semibold text-brand-blue-600">{result.total.toLocaleString()}</span>
+          <span className="ml-0.5 text-body-2 font-medium text-slate-500">건</span>
+        </h2>
         {result.items.length === 0 ? (
           <EmptyState
             icon={Briefcase}
@@ -182,7 +170,7 @@ export default async function JobsPage({
         ) : (
           <>
             <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {result.items.map((job) => (
+              {result.items.slice(0, INTERLEAVE_AFTER).map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
@@ -190,9 +178,53 @@ export default async function JobsPage({
                   isAuthenticated={isAuthenticated}
                   isBookmarked={bookmarkedSet.has(job.id)}
                   readiness={readinessMap.get(job.id)}
+                  hoverTint
                 />
               ))}
             </div>
+
+            {/*
+              진단 준비 트랙("자격 따면 열리는") 섹션은 목록 사이에 끼운다.
+              맨 위에 두면 검색 결과가 밀리고, 맨 아래면 아무도 못 본다.
+              페이지를 넘길 때마다 또 나오면 광고처럼 읽혀 첫 페이지에만 둔다.
+            */}
+            {page === 1 && recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
+              <div className="mt-6 rounded-2xl bg-amber-50/70 p-5 sm:p-6">
+                <div className="flex items-center gap-2">
+                  <KeyRound className="size-5 text-amber-600" />
+                  <h2 className="text-body-1 font-bold text-slate-900">
+                    자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
+                  </h2>
+                </div>
+                <p className="mt-1 text-label-1 text-slate-600">
+                  진단에서 성향이 잘 맞았던 직업이에요.
+                  {recommendation.preparation.missingQualifications?.length
+                    ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
+                    : ""}
+                </p>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {recommendation.preparation.jobs.map((job) => (
+                    <JobRowCompact key={`prep-${job.id}`} job={job} readiness={readinessMap.get(job.id)} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {result.items.length > INTERLEAVE_AFTER && (
+              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {result.items.slice(INTERLEAVE_AFTER).map((job) => (
+                  <JobCard
+                    key={job.id}
+                    job={job}
+                    matchReasonLabel={job.match?.reasons[0]?.label}
+                    isAuthenticated={isAuthenticated}
+                    isBookmarked={bookmarkedSet.has(job.id)}
+                    readiness={readinessMap.get(job.id)}
+                    hoverTint
+                  />
+                ))}
+              </div>
+            )}
 
             <Pagination page={page} totalPages={totalPages} buildHref={buildPageHref} className="mt-8" />
           </>

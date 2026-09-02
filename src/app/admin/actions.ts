@@ -28,6 +28,7 @@ export async function saveContentAction(formData: FormData) {
     targetConditions: [],
     requiredQualifications: [],
     recommendationRules: { weight: Number(formData.get("weight") ?? 1) || 1 },
+    externalUrl: String(formData.get("externalUrl") ?? "").trim() || undefined,
   };
 
   if (!input.title) {

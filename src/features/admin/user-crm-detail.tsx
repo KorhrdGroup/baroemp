@@ -403,7 +403,7 @@ export function UserCrmDetailView({ detail }: { detail: UserCrmDetail }) {
                   <div className="flex flex-wrap gap-1">
                     {result.generatedTags.slice(0, 6).map((tag) => (
                       <Badge key={tag} variant="outline" className="rounded-md text-label-2">
-                        {tag}
+                        #{tag}
                       </Badge>
                     ))}
                   </div>

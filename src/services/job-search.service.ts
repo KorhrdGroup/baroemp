@@ -67,12 +67,6 @@ export async function getRecommendedJobsForUser(userId: string | undefined, limi
   return scored.slice(0, limit).map(({ job, match }) => ({ ...job, match }));
 }
 
-export interface AnonymousRecommendation {
-  occupationName: string;
-  jobCategoryCode: string;
-  jobs: Job[];
-}
-
 /**
  * 비회원의 최근 검사 결과(extractedProfile)를 evaluateJobFit이 읽을 수 있는 CareerProfile 모양으로 감싼다.
  * 실제 career_profiles row가 아니라 즉석에서 만든 값이므로 id/userId는 placeholder다.
@@ -93,30 +87,6 @@ export async function getAnonymousCareerSignal(anonymousId: string | undefined):
   } as CareerProfile;
 }
 
-/**
- * 비회원 "맞춤 채용공고" 영역용. 로그인 없이도 최근 완료한 검사 세션(anonymousId)이 있으면
- * 검사 TOP1 추천 직업과 관련된 공고를 보여준다 (Career Profile이 없어 매칭 점수는 계산하지 않는다).
- */
-export async function getRecommendedJobsForAnonymous(
-  anonymousId: string | undefined,
-  limit = 6,
-): Promise<AnonymousRecommendation | null> {
-  if (!anonymousId) return null;
-  const results = await getAssessmentResultRepository().findAll({ anonymousId });
-  if (results.length === 0) return null;
-
-  const latest = [...results].sort((a, b) => (a.completedAt < b.completedAt ? 1 : -1))[0];
-  const top = latest.recommendations[0];
-  if (!top?.jobCategoryCode) return null;
-
-  const jobs = await getJobRepository().findAll({
-    jobCategory: top.jobCategoryCode,
-    activeOnly: true,
-  } as JobSearchFilter);
-  if (jobs.length === 0) return null;
-
-  return { occupationName: top.occupationName, jobCategoryCode: top.jobCategoryCode, jobs: jobs.slice(0, limit) };
-}
 
 /**
  * Assessment 결과 화면에서 "현재 관련 채용공고 N건 / 회원님의 조건과 높은 일치 M건" 표시에 사용한다.
