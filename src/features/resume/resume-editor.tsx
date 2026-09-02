@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { AlertCircle, ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, CheckCircle2, ChevronDown, Eye, ListPlus, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -53,6 +53,7 @@ import {
 } from "./resume-actions";
 import { calculateResumeCompleteness } from "@/lib/resume/completeness";
 import { ResumePreview } from "./resume-preview";
+import { ReviewRail, type RailItem } from "./review-rail";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
 import { REGION_LABELS } from "@/lib/labels";
@@ -122,6 +123,16 @@ const EXTRA_SECTION_KEY = "EXTRA";
 function sectionAnchorId(key: string) {
   return `resume-section-${key}`;
 }
+
+/** AI가 짧은 제목을 안 준 항목(Mock 등)의 기본 제목. */
+const SECTION_RAIL_TITLES: Record<string, string> = {
+  SUMMARY: "한 줄 소개 정돈",
+  EXPERIENCE: "경력 내용 보완",
+  EDUCATION: "학력 채우기",
+  QUALIFICATION: "자격증 채우기",
+  TRAINING: "교육·훈련 채우기",
+  SKILLS: "보유 스킬 채우기",
+};
 
 const ITEM_SECTION_LABELS: Record<ResumeItemSectionType, string> = {
   AWARD: "수상",
@@ -417,9 +428,10 @@ export function ResumeEditor({
   );
 
   const [reviewResult, setReviewResult] = useState<AIResumeReviewResult | null>(null);
-  /** 보완할 부분은 처음에 3개만 보여준다. 40~60대 사용자에게 열 줄짜리 벽글은 안 읽힌다. */
-  const [showAllImprovements, setShowAllImprovements] = useState(false);
-  const reviewResultRef = useRef<HTMLDivElement>(null);
+  /** 점검 결과 팝업(레일). 항목을 누르면 해당 섹션으로 이동해 바로 고친다. */
+  const [railItems, setRailItems] = useState<RailItem[]>([]);
+  const [railOpen, setRailOpen] = useState(false);
+  const [activeRailItemId, setActiveRailItemId] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const photoInputRef = useRef<HTMLInputElement>(null);
   const [marketComparison, setMarketComparison] = useState<ResumeMarketComparisonView | null>(null);
@@ -588,10 +600,28 @@ export function ResumeEditor({
         await handleSave();
         const result = await reviewResumeAiAction(resume.id);
         setReviewResult(result);
-        setShowAllImprovements(false);
-        // 점검 버튼은 사이드바에 있고 결과는 페이지 상단에 뜬다. 결과가 뜬 줄로 데려가지
-        // 않으면 사용자는 결과가 나온 것 자체를 모른다.
-        requestAnimationFrame(() => reviewResultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+        // 개선점을 팝업 레일 항목으로 바꾼다. AI가 준 짧은 제목·예상 점수를 쓰고,
+        // 없으면(Mock 등) 심각도로 기본값을 채운다. PROJECT·ACTIVITY는 한 카드(EXTRA)로 묶인다.
+        const items = result.improvements.map((imp, i): RailItem => {
+          const section = String(imp.section);
+          const sectionKey = ["PROJECT", "ACTIVITY", "VOLUNTEER"].includes(section)
+            ? EXTRA_SECTION_KEY
+            : ["SUMMARY", "EXPERIENCE", "EDUCATION", "QUALIFICATION", "TRAINING", "SKILLS"].includes(section)
+              ? section
+              : "BASIC_INFO";
+          return {
+            id: `imp-${i}`,
+            sectionKey,
+            title: imp.title ?? SECTION_RAIL_TITLES[section] ?? "내용 보완",
+            hint: imp.comment,
+            gain: Math.max(1, Math.round(imp.gain ?? (imp.severity === "critical" ? 10 : 5))),
+            severity: imp.severity === "critical" ? "required" : "recommended",
+            done: false,
+          };
+        });
+        setRailItems(items);
+        setActiveRailItemId(items[0]?.id ?? null);
+        setRailOpen(true);
         setMarketComparison(null);
         // AI 첨삭과 독립 - 실패해도 첨삭 결과 표시에는 영향 없음 (설계 3절)
         const requestId = ++marketComparisonRequestRef.current;
@@ -647,6 +677,26 @@ export function ResumeEditor({
     });
   }
 
+  /** 레일 항목 선택: 해당 섹션 카드로 스크롤해 바로 고치게 한다. */
+  function selectRailItem(id: string) {
+    setActiveRailItemId(id);
+    const item = railItems.find((i) => i.id === id);
+    if (!item) return;
+    document.getElementById(sectionAnchorId(item.sectionKey))?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function toggleRailDone(id: string) {
+    setRailItems((prev) => prev.map((i) => (i.id === id ? { ...i, done: !i.done } : i)));
+    const next = railItems.find((i) => !i.done && i.id !== id);
+    if (next) selectRailItem(next.id);
+  }
+
+  function goNextRailItem() {
+    const idx = railItems.findIndex((i) => i.id === activeRailItemId);
+    const next = [...railItems.slice(idx + 1), ...railItems.slice(0, idx + 1)].find((i) => !i.done);
+    if (next) selectRailItem(next.id);
+  }
+
   async function handlePhotoChange(file: File | undefined) {
     if (!file) return;
     setUploadingPhoto(true);
@@ -666,6 +716,9 @@ export function ResumeEditor({
   function handlePrint() {
     void trackResumeExportedAction(resume.id, "pdf");
     window.print();
+    // 미리보기 팝업이 열린 채 인쇄하면 인쇄창이 화면을 얼리는 동안 스크롤/클릭 잠금
+    // 정리가 씹힐 수 있다. 인쇄창이 닫힌 뒤 남은 잠금을 직접 풀어준다.
+    document.body.style.pointerEvents = "";
   }
 
   /** 팝업 오버레이가 인쇄물에 끼지 않도록 닫힘 애니메이션이 끝난 뒤 인쇄한다. */
@@ -1410,7 +1463,9 @@ export function ResumeEditor({
   };
 
   return (
-    <div className="space-y-6">
+    <>
+    {/* 인쇄 시 편집 화면은 display:none. 눈에만 숨기면(visibility) 높이가 남아 PDF가 빈 장으로 늘어난다. */}
+    <div className="space-y-6 print:hidden">
 
       {/*
         좁은 화면용 항목 띠. 항목이 세로로 길게 이어져 본문 한가운데서는 지금 무엇을
@@ -1566,82 +1621,7 @@ export function ResumeEditor({
           </div>
         </div>
 
-        {reviewResult && (
-          /*
-            40~60대가 읽는 화면이라 벽글 목록 대신 큰 글자 카드로 편다.
-            scroll-mt는 스크롤 이동 시 고정 헤더에 가리지 않게 하는 여유분.
-          */
-          <div ref={reviewResultRef} className="scroll-mt-24 rounded-2xl bg-brand-blue-50/50 p-5 ring-1 ring-brand-blue-200 sm:p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <h2 className="text-title-3 font-bold text-slate-900">AI 점검 결과</h2>
-              <p className="text-slate-500">
-                <span className="text-4xl font-bold text-brand-blue-600">{reviewResult.score}</span>
-                <span className="ml-1 text-body-2 font-medium">점 / 100점</span>
-              </p>
-            </div>
-
-            {reviewResult.strengths.length > 0 && (
-              <section className="mt-5">
-                <p className="flex items-center gap-1.5 text-body-2 font-bold text-emerald-700">
-                  <CheckCircle2 className="size-5" /> 잘하신 부분
-                </p>
-                <ul className="mt-2 space-y-2">
-                  {reviewResult.strengths.map((s, i) => (
-                    <li key={i} className="rounded-xl bg-white px-4 py-3 text-body-2-reading break-keep text-slate-700">
-                      {s}
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-
-            {reviewResult.improvements.length > 0 && (
-              <section className="mt-5">
-                <p className="flex items-center gap-1.5 text-body-2 font-bold text-orange-700">
-                  <AlertCircle className="size-5" /> 이렇게 고쳐보세요
-                </p>
-                <ul className="mt-2 space-y-2">
-                  {(showAllImprovements ? reviewResult.improvements : reviewResult.improvements.slice(0, 3)).map(
-                    (s, i) => (
-                      <li key={i} className="flex gap-3 rounded-xl bg-white px-4 py-3">
-                        <span className="mt-0.5 flex size-6 shrink-0 items-center justify-center rounded-full bg-orange-100 text-label-1 font-bold text-orange-700">
-                          {i + 1}
-                        </span>
-                        <span className="text-body-2-reading break-keep text-slate-700">{s.comment}</span>
-                      </li>
-                    ),
-                  )}
-                </ul>
-                {reviewResult.improvements.length > 3 && !showAllImprovements && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllImprovements(true)}
-                    className="mt-2 flex w-full items-center justify-center gap-1 rounded-xl border border-orange-200 bg-white py-2.5 text-body-2 font-semibold text-orange-700 hover:bg-orange-50"
-                  >
-                    나머지 {reviewResult.improvements.length - 3}개 더 보기
-                    <ChevronDown className="size-4" />
-                  </button>
-                )}
-              </section>
-            )}
-
-            {reviewResult.missingInformation.length > 0 && (
-              <section className="mt-5">
-                <p className="flex items-center gap-1.5 text-body-2 font-bold text-slate-600">
-                  <ListPlus className="size-5" /> 추가하면 좋은 정보
-                </p>
-                {/* 문장이 아니라 채울 항목의 나열이라, 카드 대신 칩으로 가볍게 깐다. */}
-                <div className="mt-2 flex flex-wrap gap-2">
-                  {reviewResult.missingInformation.map((s, i) => (
-                    <span key={i} className="rounded-full bg-white px-3 py-1.5 text-body-2 break-keep text-slate-600 ring-1 ring-slate-200">
-                      {s}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            )}
-          </div>
-        )}
+        {/* 점검 결과는 인라인 카드 대신 플로팅 레일(아래 ReviewRail)로 띄운다. */}
 
         {reviewResult && marketComparison && (
           <MarketComparisonCard
@@ -1807,10 +1787,23 @@ export function ResumeEditor({
         </div>
       </div>
 
-      {/* 화면에서는 미리보기를 팝업으로 띄우고, 인쇄(PDF 저장)할 때만 문서 흐름에 노출한다. */}
-      <div className="hidden print:block">
-        <ResumePreview detail={currentPreviewDetail()} />
-      </div>
+      {/* AI 점검 결과 팝업. 항목을 누르면 그 섹션으로 이동하고, 고친 항목은 완료로 지워간다. */}
+      {railOpen && reviewResult && (
+        <div className="print:hidden">
+          <ReviewRail
+            score={reviewResult.score}
+            items={railItems}
+            activeItemId={activeRailItemId}
+            strengths={reviewResult.strengths}
+            onSelectItem={selectRailItem}
+            onToggleDone={toggleRailDone}
+            onNext={goNextRailItem}
+            onRecheck={() => void handleReview()}
+            onClose={() => setRailOpen(false)}
+            rechecking={isReviewing}
+          />
+        </div>
+      )}
 
       {/*
         저장은 폼을 다 채운 뒤에 하는 동작이라 아래에 둔다. 폼이 길어 화면 밖으로 나가므로
@@ -1933,7 +1926,7 @@ export function ResumeEditor({
       </Dialog>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="print:hidden sm:max-w-3xl">
+        <DialogContent className="print:hidden sm:max-w-4xl">
           <DialogHeader>
             <DialogTitle>미리보기</DialogTitle>
           </DialogHeader>
@@ -1948,6 +1941,12 @@ export function ResumeEditor({
         </DialogContent>
       </Dialog>
     </div>
+
+      {/* 인쇄 전용 사본. print:hidden 루트 밖에 두어 인쇄 때만 홀로 흐름에 존재한다. */}
+      <div className="hidden print:block">
+        <ResumePreview detail={currentPreviewDetail()} />
+      </div>
+    </>
   );
 }
 

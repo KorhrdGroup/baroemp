@@ -175,6 +175,10 @@ const ReviewIssueSchema = z.object({
   section: z.string(),
   severity: z.enum(["info", "suggestion", "critical"]),
   comment: z.string(),
+  title: z.string().describe("점검 목록에 보일 짧은 제목. 12자 이내 명사구 (예: 근무 기간·직책 시점)"),
+  gain: z
+    .number()
+    .describe("이 항목을 고치면 오를 예상 점수. 중요할수록 크게, 모든 항목의 합이 (100-score)를 넘지 않게"),
 });
 
 const ReviewSchema = z.object({
