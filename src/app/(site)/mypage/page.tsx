@@ -34,6 +34,9 @@ import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
 import { SUPPORT_CATEGORY_LABELS, SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 import type { Job, MatchResult, SupportEligibilityGrade, SupportProgram } from "@/types";
+import { BellRing } from "lucide-react";
+import { getJobAlertSettings } from "@/services/job-alert.service";
+import { JobAlertSettingsForm } from "@/features/mypage/job-alert-settings-form";
 
 interface MyPageJobData {
   bookmarked: Job[];
@@ -145,6 +148,7 @@ export const metadata: Metadata = {
  */
 export default async function MyPage() {
   const user = await requireUser("/mypage");
+  const jobAlertSettings = await getJobAlertSettings(user.id);
   // 프로필 행이 아직 없어도(가입 직후, Mock 로그인 등) 인증 정보로 최소 프로필을 만들어 화면을 연다.
   const detail = await getUserCrmDetail(user.id, {
     id: user.id,
@@ -355,6 +359,18 @@ export default async function MyPage() {
                 <span className="text-slate-400">보유 자격증</span> ·{" "}
                 {heldQualificationNames.length > 0 ? heldQualificationNames.join(", ") : "-"}
               </p>
+            </CardContent>
+          </Card>
+
+          {/* 거주지 근처 공고 알림. 켜는 것이 알림톡 수신 동의라 프로필 바로 아래, 눈에 띄는 자리에 둔다. */}
+          <Card id="job-alerts" className="scroll-mt-24 rounded-xl border-0 ring-1 ring-border">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-1.5 text-body-2">
+                <BellRing className="size-4" /> 공고 알림
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <JobAlertSettingsForm initial={jobAlertSettings} phone={profile.phone ? formatPhone(profile.phone) : undefined} />
             </CardContent>
           </Card>
         </aside>
