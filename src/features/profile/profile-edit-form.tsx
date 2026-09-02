@@ -12,7 +12,7 @@ import {
   REGION_LABELS,
   WORK_TYPE_LABELS,
 } from "@/lib/labels";
-import { ChipToggle, JOB_CATEGORY_OPTIONS } from "./profile-form-fields";
+import { ChipToggle, JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "./profile-form-fields";
 
 /*
   고르는 칸. 창은 OS 기본 피커를 그대로 쓴다 - 모바일에서 커스텀 목록보다 그편이 낫다.
@@ -51,10 +51,24 @@ import type { CareerProfile, Profile, WorkType } from "@/types";
 
 const initialState: ProfileEditFormState = {};
 
-export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; careerProfile: CareerProfile | null }) {
+export function ProfileEditForm({
+  profile,
+  careerProfile,
+  heldQualificationNames = [],
+}: {
+  profile: Profile;
+  careerProfile: CareerProfile | null;
+  /** Career DB(user_qualifications)에 등록된 보유 자격. 선택지에 있는 것만 체크 상태로 보인다. */
+  heldQualificationNames?: string[];
+}) {
   const [state, formAction, pending] = useActionState(updateProfileAction, initialState);
   const [jobCategories, setJobCategories] = useState<string[]>(careerProfile?.desiredJobCategories ?? []);
   const [workTypes, setWorkTypes] = useState<WorkType[]>(careerProfile?.desiredWorkTypes ?? []);
+  const [qualifications, setQualifications] = useState<string[]>(
+    heldQualificationNames.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
+  );
+  // 목록에 없는 자격(이력서에서 올라온 것 등)은 여기서 고칠 수 없으니, 있다는 것만 알려준다.
+  const otherQualifications = heldQualificationNames.filter((n) => !QUALIFICATION_OPTIONS.includes(n));
 
   return (
     <form action={formAction} className="space-y-8">
@@ -215,6 +229,34 @@ export function ProfileEditForm({ profile, careerProfile }: { profile: Profile; 
           {jobCategories.map((v) => (
             <input key={v} type="hidden" name="desiredJobCategories" value={v} />
           ))}
+        </div>
+
+        <div>
+          <Label className="mb-2">보유 자격증</Label>
+          <div className="flex flex-wrap gap-2">
+            {QUALIFICATION_OPTIONS.map((name) => {
+              const selected = qualifications.includes(name);
+              return (
+                <ChipToggle
+                  key={name}
+                  selected={selected}
+                  onClick={() =>
+                    setQualifications((prev) => (selected ? prev.filter((v) => v !== name) : [...prev, name]))
+                  }
+                >
+                  {name}
+                </ChipToggle>
+              );
+            })}
+          </div>
+          {qualifications.map((v) => (
+            <input key={v} type="hidden" name="heldQualifications" value={v} />
+          ))}
+          {otherQualifications.length > 0 && (
+            <p className="mt-2 text-label-2 text-slate-400">
+              이력서 등에서 등록된 자격: {otherQualifications.join(", ")} (이력서에서 수정할 수 있어요)
+            </p>
+          )}
         </div>
 
         <label className="flex items-center gap-2 text-label-1 text-slate-700">
