@@ -92,7 +92,7 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
 
       {/* 다음 할 일 하나만 크게. 다섯 개를 다 권하면 하나도 안 하게 된다. */}
       {next && (
-        <div className="mt-6 flex flex-col gap-3 rounded-xl bg-white p-4 ring-1 ring-brand-blue-100 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="mt-6 flex flex-col gap-3 rounded-xl bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <p className="break-keep text-body-2 text-slate-700">{next.todoMessage}</p>
           <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" size="lg" asChild>
             <Link href={next.href}>
