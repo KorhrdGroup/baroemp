@@ -765,14 +765,15 @@ export default async function MyPage() {
                     </Link>
                   )}
                 </CardHeader>
-                <CardContent className="text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   {jobData.bookmarked.length === 0 ? (
-                    <p className="py-1 text-slate-400">
-                      아직 찜한 일자리가 없어요.{" "}
-                      <Link href="/jobs" className="font-semibold text-brand-blue-600 hover:underline">
-                        일자리 찾아보기 →
-                      </Link>
-                    </p>
+                    /* 2단계 카드와 같은 모양: 안내 한 줄 + 아래 꽉 찬 버튼. 글자 링크는 카드 안에서 누를 곳으로 안 보였다. */
+                    <>
+                      <p>아직 찜한 일자리가 없어요. 내 조건에 맞는 공고를 둘러보고 마음에 드는 곳을 찜해 두세요.</p>
+                      <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                        <Link href="/jobs">일자리 찾아보기</Link>
+                      </Button>
+                    </>
                   ) : (
                     jobData.bookmarked.map((job) => (
                       <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
@@ -808,14 +809,14 @@ export default async function MyPage() {
                     </Link>
                   )}
                 </CardHeader>
-                <CardContent className="text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
                   {supportData.bookmarked.length === 0 ? (
-                    <p className="py-1 text-slate-400">
-                      아직 찜한 지원제도가 없어요.{" "}
-                      <Link href="/support" className="font-semibold text-brand-blue-600 hover:underline">
-                        지원금 찾아보기 →
-                      </Link>
-                    </p>
+                    <>
+                      <p>아직 찜한 지원제도가 없어요. 받을 수 있는 교육·훈련 지원을 찾아 찜해 두세요.</p>
+                      <Button variant="outline" className="mt-auto w-full text-brand-blue-600 hover:bg-brand-blue-50" asChild>
+                        <Link href="/support">지원금 찾아보기</Link>
+                      </Button>
+                    </>
                   ) : (
                     supportData.bookmarked.map((program) => (
                       <Link key={program.id} href={`/support/${program.id}`} className={listRowClass}>
