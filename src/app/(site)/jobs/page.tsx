@@ -76,6 +76,8 @@ export default async function JobsPage({
     activeOnly: true,
     page,
     pageSize: PAGE_SIZE,
+    /* userId 가 빠져 있어 로그인 회원도 프로필 없는 셈으로 검색됐다 - 추천순이 회원 점수를 한 번도 안 탔던 이유. */
+    userId: user.id,
     anonymousId,
   };
 
