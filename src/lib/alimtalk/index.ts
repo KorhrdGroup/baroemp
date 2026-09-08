@@ -50,7 +50,10 @@ export function buildJobAlertBody(m: Pick<JobAlertMessage, "memberName" | "jobTi
   ].join("\n");
 }
 
-/** 발송 버튼. 템플릿과 순서·이름이 같아야 한다: 채널 추가(AC) → 공고 자세히 보기(WL) → 알림 끄기(WL). */
+/**
+ * 발송 버튼. 템플릿과 순서·이름이 같아야 한다: 채널 추가(AC) → 공고 자세히 보기(WL) → 알림 끄기(WL).
+ * 링크도 대조 대상이다. 등록된 링크는 https://www.job24.co.kr/mypage 라 해시(#job-alerts)를 붙이면 불일치가 된다.
+ */
 export function buildJobAlertButtons(m: Pick<JobAlertMessage, "detailUrl" | "settingsUrl">) {
   return [
     { name: "채널 추가", linkType: "AC", linkTypeName: "채널 추가" },

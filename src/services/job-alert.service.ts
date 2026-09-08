@@ -202,7 +202,7 @@ export async function runDailyJobAlerts(options: { dryRun?: boolean } = {}): Pro
       regionLabel: [labelRegion(pick.region as Region), pick.region_sigungu].filter(Boolean).join(" "),
       deadlineLabel: pick.apply_deadline ? pick.apply_deadline.slice(0, 10) : "상시채용",
       detailUrl: `${SITE_URL}/jobs/${pick.id}`,
-      settingsUrl: `${SITE_URL}/mypage#job-alerts`,
+      settingsUrl: `${SITE_URL}/mypage`,
     };
     const result = await provider.sendJobAlert({ phone, ...payload });
     summary.channel = result.channel;
