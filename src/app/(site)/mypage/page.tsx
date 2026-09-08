@@ -41,7 +41,7 @@ import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 import type { Job, JobApplication, MatchResult, SupportEligibilityGrade, SupportProgram } from "@/types";
-import { getJobAlertSettings } from "@/services/job-alert.service";
+import { getJobAlertSettings, listMyJobAlerts } from "@/services/job-alert.service";
 import { JobAlertSettingsForm } from "@/features/mypage/job-alert-settings-form";
 
 interface MyPageJobData {
@@ -222,7 +222,7 @@ function StepHeading({
  */
 export default async function MyPage() {
   const user = await requireUser("/mypage");
-  const jobAlertSettings = await getJobAlertSettings(user.id);
+  const [jobAlertSettings, myJobAlerts] = await Promise.all([getJobAlertSettings(user.id), listMyJobAlerts(user.id)]);
   // 프로필 행이 아직 없어도(가입 직후, Mock 로그인 등) 인증 정보로 최소 프로필을 만들어 화면을 연다.
   const detail = await getMyPageDetail(user.id, {
     id: user.id,
@@ -528,8 +528,34 @@ export default async function MyPage() {
                 <BellRing className="size-4" /> 공고 알림
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <JobAlertSettingsForm initial={jobAlertSettings} phone={profile.phone ? formatPhone(profile.phone) : undefined} />
+              {/* 최근 받은 알림. 무엇을 보냈는지 회원도 알아야 "왜 이 공고가 왔지"가 풀린다. */}
+              {myJobAlerts.length > 0 && (
+                <div className="border-t border-slate-100 pt-3">
+                  <p className="text-label-2 font-semibold text-slate-500">최근 받은 알림</p>
+                  <ul className="mt-2 space-y-1.5">
+                    {myJobAlerts.map((a) => (
+                      <li key={`${a.sentAt}-${a.jobId ?? ""}`} className="flex items-start justify-between gap-3 text-label-1">
+                        <span className="min-w-0">
+                          {a.jobId ? (
+                            <Link href={`/jobs/${a.jobId}`} className="line-clamp-1 font-medium text-slate-800 hover:underline">
+                              {a.jobTitle ?? "채용공고"}
+                            </Link>
+                          ) : (
+                            <span className="line-clamp-1 text-slate-800">{a.jobTitle ?? "채용공고"}</span>
+                          )}
+                          {a.companyName && <span className="block text-label-2 text-slate-400">{a.companyName}</span>}
+                        </span>
+                        <span className="shrink-0 text-label-2 text-slate-400">
+                          {a.sentAt.slice(5, 10).replace("-", ".")}
+                          {a.status === "failed" ? " · 문자 대체" : ""}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </CardContent>
           </Card>
         </section>

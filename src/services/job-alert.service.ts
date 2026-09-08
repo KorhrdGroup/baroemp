@@ -75,16 +75,10 @@ export async function saveJobAlertSettings(
 /** 지역별 시군구 목록. 공고가 실제로 있는 시군구만 보여준다. */
 export async function listSigunguForRegion(region: string): Promise<string[]> {
   const admin = createAdminSupabaseClient();
-  if (!admin || !region) return [];
-  const { data } = await admin
-    .from("jobs")
-    .select("region_sigungu")
-    .eq("region", region)
-    .eq("is_active", true)
-    .not("region_sigungu", "is", null)
-    .limit(1000);
-  const set = new Set((data ?? []).map((r) => String(r.region_sigungu)));
-  return [...set].sort((a, b) => a.localeCompare(b, "ko"));
+  if (!admin || !region || region === "all") return [];
+  // DB 함수(list_job_sigungu)로 distinct 를 뽑는다. 공고 1,000건만 훑던 방식은 구가 빠졌다.
+  const { data } = await admin.rpc("list_job_sigungu", { p_region: region });
+  return ((data ?? []) as { sigungu: string }[]).map((r) => r.sigungu);
 }
 
 interface JobRow {
@@ -151,11 +145,13 @@ export async function runDailyJobAlerts(options: { dryRun?: boolean } = {}): Pro
   async function jobsFor(region: string): Promise<JobRow[]> {
     const cached = jobsByRegion.get(region);
     if (cached) return cached;
-    const { data } = await admin!
+    // "all"(전국)이면 지역 조건 없이 최신 공고를 본다.
+    let q = admin!
       .from("jobs")
       .select("id, title, company_name, region, region_sigungu, job_category, apply_deadline, created_at")
-      .eq("region", region)
-      .eq("is_active", true)
+      .eq("is_active", true);
+    if (region !== "all") q = q.eq("region", region);
+    const { data } = await q
       .gte("created_at", since)
       .order("created_at", { ascending: false })
       .limit(300);
@@ -277,4 +273,37 @@ export async function countJobAlertSubscribers(): Promise<number> {
     .select("user_id", { count: "exact", head: true })
     .eq("enabled", true);
   return count ?? 0;
+}
+
+/** 회원 본인이 최근 받은 공고 알림. 마이페이지 공고 알림 카드 아래에 보여준다. */
+export interface MyJobAlertRow {
+  sentAt: string;
+  jobId?: string;
+  jobTitle?: string;
+  companyName?: string;
+  status: string;
+  channel: string;
+}
+
+export async function listMyJobAlerts(userId: string, limit = 5): Promise<MyJobAlertRow[]> {
+  const admin = createAdminSupabaseClient();
+  if (!admin) return [];
+  const { data } = await admin
+    .from("job_alert_logs")
+    .select("created_at, job_id, status, channel, payload")
+    .eq("user_id", userId)
+    .in("status", ["sent", "failed"])
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  return (data ?? []).map((r) => {
+    const payload = (r.payload as Record<string, unknown> | null) ?? {};
+    return {
+      sentAt: String(r.created_at),
+      jobId: (r.job_id as string | null) ?? undefined,
+      jobTitle: typeof payload.jobTitle === "string" ? payload.jobTitle : undefined,
+      companyName: typeof payload.companyName === "string" ? payload.companyName : undefined,
+      status: String(r.status),
+      channel: String(r.channel),
+    };
+  });
 }
