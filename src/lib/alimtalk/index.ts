@@ -32,6 +32,76 @@ export interface AlimtalkProvider {
 /** 알리고 템플릿 코드. 2026-09-02 승인된 '거주지역 신규 채용공고 안내' 템플릿. */
 export const JOB_ALERT_TEMPLATE_CODE = process.env.ALIGO_TEMPLATE_JOB_ALERT ?? "UL_0316";
 
+/** 발송 본문. 승인된 템플릿(UL_0316)과 글자 단위로 같아야 한다. */
+export function buildJobAlertBody(m: Pick<JobAlertMessage, "memberName" | "jobTitle" | "companyName" | "regionLabel" | "deadlineLabel">): string {
+  return [
+    "[한평생 바로취업] 새로운 채용공고 안내",
+    "",
+    `${m.memberName}님, 설정하신 알림 조건(거주지역 기준)에 맞는 채용공고가 등록되어 안내드립니다.`,
+    "",
+    `▶ 공고명 : ${m.jobTitle}`,
+    `▶ 기관명 : ${m.companyName}`,
+    `▶ 근무지 : ${m.regionLabel}`,
+    `▶ 마감일 : ${m.deadlineLabel}`,
+    "",
+    "아래 버튼을 눌러 상세 내용을 확인하실 수 있습니다.",
+    "",
+    "※ 본 메시지는 회원님이 신청하신 채용공고 알림 서비스에 따라 발송되었습니다. 알림 조건 변경 및 수신 해제는 마이페이지에서 가능합니다.",
+  ].join("\n");
+}
+
+/** 발송 버튼. 템플릿과 순서·이름이 같아야 한다: 채널 추가(AC) → 공고 자세히 보기(WL) → 알림 끄기(WL). */
+export function buildJobAlertButtons(m: Pick<JobAlertMessage, "detailUrl" | "settingsUrl">) {
+  return [
+    { name: "채널 추가", linkType: "AC", linkTypeName: "채널 추가" },
+    { name: "공고 자세히 보기", linkType: "WL", linkTypeName: "웹링크", linkMo: m.detailUrl, linkPc: m.detailUrl },
+    { name: "알림 끄기", linkType: "WL", linkTypeName: "웹링크", linkMo: m.settingsUrl, linkPc: m.settingsUrl },
+  ];
+}
+
+/** 알리고 API 호출 엔드포인트. 중계기가 있으면 경로를 중계기에 붙인다. */
+function aligoEndpoint(apiPath: string): { url: string; headers: Record<string, string> } {
+  const relayUrl = process.env.ALIGO_RELAY_URL?.trim();
+  const headers: Record<string, string> = {};
+  if (relayUrl) {
+    // ALIGO_RELAY_URL 은 .../aligo/alimtalk 형태. 베이스(.../aligo)에 API 경로를 붙인다.
+    const base = relayUrl.replace(/\/alimtalk\/?$/, "");
+    if (process.env.ALIGO_RELAY_TOKEN) headers["x-relay-token"] = process.env.ALIGO_RELAY_TOKEN.trim();
+    return { url: apiPath === "/akv10/alimtalk/send/" ? relayUrl : `${base}${apiPath}`, headers };
+  }
+  return { url: `https://kakaoapi.aligo.in${apiPath}`, headers };
+}
+
+export interface AligoTemplateInfo {
+  code: string;
+  name: string;
+  content: string;
+  buttons: { name: string; linkType: string; linkMo?: string; linkPc?: string }[];
+  raw: unknown;
+}
+
+/** 알리고에 등록된 템플릿 원본(본문·버튼)을 조회한다. 발송 불일치 원인 대조용. */
+export async function fetchAligoTemplate(code: string = JOB_ALERT_TEMPLATE_CODE): Promise<AligoTemplateInfo | { error: string }> {
+  const apiKey = process.env.ALIGO_API_KEY?.trim();
+  const userId = process.env.ALIGO_USER_ID?.trim();
+  const senderKey = process.env.ALIGO_SENDER_KEY?.trim();
+  if (!apiKey || !userId || !senderKey) return { error: "알리고 키가 설정되지 않았습니다." };
+  const { url, headers } = aligoEndpoint("/akv10/template/list/");
+  const form = new URLSearchParams({ apikey: apiKey, userid: userId, senderkey: senderKey, tpl_code: code });
+  const res = await fetch(url, { method: "POST", body: form, headers });
+  const json = (await res.json()) as { code?: number; message?: string; list?: Record<string, unknown>[] };
+  if (json.code !== 0 || !json.list?.length) return { error: json.message ?? `조회 실패 (code ${json.code})` };
+  const t = json.list.find((x) => x.templtCode === code) ?? json.list[0];
+  const buttons = (Array.isArray(t.buttons) ? t.buttons : []) as { name: string; linkType: string; linkMo?: string; linkPc?: string }[];
+  return {
+    code: String(t.templtCode ?? code),
+    name: String(t.templtName ?? ""),
+    content: String(t.templtContent ?? ""),
+    buttons,
+    raw: t,
+  };
+}
+
 /** 개발·검수 전 채널: 보낼 내용을 로그로만 남긴다. 발송 기록에는 channel=console 로 찍힌다. */
 class ConsoleAlimtalkProvider implements AlimtalkProvider {
   async sendJobAlert(message: JobAlertMessage): Promise<AlimtalkSendResult> {
@@ -54,20 +124,7 @@ class AligoAlimtalkProvider implements AlimtalkProvider {
   constructor(private readonly config: { apiKey: string; userId: string; senderKey: string; sender: string }) {}
 
   async sendJobAlert(message: JobAlertMessage): Promise<AlimtalkSendResult> {
-    const body = [
-      "[한평생 바로취업] 새로운 채용공고 안내",
-      "",
-      `${message.memberName}님, 설정하신 알림 조건(거주지역 기준)에 맞는 채용공고가 등록되어 안내드립니다.`,
-      "",
-      `▶ 공고명 : ${message.jobTitle}`,
-      `▶ 기관명 : ${message.companyName}`,
-      `▶ 근무지 : ${message.regionLabel}`,
-      `▶ 마감일 : ${message.deadlineLabel}`,
-      "",
-      "아래 버튼을 눌러 상세 내용을 확인하실 수 있습니다.",
-      "",
-      "※ 본 메시지는 회원님이 신청하신 채용공고 알림 서비스에 따라 발송되었습니다. 알림 조건 변경 및 수신 해제는 마이페이지에서 가능합니다.",
-    ].join("\n");
+    const body = buildJobAlertBody(message);
 
     const form = new URLSearchParams({
       apikey: this.config.apiKey,
@@ -89,13 +146,7 @@ class AligoAlimtalkProvider implements AlimtalkProvider {
         2) 공고 자세히 보기(WL) 3) 알림 끄기(WL) - 승인된 UL_0316 원문 기준 (2026-09-02 알리고 화면 대조)
         링크의 도메인(www.job24.co.kr)은 템플릿과 같고 경로의 #{공고ID}만 치환된다.
       */
-      button_1: JSON.stringify({
-        button: [
-          { name: "채널 추가", linkType: "AC", linkTypeName: "채널 추가" },
-          { name: "공고 자세히 보기", linkType: "WL", linkTypeName: "웹링크", linkMo: message.detailUrl, linkPc: message.detailUrl },
-          { name: "알림 끄기", linkType: "WL", linkTypeName: "웹링크", linkMo: message.settingsUrl, linkPc: message.settingsUrl },
-        ],
-      }),
+      button_1: JSON.stringify({ button: buildJobAlertButtons(message) }),
     });
 
     /*

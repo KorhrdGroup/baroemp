@@ -23,12 +23,19 @@ if (!TOKEN) {
   process.exit(1);
 }
 
-function forward(body, contentType) {
+/** 요청 경로 → 알리고 API 경로. /alimtalk 은 발송, 그 외 /akv10/... 은 그대로 통과(템플릿 조회 등). */
+function upstreamPath(url) {
+  if (url === "/alimtalk") return "/akv10/alimtalk/send/";
+  if (/^\/akv10\/[a-z/]+\/?$/.test(url)) return url.endsWith("/") ? url : url + "/";
+  return null;
+}
+
+function forward(path, body, contentType) {
   return new Promise((resolve, reject) => {
     const req = https.request(
       {
         hostname: "kakaoapi.aligo.in",
-        path: "/akv10/alimtalk/send/",
+        path,
         method: "POST",
         headers: { "content-type": contentType, "content-length": Buffer.byteLength(body) },
         timeout: 15000,
@@ -53,7 +60,8 @@ http
       res.writeHead(200, { "content-type": "text/plain" }).end("ok");
       return;
     }
-    if (req.method !== "POST" || req.url !== "/alimtalk") {
+    const path = req.method === "POST" ? upstreamPath(req.url || "") : null;
+    if (!path) {
       res.writeHead(404).end();
       return;
     }
@@ -66,7 +74,7 @@ http
     req.on("end", async () => {
       const body = Buffer.concat(chunks);
       try {
-        const out = await forward(body, req.headers["content-type"] || "application/x-www-form-urlencoded");
+        const out = await forward(path, body, req.headers["content-type"] || "application/x-www-form-urlencoded");
         console.log(new Date().toISOString(), "relay →", out.status, out.text.slice(0, 120));
         res.writeHead(out.status, { "content-type": out.type }).end(out.text);
       } catch (err) {
