@@ -57,3 +57,53 @@ export async function sendTestJobAlertAction(phoneRaw: string): Promise<{ ok: bo
     ? { ok: true, message: `${phoneRaw} 로 알림톡을 보냈습니다. 카카오톡을 확인해주세요.` }
     : { ok: false, message: `발송 실패: ${result.error ?? "알 수 없는 오류"}` };
 }
+
+/**
+ * 알리고에 등록된 템플릿 원본과 우리가 보내는 본문·버튼을 대조한다.
+ * 카카오가 "메시지가 템플릿과 일치하지 않음"으로 거절할 때 어디가 다른지 바로 본다.
+ */
+export async function inspectJobAlertTemplateAction(): Promise<{
+  ok: boolean;
+  message: string;
+  registeredContent?: string;
+  registeredButtons?: string;
+  ourContent?: string;
+  ourButtons?: string;
+  diffs?: string[];
+}> {
+  const user = await requireSessionUser();
+  if (!isAdminRole(user.role)) return { ok: false, message: "관리자만 사용할 수 있습니다." };
+  const { fetchAligoTemplate, buildJobAlertBody, buildJobAlertButtons } = await import("@/lib/alimtalk");
+  const tpl = await fetchAligoTemplate();
+  if ("error" in tpl) return { ok: false, message: tpl.error };
+
+  const sample = { memberName: "#{회원명}", jobTitle: "#{공고명}", companyName: "#{기관명}", regionLabel: "#{근무지역}", deadlineLabel: "#{마감일}", detailUrl: "https://www.job24.co.kr/jobs/#{공고ID}", settingsUrl: "https://www.job24.co.kr/mypage" };
+  const ourContent = buildJobAlertBody(sample);
+  const ourButtons = buildJobAlertButtons(sample);
+
+  const norm = (s: string) => s.replace(/\r\n/g, "\n");
+  const diffs: string[] = [];
+  const a = norm(tpl.content).split("\n");
+  const b = norm(ourContent).split("\n");
+  if (a.length !== b.length) diffs.push(`줄 수 다름: 등록 ${a.length}줄 / 우리 ${b.length}줄`);
+  for (let i = 0; i < Math.max(a.length, b.length); i++) {
+    if ((a[i] ?? "") !== (b[i] ?? "")) diffs.push(`${i + 1}번째 줄 다름 → 등록: "${a[i] ?? "(없음)"}" / 우리: "${b[i] ?? "(없음)"}"`);
+  }
+  if (tpl.buttons.length !== ourButtons.length) diffs.push(`버튼 수 다름: 등록 ${tpl.buttons.length}개 / 우리 ${ourButtons.length}개`);
+  tpl.buttons.forEach((rb, i) => {
+    const ob = ourButtons[i];
+    if (!ob) return;
+    if (rb.name !== ob.name) diffs.push(`버튼 ${i + 1} 이름 다름 → 등록: "${rb.name}" / 우리: "${ob.name}"`);
+    if (rb.linkType !== ob.linkType) diffs.push(`버튼 ${i + 1} 타입 다름 → 등록: ${rb.linkType} / 우리: ${ob.linkType}`);
+  });
+
+  return {
+    ok: diffs.length === 0,
+    message: diffs.length === 0 ? "등록 템플릿과 본문·버튼이 일치합니다." : `${diffs.length}곳이 다릅니다.`,
+    registeredContent: tpl.content,
+    registeredButtons: JSON.stringify(tpl.buttons, null, 2),
+    ourContent,
+    ourButtons: JSON.stringify(ourButtons, null, 2),
+    diffs,
+  };
+}
