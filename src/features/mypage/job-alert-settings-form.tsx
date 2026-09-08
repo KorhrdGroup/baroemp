@@ -108,6 +108,8 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
                 }}
               >
                 <option value="">선택</option>
+                {/* 지역을 안 가리는 회원용. 시군구는 의미가 없어 비활성화한다. */}
+                <option value="all">전국 (모든 지역)</option>
                 {Object.entries(REGION_LABELS).map(([code, label]) => (
                   <option key={code} value={code}>
                     {label}
@@ -121,9 +123,9 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
                 className="h-10 bg-white text-label-1"
                 value={sigungu}
                 onChange={(e) => setSigungu(e.target.value)}
-                disabled={!region}
+                disabled={!region || region === "all"}
               >
-                <option value="">전체</option>
+                <option value="">{region === "all" ? "전국 선택 시 해당 없음" : "전체"}</option>
                 {sigunguOptions.map((s) => (
                   <option key={s} value={s}>
                     {s}
