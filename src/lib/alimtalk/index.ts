@@ -29,8 +29,8 @@ export interface AlimtalkProvider {
   sendJobAlert(message: JobAlertMessage): Promise<AlimtalkSendResult>;
 }
 
-/** 알리고 템플릿 코드. 검수 승인 후 실제 코드로 바꾼다. */
-export const JOB_ALERT_TEMPLATE_CODE = process.env.ALIGO_TEMPLATE_JOB_ALERT ?? "TJ_JOB_ALERT";
+/** 알리고 템플릿 코드. 2026-09-02 승인된 '거주지역 신규 채용공고 안내' 템플릿. */
+export const JOB_ALERT_TEMPLATE_CODE = process.env.ALIGO_TEMPLATE_JOB_ALERT ?? "UL_0316";
 
 /** 개발·검수 전 채널: 보낼 내용을 로그로만 남긴다. 발송 기록에는 channel=console 로 찍힌다. */
 class ConsoleAlimtalkProvider implements AlimtalkProvider {
@@ -79,10 +79,21 @@ class AligoAlimtalkProvider implements AlimtalkProvider {
       recvname_1: message.memberName,
       subject_1: "새로운 채용공고 안내",
       message_1: body,
+      // 카카오톡 미사용·수신차단 등으로 알림톡이 실패하면 같은 내용을 문자로 대체 발송한다.
+      failover: "Y",
+      fsubject_1: "[한평생 바로취업] 새로운 채용공고 안내",
+      fmessage_1: `${message.memberName}님, 설정하신 지역의 새 채용공고가 등록되었습니다.\n${message.jobTitle} / ${message.companyName} / ${message.regionLabel}\n${message.detailUrl}`,
+      /*
+        버튼은 알리고에 등록한 템플릿과 순서·이름이 같아야 한다.
+        1) 채널 추가(AC) - 카카오가 이름을 "채널 추가"로 고정
+        2) 공고 자세히 보기(WL) 3) 알림 끄기(WL) - 승인된 UL_0316 원문 기준 (2026-09-02 알리고 화면 대조)
+        링크의 도메인(www.job24.co.kr)은 템플릿과 같고 경로의 #{공고ID}만 치환된다.
+      */
       button_1: JSON.stringify({
         button: [
+          { name: "채널 추가", linkType: "AC", linkTypeName: "채널 추가" },
           { name: "공고 자세히 보기", linkType: "WL", linkTypeName: "웹링크", linkMo: message.detailUrl, linkPc: message.detailUrl },
-          { name: "알림 설정 변경", linkType: "WL", linkTypeName: "웹링크", linkMo: message.settingsUrl, linkPc: message.settingsUrl },
+          { name: "알림 끄기", linkType: "WL", linkTypeName: "웹링크", linkMo: message.settingsUrl, linkPc: message.settingsUrl },
         ],
       }),
     });
@@ -101,6 +112,16 @@ class AligoAlimtalkProvider implements AlimtalkProvider {
       };
     }
   }
+}
+
+/** 알리고 키가 모두 설정돼 실제 발송이 가능한 상태인지. 어드민 화면 표시용. */
+export function isAlimtalkConfigured(): boolean {
+  return Boolean(
+    process.env.ALIGO_API_KEY?.trim() &&
+      process.env.ALIGO_USER_ID?.trim() &&
+      process.env.ALIGO_SENDER_KEY?.trim() &&
+      process.env.ALIGO_SENDER_PHONE?.trim(),
+  );
 }
 
 export function getAlimtalkProvider(): AlimtalkProvider {
