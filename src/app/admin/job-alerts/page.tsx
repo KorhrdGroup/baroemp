@@ -9,6 +9,8 @@ import {
 } from "@/components/ui/table";
 import { AdminPageShell } from "@/features/admin/admin-page-shell";
 import { countJobAlertSubscribers, listRecentJobAlertLogs } from "@/services/job-alert.service";
+import { isAlimtalkConfigured } from "@/lib/alimtalk";
+import { JobAlertTestForm } from "@/features/admin/job-alert-test-form";
 import { formatPhone } from "@/lib/utils/phone";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +45,10 @@ export default async function AdminJobAlertsPage() {
             <p className="mt-1 text-title-3 font-bold text-slate-900">{k.value}</p>
           </div>
         ))}
+      </div>
+
+      <div className="mb-4">
+        <JobAlertTestForm configured={isAlimtalkConfigured()} />
       </div>
 
       <div className="overflow-hidden rounded-xl bg-white ring-1 ring-slate-200">
