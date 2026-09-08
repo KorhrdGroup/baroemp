@@ -37,7 +37,7 @@ export async function sendTestJobAlertAction(phoneRaw: string): Promise<{ ok: bo
     regionLabel: ["서울", job.region_sigungu].filter(Boolean).join(" "),
     deadlineLabel: job.apply_deadline ? String(job.apply_deadline).slice(0, 10) : "상시채용",
     detailUrl: `${site}/jobs/${job.id}`,
-    settingsUrl: `${site}/mypage#job-alerts`,
+    settingsUrl: `${site}/mypage`,
   });
 
   await admin.from("job_alert_logs").insert({
