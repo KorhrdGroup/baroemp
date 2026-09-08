@@ -98,8 +98,18 @@ class AligoAlimtalkProvider implements AlimtalkProvider {
       }),
     });
 
+    /*
+      알리고는 호출 서버 IP를 사전 등록해야 하는데 Vercel은 고정 IP가 없다.
+      ALIGO_RELAY_URL 이 있으면 고정 IP 서버의 중계기(scripts/aligo-relay)로 보내고,
+      중계기가 알리고로 그대로 전달한다. 중계기와는 공유 토큰으로만 통한다.
+    */
+    const relayUrl = process.env.ALIGO_RELAY_URL?.trim();
+    const endpoint = relayUrl || "https://kakaoapi.aligo.in/akv10/alimtalk/send/";
+    const headers: Record<string, string> = {};
+    if (relayUrl && process.env.ALIGO_RELAY_TOKEN) headers["x-relay-token"] = process.env.ALIGO_RELAY_TOKEN.trim();
+
     try {
-      const res = await fetch("https://kakaoapi.aligo.in/akv10/alimtalk/send/", { method: "POST", body: form });
+      const res = await fetch(endpoint, { method: "POST", body: form, headers });
       const json = (await res.json()) as { code?: number; message?: string };
       if (json.code === 0) return { channel: "aligo_alimtalk", templateCode: JOB_ALERT_TEMPLATE_CODE, ok: true };
       return { channel: "aligo_alimtalk", templateCode: JOB_ALERT_TEMPLATE_CODE, ok: false, error: json.message ?? `code ${json.code}` };
