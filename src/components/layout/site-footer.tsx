@@ -56,6 +56,7 @@ export function SiteFooter() {
         {/* 사업자 정보도 좁은 화면에서 접힌다. 낱말·번호가 가운데서 갈리지 않게 한다. */}
         <div className="mt-10 border-t border-border pt-6 text-label-2 break-keep text-slate-400">
           <p>한평생그룹 · 대표 양병웅 · 사업자등록번호 227-88-03196 · 통신판매업 2024-서울도봉-0983</p>
+          <p>직업정보제공사업 신고번호 : J1205020260013 (서울북부 제2026-13호)</p>
           <p>서울특별시 도봉구 마들로13길 61, 씨드큐브 창동 B동 9층 905, 906호 · korhrdpartners@naver.com</p>
           <p className="mt-2">&copy; {new Date().getFullYear()} Hanpyeongsaeng Baro Job. All rights reserved.</p>
         </div>
