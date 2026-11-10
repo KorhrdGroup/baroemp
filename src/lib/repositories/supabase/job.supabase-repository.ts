@@ -234,7 +234,7 @@ export function createSupabaseJobRepository(): JobRepository | null {
       const pageSize = Math.min(500, Math.max(1, filter.pageSize ?? 20));
       const start = (page - 1) * pageSize;
 
-      let query = client.from("jobs").select("*", { count: "exact" });
+      let query = client.from("jobs").select("*", filter.withTotal === false ? undefined : { count: "exact" });
       query = applySearchFilters(query, filter);
 
       switch (filter.sort) {
