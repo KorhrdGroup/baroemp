@@ -154,11 +154,12 @@ async function getCommonTab(kind: "new" | "closing_soon"): Promise<{ state: "REA
   const repo = getJobRepository();
   const now = Date.now();
 
+  // 탭은 건수를 안 쓴다 - 활성 공고 전체를 세는 데만 3초가 걸려 끈다.
   let result;
   if (kind === "new") {
-    result = await repo.search({ activeOnly: true, page: 1, pageSize: 200, sort: "latest" });
+    result = await repo.search({ activeOnly: true, page: 1, pageSize: 200, sort: "latest", withTotal: false });
   } else {
-    result = await repo.search({ activeOnly: true, closingWithinDays: CLOSING_WITHIN_DAYS, sort: "deadline", page: 1, pageSize: TAB_LIMIT });
+    result = await repo.search({ activeOnly: true, closingWithinDays: CLOSING_WITHIN_DAYS, sort: "deadline", page: 1, pageSize: TAB_LIMIT, withTotal: false });
   }
 
   let jobs: Job[];
