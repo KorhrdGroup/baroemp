@@ -46,11 +46,21 @@ export async function GET(request: Request) {
     );
 
     if (!summary.reachedEnd && !summary.errorMessage) {
-      const next = new URL(url);
+      /*
+        Vercel Cron 은 *.vercel.app 배포 주소로 부르는데, 그 주소는 Vercel 인증(Deployment Protection)에
+        막혀 있다. request.url 로 자기 자신을 부르면 SSO 로그인 페이지로 튕겨 다음 청크가 한 번도 돌지 않았고,
+        그래서 목록 끝(reachedEnd)에 못 닿아 마감 공고가 비활성화되지 않은 채 22만 건까지 쌓였다.
+        다음 청크는 공개 도메인으로 부른다.
+      */
+      const next = new URL(url.pathname + url.search, process.env.NEXT_PUBLIC_SITE_URL ?? url.origin);
       next.searchParams.set("startPage", String(startPage + CHUNK_PAGES));
       next.searchParams.set("staleBefore", staleBefore);
       // 다음 청크 호출 - 상대편도 즉시 202를 반환하므로 이 대기는 짧다.
-      await fetch(next, { headers: { authorization: `Bearer ${secret}` } });
+      // 리다이렉트를 따라가면 로그인 페이지의 200 을 성공으로 오인하므로 따라가지 않고 상태를 본다.
+      const res = await fetch(next, { headers: { authorization: `Bearer ${secret}` }, redirect: "manual" });
+      if (res.status !== 202) {
+        console.error(`[cron/sync-jobs] 다음 청크(${next.origin}, startPage=${startPage + CHUNK_PAGES}) 호출 실패: HTTP ${res.status}`);
+      }
     }
   });
 

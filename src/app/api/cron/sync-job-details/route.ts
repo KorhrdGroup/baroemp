@@ -44,9 +44,13 @@ export async function GET(request: Request) {
       );
 
       if (summary.hasMore) {
-        const next = new URL(url);
+        // *.vercel.app 주소는 Vercel 인증에 막혀 자기 호출이 닿지 않는다 - sync-jobs/route.ts 참고.
+        const next = new URL(url.pathname + url.search, process.env.NEXT_PUBLIC_SITE_URL ?? url.origin);
         next.searchParams.set("chain", String(chain + 1));
-        await fetch(next, { headers: { authorization: `Bearer ${secret}` } });
+        const res = await fetch(next, { headers: { authorization: `Bearer ${secret}` }, redirect: "manual" });
+        if (res.status !== 202) {
+          console.error(`[cron/sync-job-details] 다음 배치(${next.origin}, chain=${chain + 1}) 호출 실패: HTTP ${res.status}`);
+        }
       } else {
         console.log(`[cron/sync-job-details] 완료. 남은 건수=${await countPendingJobDetails()}`);
       }
