@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
-import { ChevronRight, ClipboardCheck, Clock, Coins, FileText, MessagesSquare, PenLine, Sprout, TrendingUp } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { ServiceIcon } from "./service-icons";
 import { cn } from "@/lib/utils";
 
 /**
@@ -13,13 +13,14 @@ import { cn } from "@/lib/utils";
 interface ServiceCard {
   title: string;
   href: string;
-  icon: LucideIcon;
+  /** service-icons 의 채운 그림 이름. */
+  icon: string;
 }
 
 const CONSULTING: ServiceCard = {
   title: "1:1 취업컨설팅",
   href: "/consulting",
-  icon: MessagesSquare,
+  icon: "consulting",
 };
 
 const TABS: { id: string; label: string; emoji: string; cards: ServiceCard[] }[] = [
@@ -31,17 +32,17 @@ const TABS: { id: string; label: string; emoji: string; cards: ServiceCard[] }[]
       {
         title: "내게 맞는 직업 찾기",
         href: "/assessment",
-        icon: ClipboardCheck,
+        icon: "assessment",
       },
       {
         title: "경력 없어도 되는 일자리",
         href: "/jobs?beginner=1",
-        icon: Sprout,
+        icon: "beginner",
       },
       {
         title: "직업훈련 지원금",
         href: "/support",
-        icon: Coins,
+        icon: "support",
       },
       CONSULTING,
     ],
@@ -54,17 +55,17 @@ const TABS: { id: string; label: string; emoji: string; cards: ServiceCard[] }[]
       {
         title: "곧 마감되는 공고",
         href: "/jobs?closingSoon=1",
-        icon: Clock,
+        icon: "closing",
       },
       {
         title: "이력서 다시 쓰기",
         href: "/resume",
-        icon: FileText,
+        icon: "resume",
       },
       {
         title: "받을 수 있는 지원금",
         href: "/support",
-        icon: Coins,
+        icon: "support",
       },
       CONSULTING,
     ],
@@ -77,17 +78,17 @@ const TABS: { id: string; label: string; emoji: string; cards: ServiceCard[] }[]
       {
         title: "급여 높은 공고",
         href: "/jobs?sort=salary_desc",
-        icon: TrendingUp,
+        icon: "salary",
       },
       {
         title: "이력서 첨삭",
         href: "/resume",
-        icon: FileText,
+        icon: "resume",
       },
       {
         title: "자기소개서 첨삭",
         href: "/cover-letter",
-        icon: PenLine,
+        icon: "coverLetter",
       },
       CONSULTING,
     ],
@@ -118,10 +119,10 @@ export function SituationTabsSection() {
                   onClick={() => setActiveId(tab.id)}
                   className={cn(
                     // 흰 알약에 테두리 색으로 가른다 (공고 판 탭과 같은 모양).
-                    "flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-4 py-2.5 text-body-2 whitespace-nowrap transition-colors sm:text-body-1",
+                    "flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-4 py-2.5 text-body-2 whitespace-nowrap sm:text-body-1",
                     selected
                       ? "border-brand-blue-600 font-semibold text-brand-blue-600"
-                      : "border-slate-300 font-medium text-slate-700 hover:border-slate-400",
+                      : "border-slate-300 font-medium text-slate-700",
                   )}
                 >
                   <span aria-hidden>{tab.emoji}</span>
@@ -139,19 +140,16 @@ export function SituationTabsSection() {
           className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
         >
           {active.cards.map((card) => {
-            const Icon = card.icon;
             return (
               <Link
                 key={card.title}
                 href={card.href}
-                className="group flex flex-col gap-4 rounded-2xl border border-border bg-gov-surface p-5 transition-colors hover:border-slate-300 sm:p-6"
+                className="flex flex-col gap-4 rounded-2xl border border-border bg-white p-5 sm:p-6"
               >
-                <span className="flex size-12 items-center justify-center rounded-full bg-white text-brand-blue-600">
-                  <Icon className="size-6" strokeWidth={1.75} />
-                </span>
+                <ServiceIcon id={card.icon} />
                 <span className="flex items-end justify-between gap-2">
                   <span className="text-body-1 font-semibold break-keep text-slate-900 sm:text-title-3">{card.title}</span>
-                  <ChevronRight className="mb-0.5 size-5 shrink-0 text-slate-400 group-hover:text-slate-700" />
+                  <ChevronRight className="mb-0.5 size-5 shrink-0 text-slate-500" />
                 </span>
               </Link>
             );

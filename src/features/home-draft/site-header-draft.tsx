@@ -1,9 +1,10 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isAuthPath } from "@/lib/auth/redirect";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mainNavItems, siteConfig } from "@/lib/site-config";
 import { Logo } from "@/components/layout/logo";
@@ -28,17 +29,18 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
    * 로그인 화면에서는 내비 밑줄의 focus-within 만 끈다.
    * 보호 페이지 메뉴를 클릭해 로그인으로 튕기면 그 링크에 포커스가 남고,
    * 마우스를 치워도 밑줄이 계속 켜진 채라 엉뚱한 메뉴가 선택된 것처럼 보인다.
-   * 호버 반응은 로그인 화면에서도 그대로 살려둔다.
    */
   const onAuthScreen = isAuthPath(pathname);
   // 로그인 후 보던 화면으로 돌아오게 한다. 없으면 마이페이지로 떨어진다.
   const loginHref = onAuthScreen ? "/login" : `/login?next=${encodeURIComponent(pathname)}`;
   const isCurrentNav = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
   /*
-   * 사람인처럼 검색창이 머리글의 주인공이다. 로고 · 검색 · 로그인을 한 줄에 두고 메뉴는 아래 줄로 내린다.
+   * 메뉴가 넷뿐이라 줄을 따로 쓰면 빈 줄이 된다. 로고 · 메뉴 · 검색 · 로그인을 한 줄에 모은다.
    * 일자리찾기 목록은 화면 안에 검색창이 이미 있어 둘이 되므로 뺀다.
    */
   const showHeaderSearch = !onAuthScreen && pathname !== "/jobs";
+  /* 잡아바처럼 머리글에는 작은 검색 단추만 두고, 누르면 위에서 검색 판이 내려온다. */
+  const [searchOpen, setSearchOpen] = useState(false);
   return (
     <>
     {/*
@@ -52,24 +54,56 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
       </div>
     </div>
     {/*
-      넓은 화면은 두 줄(로고·검색·로그인 / 메뉴)이 붙어 따라온다. 휴대폰은 두 줄이 붙으면 화면의
+      넓은 화면은 한 줄이 붙어 따라온다. 휴대폰은 로고 줄 아래 검색 줄까지 두 줄이라 붙이면 화면의
       1/6을 먹어 붙이지 않는다 - 메뉴는 아래 탭이 늘 붙어 있다.
     */}
     <header className="z-50 w-full border-b border-border/70 bg-white lg:sticky lg:top-0">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4.5 lg:h-20 lg:gap-10 lg:px-8">
+      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4.5 lg:h-[72px] lg:gap-8 lg:px-8">
         <Link href="/" aria-label={siteConfig.name} className="flex shrink-0 items-center">
           {/* 같은 그림 한 장이라 두 번 그려도 요청은 하나다. 좁은 화면에서는 한 단계 작게. */}
           <Logo height={18} priority className="lg:hidden" />
-          <Logo height={24} priority className="hidden lg:block" />
+          <Logo height={20} priority className="hidden lg:block" />
         </Link>
 
-        {showHeaderSearch && <HeaderSearch className="hidden flex-1 lg:flex lg:max-w-xl" />}
+        {/* 메뉴. 막대를 머리글 아래 선에 맞추려고 줄 높이만큼 늘린다. */}
+        <nav aria-label="주 메뉴" className="hidden h-full items-center lg:flex">
+          {mainNavItems.map((item) => {
+            const current = isCurrentNav(item.href);
+            return (
+              <div key={item.href} className="group relative flex h-full items-center">
+                <Link
+                  href={item.href}
+                  aria-current={current ? "page" : undefined}
+                  className={cn(
+                    "px-4 py-2 text-body-1 whitespace-nowrap xl:px-5",
+                    current ? "font-bold text-brand-blue-600" : "font-semibold text-slate-800",
+                  )}
+                >
+                  {item.label}
+                </Link>
+                {/* 막대가 왼쪽에서 오른쪽으로 채워지도록 scaleX를 쓴다(width 애니메이션은 리플로우를 유발). */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    "absolute inset-x-3 bottom-0 h-[3px] origin-left transition-transform duration-200 ease-out",
+                    current ? "bg-brand-blue-600" : "bg-slate-300 scale-x-0",
+                    !current && !onAuthScreen && "group-focus-within:scale-x-100",
+                  )}
+                />
+              </div>
+            );
+          })}
+        </nav>
+
+        {showHeaderSearch && (
+          <SearchTrigger onOpen={() => setSearchOpen(true)} className="ml-auto hidden lg:flex" />
+        )}
 
         {/*
           좁은 화면의 메뉴는 아래 탭(BottomTabBar)이 맡는다. 그래서 햄버거가 없고,
           로그인한 회원의 버튼들도 lg 부터만 보인다 - 좁은 화면에서는 아래 탭의 "마이"가 같은 곳이다.
         */}
-        <div className="ml-auto flex shrink-0 items-center gap-2">
+        <div className={cn("ml-auto flex shrink-0 items-center gap-2", showHeaderSearch && "lg:ml-0")}>
           {user ? (
             <>
               {isAdmin && (
@@ -77,7 +111,7 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
                   <Link href="/admin">관리자</Link>
                 </Button>
               )}
-              <Button size="sm" className="hidden bg-brand-blue-600 hover:bg-brand-blue-700 lg:inline-flex" asChild>
+              <Button size="sm" className="hidden bg-brand-blue-600 lg:inline-flex" asChild>
                 <Link href="/mypage">마이페이지</Link>
               </Button>
               <form action={signOutAction} className="hidden lg:inline-flex">
@@ -88,85 +122,142 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
             </>
           ) : (
             /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
-            <Button size="sm" className="bg-brand-blue-600 hover:bg-brand-blue-700" asChild>
+            <Button size="sm" className="bg-brand-blue-600" asChild>
               <Link href={loginHref}>로그인/회원가입</Link>
             </Button>
           )}
         </div>
       </div>
 
-      {/* 휴대폰: 검색창을 로고 아래 한 줄로. */}
+      {/* 휴대폰: 검색 단추를 로고 아래 한 줄로. 눌러도 같은 판이 내려온다. */}
       {showHeaderSearch && (
         <div className="px-4.5 pb-3 lg:hidden">
-          <HeaderSearch className="flex" />
+          <SearchTrigger onOpen={() => setSearchOpen(true)} className="flex w-full" />
         </div>
       )}
 
-      {/* 넓은 화면: 메뉴 줄. 지금 있는 메뉴는 아래 막대로 표시한다. */}
-      <nav aria-label="주 메뉴" className="hidden border-t border-border/70 lg:block">
-        <div className="mx-auto flex h-12 max-w-7xl items-center gap-2 px-8">
-          {mainNavItems.map((item) => {
-            const current = isCurrentNav(item.href);
-            return (
-              <div key={item.href} className="group relative flex h-full items-center">
-                <Link
-                  href={item.href}
-                  aria-current={current ? "page" : undefined}
-                  className={cn(
-                    // 활성 시 굵어져도 폭이 흔들리지 않도록 고정폭을 준다.
-                    "w-28 px-3 py-2 text-center text-body-1",
-                    current ? "font-bold text-brand-blue-600" : "font-semibold text-slate-800 hover:text-slate-950",
-                  )}
-                >
-                  {item.label}
-                </Link>
-                {/* 막대가 왼쪽에서 오른쪽으로 채워지도록 scaleX를 쓴다(width 애니메이션은 리플로우를 유발). */}
-                <span
-                  aria-hidden
-                  className={cn(
-                    "absolute inset-x-0 bottom-0 h-0.5 origin-left transition-transform duration-200 ease-out",
-                    current ? "bg-brand-blue-600" : "bg-brand-blue-300 scale-x-0 group-hover:scale-x-100",
-                    !current && !onAuthScreen && "group-focus-within:scale-x-100",
-                  )}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </nav>
     </header>
+    {showHeaderSearch && <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />}
     </>
   );
 }
 
-/**
- * 머리글 검색창. /jobs 가 keyword 파라미터로 검색하므로 GET form 으로 그대로 넘긴다.
- * 사람인처럼 둥근 파란 테두리로 머리글에서 가장 먼저 눈에 들어오게 한다.
- */
-function HeaderSearch({ className }: { className?: string }) {
+/** 검색 판을 내리는 단추. 입력칸처럼 보이지만 누르면 판이 열린다. */
+function SearchTrigger({ onOpen, className }: { onOpen: () => void; className?: string }) {
   return (
-    <form
-      action="/jobs"
-      role="search"
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-haspopup="dialog"
       className={cn(
-        "h-12 items-center rounded-full border-2 border-brand-blue-600 bg-white pr-1.5 pl-5 lg:h-[52px]",
+        "h-11 cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white pr-2 pl-4 text-left lg:h-10 lg:w-56 xl:w-64",
         className,
       )}
     >
+      <span className="min-w-0 flex-1 truncate text-body-2 text-slate-600">일자리 검색</span>
       <Search className="size-5 shrink-0 text-brand-blue-600" />
-      <input
-        type="text"
-        name="keyword"
-        placeholder="직종이나 회사 이름 (예: 요양보호사)"
-        aria-label="일자리 검색"
-        className="h-full w-full min-w-0 bg-transparent px-3 text-body-2 text-slate-800 placeholder:text-slate-400 focus:outline-none lg:text-body-1"
-      />
+    </button>
+  );
+}
+
+/** 판에 늘어놓는 검색어. 공고가 실제로 넉넉한 말만 둔다. */
+const SUGGESTED_KEYWORDS = ["요양보호사", "사회복지사", "경비", "조리", "청소", "운전"];
+
+/**
+ * 위에서 내려오는 검색 판 (잡아바 통합검색과 같은 모양).
+ * 판은 늘 그려 두고 위로 숨겨 둔다 - 열고 닫을 때 미끄러져 내려오고 올라가게 하려면
+ * 숨김 상태에서도 자리에 있어야 한다. 닫힌 동안은 invisible 이라 키보드로도 들어가지 않는다.
+ * /jobs 가 keyword 파라미터로 검색하므로 GET form 으로 그대로 넘긴다.
+ */
+function SearchPanel({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    // 판이 내려오기 시작한 뒤에 커서를 넣는다. 바로 넣으면 숨김 상태라 들어가지 않는다.
+    const t = window.setTimeout(() => inputRef.current?.focus(), 60);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.clearTimeout(t);
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  return (
+    <div className={cn("fixed inset-0 z-[70]", open ? "visible" : "invisible delay-300")} aria-hidden={!open}>
       <button
-        type="submit"
-        className="h-9 shrink-0 cursor-pointer rounded-full bg-brand-blue-600 px-5 text-label-1 font-semibold text-white hover:bg-brand-blue-700 lg:h-10"
+        type="button"
+        aria-label="검색 닫기"
+        tabIndex={-1}
+        onClick={onClose}
+        className={cn(
+          "absolute inset-0 cursor-default bg-slate-900/40 transition-opacity duration-300",
+          open ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="일자리 검색"
+        className={cn(
+          "absolute inset-x-0 top-0 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.12)] transition-transform duration-300 ease-out",
+          open ? "translate-y-0" : "-translate-y-full",
+        )}
       >
-        검색
-      </button>
-    </form>
+        <div className="mx-auto max-w-5xl px-4.5 pt-5 pb-6 lg:px-8 lg:pt-7 lg:pb-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-title-3 font-bold text-slate-900">일자리 검색</h2>
+            <button
+              type="button"
+              aria-label="검색 닫기"
+              onClick={onClose}
+              className="-mr-2 rounded-lg p-2 text-slate-500"
+            >
+              <X className="size-6" />
+            </button>
+          </div>
+
+          <form
+            action="/jobs"
+            role="search"
+            onSubmit={onClose}
+            className="mt-4 flex h-14 items-center rounded-xl border-2 border-brand-blue-600 bg-white pr-2 pl-5"
+          >
+            <input
+              ref={inputRef}
+              type="text"
+              name="keyword"
+              placeholder="예: 요양보호사, 경비, 조리"
+              aria-label="검색어"
+              className="h-full w-full min-w-0 bg-transparent text-body-1 text-slate-900 placeholder:text-slate-600 focus:outline-none"
+            />
+            <button
+              type="submit"
+              className="flex h-10 shrink-0 cursor-pointer items-center gap-1.5 rounded-lg bg-brand-blue-600 px-5 text-body-2 font-semibold text-white"
+            >
+              <Search className="size-4" />
+              검색
+            </button>
+          </form>
+
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <span className="mr-1 text-body-3 font-semibold text-slate-700">많이 찾는 일</span>
+            {SUGGESTED_KEYWORDS.map((keyword) => (
+              <Link
+                key={keyword}
+                href={`/jobs?keyword=${encodeURIComponent(keyword)}`}
+                onClick={onClose}
+                className="rounded-full border border-slate-300 bg-white px-3.5 py-1.5 text-body-3 font-medium text-slate-700"
+              >
+                {keyword}
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

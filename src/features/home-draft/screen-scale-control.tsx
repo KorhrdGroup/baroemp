@@ -49,7 +49,7 @@ export function ScreenScaleControl() {
 
   return (
     <div role="group" aria-label="화면 크기" className="flex items-center gap-2">
-      <span className="text-label-2 font-semibold text-slate-600">화면 크기</span>
+      <span className="text-caption-1 font-semibold text-slate-600">화면 크기</span>
       <div className="flex overflow-hidden rounded-sm border border-slate-300 bg-white">
         {LEVELS.map((level) => (
           <button
@@ -58,10 +58,10 @@ export function ScreenScaleControl() {
             aria-pressed={scale === level.value}
             onClick={() => choose(level.value)}
             className={cn(
-              "h-6 cursor-pointer border-l border-slate-300 px-2.5 text-label-2 first:border-l-0",
+              "h-6 cursor-pointer border-l border-slate-300 px-2.5 text-caption-1 first:border-l-0",
               scale === level.value
                 ? "bg-brand-blue-400 font-semibold text-white"
-                : "font-medium text-slate-600 hover:bg-slate-50",
+                : "font-medium text-slate-600",
             )}
           >
             {level.label}

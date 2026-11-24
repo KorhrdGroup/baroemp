@@ -95,6 +95,11 @@
   --text-label-1--line-height: 19.6px;
   --text-label-2: 12px;
   --text-label-2--line-height: 16.8px;
+  /* KRDS 본문 small(15px) · xsmall(13px). 카드 보조 글자와 배지에 쓴다. */
+  --text-body-3: 15px;
+  --text-body-3--line-height: 21px;
+  --text-caption-1: 13px;
+  --text-caption-1--line-height: 18.2px;
 
   /* 굵기 체계. Semibold(600)는 HDS에 없는 프로젝트 확장값 */
   --font-weight-normal: 400;
@@ -295,6 +300,11 @@
 @layer base {
   * {
     @apply border-border outline-ring/50;
+  }
+  /* Tailwind v4 는 버튼에 손 모양 커서를 주지 않는다. 눌리는 것임을 알 수 있게 되돌린다. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
   }
   body {
     @apply bg-background text-foreground font-medium;

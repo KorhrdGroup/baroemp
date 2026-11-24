@@ -17,7 +17,7 @@ export function QualificationSection() {
           <Link
             key={name}
             href={`/jobs?keyword=${encodeURIComponent(name)}`}
-            className="group flex items-center gap-3 rounded-xl border border-border bg-white p-4 transition-colors hover:border-slate-300 lg:flex-col lg:items-start lg:p-5"
+            className="group flex items-center gap-3 rounded-xl border border-border bg-white p-4 lg:flex-col lg:items-start lg:p-5"
           >
             <QualificationIcon name={name} />
             <span className="min-w-0 text-body-2 font-semibold text-slate-900 sm:text-body-1 lg:mt-1">{name}</span>

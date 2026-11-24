@@ -10,17 +10,16 @@ export function SupportBanner() {
   return (
     <Link
       href="/support"
-      className="group relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] px-5 py-6 sm:px-10 sm:py-7"
+      className="relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] px-5 py-6 sm:px-10 sm:py-7"
     >
       <Waves />
 
       <div className="relative min-w-0">
-        <p className="text-label-2 font-bold tracking-wider text-brand-blue-600">SUPPORT · 지원금</p>
-        <p className="mt-1.5 text-body-1 font-bold break-keep text-slate-900 sm:text-title-2">
+        <p className="text-body-1 font-bold break-keep text-slate-900 sm:text-title-2">
           국민내일배움카드로 훈련비 <span className="text-brand-blue-600">최대 500만원</span>
         </p>
         {/* 하늘색 바탕 위 흰 알약. 테두리 없이 면 색만으로 띄운다. */}
-        <span className="mt-3 inline-flex items-center gap-0.5 rounded-full bg-white py-2 pr-3 pl-4 text-label-1 font-semibold text-slate-800 transition-colors group-hover:bg-slate-50 sm:mt-4">
+        <span className="mt-3 inline-flex items-center gap-0.5 rounded-full bg-white py-2 pr-3 pl-4 text-body-3 font-semibold text-slate-800 sm:mt-4">
           받을 수 있는지 보기
           <ChevronRight className="size-4" />
         </span>

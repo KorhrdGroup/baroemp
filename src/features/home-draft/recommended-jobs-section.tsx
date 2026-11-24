@@ -24,7 +24,7 @@ export function RecommendedJobsSection({
           <h2 className="text-title-3 font-bold tracking-tight text-slate-900 sm:text-title-1">최근 올라온 공고</h2>
           <Link
             href="/jobs?sort=latest"
-            className="inline-flex shrink-0 items-center gap-0.5 text-body-2 font-semibold text-slate-700 hover:text-slate-900"
+            className="inline-flex shrink-0 items-center gap-0.5 text-body-2 font-semibold text-slate-700"
           >
             더보기
             <ChevronRight className="size-4" />

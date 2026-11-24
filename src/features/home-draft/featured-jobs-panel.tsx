@@ -45,7 +45,7 @@ export function FeaturedJobsPanel({
         {active && (
           <Link
             href={active.href}
-            className="inline-flex items-center gap-0.5 text-body-2 font-semibold text-slate-700 hover:text-slate-900"
+            className="inline-flex items-center gap-0.5 text-body-2 font-semibold text-slate-700"
           >
             {active.label} 더보기
             <ChevronRight className="size-4" />
@@ -67,10 +67,10 @@ export function FeaturedJobsPanel({
                   onClick={() => setActiveKey(tab.key)}
                   className={cn(
                     // 흰 알약에 테두리 색으로 가른다. 고른 탭은 파란 테두리·글자.
-                    "flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-4 py-2 text-body-2 whitespace-nowrap transition-colors",
+                    "flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-4 py-2 text-body-2 whitespace-nowrap",
                     selected
                       ? "border-brand-blue-600 font-semibold text-brand-blue-600"
-                      : "border-slate-300 font-medium text-slate-700 hover:border-slate-400",
+                      : "border-slate-300 font-medium text-slate-700",
                   )}
                 >
                   <span aria-hidden>{tab.emoji}</span>
@@ -137,7 +137,7 @@ function JobsCarousel({
   };
 
   const arrowClass =
-    "absolute top-1/2 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] transition-colors hover:bg-slate-50 sm:flex";
+    "absolute top-1/2 z-10 hidden size-11 -translate-y-1/2 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700 shadow-[0_2px_8px_rgba(15,23,42,0.08)] sm:flex";
 
   return (
     <div className="relative mt-4 flex-1">

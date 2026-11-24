@@ -19,10 +19,10 @@ export function QuickToolsCard() {
         <Link
           key={tool.id}
           href={tool.href}
-          className="flex flex-col items-center gap-2 rounded-xl px-1 py-3 text-center transition-colors hover:bg-slate-50"
+          className="flex flex-col items-center gap-2 rounded-xl px-1 py-3 text-center"
         >
           <ServiceIcon id={tool.id} />
-          <span className="text-label-1 font-semibold break-keep text-slate-800">{tool.label}</span>
+          <span className="text-body-3 font-semibold break-keep text-slate-800">{tool.label}</span>
         </Link>
       ))}
     </nav>

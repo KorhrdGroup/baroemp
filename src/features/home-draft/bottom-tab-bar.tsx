@@ -34,8 +34,8 @@ export function BottomTabBar() {
                 href={href}
                 aria-current={current ? "page" : undefined}
                 className={cn(
-                  "flex h-16 flex-col items-center justify-center gap-1 text-label-2",
-                  current ? "font-bold text-brand-blue-600" : "font-medium text-slate-500",
+                  "flex h-16 flex-col items-center justify-center gap-1 text-caption-1",
+                  current ? "font-bold text-brand-blue-600" : "font-medium text-slate-600",
                 )}
               >
                 <Icon className="size-6" strokeWidth={current ? 2.2 : 1.8} />

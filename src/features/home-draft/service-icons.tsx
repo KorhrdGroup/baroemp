@@ -62,6 +62,58 @@ const CUSTOM: Record<string, React.ReactNode> = {
       <path d="M22 41l1.8-6.8 5 5L22 41z" fill={DEEP} />
     </CustomSvg>
   ),
+  // 경력 없어도 되는 일자리: 화분의 새싹
+  beginner: (
+    <CustomSvg>
+      <path d="M24 21c-1-7-7-11-15-10 0 7 7 11 15 10z" fill={MID} />
+      <path d="M24 18c1-6 6-10 14-9 0 6-6 10-14 9z" fill={SOFT} />
+      <path d="M24 29V15" stroke={DEEP} strokeWidth="3" strokeLinecap="round" />
+      <rect x="11" y="28" width="26" height="5" rx="2.5" fill={MID} />
+      <path d="M14 33h20l-3 10H17l-3-10z" fill={DEEP} />
+      <circle cx="40" cy="25" r="3.5" fill={ACCENT} />
+    </CustomSvg>
+  ),
+  // 1:1 취업컨설팅: 주고받는 말풍선
+  consulting: (
+    <CustomSvg>
+      <rect x="16" y="5" width="27" height="20" rx="6" fill={SOFT} />
+      <path d="M35 25l4 6-9-6h5z" fill={SOFT} />
+      <rect x="5" y="15" width="28" height="21" rx="6" fill={DEEP} />
+      <path d="M11 36l-2 7 8-7h-6z" fill={DEEP} />
+      <circle cx="12.5" cy="25.5" r="2.2" fill="white" />
+      <circle cx="19" cy="25.5" r="2.2" fill="white" />
+      <circle cx="25.5" cy="25.5" r="2.2" fill="white" />
+      <circle cx="40" cy="8" r="4" fill={ACCENT} />
+    </CustomSvg>
+  ),
+  // 곧 마감되는 공고: 자명종
+  closing: (
+    <CustomSvg>
+      <path d="M7 14a7 7 0 0 1 9-7M41 14a7 7 0 0 0-9-7" stroke={MID} strokeWidth="4" strokeLinecap="round" />
+      <circle cx="24" cy="26" r="16" fill={SOFT} stroke={DEEP} strokeWidth="3.5" />
+      <path d="M24 17v9l6 4" stroke={DEEP} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="24" cy="26" r="2.5" fill={ACCENT} />
+    </CustomSvg>
+  ),
+  // 급여 높은 공고: 오르는 막대와 화살표
+  salary: (
+    <CustomSvg>
+      <rect x="6" y="30" width="8" height="13" rx="2" fill={SOFT} />
+      <rect x="18" y="23" width="8" height="20" rx="2" fill={MID} />
+      <rect x="30" y="16" width="8" height="27" rx="2" fill={DEEP} />
+      <path d="M6 22l11-9 6 5 15-12M31 6h7v7" stroke={ACCENT} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+    </CustomSvg>
+  ),
+  // 자기소개서 첨삭: 봉투에서 나온 편지
+  coverLetter: (
+    <CustomSvg>
+      <rect x="11" y="5" width="26" height="28" rx="3" fill={SOFT} />
+      <rect x="16" y="11" width="16" height="3" rx="1.5" fill={MID} />
+      <rect x="16" y="17" width="10" height="3" rx="1.5" fill={MID} />
+      <path d="M5 21l19 12 19-12v17a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4V21z" fill={DEEP} />
+      <circle cx="24" cy="34" r="3.5" fill={ACCENT} />
+    </CustomSvg>
+  ),
 };
 
 export function ServiceIcon({ id }: { id: string }) {

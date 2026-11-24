@@ -22,10 +22,10 @@ export function AccountCard({ user }: { user: { name?: string } | null }) {
                 <Link
                   key={item.href}
                   href={item.href}
-                  className="flex items-center justify-between py-3 text-body-1 text-slate-700 hover:text-slate-900"
+                  className="flex items-center justify-between py-3 text-body-1 text-slate-700"
                 >
                   {item.label}
-                  <ChevronRight className="size-4 text-slate-400" />
+                  <ChevronRight className="size-4 text-slate-500" />
                 </Link>
               ))}
             </div>
@@ -34,7 +34,7 @@ export function AccountCard({ user }: { user: { name?: string } | null }) {
             <Button asChild size="lg" className="w-full">
               <Link href="/jobs">나에게 맞는 공고 보기</Link>
             </Button>
-            <Link href="/mypage" className="py-1 text-center text-body-2 text-slate-600 hover:text-slate-900">
+            <Link href="/mypage" className="py-1 text-center text-body-3 text-slate-600">
               마이페이지
             </Link>
           </div>
@@ -49,7 +49,7 @@ export function AccountCard({ user }: { user: { name?: string } | null }) {
             <Button asChild size="lg" className="w-full">
               <Link href="/login">로그인</Link>
             </Button>
-            <Link href="/signup" className="py-1 text-center text-body-2 text-slate-600 hover:text-slate-900">
+            <Link href="/signup" className="py-1 text-center text-body-3 text-slate-600">
               회원가입
             </Link>
           </div>

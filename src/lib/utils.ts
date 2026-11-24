@@ -24,6 +24,8 @@ const twMerge = extendTailwindMerge({
             "body-1-reading",
             "body-2",
             "body-2-reading",
+            "body-3",
+            "caption-1",
             "label-1",
             "label-2",
           ],

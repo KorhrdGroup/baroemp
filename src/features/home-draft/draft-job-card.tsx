@@ -38,31 +38,31 @@ export function DraftJobCard({
     <div className="relative h-full">
       <Link
         href={`/jobs/${job.id}`}
-        className="group flex h-full min-h-52 flex-col rounded-2xl border border-border bg-white p-5 transition-colors hover:border-slate-400"
+        className="flex h-full min-h-52 flex-col rounded-2xl border border-border bg-white p-5"
       >
-        <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
+        <p className="truncate text-body-3 font-medium text-slate-600">{job.companyName}</p>
 
-        <h3 className="mt-1.5 line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-900 group-hover:underline">
+        <h3 className="mt-1.5 line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-900">
           {job.title}
         </h3>
 
         {/* 항목 이름 칸을 같은 폭으로 잡아 값이 한 줄로 맞춰 선다. */}
-        <dl className="mt-3 space-y-1 text-label-1">
+        <dl className="mt-3 space-y-1 text-body-3">
           <div className="flex gap-3">
-            <dt className="w-7 shrink-0 font-medium text-slate-500">급여</dt>
+            <dt className="w-8 shrink-0 font-medium text-slate-600">급여</dt>
             <dd className="truncate font-semibold text-slate-900">
               {salary.typeLabel && <span className="mr-1 font-medium text-slate-600">{salary.typeLabel}</span>}
               {salary.amount}
             </dd>
           </div>
           <div className="flex gap-3">
-            <dt className="w-7 shrink-0 font-medium text-slate-500">지역</dt>
+            <dt className="w-8 shrink-0 font-medium text-slate-600">지역</dt>
             <dd className="truncate font-medium text-slate-700">{location || "정보 없음"}</dd>
           </div>
         </dl>
 
         {/* 아래 줄 오른쪽은 찜 버튼 자리다. */}
-        <p className={cn("mt-auto pt-4 text-label-1", urgent ? "font-bold text-rose-600" : "font-medium text-slate-500")}>
+        <p className={cn("mt-auto pt-4 text-body-3", urgent ? "font-bold text-rose-600" : "font-medium text-slate-600")}>
           {deadlineLabel(left)}
         </p>
       </Link>

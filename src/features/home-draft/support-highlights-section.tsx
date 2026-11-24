@@ -76,11 +76,11 @@ function SupportCard({ item }: { item: (typeof highlights)[number] }) {
         {logo ? (
           <Image src={logo} alt={item.org} width={80} height={24} className="h-5 w-auto" />
         ) : (
-          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
+          <Badge variant="outline" className="rounded-full text-caption-1 text-slate-600">
             {item.org}
           </Badge>
         )}
-        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-label-2 font-semibold text-emerald-700">
+        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-caption-1 font-semibold text-emerald-700">
           신청가능
         </span>
       </div>
@@ -91,13 +91,14 @@ function SupportCard({ item }: { item: (typeof highlights)[number] }) {
         {item.amount}
       </p>
 
-      <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 text-label-2 text-slate-400">
+      <div className="mt-auto flex flex-wrap items-center gap-x-4 gap-y-1 pt-2 text-caption-1 text-slate-600">
         <span className="flex items-center gap-1">
-          <MapPin className="size-3" />
+          {/* 핀은 폭이 좁아 같은 크기면 시계보다 작아 보인다. 한 단계 키우고 선은 둘 다 같은 px 로 고정한다. */}
+          <MapPin className="size-3.5" absoluteStrokeWidth strokeWidth={1.25} />
           {item.region}
         </span>
         <span className="flex items-center gap-1">
-          <Clock className="size-3" />
+          <Clock className="size-3" absoluteStrokeWidth strokeWidth={1.25} />
           {item.period}
         </span>
       </div>
@@ -112,7 +113,7 @@ export function SupportHighlightsSection() {
         <h2 className="text-title-3 font-bold tracking-tight text-slate-900 sm:text-title-1">지금 신청할 수 있는 지원금</h2>
         <Link
           href="/support"
-          className="inline-flex shrink-0 items-center gap-0.5 text-body-2 font-semibold text-slate-700 hover:text-slate-900"
+          className="inline-flex shrink-0 items-center gap-0.5 text-body-2 font-semibold text-slate-700"
         >
           더보기
           <ChevronRight className="size-4" />
