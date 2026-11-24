@@ -106,13 +106,13 @@ export function JobCard({
           줄간격은 body-1 기본값이 120%(21.6px)라 두 줄이 붙어 보인다.
           같은 시스템의 body-1-reading 과 같은 140%(25.2px)로 띄운다.
         */}
-        <h3 className="mt-2 line-clamp-2 break-keep text-balance text-body-1 leading-[1.4] font-bold text-slate-900 group-hover:underline">
+        <h3 className="mt-2 line-clamp-2 break-keep text-balance text-body-1 leading-[1.4] font-semibold text-slate-900 group-hover:underline">
           {job.title}
         </h3>
 
-        {/* 종류는 금액을 읽는 단위일 뿐이라 무채색으로 두고, 금액만 파랗게 강조한다. */}
-        <p className="mt-3 break-keep text-body-2 font-bold text-brand-blue-600">
-          {salary.typeLabel && <span className="mr-1 font-medium text-slate-500">{salary.typeLabel}</span>}
+        {/* 금액은 굵기로만 강조한다. 파랑은 누르는 것(버튼·링크)에만 쓴다. 종류는 금액을 읽는 단위라 옅게. */}
+        <p className="mt-3 break-keep text-body-2 font-bold text-slate-900">
+          {salary.typeLabel && <span className="mr-1 font-medium text-slate-600">{salary.typeLabel}</span>}
           {salary.amount}
         </p>
 
@@ -129,14 +129,12 @@ export function JobCard({
               </Badge>
             )}
             {job.isBeginnerFriendly && (
-              <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-                <span aria-hidden className="mr-0.5">🌱</span>
+              <Badge variant="outline" className="rounded-full text-label-2 text-slate-600">
                 신입가능
               </Badge>
             )}
             {midlifeRecommended && (
-              <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-                <span aria-hidden className="mr-0.5">🙌</span>
+              <Badge variant="outline" className="rounded-full text-label-2 text-slate-600">
                 중장년 추천
               </Badge>
             )}
@@ -158,7 +156,7 @@ export function JobCard({
           content-end 는 남는 자리를 위에 두고 글자를 아래에 붙인다. 카드의 마지막
           줄이라 아래 여백에 맞춰 떨어져 있어야 카드마다 바닥선이 같아 보인다.
         */}
-        <div className="mt-auto flex min-h-[3.7rem] flex-wrap content-end items-center gap-x-2 gap-y-1 pt-4 text-label-1 font-medium text-slate-500">
+        <div className="mt-auto flex min-h-[3.7rem] flex-wrap content-end items-center gap-x-2 gap-y-1 pt-4 text-label-1 font-medium text-slate-600">
           {matchReasonLabel && (
             <>
               <span className="text-brand-blue-600">✓ {matchReasonLabel}</span>

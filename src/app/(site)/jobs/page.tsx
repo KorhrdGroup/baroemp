@@ -146,13 +146,8 @@ export default async function JobsPage({
     */
     <GuestGate active={!isAuthenticated}>
     <div className="mx-auto max-w-6xl px-4.5 py-10 lg:px-8">
-      <div className="mb-8">
-        <p className="text-label-1 font-semibold text-brand-blue-600">일자리찾기</p>
-        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나에게 맞는 일자리를 찾아보세요</h1>
-        <p className="mt-2 text-body-2-reading text-balance text-slate-500">
-          실시간 채용정보를 조건에 맞게 확인하고, 관심 있는 공고에 바로 지원해보세요.
-        </p>
-      </div>
+      {/* 제목 한 줄만 둔다. 무엇을 하는 화면인지는 아래 검색바가 말한다. */}
+      <h1 className="mb-6 text-title-2 font-extrabold tracking-tight text-slate-900 sm:mb-8 sm:text-headline-3">일자리 찾기</h1>
 
       <JobFiltersForm
         initial={{
@@ -166,27 +161,23 @@ export default async function JobsPage({
         }}
         jobCategoryLabel={jobCategoryLabel}
         profileRegion={careerProfile?.region}
+        /* 건수를 정렬 줄 왼쪽에 둔다 - 같은 목록을 다루는 정보라 한 줄로 읽히게. */
         summary={
-          <p className="text-body-2 text-slate-500">
-            총 <span className="font-bold text-brand-blue-600">{result.total.toLocaleString()}건</span>
-          </p>
+          <h2 className="text-title-3 font-bold text-slate-900">
+            전체 공고 <span className="ml-1">{result.total.toLocaleString()}</span>
+            <span className="ml-0.5 text-body-1 font-medium text-slate-600">건</span>
+          </h2>
+        }
+        /* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */
+        curation={
+          <JobCurationSection
+            initialActive={initialCuration}
+            bookmarkedIds={bookmarkedIds}
+            isAuthenticated={isAuthenticated}
+          />
         }
       >
-      {/* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */}
-      <div className="mt-8">
-        <JobCurationSection
-          initialActive={initialCuration}
-          bookmarkedIds={bookmarkedIds}
-          isAuthenticated={isAuthenticated}
-        />
-      </div>
-      </JobFiltersForm>
-
-      <div className="mt-8">
-        <h2 className="text-body-1 font-bold text-slate-900">
-          전체 공고 <span className="font-semibold text-brand-blue-600">{result.total.toLocaleString()}</span>
-          <span className="ml-0.5 text-body-2 font-medium text-slate-500">건</span>
-        </h2>
+      <div className="mt-2">
         {result.items.length === 0 ? (
           <EmptyState
             icon={Briefcase}
@@ -196,7 +187,7 @@ export default async function JobsPage({
           />
         ) : (
           <>
-            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
               {result.items.slice(0, INTERLEAVE_AFTER).map((job) => (
                 <JobCard
                   key={job.id}
@@ -229,7 +220,7 @@ export default async function JobsPage({
                     ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
                     : ""}
                 </p>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                   {recommendation.preparation.jobs.map((job) => (
                     <JobRowCompact
                       key={`prep-${job.id}`}
@@ -243,7 +234,7 @@ export default async function JobsPage({
             )}
 
             {result.items.length > INTERLEAVE_AFTER && (
-              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
                 {result.items.slice(INTERLEAVE_AFTER).map((job) => (
                   <JobCard
                     key={job.id}
@@ -262,6 +253,7 @@ export default async function JobsPage({
           </>
         )}
       </div>
+      </JobFiltersForm>
     </div>
     </GuestGate>
   );

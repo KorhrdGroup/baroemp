@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { JobCurationResult, JobCurationTab } from "@/types";
 import { cn } from "@/lib/utils";
-import { filterPillClass, filterPillOffClass, filterPillOnSolidClass } from "@/lib/ui-classes";
+import { filterPillClass, filterPillOffClass } from "@/lib/ui-classes";
 import { JobCard } from "./job-card";
 import {
   getAllJobCurationsAction,
@@ -15,13 +15,13 @@ import {
 } from "./job-actions";
 
 /** 탭 순서. 기준은 job-curation.service (신규 3일 · 마감임박 7일 · 개인화 탭은 희망 직종/지역 후보군). */
-const TABS: { key: JobCurationTab; emoji: string; label: string }[] = [
-  { key: "matched", emoji: "🎯", label: "맞춤 추천" },
-  { key: "assessment_matched", emoji: "🧭", label: "진단 맞춤 공고" },
-  { key: "ready_to_apply", emoji: "✅", label: "지금 지원가능" },
-  { key: "unlockable", emoji: "🔑", label: "자격 따면 열리는 공고" },
-  { key: "new", emoji: "✨", label: "신규 일자리" },
-  { key: "closing_soon", emoji: "⏰", label: "마감임박" },
+const TABS: { key: JobCurationTab; label: string }[] = [
+  { key: "matched", label: "맞춤 추천" },
+  { key: "assessment_matched", label: "진단 맞춤 공고" },
+  { key: "ready_to_apply", label: "지금 지원가능" },
+  { key: "unlockable", label: "자격 따면 열리는 공고" },
+  { key: "new", label: "신규 일자리" },
+  { key: "closing_soon", label: "마감임박" },
 ];
 
 
@@ -209,11 +209,11 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
 
   return (
     /*
-      하늘색 판을 깔아 아래 검색 결과 목록과 갈라 놓는다.
+      옅은 회색 판을 깔아 아래 검색 결과 목록과 갈라 놓는다 (파란 판은 화면을 너무 파랗게 했다).
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
-    <section ref={sectionRef} className="mb-8 rounded-2xl bg-brand-blue-50 p-5 pt-6 sm:p-6 sm:pt-8">
+    <section ref={sectionRef} className="mb-8 rounded-2xl bg-gov-surface p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
       {/*
         제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
@@ -221,7 +221,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         튀어나와 보인다. 제목은 글자가 굵어 더 튀므로 한 단계 덜 준다.
       */}
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 pl-1">
-        <h2 className="text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
+        <h2 className="text-title-3 font-bold text-slate-900">이런 일자리 어때요?</h2>
         {/* 비로그인에게는 지금 보는 것이 전부가 아니라는 것과, 무엇을 더 볼 수 있는지 알린다. */}
         {!isAuthenticated && (
           <p className="text-label-1 text-slate-600">
@@ -234,14 +234,14 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-brand-blue-50 to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-gov-surface to-transparent transition-opacity",
             tabFade.start ? "opacity-100" : "opacity-0",
           )}
         />
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-brand-blue-50 to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-gov-surface to-transparent transition-opacity",
             tabFade.end ? "opacity-100" : "opacity-0",
           )}
         />
@@ -258,18 +258,10 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             onFocus={() => prefetchTab(t.key)}
             className={cn(
               filterPillClass,
-              /*
-                그림문자의 글자 상자는 한글보다 높아서, 그냥 글 안에 두면 줄 높이를 늘려
-                글자가 위로 밀리고 아래쪽만 넓어 보인다. 칩을 flex 로 만들어 세로 가운데로 맞춘다.
-              */
-              "inline-flex items-center gap-1",
-              activeTab === t.key ? filterPillOnSolidClass : filterPillOffClass,
+              /* 고른 탭은 검정 칩으로 (홈 시안의 상황별 탭과 같은 표시). */
+              activeTab === t.key ? "border-slate-900 bg-slate-900 text-white" : filterPillOffClass,
             )}
           >
-            {/* 그림문자는 읽어줄 것이 없다. 라벨이 이미 같은 말을 하므로 화면에서만 보이게 둔다. */}
-            <span aria-hidden className="leading-none">
-              {t.emoji}
-            </span>
             {t.label}
             </button>
           ))}
@@ -337,14 +329,14 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-brand-blue-50 to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-gov-surface to-transparent transition-opacity",
             fade.start ? "opacity-100" : "opacity-0",
           )}
         />
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-brand-blue-50 to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-gov-surface to-transparent transition-opacity",
             fade.end ? "opacity-100" : "opacity-0",
           )}
         />
