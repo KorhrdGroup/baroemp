@@ -39,7 +39,7 @@ async function loadHomeJobs(): Promise<{ items: Job[] }> {
 
 /*
   첫 줄 공고 판의 탭. 회원 조건 없이 고를 수 있는 것만 둔다 - 비로그인에게도 같은 판이 보인다.
-  탭마다 세 건만 필요하고 건수는 세지 않는다(withTotal: false). 위 최근 공고와 같이 10분 기억한다.
+  탭마다 아홉 건(세 장씩 세 번 넘김)을 받고 건수는 세지 않는다(withTotal: false). 위 최근 공고와 같이 10분 기억한다.
 */
 const FEATURED_TABS: { key: string; label: string; emoji: string; href: string; filter: Partial<JobSearchFilter> }[] = [
   { key: "closing", label: "마감 임박", emoji: "⏰", href: "/jobs?closingSoon=1&sort=deadline", filter: { closingWithinDays: 7, sort: "deadline" } },
@@ -50,6 +50,7 @@ const FEATURED_TABS: { key: string; label: string; emoji: string; href: string; 
   */
   { key: "care", label: "요양보호사", emoji: "🤝", href: "/jobs?category=care_worker&sort=latest", filter: { jobCategoryPatterns: ["5501"], sort: "latest" } },
 ];
+const FEATURED_PER_TAB = 9;
 let featuredCache: { at: number; tabs: FeaturedJobsTab[] } | null = null;
 
 async function loadFeaturedTabs(): Promise<FeaturedJobsTab[]> {
@@ -58,7 +59,7 @@ async function loadFeaturedTabs(): Promise<FeaturedJobsTab[]> {
   const tabs = await Promise.all(
     FEATURED_TABS.map(async ({ filter, ...tab }) => {
       try {
-        const { items } = await repo.search({ activeOnly: true, page: 1, pageSize: 3, withTotal: false, ...filter });
+        const { items } = await repo.search({ activeOnly: true, page: 1, pageSize: FEATURED_PER_TAB, withTotal: false, ...filter });
         return { ...tab, jobs: items };
       } catch (err) {
         console.error(`[home] 공고 판 "${tab.label}" 조회 실패`, err);
