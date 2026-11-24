@@ -173,6 +173,41 @@ function toProfileParam(signal: JobMatchSignal) {
   };
 }
 
+/**
+ * DB 함수(search_jobs_scored·search_jobs_keyword)는 /jobs 검색바가 쓰는 조건만 안다.
+ * 그 밖의 조건(직종 eq·고용형태·급여 범위·태그 등)이 오면 예전 조회로 물러나야 한다.
+ * 조용히 조건을 빠뜨리는 것보다, 느리더라도 결과가 틀리지 않는 쪽을 택한다.
+ */
+function hasFiltersOutsideRpc(filter: JobSearchFilter): boolean {
+  return (
+    filter.jobCategory !== undefined ||
+    filter.occupationCode !== undefined ||
+    filter.employmentDestinationId !== undefined ||
+    filter.regionSigungu !== undefined ||
+    filter.workType !== undefined ||
+    filter.employmentTypeCode !== undefined ||
+    filter.careerRequirement !== undefined ||
+    filter.isBeginnerFriendly === false ||
+    filter.salaryMin !== undefined ||
+    filter.salaryMax !== undefined ||
+    (filter.preferentialCodes?.length ?? 0) > 0 ||
+    (filter.tags?.length ?? 0) > 0
+  );
+}
+
+/** search_jobs_scored·search_jobs_keyword 의 p_filter 모양. */
+function toFilterParam(filter: JobSearchFilter) {
+  return {
+    active_only: filter.activeOnly !== false,
+    region: filter.region ?? null,
+    sigungus: filter.regionSigungus ?? [],
+    category_prefixes: filter.jobCategoryPatterns ?? [],
+    beginner_only: filter.isBeginnerFriendly === true,
+    closing_within_days: filter.closingWithinDays ?? null,
+    keyword: filter.keyword?.trim() || null,
+  };
+}
+
 /** count(*) over () 는 bigint 라 PostgREST 가 문자열로 줄 수 있다. */
 function row0Total(row: { total_count: number | string }): number {
   return Number(row.total_count);
@@ -234,7 +269,28 @@ export function createSupabaseJobRepository(): JobRepository | null {
       const pageSize = Math.min(500, Math.max(1, filter.pageSize ?? 20));
       const start = (page - 1) * pageSize;
 
-      let query = client.from("jobs").select("*", filter.withTotal === false ? undefined : { count: "exact" });
+      /*
+        키워드 검색은 좁은 표에서 거르고 세는 DB 함수로 보낸다(0076).
+        jobs 에 바로 보내면 "총 N건"을 세려고 맞는 공고를 큰 표에서 다 읽어 "요양"이 3.5초였다.
+      */
+      if (filter.keyword?.trim() && !hasFiltersOutsideRpc(filter)) {
+        const result = await client.rpc("search_jobs_keyword", {
+          p_filter: toFilterParam(filter),
+          p_sort: filter.sort ?? "recommended",
+          p_limit: pageSize,
+          p_offset: start,
+        });
+        if (result.error) throwDataSourceError("JobRepository.search", result.error);
+        const rows = (result.data ?? []) as { job: Record<string, unknown>; total_count: number | string }[];
+        return {
+          items: rows.map((row) => mapRow(row.job)),
+          total: rows[0] ? row0Total(rows[0]) : 0,
+          page,
+          pageSize,
+        } satisfies JobSearchResult;
+      }
+
+      let query = client.from("jobs").select("*", filter.withTotal === false ? undefined : { count: filter.withTotal === "estimated" ? "estimated" : "exact" });
       query = applySearchFilters(query, filter);
 
       switch (filter.sort) {
@@ -265,39 +321,14 @@ export function createSupabaseJobRepository(): JobRepository | null {
       } satisfies JobSearchResult;
     },
     async searchRanked(filter, signal) {
-      /*
-        DB 함수(search_jobs_scored)는 /jobs 검색바가 쓰는 조건만 안다.
-        그 밖의 조건(직종 eq·고용형태·급여 범위·태그 등)이 오면 예전 방식으로 물러난다.
-        조용히 조건을 빠뜨리고 정렬만 하는 것보다, 정렬을 포기하는 쪽이 결과가 틀리지 않는다.
-      */
-      const unsupported =
-        filter.jobCategory !== undefined ||
-        filter.occupationCode !== undefined ||
-        filter.employmentDestinationId !== undefined ||
-        filter.regionSigungu !== undefined ||
-        filter.workType !== undefined ||
-        filter.employmentTypeCode !== undefined ||
-        filter.careerRequirement !== undefined ||
-        filter.isBeginnerFriendly === false ||
-        filter.salaryMin !== undefined ||
-        filter.salaryMax !== undefined ||
-        (filter.preferentialCodes?.length ?? 0) > 0 ||
-        (filter.tags?.length ?? 0) > 0;
-      if (unsupported) return this.search({ ...filter, sort: "recommended" });
+      /* 함수가 모르는 조건이 오면 정렬을 포기하고 예전 방식으로 물러난다(hasFiltersOutsideRpc). */
+      if (hasFiltersOutsideRpc(filter)) return this.search({ ...filter, sort: "recommended" });
 
       const page = Math.max(1, filter.page ?? 1);
       const pageSize = Math.min(500, Math.max(1, filter.pageSize ?? 20));
       const result = await client.rpc("search_jobs_scored", {
         p_profile: toProfileParam(signal),
-        p_filter: {
-          active_only: filter.activeOnly !== false,
-          region: filter.region ?? null,
-          sigungus: filter.regionSigungus ?? [],
-          category_prefixes: filter.jobCategoryPatterns ?? [],
-          beginner_only: filter.isBeginnerFriendly === true,
-          closing_within_days: filter.closingWithinDays ?? null,
-          keyword: filter.keyword?.trim() || null,
-        },
+        p_filter: toFilterParam(filter),
         p_limit: pageSize,
         p_offset: (page - 1) * pageSize,
       });

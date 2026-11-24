@@ -147,8 +147,9 @@ export interface JobSearchFilter {
   /**
    * false 면 전체 건수를 세지 않는다 (total 은 받아온 행 수). 활성 공고 전체를 세는 데 수 초가 걸려,
    * 건수를 안 쓰는 서버 내부 조회(큐레이션 탭 등)는 끈다.
+   * "estimated" 면 플래너 추정치로 센다. 정확할 필요 없는 표시용 수치(홈 배너)에 쓴다.
    */
-  withTotal?: boolean;
+  withTotal?: boolean | "estimated";
 }
 
 export interface JobSearchResult {

@@ -24,7 +24,7 @@ let jobCountCache: { at: number; value: number } | null = null;
 async function loadActiveJobCount(): Promise<number | undefined> {
   if (jobCountCache && Date.now() - jobCountCache.at < JOB_COUNT_TTL_MS) return jobCountCache.value;
   try {
-    const { total } = await getJobRepository().search({ activeOnly: true, page: 1, pageSize: 1 });
+    const { total } = await getJobRepository().search({ activeOnly: true, page: 1, pageSize: 1, withTotal: "estimated" });
     jobCountCache = { at: Date.now(), value: total };
     return total;
   } catch (err) {
