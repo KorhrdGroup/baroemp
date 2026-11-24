@@ -1,7 +1,7 @@
-import { HeroSection } from "@/features/home-draft/hero-section";
-import { HeroSideCards } from "@/features/home-draft/hero-side-cards";
 import { AccountCard } from "@/features/home-draft/account-card";
-import { CoreServicesSection } from "@/features/home-draft/core-services-section";
+import { FeaturedJobsPanel, type FeaturedJobsTab } from "@/features/home-draft/featured-jobs-panel";
+import { QuickToolsCard } from "@/features/home-draft/quick-tools-card";
+import { SupportBanner } from "@/features/home-draft/support-banner";
 import { SituationTabsSection } from "@/features/home-draft/situation-tabs-section";
 import { SupportHighlightsSection } from "@/features/home-draft/support-highlights-section";
 import { QualificationSection } from "@/features/home-draft/qualification-section";
@@ -9,59 +9,101 @@ import { RecommendedJobsSection } from "@/features/home-draft/recommended-jobs-s
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getJobRepository } from "@/lib/repositories";
-import type { Job } from "@/types";
+import type { Job, JobSearchFilter } from "@/types";
 
 /*
-  디자인 리뉴얼 시안의 홈. 최근 올라온 공고 8건과 활성 공고 수(추정치)를 한 번의 조회로 받아
-  프로세스 안에 10분 기억한다.
+  디자인 리뉴얼 시안의 홈. 최근 올라온 공고 8건을 받아 프로세스 안에 10분 기억한다.
+  공고 수는 화면에 쓰지 않아 세지 않는다.
 */
 const HOME_JOBS_TTL_MS = 10 * 60 * 1000;
 const HOME_JOBS_LIMIT = 8;
-let homeJobsCache: { at: number; total: number; items: Job[] } | null = null;
+let homeJobsCache: { at: number; items: Job[] } | null = null;
 
-async function loadHomeJobs(): Promise<{ total?: number; items: Job[] }> {
+async function loadHomeJobs(): Promise<{ items: Job[] }> {
   if (homeJobsCache && Date.now() - homeJobsCache.at < HOME_JOBS_TTL_MS) return homeJobsCache;
   try {
-    const { total, items } = await getJobRepository().search({
+    const { items } = await getJobRepository().search({
       activeOnly: true,
       page: 1,
       pageSize: HOME_JOBS_LIMIT,
       sort: "latest",
-      withTotal: "estimated",
+      withTotal: false,
     });
-    homeJobsCache = { at: Date.now(), total, items };
+    homeJobsCache = { at: Date.now(), items };
     return homeJobsCache;
   } catch (err) {
-    console.error("[home] 최근 공고·활성 공고 수치 조회 실패", err);
+    console.error("[home] 최근 공고 조회 실패", err);
     return homeJobsCache ?? { items: [] };
   }
 }
 
+/*
+  첫 줄 공고 판의 탭. 회원 조건 없이 고를 수 있는 것만 둔다 - 비로그인에게도 같은 판이 보인다.
+  탭마다 세 건만 필요하고 건수는 세지 않는다(withTotal: false). 위 최근 공고와 같이 10분 기억한다.
+*/
+const FEATURED_TABS: { key: string; label: string; emoji: string; href: string; filter: Partial<JobSearchFilter> }[] = [
+  { key: "closing", label: "마감 임박", emoji: "⏰", href: "/jobs?closingSoon=1&sort=deadline", filter: { closingWithinDays: 7, sort: "deadline" } },
+  { key: "beginner", label: "경력 없어도 돼요", emoji: "🙌", href: "/jobs?beginner=1", filter: { isBeginnerFriendly: true, sort: "latest" } },
+  /*
+    "급여 높은 순"을 두려 했으나 지역·직종 없이 급여로 줄 세우는 조회가 8초 제한에 걸린다(색인 없음).
+    대신 공고가 가장 많은 요양보호사를 둔다.
+  */
+  { key: "care", label: "요양보호사", emoji: "🤝", href: "/jobs?category=care_worker&sort=latest", filter: { jobCategoryPatterns: ["5501"], sort: "latest" } },
+];
+let featuredCache: { at: number; tabs: FeaturedJobsTab[] } | null = null;
+
+async function loadFeaturedTabs(): Promise<FeaturedJobsTab[]> {
+  if (featuredCache && Date.now() - featuredCache.at < HOME_JOBS_TTL_MS) return featuredCache.tabs;
+  const repo = getJobRepository();
+  const tabs = await Promise.all(
+    FEATURED_TABS.map(async ({ filter, ...tab }) => {
+      try {
+        const { items } = await repo.search({ activeOnly: true, page: 1, pageSize: 3, withTotal: false, ...filter });
+        return { ...tab, jobs: items };
+      } catch (err) {
+        console.error(`[home] 공고 판 "${tab.label}" 조회 실패`, err);
+        return { ...tab, jobs: [] as Job[] };
+      }
+    }),
+  );
+  // 하나라도 비었으면 기억하지 않는다 - 잠깐 실패한 탭이 10분 동안 빠져 있지 않게.
+  if (tabs.every((t) => t.jobs.length > 0)) featuredCache = { at: Date.now(), tabs };
+  return featuredCache?.tabs ?? tabs;
+}
+
 export default async function DraftHomePage() {
-  const [{ total: jobCount, items: jobs }, user] = await Promise.all([loadHomeJobs(), getCurrentUser()]);
+  const [{ items: jobs }, featuredTabs, user] = await Promise.all([
+    loadHomeJobs(),
+    loadFeaturedTabs(),
+    getCurrentUser(),
+  ]);
   // 찜 상태는 회원마다 달라 캐시에 넣지 않는다. 보여줄 공고가 있을 때만 읽는다.
   const bookmarkedIds = user && jobs.length > 0 ? await getUserJobBookmarkIdsAction() : [];
   return (
     <div className="pb-16 sm:pb-24">
       {/*
-        첫 줄 (잡아바의 3단). 넓은 화면은 검색 판 · 소식 카드 두 장 · 로그인 카드가 나란히 서서 폭을 채우고
-        (앱 화면을 가운데 세워 둔 모양이 되지 않게), 좁은 화면은 검색 판 아래에 소식 카드가 두 칸으로 온다.
-        로그인 카드는 휴대폰에서 아래 탭의 "마이"가 대신한다.
+        첫 줄 (사람인의 3단 중 가운데 · 오른쪽). 검색은 머리글이 맡고, 여기는 곧장 공고로 시작한다.
+        넓은 화면은 공고 판(9칸) 옆에 로그인 카드와 도구 상자(3칸)를 세운다.
+        휴대폰은 공고 판 아래 도구 상자만 오고, 로그인 카드는 아래 탭의 "마이"가 대신한다.
       */}
-      <section className="mx-auto grid max-w-7xl gap-3 px-4.5 pt-4 sm:gap-4 sm:pt-8 lg:grid-cols-12 lg:px-8">
-        <div className="lg:col-span-6">
-          <HeroSection jobCount={jobCount} />
+      <section className="mx-auto grid max-w-7xl grid-cols-1 gap-3 px-4.5 pt-4 sm:gap-4 sm:pt-8 lg:grid-cols-12 lg:px-8">
+        <div className="lg:col-span-9">
+          <FeaturedJobsPanel
+            tabs={featuredTabs}
+            isAuthenticated={Boolean(user)}
+            bookmarkedIds={bookmarkedIds}
+          />
         </div>
-        <div className="lg:col-span-3">
-          <HeroSideCards />
-        </div>
-        <div className="hidden lg:col-span-3 lg:block">
-          <AccountCard user={user} />
+        <div className="flex flex-col gap-3 sm:gap-4 lg:col-span-3">
+          <div className="hidden flex-1 lg:block">
+            <AccountCard user={user} />
+          </div>
+          <QuickToolsCard />
         </div>
       </section>
 
       <div className="mx-auto mt-3 max-w-7xl px-4.5 sm:mt-4 lg:px-8">
-        <CoreServicesSection />
+        <SupportBanner />
       </div>
 
       {jobs.length > 0 && (

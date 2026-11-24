@@ -22,10 +22,11 @@ const CONSULTING: ServiceCard = {
   icon: MessagesSquare,
 };
 
-const TABS: { id: string; label: string; cards: ServiceCard[] }[] = [
+const TABS: { id: string; label: string; emoji: string; cards: ServiceCard[] }[] = [
   {
     id: "new",
     label: "새로운 일을 찾아요",
+    emoji: "🔍",
     cards: [
       {
         title: "내게 맞는 직업 찾기",
@@ -48,6 +49,7 @@ const TABS: { id: string; label: string; cards: ServiceCard[] }[] = [
   {
     id: "return",
     label: "다시 일하고 싶어요",
+    emoji: "🌱",
     cards: [
       {
         title: "곧 마감되는 공고",
@@ -70,6 +72,7 @@ const TABS: { id: string; label: string; cards: ServiceCard[] }[] = [
   {
     id: "working",
     label: "지금 일하고 있어요",
+    emoji: "💼",
     cards: [
       {
         title: "급여 높은 공고",
@@ -114,12 +117,14 @@ export function SituationTabsSection() {
                   aria-controls="situation-panel"
                   onClick={() => setActiveId(tab.id)}
                   className={cn(
-                    "shrink-0 rounded-full border px-4 py-2.5 text-body-2 whitespace-nowrap transition-colors sm:text-body-1",
+                    // 흰 알약에 테두리 색으로 가른다 (공고 판 탭과 같은 모양).
+                    "flex shrink-0 items-center gap-1.5 rounded-full border bg-white px-4 py-2.5 text-body-2 whitespace-nowrap transition-colors sm:text-body-1",
                     selected
-                      ? "border-slate-900 bg-slate-900 text-white"
-                      : "border-border bg-white text-slate-700 hover:border-slate-400",
+                      ? "border-brand-blue-600 font-semibold text-brand-blue-600"
+                      : "border-slate-300 font-medium text-slate-700 hover:border-slate-400",
                   )}
                 >
+                  <span aria-hidden>{tab.emoji}</span>
                   {tab.label}
                 </button>
               );

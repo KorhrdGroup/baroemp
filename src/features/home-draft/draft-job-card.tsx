@@ -2,18 +2,24 @@ import Link from "next/link";
 import { JobBookmarkButton } from "@/features/jobs/job-bookmark-button";
 import { labelRegion } from "@/lib/labels";
 import { splitSalary } from "@/lib/salary";
+import { cn } from "@/lib/utils";
 import type { Job } from "@/types";
 
-function deadlineLabel(job: Job): string {
-  if (!job.applyDeadline) return "상시채용";
-  const daysLeft = Math.ceil((new Date(job.applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-  if (daysLeft < 0) return "마감";
-  return daysLeft === 0 ? "오늘 마감" : `D-${daysLeft}`;
+function daysLeft(job: Job): number | null {
+  if (!job.applyDeadline) return null;
+  return Math.ceil((new Date(job.applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+}
+
+function deadlineLabel(left: number | null): string {
+  if (left === null) return "상시채용";
+  if (left < 0) return "마감";
+  return left === 0 ? "오늘 마감" : `D-${left}`;
 }
 
 /**
- * 시안의 공고 카드. 한눈에 읽히도록 제목 · 회사와 지역 · 급여 · 남은 날만 둔다.
- * 배지와 메타 줄은 목록(일자리찾기)에서 보면 된다.
+ * 시안의 공고 카드. 잡아바의 교육 카드처럼 흰 면 · 옅은 테두리에, 위에서 아래로
+ * 회사(옅게) → 제목(굵게) → "급여 · 지역" 항목 줄 → 남은 날 순으로 놓는다.
+ * 색은 마감이 가까운 남은 날 하나에만 쓴다 - 띠·동그라미에 색을 쓰면 카드가 여럿 모일 때 어지럽다.
  */
 export function DraftJobCard({
   job,
@@ -26,32 +32,45 @@ export function DraftJobCard({
 }) {
   const salary = splitSalary(job);
   const location = [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ");
+  const left = daysLeft(job);
+  const urgent = left !== null && left >= 0 && left <= 7;
   return (
     <div className="relative h-full">
       <Link
         href={`/jobs/${job.id}`}
-        className="group flex h-full min-h-44 flex-col rounded-xl border border-border bg-white p-5 transition-colors hover:border-slate-300"
+        className="group flex h-full min-h-52 flex-col rounded-2xl border border-border bg-white p-5 transition-colors hover:border-slate-400"
       >
-        <h3 className="line-clamp-2 pr-9 text-body-1 leading-[1.4] font-semibold break-keep text-slate-900 group-hover:underline">
+        <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
+
+        <h3 className="mt-1.5 line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-900 group-hover:underline">
           {job.title}
         </h3>
-        <p className="mt-2 truncate text-label-1 text-slate-500">
-          {job.companyName}
-          {location && <span className="before:mx-1.5 before:content-['·']">{location}</span>}
-        </p>
-        <p className="mt-auto flex items-baseline justify-between gap-2 pt-4">
-          <span className="truncate text-body-2 font-semibold text-slate-900">
-            {salary.typeLabel && <span className="mr-1 font-medium text-slate-500">{salary.typeLabel}</span>}
-            {salary.amount}
-          </span>
-          <span className="shrink-0 text-label-1 text-slate-500">{deadlineLabel(job)}</span>
+
+        {/* 항목 이름 칸을 같은 폭으로 잡아 값이 한 줄로 맞춰 선다. */}
+        <dl className="mt-3 space-y-1 text-label-1">
+          <div className="flex gap-3">
+            <dt className="w-7 shrink-0 font-medium text-slate-500">급여</dt>
+            <dd className="truncate font-semibold text-slate-900">
+              {salary.typeLabel && <span className="mr-1 font-medium text-slate-600">{salary.typeLabel}</span>}
+              {salary.amount}
+            </dd>
+          </div>
+          <div className="flex gap-3">
+            <dt className="w-7 shrink-0 font-medium text-slate-500">지역</dt>
+            <dd className="truncate font-medium text-slate-700">{location || "정보 없음"}</dd>
+          </div>
+        </dl>
+
+        {/* 아래 줄 오른쪽은 찜 버튼 자리다. */}
+        <p className={cn("mt-auto pt-4 text-label-1", urgent ? "font-bold text-rose-600" : "font-medium text-slate-500")}>
+          {deadlineLabel(left)}
         </p>
       </Link>
       <JobBookmarkButton
         jobId={job.id}
         isAuthenticated={isAuthenticated}
         initialBookmarked={isBookmarked}
-        className="absolute right-3.5 top-3.5"
+        className="absolute right-3 bottom-3"
       />
     </div>
   );
