@@ -129,10 +129,10 @@ export async function getCandidateJobsForUser(userId: string, limit = CANDIDATE_
      * 워크넷 6자리 코드라, eq 비교로는 아무 공고도 걸리지 않았다. /jobs 검색과 같이
      * 코드 앞자리 like 매칭으로 바꾼다.
      */
-    filters.push({ jobCategoryPatterns: toJobCategoryPatterns([category]), activeOnly: true, page: 1, pageSize: 250 });
+    filters.push({ jobCategoryPatterns: toJobCategoryPatterns([category]), activeOnly: true, page: 1, pageSize: 250, withTotal: false });
   }
   if (profile.region) {
-    filters.push({ region: profile.region, activeOnly: true, page: 1, pageSize: 250 });
+    filters.push({ region: profile.region, activeOnly: true, page: 1, pageSize: 250, withTotal: false });
   }
   if (filters.length === 0) return [];
 

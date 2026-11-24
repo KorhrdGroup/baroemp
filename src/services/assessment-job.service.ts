@@ -100,6 +100,8 @@ async function findJobsForRecommendation(
       sort: "latest",
       page: 1,
       pageSize: needsQualificationFilter ? QUALIFICATION_SCAN_POOL : limit,
+      // 건수는 쓰지 않는다. 직종 앞자리 조건은 인덱스를 못 타 정확히 세면 8초를 넘겼다.
+      withTotal: false,
     } as JobSearchFilter);
     return needsQualificationFilter
       ? items.filter((job) => jobMentionsAnyQualification(job, missingQualifications))
