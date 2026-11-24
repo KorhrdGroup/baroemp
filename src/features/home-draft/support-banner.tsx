@@ -7,19 +7,21 @@ import { ChevronRight } from "lucide-react";
  * 한 장만 두고 넘어가지 않는다 - 저절로 바뀌는 배너는 중장년 이용자가 놓치기 쉽다.
  */
 export function SupportBanner() {
+  // 놓이는 칸의 폭(첫 줄 오른쪽 좁은 칸 / 휴대폰 / 넓은 띠)에 따라 모양을 바꾸려고 화면 폭이 아닌 배너 폭(@container)을 본다.
   return (
+    <div className="@container h-full">
     <Link
       href="/support"
-      className="relative flex items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] px-5 py-6 sm:px-10 sm:py-7"
+      className="relative flex h-full items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] px-5 py-6 @2xl:px-10 @2xl:py-7"
     >
       <Waves />
 
       <div className="relative min-w-0">
-        <p className="text-body-1 font-bold break-keep text-slate-900 sm:text-title-2">
-          국민내일배움카드로 훈련비 <span className="text-brand-blue-600">최대 500만원</span>
+        <p className="text-body-1 font-bold break-keep text-slate-900 @2xl:text-title-2">
+          국민내일배움카드로 훈련비 <span className="whitespace-nowrap text-brand-blue-600">최대 500만원</span>
         </p>
         {/* 하늘색 바탕 위 흰 알약. 테두리 없이 면 색만으로 띄운다. */}
-        <span className="mt-3 inline-flex items-center gap-0.5 rounded-full bg-white py-2 pr-3 pl-4 text-body-3 font-semibold text-slate-800 sm:mt-4">
+        <span className="mt-3 inline-flex items-center gap-0.5 rounded-full bg-white py-2 pr-3 pl-4 text-body-3 font-semibold text-slate-800 @2xl:mt-4">
           받을 수 있는지 보기
           <ChevronRight className="size-4" />
         </span>
@@ -27,6 +29,7 @@ export function SupportBanner() {
 
       <CardIllustration />
     </Link>
+    </div>
   );
 }
 
@@ -56,7 +59,7 @@ function Waves() {
 /** 반짝이는 카드 그림. 면은 그라데이션, 위쪽에 흰 반사광을 얹어 입체로 보이게 한다. */
 function CardIllustration() {
   return (
-    <svg aria-hidden viewBox="0 0 160 120" className="relative hidden h-24 w-32 shrink-0 sm:block sm:h-28 sm:w-36">
+    <svg aria-hidden viewBox="0 0 160 120" className="relative hidden h-28 w-36 shrink-0 @2xl:block">
       <defs>
         <linearGradient id="sb-card-back" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="#C9DAFF" />

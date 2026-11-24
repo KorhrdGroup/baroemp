@@ -263,6 +263,26 @@
   --gov-surface: #F5F6F8;
 }
 
+/*
+  디자인 리뉴얼 시안(/draft)의 회색. 기본 회색(mono)은 색기가 전혀 없어, 푸른 기운이 도는
+  바탕(gov-surface)·파란 주색 옆에서 누렇게(웜그레이로) 보였다. 단계마다 밝기는 거의 그대로 두고
+  푸른 기를 조금 얹은 쿨그레이로 바꾼다. 글자 600 은 흰 바탕 대비 5.60:1, 아이콘 500 은 3.05:1 로
+  KRDS 기준을 그대로 넘는다. slate-* 클래스가 이 변수를 바로 읽어(@theme inline) 시안 안에서만 바뀐다.
+*/
+.draft-cool-grey {
+  --atomic-mono-50: #F9FAFB;
+  --atomic-mono-100: #F1F3F6;
+  --atomic-mono-200: #E3E6EB;
+  --atomic-mono-300: #CED3DA;
+  --atomic-mono-400: #AFB5BE;
+  --atomic-mono-500: #8E949E;
+  --atomic-mono-600: #626873;
+  --atomic-mono-700: #3B4049;
+  --atomic-mono-800: #1C1F25;
+  --atomic-mono-900: #010204;
+  --border: #E8EBEF;
+}
+
 .dark {
   --background: oklch(0.19 0.02 262);
   --foreground: oklch(0.96 0.01 255);
