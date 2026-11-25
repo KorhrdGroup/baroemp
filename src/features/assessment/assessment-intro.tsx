@@ -51,7 +51,7 @@ export function AssessmentIntro({
           {latestResultSessionId && (
             <Link
               href={`/assessment/result/${latestResultSessionId}`}
-              className="flex h-14 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
+              className="flex h-14 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
             >
               지난 결과 보기
             </Link>
@@ -65,15 +65,15 @@ export function AssessmentIntro({
               <li key={s.name}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex items-center gap-2 text-body-2 font-semibold text-slate-900">
-                    <span className="flex size-6 items-center justify-center rounded-full bg-brand-blue-50 text-caption-1 font-semibold text-atomic-blue-600">{i + 1}</span>
+                    <span className="flex size-6 items-center justify-center rounded-full bg-baro-blue-50 text-caption-1 font-semibold text-baro-blue">{i + 1}</span>
                     {s.name}
                   </span>
-                  <span className="text-body-2 font-bold text-atomic-blue-600">{s.fit}%</span>
+                  <span className="text-body-2 font-bold text-baro-blue">{s.fit}%</span>
                 </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-brand-blue-400" style={{ width: `${s.fit}%` }} />
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-baro-blue-50">
+                  <div className="h-full rounded-full bg-baro-blue" style={{ width: `${s.fit}%` }} />
                 </div>
-                <p className={`mt-1.5 text-caption-1 font-semibold ${s.ready === "바로 지원 가능" ? "text-emerald-700" : "text-amber-700"}`}>{s.ready}</p>
+                <p className={`mt-1.5 text-caption-1 font-semibold ${s.ready === "바로 지원 가능" ? "text-baro-blue" : "text-slate-600"}`}>{s.ready}</p>
               </li>
             ))}
           </ul>

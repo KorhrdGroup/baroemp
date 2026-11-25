@@ -562,7 +562,7 @@ function SupportIntro({
             size="lg"
             onClick={onStart}
             disabled={loading}
-            className="h-14 w-full rounded-lg bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
           >
             {loading ? (
               <Loader2 className="size-5 animate-spin" />
@@ -576,7 +576,7 @@ function SupportIntro({
           {latestResultSessionId && (
             <Link
               href={`/support/result/${latestResultSessionId}`}
-              className="flex h-14 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
+              className="flex h-14 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
             >
               지난 결과 보기
             </Link>
@@ -593,8 +593,8 @@ function SupportIntro({
                   <p className="mt-0.5 text-caption-1 font-medium text-slate-600">{s.org}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-body-2 font-bold text-atomic-blue-600">{s.amount}</p>
-                  <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-emerald-700" : "text-amber-700"}`}>{s.grade}</p>
+                  <p className="text-body-2 font-bold text-baro-blue">{s.amount}</p>
+                  <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-baro-blue" : "text-slate-600"}`}>{s.grade}</p>
                 </div>
               </li>
             ))}
@@ -901,7 +901,7 @@ export function SupportFlow({
           <Button
             onClick={() => void handleNext()}
             disabled={submitting || (step.required && !canProceed)}
-            className="h-14 w-full rounded-lg bg-atomic-blue-600 text-body-1 font-bold text-white"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold text-white"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>
