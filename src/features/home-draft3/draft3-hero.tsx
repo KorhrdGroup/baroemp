@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
+import { CountUp } from "./count-up";
 
 const POPULAR = ["요양보호사", "경비", "미화", "조리", "운전", "사무보조"];
 
@@ -15,7 +16,7 @@ export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
       {/* 오른쪽 위에서 번지는 옅은 파란 빛. 판이 납작해 보이지 않게만 깐다. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_80%_at_85%_0%,rgba(0,73,229,0.55),transparent_70%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_80%_at_85%_0%,rgba(36,105,255,0.45),transparent_70%)]"
       />
       <div className="relative mx-auto max-w-7xl px-4.5 lg:px-8">
         {activeCount !== null && (
@@ -23,18 +24,18 @@ export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
             <span>{today} 기준</span>
             <span aria-hidden className="h-3 w-px bg-white/30" />
             <span>
-              진행 중인 공고 <strong className="font-bold text-[#7FAAFF]">{activeCount.toLocaleString("ko-KR")}</strong>건
+              진행 중인 공고 <CountUp value={activeCount} className="font-bold text-[#7CA5FF]" />건
             </span>
           </p>
         )}
         <h1 className="mt-4 text-headline-3 leading-[1.3] font-medium tracking-[-0.03em] break-keep text-white sm:text-headline-1 sm:leading-[1.3]">
           중장년 일자리, <strong className="font-extrabold">한 곳에서 찾고</strong>
           <br />
-          <strong className="font-extrabold text-[#7FAAFF]">바로 지원</strong>까지
+          <strong className="font-extrabold text-[#7CA5FF]">바로 지원</strong>까지
         </h1>
 
         {/* 정부 누리집처럼 폭 넓은 흰 검색 칸 하나. 일자리찾기(/jobs)가 keyword 로 받는다. */}
-        <form action="/jobs" className="mt-8 flex h-14 max-w-3xl items-center rounded-xl bg-white pl-5 sm:h-16">
+        <form action="/jobs" className="mt-8 flex h-14 max-w-3xl items-center rounded-xl bg-white pl-5 outline-offset-2 has-[input:focus-visible]:outline-[3px] has-[input:focus-visible]:outline-[#7CA5FF] sm:h-16">
           <label htmlFor="draft3-search" className="sr-only">
             일자리 검색
           </label>

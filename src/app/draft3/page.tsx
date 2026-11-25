@@ -24,6 +24,21 @@ import { getCurrentUser } from "@/lib/auth/session";
   상자를 겹겹이 두지 않는다: 테두리 대신 여백 · 가는 구분선 · 바탕색으로 나눈다.
   파랑은 아낀다: 구역 머리말 · 제목은 회색과 검정만, 지원금 금액도 대표 한 건만 파랗게.
 */
+/*
+  /draft3 색은 두 가지로만 짠다: 파랑 #2469FF(누르는 곳 · 핵심 숫자 · 그림 윤곽)와 남색 #00184D(첫 화면 · 선택된 탭 · 그림 포인트).
+  나머지는 이 둘을 흰색에 섞은 옅은 단계(#7CA5FF · #DEE8FF · #EFF4FF)와 회색뿐. 마감 임박 빨강만 뜻이 있는 예외.
+  공용 조각(단추 · 서비스 그림)은 색 변수를 읽으므로 이 판에서 변수만 덮어쓴다.
+*/
+const TWO_BLUE =
+  "[--atomic-blue-600:#2469FF] [--atomic-blue-50:#EFF4FF] [--icon-mid:#7CA5FF] [--icon-soft:#DEE8FF] [--icon-accent:#00184D]";
+
+/*
+  키보드(Tab)로 움직일 때 지금 어디인지 굵은 파란 테두리로 보인다. 마우스로 누를 때는 나오지 않는다(focus-visible).
+  둥근 모서리를 따라가고, 판 안쪽으로 2px 띄운다.
+*/
+const FOCUS_RING =
+  "[&_:is(a,button):focus-visible]:outline-[3px] [&_:is(a,button):focus-visible]:outline-offset-2 [&_:is(a,button):focus-visible]:outline-[#2469FF]";
+
 export default async function Draft3HomePage() {
   const [featuredTabs, activeCount, midlifeSupport, user] = await Promise.all([
     loadFeaturedTabs(),
@@ -34,8 +49,7 @@ export default async function Draft3HomePage() {
   // 찜 상태는 회원마다 달라 캐시에 넣지 않는다.
   const bookmarkedIds = user ? await getUserJobBookmarkIdsAction() : [];
   return (
-    // 그림 포인트 색을 노랑 대신 민트로 - 공용 서비스 그림(service-icons)은 --icon-accent 로 받는다.
-    <div className="bg-white [--icon-accent:#2EC4A6]">
+    <div className={`bg-white ${TWO_BLUE} ${FOCUS_RING}`}>
       <Draft3Hero activeCount={activeCount} />
       <Draft3ServiceGrid />
 

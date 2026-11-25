@@ -1,10 +1,10 @@
 /*
- * /draft3 공고 탭 알약 앞 작은 그림. 다른 그림들과 같은 평면 화풍(파랑 면 + 포인트 한 군데)이되, 포인트는 노랑 대신 민트.
- * 선택된 알약은 남색 바탕이라 진한 파랑은 묻힌다 - 중간 파랑 · 옅은 파랑 · 민트 · 흰색만 써서 흰 알약과 남색 알약 양쪽에서 보이게 한다.
+ * /draft3 공고 탭 알약 앞 작은 그림. 다른 그림들과 같은 평면 화풍(파랑 면 + 포인트 한 군데).
+ * 선택된 알약은 남색(#00184D) 바탕이라 남색 포인트는 묻힌다 - 파랑 #2469FF · 그 옅은 단계 · 흰색만 써서 흰 알약과 남색 알약 양쪽에서 보이게 한다.
  */
-const MID = "var(--atomic-blue-400)";
-const SOFT = "var(--atomic-blue-100)";
-const ACCENT = "#2EC4A6";
+const MID = "#2469FF";
+const SOFT = "#DEE8FF";
+const ACCENT = "#7CA5FF";
 
 const ICONS: Record<string, React.ReactNode> = {
   // 마감 임박: 자명종

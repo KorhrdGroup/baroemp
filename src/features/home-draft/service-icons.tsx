@@ -5,10 +5,10 @@
 const SIZE = "size-10 sm:size-12";
 
 /* 직접 그린 그림의 색. 진한 파랑은 윤곽 역할, 옅은 파랑은 면, 노랑은 그림마다 한 군데만 쓴다. */
-const DEEP = "var(--atomic-blue-600)";
-const MID = "var(--atomic-blue-400)";
-const SOFT = "var(--atomic-blue-100)";
-/* 포인트 색은 --icon-accent 로 바꿀 수 있다(없으면 노랑). /draft3 은 민트로 덮어쓴다. */
+/* 각 색은 --icon-* 변수로 화면마다 바꿀 수 있다(없으면 아래 기본값). /draft3 은 두 파랑(#2469FF · #00184D)으로 덮어쓴다. */
+const DEEP = "var(--icon-deep, var(--atomic-blue-600))";
+const MID = "var(--icon-mid, var(--atomic-blue-400))";
+const SOFT = "var(--icon-soft, var(--atomic-blue-100))";
 const ACCENT = "var(--icon-accent, #FFC043)";
 
 function CustomSvg({ children, className = SIZE }: { children: React.ReactNode; className?: string }) {

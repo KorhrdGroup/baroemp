@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { daysLeft, deadlineLabel, shortLocation } from "@/features/home-draft/draft-job-card";
@@ -16,9 +16,12 @@ import type { Job } from "@/types";
  * 같은 6장을 한 번 더 이어 붙여 translateX(-50%) 로 돌리면 이음매 없이 반복된다(globals.css 의 marquee).
  * 마우스를 올리거나 키보드로 들어오면 멈춘다 - 움직이는 카드는 누르기 어려워서.
  * 탭을 바꿔도 목록(ul)은 그대로 두고 카드만 갈아 끼워, 흐름이 처음으로 튀지 않고 이어진다.
+ * 줄 위아래 1.5 여백은 키보드 이동 테두리가 잘리지 않게(바깥 판이 overflow-hidden).
  * 휴대폰(sm 미만)과 움직임 줄이기 설정에서는 흐르지 않고 손으로 미는 가로 목록이 된다 - 휴대폰은 마우스를 올려 멈출 수가 없어서.
  */
 const CARD_COUNT = 6;
+/** 탭을 바꿀 때 카드 줄이 흐려졌다 돌아오는 시간(ms). 내용이 순간 바뀌면 바뀐 걸 놓치기 쉬워서. */
+const FADE_MS = 150;
 
 /**
  * /draft3 공고 구역. 탭은 알약 단추, 공고는 가로로 흐르는 카드 한 줄(아래 SimpleJobCard).
@@ -37,6 +40,24 @@ export function JobCardTabs({
   const [activeKey, setActiveKey] = useState(visibleTabs[0]?.key);
   const active = visibleTabs.find((t) => t.key === activeKey) ?? visibleTabs[0];
   const rowRef = useRef<HTMLDivElement>(null);
+  const [switching, setSwitching] = useState(false);
+  const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    if (fadeTimer.current) clearTimeout(fadeTimer.current);
+  }, []);
+
+  /** 줄을 흐리게 → 카드 갈아 끼우기 → 다시 보이게. 흐름(애니메이션)은 끊지 않는다. */
+  function selectTab(key: string) {
+    if (key === activeKey) return;
+    if (fadeTimer.current) clearTimeout(fadeTimer.current);
+    setSwitching(true);
+    fadeTimer.current = setTimeout(() => {
+      setActiveKey(key);
+      // 휴대폰은 손으로 민 목록이라, 탭을 바꾸면 처음 카드부터 보이게 되돌린다.
+      rowRef.current?.scrollTo({ left: 0 });
+      setSwitching(false);
+    }, FADE_MS);
+  }
 
   if (!active) {
     return <p className="py-10 text-center text-body-2 font-medium text-slate-600">공고를 불러오지 못했어요. 잠시 뒤 다시 열어 주세요.</p>;
@@ -53,11 +74,7 @@ export function JobCardTabs({
               type="button"
               role="tab"
               aria-selected={selected}
-              onClick={() => {
-                setActiveKey(tab.key);
-                // 휴대폰은 손으로 민 목록이라, 탭을 바꾸면 처음 카드부터 보이게 되돌린다.
-                rowRef.current?.scrollTo({ left: 0 });
-              }}
+              onClick={() => selectTab(tab.key)}
               className={cn(
                 "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full pr-5 pl-4 text-body-2 whitespace-nowrap sm:text-body-1",
                 selected ? "bg-atomic-blue-900 font-bold text-white" : "bg-white font-semibold text-slate-700",
@@ -70,10 +87,17 @@ export function JobCardTabs({
         })}
       </div>
 
-      <div ref={rowRef} className="scrollbar-hidden -mx-4.5 mt-6 overflow-x-auto sm:mx-0 sm:[mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] sm:motion-safe:overflow-hidden">
+      <div
+        ref={rowRef}
+        className={cn(
+          "transition-opacity duration-200 ease-out motion-reduce:transition-none",
+          switching && "opacity-0",
+          "scrollbar-hidden -mx-4.5 mt-4.5 overflow-x-auto sm:mx-0 sm:[mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] sm:motion-safe:overflow-hidden",
+        )}
+      >
         <ul
           aria-label={`${active.label} 공고`}
-          className="flex w-max pr-4.5 pl-1.5 focus-within:[animation-play-state:paused] hover:[animation-play-state:paused] sm:px-0 sm:motion-safe:animate-[marquee_50s_linear_infinite]"
+          className="flex w-max py-1.5 pr-4.5 pl-1.5 focus-within:[animation-play-state:paused] hover:[animation-play-state:paused] sm:px-0 sm:motion-safe:animate-[marquee_50s_linear_infinite]"
         >
           {[0, 1].map((copy) =>
             active.jobs.slice(0, CARD_COUNT).map((job) => (

@@ -1,23 +1,23 @@
 /*
  * 상담 장면 그림. 정부 · 공공기관 누리집에서 흔히 쓰는 평면 그림 방식:
  * 외곽선 없이 면만, 사람은 동그란 머리와 둥근 몸통으로 단순하게, 뒤에 옅은 파랑 큰 원.
- * 색은 서비스 그림과 같은 파랑 계열 + 민트 한 군데 + 화분 초록.
+ * 색은 /draft3 의 두 파랑(#2469FF · #00184D)과 그 옅은 단계 + 화분 초록.
  * 왼쪽은 상담받는 중장년(흰머리 · 하늘색 스웨터), 오른쪽은 상담사(남색 재킷 · 목걸이 명찰).
  */
 const SKIN = "#F6D2B8";
 const SKIN_SHADE = "#EDBF9F";
 const DEEP = "var(--atomic-blue-600)";
-const SOFT = "var(--atomic-blue-100)";
-const NAVY = "#1E3A8A";
-const SWEATER = "#7EA6FF";
-const ACCENT = "#2EC4A6";
+const SOFT = "#DEE8FF";
+const NAVY = "#00184D";
+const SWEATER = "#7CA5FF";
+const ACCENT = "#2469FF";
 
 export function ConsultIllustration({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 480 340" fill="none" aria-hidden className={className}>
       {/* 바탕: 큰 원과 바닥 그림자, 작은 장식 */}
-      <circle cx="240" cy="180" r="150" fill="#DCE7FF" />
-      <ellipse cx="240" cy="318" rx="190" ry="12" fill="#CCDBF8" />
+      <circle cx="240" cy="180" r="150" fill="#DEE8FF" />
+      <ellipse cx="240" cy="318" rx="190" ry="12" fill="#CBDBFF" />
       <circle cx="420" cy="86" r="7" fill={ACCENT} />
       <circle cx="62" cy="120" r="5" fill={SOFT} />
       <path d="M418 200l4 9 9 4-9 4-4 9-4-9-9-4 9-4z" fill="#FFFFFF" />
@@ -56,19 +56,19 @@ export function ConsultIllustration({ className }: { className?: string }) {
         <rect x="218" y="176" width="42" height="5" rx="2.5" fill={SOFT} />
         <rect x="218" y="188" width="26" height="5" rx="2.5" fill={SOFT} />
         <circle cx="252" cy="208" r="9" fill={ACCENT} />
-        <path d="M247.5 208l3 3 5.5-6" stroke={NAVY} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M247.5 208l3 3 5.5-6" stroke="#FFFFFF" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
       </g>
 
       {/* 팔 · 손 (서류를 잡고 있다) */}
-      <rect x="168" y="208" width="52" height="16" rx="8" fill="#6A94F5" />
+      <rect x="168" y="208" width="52" height="16" rx="8" fill="#5C8EFF" />
       <circle cx="218" cy="214" r="8" fill={SKIN} />
-      <rect x="262" y="208" width="52" height="16" rx="8" fill="#2A4BA8" />
+      <rect x="262" y="208" width="52" height="16" rx="8" fill="#0A2A6E" />
       <circle cx="264" cy="214" r="8" fill={SKIN} />
 
       {/* 책상과 노트북 · 화분 */}
-      <rect x="64" y="226" width="352" height="16" rx="8" fill="#B7CAF2" />
-      <rect x="96" y="242" width="12" height="74" rx="4" fill="#A0B6E6" />
-      <rect x="372" y="242" width="12" height="74" rx="4" fill="#A0B6E6" />
+      <rect x="64" y="226" width="352" height="16" rx="8" fill="#BDD2FF" />
+      <rect x="96" y="242" width="12" height="74" rx="4" fill="#A3C0FF" />
+      <rect x="372" y="242" width="12" height="74" rx="4" fill="#A3C0FF" />
       <path d="M346 226l7-40h54l-7 40z" fill="#DCE3EE" />
       <rect x="338" y="222" width="72" height="6" rx="3" fill="#C4CEDD" />
       <circle cx="377" cy="206" r="4" fill="#FFFFFF" />
