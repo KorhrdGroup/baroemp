@@ -1,14 +1,15 @@
 import { loadActiveJobCount, loadFeaturedTabs, loadMidlifeSupportPrograms } from "@/features/home-draft/load-home-data";
 import { Draft3Hero } from "@/features/home-draft3/draft3-hero";
-import { SituationColumns } from "@/features/home-draft2/draft2-lower-sections";
 import {
   Draft3ConsultBand,
   Draft3Heading,
   Draft3NewsList,
   Draft3QualificationLinks,
   Draft3ServiceGrid,
+  Draft3SituationPanels,
 } from "@/features/home-draft3/draft3-sections";
 import { JobCardTabs } from "@/features/home-draft3/job-card-tabs";
+import { Reveal } from "@/features/home-draft3/reveal";
 import { SupportBento } from "@/features/home-draft3/support-bento";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -53,47 +54,57 @@ export default async function Draft3HomePage() {
       <Draft3Hero activeCount={activeCount} />
       <Draft3ServiceGrid />
 
-      {/* 카드 구역: 회색 바탕 위 흰 공고 카드 */}
-      <section className="mt-12 bg-gov-surface py-14 sm:mt-16 sm:py-20">
-        <div className="mx-auto max-w-7xl px-4.5 lg:px-8">
-          <Draft3Heading eyebrow="일자리 정보" moreHref="/jobs">
-            지금 모집 중인 일자리
-          </Draft3Heading>
-          <div className="mt-6">
-            <JobCardTabs tabs={featuredTabs} isAuthenticated={Boolean(user)} bookmarkedIds={bookmarkedIds} />
+      <Reveal>
+        {/* 카드 구역: 회색 바탕 위 흰 공고 카드 */}
+        <section className="mt-12 bg-gov-surface py-14 sm:mt-16 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4.5 lg:px-8">
+            <Draft3Heading eyebrow="일자리 정보" moreHref="/jobs">
+              지금 모집 중인 일자리
+            </Draft3Heading>
+            <div className="mt-6">
+              <JobCardTabs tabs={featuredTabs} isAuthenticated={Boolean(user)} bookmarkedIds={bookmarkedIds} />
+            </div>
           </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        {/* 카드 + 목록 구역 */}
+        <section className="mx-auto mt-20 max-w-7xl px-4.5 sm:mt-28 lg:px-8">
+          <Draft3Heading eyebrow="지원제도" moreHref="/support">
+            신청할 수 있는 지원금
+          </Draft3Heading>
+          <SupportBento />
+        </section>
+      </Reveal>
+
+      <Reveal>
+        {/* 목록 구역 */}
+        <section className="mx-auto mt-20 max-w-7xl px-4.5 sm:mt-28 lg:px-8">
+          <Draft3Heading eyebrow="상황별 서비스">
+            지금 내 상황에 맞는 서비스
+          </Draft3Heading>
+          <Draft3SituationPanels />
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <section className="mx-auto mt-16 max-w-7xl px-4.5 sm:mt-20 lg:px-8">
+          <Draft3Heading eyebrow="더 알아보기">
+            중장년 소식과 자격증
+          </Draft3Heading>
+          <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-[2fr_1fr] lg:gap-16">
+            <Draft3NewsList programs={midlifeSupport.slice(0, 4)} />
+            <Draft3QualificationLinks />
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal>
+        <div className="mt-20 pb-20 sm:mt-28 sm:pb-28">
+          <Draft3ConsultBand />
         </div>
-      </section>
-
-      {/* 카드 + 목록 구역 */}
-      <section className="mx-auto mt-20 max-w-7xl px-4.5 sm:mt-28 lg:px-8">
-        <Draft3Heading eyebrow="지원제도" moreHref="/support">
-          신청할 수 있는 지원금
-        </Draft3Heading>
-        <SupportBento />
-      </section>
-
-      {/* 목록 구역 */}
-      <section className="mx-auto mt-20 max-w-7xl px-4.5 sm:mt-28 lg:px-8">
-        <Draft3Heading eyebrow="상황별 서비스">
-          지금 내 상황에 맞는 서비스
-        </Draft3Heading>
-        <SituationColumns />
-      </section>
-
-      <section className="mx-auto mt-16 max-w-7xl px-4.5 sm:mt-20 lg:px-8">
-        <Draft3Heading eyebrow="더 알아보기">
-          중장년 소식과 자격증
-        </Draft3Heading>
-        <div className="mt-8 grid grid-cols-1 gap-12 lg:grid-cols-[2fr_1fr] lg:gap-16">
-          <Draft3NewsList programs={midlifeSupport.slice(0, 4)} />
-          <Draft3QualificationLinks />
-        </div>
-      </section>
-
-      <div className="mt-20 pb-20 sm:mt-28 sm:pb-28">
-        <Draft3ConsultBand />
-      </div>
+      </Reveal>
     </div>
   );
 }

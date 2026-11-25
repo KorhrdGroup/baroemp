@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { QUALIFICATIONS } from "@/features/home-draft/qualification-section";
+import { SITUATIONS } from "@/features/home-draft2/draft2-lower-sections";
 import { ServiceIcon } from "@/features/home-draft/service-icons";
 import { labelRegion } from "@/lib/labels";
 import { cn } from "@/lib/utils";
@@ -115,6 +116,40 @@ export function Draft3Heading({
         </Link>
       )}
     </div>
+  );
+}
+
+/**
+ * 상황별 서비스. /draft2 는 굵은 검정 윗줄 + 세로 칸막이 표였는데, /draft3 의 다른 구역(자격증 · 상담 판)처럼
+ * 테두리 없는 회색 판 세 장으로 나눈다. 그림은 흰 원에 얹어 서비스 판과 결을 맞추고, 링크 사이는 옅은 줄만.
+ * 세 판 모두 끝에 붙던 "1:1 취업컨설팅"은 뺀다 - 바로 아래 상담 구역과 겹쳐서, 판마다 그 상황에만 맞는 세 줄만 남긴다.
+ */
+export function Draft3SituationPanels() {
+  return (
+    <ul className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+      {SITUATIONS.map((s) => (
+        <li key={s.title} className="rounded-xl bg-gov-surface p-6 sm:p-7">
+          <div className="flex items-center gap-3">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white sm:size-14 [&>svg]:size-8 sm:[&>svg]:size-9">
+              <ServiceIcon id={s.icon} />
+            </span>
+            <h3 className="text-title-3 font-bold text-slate-900">{s.title}</h3>
+          </div>
+          <ul className="mt-5 flex flex-col divide-y divide-slate-200/70">
+            {s.links
+              .filter((l) => l.href !== "/consulting")
+              .map((l) => (
+                <li key={l.label}>
+                  <Link href={l.href} className="flex items-center justify-between py-3 text-body-1 font-medium text-slate-800">
+                    {l.label}
+                    <ChevronRight className="size-4 text-slate-500" aria-hidden />
+                  </Link>
+                </li>
+              ))}
+          </ul>
+        </li>
+      ))}
+    </ul>
   );
 }
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
 import { daysLeft, deadlineLabel, shortLocation } from "@/features/home-draft/draft-job-card";
@@ -20,8 +20,6 @@ import type { Job } from "@/types";
  * 휴대폰(sm 미만)과 움직임 줄이기 설정에서는 흐르지 않고 손으로 미는 가로 목록이 된다 - 휴대폰은 마우스를 올려 멈출 수가 없어서.
  */
 const CARD_COUNT = 6;
-/** 탭을 바꿀 때 카드 줄이 흐려졌다 돌아오는 시간(ms). 내용이 순간 바뀌면 바뀐 걸 놓치기 쉬워서. */
-const FADE_MS = 150;
 
 /**
  * /draft3 공고 구역. 탭은 알약 단추, 공고는 가로로 흐르는 카드 한 줄(아래 SimpleJobCard).
@@ -40,23 +38,12 @@ export function JobCardTabs({
   const [activeKey, setActiveKey] = useState(visibleTabs[0]?.key);
   const active = visibleTabs.find((t) => t.key === activeKey) ?? visibleTabs[0];
   const rowRef = useRef<HTMLDivElement>(null);
-  const [switching, setSwitching] = useState(false);
-  const fadeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => {
-    if (fadeTimer.current) clearTimeout(fadeTimer.current);
-  }, []);
 
-  /** 줄을 흐리게 → 카드 갈아 끼우기 → 다시 보이게. 흐름(애니메이션)은 끊지 않는다. */
+  /** 카드만 바로 갈아 끼운다(깜빡임 없이). 흐름(애니메이션)은 끊지 않는다. */
   function selectTab(key: string) {
-    if (key === activeKey) return;
-    if (fadeTimer.current) clearTimeout(fadeTimer.current);
-    setSwitching(true);
-    fadeTimer.current = setTimeout(() => {
-      setActiveKey(key);
-      // 휴대폰은 손으로 민 목록이라, 탭을 바꾸면 처음 카드부터 보이게 되돌린다.
-      rowRef.current?.scrollTo({ left: 0 });
-      setSwitching(false);
-    }, FADE_MS);
+    setActiveKey(key);
+    // 휴대폰은 손으로 민 목록이라, 탭을 바꾸면 처음 카드부터 보이게 되돌린다.
+    rowRef.current?.scrollTo({ left: 0 });
   }
 
   if (!active) {
@@ -89,11 +76,7 @@ export function JobCardTabs({
 
       <div
         ref={rowRef}
-        className={cn(
-          "transition-opacity duration-200 ease-out motion-reduce:transition-none",
-          switching && "opacity-0",
-          "scrollbar-hidden -mx-4.5 mt-4.5 overflow-x-auto sm:mx-0 sm:[mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] sm:motion-safe:overflow-hidden",
-        )}
+        className="scrollbar-hidden -mx-4.5 mt-4.5 overflow-x-auto sm:mx-0 sm:[mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] sm:motion-safe:overflow-hidden"
       >
         <ul
           aria-label={`${active.label} 공고`}
