@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, FileCheck, Loader2, Search, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
@@ -514,9 +514,9 @@ function StepBody({
 }
 
 const INTRO_STEPS = [
-  { title: "내 상황 고르기", desc: "나이 · 사는 곳 · 일하는 상태를 골라요." },
-  { title: "맞는 제도 찾기", desc: "정부 · 지자체 지원제도 가운데 조건에 맞는 것을 찾아요." },
-  { title: "신청 방법 확인", desc: "받을 가능성과 신청 방법 · 서류를 알려드려요." },
+  { title: "내 상황 고르기", desc: "나이 · 사는 곳 · 일하는 상태를 골라요.", icon: UserRound },
+  { title: "맞는 제도 찾기", desc: "정부 · 지자체 지원제도 가운데 조건에 맞는 것을 찾아요.", icon: Search },
+  { title: "신청 방법 확인", desc: "받을 가능성과 신청 방법 · 서류를 알려드려요.", icon: FileCheck },
 ];
 
 const RESULT_ITEMS = [

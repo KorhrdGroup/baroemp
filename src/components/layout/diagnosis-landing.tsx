@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/features/home-draft3/reveal";
 import { LandingItemIcon } from "./landing-item-icons";
 import type { Crumb } from "./page-head";
@@ -9,7 +9,7 @@ import type { Crumb } from "./page-head";
   다른 세부 화면은 "위치 줄 + 제목" 머리 아래 바로 내용이지만, 여기는 처음 온 사람이 무엇을 얻는지 보고
   시작 단추를 누르게 하는 곳이라 소개 화면처럼 짠다:
   ① 첫 칸 - 왼쪽 큰 제목 · 시작 단추, 오른쪽 결과 예시 카드(받게 될 것을 미리 보여 준다)
-  ② 이렇게 진행돼요 - 옅은 파랑 판 세 칸을 화살표로 잇는다
+  ② 이렇게 진행돼요 - 큰 동그라미(아이콘 + N단계)를 가는 선으로 잇는다
   ③ 알 수 있는 것 - 그림 붙은 칸
   ④ 안내 글
   무게: 굵기 800은 제목에만, 칸 제목은 700, 나머지는 500~600. 진한 파랑은 시작 단추와 핵심 숫자에만 -
@@ -20,6 +20,8 @@ import type { Crumb } from "./page-head";
 export interface LandingStep {
   title: string;
   desc: string;
+  /** 단계 동그라미 안 선 아이콘(Lucide). */
+  icon?: LucideIcon;
 }
 
 export interface LandingItem {
@@ -105,30 +107,39 @@ export function DiagnosisLanding({
       </section>
 
       <div className="mx-auto max-w-6xl px-4.5 lg:px-8">
-        {/* ② 진행 순서. 상자 없이 번호 원을 선으로 이어 "차례대로 간다"가 한눈에 보이게 한다 (/draft3 상황별 서비스와 같은 잇는 선).
-            넓은 화면은 가로로, 휴대폰은 세로로 잇는다. 선은 원 가운데에서 다음 원 가운데까지.
-            번호 원은 옅은 파랑에 파랑 숫자 - 진한 원 세 개는 시작 단추보다 무거워 보였다. */}
-        <Reveal>
+        {/* ② 진행 순서. 경기 잡아바 "세부일정"처럼 큰 동그라미(아이콘 + "N단계")를 가는 파랑 선으로 잇고, 제목 · 설명은 그 아래 가운데에.
+            넓은 화면은 가로 한 줄, 휴대폰은 동그라미를 왼쪽에 두고 세로로 잇는다. 화면에 들어오면 한 단계씩 떠오른다. */}
+        <Reveal className="group">
           <section className="py-14 sm:py-20">
-            <h2 className="text-title-2 font-extrabold text-slate-900">이렇게 진행돼요</h2>
-            <ol className="mt-7 grid grid-cols-1 gap-6 md:grid-cols-3">
-              {steps.map((s, i) => (
-                <li key={s.title} className="relative flex items-start gap-4 md:flex-col md:gap-4">
-                  {i < steps.length - 1 && (
-                    <>
-                      <span aria-hidden className="absolute top-6 left-6 h-[calc(100%+1.5rem)] w-0.5 -translate-x-1/2 bg-baro-blue-300 md:hidden" />
-                      <span aria-hidden className="absolute top-6 left-6 hidden h-0.5 w-[calc(100%+1.5rem)] -translate-y-1/2 bg-baro-blue-300 md:block" />
-                    </>
-                  )}
-                  <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full bg-baro-blue-50 text-title-3 font-bold text-baro-blue ring-4 ring-white">
-                    {i + 1}
-                  </span>
-                  <div className="min-w-0 pt-2.5 md:pt-0">
-                    <p className="text-body-1 font-bold text-slate-900 sm:text-title-3">{s.title}</p>
-                    <p className="mt-1 text-body-3 font-medium break-keep text-slate-600 sm:text-body-2">{s.desc}</p>
-                  </div>
-                </li>
-              ))}
+            <p className="text-body-3 font-semibold text-slate-600">진행 순서</p>
+            <h2 className="mt-1.5 text-title-2 font-extrabold tracking-[-0.02em] text-slate-900">이렇게 진행돼요</h2>
+            <ol className={`mt-8 grid grid-cols-1 gap-6 md:mt-12 md:gap-4 ${steps.length === 4 ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
+              {steps.map((s, i) => {
+                const Icon = s.icon;
+                return (
+                  <li
+                    key={s.title}
+                    className="relative flex items-center gap-5 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0 md:flex-col md:gap-0 md:text-center"
+                    style={{ transitionDelay: `${150 + i * 90}ms` }}
+                  >
+                    {/* 다음 동그라미까지 잇는 선. 동그라미 가운데에서 시작해 동그라미 뒤로 숨는다. */}
+                    {i < steps.length - 1 && (
+                      <>
+                        <span aria-hidden className="absolute top-12 left-12 h-[calc(100%+1.5rem)] w-0.5 -translate-x-1/2 bg-baro-blue-300 md:hidden" />
+                        <span aria-hidden className="absolute top-16 left-1/2 hidden h-0.5 w-[calc(100%+1rem)] -translate-y-1/2 bg-baro-blue-300 md:block lg:top-[4.375rem]" />
+                      </>
+                    )}
+                    <span className="relative flex size-24 shrink-0 flex-col items-center justify-center gap-1 rounded-full bg-baro-blue-50 md:size-32 lg:size-35">
+                      {Icon && <Icon aria-hidden strokeWidth={1.5} className="size-8 text-baro-blue md:size-10" />}
+                      <span className="text-body-3 font-bold text-baro-blue md:text-body-2">{i + 1}단계</span>
+                    </span>
+                    <div className="min-w-0 md:mt-5">
+                      <p className="text-body-1 font-bold break-keep text-slate-900 sm:text-title-3">{s.title}</p>
+                      <p className="mt-1.5 text-body-3 font-medium break-keep text-slate-600 sm:text-body-2 md:mx-auto md:max-w-60">{s.desc}</p>
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           </section>
         </Reveal>

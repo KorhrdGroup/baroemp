@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { BadgeCheck, ClipboardList, MessageCircleQuestion } from "lucide-react";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
 import { StartAssessmentButton } from "./start-assessment-button";
 
 const STEPS = [
-  { title: "경력·희망 조건 고르기", desc: "해 온 일과 원하는 지역·급여·근무형태를 골라요." },
-  { title: "성향 문항에 답하기", desc: "어떤 일이 편한지 쉬운 질문 몇 개에 답해요." },
-  { title: "맞는 직업 확인하기", desc: "적합도와 준비도를 바로 보여드려요." },
+  { title: "경력·희망 조건 고르기", desc: "해 온 일과 원하는 지역·급여·근무형태를 골라요.", icon: ClipboardList },
+  { title: "성향 문항에 답하기", desc: "어떤 일이 편한지 쉬운 질문 몇 개에 답해요.", icon: MessageCircleQuestion },
+  { title: "맞는 직업 확인하기", desc: "적합도와 준비도를 바로 보여드려요.", icon: BadgeCheck },
 ];
 
 const ITEMS = [
