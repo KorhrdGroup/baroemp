@@ -62,8 +62,8 @@ export default async function Draft3HomePage() {
         </div>
       </section>
 
-      <Reveal>
-        {/* 카드 + 목록 구역 */}
+      <Reveal className="group">
+        {/* 카드 + 목록 구역. group: 오른쪽 목록 줄이 하나씩 따로 떠오르게 */}
         <section className="mx-auto mt-20 max-w-7xl px-4.5 sm:mt-28 lg:px-8">
           <Draft3Heading eyebrow="지원제도" moreHref="/support">
             신청할 수 있는 지원금
@@ -86,7 +86,8 @@ export default async function Draft3HomePage() {
         </section>
       </Reveal>
 
-      <Reveal>
+      <Reveal className="group">
+        {/* group: 왼쪽 소식 목록 줄이 하나씩 따로 떠오르게 */}
         <section className="mx-auto mt-16 max-w-7xl px-4.5 sm:mt-20 lg:px-8">
           <Draft3Heading eyebrow="더 알아보기">
             중장년 소식과 자격증

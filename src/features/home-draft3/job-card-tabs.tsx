@@ -16,7 +16,7 @@ import type { Job } from "@/types";
  * 같은 6장을 한 번 더 이어 붙여 translateX(-50%) 로 돌리면 이음매 없이 반복된다(globals.css 의 marquee).
  * 마우스를 올리거나 키보드로 들어오면 멈춘다 - 움직이는 카드는 누르기 어려워서.
  * 탭을 바꿔도 목록(ul)은 그대로 두고 카드만 갈아 끼워, 흐름이 처음으로 튀지 않고 이어진다.
- * 줄 위아래 1.5 여백은 키보드 이동 테두리가 잘리지 않게(바깥 판이 overflow-hidden).
+ * 줄 위아래 4.5 여백은 키보드 이동 테두리 · 마우스 올림 그림자가 잘리지 않게(바깥 판이 overflow-hidden). 늘린 만큼 바깥 여백을 줄여 간격은 그대로.
  * 휴대폰(sm 미만)과 움직임 줄이기 설정에서는 흐르지 않고 손으로 미는 가로 목록이 된다 - 휴대폰은 마우스를 올려 멈출 수가 없어서.
  */
 const CARD_COUNT = 6;
@@ -41,9 +41,9 @@ export function JobCardTabs({
   const [activeKey, setActiveKey] = useState(visibleTabs[0]?.key);
   const active = visibleTabs.find((t) => t.key === activeKey) ?? visibleTabs[0];
   const rowRef = useRef<HTMLDivElement>(null);
-
   /** 카드만 바로 갈아 끼운다(깜빡임 없이). 흐름(애니메이션)은 끊지 않는다. */
   function selectTab(key: string) {
+    if (key === activeKey) return;
     setActiveKey(key);
     // 휴대폰은 손으로 민 목록이라, 탭을 바꾸면 처음 카드부터 보이게 되돌린다.
     rowRef.current?.scrollTo({ left: 0 });
@@ -66,7 +66,8 @@ export function JobCardTabs({
               aria-selected={selected}
               onClick={() => selectTab(tab.key)}
               className={cn(
-                "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full pr-5 pl-4 text-body-2 whitespace-nowrap sm:text-body-1",
+                // 알약 색이 툭 바뀌지 않고 천천히 넘어가게.
+                "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full pr-5 pl-4 text-body-2 whitespace-nowrap transition-colors duration-300 ease-out sm:text-body-1",
                 selected ? "bg-atomic-blue-900 font-bold text-white" : "bg-white font-semibold text-slate-700",
               )}
             >
@@ -79,11 +80,11 @@ export function JobCardTabs({
 
       <div
         ref={rowRef}
-        className="scrollbar-hidden -mx-4.5 mt-4.5 overflow-x-auto sm:mx-0 sm:[mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] sm:motion-safe:overflow-hidden"
+        className="scrollbar-hidden -mx-4.5 mt-1.5 -mb-3 overflow-x-auto sm:mx-0 sm:[mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] sm:motion-safe:overflow-hidden"
       >
         <ul
           aria-label={`${SHORT_LABEL[active.key] ?? active.label} 공고`}
-          className="flex w-max py-1.5 pr-4.5 pl-1.5 focus-within:[animation-play-state:paused] hover:[animation-play-state:paused] sm:px-0 sm:motion-safe:animate-[marquee_50s_linear_infinite]"
+          className="flex w-max py-4.5 pr-4.5 pl-1.5 focus-within:[animation-play-state:paused] hover:[animation-play-state:paused] sm:px-0 sm:motion-safe:animate-[marquee_50s_linear_infinite]"
         >
           {[0, 1].map((copy) =>
             active.jobs.slice(0, CARD_COUNT).map((job) => (
@@ -103,7 +104,7 @@ export function JobCardTabs({
       <div className="mt-6 flex justify-center">
         <Link
           href={active.href}
-          className="inline-flex h-12 items-center gap-1 rounded-lg border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
+          className="inline-flex h-12 items-center gap-1 rounded-xl border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
         >
           {/* 글자는 고정 - 탭 이름을 넣으면 탭마다 단추 폭이 바뀌어 덜컹거린다. 어느 조건인지는 위 알약이 말해 준다. */}
           같은 조건 공고 더 보기
@@ -127,7 +128,7 @@ function SimpleJobCard({ job, isAuthenticated, isBookmarked }: { job: Job; isAut
   const urgent = left !== null && left >= 0 && left <= 7;
   return (
     <div className="relative h-full">
-      <Link href={`/jobs/${job.id}`} className="flex h-full flex-col rounded-xl bg-white p-5 sm:p-6">
+      <Link href={`/jobs/${job.id}`} className="flex h-full flex-col rounded-[20px] bg-white p-5 transition-shadow duration-200 hover:shadow-[0_0_10px_rgba(0,24,77,0.12)] sm:p-6">
         <h3 className="line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-800">{job.title}</h3>
         <p className="mt-2 flex min-w-0 items-center gap-1.5 text-body-3 font-medium text-slate-600">
           <span className="truncate">{job.companyName}</span>

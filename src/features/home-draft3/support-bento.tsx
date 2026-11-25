@@ -21,15 +21,13 @@ export function SupportBento() {
 
   return (
     <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-12">
-      <Link
-        href="/support"
-        className="relative flex flex-col justify-between gap-6 overflow-hidden rounded-xl bg-[#EFF4FF] p-6 sm:p-8 lg:col-span-5"
-      >
-        {/* 배움카드 그림(공공기관 누리집식 평면 그림)을 오른쪽 아래 모서리 밖으로 크게 걸쳐 둔다 - 카드가 잘라 내 화면 밖으로 이어지는 느낌.
-            글은 그림 위로 올린다(relative). 좁은 휴대폰에서는 글과 겹쳐 빼 둔다. */}
-        <LearningCardIllustration className="pointer-events-none absolute -right-10 -bottom-6 hidden w-[21rem] sm:block" />
-        <div className="relative flex items-start justify-between gap-4">
-          <div>
+      {/* 대표 카드는 위 · 아래 두 칸으로 나눈다.
+          위 칸: 기관 · 제목 · 설명 · 금액을 왼쪽에 한 덩어리로 모으고, 배움카드 그림은 오른쪽 아래로 내려 아래 칸 경계선 · 오른쪽 끝에서 잘리게 둔다(책 아랫부분이 경계선 밑으로 들어간 느낌).
+          아래 칸: 신청 기간 · 지역 · 자세히를 진한 파랑 띠 한 줄로(흰 글자) - 그림이 글을 덮지 않는다. 좁은 휴대폰에서는 그림을 뺀다. */}
+      <Link href="/support" className="flex flex-col overflow-hidden rounded-[20px] bg-[#EFF4FF] lg:col-span-5">
+        <div className="relative flex-1 overflow-hidden p-6 sm:p-8">
+          <LearningCardIllustration className="pointer-events-none absolute -right-10 -bottom-7 hidden w-[21rem] sm:block" />
+          <div className="relative">
             {leadLogo ? (
               <Image src={leadLogo} alt={lead.org} width={128} height={32} className="h-8 w-auto" />
             ) : (
@@ -37,22 +35,21 @@ export function SupportBento() {
             )}
             <p className="mt-4 text-title-2 font-extrabold tracking-[-0.02em] text-slate-900">{lead.title}</p>
             <p className="mt-2 text-body-2 font-medium break-keep text-slate-700">{lead.summary}</p>
+            <p className="mt-6 text-headline-3 font-extrabold tracking-[-0.02em] text-atomic-blue-600">{lead.amount}</p>
           </div>
         </div>
-        <p className="relative text-headline-3 font-extrabold tracking-[-0.02em] text-atomic-blue-600">{lead.amount}</p>
-        {/* 오른쪽 목록 다섯 줄과 높이를 맞추느라 생기는 가운데 빈자리를, 금액과 신청 정보 한 줄로 나눠 채운다. */}
-        <div className="relative flex items-end justify-between gap-4 border-t border-[#DEE8FF] pt-5 sm:border-transparent">
+        <div className="relative flex items-center justify-between gap-4 bg-[#2469FF] px-6 py-4 sm:px-8">
           <dl className="flex gap-6 text-body-3">
             <div>
-              <dt className="font-medium text-slate-600">신청 기간</dt>
-              <dd className="mt-0.5 font-semibold text-slate-800">{lead.period}</dd>
+              <dt className="font-medium text-white/75">신청 기간</dt>
+              <dd className="mt-0.5 font-semibold text-white">{lead.period}</dd>
             </div>
             <div>
-              <dt className="font-medium text-slate-600">지역</dt>
-              <dd className="mt-0.5 font-semibold text-slate-800">{lead.region}</dd>
+              <dt className="font-medium text-white/75">지역</dt>
+              <dd className="mt-0.5 font-semibold text-white">{lead.region}</dd>
             </div>
           </dl>
-          <span className="inline-flex shrink-0 items-center gap-0.5 text-body-2 font-semibold text-slate-800">
+          <span className="inline-flex shrink-0 items-center gap-0.5 text-body-2 font-semibold text-white">
             자세히
             <ChevronRight className="size-4" aria-hidden />
           </span>
@@ -60,8 +57,13 @@ export function SupportBento() {
       </Link>
 
       <ul className="divide-y divide-border border-y border-slate-300 lg:col-span-7 lg:ml-4">
-        {rest.map((item) => (
-          <li key={item.id}>
+        {/* 줄마다 차례로 아래에서 떠오른다. 구역 전체를 감싼 Reveal(group)의 data-reveal 을 따라간다. */}
+        {rest.map((item, i) => (
+          <li
+            key={item.id}
+            className="transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0"
+            style={{ transitionDelay: `${150 + i * 90}ms` }}
+          >
             <Link href="/support" className="flex items-center justify-between gap-4 py-4">
               <div className="min-w-0">
                 <p className="truncate text-body-1 font-semibold text-slate-800">{item.title}</p>

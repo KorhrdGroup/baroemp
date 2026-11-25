@@ -11,7 +11,7 @@ import type { Region, SupportProgram } from "@/types";
 /*
   /draft3 전용 조각. /draft2 의 같은 조각은 테두리 상자 안에 담겨 있어, 상자가 겹겹이 쌓이면 서류 양식처럼 딱딱해졌다.
   여기서는 테두리를 걷고 여백과 가는 구분선만으로 나눈다.
-  모서리는 두 가지만: 판 · 카드 12px(rounded-xl), 단추 · 글자 단추 8px(rounded-lg).
+  모서리는 두 가지만: 판 · 카드 20px(rounded-[20px]), 단추 · 글자 단추 12px(rounded-xl) - 경기 잡아바처럼 둥글게.
 */
 
 const SERVICES = [
@@ -30,7 +30,7 @@ const SERVICES = [
 export function Draft3ServiceGrid() {
   return (
     <nav aria-label="자주 찾는 서비스" className="relative mx-auto -mt-14 max-w-7xl px-4.5 sm:-mt-20 lg:px-8">
-      <ul className="grid grid-cols-3 overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.08)] lg:grid-cols-6">
+      <ul className="grid grid-cols-3 overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.08)] lg:grid-cols-6">
         {SERVICES.map((s, i) => (
           <li
             key={s.id}
@@ -43,7 +43,12 @@ export function Draft3ServiceGrid() {
               i >= 3 && "after:absolute after:inset-x-4 after:top-0 after:h-px after:bg-slate-200/70 lg:after:hidden",
             )}
           >
-            <Link href={s.href} className="flex flex-col items-center gap-2.5 px-2 py-5 sm:gap-3 sm:py-7">
+            {/* 처음 열 때 그림 · 이름이 왼쪽부터 차례로 아래에서 떠오른다(상황별 서비스 카드와 같은 situation-in). 움직임 줄이기면 끈다. */}
+            <Link
+              href={s.href}
+              className="flex flex-col items-center gap-2.5 px-2 py-5 motion-safe:animate-[situation-in_500ms_ease-out_backwards] sm:gap-3 sm:py-7"
+              style={{ animationDelay: `${150 + i * 70}ms` }}
+            >
               {/* 그림을 옅은 파랑 원에 얹어 크기 · 무게를 고르게 맞춘다. */}
               <span className="flex size-14 items-center justify-center rounded-full bg-brand-blue-50 sm:size-[4.5rem] [&>svg]:size-8 sm:[&>svg]:size-10">
                 <ServiceIcon id={s.id} />
@@ -65,7 +70,7 @@ export function Draft3ServiceGrid() {
 export function Draft3ConsultBand() {
   return (
     <section className="mx-auto max-w-7xl px-4.5 lg:px-8">
-      <div className="grid grid-cols-1 items-center overflow-hidden rounded-xl bg-gov-surface lg:grid-cols-2">
+      <div className="grid grid-cols-1 items-center overflow-hidden rounded-[20px] bg-gov-surface lg:grid-cols-2">
         <div className="flex items-center justify-center bg-brand-blue-50 px-6 pt-8 pb-4 lg:h-full lg:min-h-[22rem] lg:p-10">
           <ConsultIllustration className="w-full max-w-[26rem]" />
         </div>
@@ -81,7 +86,7 @@ export function Draft3ConsultBand() {
           </p>
           <Link
             href="/consulting"
-            className="mt-8 inline-flex h-14 items-center gap-1 rounded-lg bg-atomic-blue-600 px-7 text-body-1 font-bold text-white"
+            className="mt-8 inline-flex h-14 items-center gap-1 rounded-xl bg-atomic-blue-600 px-7 text-body-1 font-bold text-white"
           >
             상담 신청하기
             <ChevronRight className="size-5" aria-hidden />
@@ -135,9 +140,14 @@ export function Draft3NewsList({ programs }: { programs: SupportProgram[] }) {
         </Link>
       </div>
       {programs.length > 0 ? (
-        <ul className="divide-y divide-border">
-          {programs.map((p) => (
-            <li key={p.id} className="py-4">
+        <ul className="divide-y divide-border border-b border-slate-300">
+          {/* 줄마다 차례로 아래에서 떠오른다. 구역을 감싼 Reveal(group)의 data-reveal 을 따라간다(지원금 목록과 같은 방식). */}
+          {programs.map((p, i) => (
+            <li
+              key={p.id}
+              className="py-4 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0"
+              style={{ transitionDelay: `${150 + i * 90}ms` }}
+            >
               <Link href={`/support/${p.id}`} className="line-clamp-1 text-body-2 font-semibold text-slate-800">
                 {p.title}
               </Link>
@@ -157,12 +167,12 @@ export function Draft3NewsList({ programs }: { programs: SupportProgram[] }) {
 }
 
 /**
- * 자격증으로 찾기. 옆 소식 목록과 높이를 맞춘 회색 판 - 글자 단추만 있으면 아래가 비어 보여서.
+ * 자격증으로 찾기. 옆 소식 목록과 높이를 맞춘 옅은 하늘색 판(지원금 대표 카드와 같은 색) - 글자 단추만 있으면 아래가 비어 보여서.
  * 단추는 흰 바탕 두 줄 격자, 판 높이만큼 늘어나 아래가 비지 않게.
  */
 export function Draft3QualificationLinks() {
   return (
-    <div className="flex h-full flex-col rounded-xl bg-gov-surface p-6 sm:p-7">
+    <div className="flex h-full flex-col rounded-[20px] bg-[#EFF4FF] p-6 sm:p-7">
       <h3 className="text-body-1 font-bold text-slate-900">자격증으로 찾기</h3>
       <p className="mt-1 text-body-3 font-medium text-slate-600">가진 자격증으로 맞는 공고를 모아 봐요.</p>
       <ul className="mt-5 grid flex-1 auto-rows-fr grid-cols-2 gap-2">
@@ -170,7 +180,7 @@ export function Draft3QualificationLinks() {
           <li key={name}>
             <Link
               href={`/jobs?keyword=${encodeURIComponent(name)}`}
-              className="flex h-full min-h-12 items-center gap-3 rounded-lg bg-white px-4 text-body-2 font-semibold text-slate-800"
+              className="flex h-full min-h-12 items-center gap-3 rounded-xl bg-white px-4 text-body-2 font-semibold text-slate-800 transition-shadow duration-200 hover:shadow-[0_0_10px_rgba(0,24,77,0.12)]"
             >
               <QualificationIcon name={name} />
               {name}
