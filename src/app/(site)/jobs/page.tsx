@@ -147,7 +147,7 @@ export default async function JobsPage({
     */
     <GuestGate active={!isAuthenticated}>
     {/* 화면 머리(위치 · 제목)는 세부 화면 공통. 무엇을 하는 화면인지는 아래 검색바가 말한다. */}
-    <PageHead crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
+    <PageHead icon="jobs" crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
     <div className="mx-auto max-w-6xl px-4.5 py-8 lg:px-8">
 
       <JobFiltersForm

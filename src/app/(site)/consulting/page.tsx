@@ -14,7 +14,7 @@ export default function ConsultingPage() {
        * 다른 세부 화면과 같은 흰 바탕 화면 머리를 쓴다.
        * 유일한 유료 서비스라는 점은 진한 띠 대신 제목 옆 "유료 서비스" 표시와 폼 안 안내문으로 알린다.
        */}
-      <PageHead
+      <PageHead icon="consulting"
         crumbs={[{ label: "취업 상담" }]}
         title="1:1 취업컨설팅"
         description="전문가와 함께 직업·자격·채용·지원금을 연결하는 맞춤 상담을 받아보세요."

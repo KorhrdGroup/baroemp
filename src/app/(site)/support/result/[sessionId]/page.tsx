@@ -41,7 +41,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     // 세부 화면 공통 바탕: 흰 바탕 · 위치 줄과 큰 제목. 진단 결과 문장을 화면 제목으로 쓴다.
     <div className="bg-white">
       <SupportMatchViewTracker items={trackedItems} />
-      <PageHead
+      <PageHead icon="support"
         crumbs={[{ label: "지원금 찾기", href: "/support" }, { label: "진단 결과" }]}
         title={
           view.totalCount === 0

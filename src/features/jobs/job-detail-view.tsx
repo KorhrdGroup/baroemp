@@ -163,7 +163,7 @@ export function JobDetailView({
     // 세부 화면 공통 바탕: 흰 바탕 · 위치 줄과 큰 제목 · 표와 얇은 선. 지원 동작은 하단에 고정한다.
     <div className="bg-white">
       <JobViewTracker jobId={job.id} matchScore={match?.score} />
-      <PageHead
+      <PageHead icon="jobs"
         crumbs={[{ label: "일자리 찾기", href: "/jobs" }, { label: "공고 상세" }]}
         title={<span className="text-balance">{job.title}</span>}
         description={

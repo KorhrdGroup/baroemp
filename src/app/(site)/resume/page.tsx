@@ -73,7 +73,7 @@ export default async function ResumeListPage() {
 
   return (
     <>
-    <PageHead
+    <PageHead icon="resume"
       crumbs={[{ label: "이력서" }]}
       title="이력서 · 자기소개서"
       description="내 경력/자격/희망직무 정보를 불러와 이력서를 빠르게 작성하고, AI 첨삭으로 다듬을 수 있어요."

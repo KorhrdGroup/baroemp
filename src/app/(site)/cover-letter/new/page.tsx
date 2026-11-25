@@ -35,7 +35,7 @@ export default async function CoverLetterNewPage({
   return (
     // 다른 세부 화면과 같이 흰 바탕에 화면 머리를 얹는다. 단계 카드는 얇은 선으로 나눈다.
     <>
-      <PageHead
+      <PageHead icon="coverLetter"
         crumbs={[{ label: "자기소개서", href: "/cover-letter" }, { label: "새 자기소개서" }]}
         title="새 자기소개서"
         description="양식을 고르고 문항과 내 경험을 담으면, 편집 화면에서 AI 초안을 받을 수 있어요."

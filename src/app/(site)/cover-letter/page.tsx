@@ -16,7 +16,7 @@ export default async function CoverLetterListPage() {
 
   return (
     <>
-      <PageHead
+      <PageHead icon="coverLetter"
         crumbs={[{ label: "자기소개서" }]}
         title="자기소개서"
         description="문항을 자유롭게 추가/삭제/순서변경하고, AI 초안/첨삭을 받아보세요."

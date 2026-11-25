@@ -34,7 +34,7 @@ export default async function ResumeNewPage({
   return (
     // 다른 세부 화면과 같이 흰 바탕 위에 화면 머리를 두고, 단계 카드는 얇은 선으로 나눈다.
     <div>
-      <PageHead
+      <PageHead icon="resume"
         crumbs={[{ label: "이력서", href: "/resume" }, { label: "새 이력서" }]}
         title="새 이력서 만들기"
         description="양식을 고르고 담을 항목과 불러올 정보를 정하면, 편집 화면으로 넘어가요."

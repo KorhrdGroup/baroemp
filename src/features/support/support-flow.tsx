@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, BadgeCheck, Check, FileText, Loader2, MapPin, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
-import { PageHead } from "@/components/layout/page-head";
+import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { ResumeSessionDialog } from "@/components/common/resume-session-dialog";
@@ -513,12 +513,25 @@ function StepBody({
   }
 }
 
-const INFO_ITEMS = [
-  { icon: Clock, label: "약 2~3분" },
-  { icon: Sparkles, label: "결과 즉시 확인" },
+const INTRO_STEPS = [
+  { title: "내 상황 고르기", desc: "나이 · 사는 곳 · 일하는 상태를 골라요." },
+  { title: "맞는 제도 찾기", desc: "정부 · 지자체 지원제도 가운데 조건에 맞는 것을 찾아요." },
+  { title: "신청 방법 확인", desc: "받을 가능성과 신청 방법 · 서류를 알려드려요." },
 ];
 
-const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지역 지원제도", "지원 가능성 등급", "신청 방법과 서류"];
+const RESULT_ITEMS = [
+  { icon: Wallet, title: "취업·훈련 지원금", desc: "구직 · 직업훈련에 받을 수 있는 돈을 찾아요." },
+  { icon: MapPin, title: "생활·지역 지원제도", desc: "사는 지역에서 받을 수 있는 제도도 함께 봐요." },
+  { icon: BadgeCheck, title: "지원 가능성 등급", desc: "조건이 얼마나 맞는지 등급으로 보여드려요." },
+  { icon: FileText, title: "신청 방법과 서류", desc: "어디서 어떻게 신청하는지 알려드려요." },
+];
+
+/* 결과 예시 카드의 지원제도 세 줄. 실제 결과가 아닌 보기다(카드 맨 위에 "결과 예시"로 밝힌다). */
+const SAMPLE = [
+  { name: "국민내일배움카드", org: "고용노동부", amount: "최대 500만원", grade: "가능성 높음" },
+  { name: "중장년 취업성공패키지", org: "고용노동부", amount: "최대 195만원", grade: "가능성 높음" },
+  { name: "중장년 일자리희망센터", org: "서울특별시", amount: "무료 상담", grade: "확인 필요" },
+];
 
 function SupportIntro({
   onStart,
@@ -530,76 +543,74 @@ function SupportIntro({
   latestResultSessionId?: string;
 }) {
   return (
-    // 세부 화면 공통 바탕: 직업진단 첫 화면(assessment-intro)과 같은 틀 - 위치 줄 · 큰 제목 · 시작 상자 · 알 수 있는 것.
-    <div className="bg-white">
-      <PageHead
-        crumbs={[{ label: "지원금 찾기" }]}
-        title="놓치고 있는 취업·교육 혜택을 찾아보세요"
-        description="몇 가지 조건만 입력하면 현재 상황에 맞는 정부·지자체 지원제도를 찾아드립니다."
-      />
-
-      <div className="mx-auto max-w-6xl px-4.5 pb-16 lg:px-8">
-        <div className="max-w-3xl">
-          <section className="mt-8 flex flex-col gap-5 rounded-xl border border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
-            <div className="min-w-0">
-              <div className="flex flex-wrap gap-x-4 gap-y-1">
-                {INFO_ITEMS.map(({ icon: InfoIcon, label }) => (
-                  <span key={label} className="flex items-center gap-1.5 text-body-3 font-semibold text-slate-700">
-                    <InfoIcon className="size-4 text-atomic-blue-600" />
-                    {label}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-3 text-body-1 font-bold text-slate-900">2~3분이면 진단이 끝납니다</p>
-              <p className="mt-1 text-body-3 font-medium text-slate-600">지금 시작하면 받을 수 있는 지원제도를 바로 확인할 수 있어요.</p>
-            </div>
-            {/* 이미 결과가 있으면 두 버튼을 나란히 세운다. 상자 밖 작은 글줄로는 눈에 띄지 않았다. */}
-            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
-              {latestResultSessionId && (
-                <Link
-                  href={`/support/result/${latestResultSessionId}`}
-                  className="flex h-14 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
-                >
-                  지난 결과 보기
-                </Link>
-              )}
-              <Button
-                size="lg"
-                onClick={onStart}
-                disabled={loading}
-                className="h-14 w-full rounded-lg bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
-              >
-                {loading ? (
-                  <Loader2 className="size-5 animate-spin" />
-                ) : (
-                  <>
-                    지원금 찾기
-                    <ArrowRight className="size-5" />
-                  </>
-                )}
-              </Button>
-            </div>
-          </section>
-
-          <section className="mt-10">
-            <h2 className="text-title-3 font-extrabold text-slate-900">이 진단으로 확인할 수 있는 것</h2>
-            <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-              {RESULT_ITEMS.map((item) => (
-                <li key={item} className="flex items-center gap-2.5 rounded-xl border border-border px-5 py-4 text-body-2 font-medium text-slate-800">
-                  <CheckCircle2 className="size-5 shrink-0 text-atomic-blue-600" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <p className="mt-10 text-body-3 leading-relaxed font-medium text-slate-600">
-            주민등록번호, 상세 재산정보 등 민감정보는 수집하지 않습니다. 소득/재산 조건이 필요한 정책은 &quot;확인
-            필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
-          </p>
+    // 직업진단 첫 화면과 같은 소개 틀(DiagnosisLanding): 첫 칸 · 진행 순서 · 알 수 있는 것 · 안내.
+    <DiagnosisLanding
+      crumbs={[{ label: "지원금 찾기" }]}
+      badges={["무료", "약 2~3분", "결과 바로 확인"]}
+      title={
+        <>
+          놓치고 있는
+          <br />
+          <span className="text-atomic-blue-600">취업·교육 혜택</span>을 찾아보세요
+        </>
+      }
+      description="몇 가지 조건만 고르면 지금 상황에 맞는 정부·지자체 지원제도와 신청 방법을 찾아드립니다."
+      actions={
+        /* 이미 결과가 있으면 두 단추를 나란히 세운다. 작은 글줄로는 눈에 띄지 않았다. */
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <Button
+            size="lg"
+            onClick={onStart}
+            disabled={loading}
+            className="h-14 w-full rounded-lg bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
+          >
+            {loading ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <>
+                지원금 찾기
+                <ArrowRight className="size-5" />
+              </>
+            )}
+          </Button>
+          {latestResultSessionId && (
+            <Link
+              href={`/support/result/${latestResultSessionId}`}
+              className="flex h-14 items-center justify-center rounded-lg border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
+            >
+              지난 결과 보기
+            </Link>
+          )}
         </div>
-      </div>
-    </div>
+      }
+      preview={
+        <PreviewCard label="결과 예시" title="받을 수 있는 지원제도">
+          <ul className="flex flex-col divide-y divide-border">
+            {SAMPLE.map((s) => (
+              <li key={s.name} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                <div className="min-w-0">
+                  <p className="truncate text-body-2 font-bold text-slate-900">{s.name}</p>
+                  <p className="mt-0.5 text-caption-1 font-medium text-slate-600">{s.org}</p>
+                </div>
+                <div className="shrink-0 text-right">
+                  <p className="text-body-2 font-extrabold text-atomic-blue-600">{s.amount}</p>
+                  <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-emerald-700" : "text-amber-700"}`}>{s.grade}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </PreviewCard>
+      }
+      steps={INTRO_STEPS}
+      itemsTitle="이 진단으로 확인할 수 있는 것"
+      items={RESULT_ITEMS}
+      note={
+        <>
+          주민등록번호, 상세 재산정보 등 민감정보는 수집하지 않습니다. 소득/재산 조건이 필요한 정책은 &quot;확인
+          필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
+        </>
+      }
+    />
   );
 }
 

@@ -55,7 +55,7 @@ export function ResultView({
   return (
     <>
       {/* 세부 화면 공통 머리: 위치 줄 → 큰 제목 → 결과 요약. */}
-      <PageHead
+      <PageHead icon="assessment"
         crumbs={[{ label: "직업진단", href: "/assessment" }, { label: "진단 결과" }]}
         title="회원님께 잘 맞는 직업을 찾았습니다"
         description={result.summary}

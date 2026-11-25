@@ -86,7 +86,7 @@ export function SupportDetailView({
     // 세부 화면 공통 바탕: 흰 바탕 · 위치 줄과 큰 제목 · 표와 얇은 선. 신청 동작은 하단에 고정한다. 공고 상세와 같은 틀.
     <div className="bg-white">
       <SupportViewTracker supportProgramId={program.id} matchScore={match?.score} eligibilityGrade={match?.grade} />
-      <PageHead
+      <PageHead icon="support"
         crumbs={[{ label: "지원금 찾기", href: "/support" }, { label: "지원제도 상세" }]}
         title={<span className="text-balance">{program.title}</span>}
         description={
