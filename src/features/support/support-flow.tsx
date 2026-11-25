@@ -589,11 +589,11 @@ function SupportIntro({
             {SAMPLE.map((s) => (
               <li key={s.name} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
-                  <p className="truncate text-body-2 font-bold text-slate-900">{s.name}</p>
+                  <p className="truncate text-body-2 font-semibold text-slate-900">{s.name}</p>
                   <p className="mt-0.5 text-caption-1 font-medium text-slate-600">{s.org}</p>
                 </div>
                 <div className="shrink-0 text-right">
-                  <p className="text-body-2 font-extrabold text-atomic-blue-600">{s.amount}</p>
+                  <p className="text-body-2 font-bold text-atomic-blue-600">{s.amount}</p>
                   <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-emerald-700" : "text-amber-700"}`}>{s.grade}</p>
                 </div>
               </li>

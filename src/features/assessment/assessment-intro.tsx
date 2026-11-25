@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { BarChart3, ClipboardCheck, Gauge, GraduationCap, Route, Target } from "lucide-react";
+import { BarChart3, ClipboardCheck, GraduationCap, Route, ShieldCheck, Target } from "lucide-react";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
 import { StartAssessmentButton } from "./start-assessment-button";
 
@@ -12,7 +12,7 @@ const STEPS = [
 const ITEMS = [
   { icon: Target, title: "나에게 맞는 직업", desc: "경력과 성향에 맞는 직업을 골라 드려요." },
   { icon: BarChart3, title: "직업별 적합도", desc: "직업마다 얼마나 잘 맞는지 점수로 보여드려요." },
-  { icon: Gauge, title: "현재 준비도", desc: "지금 바로 지원할 수 있는지 알려드려요." },
+  { icon: ShieldCheck, title: "현재 준비도", desc: "지금 바로 지원할 수 있는지 알려드려요." },
   { icon: ClipboardCheck, title: "부족한 조건", desc: "지원 전에 채워야 할 것을 짚어 드려요." },
   { icon: GraduationCap, title: "필요한 자격·교육", desc: "따면 길이 열리는 자격과 과정을 알려드려요." },
   { icon: Route, title: "추천 취업경로", desc: "공고 · 이력서 · 상담으로 바로 이어 드려요." },
@@ -65,14 +65,14 @@ export function AssessmentIntro({
             {SAMPLE.map((s, i) => (
               <li key={s.name}>
                 <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2 text-body-2 font-bold text-slate-900">
-                    <span className="flex size-6 items-center justify-center rounded-full bg-brand-blue-50 text-caption-1 font-bold text-atomic-blue-600">{i + 1}</span>
+                  <span className="flex items-center gap-2 text-body-2 font-semibold text-slate-900">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-brand-blue-50 text-caption-1 font-semibold text-atomic-blue-600">{i + 1}</span>
                     {s.name}
                   </span>
-                  <span className="text-body-2 font-extrabold text-atomic-blue-600">{s.fit}%</span>
+                  <span className="text-body-2 font-bold text-atomic-blue-600">{s.fit}%</span>
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div className="h-full rounded-full bg-atomic-blue-600" style={{ width: `${s.fit}%` }} />
+                  <div className="h-full rounded-full bg-brand-blue-400" style={{ width: `${s.fit}%` }} />
                 </div>
                 <p className={`mt-1.5 text-caption-1 font-semibold ${s.ready === "바로 지원 가능" ? "text-emerald-700" : "text-amber-700"}`}>{s.ready}</p>
               </li>

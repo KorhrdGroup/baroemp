@@ -7,9 +7,12 @@ import type { Crumb } from "./page-head";
   다른 세부 화면은 "위치 줄 + 제목" 머리 아래 바로 내용이지만, 여기는 처음 온 사람이 무엇을 얻는지 보고
   시작 단추를 누르게 하는 곳이라 소개 화면처럼 짠다:
   ① 첫 칸 - 왼쪽 큰 제목 · 시작 단추, 오른쪽 결과 예시 카드(받게 될 것을 미리 보여 준다)
-  ② 이렇게 진행돼요 - 번호 세 개를 선으로 잇는다
+  ② 이렇게 진행돼요 - 옅은 파랑 판 세 칸을 화살표로 잇는다
   ③ 알 수 있는 것 - 그림 붙은 칸
   ④ 안내 글
+  무게: 굵기 800은 제목에만, 칸 제목은 700, 나머지는 500~600. 진한 파랑은 시작 단추와 핵심 숫자에만 -
+  번호 · 표시까지 진하게 칠하면 화면이 무겁고 투박해진다. 모서리는 카드 12px, 단추 · 표시 8px 두 가지.
+  그림은 홈 서비스 그림처럼 면을 채운 두 톤(진한 파랑 선 + 옅은 파랑 면)으로 맞춘다.
 */
 
 export interface LandingStep {
@@ -51,8 +54,8 @@ export function DiagnosisLanding({
 }) {
   return (
     <div className="bg-white">
-      {/* ① 첫 칸. 바탕은 화면 머리(PageHead)와 같은 옅은 하늘색 그라데이션. */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-[#E4EEFF] via-[#EEF4FF] to-white">
+      {/* ① 첫 칸. 바탕은 화면 머리(PageHead)와 같은 옅은 하늘색. 아래로 흰색까지 풀어 다음 구역과 끊기지 않게. */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-24 -right-24 size-[28rem] rounded-full bg-[radial-gradient(circle,rgba(0,73,229,0.12),transparent_65%)]"
@@ -76,7 +79,7 @@ export function DiagnosisLanding({
 
             <ul className="mt-8 flex flex-wrap gap-2 sm:mt-10">
               {badges.map((b) => (
-                <li key={b} className="rounded-full bg-white px-3 py-1 text-body-3 font-bold text-atomic-blue-600">
+                <li key={b} className="rounded-lg bg-white/90 px-3 py-1 text-body-3 font-semibold text-slate-700">
                   {b}
                 </li>
               ))}
@@ -93,34 +96,42 @@ export function DiagnosisLanding({
       </section>
 
       <div className="mx-auto max-w-6xl px-4.5 lg:px-8">
-        {/* ② 진행 순서. 넓은 화면은 가로로 번호를 선으로 잇고, 휴대폰은 세로로 잇는다. */}
-        <section className="mt-16 sm:mt-20">
+        {/* ② 진행 순서. 흰 바탕에 번호 · 선만 두면 떠 보여, 아래 "알 수 있는 것"과 같은 세 칸 격자에 옅은 파랑 판으로 앉힌다.
+            칸 사이 화살표로 순서를 잇는다(넓은 화면만). */}
+        <section className="mt-12 sm:mt-14">
           <h2 className="text-title-2 font-extrabold text-slate-900">이렇게 진행돼요</h2>
-          <ol className="relative mt-8 grid gap-8 md:grid-cols-3 md:gap-6">
-            <span aria-hidden className="absolute top-6 bottom-6 left-6 w-px bg-brand-blue-200 md:top-6 md:right-[16.6%] md:bottom-auto md:left-[16.6%] md:h-px md:w-auto" />
+          <ol className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
             {steps.map((s, i) => (
-              <li key={s.title} className="relative flex gap-4 md:flex-col md:items-center md:text-center">
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-atomic-blue-600 text-title-3 font-extrabold text-white ring-8 ring-white">
+              <li key={s.title} className="relative flex items-start gap-4 rounded-xl bg-[#F1F6FF] p-5 md:flex-col md:gap-3 md:p-6">
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-body-1 font-bold text-atomic-blue-600">
                   {i + 1}
                 </span>
-                <div className="md:mt-4">
+                <div className="min-w-0 pt-1.5 md:pt-0">
                   <p className="text-body-1 font-bold text-slate-900">{s.title}</p>
                   <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{s.desc}</p>
                 </div>
+                {i < steps.length - 1 && (
+                  <span
+                    aria-hidden
+                    className="absolute top-1/2 -right-[1.375rem] z-10 hidden size-7 -translate-y-1/2 items-center justify-center rounded-full border border-brand-blue-200 bg-white text-atomic-blue-600 md:flex"
+                  >
+                    <ChevronRight className="size-4" />
+                  </span>
+                )}
               </li>
             ))}
           </ol>
         </section>
 
-        {/* ③ 알 수 있는 것. 그림은 옅은 파랑 네모 위에. */}
-        <section className="mt-16 sm:mt-20">
+        {/* ③ 알 수 있는 것. 그림은 네모 없이 두 톤으로(선은 진한 파랑, 면은 옅은 파랑).
+            넓은 화면의 칸 수는 개수에 맞춘다 - 6개는 3칸 두 줄, 4개는 4칸 한 줄. 3칸에 4개를 놓으면 한 칸이 혼자 남는다.
+            칸이 좁아지는 4칸에서도 글이 눌리지 않게, 휴대폰이 아니면 그림을 글 위에 둔다. */}
+        <section className="mt-12 sm:mt-16">
           <h2 className="text-title-2 font-extrabold text-slate-900">{itemsTitle}</h2>
-          <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
+          <ul className={`mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 ${items.length % 3 === 0 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
             {items.map(({ icon: Icon, title: itemTitle, desc }) => (
-              <li key={itemTitle} className="flex items-start gap-4 rounded-xl border border-border p-5">
-                <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-brand-blue-50 text-atomic-blue-600">
-                  <Icon className="size-6" />
-                </span>
+              <li key={itemTitle} className="flex items-start gap-4 rounded-xl border border-border p-5 sm:flex-col sm:gap-3 sm:p-6">
+                <Icon aria-hidden className="size-9 shrink-0 text-atomic-blue-600" fill="var(--atomic-blue-100)" strokeWidth={1.75} />
                 <div className="min-w-0">
                   <p className="text-body-1 font-bold text-slate-900">{itemTitle}</p>
                   <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{desc}</p>
@@ -144,10 +155,10 @@ export function DiagnosisLanding({
 export function PreviewCard({ label, title, children }: { label: string; title: string; children: React.ReactNode }) {
   return (
     <div aria-hidden className="relative mx-auto w-full max-w-[26rem]">
-      <div className="absolute inset-0 translate-x-3 translate-y-3 rotate-2 rounded-2xl bg-brand-blue-100" />
-      <div className="relative rounded-2xl border border-border bg-white p-6 shadow-[0_12px_32px_rgba(0,41,128,0.10)]">
-        <p className="inline-flex rounded bg-slate-100 px-2 py-0.5 text-caption-1 font-semibold text-slate-600">{label}</p>
-        <p className="mt-3 text-title-3 font-extrabold text-slate-900">{title}</p>
+      <div className="absolute inset-0 translate-x-3 translate-y-3 rotate-2 rounded-xl bg-brand-blue-100" />
+      <div className="relative rounded-xl border border-border bg-white p-6 shadow-[0_12px_32px_rgba(0,41,128,0.10)]">
+        <p className="inline-flex rounded-lg bg-slate-100 px-2 py-0.5 text-caption-1 font-semibold text-slate-600">{label}</p>
+        <p className="mt-3 text-title-3 font-bold text-slate-900">{title}</p>
         <div className="mt-5">{children}</div>
       </div>
     </div>
