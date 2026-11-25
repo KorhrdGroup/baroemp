@@ -85,7 +85,8 @@ export interface JobCardProps {
  * 공고 카드 - 홈 시안(/draft · /draft2)과 일자리찾기 · 찜 목록이 모두 이 하나를 쓴다.
  * 흰 면 · 옅은 테두리에, 위에서 아래로 제목(굵게) → 회사 · 지역 → 급여 → 조건 태그 · 남은 날 순.
  * 색은 마감이 가까운 남은 날(과 자격 준비 배지)에만 쓴다 - 카드가 여럿 모일 때 어지럽지 않게.
- * /draft3 색 판(.draft3-theme) 안에서는 테두리를 걷고 옅은 회색 면(gov-surface)으로, 모서리 12px - 태그는 흰 칩.
+ * /draft3 색 판(.draft3-theme) 안에서는 회색 띠 위의 흰 카드로: 테두리를 걷고 모서리 20px, 태그는 회색 칩.
+ * 흰 판 안에 놓는 큐레이션 카드(borderless)는 거꾸로 회색 면에 흰 칩.
  */
 export function JobCard({
   job,
@@ -107,8 +108,8 @@ export function JobCard({
       <Link
         href={`/jobs/${job.id}`}
         className={cn(
-          "flex h-full flex-col rounded-2xl bg-white p-5 in-[.draft3-theme]:rounded-xl",
-          !borderless && "border border-border in-[.draft3-theme]:border-0 in-[.draft3-theme]:bg-gov-surface",
+          "flex h-full flex-col rounded-2xl bg-white p-5 in-[.draft3-theme]:rounded-card",
+          borderless ? "in-[.draft3-theme]:bg-gov-surface" : "border border-border in-[.draft3-theme]:border-0",
         )}
       >
         <h3 className="line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-900">{job.title}</h3>
@@ -155,7 +156,7 @@ export function JobCard({
                 key={tag}
                 className={cn(
                   "flex h-6 items-center rounded bg-slate-100 px-2 pt-px text-caption-1 font-medium text-slate-700",
-                  !borderless && "in-[.draft3-theme]:bg-white",
+                  borderless && "in-[.draft3-theme]:bg-white",
                 )}
               >
                 {tag}

@@ -73,7 +73,7 @@ export function AssessmentIntro({
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-baro-blue-50">
                   <div className="h-full rounded-full bg-baro-blue" style={{ width: `${s.fit}%` }} />
                 </div>
-                <p className={`mt-1.5 text-caption-1 font-semibold ${s.ready === "바로 지원 가능" ? "text-baro-blue" : "text-slate-600"}`}>{s.ready}</p>
+                <p className={`mt-1.5 text-caption-1 font-semibold ${s.ready === "바로 지원 가능" ? "text-emerald-700" : "text-amber-700"}`}>{s.ready}</p>
               </li>
             ))}
           </ul>

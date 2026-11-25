@@ -270,7 +270,7 @@ export function JobFiltersForm({
           e.preventDefault();
           void submit();
         }}
-        className="flex h-14 items-center rounded-xl bg-gov-surface sm:h-16"
+        className="flex h-14 items-center rounded-xl bg-white sm:h-16"
       >
         <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-2 pl-5 sm:pl-6">
           <Search className="size-[18px] shrink-0 text-slate-400" />
@@ -284,7 +284,7 @@ export function JobFiltersForm({
         </div>
         <button
           type="submit"
-          className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-lg bg-brand-blue-600 px-6 text-body-2 font-semibold text-white sm:h-[52px] sm:px-8"
+          className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand-blue-600 px-6 text-body-2 font-semibold text-white sm:h-[52px] sm:px-8"
         >
           <Search className="size-4" strokeWidth={2.2} />
           검색
@@ -295,7 +295,7 @@ export function JobFiltersForm({
       <button
         type="button"
         onClick={() => setSheetOpen(true)}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gov-surface py-3 text-body-2 font-semibold text-slate-700 lg:hidden"
+        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 text-body-2 font-semibold text-slate-700 lg:hidden"
       >
         <SlidersHorizontal className="size-4" />
         지역·직종·조건 선택
@@ -306,7 +306,7 @@ export function JobFiltersForm({
 
       <div className="mt-8 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8">
         {/* 넓은 화면: 왼쪽에 늘 펼친 조건 판. 목록을 내려도 따라오도록 머리글 아래에 붙인다. */}
-        <aside className="sticky top-24 hidden max-h-[calc(100vh-7rem)] flex-col rounded-xl bg-gov-surface lg:flex">
+        <aside className="sticky top-24 hidden max-h-[calc(100vh-7rem)] flex-col rounded-card bg-white lg:flex">
           <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
             <h2 className="text-body-1 font-bold text-slate-900">조건 선택</h2>
           </div>

@@ -81,7 +81,7 @@ function RailItemRow({
         <span
           className={cn(
             "mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[5px] text-[10.5px] font-extrabold",
-            item.done ? "bg-baro-navy text-white" : active ? "bg-atomic-blue-600 text-white" : "bg-slate-100 text-slate-600",
+            item.done ? "bg-emerald-600 text-white" : active ? "bg-atomic-blue-600 text-white" : "bg-slate-100 text-slate-600",
           )}
         >
           {item.done ? "✓" : index + 1}
@@ -97,15 +97,14 @@ function RailItemRow({
           </span>
         </span>
         {!item.done && item.severity === "required" && (
-          <span className="inline-flex h-[18px] shrink-0 items-center rounded bg-baro-navy px-1.5 text-[9.5px] font-extrabold text-white">
+          <span className="inline-flex h-[18px] shrink-0 items-center rounded bg-rose-50 px-1.5 text-[9.5px] font-extrabold text-rose-600">
             필수
           </span>
         )}
         <span
           className={cn(
             "shrink-0 text-caption-1 font-extrabold",
-            // /draft3 두 파랑: 필수는 파랑, 권장은 회색, 끝난 건 남색.
-            item.done ? "text-baro-navy" : item.severity === "required" ? "text-baro-blue" : "text-slate-600",
+            item.done ? "text-emerald-600" : item.severity === "required" ? "text-orange-600" : "text-violet-500",
           )}
         >
           {item.done ? "완료" : `+${item.gain}`}
@@ -145,7 +144,7 @@ function RailItemRow({
             <button
               type="button"
               onClick={onToggleDone}
-              className="mt-2 h-8 rounded-lg border border-baro-blue-300 bg-white px-3 text-body-3 font-semibold text-baro-blue"
+              className="mt-2 h-8 rounded-lg border border-emerald-200 bg-white px-3 text-body-3 font-semibold text-emerald-700"
             >
               고쳤어요 ✓
             </button>
@@ -224,15 +223,15 @@ export function ReviewRail({
           <span className="text-slate-600">
             {s.total}개 중 <b className="text-slate-900">{s.doneCount}개</b> 완료
           </span>
-          <span className="font-bold text-baro-blue">다 고치면 약 {s.projected}점</span>
+          <span className="font-bold text-emerald-700">다 고치면 약 {s.projected}점</span>
         </div>
 
         {s.requiredLeft > 0 ? (
           <p className="mt-2 text-body-3 leading-relaxed font-medium break-keep text-slate-600">
-            <b className="text-baro-blue">필수 {s.requiredLeft}개</b>부터 채우면 점수가 가장 크게 오릅니다.
+            <b className="text-rose-600">필수 {s.requiredLeft}개</b>부터 채우면 점수가 가장 크게 오릅니다.
           </p>
         ) : s.total > 0 ? (
-          <p className="mt-2 text-body-3 font-semibold break-keep text-baro-blue">
+          <p className="mt-2 text-body-3 font-semibold break-keep text-emerald-700">
             필수 항목을 모두 채웠습니다. 권장 항목까지 채우면 더 좋아져요.
           </p>
         ) : null}
@@ -241,7 +240,7 @@ export function ReviewRail({
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pt-3 pb-2">
         {items.length > 0 && (
           <div className="flex items-center gap-1.5 px-1 pb-2">
-            <span className="flex size-[17px] items-center justify-center rounded-[5px] bg-baro-blue text-[10px] font-extrabold text-white">
+            <span className="flex size-[17px] items-center justify-center rounded-[5px] bg-orange-500 text-[10px] font-extrabold text-white">
               !
             </span>
             <span className="text-body-3 font-bold text-slate-900">누르면 바로 고칠 수 있어요</span>
@@ -265,23 +264,23 @@ export function ReviewRail({
         </ol>
 
         {strengths.length > 0 && (
-          <div className="mt-3 rounded-xl bg-baro-blue-50 px-3 pt-3 pb-3">
+          <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/40 px-3 pt-3 pb-3">
             <button
               type="button"
               onClick={() => setStrengthsOpen((v) => !v)}
               className="flex w-full items-center gap-1.5"
               aria-expanded={strengthsOpen}
             >
-              <span className="flex size-[17px] items-center justify-center rounded-full bg-baro-navy text-[10px] font-extrabold text-white">
+              <span className="flex size-[17px] items-center justify-center rounded-full bg-emerald-600 text-[10px] font-extrabold text-white">
                 ✓
               </span>
-              <span className="text-body-3 font-bold text-baro-navy">잘하신 부분 {strengths.length}가지</span>
-              <span className="ml-auto text-caption-1 font-medium text-slate-600">{strengthsOpen ? "접기 ▴" : "펼치기 ▾"}</span>
+              <span className="text-body-3 font-bold text-emerald-800">잘하신 부분 {strengths.length}가지</span>
+              <span className="ml-auto text-caption-1 font-medium text-emerald-700">{strengthsOpen ? "접기 ▴" : "펼치기 ▾"}</span>
             </button>
             {strengthsOpen && (
               <ul className="mt-2.5 flex flex-col gap-2 pl-1">
                 {strengths.map((text) => (
-                  <li key={text} className="text-body-3 leading-relaxed font-medium break-keep text-slate-700">
+                  <li key={text} className="text-body-3 leading-relaxed font-medium break-keep text-emerald-900/80">
                     {text}
                   </li>
                 ))}

@@ -12,9 +12,13 @@ const COLLAPSE_COUNT = 4;
 
 const FILTER_GRADES: SupportEligibilityGrade[] = ["HIGH", "MEDIUM", "CHECK_REQUIRED"];
 
-/* 등급 거르기 알약. /draft3 탭 알약처럼 안 고른 건 흰 알약, 고른 건 남색 알약 - 등급 색은 카드 배지에서만 보여 준다. */
-const PILL_BASE = "bg-white text-slate-700";
-const PILL_ACTIVE = "bg-baro-navy text-white";
+/* 등급 거르기 알약. 카드 배지와 같은 등급 색을 쓴다. 회색 띠 위라 안 고른 알약도 흰 바탕을 깐다. */
+const PILL_CLASS: Record<SupportEligibilityGrade, { base: string; active: string }> = {
+  HIGH: { base: "border-emerald-200 bg-white text-emerald-700", active: "bg-emerald-50 border-emerald-300 text-emerald-700 ring-1 ring-emerald-200" },
+  MEDIUM: { base: "border-brand-blue-200 bg-white text-brand-blue-700", active: "bg-brand-blue-50 border-brand-blue-300 text-brand-blue-700 ring-1 ring-brand-blue-200" },
+  CHECK_REQUIRED: { base: "border-orange-200 bg-white text-orange-700", active: "bg-orange-50 border-orange-300 text-orange-700 ring-1 ring-orange-200" },
+  LOW: { base: "border-slate-200 bg-white text-slate-600", active: "bg-slate-100 border-slate-300 text-slate-600 ring-1 ring-slate-200" },
+};
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   employment: Briefcase,
@@ -164,8 +168,8 @@ export function SupportResultSections({
               onClick={() => setActiveGrade(isActive ? null : grade)}
               aria-pressed={isActive}
               className={cn(
-                "h-11 rounded-full px-5 text-body-2 font-semibold transition-colors duration-300",
-                isActive ? PILL_ACTIVE : PILL_BASE,
+                "h-11 rounded-full border px-5 text-body-2 font-semibold transition-colors duration-300",
+                isActive ? PILL_CLASS[grade].active : PILL_CLASS[grade].base,
               )}
             >
               {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]} {count}개

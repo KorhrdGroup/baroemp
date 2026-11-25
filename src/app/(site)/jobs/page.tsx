@@ -149,7 +149,9 @@ export default async function JobsPage({
     <div className="draft3-theme">
     {/* 화면 머리(위치 · 제목)는 세부 화면 공통. 무엇을 하는 화면인지는 아래 검색바가 말한다. */}
     <PageHead icon="jobs" crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
-    <div className="mx-auto max-w-6xl px-4.5 py-8 lg:px-8">
+    {/* /draft3처럼 회색 띠 위에 흰 판 · 흰 카드(모서리 20px, 테두리 없음). */}
+    <div className="bg-gov-surface">
+    <div className="mx-auto max-w-6xl px-4.5 pt-8 pb-16 lg:px-8">
 
       <JobFiltersForm
         initial={{
@@ -185,7 +187,7 @@ export default async function JobsPage({
             icon={Briefcase}
             title="조건에 맞는 채용공고가 없어요"
             description="검색어나 필터 조건을 조정해서 다시 확인해보세요."
-            className="mt-4"
+            className="mt-4 rounded-card border-0 bg-white"
           />
         ) : (
           <>
@@ -208,7 +210,7 @@ export default async function JobsPage({
               페이지를 넘길 때마다 또 나오면 광고처럼 읽혀 첫 페이지에만 둔다.
             */}
             {page === 1 && recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
-              <div className="mt-6 rounded-xl bg-atomic-blue-50 p-5 sm:p-6">
+              <div className="mt-6 rounded-card bg-atomic-blue-50 p-5 sm:p-6">
                 <div className="flex items-center gap-2">
                   <KeyRound className="size-5 text-atomic-blue-600" />
                   <h2 className="text-body-1 font-bold text-slate-900">
@@ -254,6 +256,7 @@ export default async function JobsPage({
         )}
       </div>
       </JobFiltersForm>
+    </div>
     </div>
     </div>
     </GuestGate>

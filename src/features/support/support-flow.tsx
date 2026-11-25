@@ -594,7 +594,7 @@ function SupportIntro({
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-body-2 font-bold text-baro-blue">{s.amount}</p>
-                  <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-baro-blue" : "text-slate-600"}`}>{s.grade}</p>
+                  <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-emerald-700" : "text-amber-700"}`}>{s.grade}</p>
                 </div>
               </li>
             ))}

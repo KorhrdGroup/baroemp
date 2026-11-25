@@ -33,21 +33,21 @@ const COMPARISON_GROUPS = [
     key: "fulfilled",
     label: "충족",
     icon: CheckCircle2,
-    box: "bg-emerald-50/60",
+    box: "bg-emerald-50",
     head: "text-emerald-700",
   },
   {
     key: "needsCheck",
     label: "확인 필요",
     icon: HelpCircle,
-    box: "bg-orange-50/60",
+    box: "bg-orange-50",
     head: "text-orange-600",
   },
   {
     key: "lacking",
     label: "부족",
     icon: XCircle,
-    box: "bg-rose-50/60",
+    box: "bg-rose-50",
     head: "text-rose-600",
   },
 ] as const satisfies readonly {
@@ -85,10 +85,11 @@ const REQUIREMENT_STATUS_STYLE: Record<
   string,
   { icon: LucideIcon; label: string; className: string; box: string }
 > = {
-  SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700", box: "bg-emerald-50/60" },
-  NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600", box: "bg-rose-50/60" },
-  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50/60" },
-  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50/60" },
+  // 상태 뜻이 있는 색이라 두 파랑으로 바꾸지 않는다. 회색 띠 위라 반투명 대신 꽉 찬 옅은 색.
+  SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700", box: "bg-emerald-50" },
+  NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600", box: "bg-rose-50" },
+  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50" },
+  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50" },
 };
 
 /** 모집 요강 표의 한 줄. 정부 누리집 공고처럼 왼쪽 회색 칸에 항목 이름, 오른쪽에 값. 값이 없으면("-" 포함) 줄째 뺀다. */
@@ -160,7 +161,7 @@ export function JobDetailView({
   ].filter((t): t is string => Boolean(t));
 
   return (
-    // 세부 화면 공통 바탕: 흰 바탕 · 위치 줄과 큰 제목 · 표와 얇은 선. 지원 동작은 하단에 고정한다.
+    // 세부 화면 공통 바탕: 위치 줄과 큰 제목 아래 회색 띠 위에 흰 판(/draft3). 지원 동작은 하단에 고정한다.
     <div className="bg-white">
       <JobViewTracker jobId={job.id} matchScore={match?.score} />
       <PageHead icon="jobs"
@@ -178,11 +179,12 @@ export function JobDetailView({
         }
       />
 
+    <div className="bg-gov-surface">
     <div className="mx-auto max-w-6xl px-4.5 pb-10 lg:px-8">
      <div className="max-w-3xl">
       <Section title="모집 요강">
-        {/* 테두리 표 대신 옅은 회색 판 + 흰 줄로 나눈다 (/draft3 구성). */}
-        <dl className="divide-y divide-white overflow-hidden rounded-xl bg-gov-surface">
+        {/* 테두리 표 대신 흰 판 + 옅은 줄로 나눈다 (/draft3 구성). */}
+        <dl className="divide-y divide-slate-100 overflow-hidden rounded-card bg-white">
           <InfoRow
             label="근무지역"
             value={job.address ?? job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
@@ -200,7 +202,7 @@ export function JobDetailView({
         <Section title="우대·필요 자격">
           <div className="flex flex-wrap gap-2">
             {job.preferredQualifications.map((code) => (
-              <span key={code} className="rounded-full bg-brand-blue-50 px-3 py-1.5 text-body-3 font-semibold text-brand-blue-600">
+              <span key={code} className="rounded-full bg-white px-3 py-1.5 text-body-3 font-semibold text-baro-blue">
                 {labelQualification(code)}
               </span>
             ))}
@@ -209,7 +211,7 @@ export function JobDetailView({
       )}
 
       <Section title="상세 설명">
-        <div className="rounded-xl bg-gov-surface p-5 sm:p-6">
+        <div className="rounded-card bg-white p-5 sm:p-6">
           <p className="text-body-2-reading font-medium whitespace-pre-line text-slate-800">{job.description}</p>
           {job.qualificationRequirements && (
             <p className="mt-3 text-body-3 font-medium whitespace-pre-line text-slate-600">
@@ -231,7 +233,7 @@ export function JobDetailView({
               <p className="text-body-3 font-semibold text-slate-700">희망 근무조건</p>
               <div className={cn("mt-2 grid gap-3", visibleComparisons.length > 1 && "sm:grid-cols-2")}>
                 {visibleComparisons.map(({ key, label, icon: Icon, box, head }) => (
-                  <div key={key} className={cn("rounded-lg p-4", box)}>
+                  <div key={key} className={cn("rounded-xl p-4", box)}>
                     <p className={cn("flex items-center gap-1.5 text-body-3 font-semibold", head)}>
                       <Icon className="size-4" /> {label}
                     </p>
@@ -258,7 +260,7 @@ export function JobDetailView({
                     <div
                       key={item.requirementId}
                       className={cn(
-                        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-lg px-3 py-2.5 text-body-3",
+                        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl px-4 py-3 text-body-3",
                         style.box,
                       )}
                     >
@@ -296,11 +298,11 @@ export function JobDetailView({
       )}
 
       {!match && !hasCareerSignal && (
-        <div className="mt-10 flex flex-col items-start gap-3 rounded-xl bg-brand-blue-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div className="mt-10 flex flex-col items-start gap-3 rounded-card bg-baro-blue-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <p className="text-body-2 font-semibold break-keep text-slate-800">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
           <Link
             href="/assessment"
-            className="inline-flex h-11 shrink-0 items-center rounded-lg bg-atomic-blue-600 px-5 text-body-3 font-bold text-white"
+            className="inline-flex h-11 shrink-0 items-center rounded-xl bg-atomic-blue-600 px-5 text-body-3 font-bold text-white"
           >
             내게 맞는 직업 찾기
           </Link>
@@ -311,7 +313,7 @@ export function JobDetailView({
         <Section title="이 공고에 필요한 준비" description="이 공고와 관련된 자격/교육 과정이에요.">
           <div className="grid gap-3 sm:grid-cols-2">
             {recommendedContents.map((content) => (
-              <div key={content.id} className="rounded-xl bg-gov-surface p-4">
+              <div key={content.id} className="rounded-card bg-white p-5">
                 <p className="text-body-2 font-semibold text-slate-900">{content.title}</p>
                 <p className="mt-1 text-body-3 font-medium text-slate-600">{content.summary ?? content.shortDescription}</p>
               </div>
@@ -322,7 +324,7 @@ export function JobDetailView({
 
       <Link
         href={`/resume/new?job=${job.id}`}
-        className="mt-10 flex h-12 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-body-2 font-semibold text-slate-800"
+        className="mt-10 flex h-12 items-center justify-center gap-2 rounded-xl bg-white text-body-2 font-semibold text-slate-800"
       >
         <FileText className="size-4" />이 공고에 맞는 이력서 만들기
       </Link>
@@ -332,7 +334,7 @@ export function JobDetailView({
         마이페이지 5단계가 완료로 바뀐다. 목록을 늘어놓는 대신 공고마다 이 한 줄이 기록 자리다.
       */}
       {isAuthenticated && (
-        <section className="mt-4 flex flex-col gap-3 rounded-xl bg-gov-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <section className="mt-4 flex flex-col gap-3 rounded-card bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="min-w-0">
             <p className="text-body-2 font-semibold text-slate-900">이 공고에 지원하셨나요?</p>
             <p className="mt-0.5 text-body-3 font-medium text-slate-600">표시해 두면 마이페이지 취업 절차에 기록돼요. 면접·취업까지 이어지면 단계를 올려 주세요.</p>
@@ -351,12 +353,13 @@ export function JobDetailView({
       <div className="h-24" />
      </div>
     </div>
+    </div>
 
     {/* ── 하단 고정 CTA ── */}
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white">
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4.5 py-3 lg:px-8">
         <div className="flex w-full max-w-3xl items-center gap-3">
-        <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 bg-atomic-blue-600 text-body-1 font-bold" />
+        <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 rounded-xl bg-atomic-blue-600 text-body-1 font-bold" />
         <JobBookmarkButton
           jobId={job.id}
           jobCategory={job.jobCategory}
