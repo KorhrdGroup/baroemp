@@ -73,13 +73,13 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
         size="lg"
         onClick={handleStart}
         disabled={loading}
-        className="h-14 w-full rounded-lg bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
+        className="h-14 w-full rounded-lg bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
       >
         {loading ? <Loader2 className="size-5 animate-spin" /> : <>직업진단 시작하기 <ArrowRight className="size-5" /></>}
       </Button>
 
       {error ? (
-        <p role="alert" className="mt-2 text-label-2 text-[#e5484d]">
+        <p role="alert" className="mt-2 text-caption-1 font-medium text-[#e5484d]">
           {error}
         </p>
       ) : null}

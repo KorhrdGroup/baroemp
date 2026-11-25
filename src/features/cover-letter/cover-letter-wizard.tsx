@@ -85,8 +85,8 @@ function StepHeader({ step, title, description }: { step: 1 | 2; title: string; 
           <div key={n} className="flex items-center gap-2">
             <span
               className={cn(
-                "flex size-7 items-center justify-center rounded-full text-label-2 font-bold",
-                n <= step ? "bg-brand-blue-600 text-white" : "bg-slate-200 text-slate-400",
+                "flex size-7 items-center justify-center rounded-full text-caption-1 font-bold",
+                n <= step ? "bg-brand-blue-600 text-white" : "bg-slate-200 text-slate-600",
               )}
             >
               {n < step ? <Check className="size-4" /> : n}
@@ -95,22 +95,23 @@ function StepHeader({ step, title, description }: { step: 1 | 2; title: string; 
           </div>
         ))}
       </div>
-      <h1 className="mt-5 text-title-2 font-bold text-slate-900">{title}</h1>
-      <p className="mt-2 text-body-2 text-slate-500">{description}</p>
+      {/* 화면 제목(h1)은 위 화면 머리가 맡는다. 단계 제목은 그 아래 h2. */}
+      <h2 className="mt-5 text-title-2 font-extrabold text-slate-900">{title}</h2>
+      <p className="mt-2 text-body-2 font-medium text-slate-600">{description}</p>
     </div>
   );
 }
 
-/** 1단계·2단계를 감싸는 흰 종이. 사람인처럼 회색 바탕 위에 카드 한 장으로 둔다. */
+/** 1단계·2단계를 감싸는 종이 한 장. 바탕이 흰색이라 그림자 대신 얇은 선으로 테두리를 둔다. */
 function WizardCard({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-3xl rounded-2xl bg-white p-6 sm:p-10">{children}</div>;
+  return <div className="mx-auto max-w-3xl rounded-xl border border-border bg-white p-6 sm:p-10">{children}</div>;
 }
 
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
     <div className="mb-2">
       <Label className="text-body-2 font-bold text-slate-900">{children}</Label>
-      {hint && <p className="mt-1 text-label-1 text-slate-500">{hint}</p>}
+      {hint && <p className="mt-1 text-body-3 font-medium text-slate-600">{hint}</p>}
     </div>
   );
 }
@@ -226,10 +227,10 @@ export function CoverLetterWizard({
       <div>
         <div className="text-center">
           <Sparkles className="mx-auto size-8 text-brand-blue-400" />
-          <h1 className="mt-5 text-title-2 font-bold text-slate-900 sm:text-headline-3">
+          <h2 className="mt-5 text-title-2 font-extrabold text-slate-900 sm:text-headline-3">
             어떤 자기소개서를 만들까요?
-          </h1>
-          <p className="mt-3 text-body-2 text-slate-500">
+          </h2>
+          <p className="mt-3 text-body-2 font-medium text-slate-600">
             골라주시면 그에 맞는 문항을 미리 담아드려요. 문항은 다음 단계에서 바꿀 수 있어요.
           </p>
         </div>
@@ -239,19 +240,19 @@ export function CoverLetterWizard({
             const style = TEMPLATE_CARD_STYLES[idx % TEMPLATE_CARD_STYLES.length];
             const Icon = style.icon;
             return (
-              <div key={t.id} className={cn("flex flex-col rounded-2xl p-5 text-center sm:p-7", style.tone)}>
+              <div key={t.id} className={cn("flex flex-col rounded-xl border border-border p-5 text-center sm:p-7", style.tone)}>
                 <div className="flex justify-center">
                   <Icon className={cn("size-7", style.iconTone)} />
                 </div>
                 <p className="mt-4 break-keep text-body-1 font-bold text-slate-900">{t.name}</p>
                 {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "자기소개 / 서입니다." 처럼 끊긴다. */}
-                <p className="mt-2 flex-1 break-keep text-body-2 leading-relaxed text-slate-600">
+                <p className="mt-2 flex-1 break-keep text-body-2 leading-relaxed font-medium text-slate-600">
                   {t.description}
                 </p>
-                <p className="mt-3 text-label-2 text-slate-500">문항 {t.defaultQuestions.length}개</p>
+                <p className="mt-3 text-caption-1 font-medium text-slate-600">문항 {t.defaultQuestions.length}개</p>
                 <Button
-                  /* 좁은 화면에서는 카드 폭을 채운다. 가운데 뜬 작은 알약은 손가락으로 겨누기 어렵다. */
-                  className="mt-4 h-11 self-stretch rounded-full px-7 sm:self-center"
+                  /* 좁은 화면에서는 카드 폭을 채운다. 가운데 뜬 작은 버튼은 손가락으로 겨누기 어렵다. */
+                  className="mt-4 h-12 self-stretch bg-atomic-blue-600 px-7 font-bold text-white sm:self-center"
                   onClick={() => startWithTemplate(t)}
                 >
                   시작하기
@@ -262,7 +263,7 @@ export function CoverLetterWizard({
         </div>
 
         <div className="mt-8 text-center">
-          <Button variant="ghost" size="sm" className="text-slate-500" asChild>
+          <Button variant="ghost" size="sm" className="text-body-3 text-slate-600" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
@@ -286,7 +287,7 @@ export function CoverLetterWizard({
             description="자기소개서에 담을 문항을 골라주세요. 나중에 편집 화면에서도 바꿀 수 있어요."
           />
           {/* 앞 화면에서 고른 양식. 지금 무엇을 바탕으로 담겨 있는지 알아야 문항을 손볼 수 있다. */}
-          <p className="mt-4 text-center text-label-1 text-slate-500">
+          <p className="mt-4 text-center text-body-3 font-medium text-slate-600">
             고른 양식 <span className="font-semibold text-slate-700">{template.name}</span>
           </p>
 
@@ -297,8 +298,8 @@ export function CoverLetterWizard({
               </FieldLabel>
 
               <div className="rounded-xl bg-brand-blue-50 p-4">
-                <p className="text-label-1 font-semibold text-slate-700">추천 문항</p>
-                <p className="mt-1 flex items-center gap-1 text-label-2 text-slate-500">
+                <p className="text-body-3 font-semibold text-slate-700">추천 문항</p>
+                <p className="mt-1 flex items-center gap-1 text-caption-1 font-medium text-slate-600">
                   <ThumbsUp className="size-3.5" /> 표시는 고르신 자기소개서에서 자주 묻는 문항이에요.
                 </p>
                 <div className="mt-3 flex flex-wrap gap-2">
@@ -314,10 +315,10 @@ export function CoverLetterWizard({
                         onClick={() => toggleQuestion(entry)}
                         aria-pressed={picked}
                         className={cn(
-                          "flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-label-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40",
+                          "flex cursor-pointer items-center gap-1 rounded-lg border px-3 py-1.5 text-body-3 font-medium disabled:cursor-not-allowed disabled:opacity-40",
                           picked
-                            ? "border-brand-blue-400 bg-brand-blue-50 font-medium text-brand-blue-700"
-                            : "border-border bg-white text-slate-600 hover:border-brand-blue-200",
+                            ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
+                            : "border-border bg-white text-slate-600",
                         )}
                       >
                         {recommended && <ThumbsUp className="size-3.5" />}
@@ -328,10 +329,10 @@ export function CoverLetterWizard({
                 </div>
 
                 <div className="mt-4 border-t border-brand-blue-100 pt-4">
-                  <p className="text-label-1 text-slate-500">원하는 문항이 없다면 직접 적어보세요.</p>
+                  <p className="text-body-3 font-medium text-slate-600">원하는 문항이 없다면 직접 적어보세요.</p>
                   <Button
                     variant="outline"
-                    className="mt-2 w-full border-brand-blue-200 text-brand-blue-700 hover:bg-white"
+                    className="mt-2 h-12 w-full border-brand-blue-200 bg-white font-semibold text-brand-blue-700 hover:bg-white"
                     disabled={questions.length >= MAX_QUESTIONS}
                     onClick={() => setQuestionDraft({ key: null, text: "" })}
                   >
@@ -342,20 +343,20 @@ export function CoverLetterWizard({
 
               <div className="mt-4 divide-y divide-border rounded-xl border border-border">
                 {questions.length === 0 ? (
-                  <p className="p-5 text-center text-label-1 text-slate-400">
+                  <p className="p-5 text-center text-body-3 font-medium text-slate-600">
                     위에서 문항을 골라주세요. 한 개는 있어야 다음으로 갈 수 있어요.
                   </p>
                 ) : (
                   questions.map((q, idx) => (
                     <div key={q.key} className="flex items-center gap-3 px-4 py-3">
-                      <span className="shrink-0 text-label-1 font-bold text-slate-400">문항 {idx + 1}</span>
-                      <span className="min-w-0 flex-1 truncate text-label-1 text-slate-700">
+                      <span className="shrink-0 text-body-3 font-bold text-slate-600">문항 {idx + 1}</span>
+                      <span className="min-w-0 flex-1 truncate text-body-3 font-medium text-slate-700">
                         {questionHeading(q.questionType, q.question)}
                       </span>
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="shrink-0 text-slate-500"
+                        className="shrink-0 text-slate-600"
                         onClick={() => setQuestionDraft({ key: q.key, text: q.question })}
                       >
                         <Pencil className="size-3.5" /> 수정
@@ -363,7 +364,7 @@ export function CoverLetterWizard({
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="shrink-0 text-slate-500"
+                        className="shrink-0 text-slate-600"
                         onClick={() => setQuestions((prev) => prev.filter((p) => p.key !== q.key))}
                       >
                         <Trash2 className="size-3.5" /> 삭제
@@ -380,16 +381,16 @@ export function CoverLetterWizard({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="예: 요양보호사 지원용 자기소개서"
-                className="h-12 bg-white"
+                className="h-12 rounded-lg border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
               />
             </div>
           </div>
 
           <div className="mt-10 flex justify-center gap-3">
-            <Button variant="outline" className="h-12 min-w-32 rounded-full" onClick={() => goToStep("template")}>
+            <Button variant="outline" className="h-12 min-w-32 border-slate-300 bg-white font-semibold text-slate-800" onClick={() => goToStep("template")}>
               이전
             </Button>
-            <Button className="h-12 min-w-32 rounded-full" disabled={!canGoNext} onClick={() => goToStep("experiences")}>
+            <Button className="h-12 min-w-32 bg-atomic-blue-600 font-bold text-white" disabled={!canGoNext} onClick={() => goToStep("experiences")}>
               다음
             </Button>
           </div>
@@ -438,7 +439,7 @@ export function CoverLetterWizard({
           <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
             <div>
               <Label className="text-body-2 font-bold text-slate-900">내 경험뱅크</Label>
-              <p className="mt-1 text-label-1 text-slate-500">
+              <p className="mt-1 text-body-3 font-medium text-slate-600">
                 {experiences.length > 0
                   ? `${experiences.length}개 중 ${selectedExperienceIds.length}개를 골랐어요.`
                   : "아직 정리해둔 경험이 없어요."}
@@ -449,7 +450,7 @@ export function CoverLetterWizard({
               <Button
                 variant="outline"
                 size="sm"
-                className="text-slate-700"
+                className="border-slate-300 bg-white font-semibold text-slate-800"
                 onClick={() => setExperienceFormOpen(true)}
               >
                 <Plus className="size-4" /> 내 경험 추가하기
@@ -459,10 +460,10 @@ export function CoverLetterWizard({
 
           {experiences.length === 0 ? (
             <div className="rounded-xl border border-dashed border-border bg-slate-50 p-10 text-center">
-              <p className="text-body-2 text-slate-600">
+              <p className="text-body-2 font-medium text-slate-600">
                 일하며 겪은 일을 하나만 적어두면, AI가 그걸 자기소개서 문장으로 바꿔드려요.
               </p>
-              <Button className="mt-4 rounded-full px-6" onClick={() => setExperienceFormOpen(true)}>
+              <Button className="mt-4 h-12 bg-atomic-blue-600 px-6 font-bold text-white" onClick={() => setExperienceFormOpen(true)}>
                 <Plus className="size-4" /> 첫 경험 적어보기
               </Button>
             </div>
@@ -482,10 +483,10 @@ export function CoverLetterWizard({
                       )
                     }
                     className={cn(
-                      "flex w-full cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
+                      "flex w-full cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left",
                       selected
                         ? "border-brand-blue-600 bg-brand-blue-50"
-                        : "border-border bg-white hover:border-brand-blue-200",
+                        : "border-border bg-white",
                     )}
                   >
                     <span
@@ -498,7 +499,7 @@ export function CoverLetterWizard({
                     </span>
                     <span className="min-w-0">
                       <span className="block truncate text-body-2 font-semibold text-slate-900">{exp.title}</span>
-                      {summary && <span className="mt-0.5 block truncate text-label-1 text-slate-500">{summary}</span>}
+                      {summary && <span className="mt-0.5 block truncate text-body-3 font-medium text-slate-600">{summary}</span>}
                     </span>
                   </button>
                 );
@@ -506,19 +507,19 @@ export function CoverLetterWizard({
             </div>
           )}
 
-          {error && <p className="mt-4 text-center text-label-1 text-rose-600">{error}</p>}
+          {error && <p className="mt-4 text-center text-body-3 font-medium text-rose-600">{error}</p>}
         </div>
 
         <div className="mt-10 flex justify-center gap-3">
           <Button
             variant="outline"
-            className="h-12 min-w-32 rounded-full"
+            className="h-12 min-w-32 border-slate-300 bg-white font-semibold text-slate-800"
             disabled={isCreating}
             onClick={() => goToStep("questions")}
           >
             이전
           </Button>
-          <Button className="h-12 min-w-44 rounded-full" disabled={isCreating} onClick={handleCreate}>
+          <Button className="h-12 min-w-44 bg-atomic-blue-600 font-bold text-white" disabled={isCreating} onClick={handleCreate}>
             {isCreating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
             자기소개서 만들기
           </Button>

@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass } from "@/lib/ui-classes";
 import { SupportBookmarkButton } from "./support-bookmark-button";
 import { guessRegionFromText, labelOrganization, REGION_LABELS } from "@/lib/labels";
 import { resolveOrganizationLogo } from "@/lib/support/organization-logo";
@@ -50,11 +49,9 @@ export function SupportProgramCard({
       /*
         일자리 카드(JobCard)와 같은 틀로 맞춘다. 테두리가 없으면 흰 바탕 위에서
         카드로 안 읽히고, h-full 이 없으면 한 줄에 나란히 선 카드끼리 키가 어긋난다.
+        세부 화면 공통 바탕대로 호버 효과(면 물들이기 · 제목 밑줄)는 두지 않는다.
       */
-      className={cn(
-        "group flex h-full flex-col overflow-hidden rounded-xl border border-border bg-white",
-        interactiveCardClass,
-      )}
+      className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-white"
     >
       {/*
         오른쪽 끝은 겹쳐 놓은 찜 버튼 자리다. pr-14 로 비워 두지 않으면 적합등급 배지가
@@ -66,36 +63,36 @@ export function SupportProgramCard({
         {logo ? (
           <Image src={logo} alt={orgName} width={80} height={20} className="h-5 w-auto object-contain" />
         ) : (
-          <p className="min-w-0 truncate text-label-1 font-medium text-slate-500">{orgName}</p>
+          <p className="min-w-0 truncate text-body-3 font-medium text-slate-600">{orgName}</p>
         )}
         {/* 내부 매칭 점수는 회원에게 의미가 없는 숫자라 등급 라벨만 보여준다. */}
         {grade && (
-          <span className={cn("shrink-0 rounded-full px-3 py-1.5 text-label-1 font-bold", GRADE_BADGE_CLASS[grade])}>
+          <span className={cn("shrink-0 rounded-full px-3 py-1.5 text-body-3 font-bold", GRADE_BADGE_CLASS[grade])}>
             {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]}
           </span>
         )}
       </div>
 
       {/* break-keep 이 없으면 한글이 음절 단위로 잘린다. 일자리 카드 제목과 같은 규칙. */}
-      <h3 className="mt-3 line-clamp-2 break-keep px-5 text-balance text-body-1 leading-[1.4] font-bold text-slate-900 group-hover:underline">
+      <h3 className="mt-3 line-clamp-2 break-keep px-5 text-balance text-body-1 leading-[1.4] font-bold text-slate-900">
         {program.title}
       </h3>
-      <p className="mt-2 px-5 line-clamp-2 text-label-1 text-slate-600">
+      <p className="mt-2 px-5 line-clamp-2 text-body-3 font-medium text-slate-600">
         {program.benefitDescription ?? program.summary}
       </p>
 
-      {/* 맨 아랫줄 글자는 일자리 카드와 같게 둔다(label-1 medium). 같은 성격의 줄이 크기가 다르면 두 카드가 다른 규칙으로 보인다. */}
-      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pt-4 pb-5 text-label-1 font-medium text-slate-500">
+      {/* 맨 아랫줄 글자는 일자리 카드의 회사 · 지역 줄과 같게 둔다(body-3 medium, slate-600). 같은 성격의 줄이 크기가 다르면 두 카드가 다른 규칙으로 보인다. */}
+      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pt-4 pb-5 text-body-3 font-medium text-slate-600">
         {topReason && (
           <>
             <span>✓ {topReason}</span>
-            <span aria-hidden>|</span>
+            <span aria-hidden className="text-slate-400">|</span>
           </>
         )}
         {region && (
           <>
             <span>{region}</span>
-            <span aria-hidden>|</span>
+            <span aria-hidden className="text-slate-400">|</span>
           </>
         )}
         <span>{program.applicationPeriod ?? "상시"}</span>

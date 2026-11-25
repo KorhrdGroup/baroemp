@@ -3,10 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Clock, Coins, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, CheckCircle2, Clock, Loader2, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
-import { IntroHero } from "@/components/common/intro-hero";
+import { PageHead } from "@/components/layout/page-head";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { ResumeSessionDialog } from "@/components/common/resume-session-dialog";
@@ -197,18 +197,18 @@ function ChipButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
+        "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium",
         indicator === "none" ? "px-4" : "px-11",
         selected
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-          : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+          : "border-border text-slate-700",
         disabled && "pointer-events-none opacity-40",
       )}
     >
       {indicator === "radio" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-full border-2 transition-colors",
+            "absolute left-4 flex size-5 items-center justify-center rounded-full border-2",
             selected ? "border-brand-blue-400" : "border-slate-300",
           )}
         >
@@ -218,7 +218,7 @@ function ChipButton({
       {indicator === "check" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2 transition-colors",
+            "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2",
             selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
           )}
         >
@@ -265,7 +265,7 @@ function StepBody({
             </NativeSelect>
           </div>
           {answers.birthYear && (
-            <p className="text-label-1 text-slate-500">
+            <p className="text-body-3 font-medium text-slate-600">
               만 {new Date().getFullYear() - answers.birthYear}세 기준으로 연령 조건을 확인해 드려요.
             </p>
           )}
@@ -347,13 +347,13 @@ function StepBody({
             type="button"
             onClick={() => onChange({ householdTraits: noneSelected ? [] : ["none"] })}
             className={cn(
-              "mt-2 flex items-center justify-center gap-2 self-center rounded-lg px-3 py-2 text-body-2 font-medium transition-colors",
-              noneSelected ? "text-brand-blue-700" : "text-slate-500 hover:text-slate-700",
+              "mt-2 flex items-center justify-center gap-2 self-center rounded-lg px-3 py-2 text-body-2 font-medium",
+              noneSelected ? "text-brand-blue-700" : "text-slate-700",
             )}
           >
             <span
               className={cn(
-                "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
                 noneSelected ? "border-brand-blue-400" : "border-slate-300",
               )}
             >
@@ -373,10 +373,10 @@ function StepBody({
               type="button"
               onClick={() => onChange({ region: code })}
               className={cn(
-                "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
+                "min-h-12 rounded-xl border bg-white px-3 py-3 text-body-2 font-medium",
                 answers.region === code
                   ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-                  : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                  : "border-border text-slate-700",
               )}
             >
               {label}
@@ -397,8 +397,8 @@ function StepBody({
               </ChipButton>
               {code === "employed" && answers.employmentStatus === "employed" && (
                 <div className="mt-1.5">
-                  <div className="rounded-xl bg-slate-50/60 px-2.5 pb-2.5 pt-3">
-                    <p className="mb-3 text-center text-body-2 font-medium text-slate-500">어떤 직종에서 일하고 계신가요? <span className="text-slate-400">(선택)</span></p>
+                  <div className="rounded-xl bg-slate-50 px-2.5 pb-2.5 pt-3">
+                    <p className="mb-3 text-center text-body-2 font-medium text-slate-600">어떤 직종에서 일하고 계신가요? (선택)</p>
                     <div className="grid grid-cols-2 gap-1.5">
                       {JOB_CATEGORY_OPTIONS.map((opt) => (
                         <button
@@ -406,10 +406,10 @@ function StepBody({
                           type="button"
                           onClick={() => onChange({ currentJobCategory: opt.code })}
                           className={cn(
-                            "rounded-lg border px-3 py-2 text-label-1 font-medium transition-colors",
+                            "rounded-lg border px-3 py-2 text-body-3 font-medium",
                             answers.currentJobCategory === opt.code
                               ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-600"
-                              : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                              : "border-slate-200 bg-white text-slate-700",
                           )}
                         >
                           {opt.label}
@@ -447,17 +447,17 @@ function StepBody({
                 type="button"
                 onClick={() => onChange({ trainingWillingness: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-bold transition-colors",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border bg-white text-body-1 font-bold",
                   answers.trainingWillingness === n
                     ? "border-brand-blue-400 bg-brand-blue-400 text-white"
-                    : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                    : "border-border text-slate-700",
                 )}
               >
                 {n}
               </button>
             ))}
           </div>
-          <div className="mt-2 flex justify-between text-label-1 text-slate-400">
+          <div className="mt-2 flex justify-between text-body-3 font-medium text-slate-600">
             <span>{TRAINING_WILLINGNESS_LABELS[1]}</span>
             <span>{TRAINING_WILLINGNESS_LABELS[5]}</span>
           </div>
@@ -492,7 +492,7 @@ function StepBody({
                 className="h-14 w-40 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
                 placeholder="0"
               />
-              <span className="text-body-2 text-slate-500">개월 정도</span>
+              <span className="text-body-2 font-medium text-slate-600">개월 정도</span>
             </div>
           )}
         </div>
@@ -530,56 +530,76 @@ function SupportIntro({
   latestResultSessionId?: string;
 }) {
   return (
-    <IntroHero
-      icon={Coins}
-      title="놓치고 있는 취업·교육 혜택을 찾아보세요"
-      description={
-        <>
-          몇 가지 조건만 입력하면{" "}
-          <br className="hidden sm:block" />
-          현재 상황에 맞는 정부·지자체 지원제도를 찾아드립니다.
-        </>
-      }
-      infoItems={INFO_ITEMS}
-      ctaHeadline="2~3분이면 진단이 끝납니다"
-      ctaDescription="지금 시작하면 받을 수 있는 지원제도를 바로 확인할 수 있어요."
-      cta={
-        /* 이미 결과가 있으면 두 버튼을 나란히 세운다. 카드 밖 작은 글줄로는 눈에 띄지 않았다. */
-        <div className="flex flex-col gap-2 sm:flex-row">
-          {latestResultSessionId && (
-            <Link
-              href={`/support/result/${latestResultSessionId}`}
-              className="flex h-14 items-center justify-center gap-1.5 rounded-lg bg-brand-blue-50 px-6 text-body-2 font-bold text-brand-blue-700 transition-colors hover:bg-brand-blue-100/60"
-            >
-              지난 결과 보기
-            </Link>
-          )}
-          <Button
-            size="lg"
-            onClick={onStart}
-            disabled={loading}
-            className="h-14 w-full rounded-lg bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
-          >
-            {loading ? (
-              <Loader2 className="size-5 animate-spin" />
-            ) : (
-              <>
-                지원금 찾기
-                <ArrowRight className="size-5" />
-              </>
-            )}
-          </Button>
+    // 세부 화면 공통 바탕: 직업진단 첫 화면(assessment-intro)과 같은 틀 - 위치 줄 · 큰 제목 · 시작 상자 · 알 수 있는 것.
+    <div className="bg-white">
+      <PageHead
+        crumbs={[{ label: "지원금 찾기" }]}
+        title="놓치고 있는 취업·교육 혜택을 찾아보세요"
+        description="몇 가지 조건만 입력하면 현재 상황에 맞는 정부·지자체 지원제도를 찾아드립니다."
+      />
+
+      <div className="mx-auto max-w-6xl px-4.5 pb-16 lg:px-8">
+        <div className="max-w-3xl">
+          <section className="mt-8 flex flex-col gap-5 rounded-xl border border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <div className="min-w-0">
+              <div className="flex flex-wrap gap-x-4 gap-y-1">
+                {INFO_ITEMS.map(({ icon: InfoIcon, label }) => (
+                  <span key={label} className="flex items-center gap-1.5 text-body-3 font-semibold text-slate-700">
+                    <InfoIcon className="size-4 text-atomic-blue-600" />
+                    {label}
+                  </span>
+                ))}
+              </div>
+              <p className="mt-3 text-body-1 font-bold text-slate-900">2~3분이면 진단이 끝납니다</p>
+              <p className="mt-1 text-body-3 font-medium text-slate-600">지금 시작하면 받을 수 있는 지원제도를 바로 확인할 수 있어요.</p>
+            </div>
+            {/* 이미 결과가 있으면 두 버튼을 나란히 세운다. 상자 밖 작은 글줄로는 눈에 띄지 않았다. */}
+            <div className="flex shrink-0 flex-col gap-2 sm:flex-row">
+              {latestResultSessionId && (
+                <Link
+                  href={`/support/result/${latestResultSessionId}`}
+                  className="flex h-14 items-center justify-center gap-1.5 rounded-lg border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
+                >
+                  지난 결과 보기
+                </Link>
+              )}
+              <Button
+                size="lg"
+                onClick={onStart}
+                disabled={loading}
+                className="h-14 w-full rounded-lg bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
+              >
+                {loading ? (
+                  <Loader2 className="size-5 animate-spin" />
+                ) : (
+                  <>
+                    지원금 찾기
+                    <ArrowRight className="size-5" />
+                  </>
+                )}
+              </Button>
+            </div>
+          </section>
+
+          <section className="mt-10">
+            <h2 className="text-title-3 font-extrabold text-slate-900">이 진단으로 확인할 수 있는 것</h2>
+            <ul className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {RESULT_ITEMS.map((item) => (
+                <li key={item} className="flex items-center gap-2.5 rounded-xl border border-border px-5 py-4 text-body-2 font-medium text-slate-800">
+                  <CheckCircle2 className="size-5 shrink-0 text-atomic-blue-600" />
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <p className="mt-10 text-body-3 leading-relaxed font-medium text-slate-600">
+            주민등록번호, 상세 재산정보 등 민감정보는 수집하지 않습니다. 소득/재산 조건이 필요한 정책은 &quot;확인
+            필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
+          </p>
         </div>
-      }
-      highlightTitle="이 진단으로 확인할 수 있는 것"
-      highlights={RESULT_ITEMS}
-      note={
-        <>
-          주민등록번호, 상세 재산정보 등 민감정보는 수집하지 않습니다. 소득/재산 조건이 필요한 정책은 &quot;확인
-          필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
-        </>
-      }
-    />
+      </div>
+    </div>
   );
 }
 
@@ -696,7 +716,7 @@ export function SupportFlow({
       return (
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col items-center justify-center px-4 text-center">
           <Loader2 className="size-6 animate-spin text-brand-blue-400" />
-          <p className="mt-4 text-label-1 text-slate-500">지원금 찾기를 준비하고 있어요…</p>
+          <p className="mt-4 text-body-3 font-medium text-slate-600">지원금 찾기를 준비하고 있어요…</p>
         </div>
       );
     }
@@ -797,11 +817,11 @@ export function SupportFlow({
   }
 
   return (
-    // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다.
-    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
+    // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다. 바탕은 세부 화면 공통대로 흰색.
+    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-white pb-32">
       {/* 진행 바 - 대분류 3칸 */}
       <div className="sticky top-16 z-30">
-        <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
+        <div className="flex gap-1.5 bg-white px-4 pt-3">
           {GROUPS.map((g, i) => (
             <div key={g.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
               <div
@@ -815,18 +835,18 @@ export function SupportFlow({
           문항 영역과 같은 폭·패딩을 써서 뒤로가기 화살표가 아래 선택지 박스와 왼쪽 라인을 맞춘다.
           -ml-2는 아이콘 버튼의 안쪽 여백(36px 박스 안 20px 아이콘)을 상쇄해 아이콘 자체를 정렬시킨다.
         */}
-        <div className="mx-auto flex max-w-[24.5rem] items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-[24.5rem] items-center bg-white px-4 py-3">
           <button
             type="button"
             onClick={handlePrev}
             disabled={stepIndex === 0 || submitting}
             aria-label="이전 문항"
-            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowLeft className="size-5" />
           </button>
           {/* 지금 어느 분류인지는 화면 상단에 고정으로 둔다. */}
-          <span className="flex-1 truncate text-center text-label-1 font-semibold text-brand-blue-600">
+          <span className="flex-1 truncate text-center text-body-3 font-semibold text-slate-700">
             {GROUPS[groupIndex]?.label}
           </span>
           {/* 이미 지나온 문항이면 하단 CTA를 쓰지 않고도 앞으로 되돌아갈 수 있게 한다. */}
@@ -835,7 +855,7 @@ export function SupportFlow({
             onClick={handleNext}
             disabled={(stepIndex >= furthestIndex && !canProceed) || isLast || submitting}
             aria-label="다음 문항"
-            className="-mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+            className="-mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowRight className="size-5" />
           </button>
@@ -849,28 +869,28 @@ export function SupportFlow({
           {posInGroup + 1}/{groupSteps.length}
         </p>
         {/* 진단·온보딩 위저드와 같은 규칙: 어절 중간 잘림 방지 + 두 줄 길이 균형 + 살짝 여유 있는 줄간격. */}
-        <h2 className="mt-3 text-center text-title-2 leading-[1.4] font-bold break-keep text-balance text-slate-900">{step.title}</h2>
+        <h2 className="mt-3 text-center text-title-2 leading-[1.4] font-extrabold break-keep text-balance text-slate-900">{step.title}</h2>
         {step.description && (
-          <p className="mt-3 text-center text-body-2-reading text-slate-500">{step.description}</p>
+          <p className="mt-3 text-center text-body-2-reading font-medium text-slate-600">{step.description}</p>
         )}
 
         <div className="mt-10">
           <StepBody step={step} answers={answers} onChange={updateAnswer} />
         </div>
 
-        {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
+        {error && <p className="mt-6 text-center text-body-3 font-medium text-red-500">{error}</p>}
 
         {/* 선택지가 긴 단계에서만 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
         {step.scrollHint && <ScrollMoreHint key={step.id} />}
       </div>
 
       {/* 하단 고정 CTA */}
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-atomic-mono-50 via-atomic-mono-50 to-transparent pt-6">
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-white via-white to-transparent pt-6">
         <div className="mx-auto max-w-[24.5rem] px-4 pb-8">
           <Button
             onClick={() => void handleNext()}
             disabled={submitting || (step.required && !canProceed)}
-            className="h-14 w-full rounded-lg bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-lg bg-atomic-blue-600 text-body-1 font-bold text-white"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

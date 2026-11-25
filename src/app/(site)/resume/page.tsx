@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass, sectionCountClass } from "@/lib/ui-classes";
+import { sectionCountClass } from "@/lib/ui-classes";
 import Link from "next/link";
 import { FileText, Plus } from "lucide-react";
 import { requireUser } from "@/lib/auth/session";
@@ -21,6 +21,7 @@ import { deleteResumeAction, setPrimaryResumeAction } from "@/features/resume/re
 import { deleteCoverLetterAction } from "@/features/cover-letter/cover-letter-actions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { PageHead } from "@/components/layout/page-head";
 
 export const metadata: Metadata = {
   title: "이력서 Builder | 한평생 바로취업",
@@ -45,10 +46,10 @@ function SectionHeader({
   return (
     <div className="flex flex-wrap items-center justify-between gap-3">
       <div className="min-w-0">
-        <h2 className="text-body-1 font-bold text-slate-900">
-          {title}<span className={sectionCountClass}>{count}</span>
+        <h2 className="text-title-3 font-extrabold text-slate-900">
+          {title}<span className={cn(sectionCountClass, "text-slate-600")}>{count}</span>
         </h2>
-        {description && <p className="mt-1 text-label-1 text-slate-500">{description}</p>}
+        {description && <p className="mt-1 text-body-3 font-medium text-slate-600">{description}</p>}
       </div>
       {action}
     </div>
@@ -71,15 +72,13 @@ export default async function ResumeListPage() {
   const coverLetterAtLimit = coverLetters.length >= MAX_COVER_LETTERS_PER_USER;
 
   return (
+    <>
+    <PageHead
+      crumbs={[{ label: "이력서" }]}
+      title="이력서 · 자기소개서"
+      description="내 경력/자격/희망직무 정보를 불러와 이력서를 빠르게 작성하고, AI 첨삭으로 다듬을 수 있어요."
+    />
     <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
-      <div className="mb-8">
-        <p className="text-label-1 font-semibold text-brand-blue-600">이력서 · 자기소개서</p>
-        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">취업에 바로 사용할 이력서를 만들어보세요.</h1>
-        <p className="mt-2 text-body-2-reading text-balance text-slate-500">
-          내 경력/자격/희망직무 정보를 불러와 이력서를 빠르게 작성하고, AI 첨삭으로 다듬을 수 있어요.
-        </p>
-      </div>
-
       <div>
         <SectionHeader
           title="내 이력서"
@@ -101,7 +100,7 @@ export default async function ResumeListPage() {
                 <Plus className="size-4" /> 새 이력서 만들기
               </Button>
             ) : (
-              <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+              <Button className="bg-atomic-blue-600 font-bold text-white" asChild>
                 <Link href="/resume/new">
                   <Plus className="size-4" /> 새 이력서 만들기
                 </Link>
@@ -112,10 +111,10 @@ export default async function ResumeListPage() {
         {resumes.length === 0 ? (
           <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-10 text-center">
             <FileText className="mx-auto size-8 text-slate-300" />
-            <p className="mt-3 text-label-1 text-slate-500">아직 작성한 이력서가 없어요.</p>
+            <p className="mt-3 text-body-3 font-medium text-slate-600">아직 작성한 이력서가 없어요.</p>
             <Link
               href="/resume/new"
-              className="mt-3 inline-block text-label-1 font-semibold text-brand-blue-600 hover:underline"
+              className="mt-3 inline-block text-body-3 font-semibold text-atomic-blue-600"
             >
               이력서 작성하기 →
             </Link>
@@ -126,19 +125,19 @@ export default async function ResumeListPage() {
               <Link
                 key={resume.id}
                 href={`/resume/${resume.id}/edit`}
-                className={cn("flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-5", interactiveCardClass)}
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-5"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
-                    <p className={cn("truncate text-body-2 font-semibold", resume.title ? "text-slate-900" : "text-slate-400")}>
+                    <p className={cn("truncate text-body-2 font-semibold", resume.title ? "text-slate-900" : "text-slate-600")}>
                       {resume.title || "제목 없는 이력서"}
                     </p>
-                    {resume.isPrimary && <Badge className="rounded-full bg-brand-blue-400 text-label-2">대표</Badge>}
-                    <Badge variant="outline" className="rounded-full text-label-2">
+                    {resume.isPrimary && <Badge className="rounded-full bg-atomic-blue-600 text-caption-1 font-semibold">대표</Badge>}
+                    <Badge variant="outline" className="rounded-full text-caption-1 font-medium text-slate-700">
                       {resume.status === "completed" ? "완성" : resume.status === "archived" ? "보관" : "작성중"}
                     </Badge>
                   </div>
-                  <p className="mt-1 text-label-1 text-slate-400">
+                  <p className="mt-1 text-body-3 font-medium text-slate-600">
                     {resume.desiredJobTitle ? `희망직무 ${resume.desiredJobTitle} · ` : ""}
                     최근수정 {new Date(resume.updatedAt).toLocaleDateString("ko-KR")}
                   </p>
@@ -154,10 +153,10 @@ export default async function ResumeListPage() {
                   */}
                   <Badge
                     className={cn(
-                      "rounded-full text-label-2",
+                      "rounded-full text-caption-1 font-medium",
                       resume.completeness >= 100
                         ? "bg-brand-blue-50 text-brand-blue-700"
-                        : "bg-slate-100 text-slate-500",
+                        : "bg-slate-100 text-slate-600",
                     )}
                   >
                     완성도 {resume.completeness}%
@@ -202,7 +201,7 @@ export default async function ResumeListPage() {
                 <Plus className="size-4" /> 새 자기소개서 만들기
               </Button>
             ) : (
-              <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+              <Button className="bg-atomic-blue-600 font-bold text-white" asChild>
                 <Link href="/cover-letter/new">
                   <Plus className="size-4" /> 새 자기소개서 만들기
                 </Link>
@@ -212,10 +211,10 @@ export default async function ResumeListPage() {
         />
         {coverLetters.length === 0 ? (
           <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-8 text-center">
-            <p className="text-label-1 text-slate-500">
+            <p className="text-body-3 font-medium text-slate-600">
               아직 작성한 자기소개서가 없어요. 경험뱅크를 먼저 채워두면 문항 작성이 훨씬 빨라요.
             </p>
-            <Link href="/cover-letter/new" className="mt-3 inline-block text-label-1 font-semibold text-brand-blue-600 hover:underline">
+            <Link href="/cover-letter/new" className="mt-3 inline-block text-body-3 font-semibold text-atomic-blue-600">
               자기소개서 작성하기 →
             </Link>
           </div>
@@ -225,13 +224,13 @@ export default async function ResumeListPage() {
               <Link
                 key={cl.id}
                 href={`/cover-letter/${cl.id}/edit`}
-                className={cn("flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5", interactiveCardClass)}
+                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5"
               >
                 <div>
-                  <p className={cn("truncate text-body-2 font-semibold", cl.title ? "text-slate-900" : "text-slate-400")}>
+                  <p className={cn("truncate text-body-2 font-semibold", cl.title ? "text-slate-900" : "text-slate-600")}>
                     {cl.title || "제목 없는 자기소개서"}
                   </p>
-                  <p className="mt-1 text-label-1 text-slate-400">최근수정 {new Date(cl.updatedAt).toLocaleDateString("ko-KR")}</p>
+                  <p className="mt-1 text-body-3 font-medium text-slate-600">최근수정 {new Date(cl.updatedAt).toLocaleDateString("ko-KR")}</p>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
                   <DocumentMenu
@@ -257,5 +256,6 @@ export default async function ResumeListPage() {
         <ExperienceBankSection initialItems={experiences} nested />
       </div>
     </div>
+    </>
   );
 }

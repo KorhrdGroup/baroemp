@@ -1,3 +1,4 @@
+import { PageHead } from "@/components/layout/page-head";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Briefcase, KeyRound } from "lucide-react";
@@ -145,9 +146,9 @@ export default async function JobsPage({
       바로 로그인 화면으로 밀지 않고 가입 안내 창을 띄운다 - 보던 것이 사라지면 대부분 떠난다.
     */
     <GuestGate active={!isAuthenticated}>
-    <div className="mx-auto max-w-6xl px-4.5 py-10 lg:px-8">
-      {/* 제목 한 줄만 둔다. 무엇을 하는 화면인지는 아래 검색바가 말한다. */}
-      <h1 className="mb-6 text-title-2 font-extrabold tracking-tight text-slate-900 sm:mb-8 sm:text-headline-3">일자리 찾기</h1>
+    {/* 화면 머리(위치 · 제목)는 세부 화면 공통. 무엇을 하는 화면인지는 아래 검색바가 말한다. */}
+    <PageHead crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
+    <div className="mx-auto max-w-6xl px-4.5 py-8 lg:px-8">
 
       <JobFiltersForm
         initial={{
@@ -196,7 +197,6 @@ export default async function JobsPage({
                   isAuthenticated={isAuthenticated}
                   isBookmarked={bookmarkedSet.has(job.id)}
                   readiness={readinessMap.get(job.id)}
-                  hoverTint
                 />
               ))}
             </div>
@@ -243,8 +243,7 @@ export default async function JobsPage({
                     isAuthenticated={isAuthenticated}
                     isBookmarked={bookmarkedSet.has(job.id)}
                     readiness={readinessMap.get(job.id)}
-                    hoverTint
-                  />
+                    />
                 ))}
               </div>
             )}

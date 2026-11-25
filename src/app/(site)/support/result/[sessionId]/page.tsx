@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PageHead } from "@/components/layout/page-head";
 import { EmptyState } from "@/components/common/empty-state";
 import { SupportMatchViewTracker } from "@/features/support/support-match-view-tracker";
 import { SupportResultSections } from "@/features/support/support-card-grid";
@@ -37,31 +38,30 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     }));
 
   return (
-    <div className="min-h-screen bg-slate-50">
-    <div className="mx-auto max-w-6xl px-4.5 py-10 pb-20 lg:px-8">
+    // 세부 화면 공통 바탕: 흰 바탕 · 위치 줄과 큰 제목. 진단 결과 문장을 화면 제목으로 쓴다.
+    <div className="bg-white">
       <SupportMatchViewTracker items={trackedItems} />
-
-      <div className="mb-8">
-        <p className="text-label-1 font-semibold text-brand-blue-600">지원금 진단 결과</p>
-        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">
-          {view.totalCount === 0
+      <PageHead
+        crumbs={[{ label: "지원금 찾기", href: "/support" }, { label: "진단 결과" }]}
+        title={
+          view.totalCount === 0
             ? "현재 조건에 맞는 지원제도를 찾지 못했습니다."
             : likelyCount > 0
               ? `${displayName}에게 해당 가능성이 높은 지원제도 ${likelyCount}개를 찾았습니다.`
-              : `${displayName}, 조건 확인이 필요한 지원제도 ${view.totalCount}개를 찾았습니다.`}
-        </h1>
-        <p className="mt-2 text-label-1 text-slate-400">
-          입력하신 조건 기준의 참고 정보로, 최종 신청 가능 여부 확인은 각 운영기관에서 확인해야 합니다.
-        </p>
-      </div>
+              : `${displayName}, 조건 확인이 필요한 지원제도 ${view.totalCount}개를 찾았습니다.`
+        }
+        description="입력하신 조건 기준의 참고 정보로, 최종 신청 가능 여부 확인은 각 운영기관에서 확인해야 합니다."
+      />
 
+    <div className="mx-auto max-w-6xl px-4.5 pt-3 pb-20 lg:px-8">
       {view.totalCount === 0 ? (
         <EmptyState
+          className="mt-5"
           icon={Coins}
           title="조건에 맞는 지원제도를 찾지 못했어요"
           description="조건을 다시 입력하거나 잠시 후 다시 시도해주세요."
           action={
-            <Button className="bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+            <Button className="h-12 rounded-lg bg-atomic-blue-600 px-6 text-body-2 font-bold text-white" asChild>
               <Link href="/support">다시 진단하기</Link>
             </Button>
           }

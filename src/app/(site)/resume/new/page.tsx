@@ -5,6 +5,7 @@ import { getResumeTemplateRepository, getJobRepository } from "@/lib/repositorie
 import { getResumePrefill, listResumesForUser, MAX_RESUMES_PER_USER } from "@/services/resume.service";
 import { buildResumeSectionOptions } from "@/lib/resume/completeness";
 import { ResumeWizard } from "@/features/resume/resume-wizard";
+import { PageHead } from "@/components/layout/page-head";
 
 export const metadata: Metadata = {
   title: "새 이력서 만들기 | 한평생 바로취업",
@@ -31,9 +32,14 @@ export default async function ResumeNewPage({
   if (existing.length >= MAX_RESUMES_PER_USER) redirect("/resume");
 
   return (
-    // 양식 고르기 화면은 짧아서, 회색 바탕을 화면 끝까지 깔아야 흰 띠가 안 남는다.
-    <div className="min-h-screen bg-slate-100">
-      <div className="mx-auto max-w-5xl px-4.5 pt-10 pb-20 lg:px-8">
+    // 다른 세부 화면과 같이 흰 바탕 위에 화면 머리를 두고, 단계 카드는 얇은 선으로 나눈다.
+    <div>
+      <PageHead
+        crumbs={[{ label: "이력서", href: "/resume" }, { label: "새 이력서" }]}
+        title="새 이력서 만들기"
+        description="양식을 고르고 담을 항목과 불러올 정보를 정하면, 편집 화면으로 넘어가요."
+      />
+      <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
         <ResumeWizard
           templates={ordered.map((t) => ({
             id: t.id,

@@ -1,18 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Building2,
-  Calendar,
-  CheckCircle2,
-  Coins,
-  FileText,
-  HelpCircle,
-  MapPin,
-  Phone,
-  Users,
-  XCircle,
-  type LucideIcon,
-} from "lucide-react";
+import { Building2, CheckCircle2, HelpCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { labelEmploymentStatus, labelOrganization, labelRegion } from "@/lib/labels";
 import { resolveOrganizationLogo } from "@/lib/support/organization-logo";
@@ -23,21 +11,30 @@ import { SupportApplyButton } from "./support-apply-button";
 import { SupportBookmarkButton } from "./support-bookmark-button";
 import { SupportViewTracker } from "./support-view-tracker";
 import { SupportLongText } from "./support-long-text";
-import { BackButton } from "@/components/common/back-button";
+import { PageHead } from "@/components/layout/page-head";
 
 import { GRADE_BADGE_CLASS } from "./grade-badge";
 
-function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value?: string }) {
+/** 지원 요강 표의 한 줄. 정부 누리집 공고처럼 왼쪽 회색 칸에 항목 이름, 오른쪽에 값. 공고 상세와 같은 표. */
+function InfoRow({ label, value }: { label: string; value?: string }) {
   if (!value) return null;
   return (
-    <div className="flex items-start gap-3 text-label-1">
-      <Icon className="mt-0.5 size-4 shrink-0 text-slate-400" />
-      <div>
-        <p className="text-slate-400">{label}</p>
-        {/* 실 API는 짧은 사실 필드에도 안내문 전체를 담아 보내는 경우가 있어 길이를 제한한다. */}
-        <p className="line-clamp-3 font-medium text-slate-800">{value}</p>
-      </div>
+    <div className="grid grid-cols-[6.5rem_1fr] sm:grid-cols-[8rem_1fr]">
+      <dt className="bg-slate-50 px-4 py-3.5 text-body-3 font-semibold text-slate-700">{label}</dt>
+      {/* 실 API는 짧은 사실 필드에도 안내문 전체를 담아 보내는 경우가 있어 길이를 제한한다. */}
+      <dd className="line-clamp-3 px-4 py-3.5 text-body-2 font-medium break-keep text-slate-900">{value}</dd>
     </div>
+  );
+}
+
+/** 상세 화면의 한 구역: 제목 + 내용. 구역끼리는 간격으로만 나눈다. */
+function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-10">
+      <h2 className="text-title-3 font-extrabold text-slate-900">{title}</h2>
+      {description && <p className="mt-1 text-body-3 font-medium text-slate-600">{description}</p>}
+      <div className="mt-4">{children}</div>
+    </section>
   );
 }
 
@@ -86,49 +83,42 @@ export function SupportDetailView({
   const logo = resolveOrganizationLogo(organization);
 
   return (
-    <div className="min-h-screen bg-slate-50">
-    <div className="mx-auto max-w-3xl px-4.5 py-10 lg:px-8">
+    // 세부 화면 공통 바탕: 흰 바탕 · 위치 줄과 큰 제목 · 표와 얇은 선. 신청 동작은 하단에 고정한다. 공고 상세와 같은 틀.
+    <div className="bg-white">
       <SupportViewTracker supportProgramId={program.id} matchScore={match?.score} eligibilityGrade={match?.grade} />
-
-      <div className="mb-6 -ml-2">
-        <BackButton fallbackHref="/support" label="목록으로 돌아가기" />
-      </div>
-
-      {/* ── 헤더: 배지 + 제목 + 기관 ── */}
-      <header>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-full bg-slate-100 px-3 py-1.5 text-label-1 font-semibold text-slate-600">
-            {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
-          </span>
-          {/* 목록 카드와 같은 이유로 내부 매칭 점수는 숨기고 등급 라벨만 보여준다. */}
-          {match && (
-            <span className={cn("rounded-full px-3 py-1.5 text-label-1 font-bold", GRADE_BADGE_CLASS[match.grade])}>
-              {SUPPORT_ELIGIBILITY_GRADE_LABELS[match.grade]}
+      <PageHead
+        crumbs={[{ label: "지원금 찾기", href: "/support" }, { label: "지원제도 상세" }]}
+        title={<span className="text-balance">{program.title}</span>}
+        description={
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            {logo ? (
+              <Image src={logo} alt={orgName} width={100} height={24} className="h-6 w-auto object-contain" />
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <Building2 className="size-4 text-slate-500" />
+                {orgName}
+              </span>
+            )}
+            {program.departmentName && <span>{program.departmentName}</span>}
+            <span className="rounded bg-slate-100 px-2 py-0.5 text-body-3 font-medium text-slate-700">
+              {SUPPORT_CATEGORY_LABELS[program.category] ?? program.category}
             </span>
-          )}
-        </div>
+            {/* 목록 카드와 같은 이유로 내부 매칭 점수는 숨기고 등급 라벨만 보여준다. */}
+            {match && (
+              <span className={cn("rounded px-2 py-0.5 text-body-3 font-bold", GRADE_BADGE_CLASS[match.grade])}>
+                {SUPPORT_ELIGIBILITY_GRADE_LABELS[match.grade]}
+              </span>
+            )}
+          </span>
+        }
+      />
 
-        <h1 className="mt-3 text-title-2 font-bold text-slate-900 sm:text-headline-3">{program.title}</h1>
-
-        <div className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
-          {logo ? (
-            <Image src={logo} alt={orgName} width={100} height={24} className="h-6 w-auto object-contain" />
-          ) : (
-            <>
-              <Building2 className="size-4" />
-              {orgName}
-            </>
-          )}
-          {program.departmentName && <span className="text-slate-400">· {program.departmentName}</span>}
-        </div>
-      </header>
-
-      {/* ── 주요 정보 카드 ── */}
-      <div className="mt-8 rounded-xl bg-white">
-        <div className="grid grid-cols-1 gap-4 p-6 sm:grid-cols-2">
-          <InfoRow icon={Users} label="지원대상" value={targetSummary(program)} />
+    <div className="mx-auto max-w-6xl px-4.5 pb-10 lg:px-8">
+     <div className="max-w-3xl">
+      <Section title="지원 요강">
+        <dl className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+          <InfoRow label="지원대상" value={targetSummary(program)} />
           <InfoRow
-            icon={MapPin}
             label="지역"
             value={
               program.regionScope === "national" || !program.regionScope
@@ -136,41 +126,35 @@ export function SupportDetailView({
                 : labelRegion(program.regionScope as Region)
             }
           />
-          <InfoRow icon={Coins} label="지원내용" value={benefitSummary(program)} />
-          <InfoRow icon={Calendar} label="신청기간" value={program.applicationPeriod ?? "상시"} />
-          <InfoRow icon={FileText} label="신청방법" value={program.applicationMethod} />
-          <InfoRow icon={Phone} label="문의처" value={program.contact} />
-        </div>
+          <InfoRow label="지원내용" value={benefitSummary(program)} />
+          <InfoRow label="신청기간" value={program.applicationPeriod ?? "상시"} />
+          <InfoRow label="신청방법" value={program.applicationMethod} />
+          <InfoRow label="문의처" value={program.contact} />
+        </dl>
+      </Section>
 
-        {program.requiredDocuments && program.requiredDocuments.length > 0 && (
-          <div className="border-t border-slate-100 px-6 py-4">
-            <p className="mb-2 text-label-2 font-semibold text-slate-400">필요서류</p>
-            <div className="flex flex-wrap gap-2">
-              {program.requiredDocuments.map((doc) => (
-                <span key={doc} className="rounded-full bg-slate-100 px-3 py-1 text-label-1 font-medium text-slate-600">
-                  {doc}
-                </span>
-              ))}
-            </div>
+      {program.requiredDocuments && program.requiredDocuments.length > 0 && (
+        <Section title="필요서류">
+          <div className="flex flex-wrap gap-2">
+            {program.requiredDocuments.map((doc) => (
+              <span key={doc} className="rounded-full bg-slate-100 px-3 py-1.5 text-body-3 font-medium text-slate-700">
+                {doc}
+              </span>
+            ))}
           </div>
-        )}
-      </div>
+        </Section>
+      )}
 
       {/* ── 내 조건과 비교 ── */}
       {match ? (
-        <div className="mt-6 rounded-xl bg-white p-6">
-          <h2 className="text-body-1 font-bold text-slate-900">내 조건과 비교</h2>
-          <p className="mt-1 text-label-1 text-slate-400">
-            입력하신 조건 기준의 참고 정보이며, 최종 신청 가능 여부는 운영기관에서 확인해야 합니다.
-          </p>
-
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Section title="내 조건과 비교" description="입력하신 조건 기준의 참고 정보이며, 최종 신청 가능 여부는 운영기관에서 확인해야 합니다.">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             {match.matchedConditions.length > 0 && (
               <div className="rounded-lg bg-emerald-50/60 p-4">
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-emerald-700">
+                <p className="flex items-center gap-1.5 text-body-3 font-semibold text-emerald-700">
                   <CheckCircle2 className="size-4" /> 충족
                 </p>
-                <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+                <ul className="mt-2 space-y-1 text-body-3 font-medium text-slate-700">
                   {match.matchedConditions.map((f) => (
                     <li key={f}>· {f}</li>
                   ))}
@@ -179,10 +163,10 @@ export function SupportDetailView({
             )}
             {match.checkRequiredConditions.length > 0 && (
               <div className="rounded-lg bg-orange-50/60 p-4">
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
+                <p className="flex items-center gap-1.5 text-body-3 font-semibold text-orange-600">
                   <HelpCircle className="size-4" /> 확인 필요
                 </p>
-                <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+                <ul className="mt-2 space-y-1 text-body-3 font-medium text-slate-700">
                   {match.checkRequiredConditions.map((f) => (
                     <li key={f}>· {f}</li>
                   ))}
@@ -191,10 +175,10 @@ export function SupportDetailView({
             )}
             {match.missingConditions.length > 0 && (
               <div className="rounded-lg bg-rose-50/60 p-4">
-                <p className="flex items-center gap-1.5 text-label-1 font-semibold text-rose-600">
+                <p className="flex items-center gap-1.5 text-body-3 font-semibold text-rose-600">
                   <XCircle className="size-4" /> 부족
                 </p>
-                <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+                <ul className="mt-2 space-y-1 text-body-3 font-medium text-slate-700">
                   {match.missingConditions.map((f) => (
                     <li key={f}>· {f}</li>
                   ))}
@@ -202,14 +186,14 @@ export function SupportDetailView({
               </div>
             )}
           </div>
-        </div>
+        </Section>
       ) : (
         !hasMatchSignal && (
-          <div className="mt-6 rounded-xl bg-brand-blue-50/40 p-6 text-center">
-            <p className="text-label-1 text-slate-600">지원금 진단을 받으면 이 제도와 내 조건을 비교해볼 수 있어요.</p>
+          <div className="mt-10 flex flex-col items-start gap-3 rounded-xl bg-brand-blue-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+            <p className="text-body-2 font-semibold break-keep text-slate-800">지원금 진단을 받으면 이 제도와 내 조건을 비교해볼 수 있어요.</p>
             <Link
               href="/support"
-              className="mt-3 inline-block rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+              className="inline-flex h-11 shrink-0 items-center rounded-lg bg-atomic-blue-600 px-5 text-body-3 font-bold text-white"
             >
               지원금 찾기 진단하기
             </Link>
@@ -219,54 +203,54 @@ export function SupportDetailView({
 
       {/* ── 사업 상세 ── */}
       {(program.description || program.eligibilityRaw) && (
-        <div className="mt-6 rounded-xl bg-white p-6">
-          <h2 className="text-body-1 font-bold text-slate-900">사업 상세</h2>
-          {program.description && (
-            <div className="mt-3">
-              <SupportLongText text={program.description} className="text-body-2-reading text-slate-600" />
-            </div>
-          )}
-          {program.eligibilityRaw && (
-            <div className="mt-4 rounded-lg bg-slate-50 p-4">
-              <p className="mb-1 text-label-2 font-semibold text-slate-400">지원대상 원문</p>
-              <SupportLongText text={program.eligibilityRaw} className="text-label-1 text-slate-500" />
-            </div>
-          )}
-        </div>
+        <Section title="사업 상세">
+          <div className="rounded-xl border border-border p-5 sm:p-6">
+            {program.description && (
+              <SupportLongText text={program.description} className="text-body-2-reading font-medium text-slate-800" />
+            )}
+            {program.eligibilityRaw && (
+              <div className={cn("rounded-lg bg-slate-50 p-4", program.description && "mt-4")}>
+                <p className="mb-1 text-caption-1 font-semibold text-slate-600">지원대상 원문</p>
+                <SupportLongText text={program.eligibilityRaw} className="text-body-3 font-medium text-slate-700" />
+              </div>
+            )}
+          </div>
+        </Section>
       )}
 
       {/* ── 함께 준비할 수 있는 과정 ── */}
       {recommendedContents.length > 0 && (
-        <div className="mt-6 rounded-xl bg-white p-6">
-          <h2 className="text-body-1 font-bold text-slate-900">함께 준비할 수 있는 과정</h2>
-          <p className="mt-1 text-label-1 text-slate-400">이 지원제도와 관련된 자격/교육 과정이에요.</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <Section title="함께 준비할 수 있는 과정" description="이 지원제도와 관련된 자격/교육 과정이에요.">
+          <div className="grid gap-3 sm:grid-cols-2">
             {recommendedContents.map((content) => (
-              <div key={content.id} className="rounded-xl bg-slate-50 p-4">
-                <p className="text-body-2 font-semibold text-slate-800">{content.title}</p>
-                <p className="mt-1 text-label-1 text-slate-500">{content.summary ?? content.shortDescription}</p>
+              <div key={content.id} className="rounded-xl border border-border p-4">
+                <p className="text-body-2 font-semibold text-slate-900">{content.title}</p>
+                <p className="mt-1 text-body-3 font-medium text-slate-600">{content.summary ?? content.shortDescription}</p>
               </div>
             ))}
           </div>
-        </div>
+        </Section>
       )}
 
       {(program.sourceUrl ?? program.applyUrl) && (
-        <p className="mt-10 text-center text-label-2 text-slate-400">
+        <p className="mt-10 text-center text-body-3 font-medium text-slate-600">
           이 정보는 {orgName}에서 제공한 내용입니다. 신청 시 공식 페이지로 이동합니다.
         </p>
       )}
 
+      {/* 하단 고정 CTA가 마지막 내용을 가리지 않도록 비워둔다. */}
       <div className="h-24" />
+     </div>
     </div>
 
     {/* ── 하단 고정 CTA ── */}
-    <div className="fixed inset-x-0 bottom-0 z-40 bg-white/95 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
-      <div className="mx-auto flex max-w-3xl items-center gap-3 px-4.5 py-3 lg:px-8">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white">
+      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4.5 py-3 lg:px-8">
+        <div className="flex w-full max-w-3xl items-center gap-3">
         <SupportApplyButton
           supportProgramId={program.id}
           sourceUrl={program.sourceUrl ?? program.applyUrl}
-          className="h-12 flex-1 bg-brand-blue-400 hover:bg-brand-blue-600"
+          className="h-12 flex-1 bg-atomic-blue-600 text-body-1 font-bold"
         />
         <SupportBookmarkButton
           supportProgramId={program.id}
@@ -274,6 +258,7 @@ export function SupportDetailView({
           isAuthenticated={isAuthenticated}
           initialBookmarked={isBookmarked}
         />
+        </div>
       </div>
     </div>
     </div>

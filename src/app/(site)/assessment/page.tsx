@@ -36,6 +36,6 @@ export default async function AssessmentPage({
     : undefined;
 
   // 이어하기 여부는 시작 버튼을 누르는 순간 팝업으로 묻는다 (StartAssessmentButton).
-  // 히어로가 화면 폭을 꽉 채우므로 페이지에서 폭을 제한하지 않는다.
+  // 화면 머리(PageHead)가 폭을 꽉 채우고 본문 폭은 소개 화면 안에서 잡으므로 여기서는 제한하지 않는다.
   return <AssessmentIntro isLoggedIn={Boolean(user)} latestResultSessionId={latestResult?.sessionId} />;
 }

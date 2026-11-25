@@ -81,10 +81,11 @@ export const outlinedCardClass = `${cardBorderClass} hover:border-brand-blue-300
  * 파랑은 팔레트 규칙대로 400/300 단계만 쓴다(남색은 700~900). 500은 팔레트에 없는 단계라
  * 같은 화면 안에서도 버튼마다 파랑 톤이 달라 보이는 원인이었다.
  * 꺼진 상태의 테두리는 다른 카드와 같은 border-border 를 쓴다.
+ * 디자인 리뉴얼: 홈 시안의 탭처럼 둥근 알약 · 15px 글자로 맞추고 호버 효과는 뺐다.
  */
-export const filterPillClass = "shrink-0 rounded-lg border px-4 py-2 text-label-1 transition-colors";
+export const filterPillClass = "shrink-0 rounded-full border px-4 py-2 text-body-3";
 export const filterPillOnClass = "border-brand-blue-300 bg-brand-blue-50 font-semibold text-brand-blue-600";
-export const filterPillOffClass = "border-border bg-white font-medium text-slate-600 hover:bg-slate-50";
+export const filterPillOffClass = "border-border bg-white font-medium text-slate-700";
 
 /**
  * 색 있는 바탕 위에 놓는 필터 칩의 켜진 상태.

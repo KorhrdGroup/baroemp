@@ -752,9 +752,9 @@ export function ResumeEditor({
   */
   const sectionCards: Record<string, React.ReactNode> = {
     BASIC_INFO: (
-            <Card className="rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border border-border ring-0">
               <CardHeader>
-                <CardTitle className="text-body-1 font-semibold">기본정보</CardTitle>
+                <CardTitle className="text-title-3 font-extrabold text-slate-900">기본정보</CardTitle>
               </CardHeader>
               {/*
                 실제 이력서 헤더와 같은 골격으로 배치한다: 사진은 왼쪽 세로 블록,
@@ -785,13 +785,14 @@ export function ResumeEditor({
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={form.photoUrl} alt="증명사진" className="h-[150px] w-[118px] object-cover" />
                     ) : (
-                      <div className="flex h-[150px] w-[118px] flex-col items-center justify-center gap-1.5 bg-slate-50 text-label-2 text-slate-400">
+                      <div className="flex h-[150px] w-[118px] flex-col items-center justify-center gap-1.5 bg-slate-50 text-caption-1 text-slate-600">
                         {uploadingPhoto ? <Loader2 className="size-5 animate-spin" /> : <Plus className="size-5" />}
                         사진 올리기
                       </div>
                     )}
+                    {/* 호버 효과를 두지 않아, 눌러서 바꿀 수 있다는 띠를 늘 보이게 둔다. */}
                     {form.photoUrl && (
-                      <span className="absolute inset-x-0 bottom-0 bg-slate-900/60 py-1 text-center text-label-2 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                      <span className="absolute inset-x-0 bottom-0 bg-slate-900/60 py-1 text-center text-caption-1 text-white">
                         {uploadingPhoto ? "올리는 중…" : "사진 바꾸기"}
                       </span>
                     )}
@@ -800,12 +801,12 @@ export function ResumeEditor({
                     <button
                       type="button"
                       onClick={() => setForm((f) => ({ ...f, photoUrl: "" }))}
-                      className="text-label-2 text-slate-400 underline-offset-2 hover:text-slate-600 hover:underline"
+                      className="text-caption-1 text-slate-600 underline underline-offset-2"
                     >
                       사진 빼기
                     </button>
                   ) : (
-                    <p className="text-center text-label-2 leading-snug text-slate-400">JPG·PNG 5MB 이하</p>
+                    <p className="text-center text-caption-1 leading-snug text-slate-600">JPG·PNG 5MB 이하</p>
                   )}
                 </div>
 
@@ -822,7 +823,7 @@ export function ResumeEditor({
                 </Field>
                 <Field label="성별">
                   <NativeSelect
-                    className="h-10 text-label-1"
+                    className="h-10 text-body-3"
                     value={form.gender}
                     onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value }))}
                   >
@@ -851,7 +852,7 @@ export function ResumeEditor({
                       <Button
                         type="button"
                         variant="outline"
-                        className="h-10 shrink-0"
+                        className="h-10 shrink-0 border-slate-300 bg-white font-semibold text-slate-800"
                         onClick={() => openPostcodeSearch((address) => setForm((f) => ({ ...f, address })))}
                       >
                         주소 검색
@@ -874,7 +875,7 @@ export function ResumeEditor({
                 */}
                 <Field label="희망근무지역">
                   <NativeSelect
-                    className="h-10 text-label-1"
+                    className="h-10 text-body-3"
                     value={form.desiredRegion ?? ""}
                     onChange={(e) => setForm((f) => ({ ...f, desiredRegion: e.target.value }))}
                   >
@@ -891,14 +892,14 @@ export function ResumeEditor({
             </Card>
     ),
     SUMMARY: (
-            <Card className="rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border border-border ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 {/*
                   * 를 붙이지 않는다. 이 별표는 이름·이메일처럼 "이 칸을 비우면 안 된다"는
                   뜻으로 쓰는데, 한 줄 소개는 항목 자체를 뺄 수 있다. 담은 동안 채워야 하는 건
                   경력·학력과 똑같고, 그쪽에도 별표는 없다.
                 */}
-                <CardTitle className="text-body-1 font-semibold">한 줄 소개</CardTitle>
+                <CardTitle className="text-title-3 font-extrabold text-slate-900">한 줄 소개</CardTitle>
                 {/*
                   이 버튼은 이 칸에 쓴 글을 고치는 것이 아니라, 경력·자격·스킬을 재료로
                   문장을 만들어 제안한다. "다듬기"라고 부르면 쓴 글을 손봐주는 줄 알고
@@ -922,15 +923,15 @@ export function ResumeEditor({
                 />
                 {/* 버튼이 왜 잠겨 있는지 버튼 옆에서 바로 알 수 있어야 한다. */}
                 {!hasSummaryMaterial && (
-                  <p className="mt-2 text-label-1 text-slate-500">
+                  <p className="mt-2 text-body-3 text-slate-600">
                     아래 경력·자격·스킬을 하나라도 채우시면, 그 내용으로 이 문장을 만들어드려요.
                   </p>
                 )}
                 {summarySuggestion && (
-                  <div className="mt-2 rounded-lg bg-brand-blue-50 p-3 text-label-1">
+                  <div className="mt-2 rounded-lg bg-brand-blue-50 p-3 text-body-3">
                     <p className="text-slate-700">{summarySuggestion}</p>
                     <div className="mt-2 flex gap-2">
-                      <Button size="sm" onClick={() => { setForm((f) => ({ ...f, summary: summarySuggestion })); setSummarySuggestion(null); }}>
+                      <Button size="sm" className="bg-atomic-blue-600 font-bold text-white" onClick={() => { setForm((f) => ({ ...f, summary: summarySuggestion })); setSummarySuggestion(null); }}>
                         적용
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => setSummarySuggestion(null)}>
@@ -943,13 +944,13 @@ export function ResumeEditor({
             </Card>
     ),
     EXPERIENCE: (
-            <Card className="rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border border-border ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1 font-semibold">경력</CardTitle>
+                <CardTitle className="text-title-3 font-extrabold text-slate-900">경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-slate-700"
+                  className="border-slate-300 bg-white font-semibold text-slate-800"
                   disabled={Boolean(form.hasNoWorkExperience)}
                   onClick={() => {
                     const key = nextKey("exp");
@@ -966,7 +967,7 @@ export function ResumeEditor({
                   "아직 경력이 없어요" 체크를 여기 따로 두면 같은 말을 두 군데서 하게 된다.
                 */}
                 {experiences.length === 0 && (
-                  <p className="text-label-1 text-slate-400">
+                  <p className="text-body-3 text-slate-600">
                     아직 등록된 경력이 없습니다. [경력 추가]를 눌러 시작해보세요.
                   </p>
                 )}
@@ -974,9 +975,9 @@ export function ResumeEditor({
                   isEntryEditing(exp._key) ? (
                   <div key={exp._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-label-2 font-semibold text-slate-400">경력 {idx + 1}</p>
+                      <p className="text-caption-1 font-semibold text-slate-600">경력 {idx + 1}</p>
                       <div className="flex items-center gap-1">
-                        <Button variant="outline" size="sm" onClick={() => setEntryEditing(exp._key, false)}>
+                        <Button variant="outline" size="sm" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setEntryEditing(exp._key, false)}>
                           완료
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => setExperiences((prev) => prev.filter((e) => e._key !== exp._key))}>
@@ -1005,7 +1006,7 @@ export function ResumeEditor({
                         />
                       </Field>
                     </div>
-                    <label className="flex items-center gap-2 text-label-1 text-slate-600">
+                    <label className="flex items-center gap-2 text-body-3 text-slate-600">
                       <Checkbox checked={exp.isCurrent} onCheckedChange={(v) => updateAt(setExperiences, exp._key, { isCurrent: Boolean(v) })} />
                       현재 재직중
                     </label>
@@ -1044,11 +1045,12 @@ export function ResumeEditor({
                       </AiButton>
                     </Field>
                     {rewriteTarget?.key === exp._key && (
-                      <div className="rounded-lg bg-white p-3 text-label-1 ring-1 ring-brand-blue-200">
+                      <div className="rounded-lg bg-white p-3 text-body-3 ring-1 ring-brand-blue-200">
                         <p className="text-slate-700">{rewriteTarget.text}</p>
                         <div className="mt-2 flex gap-2">
                           <Button
                             size="sm"
+                            className="bg-atomic-blue-600 font-bold text-white"
                             onClick={() => {
                               updateAt(setExperiences, exp._key, { [rewriteTarget.field]: rewriteTarget.text });
                               setRewriteTarget(null);
@@ -1082,13 +1084,13 @@ export function ResumeEditor({
             </Card>
     ),
     EDUCATION: (
-            <Card className="rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border border-border ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1 font-semibold">학력</CardTitle>
+                <CardTitle className="text-title-3 font-extrabold text-slate-900">학력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-slate-700"
+                  className="border-slate-300 bg-white font-semibold text-slate-800"
                   onClick={() => {
                     const key = nextKey("edu");
                     setEducations((prev) => [...prev, { _key: key, schoolName: "", orderIndex: prev.length }]);
@@ -1099,7 +1101,7 @@ export function ResumeEditor({
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {educations.length === 0 && <p className="text-label-1 text-slate-400">최종학력 위주로 간단히 입력하셔도 됩니다.</p>}
+                {educations.length === 0 && <p className="text-body-3 text-slate-600">최종학력 위주로 간단히 입력하셔도 됩니다.</p>}
                 {educations.map((edu, idx) => {
                   // 고등학교/검정고시는 입학년월·전공 입력 없이 졸업 정보만 받는다.
                   const isGed = edu.educationType === GED_TYPE;
@@ -1130,9 +1132,9 @@ export function ResumeEditor({
                   return (
                     <div key={edu._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
                       <div className="flex items-center justify-between">
-                        <p className="text-label-2 font-semibold text-slate-400">학력 {idx + 1}</p>
+                        <p className="text-caption-1 font-semibold text-slate-600">학력 {idx + 1}</p>
                         <div className="flex items-center gap-1">
-                          <Button variant="outline" size="sm" onClick={() => setEntryEditing(edu._key, false)}>
+                          <Button variant="outline" size="sm" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setEntryEditing(edu._key, false)}>
                             완료
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => setEducations((prev) => prev.filter((e) => e._key !== edu._key))}>
@@ -1143,7 +1145,7 @@ export function ResumeEditor({
                       <div className="grid gap-2 sm:grid-cols-6">
                         <Field label="학교구분" className="sm:col-span-2">
                           <NativeSelect
-                            className="h-10 text-label-1"
+                            className="h-10 text-body-3"
                             value={isGed ? "고등학교" : (edu.educationType ?? "")}
                             onChange={(e) => updateAt(setEducations, edu._key, { educationType: e.target.value })}
                           >
@@ -1173,7 +1175,7 @@ export function ResumeEditor({
                         {!isGed && (
                           <Field label="졸업상태" className="sm:col-span-2">
                             <NativeSelect
-                              className="h-10 text-label-1"
+                              className="h-10 text-body-3"
                               value={edu.graduationStatus ?? ""}
                               onChange={(e) => updateAt(setEducations, edu._key, { graduationStatus: e.target.value })}
                             >
@@ -1187,7 +1189,7 @@ export function ResumeEditor({
                           </Field>
                         )}
                         {isSimpleEducation && (
-                          <label className="flex items-center gap-2 self-end pb-2 text-label-1 text-slate-600 sm:col-span-2">
+                          <label className="flex items-center gap-2 self-end pb-2 text-body-3 text-slate-600 sm:col-span-2">
                             <Checkbox
                               checked={isGed}
                               onCheckedChange={(v) =>
@@ -1209,7 +1211,7 @@ export function ResumeEditor({
                           </Field>
                         )}
                         {isCollege && (
-                          <label className="flex items-center gap-2 self-end pb-2 text-label-1 text-slate-600 sm:col-span-2">
+                          <label className="flex items-center gap-2 self-end pb-2 text-body-3 text-slate-600 sm:col-span-2">
                             <Checkbox
                               checked={isTransfer}
                               onCheckedChange={(v) => updateAt(setEducations, edu._key, { description: v ? "편입" : undefined })}
@@ -1225,13 +1227,13 @@ export function ResumeEditor({
             </Card>
     ),
     QUALIFICATION: (
-            <Card className="rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border border-border ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1 font-semibold">보유 자격</CardTitle>
+                <CardTitle className="text-title-3 font-extrabold text-slate-900">보유 자격</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-slate-700"
+                  className="border-slate-300 bg-white font-semibold text-slate-800"
                   onClick={() => {
                     const key = nextKey("qual");
                     setQualifications((prev) => [...prev, { _key: key, name: "", orderIndex: prev.length }]);
@@ -1242,15 +1244,15 @@ export function ResumeEditor({
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {qualifications.length === 0 && <p className="text-label-1 text-slate-400">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
+                {qualifications.length === 0 && <p className="text-body-3 text-slate-600">사회복지사 2급, 요양보호사, 운전면허 등을 추가해보세요.</p>}
                 {qualifications.map((q, idx) => (
                   isEntryEditing(q._key) ? (
                   /* 교육/훈련과 같은 구조. 연월이 두 칸이라 한 줄에 다 넣으면 좁다. */
                   <div key={q._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-label-2 font-semibold text-slate-400">자격 {idx + 1}</p>
+                      <p className="text-caption-1 font-semibold text-slate-600">자격 {idx + 1}</p>
                       <div className="flex items-center gap-1">
-                        <Button variant="outline" size="sm" onClick={() => setEntryEditing(q._key, false)}>
+                        <Button variant="outline" size="sm" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setEntryEditing(q._key, false)}>
                           완료
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => setQualifications((prev) => prev.filter((x) => x._key !== q._key))}>
@@ -1289,9 +1291,9 @@ export function ResumeEditor({
             </Card>
     ),
     SKILLS: (
-            <Card className="rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border border-border ring-0">
               <CardHeader>
-                <CardTitle className="text-body-1 font-semibold">보유 스킬</CardTitle>
+                <CardTitle className="text-title-3 font-extrabold text-slate-900">보유 스킬</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
@@ -1310,7 +1312,7 @@ export function ResumeEditor({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-slate-700"
+                    className="border-slate-300 bg-white font-semibold text-slate-800"
                     onClick={() => {
                       if (!skillDraft.trim()) return;
                       setSkills((prev) => [...prev, { _key: nextKey("skill"), name: skillDraft.trim(), orderIndex: prev.length }]);
@@ -1325,13 +1327,13 @@ export function ResumeEditor({
                     <Badge
                       key={s._key}
                       /* 직접 넣은 값이라 회색보다 눈에 들어와야 하고, 옆 × 를 누르려면 손가락이 닿을 만큼은 커야 한다. */
-                      className="gap-1.5 rounded-full border-transparent bg-brand-blue-50 px-3 py-2 text-label-1 font-semibold text-brand-blue-700"
+                      className="gap-1.5 rounded-full border-transparent bg-brand-blue-50 px-3 py-2 text-body-3 font-semibold text-brand-blue-700"
                     >
                       {s.name}
                       <button
                         onClick={() => setSkills((prev) => prev.filter((x) => x._key !== s._key))}
                         aria-label={`${s.name} 삭제`}
-                        className="-mr-0.5 flex size-4 items-center justify-center rounded-full text-brand-blue-600 transition-colors hover:bg-brand-blue-100 hover:text-brand-blue-800"
+                        className="-mr-0.5 flex size-4 items-center justify-center rounded-full text-brand-blue-600"
                       >
                         ×
                       </button>
@@ -1342,13 +1344,13 @@ export function ResumeEditor({
             </Card>
     ),
     TRAINING: (
-            <Card className="rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border border-border ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1 font-semibold">교육/훈련</CardTitle>
+                <CardTitle className="text-title-3 font-extrabold text-slate-900">교육/훈련</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-slate-700"
+                  className="border-slate-300 bg-white font-semibold text-slate-800"
                   onClick={() => {
                     const key = nextKey("train");
                     setTrainings((prev) => [...prev, { _key: key, courseName: "", orderIndex: prev.length }]);
@@ -1367,9 +1369,9 @@ export function ResumeEditor({
                   */
                   <div key={t._key} className="space-y-2 rounded-xl bg-slate-50 p-3">
                     <div className="flex items-center justify-between">
-                      <p className="text-label-2 font-semibold text-slate-400">교육 {idx + 1}</p>
+                      <p className="text-caption-1 font-semibold text-slate-600">교육 {idx + 1}</p>
                       <div className="flex items-center gap-1">
-                        <Button variant="outline" size="sm" onClick={() => setEntryEditing(t._key, false)}>
+                        <Button variant="outline" size="sm" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setEntryEditing(t._key, false)}>
                           완료
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => setTrainings((prev) => prev.filter((x) => x._key !== t._key))}>
@@ -1416,13 +1418,13 @@ export function ResumeEditor({
             </Card>
     ),
     EXTRA: (
-            <Card className="rounded-xl border-0 ring-0">
+            <Card className="rounded-xl border border-border ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-body-1 font-semibold">봉사·수상 등 추가 경력</CardTitle>
+                <CardTitle className="text-title-3 font-extrabold text-slate-900">봉사·수상 등 추가 경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-slate-700"
+                  className="border-slate-300 bg-white font-semibold text-slate-800"
                   onClick={() => {
                     const key = nextKey("item");
                     setItems((prev) => [...prev, { _key: key, sectionType: "AWARD", title: "", orderIndex: prev.length }]);
@@ -1433,7 +1435,7 @@ export function ResumeEditor({
                 </Button>
               </CardHeader>
               <CardContent className="space-y-3">
-                {items.length === 0 && <p className="text-label-1 text-slate-400">모든 사용자에게 필수는 아닙니다. 있으면 추가해주세요.</p>}
+                {items.length === 0 && <p className="text-body-3 text-slate-600">모든 사용자에게 필수는 아닙니다. 있으면 추가해주세요.</p>}
                 {items.map((item, idx) => (
                   isEntryEditing(item._key) ? (
                   <div
@@ -1442,7 +1444,7 @@ export function ResumeEditor({
                     className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[9rem_1fr_1.6fr_auto]"
                   >
                     <NativeSelect
-                      className="h-10 text-label-1"
+                      className="h-10 text-body-3"
                       value={item.sectionType}
                       onChange={(e) => updateAt(setItems, item._key, { sectionType: e.target.value as ResumeItemSectionType })}
                     >
@@ -1457,7 +1459,7 @@ export function ResumeEditor({
                     <CompactInput placeholder="제목" value={item.title} onChange={(e) => updateAt(setItems, item._key, { title: e.target.value })} />
                     <CompactInput placeholder="설명 (선택)" value={item.description ?? ""} onChange={(e) => updateAt(setItems, item._key, { description: e.target.value })} />
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="outline" size="sm" onClick={() => setEntryEditing(item._key, false)}>
+                      <Button variant="outline" size="sm" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setEntryEditing(item._key, false)}>
                         완료
                       </Button>
                       <Button variant="ghost" size="sm" onClick={() => setItems((prev) => prev.filter((x) => x._key !== item._key))}>
@@ -1499,7 +1501,7 @@ export function ResumeEditor({
         <button
           type="button"
           onClick={() => setSectionSheetOpen(true)}
-          className="flex shrink-0 items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-label-1 font-medium whitespace-nowrap text-slate-600"
+          className="flex shrink-0 items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-body-3 font-medium whitespace-nowrap text-slate-600"
         >
           <ArrowUpDown className="size-3.5" />
           항목 편집
@@ -1512,10 +1514,10 @@ export function ResumeEditor({
             data-strip-key={item.key}
             onClick={() => scrollToSection(item.key)}
             className={cn(
-              "shrink-0 rounded-lg px-3 py-2 text-label-1 whitespace-nowrap transition-colors",
+              "shrink-0 rounded-lg px-3 py-2 text-body-3 whitespace-nowrap",
               activeSectionKey === item.key
                 ? "bg-brand-blue-50 font-semibold text-brand-blue-600"
-                : "font-medium text-slate-500",
+                : "font-medium text-slate-600",
             )}
           >
             {item.label}
@@ -1553,22 +1555,22 @@ export function ResumeEditor({
                 <li key={row.key} className="flex items-center gap-2 rounded-lg bg-slate-50 py-1.5 pr-2 pl-3">
                   <span
                     className={cn(
-                      "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
-                      !row.included ? "text-slate-300" : row.filled ? "bg-brand-blue-100 text-brand-blue-600" : "bg-white text-slate-500",
+                      "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-bold",
+                      !row.included ? "text-slate-300" : row.filled ? "bg-brand-blue-100 text-brand-blue-600" : "bg-white text-slate-600",
                     )}
                   >
                     {!row.included ? "" : row.filled ? <Check className="size-3.5" /> : row.order}
                   </span>
-                  <span className={cn("min-w-0 flex-1 truncate text-label-1", row.included ? "text-slate-700" : "text-slate-400")}>
+                  <span className={cn("min-w-0 flex-1 truncate text-body-3", row.included ? "text-slate-800" : "text-slate-600")}>
                     {row.label}
                   </span>
                   {row.fixed ? (
-                    <span className="pr-1 text-label-2 text-brand-blue-300">필수</span>
+                    <span className="pr-1 text-caption-1 font-semibold text-atomic-blue-600">필수</span>
                   ) : !row.included ? (
                     <Button
                       variant="outline"
                       size="icon-xs"
-                      className="text-slate-500"
+                      className="text-slate-600"
                       aria-label={`${row.label} 담기`}
                       onClick={() => addSectionRow(row)}
                     >
@@ -1579,7 +1581,7 @@ export function ResumeEditor({
                       <Button
                         variant="outline"
                         size="icon-xs"
-                        className="text-slate-500"
+                        className="text-slate-600"
                         aria-label={`${row.label} 위로`}
                         disabled={row.navIndex === firstMovableIndex}
                         onClick={() => moveSectionItem(row, -1)}
@@ -1589,7 +1591,7 @@ export function ResumeEditor({
                       <Button
                         variant="outline"
                         size="icon-xs"
-                        className="text-slate-500"
+                        className="text-slate-600"
                         aria-label={`${row.label} 아래로`}
                         disabled={row.navIndex === navItems.length - 1}
                         onClick={() => moveSectionItem(row, 1)}
@@ -1599,7 +1601,7 @@ export function ResumeEditor({
                       <Button
                         variant="outline"
                         size="icon-xs"
-                        className="text-slate-500"
+                        className="text-slate-600"
                         aria-label={`${row.label} 빼기`}
                         onClick={() => removeSectionItem(row)}
                       >
@@ -1615,7 +1617,7 @@ export function ResumeEditor({
               <button
                 type="button"
                 onClick={() => setSectionSheetOpen(false)}
-                className="w-full rounded-lg bg-brand-blue-400 px-5 py-2.5 text-label-1 font-semibold text-white"
+                className="w-full rounded-lg bg-atomic-blue-600 px-5 py-2.5 text-body-3 font-bold text-white"
               >
                 완료
               </button>
@@ -1625,9 +1627,9 @@ export function ResumeEditor({
       )}
 
       <div className="space-y-4 print:hidden">
-        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
+        <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl border border-border bg-white p-4">
           <div className="min-w-48 flex-1">
-            <Label htmlFor="resume-title" className="text-label-2 text-slate-400">
+            <Label htmlFor="resume-title" className="text-caption-1 text-slate-600">
               이력서 제목
             </Label>
             <CompactInput
@@ -1660,13 +1662,13 @@ export function ResumeEditor({
             완성도만 아래 고정바에 두면 "얼마나 남았는지"와 "무엇을 더 담을 수 있는지"가
             화면 양 끝으로 갈라져, 완성도를 올리려고 항목을 손보는 흐름이 끊긴다.
           */}
-          <nav className="rounded-xl bg-white p-4 lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+          <nav className="rounded-xl border border-border bg-white p-4 lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
             <div className="flex items-baseline justify-between gap-2">
-              <p className="text-label-1 font-bold text-slate-900">이력서 완성도</p>
+              <p className="text-body-3 font-bold text-slate-900">이력서 완성도</p>
               <p className="text-body-1 font-bold text-brand-blue-600">{liveCompleteness.score}%</p>
             </div>
             <Progress value={liveCompleteness.score} className="mt-2 h-2" />
-            <p className="mt-2 text-label-2 text-slate-500">
+            <p className="mt-2 text-caption-1 text-slate-600">
               {liveCompleteness.missing.length > 0
                 ? `다음은 ${liveCompleteness.missing[0].label} 차례예요.`
                 : `${form.name ? `${form.name} 회원님의 ` : ""}이력서가 다 채워졌어요!`}
@@ -1679,7 +1681,7 @@ export function ResumeEditor({
             */}
             {/* 이 화면에서 가장 먼저 권하는 동작이라, 다른 AI 버튼과 달리 채운 파랑으로 둔다. */}
             <AiButton
-              className="mt-4 w-full bg-brand-blue-600 font-semibold text-white hover:bg-brand-blue-700 active:bg-brand-blue-700"
+              className="mt-4 w-full bg-atomic-blue-600 font-bold text-white"
               onClick={() => setReviewPickerOpen(true)}
               loading={isReviewing || isChangingTemplate}
             >
@@ -1688,30 +1690,30 @@ export function ResumeEditor({
 
             {/* 좁은 화면에서는 위 항목 띠가 같은 목록을 보여주고, 편집은 시트로 한다. */}
             <div className="mt-4 hidden border-t border-border pt-3 lg:block">
-              <p className="px-1 text-label-2 font-semibold text-slate-400">이력서 항목 {navItems.length}/{sectionRows.length}</p>
+              <p className="px-1 text-caption-1 font-semibold text-slate-600">이력서 항목 {navItems.length}/{sectionRows.length}</p>
 
               <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
                 {sectionRows.map((row) => (
                   <li key={row.key} className="shrink-0 lg:shrink">
-                    <div className="flex items-center rounded-lg transition-colors hover:bg-slate-50">
+                    <div className="flex items-center rounded-lg">
                       <button
                         type="button"
                         disabled={!row.included}
                         onClick={() => scrollToSection(row.key)}
                         className={cn(
                           // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
-                          "flex max-w-40 min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 lg:max-w-none",
-                          row.included ? "cursor-pointer text-slate-700" : "text-slate-400",
+                          "flex max-w-40 min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-left text-body-3 lg:max-w-none",
+                          row.included ? "cursor-pointer text-slate-800" : "text-slate-600",
                         )}
                       >
                         <span
                           className={cn(
-                            "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
+                            "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-bold",
                             !row.included
                               ? "text-slate-300"
                               : row.filled
                                 ? "bg-brand-blue-100 text-brand-blue-600"
-                                : "bg-slate-100 text-slate-400",
+                                : "bg-slate-100 text-slate-600",
                           )}
                         >
                           {/* 안 담은 항목은 자리만 비워 이름 끝이 위아래로 맞게 둔다. */}
@@ -1728,14 +1730,14 @@ export function ResumeEditor({
                         떠 있으면 호버하기 전에는 그림인지 버튼인지 알 수 없다.
                       */}
                       {row.fixed ? (
-                        /* 회색은 "빼기 버튼이 비활성"처럼 읽힌다. 뺄 수 없다는 뜻이 전해지게
-                           파랑을 쓰되, 메인 파랑(400)은 이 작은 글자에 너무 세서 한 단계 연하게 둔다. */
-                        <span className="shrink-0 pr-3 text-label-2 text-brand-blue-300">필수</span>
+                        /* 회색은 "빼기 버튼이 비활성"처럼 읽힌다. 뺄 수 없다는 뜻이 전해지게 파랑을 쓴다.
+                           연한 파랑(300)은 이 작은 글자에서 흰 바탕 대비가 모자라, 누르는 것과 같은 600으로 둔다. */
+                        <span className="shrink-0 pr-3 text-caption-1 font-semibold text-atomic-blue-600">필수</span>
                       ) : !row.included ? (
                         <Button
                           variant="outline"
                           size="icon-xs"
-                          className="mr-1.5 shrink-0 text-slate-500"
+                          className="mr-1.5 shrink-0 text-slate-600"
                           aria-label={`${row.label} 담기`}
                           onClick={() => addSectionRow(row)}
                         >
@@ -1746,7 +1748,7 @@ export function ResumeEditor({
                           <Button
                             variant="outline"
                             size="icon-xs"
-                            className="text-slate-500"
+                            className="text-slate-600"
                             aria-label={`${row.label} 위로`}
                             disabled={row.navIndex === firstMovableIndex}
                             onClick={() => moveSectionItem(row, -1)}
@@ -1756,7 +1758,7 @@ export function ResumeEditor({
                           <Button
                             variant="outline"
                             size="icon-xs"
-                            className="text-slate-500"
+                            className="text-slate-600"
                             aria-label={`${row.label} 아래로`}
                             disabled={row.navIndex === navItems.length - 1}
                             onClick={() => moveSectionItem(row, 1)}
@@ -1768,7 +1770,7 @@ export function ResumeEditor({
                         <Button
                           variant="outline"
                           size="icon-xs"
-                          className="mr-1.5 shrink-0 text-slate-500"
+                          className="mr-1.5 shrink-0 text-slate-600"
                           aria-label={`${row.label} 빼기`}
                           onClick={() => removeSectionItem(row)}
                         >
@@ -1787,7 +1789,7 @@ export function ResumeEditor({
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-3 w-full text-slate-600"
+                className="mt-3 w-full border-slate-300 bg-white font-semibold text-slate-800"
                 onClick={() => setReordering((v) => !v)}
               >
                 {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
@@ -1838,7 +1840,7 @@ export function ResumeEditor({
       <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
         {/* 좁은 화면에서는 셋이 한 줄에 안 들어가 왼쪽 버튼이 잘렸다. 남는 자리를 가운데가 먹게 둔다. */}
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4.5 py-3 lg:px-8">
-          <Button variant="outline" size="sm" className="shrink-0 text-slate-500" asChild>
+          <Button variant="outline" size="sm" className="shrink-0 border-slate-300 bg-white font-semibold text-slate-800" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
@@ -1856,8 +1858,8 @@ export function ResumeEditor({
           {/* 바깥 칸은 넓은 화면에서도 자리를 지킨다. 통째로 감추면 오른쪽 버튼들이 왼쪽으로 몰린다. */}
           <div className="mx-4 hidden min-w-0 flex-1 sm:block">
             <div className="lg:hidden">
-              <div className="flex items-center justify-between gap-2 text-label-2">
-                <span className="truncate text-slate-500">
+              <div className="flex items-center justify-between gap-2 text-caption-1">
+                <span className="truncate text-slate-600">
                   {liveCompleteness.missing.length > 0
                     ? `다음: ${liveCompleteness.missing[0].label}`
                     : "필수 항목을 모두 채웠어요"}
@@ -1869,13 +1871,13 @@ export function ResumeEditor({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            {saveMessage && <span className="shrink-0 text-label-2 text-slate-400">{saveMessage}</span>}
-            <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
+            {saveMessage && <span className="shrink-0 text-caption-1 text-slate-600">{saveMessage}</span>}
+            <Button variant="outline" size="sm" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setPreviewOpen(true)}>
               <Eye className="size-4" /> 미리보기
             </Button>
             {/* 고친 것이 없으면 누를 수 있어도 아무 일도 일어나지 않아 저장 여부가 헷갈린다. */}
             {/* 넓은 화면에서만 넉넉히 잡는다. 좁은 화면에서는 이 폭 때문에 줄이 넘쳤다. */}
-            <Button size="sm" className="sm:min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
+            <Button size="sm" className="bg-atomic-blue-600 font-bold text-white sm:min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
               {isSaving ? "저장" : isDirty ? "저장" : "저장됨"}
             </Button>
@@ -1909,14 +1911,14 @@ export function ResumeEditor({
                   aria-pressed={picked}
                   onClick={() => setPickedAgentId(agent.id)}
                   className={cn(
-                    "flex w-full cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left transition-colors",
-                    picked ? "border-brand-blue-600 bg-brand-blue-50" : "border-border bg-white hover:border-brand-blue-200",
+                    "flex w-full cursor-pointer items-start gap-3 rounded-xl border px-4 py-3 text-left",
+                    picked ? "border-atomic-blue-600 bg-brand-blue-50" : "border-border bg-white",
                   )}
                 >
                   <span
                     className={cn(
                       "mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border",
-                      picked ? "border-brand-blue-600 bg-brand-blue-600" : "border-slate-300",
+                      picked ? "border-atomic-blue-600 bg-atomic-blue-600" : "border-slate-300",
                     )}
                   >
                     {picked && <Check className="size-3 text-white" />}
@@ -1927,7 +1929,7 @@ export function ResumeEditor({
                       {agent.name}
                     </span>
                     {agent.description && (
-                      <span className="mt-0.5 block text-label-1 text-slate-500">{agent.description}</span>
+                      <span className="mt-0.5 block text-body-3 text-slate-600">{agent.description}</span>
                     )}
                   </span>
                 </button>
@@ -1935,10 +1937,10 @@ export function ResumeEditor({
             })}
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setReviewPickerOpen(false)}>
+            <Button variant="outline" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setReviewPickerOpen(false)}>
               취소
             </Button>
-            <Button disabled={!pickedAgentId} onClick={handleReviewWithAgent}>
+            <Button className="bg-atomic-blue-600 font-bold text-white" disabled={!pickedAgentId} onClick={handleReviewWithAgent}>
               이 기준으로 점검
             </Button>
           </DialogFooter>
@@ -1954,7 +1956,7 @@ export function ResumeEditor({
             <ResumePreview detail={currentPreviewDetail()} />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handlePopupPrint}>
+            <Button variant="outline" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={handlePopupPrint}>
               <Printer className="size-4" /> PDF로 저장/인쇄
             </Button>
           </DialogFooter>
@@ -1993,7 +1995,7 @@ function Field({
 }) {
   return (
     <div className={cn("space-y-1", className)}>
-      <Label className="text-label-2 text-slate-500">
+      <Label className="text-caption-1 text-slate-600">
         {label}
         {required && <RequiredMark />}
       </Label>
@@ -2032,7 +2034,7 @@ function MonthPicker({
     <div className="flex gap-2">
       <div className="flex-1">
         <NativeSelect
-          className="h-10 text-label-1"
+          className="h-10 text-body-3"
           value={year}
           disabled={disabled}
           onChange={(e) => e.target.value && onChange(`${e.target.value}-${month || "01"}`)}
@@ -2047,7 +2049,7 @@ function MonthPicker({
       </div>
       <div className="w-24">
         <NativeSelect
-          className="h-10 text-label-1"
+          className="h-10 text-body-3"
           value={month}
           disabled={disabled}
           onChange={(e) => e.target.value && onChange(`${year || String(thisYear)}-${e.target.value}`)}
@@ -2123,18 +2125,18 @@ function EntrySummaryCard({
       <div className="min-w-0 flex-1">
         {/* 짧은 정보는 세로로 쌓지 않고 한 줄에 나열한다. 기간·상태는 오른쪽 끝으로 보낸다. */}
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <p className="text-label-1 font-semibold text-slate-900">{title}</p>
-          {subtitle && <p className="text-label-2 text-slate-600">{subtitle}</p>}
-          {meta && <p className="ml-auto text-label-2 text-slate-400">{meta}</p>}
+          <p className="text-body-3 font-semibold text-slate-900">{title}</p>
+          {subtitle && <p className="text-caption-1 text-slate-600">{subtitle}</p>}
+          {meta && <p className="ml-auto text-caption-1 text-slate-600">{meta}</p>}
         </div>
-        {body && <p className="mt-1 line-clamp-2 text-label-2 leading-relaxed text-slate-600">{body}</p>}
+        {body && <p className="mt-1 line-clamp-2 text-caption-1 leading-relaxed text-slate-600">{body}</p>}
       </div>
       <Button
         variant="outline"
         size="icon-xs"
         onClick={onEdit}
         aria-label={editLabel}
-        className="rounded-full text-slate-500"
+        className="rounded-full text-slate-600"
       >
         <Pencil />
       </Button>

@@ -28,15 +28,15 @@ const TABS: { key: JobCurationTab; label: string }[] = [
 /**
  * 카드 한 장의 높이. 빈 상태와 자리지킴 카드가 같은 자리를 잡아
  * 탭을 옮길 때 판이 접혔다 펴지지 않게 한다.
- * 내용이 가장 긴 카드가 249.2px 남짓이라, 조금 위에서 못박아야 어느 탭이든 같은 높이가 된다.
+ * 공고 카드(리뉴얼)는 제목 두 줄 + 맞은 근거 한 줄일 때 216px 남짓이라, 조금 위에서 못박아야 어느 탭이든 같은 높이가 된다.
  * 최소높이를 내용보다 낮게 잡으면 내용 짧은 카드만 최소높이로 잘려 소수점만큼 덜컹인다.
  * JobCard 안쪽 여백이 바뀌면 이 값도 함께 맞춰야 한다.
  * 카드 줄 아래에 있던 탭 설명 한 줄(19.6px + 여백 16px)을 걷어내고 그만큼 카드 줄에 얹었다.
  * 탭 라벨이 이미 무엇을 고른 결과인지 말하고, 자격 조건은 카드 배지에 적혀 있어 겹쳤다.
  */
-const CARD_HEIGHT = "min-h-[286px]";
+const CARD_HEIGHT = "min-h-[218px]";
 /** 위 클래스와 같은 값. 줄 높이를 계산할 때 쓴다. */
-const CARD_HEIGHT_PX = 286;
+const CARD_HEIGHT_PX = 218;
 
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
@@ -258,8 +258,8 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             onFocus={() => prefetchTab(t.key)}
             className={cn(
               filterPillClass,
-              /* 고른 탭은 검정 칩으로 (홈 시안의 상황별 탭과 같은 표시). */
-              activeTab === t.key ? "border-slate-900 bg-slate-900 text-white" : filterPillOffClass,
+              /* 고른 탭은 파란 칩으로 (홈 시안 공고 판의 탭과 같은 표시). */
+              activeTab === t.key ? "border-atomic-blue-600 bg-atomic-blue-600 text-white" : filterPillOffClass,
             )}
           >
             {t.label}
@@ -368,6 +368,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
                   isAuthenticated
                   isBookmarked={bookmarkedIds.includes(item.job.id)}
                   readiness={item.readiness}
+                  borderless
                 />
               </div>
             );

@@ -36,7 +36,7 @@ const GRADE_SCORE_STYLE: Record<OccupationRecommendation["grade"], string> = {
   "매우 잘 맞아요": "text-emerald-700",
   "잘 맞아요": "text-brand-blue-600",
   "도전해볼 만해요": "text-amber-700",
-  "준비가 더 필요해요": "text-slate-500",
+  "준비가 더 필요해요": "text-slate-600",
 };
 
 const SUBSCORES: { key: keyof OccupationRecommendation; label: string }[] = [
@@ -126,8 +126,8 @@ export function OccupationRecommendationCard({
     <details
       open={defaultOpen}
       className={cn(
-        // 순위는 왼쪽 번호 배지가 이미 짚어주므로 카드에는 테두리를 두지 않는다.
-        "group rounded-xl bg-white",
+        // 흰 바탕 위에 놓이므로 얇은 선으로 카드를 가른다. 순위는 왼쪽 번호 배지가 짚어준다.
+        "group rounded-xl border border-border bg-white",
       )}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-5 sm:px-7 sm:py-6">
@@ -136,20 +136,20 @@ export function OccupationRecommendationCard({
             className={cn(
               "flex size-10 shrink-0 items-center justify-center rounded-xl text-body-2 font-bold",
               // 준비 트랙은 순위 경쟁이 아니라 "열리는 가능성" 목록이므로 1위 강조를 하지 않는다.
-              !isPreparation && rank === 1 ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-500",
+              !isPreparation && rank === 1 ? "bg-atomic-blue-600 text-white" : "bg-slate-100 text-slate-600",
             )}
           >
             {isPreparation ? <KeyRound className="size-4.5" /> : rank}
           </span>
           <div>
             <p className="text-body-1 font-bold text-slate-900 sm:text-title-3">{rec.occupationName}</p>
-            <p className="mt-1 text-label-1 text-slate-400">{occupation?.category ?? "추천 직업"}</p>
+            <p className="mt-1 text-body-3 font-medium text-slate-600">{occupation?.category ?? "추천 직업"}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <span
             className={cn(
-              "hidden rounded-full px-3 py-1 text-label-1 font-semibold sm:inline-flex",
+              "hidden rounded-full px-3 py-1 text-body-3 font-semibold sm:inline-flex",
               isPreparation ? "bg-amber-50 text-amber-700" : GRADE_STYLE[rec.grade],
             )}
           >
@@ -160,16 +160,16 @@ export function OccupationRecommendationCard({
             <p className={cn("text-title-2 font-extrabold", isPreparation ? "text-brand-blue-600" : GRADE_SCORE_STYLE[rec.grade])}>
               {isPreparation ? rec.dimensionFitScore : rec.totalScore}
             </p>
-            <p className="text-label-2 text-slate-400">{isPreparation ? "성향 적합도" : "적합도"}</p>
+            <p className="text-caption-1 font-medium text-slate-600">{isPreparation ? "성향 적합도" : "적합도"}</p>
           </div>
-          <ChevronDown className="size-5 shrink-0 text-slate-400 transition-transform group-open:rotate-180" />
+          <ChevronDown className="size-5 shrink-0 text-slate-500 group-open:rotate-180" />
         </div>
       </summary>
 
-      <div className="border-t border-slate-100 px-5 py-6 sm:px-7">
+      <div className="border-t border-border px-5 py-6 sm:px-7">
         <span
           className={cn(
-            "inline-flex rounded-full px-3 py-1 text-label-1 font-semibold ring-1 sm:hidden",
+            "inline-flex rounded-full px-3 py-1 text-body-3 font-semibold ring-1 sm:hidden",
             isPreparation ? "bg-amber-50 text-amber-700" : GRADE_STYLE[rec.grade],
           )}
         >
@@ -177,13 +177,13 @@ export function OccupationRecommendationCard({
         </span>
 
         {occupation?.description && (
-          <p className="mt-3 text-body-2-reading text-slate-600">{occupation.description}</p>
+          <p className="mt-3 text-body-2-reading font-medium text-slate-600">{occupation.description}</p>
         )}
 
         {/* 준비 트랙: 무엇을 채우면 열리는지 짚고, 갈 곳이 있으면 상담으로 보낸다. */}
         {isPreparation && missingRequiredNames.length > 0 && (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-amber-50/70 p-4">
-            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-amber-800">
+            <p className="flex items-center gap-1.5 text-body-3 font-semibold text-amber-800">
               <KeyRound className="size-4" /> {missingRequiredNames.join(", ")} 취득 시 지원할 수 있어요
             </p>
             {consultCourse ? (
@@ -196,14 +196,14 @@ export function OccupationRecommendationCard({
                 href={consultCourse.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-border bg-white px-4 text-label-1 font-semibold text-slate-700 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
+                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
               >
                 상담받기
-                <ExternalLinkIcon className="size-3.5 text-slate-400" />
+                <ExternalLinkIcon className="size-3.5 text-slate-500" />
               </TrackedLink>
             ) : (
               recommendedCourse && (
-                <p className="w-full text-label-1 text-amber-700">
+                <p className="w-full text-body-3 font-medium text-amber-700">
                   추천 취득 과정: {recommendedCourse.contentTitle} — 아래 &quot;도움이 되는 자격 취득 과정&quot;에서
                   확인해보세요.
                 </p>
@@ -217,7 +217,7 @@ export function OccupationRecommendationCard({
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {SUBSCORES.map(({ key, label }) => (
             <div key={label} className="rounded-xl bg-slate-50 p-4">
-              <p className="text-label-2 text-slate-400">{label}</p>
+              <p className="text-caption-1 font-medium text-slate-600">{label}</p>
               <p className="mt-1 text-title-3 font-bold text-slate-900">{rec[key] as number}</p>
               <Progress value={rec[key] as number} className="mt-2 h-1.5" />
             </div>
@@ -230,10 +230,10 @@ export function OccupationRecommendationCard({
         */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
           <div className="rounded-lg bg-brand-blue-50/60 p-4">
-            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
+            <p className="flex items-center gap-1.5 text-body-3 font-semibold text-brand-blue-700">
               <Sparkles className="size-4" /> 왜 추천되었나요
             </p>
-            <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+            <ul className="mt-2 space-y-1 text-body-3 font-medium text-slate-600">
               {rec.reasons.map((reason) => (
                 <li key={reason}>· {reason}</li>
               ))}
@@ -241,10 +241,10 @@ export function OccupationRecommendationCard({
           </div>
           {risks.length > 0 ? (
             <div className="rounded-lg bg-orange-50/60 p-4">
-              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-orange-600">
+              <p className="flex items-center gap-1.5 text-body-3 font-semibold text-orange-600">
                 <AlertTriangle className="size-4" /> 고려할 점
               </p>
-              <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+              <ul className="mt-2 space-y-1 text-body-3 font-medium text-slate-600">
                 {risks.map((risk) => (
                   <li key={risk}>· {risk}</li>
                 ))}
@@ -253,10 +253,10 @@ export function OccupationRecommendationCard({
           ) : (
             /* 비워두면 "안 뜬 건가?" 싶다. 걸리는 게 없다는 것도 알려줄 값이다. */
             <div className="rounded-lg bg-emerald-50/60 p-4">
-              <p className="flex items-center gap-1.5 text-label-1 font-semibold text-emerald-700">
+              <p className="flex items-center gap-1.5 text-body-3 font-semibold text-emerald-700">
                 <CheckCircle2 className="size-4" /> 고려할 점
               </p>
-              <p className="mt-2 text-label-1 text-slate-600">지금 조건에서 걸리는 점이 없어요.</p>
+              <p className="mt-2 text-body-3 font-medium text-slate-600">지금 조건에서 걸리는 점이 없어요.</p>
             </div>
           )}
         </div>
@@ -273,7 +273,7 @@ export function OccupationRecommendationCard({
         */}
         {rec.requiredQualifications.length > 0 && (
           <div className="mt-3 rounded-lg bg-slate-50 p-4">
-            <p className="flex items-center gap-1.5 text-label-1 font-semibold text-slate-700">
+            <p className="flex items-center gap-1.5 text-body-3 font-semibold text-slate-700">
               <ListChecks className="size-4 text-slate-500" /> 자격 요건
             </p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -284,7 +284,7 @@ export function OccupationRecommendationCard({
                   <span
                     key={q}
                     className={cn(
-                      "inline-flex items-center gap-1 rounded-full px-3 py-1 text-label-1",
+                      "inline-flex items-center gap-1 rounded-full px-3 py-1 text-body-3 font-medium",
                       !missing
                         ? "bg-emerald-50 text-emerald-700"
                         : preferred
@@ -300,7 +300,7 @@ export function OccupationRecommendationCard({
                       <AlertTriangle className="size-3.5" />
                     )}
                     {qualificationName(q)}
-                    <span className="text-label-2 opacity-70">
+                    <span className="text-caption-1 opacity-80">
                       {!missing ? "보유" : preferred ? "우대" : "필수"}
                     </span>
                   </span>
@@ -312,13 +312,13 @@ export function OccupationRecommendationCard({
 
         {/* 관련 채용공고 */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-slate-50 px-4 py-4">
-          <div className="text-label-1 text-slate-600">
+          <div className="text-body-3 font-medium text-slate-600">
             <p className="flex items-center gap-1.5">
-              <MapPin className="size-4 text-slate-400" />
+              <MapPin className="size-4 text-slate-500" />
               {regionLabel ? `${regionLabel} 지역 ` : ""}현재 관련 채용공고 <strong className="text-slate-800">{postingCount}건</strong>
             </p>
             {jobCount && jobCount.highMatchCount > 0 && (
-              <p className="mt-1 text-label-1 text-brand-blue-600">
+              <p className="mt-1 text-body-3 font-medium text-brand-blue-600">
                 회원님의 조건과 높은 일치 <strong>{jobCount.highMatchCount}건</strong>
               </p>
             )}
@@ -336,7 +336,7 @@ export function OccupationRecommendationCard({
              * 이름 검색은 제목·본문까지 훑어 코드가 다른 관련 공고도 함께 걸린다.
              */
             href={`/jobs?keyword=${encodeURIComponent(rec.occupationName)}`}
-            className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+            className="inline-flex h-12 items-center rounded-lg bg-atomic-blue-600 px-5 text-body-3 font-bold text-white"
           >
             채용공고 보기
           </TrackedLink>
@@ -350,7 +350,7 @@ export function OccupationRecommendationCard({
         <div className="mt-3 flex flex-wrap justify-end gap-4">
           <Link
             href={`/resume/new?occupation=${rec.occupationId}&title=${encodeURIComponent(rec.occupationName)}`}
-            className="flex h-10 items-center gap-1 rounded-lg px-4 text-label-1 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 active:bg-slate-100"
+            className="flex h-12 items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
           >
             {rec.occupationName} 취업용 이력서 준비하기
             <ChevronRight className="size-4" />

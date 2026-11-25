@@ -1,21 +1,43 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { labelRegion, labelWorkType } from "@/lib/labels";
-import { cn } from "@/lib/utils";
+import { createLucideIcon } from "lucide-react";
+import { labelCareerRequirement, labelRegion, labelWorkType } from "@/lib/labels";
 import { splitSalary } from "@/lib/salary";
+import { cn } from "@/lib/utils";
 import { JobBookmarkButton } from "./job-bookmark-button";
 import { READINESS_BADGE_CLASS, type JobReadiness } from "./job-readiness";
 import type { Job } from "@/types";
 
-const CLOSING_SOON_DAYS = 7;
+/**
+ * 원화(₩)가 새겨진 동전. lucide 에 원화 그림이 없어 같은 방식(24칸, 둥근 선)으로 그린다.
+ * 작은 크기라 ₩ 의 가로줄은 하나만 긋는다.
+ */
+const WonCoin = createLucideIcon("won-coin", [
+  ["circle", { cx: "12", cy: "12", r: "10", key: "coin" }],
+  ["path", { d: "M7 8.5l2.5 7 2.5-5.5 2.5 5.5 2.5-7", key: "w" }],
+  ["path", { d: "M6.5 12h11", key: "bar" }],
+]);
 
-/** 마감이 가까우면 "D-3"·"D-DAY", 아니면 null. 마감일 옆에 붙이고 마감임박 여부도 이걸로 판단한다. */
-function ddayLabel(job: Job): string | null {
+export function daysLeft(job: Job): number | null {
   if (!job.applyDeadline) return null;
-  const daysLeft = (new Date(job.applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
-  if (daysLeft < 0 || daysLeft > CLOSING_SOON_DAYS) return null;
-  const rounded = Math.ceil(daysLeft);
-  return rounded === 0 ? "D-DAY" : `D-${rounded}`;
+  return Math.ceil((new Date(job.applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+}
+
+export function deadlineLabel(left: number | null): string {
+  if (left === null) return "상시채용";
+  if (left < 0) return "마감";
+  return left === 0 ? "오늘 마감" : `D-${left}`;
+}
+
+/**
+ * 카드의 지역은 "시·도 + 시·군·구 첫 낱말"까지만 쓴다.
+ * 일반구를 둔 시("수원시 장안구", "창원시 마산회원구")는 구를 떼어 "경기 수원시"로 줄인다.
+ * 그러면 가장 긴 것도 "경기 남양주시"·"인천 미추홀구" 정도(7자)라 회사 이름 자리가 남는다.
+ * 세부 지역은 공고 상세에서 본다.
+ */
+export function shortLocation(job: Job): string {
+  const sido = job.region ? labelRegion(job.region) : "";
+  const sigungu = job.regionSigungu?.trim().split(/\s+/)[0];
+  return [sido, sigungu].filter(Boolean).join(" ");
 }
 
 /**
@@ -32,162 +54,115 @@ export function isMidlifeRecommended(job: Job): boolean {
   );
 }
 
+/** 카드 아래 태그: 경력 조건 · 고용형태 · 중장년 추천. */
+function jobTags(job: Job): string[] {
+  const career = job.isBeginnerFriendly ? "신입가능" : labelCareerRequirement(job.careerRequirement);
+  const workType = labelWorkType(job.workType);
+  return [
+    career !== "-" ? career : null,
+    workType !== "-" ? workType : null,
+    isMidlifeRecommended(job) ? "중장년 추천" : null,
+  ].filter((t): t is string => Boolean(t));
+}
+
 export interface JobCardProps {
   job: Job;
+  /** 맞춤 공고일 때 맞은 근거 한 줄(예: "희망 지역"). 급여 아래 파란 글자로. */
   matchReasonLabel?: string;
   className?: string;
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
-  /** 로그인 회원의 보유 자격증명. 전달되면 카드에 취업준비성 배지를 표시한다. */
   /**
    * 서버에서 계산한 자격 준비 상태. 판정에 요건 사전(career_requirements)이 필요해
    * 카드 안에서 만들 수 없다. 없으면 배지를 띄우지 않는다.
    */
   readiness?: JobReadiness;
-  /** 호버 시 카드 면을 연파랑으로. 전체 공고 목록처럼 카드가 큰 자리에서만 켠다 (큐레이션 띠는 끔). */
-  hoverTint?: boolean;
+  /** 회색 판 위에 놓일 때는 테두리 없이 흰 면만으로 띄운다. */
+  borderless?: boolean;
 }
 
 /**
- * 채용공고 목록 카드.
- * 지원금 결과 카드와 같은 뼈대를 쓴다 - 상단 기관/등급, 제목, 핵심 수치,
- * 그리고 맨 아래 파이프로 끊은 메타 줄. 두 목록이 같은 리듬으로 읽히게 하려는 것이다.
+ * 공고 카드 - 홈 시안(/draft · /draft2)과 일자리찾기 · 찜 목록이 모두 이 하나를 쓴다.
+ * 흰 면 · 옅은 테두리에, 위에서 아래로 제목(굵게) → 회사 · 지역 → 급여 → 조건 태그 · 남은 날 순.
+ * 색은 마감이 가까운 남은 날(과 자격 준비 배지)에만 쓴다 - 카드가 여럿 모일 때 어지럽지 않게.
  */
 export function JobCard({
   job,
   matchReasonLabel,
   className,
-  isAuthenticated,
-  isBookmarked,
+  isAuthenticated = false,
+  isBookmarked = false,
   readiness,
-  hoverTint,
+  borderless = false,
 }: JobCardProps) {
   const salary = splitSalary(job);
-  const dday = ddayLabel(job);
-  const closingSoon = dday !== null;
-  const midlifeRecommended = isMidlifeRecommended(job);
-  const location = job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ");
-
+  const location = shortLocation(job);
+  const left = daysLeft(job);
+  const urgent = left !== null && left >= 0 && left <= 7;
+  const tags = jobTags(job);
   return (
     // 찜 버튼은 카드 Link 안에 넣을 수 없어(버튼 중첩) 형제로 두고 위에 겹친다.
     <div className={cn("relative h-full", className)}>
-      {/* 기본 호버 표시는 제목 밑줄 하나. 촘촘한 띠(큐레이션)에서 면까지 파래지면 눈이 시끄럽다. */}
       <Link
         href={`/jobs/${job.id}`}
-        className={cn(
-          "group flex h-full flex-col rounded-xl border border-border bg-white p-5",
-          hoverTint && "transition-colors hover:bg-brand-blue-50/40",
-        )}
+        className={cn("flex h-full flex-col rounded-2xl bg-white p-5", !borderless && "border border-border")}
       >
-        {/*
-          지원금 카드의 "기관 + 적합등급" 줄에 대응한다. pr-10은 겹쳐 놓은 찜 버튼 자리.
-
-          줄 높이를 늘려 잡지 않는다. 버튼(size-8) 높이에 맞춰 32px 로 벌리면
-          회사명과 제목 사이가 붕 떠 보인다. 대신 버튼을 회사명 글자의
-          세로 가운데(top-3.5)에 맞춰 이 줄과 짝지어 보이게 한다.
-
-          오른쪽도 같은 14px 로 둔다. 카드 여백선(20px)에 맞추면 위아래 간격이
-          달라 모서리가 어긋나 보이고, 위를 20px 로 내리면 제목 첫 줄과 겹친다.
-        */}
-        <div className="flex items-center justify-between gap-2 pr-10">
-          <p className="truncate text-label-1 font-medium text-slate-500">{job.companyName}</p>
-        </div>
-
-        {/*
-          회사명과 제목은 "누가 무엇을"이라 한 덩어리로 붙이고(mt-2),
-          급여는 별개의 사실이라 한 칸 띄운다(mt-3).
-        */}
-        {/*
-          break-keep 이 없으면 한글이 음절 단위로 잘려 "모집합니 / 다." 처럼 끊긴다.
-          text-balance 는 두 줄 길이를 맞춰 마지막 줄에 한 단어만 남는 걸 막는다.
-          둘을 같이 써야 한다 - balance 만 주면 오히려 단어 중간에서 끊는다.
-          balance 를 모르는 브라우저는 break-keep 만 적용되어 그대로 쓸 만하다.
-
-          줄간격은 body-1 기본값이 120%(21.6px)라 두 줄이 붙어 보인다.
-          같은 시스템의 body-1-reading 과 같은 140%(25.2px)로 띄운다.
-        */}
-        <h3 className="mt-2 line-clamp-2 break-keep text-balance text-body-1 leading-[1.4] font-semibold text-slate-900 group-hover:underline">
-          {job.title}
-        </h3>
-
-        {/* 금액은 굵기로만 강조한다. 파랑은 누르는 것(버튼·링크)에만 쓴다. 종류는 금액을 읽는 단위라 옅게. */}
-        <p className="mt-3 break-keep text-body-2 font-bold text-slate-900">
-          {salary.typeLabel && <span className="mr-1 font-medium text-slate-600">{salary.typeLabel}</span>}
-          {salary.amount}
+        <h3 className="line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-900">{job.title}</h3>
+        {/* 회사 · 지역을 한 줄로. 회사 이름이 길면 회사 쪽 끝을 줄이고 지역은 끝까지 보인다. */}
+        <p className="mt-1 flex min-w-0 items-center gap-1.5 text-body-3 font-medium text-slate-600">
+          <span className="truncate">{job.companyName}</span>
+          {location && (
+            <>
+              <span aria-hidden className="size-0.5 shrink-0 rounded-full bg-slate-400" />
+              <span className="shrink-0 whitespace-nowrap">{location}</span>
+            </>
+          )}
         </p>
 
         {/*
-          채운 배지에도 투명 테두리를 준다. border-0 은 24.8px, 아웃라인 배지는
-          1px 테두리 때문에 26.8px 라, 배지 조합에 따라 카드가 2px 달라져
-          탭을 옮길 때 판이 덜컹거렸다. 배경은 border-box 로 칠해져 보이는 건 같다.
+          급여는 혼자 한 줄 - 범위 급여도 다 보인다. 항목 이름은 그림으로 대신하고 낱말은 화면 읽기 프로그램에만 남긴다.
+          동전은 칸 한가운데에 놓이지만 한글·숫자의 눈에 보이는 중심은 그보다 1px 남짓 위라 1px 올린다.
         */}
-        {(readiness || job.isBeginnerFriendly || midlifeRecommended || closingSoon) && (
-          <div className="mt-3 flex flex-wrap items-center gap-1.5">
-            {readiness && (
-              <Badge className={cn("rounded-full border border-transparent text-label-2 font-semibold", READINESS_BADGE_CLASS[readiness.level])}>
-                {readiness.label}
-              </Badge>
-            )}
-            {job.isBeginnerFriendly && (
-              <Badge variant="outline" className="rounded-full text-label-2 text-slate-600">
-                신입가능
-              </Badge>
-            )}
-            {midlifeRecommended && (
-              <Badge variant="outline" className="rounded-full text-label-2 text-slate-600">
-                중장년 추천
-              </Badge>
-            )}
-            {/* 마감임박만 색을 유지한다. 나머지 태그는 공고의 분류지만 이건 시간 경고다. */}
-            {closingSoon && (
-              <Badge className="rounded-full border border-transparent bg-rose-50 text-label-2 font-semibold text-rose-600">
-                마감임박
-              </Badge>
-            )}
-          </div>
-        )}
+        <p className="mt-3 flex items-center gap-1.5 text-body-3">
+          <WonCoin className="size-3.5 shrink-0 -translate-y-px text-slate-500" absoluteStrokeWidth strokeWidth={1.5} aria-hidden />
+          <span className="sr-only">급여</span>
+          <span className="truncate font-semibold text-slate-900">
+            {salary.typeLabel && <span className="mr-1 font-medium text-slate-600">{salary.typeLabel}</span>}
+            {salary.amount}
+          </span>
+        </p>
+        {matchReasonLabel && <p className="mt-1.5 truncate text-body-3 font-semibold text-atomic-blue-600">✓ {matchReasonLabel}</p>}
 
         {/*
-          지원금 카드와 같은 파이프 구분 메타 줄. 아이콘 없이 텍스트만 둬서 줄이 조용하다.
-
-          맞은 근거가 붙으면 두 줄, 없으면 한 줄이 되는데 카드 높이는 그 줄의
-          제일 큰 카드를 따라간다. 그래서 탭을 옮길 때마다 판 높이가 튀었다.
-          두 줄 자리를 늘 잡아 둔다: pt-4(1rem) + 19.6px 두 줄 + gap-y-1(0.25rem).
-          content-end 는 남는 자리를 위에 두고 글자를 아래에 붙인다. 카드의 마지막
-          줄이라 아래 여백에 맞춰 떨어져 있어야 카드마다 바닥선이 같아 보인다.
+          아래 줄: 왼쪽은 조건 태그(한 줄만, 넘치면 감춤), 오른쪽은 남은 날 → 찜 버튼 순.
+          찜 버튼은 링크 밖에 겹쳐 놓아 그 폭(pr-9)만큼 비워 둔다.
+          7일 안에 마감이면 빨강 #D04040(흰 바탕 대비 4.68:1, KRDS 4.5:1 이상), 아니면 회색.
         */}
-        <div className="mt-auto flex min-h-[3.7rem] flex-wrap content-end items-center gap-x-2 gap-y-1 pt-4 text-label-1 font-medium text-slate-600">
-          {matchReasonLabel && (
-            <>
-              <span className="text-brand-blue-600">✓ {matchReasonLabel}</span>
-              <span aria-hidden>|</span>
-            </>
-          )}
-          {location && (
-            <>
-              <span>{location}</span>
-              <span aria-hidden>|</span>
-            </>
-          )}
-          <span>{labelWorkType(job.workType)}</span>
-          <span aria-hidden>|</span>
-          {/*
-            남은 기간은 마감일을 구체화하는 값이라 날짜 바로 옆에 둔다.
-            한 span 으로 묶어야 지역명이 긴 카드에서 D-day 만 다음 줄로 떨어지지 않는다.
-          */}
-          <span className="whitespace-nowrap">
-            {job.applyDeadline ? `~${job.applyDeadline.slice(0, 10)}` : "상시채용"}
-            {dday && <span className="ml-1.5 font-semibold text-rose-600">{dday}</span>}
+        <div className="mt-auto flex items-center gap-2 pt-4 pr-9">
+          {/* 태그 글자는 칸 가운데에 두되, 한글은 눈에 보이는 중심이 글자 칸보다 위라 1px(pt-px) 내린다. */}
+          <ul className="flex h-6 min-w-0 flex-1 flex-wrap gap-1.5 overflow-hidden">
+            {readiness && (
+              <li className={cn("flex h-6 items-center rounded px-2 pt-px text-caption-1 font-semibold", READINESS_BADGE_CLASS[readiness.level])}>
+                {readiness.label}
+              </li>
+            )}
+            {tags.map((tag) => (
+              <li key={tag} className="flex h-6 items-center rounded bg-slate-100 px-2 pt-px text-caption-1 font-medium text-slate-700">
+                {tag}
+              </li>
+            ))}
+          </ul>
+          <span className={cn("shrink-0 text-caption-1", urgent ? "font-bold text-[#D04040]" : "font-medium text-slate-600")}>
+            {deadlineLabel(left)}
           </span>
         </div>
       </Link>
-
       <JobBookmarkButton
         jobId={job.id}
         jobCategory={job.jobCategory}
         isAuthenticated={isAuthenticated}
         initialBookmarked={isBookmarked}
-        className="absolute right-3.5 top-3.5"
+        className="absolute right-3 bottom-4"
       />
     </div>
   );

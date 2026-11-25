@@ -16,7 +16,7 @@ const PILL_CLASS: Record<SupportEligibilityGrade, { base: string; active: string
   HIGH: { base: "border-emerald-200 text-emerald-700", active: "bg-emerald-50 border-emerald-300 text-emerald-700 ring-1 ring-emerald-200" },
   MEDIUM: { base: "border-brand-blue-200 text-brand-blue-700", active: "bg-brand-blue-50 border-brand-blue-300 text-brand-blue-700 ring-1 ring-brand-blue-200" },
   CHECK_REQUIRED: { base: "border-orange-200 text-orange-700", active: "bg-orange-50 border-orange-300 text-orange-700 ring-1 ring-orange-200" },
-  LOW: { base: "border-slate-200 text-slate-500", active: "bg-slate-100 border-slate-300 text-slate-600 ring-1 ring-slate-200" },
+  LOW: { base: "border-slate-200 text-slate-600", active: "bg-slate-100 border-slate-300 text-slate-600 ring-1 ring-slate-200" },
 };
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
@@ -67,15 +67,15 @@ function CollapsibleSection({
         <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
           <Icon className="size-4" />
         </span>
-        <h2 className="text-body-1 font-bold text-slate-900">{label}</h2>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-label-2 font-semibold text-slate-500">
+        <h2 className="text-title-3 font-extrabold text-slate-900">{label}</h2>
+        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-caption-1 font-semibold text-slate-600">
           {items.length}
         </span>
         {expanded && hasMore && (
           <button
             type="button"
             onClick={handleCollapse}
-            className="ml-auto flex cursor-pointer items-center gap-1 rounded-lg px-3 py-1.5 text-label-1 font-semibold text-slate-500"
+            className="ml-auto flex cursor-pointer items-center gap-1 rounded-lg px-3 py-1.5 text-body-3 font-semibold text-slate-700"
           >
             접기
             <ChevronUp className="size-4" />
@@ -98,10 +98,10 @@ function CollapsibleSection({
         <button
           type="button"
           onClick={() => (expanded ? handleCollapse() : setExpanded(true))}
-          className="mt-3 flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-white py-3 text-label-1 font-semibold text-slate-500"
+          className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white text-body-3 font-semibold text-slate-800"
         >
           {expanded ? "접기" : `${items.length - COLLAPSE_COUNT}개 더보기`}
-          <ChevronDown className={cn("size-4 transition-transform", expanded && "rotate-180")} />
+          <ChevronDown className={cn("size-4", expanded && "rotate-180")} />
         </button>
       )}
     </section>
@@ -123,7 +123,7 @@ function ScrollToTopButton() {
     <button
       type="button"
       onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-      className="fixed bottom-6 right-6 z-40 flex size-12 items-center justify-center rounded-full bg-white text-slate-600 shadow-[0_2px_12px_rgba(0,0,0,0.12)] transition-colors hover:bg-slate-50"
+      className="fixed bottom-6 right-6 z-40 flex size-12 items-center justify-center rounded-full border border-slate-300 bg-white text-slate-700"
       aria-label="맨 위로"
     >
       <ArrowUp className="size-5" />
@@ -166,7 +166,7 @@ export function SupportResultSections({
               type="button"
               onClick={() => setActiveGrade(isActive ? null : grade)}
               className={cn(
-                "rounded-lg border px-4 py-2 text-label-1 font-semibold transition-all",
+                "rounded-full border px-4 py-2 text-body-3 font-semibold",
                 isActive ? PILL_CLASS[grade].active : PILL_CLASS[grade].base,
               )}
             >
