@@ -15,23 +15,24 @@ export default async function CoverLetterListPage() {
   const coverLetters = await listCoverLettersForUser(user.id);
 
   return (
-    <>
+    // 흰 바탕에 그림자 진 흰 카드(shadow-card). /draft3 색 구성 (globals.css .draft3-theme).
+    <div className="draft3-theme">
       <PageHead icon="coverLetter"
         crumbs={[{ label: "자기소개서" }]}
         title="자기소개서"
         description="문항을 자유롭게 추가/삭제/순서변경하고, AI 초안/첨삭을 받아보세요."
       >
-        <Button asChild className="h-12 shrink-0 bg-atomic-blue-600 px-5 text-body-2 font-bold text-white">
+        <Button asChild className="h-12 shrink-0 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-bold text-white">
           <Link href="/cover-letter/new">
             <Plus className="size-4" /> 새 자기소개서 작성
           </Link>
         </Button>
       </PageHead>
 
-      <div className="mx-auto max-w-6xl px-4.5 py-8 lg:px-8">
+      <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
         <div className="space-y-3">
           {coverLetters.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-border bg-white p-10 text-center">
+            <div className="rounded-card bg-white p-10 text-center shadow-card">
               <p className="text-body-3 font-medium text-slate-600">아직 작성한 자기소개서가 없어요.</p>
             </div>
           ) : (
@@ -39,7 +40,7 @@ export default async function CoverLetterListPage() {
               <Link
                 key={cl.id}
                 href={`/cover-letter/${cl.id}/edit`}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5"
+                className="flex items-center justify-between gap-3 rounded-card bg-white p-5 shadow-card"
               >
                 <div>
                   <p className="text-body-2 font-semibold text-slate-900">{cl.title}</p>
@@ -51,6 +52,6 @@ export default async function CoverLetterListPage() {
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }

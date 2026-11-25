@@ -59,10 +59,10 @@ export function ExperienceFormDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-lg">
+      <DialogContent className="max-h-[85vh] overflow-y-auto rounded-card sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>{editing ? "경험 수정하기" : "내 경험 추가하기"}</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-title-3 font-extrabold text-slate-900">{editing ? "경험 수정하기" : "내 경험 추가하기"}</DialogTitle>
+          <DialogDescription className="text-body-3 font-medium text-slate-600">
             여기에 정리해둔 경험은 자기소개서 문항마다 골라 쓸 수 있어요.
           </DialogDescription>
         </DialogHeader>
@@ -116,36 +116,36 @@ function ExperienceForm({
 
   return (
     <>
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div>
-          <Label className="text-label-2 text-slate-500">
+          <Label className="text-body-3 font-semibold text-slate-700">
             이 경험을 뭐라고 부르면 좋을까요? (예: 고객 민원 해결)
           </Label>
           <Input
-            className="mt-1"
+            className="mt-1.5 h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
             value={form.title}
             onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
           />
         </div>
         {FIELDS.map(({ key, label }) => (
           <div key={key}>
-            <Label className="text-label-2 text-slate-500">{label}</Label>
+            <Label className="text-body-3 font-semibold text-slate-700">{label}</Label>
             <Textarea
-              className="mt-1"
+              className="mt-1.5 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
               rows={2}
               value={form[key]}
               onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
             />
           </div>
         ))}
-        {error && <p className="text-label-1 text-rose-500">{error}</p>}
+        {error && <p role="alert" className="text-body-3 font-medium text-rose-600">{error}</p>}
       </div>
 
       <DialogFooter>
-        <Button variant="outline" onClick={onClose} disabled={isSaving}>
+        <Button variant="outline" className="h-12 rounded-full border-slate-300 bg-white px-6 font-semibold text-slate-800" onClick={onClose} disabled={isSaving}>
           취소
         </Button>
-        <Button onClick={handleSave} disabled={isSaving}>
+        <Button className="h-12 rounded-full bg-atomic-blue-600 px-6 font-bold text-white" onClick={handleSave} disabled={isSaving}>
           {isSaving && <Loader2 className="size-4 animate-spin" />}
           {editing ? "수정 저장" : "경험 저장하기"}
         </Button>

@@ -32,14 +32,14 @@ export default async function ResumeNewPage({
   if (existing.length >= MAX_RESUMES_PER_USER) redirect("/resume");
 
   return (
-    // /draft3 색 구성 (globals.css .draft3-theme): 옅은 하늘 머리 아래 회색 띠 위에 흰 단계 카드.
+    // /draft3 색 구성 (globals.css .draft3-theme): 옅은 하늘 머리 아래 흰 바탕에 그림자 진 흰 단계 카드.
     <div className="draft3-theme">
       <PageHead icon="resume"
         crumbs={[{ label: "이력서", href: "/resume" }, { label: "새 이력서" }]}
         title="새 이력서 만들기"
         description="양식을 고르고 담을 항목과 불러올 정보를 정하면, 편집 화면으로 넘어가요."
       />
-      <div className="bg-gov-surface">
+      <div className="bg-white">
       <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
         <ResumeWizard
           templates={ordered.map((t) => ({

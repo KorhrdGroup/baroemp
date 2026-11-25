@@ -149,8 +149,8 @@ export default async function JobsPage({
     <div className="draft3-theme">
     {/* 화면 머리(위치 · 제목)는 세부 화면 공통. 무엇을 하는 화면인지는 아래 검색바가 말한다. */}
     <PageHead icon="jobs" crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
-    {/* /draft3처럼 회색 띠 위에 흰 판 · 흰 카드(모서리 20px, 테두리 없음). */}
-    <div className="bg-gov-surface">
+    {/* 흰 바탕에 그림자 진 흰 판 · 흰 카드(모서리 20px, 테두리 없음). 회색 띠는 답답해서 걷었다. */}
+    <div className="bg-white">
     <div className="mx-auto max-w-6xl px-4.5 pt-8 pb-16 lg:px-8">
 
       <JobFiltersForm
@@ -187,7 +187,7 @@ export default async function JobsPage({
             icon={Briefcase}
             title="조건에 맞는 채용공고가 없어요"
             description="검색어나 필터 조건을 조정해서 다시 확인해보세요."
-            className="mt-4 rounded-card border-0 bg-white"
+            className="mt-4 rounded-card border-0 bg-white shadow-card"
           />
         ) : (
           <>

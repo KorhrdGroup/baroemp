@@ -109,7 +109,7 @@ export function JobCard({
         href={`/jobs/${job.id}`}
         className={cn(
           "flex h-full flex-col rounded-2xl bg-white p-5 in-[.draft3-theme]:rounded-card",
-          borderless ? "in-[.draft3-theme]:bg-gov-surface" : "border border-border in-[.draft3-theme]:border-0",
+          borderless ? "in-[.draft3-theme]:bg-gov-surface" : "border border-border in-[.draft3-theme]:border-0 in-[.draft3-theme]:shadow-card",
         )}
       >
         <h3 className="line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-900">{job.title}</h3>

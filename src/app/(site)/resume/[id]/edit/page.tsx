@@ -40,8 +40,8 @@ export default async function ResumeEditPage({
   const sectionOptions = buildResumeSectionOptions(ordered);
 
   return (
-    // 입력칸이 흰색으로 도드라지도록 편집 화면만 회색 바탕을 깐다. /draft3 색 구성 (globals.css .draft3-theme).
-    <div className="draft3-theme min-h-screen bg-gov-surface print:min-h-0 print:bg-transparent">
+    // 흰 바탕에 그림자 진 흰 카드(shadow-card)로 칸을 가른다. /draft3 색 구성 (globals.css .draft3-theme).
+    <div className="draft3-theme min-h-screen bg-white print:min-h-0 print:bg-transparent">
       {/* 하단 고정 액션 바(fixed)에 마지막 카드가 가려지지 않도록 아래 여백을 크게 둔다. */}
       <div className="mx-auto max-w-5xl px-4.5 pb-28 pt-10 lg:px-8">
         <ResumeEditor initialDetail={detail} templates={templateOptions} sectionOptions={sectionOptions} />

@@ -340,14 +340,14 @@ export function CoverLetterEditor({
         </button>
       </div>
 
-      <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl border border-border bg-white p-4">
+      <div className="flex flex-wrap items-end justify-between gap-3 rounded-card bg-white p-5 shadow-card">
         <div className="min-w-48 flex-1">
           <Label className="text-caption-1 text-slate-600">자기소개서 이름</Label>
           <Input
             placeholder="제목을 입력해주세요"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 h-12 rounded-lg border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
+            className="mt-1 h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
           />
         </div>
         {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
@@ -358,7 +358,7 @@ export function CoverLetterEditor({
         좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
       */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <nav className="hidden rounded-xl border border-border bg-white p-3 lg:sticky lg:top-24 lg:block lg:w-60 lg:shrink-0">
+        <nav className="hidden rounded-card bg-white p-4 shadow-card lg:sticky lg:top-24 lg:block lg:w-60 lg:shrink-0">
           <p className="px-2 pb-2 text-caption-1 font-semibold text-slate-600">문항 {sections.length}개</p>
           <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
             {sections.map((section, idx) => {
@@ -401,7 +401,7 @@ export function CoverLetterEditor({
 
         <div className="min-w-0 flex-1 space-y-4">
           {active && (
-            <div className="rounded-xl border border-border bg-white p-5">
+            <div className="rounded-card bg-white p-5 shadow-card sm:p-6">
               <div className="flex items-center justify-between gap-2">
                 <p className="text-caption-1 font-semibold text-slate-600">문항 {activeIndex + 1}</p>
                 <div className="flex items-center gap-1">
@@ -522,7 +522,7 @@ export function CoverLetterEditor({
             이 문항에 안 맞는 것만 빼게 한다. 매번 고르게 하면 초안 한 번 받기까지 손이 많이 간다.
           */}
           {active && (
-            <div className="rounded-xl border border-border bg-white p-5">
+            <div className="rounded-card bg-white p-5 shadow-card sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
                   <p className="text-body-3 font-semibold text-slate-900">이 문항에 쓸 내 경험</p>

@@ -92,7 +92,7 @@ function StepHeader({ step, title, description }: { step: 1 | 2; title: string; 
 }
 
 function WizardCard({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-3xl rounded-card bg-white p-6 sm:p-10">{children}</div>;
+  return <div className="mx-auto max-w-3xl rounded-card bg-white p-6 shadow-card sm:p-10">{children}</div>;
 }
 
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
@@ -244,7 +244,7 @@ export function ResumeWizard({
             const style = TEMPLATE_CARD_STYLES[idx % TEMPLATE_CARD_STYLES.length];
             const Icon = style.icon;
             return (
-              <div key={t.id} className="flex flex-col rounded-card bg-white p-5 text-center sm:p-6">
+              <div key={t.id} className="flex flex-col rounded-card bg-white p-5 text-center shadow-card sm:p-6">
                 <div className="flex justify-center">
                   <span className={cn("flex size-14 items-center justify-center rounded-full", style.tone)}>
                     <Icon className={cn("size-7", style.iconTone)} />
@@ -336,11 +336,12 @@ export function ResumeWizard({
                       onClick={() => toggleSection(option)}
                       aria-pressed={isPicked}
                       className={cn(
-                        "flex items-center gap-1 rounded-lg border px-3 py-1.5 text-body-3",
+                        /* 고른 항목은 파랑으로 채운다. 선만 바꾸면 고른 것과 안 고른 것이 잘 구별되지 않는다. */
+                        "flex h-10 items-center gap-1.5 rounded-full border px-4 text-body-3",
                         fixed ? "cursor-default" : "cursor-pointer",
                         isPicked
-                          ? "border-brand-blue-400 bg-brand-blue-50 font-semibold text-brand-blue-700"
-                          : "border-border bg-white font-medium text-slate-700",
+                          ? "border-baro-blue bg-baro-blue font-bold text-white"
+                          : "border-slate-300 bg-white font-medium text-slate-700",
                       )}
                     >
                       {recommended && <ThumbsUp className="size-3.5" />}

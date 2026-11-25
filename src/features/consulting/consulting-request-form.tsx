@@ -38,7 +38,7 @@ export function ConsultingRequestForm() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center rounded-card bg-white px-6 py-16 text-center">
+      <div className="flex flex-col items-center rounded-card bg-white px-6 py-16 text-center shadow-card">
         <span className="flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
           <CheckCircle2 className="size-7" />
         </span>
@@ -64,7 +64,7 @@ export function ConsultingRequestForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-card bg-white p-6 sm:p-8"
+      className="space-y-5 rounded-card bg-white p-6 shadow-card sm:p-8"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">

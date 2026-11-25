@@ -34,7 +34,8 @@ export default async function CoverLetterNewPage({
 
   return (
     // 다른 세부 화면과 같이 흰 바탕에 화면 머리를 얹는다. 단계 카드는 얇은 선으로 나눈다.
-    <>
+    // 흰 바탕에 그림자 진 흰 단계 카드. /draft3 색 구성 (globals.css .draft3-theme).
+    <div className="draft3-theme">
       <PageHead icon="coverLetter"
         crumbs={[{ label: "자기소개서", href: "/cover-letter" }, { label: "새 자기소개서" }]}
         title="새 자기소개서"
@@ -56,6 +57,6 @@ export default async function CoverLetterNewPage({
           targetOccupationId={targetOccupationId}
         />
       </div>
-    </>
+    </div>
   );
 }

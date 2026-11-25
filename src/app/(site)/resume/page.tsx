@@ -79,7 +79,7 @@ export default async function ResumeListPage() {
       title="이력서 · 자기소개서"
       description="내 경력/자격/희망직무 정보를 불러와 이력서를 빠르게 작성하고, AI 첨삭으로 다듬을 수 있어요."
     />
-    <div className="bg-gov-surface">
+    <div className="bg-white">
     <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
       <div>
         <SectionHeader
@@ -111,7 +111,7 @@ export default async function ResumeListPage() {
           }
         />
         {resumes.length === 0 ? (
-          <div className="mt-4 rounded-card bg-white p-10 text-center">
+          <div className="mt-4 rounded-card bg-white p-10 text-center shadow-card">
             <FileText className="mx-auto size-8 text-slate-400" />
             <p className="mt-3 text-body-3 font-medium text-slate-600">아직 작성한 이력서가 없어요.</p>
             <Link
@@ -127,7 +127,7 @@ export default async function ResumeListPage() {
               <Link
                 key={resume.id}
                 href={`/resume/${resume.id}/edit`}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-white p-5"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-white p-5 shadow-card"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -212,7 +212,7 @@ export default async function ResumeListPage() {
           }
         />
         {coverLetters.length === 0 ? (
-          <div className="mt-4 rounded-card bg-white p-8 text-center">
+          <div className="mt-4 rounded-card bg-white p-8 text-center shadow-card">
             <p className="text-body-3 font-medium text-slate-600">
               아직 작성한 자기소개서가 없어요. 경험뱅크를 먼저 채워두면 문항 작성이 훨씬 빨라요.
             </p>
@@ -226,7 +226,7 @@ export default async function ResumeListPage() {
               <Link
                 key={cl.id}
                 href={`/cover-letter/${cl.id}/edit`}
-                className="flex items-center justify-between gap-3 rounded-card bg-white p-5"
+                className="flex items-center justify-between gap-3 rounded-card bg-white p-5 shadow-card"
               >
                 <div>
                   <p className={cn("truncate text-body-2 font-semibold", cl.title ? "text-slate-900" : "text-slate-600")}>

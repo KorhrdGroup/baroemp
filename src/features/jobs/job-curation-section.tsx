@@ -213,7 +213,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
-    <section ref={sectionRef} className="mb-8 rounded-card bg-white p-5 pt-6 sm:p-6 sm:pt-8">
+    <section ref={sectionRef} className="mb-8 rounded-card bg-white p-5 pt-6 shadow-card sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
       {/*
         제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
