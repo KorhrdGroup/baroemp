@@ -12,7 +12,7 @@ const LEAD_ID = "support-002";
  * /draft3 지원금 구역. 한 구역 안에서 카드와 목록을 섞는다(벤토) -
  * 왼쪽 큰 카드 한 장에 대표 제도를 크게, 오른쪽에 나머지를 얇은 선 목록으로.
  * /draft 는 카드 여섯 장, /draft2 는 표 한 장이라 이 둘의 가운데.
- * 파랑은 대표 금액 하나에만 - 목록 금액까지 파랗게 하면 화면이 파랑으로 덮인다. 큰 카드 바탕도 회색으로.
+ * 목록 금액은 핵심(숫자 · 전액 · 무료)만 파랗게, 꾸밈말(최대 · 교육비 · /년)은 검정으로 둬 파랑이 줄마다 덩어리지지 않게. 큰 카드 바탕은 회색.
  */
 export function SupportBento() {
   const lead = SUPPORT_HIGHLIGHTS.find((s) => s.id === LEAD_ID) ?? SUPPORT_HIGHLIGHTS[0];
@@ -69,11 +69,28 @@ export function SupportBento() {
                   {item.org} · {item.region}
                 </p>
               </div>
-              <p className="shrink-0 text-body-1 font-bold text-slate-900">{item.amount}</p>
+              <p className="shrink-0 text-body-1 font-bold text-slate-900">
+                <AmountText amount={item.amount} />
+              </p>
             </Link>
           </li>
         ))}
       </ul>
     </div>
+  );
+}
+
+/* 금액 글에서 핵심만 파랗게: "최대 195만원" → 195만원, "교육비 전액" → 전액, "무료 상담" → 무료. 꾸밈말은 검정 그대로. */
+const KEY_PART = /(\d[\d,]*만원|전액|무료)/;
+
+function AmountText({ amount }: { amount: string }) {
+  const [before, key, after] = amount.split(KEY_PART);
+  if (key === undefined) return amount;
+  return (
+    <>
+      {before}
+      <span className="text-atomic-blue-600">{key}</span>
+      {after}
+    </>
   );
 }

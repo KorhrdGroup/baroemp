@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { QUALIFICATIONS } from "@/features/home-draft/qualification-section";
 import { ServiceIcon } from "@/features/home-draft/service-icons";
 import { labelRegion } from "@/lib/labels";
+import { cn } from "@/lib/utils";
 import { ConsultIllustration } from "./consult-illustration";
 import { QualificationIcon } from "./qualification-icons";
 import type { Region, SupportProgram } from "@/types";
@@ -29,14 +30,24 @@ const SERVICES = [
 export function Draft3ServiceGrid() {
   return (
     <nav aria-label="자주 찾는 서비스" className="relative mx-auto -mt-14 max-w-7xl px-4.5 sm:-mt-20 lg:px-8">
-      <ul className="grid grid-cols-3 overflow-hidden rounded-xl bg-white shadow-[0_6px_20px_rgba(15,23,42,0.07)] lg:grid-cols-6">
+      <ul className="grid grid-cols-3 overflow-hidden rounded-xl bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.08)] lg:grid-cols-6">
         {SERVICES.map((s, i) => (
           <li
             key={s.id}
-            className={`${i % 3 !== 0 ? "border-l" : ""} ${i >= 3 ? "border-t lg:border-t-0" : ""} ${i === 3 ? "lg:border-l" : ""} border-slate-100`}
+            className={cn(
+              "relative",
+              // 칸막이는 끝까지 긋지 않고 위아래를 띄운 짧은 선으로 - 판이 칸칸이 잘린 표처럼 보이지 않게.
+              (i % 3 !== 0 || i === 3) &&
+                "before:absolute before:inset-y-5 before:left-0 before:w-px before:bg-slate-200/70 sm:before:inset-y-7",
+              i === 3 && "before:hidden lg:before:block",
+              i >= 3 && "after:absolute after:inset-x-4 after:top-0 after:h-px after:bg-slate-200/70 lg:after:hidden",
+            )}
           >
-            <Link href={s.href} className="flex flex-col items-center gap-2 px-2 py-5 sm:gap-3 sm:py-7">
-              <ServiceIcon id={s.id} />
+            <Link href={s.href} className="flex flex-col items-center gap-2.5 px-2 py-5 sm:gap-3 sm:py-7">
+              {/* 그림을 옅은 파랑 원에 얹어 크기 · 무게를 고르게 맞춘다. */}
+              <span className="flex size-14 items-center justify-center rounded-full bg-brand-blue-50 sm:size-[4.5rem] [&>svg]:size-8 sm:[&>svg]:size-10">
+                <ServiceIcon id={s.id} />
+              </span>
               <span className="text-body-2 font-semibold whitespace-nowrap text-slate-800 sm:text-body-1">{s.label}</span>
             </Link>
           </li>

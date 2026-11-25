@@ -1,11 +1,11 @@
 /*
  * /draft3 "자격증으로 찾기" 단추 그림. 진단 화면 그림(landing-item-icons)과 같은 화풍:
- * 면을 채운 두 톤 - 진한 파랑은 중심, 중간 파랑은 면, 노랑은 그림마다 한 군데.
+ * 면을 채운 두 톤 - 진한 파랑은 중심, 중간 파랑은 면, 민트는 그림마다 한 군데.
  */
 const DEEP = "var(--atomic-blue-600)";
 const MID = "var(--atomic-blue-400)";
 const SOFT = "var(--atomic-blue-100)";
-const ACCENT = "#FFC043";
+const ACCENT = "#2EC4A6";
 
 const ICONS: Record<string, React.ReactNode> = {
   // 요양보호사: 감싸 안은 손 위 하트

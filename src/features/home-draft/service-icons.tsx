@@ -8,7 +8,8 @@ const SIZE = "size-10 sm:size-12";
 const DEEP = "var(--atomic-blue-600)";
 const MID = "var(--atomic-blue-400)";
 const SOFT = "var(--atomic-blue-100)";
-const ACCENT = "#FFC043";
+/* 포인트 색은 --icon-accent 로 바꿀 수 있다(없으면 노랑). /draft3 은 민트로 덮어쓴다. */
+const ACCENT = "var(--icon-accent, #FFC043)";
 
 function CustomSvg({ children, className = SIZE }: { children: React.ReactNode; className?: string }) {
   return (

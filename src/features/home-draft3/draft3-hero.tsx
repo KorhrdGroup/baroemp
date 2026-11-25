@@ -1,12 +1,12 @@
 import Link from "next/link";
 import { Search } from "lucide-react";
-import { HeroIllustration } from "./hero-illustration";
 
 const POPULAR = ["요양보호사", "경비", "미화", "조리", "운전", "사무보조"];
 
 /**
- * /draft3 첫 화면. /draft2 와 같은 남색 판 · 제목 · 검색 칸에, 비어 있던 오른쪽 절반에 평면 그림 한 장(넓은 화면만).
- * 많이 찾는 말 단추는 페이지 다른 단추와 같은 8px 모서리로.
+ * /draft3 첫 화면. /draft2 와 같은 남색 판 · 제목 · 검색 칸.
+ * 많이 찾는 말 단추는 공고 탭과 같은 알약 모양.
+ * (옅은 파랑 바탕도 견줘 봤지만 남색이 첫눈에 더 또렷해 남색으로 정했다.)
  */
 export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
   const today = new Date().toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit", timeZone: "Asia/Seoul" }).replace(/\.\s?/g, ".").replace(/\.$/, "");
@@ -17,8 +17,7 @@ export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(60%_80%_at_85%_0%,rgba(0,73,229,0.55),transparent_70%)]"
       />
-      <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4.5 lg:grid-cols-[minmax(0,1fr)_24rem] lg:px-8 xl:grid-cols-[minmax(0,1fr)_28rem]">
-        <div className="min-w-0">
+      <div className="relative mx-auto max-w-7xl px-4.5 lg:px-8">
         {activeCount !== null && (
           <p className="flex items-center gap-2 text-body-3 font-medium text-white/75 sm:text-body-2">
             <span>{today} 기준</span>
@@ -60,14 +59,12 @@ export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
             <Link
               key={word}
               href={`/jobs?keyword=${encodeURIComponent(word)}`}
-              className="rounded-lg border border-white/25 px-3 py-1 text-body-3 font-medium text-white"
+              className="rounded-full border border-white/25 px-3.5 py-1 text-body-3 font-medium text-white"
             >
               {word}
             </Link>
           ))}
         </div>
-        </div>
-        <HeroIllustration className="-mb-8 hidden w-full lg:block" />
       </div>
     </section>
   );

@@ -34,7 +34,8 @@ export default async function Draft3HomePage() {
   // 찜 상태는 회원마다 달라 캐시에 넣지 않는다.
   const bookmarkedIds = user ? await getUserJobBookmarkIdsAction() : [];
   return (
-    <div className="bg-white">
+    // 그림 포인트 색을 노랑 대신 민트로 - 공용 서비스 그림(service-icons)은 --icon-accent 로 받는다.
+    <div className="bg-white [--icon-accent:#2EC4A6]">
       <Draft3Hero activeCount={activeCount} />
       <Draft3ServiceGrid />
 

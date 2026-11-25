@@ -1,7 +1,7 @@
 /*
  * 상담 장면 그림. 정부 · 공공기관 누리집에서 흔히 쓰는 평면 그림 방식:
  * 외곽선 없이 면만, 사람은 동그란 머리와 둥근 몸통으로 단순하게, 뒤에 옅은 파랑 큰 원.
- * 색은 서비스 그림과 같은 파랑 계열 + 노랑 한 군데 + 화분 초록.
+ * 색은 서비스 그림과 같은 파랑 계열 + 민트 한 군데 + 화분 초록.
  * 왼쪽은 상담받는 중장년(흰머리 · 하늘색 스웨터), 오른쪽은 상담사(남색 재킷 · 목걸이 명찰).
  */
 const SKIN = "#F6D2B8";
@@ -10,7 +10,7 @@ const DEEP = "var(--atomic-blue-600)";
 const SOFT = "var(--atomic-blue-100)";
 const NAVY = "#1E3A8A";
 const SWEATER = "#7EA6FF";
-const ACCENT = "#FFC043";
+const ACCENT = "#2EC4A6";
 
 export function ConsultIllustration({ className }: { className?: string }) {
   return (
