@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, BadgeCheck, Check, FileText, Loader2, MapPin, Wallet } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
@@ -520,10 +520,10 @@ const INTRO_STEPS = [
 ];
 
 const RESULT_ITEMS = [
-  { icon: Wallet, title: "취업·훈련 지원금", desc: "구직 · 직업훈련에 받을 수 있는 돈을 찾아요." },
-  { icon: MapPin, title: "생활·지역 지원제도", desc: "사는 지역에서 받을 수 있는 제도도 함께 봐요." },
-  { icon: BadgeCheck, title: "지원 가능성 등급", desc: "조건이 얼마나 맞는지 등급으로 보여드려요." },
-  { icon: FileText, title: "신청 방법과 서류", desc: "어디서 어떻게 신청하는지 알려드려요." },
+  { icon: "wallet", title: "취업·훈련 지원금", desc: "구직 · 직업훈련에 받을 수 있는 돈을 찾아요." },
+  { icon: "region", title: "생활·지역 지원제도", desc: "사는 지역에서 받을 수 있는 제도도 함께 봐요." },
+  { icon: "grade", title: "지원 가능성 등급", desc: "조건이 얼마나 맞는지 등급으로 보여드려요." },
+  { icon: "docs", title: "신청 방법과 서류", desc: "어디서 어떻게 신청하는지 알려드려요." },
 ];
 
 /* 결과 예시 카드의 지원제도 세 줄. 실제 결과가 아닌 보기다(카드 맨 위에 "결과 예시"로 밝힌다). */

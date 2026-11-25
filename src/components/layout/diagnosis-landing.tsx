@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
+import { LandingItemIcon } from "./landing-item-icons";
 import type { Crumb } from "./page-head";
 
 /*
@@ -12,7 +13,7 @@ import type { Crumb } from "./page-head";
   ④ 안내 글
   무게: 굵기 800은 제목에만, 칸 제목은 700, 나머지는 500~600. 진한 파랑은 시작 단추와 핵심 숫자에만 -
   번호 · 표시까지 진하게 칠하면 화면이 무겁고 투박해진다. 모서리는 카드 12px, 단추 · 표시 8px 두 가지.
-  그림은 홈 서비스 그림처럼 면을 채운 두 톤(진한 파랑 선 + 옅은 파랑 면)으로 맞춘다.
+  그림은 홈 서비스 그림처럼 면을 채운 두 톤(진한 파랑 + 옅은 파랑 + 노랑 한 점)으로 맞춘다.
 */
 
 export interface LandingStep {
@@ -21,7 +22,8 @@ export interface LandingStep {
 }
 
 export interface LandingItem {
-  icon: LucideIcon;
+  /** landing-item-icons 의 그림 id. */
+  icon: string;
   title: string;
   desc: string;
 }
@@ -123,15 +125,15 @@ export function DiagnosisLanding({
           </ol>
         </section>
 
-        {/* ③ 알 수 있는 것. 그림은 네모 없이 두 톤으로(선은 진한 파랑, 면은 옅은 파랑).
+        {/* ③ 알 수 있는 것. 그림은 홈 서비스 그림과 같은 화풍으로 직접 그린 것(landing-item-icons).
             넓은 화면의 칸 수는 개수에 맞춘다 - 6개는 3칸 두 줄, 4개는 4칸 한 줄. 3칸에 4개를 놓으면 한 칸이 혼자 남는다.
             칸이 좁아지는 4칸에서도 글이 눌리지 않게, 휴대폰이 아니면 그림을 글 위에 둔다. */}
         <section className="mt-12 sm:mt-16">
           <h2 className="text-title-2 font-extrabold text-slate-900">{itemsTitle}</h2>
           <ul className={`mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 ${items.length % 3 === 0 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
-            {items.map(({ icon: Icon, title: itemTitle, desc }) => (
+            {items.map(({ icon, title: itemTitle, desc }) => (
               <li key={itemTitle} className="flex items-start gap-4 rounded-xl border border-border p-5 sm:flex-col sm:gap-3 sm:p-6">
-                <Icon aria-hidden className="size-9 shrink-0 text-atomic-blue-600" fill="var(--atomic-blue-100)" strokeWidth={1.75} />
+                <LandingItemIcon id={icon} />
                 <div className="min-w-0">
                   <p className="text-body-1 font-bold text-slate-900">{itemTitle}</p>
                   <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{desc}</p>

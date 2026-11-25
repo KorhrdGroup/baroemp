@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { BarChart3, ClipboardCheck, GraduationCap, Route, ShieldCheck, Target } from "lucide-react";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
 import { StartAssessmentButton } from "./start-assessment-button";
 
@@ -10,12 +9,12 @@ const STEPS = [
 ];
 
 const ITEMS = [
-  { icon: Target, title: "나에게 맞는 직업", desc: "경력과 성향에 맞는 직업을 골라 드려요." },
-  { icon: BarChart3, title: "직업별 적합도", desc: "직업마다 얼마나 잘 맞는지 점수로 보여드려요." },
-  { icon: ShieldCheck, title: "현재 준비도", desc: "지금 바로 지원할 수 있는지 알려드려요." },
-  { icon: ClipboardCheck, title: "부족한 조건", desc: "지원 전에 채워야 할 것을 짚어 드려요." },
-  { icon: GraduationCap, title: "필요한 자격·교육", desc: "따면 길이 열리는 자격과 과정을 알려드려요." },
-  { icon: Route, title: "추천 취업경로", desc: "공고 · 이력서 · 상담으로 바로 이어 드려요." },
+  { icon: "match", title: "나에게 맞는 직업", desc: "경력과 성향에 맞는 직업을 골라 드려요." },
+  { icon: "fit", title: "직업별 적합도", desc: "직업마다 얼마나 잘 맞는지 점수로 보여드려요." },
+  { icon: "ready", title: "현재 준비도", desc: "지금 바로 지원할 수 있는지 알려드려요." },
+  { icon: "gap", title: "부족한 조건", desc: "지원 전에 채워야 할 것을 짚어 드려요." },
+  { icon: "cert", title: "필요한 자격·교육", desc: "따면 길이 열리는 자격과 과정을 알려드려요." },
+  { icon: "route", title: "추천 취업경로", desc: "공고 · 이력서 · 상담으로 바로 이어 드려요." },
 ];
 
 /* 결과 예시 카드의 직업 세 줄. 실제 결과가 아닌 보기다(카드 맨 위에 "결과 예시"로 밝힌다). */
