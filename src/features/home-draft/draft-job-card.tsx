@@ -17,12 +17,12 @@ const WonCoin = createLucideIcon("won-coin", [
   ["path", { d: "M6.5 12h11", key: "bar" }],
 ]);
 
-function daysLeft(job: Job): number | null {
+export function daysLeft(job: Job): number | null {
   if (!job.applyDeadline) return null;
   return Math.ceil((new Date(job.applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
-function deadlineLabel(left: number | null): string {
+export function deadlineLabel(left: number | null): string {
   if (left === null) return "상시채용";
   if (left < 0) return "마감";
   return left === 0 ? "오늘 마감" : `D-${left}`;
@@ -34,7 +34,7 @@ function deadlineLabel(left: number | null): string {
  * 그러면 가장 긴 것도 "경기 남양주시"·"인천 미추홀구" 정도(7자)라 회사 이름 자리가 남는다.
  * 세부 지역은 공고 상세에서 본다.
  */
-function shortLocation(job: Job): string {
+export function shortLocation(job: Job): string {
   const sido = job.region ? labelRegion(job.region) : "";
   const sigungu = job.regionSigungu?.trim().split(/\s+/)[0];
   return [sido, sigungu].filter(Boolean).join(" ");
@@ -112,9 +112,10 @@ export function DraftJobCard({
           7일 안에 마감이면 빨강 #D04040(흰 바탕 대비 4.68:1, KRDS 4.5:1 이상), 아니면 회색.
         */}
         <div className="mt-auto flex items-center gap-2 pt-4 pr-9">
+          {/* 태그 글자는 칸 가운데에 두되, 한글은 눈에 보이는 중심이 글자 칸보다 위라 1px(pt-px) 내린다. */}
           <ul className="flex h-6 min-w-0 flex-1 flex-wrap gap-1.5 overflow-hidden">
             {tags.map((tag) => (
-              <li key={tag} className="rounded bg-slate-100 px-2 py-0.5 text-caption-1 font-medium text-slate-700">
+              <li key={tag} className="flex h-6 items-center rounded bg-slate-100 px-2 pt-px text-caption-1 font-medium text-slate-700">
                 {tag}
               </li>
             ))}

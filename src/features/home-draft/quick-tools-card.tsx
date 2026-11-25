@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 import { ServiceIcon } from "./service-icons";
 
-/** 일자리 찾기는 머리글 검색과 가운데 공고 판이 맡아, 나머지 도구만 둔다. */
+/** 일자리 찾기는 머리글 검색과 가운데 공고 판이 맡아, 나머지 도구만 둔다. 첫째가 넓은 칸에 놓인다. */
 const TOOLS = [
   { id: "assessment", label: "직업진단", desc: "나에게 맞는 일 찾기", href: "/assessment" },
   { id: "resume", label: "이력서 첨삭", desc: "경력을 이력서로 정리", href: "/resume" },
@@ -12,26 +13,51 @@ const TOOLS = [
 
 /**
  * 도구 상자 (사람인의 "AI서류합격코칭 · 맞춤법 검사" 자리).
- * 첫 줄 아래 전체 폭 한 줄. 도구마다 따로 흰 카드로 나누고, 사이 간격은 위 첫 줄과 같게 둔다.
- * 넓은 화면은 다섯 칸을 한 줄에 두고 그림 옆에 이름 · 한 줄 설명을 놓는다.
- * 휴대폰·태블릿은 세 칸씩 두 줄로, 그림 위 · 이름 아래로 쌓고 설명은 뺀다 - 칸이 좁아 두 줄로 꺾이면 더 어지럽다.
+ * 같은 크기 다섯 칸은 무게가 같아 어디부터 누를지 안 보여, 처음 온 사람이 할 일(직업진단)만 넓은 칸으로 키운다.
+ * 두 줄 높이의 큰 칸은 바로 위 첫 줄(공고 판 · 로그인 · 배너)과 겹쳐 무거워 보여, 넓은 화면은 한 줄로 낮게 둔다:
+ * 넓은 칸(두 몫) + 작은 칸 넷. 휴대폰은 넓은 칸이 맨 위 한 줄, 아래 작은 칸 2×2.
  */
 export function QuickToolsCard() {
+  const [main, ...rest] = TOOLS;
   return (
-    <nav
-      aria-label="바로가기"
-      className="grid grid-cols-3 gap-3 sm:gap-4 lg:grid-cols-5"
-    >
-      {TOOLS.map((tool) => (
+    <nav aria-label="바로가기" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-6">
+      <Link
+        href={main.href}
+        className="col-span-2 flex items-center justify-between gap-4 rounded-2xl bg-brand-blue-50 px-5 py-4 lg:px-6"
+      >
+        <span className="flex flex-col items-start">
+          <span className="text-body-1 font-bold text-slate-900">{main.label}</span>
+          <span className="mt-0.5 text-body-3 font-medium text-slate-700">{main.desc}</span>
+          {/* 누르는 곳임이 보이게 흰 알약 단추 모양으로. 링크는 카드 전체다. */}
+          <span className="mt-2.5 inline-flex items-center gap-0.5 rounded-full bg-white py-1 pr-2 pl-3 text-body-3 font-semibold text-brand-blue-600">
+            시작하기
+            <ChevronRight className="size-4" />
+          </span>
+        </span>
+        <span className="shrink-0 [&>svg]:size-[72px]">
+          <ServiceIcon id={main.id} />
+        </span>
+      </Link>
+
+      {/*
+        작은 칸: 위에 그림 · 오른쪽 위 꺾쇠, 아래에 이름 · 설명. 가로로 늘어놓으면 칸이 좁아
+        설명이 빠지고 이름만 남아 비어 보였다. 세로로 쌓으면 설명까지 한 줄씩 들어간다.
+      */}
+      {rest.map((tool) => (
         <Link
           key={tool.id}
           href={tool.href}
-          className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-border bg-white px-2 py-4 text-center lg:flex-row lg:gap-3 lg:px-4 lg:py-5 lg:text-left"
+          className="flex flex-col justify-between gap-2 rounded-2xl border border-border bg-white p-4"
         >
-          <ServiceIcon id={tool.id} />
-          <span className="flex flex-col">
-            <span className="text-body-3 font-semibold break-keep text-slate-800">{tool.label}</span>
-            <span className="hidden text-caption-1 font-medium text-slate-600 lg:block">{tool.desc}</span>
+          <span className="flex items-start justify-between">
+            <span className="[&>svg]:size-9">
+              <ServiceIcon id={tool.id} />
+            </span>
+            <ChevronRight className="size-4 shrink-0 text-slate-500" aria-hidden />
+          </span>
+          <span className="flex min-w-0 flex-col">
+            <span className="text-body-3 font-semibold whitespace-nowrap text-slate-900">{tool.label}</span>
+            <span className="truncate text-caption-1 font-medium text-slate-600">{tool.desc}</span>
           </span>
         </Link>
       ))}

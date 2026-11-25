@@ -5,7 +5,7 @@ import { QualificationIcon } from "./service-icons";
  * 자격증에서 출발하는 입구. 중장년 구직자는 직종 이름보다 "내가 가진 자격증"으로 찾는 편이 쉽다.
  * 지금은 일자리찾기 키워드 검색으로 보낸다.
  */
-const QUALIFICATIONS = ["요양보호사", "사회복지사", "조리사", "간호조무사", "지게차", "전기기사"];
+export const QUALIFICATIONS = ["요양보호사", "사회복지사", "조리사", "간호조무사", "지게차", "전기기사"];
 
 export function QualificationSection() {
   return (
