@@ -21,6 +21,9 @@ import type { Job } from "@/types";
  */
 const CARD_COUNT = 6;
 
+/** 탭 이름이 긴 것만 /draft3 에서 짧게 바꿔 부른다(공고 묶음 자체는 /draft · /draft2 와 같이 쓴다). */
+const SHORT_LABEL: Record<string, string> = { beginner: "경력 무관" };
+
 /**
  * /draft3 공고 구역. 탭은 알약 단추, 공고는 가로로 흐르는 카드 한 줄(아래 SimpleJobCard).
  * 공고는 급여 · 지역 · 마감을 견줘 보는 것이라 표보다 카드가 한눈에 들어온다.
@@ -68,7 +71,7 @@ export function JobCardTabs({
               )}
             >
               <JobTabIcon id={tab.key} />
-              {tab.label}
+              {SHORT_LABEL[tab.key] ?? tab.label}
             </button>
           );
         })}
@@ -79,7 +82,7 @@ export function JobCardTabs({
         className="scrollbar-hidden -mx-4.5 mt-4.5 overflow-x-auto sm:mx-0 sm:[mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] sm:motion-safe:overflow-hidden"
       >
         <ul
-          aria-label={`${active.label} 공고`}
+          aria-label={`${SHORT_LABEL[active.key] ?? active.label} 공고`}
           className="flex w-max py-1.5 pr-4.5 pl-1.5 focus-within:[animation-play-state:paused] hover:[animation-play-state:paused] sm:px-0 sm:motion-safe:animate-[marquee_50s_linear_infinite]"
         >
           {[0, 1].map((copy) =>

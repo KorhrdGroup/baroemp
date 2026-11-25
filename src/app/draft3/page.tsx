@@ -6,10 +6,10 @@ import {
   Draft3NewsList,
   Draft3QualificationLinks,
   Draft3ServiceGrid,
-  Draft3SituationPanels,
 } from "@/features/home-draft3/draft3-sections";
 import { JobCardTabs } from "@/features/home-draft3/job-card-tabs";
 import { Reveal } from "@/features/home-draft3/reveal";
+import { SituationTabs } from "@/features/home-draft3/situation-tabs";
 import { SupportBento } from "@/features/home-draft3/support-bento";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -54,19 +54,13 @@ export default async function Draft3HomePage() {
       <Draft3Hero activeCount={activeCount} />
       <Draft3ServiceGrid />
 
-      <Reveal>
-        {/* 카드 구역: 회색 바탕 위 흰 공고 카드 */}
-        <section className="mt-12 bg-gov-surface py-14 sm:mt-16 sm:py-20">
-          <div className="mx-auto max-w-7xl px-4.5 lg:px-8">
-            <Draft3Heading eyebrow="일자리 정보" moreHref="/jobs">
-              지금 모집 중인 일자리
-            </Draft3Heading>
-            <div className="mt-6">
-              <JobCardTabs tabs={featuredTabs} isAuthenticated={Boolean(user)} bookmarkedIds={bookmarkedIds} />
-            </div>
-          </div>
-        </section>
-      </Reveal>
+      {/* 상황별 서비스: 회색 띠 위 상황 알약 + 흰 카드 (아래 공고 띠와 같은 회색 - 사이에 흰 지원금 구역이 끼어 번갈아 나온다).
+          서비스 입구 바로 아래라 처음부터 보이는 일이 많아, 떠오르기는 SituationTabs 가 위치를 보고 스스로 정한다. */}
+      <section className="mt-12 bg-gov-surface py-14 sm:mt-16 sm:py-20">
+        <div className="mx-auto max-w-7xl px-4.5 lg:px-8">
+          <SituationTabs />
+        </div>
+      </section>
 
       <Reveal>
         {/* 카드 + 목록 구역 */}
@@ -79,12 +73,16 @@ export default async function Draft3HomePage() {
       </Reveal>
 
       <Reveal>
-        {/* 목록 구역 */}
-        <section className="mx-auto mt-20 max-w-7xl px-4.5 sm:mt-28 lg:px-8">
-          <Draft3Heading eyebrow="상황별 서비스">
-            지금 내 상황에 맞는 서비스
-          </Draft3Heading>
-          <Draft3SituationPanels />
+        {/* 카드 구역: 회색 바탕 위 흰 공고 카드 */}
+        <section className="mt-20 bg-gov-surface py-14 sm:mt-28 sm:py-20">
+          <div className="mx-auto max-w-7xl px-4.5 lg:px-8">
+            <Draft3Heading eyebrow="일자리 정보" moreHref="/jobs">
+              지금 모집 중인 일자리
+            </Draft3Heading>
+            <div className="mt-6">
+              <JobCardTabs tabs={featuredTabs} isAuthenticated={Boolean(user)} bookmarkedIds={bookmarkedIds} />
+            </div>
+          </div>
         </section>
       </Reveal>
 

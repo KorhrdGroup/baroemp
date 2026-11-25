@@ -16,7 +16,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M12 9v4.2l2.8 1.8" stroke={MID} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
-  // 경력 없어도 돼요: 새싹
+  // 경력 무관(경력 없어도 돼요): 새싹
   beginner: (
     <>
       <path d="M12 21v-8" stroke={MID} strokeWidth="2.2" strokeLinecap="round" />

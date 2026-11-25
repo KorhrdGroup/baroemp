@@ -1,6 +1,6 @@
 /*
  * /draft3 "자격증으로 찾기" 단추 그림. 진단 화면 그림(landing-item-icons)과 같은 화풍:
- * 면을 채운 두 톤 - 파랑(#2469FF)은 중심, 옅은 파랑은 면, 남색은 그림마다 한 군데.
+ * 면을 채운 두 톤 - 파랑(#2469FF)은 중심, 옅은 파랑은 면. 뜻 없는 장식 점은 두지 않는다(남색은 지게차 상자에만).
  */
 const DEEP = "var(--atomic-blue-600)";
 const MID = "#7CA5FF";
@@ -14,7 +14,6 @@ const ICONS: Record<string, React.ReactNode> = {
       <circle cx="24" cy="24" r="20" fill={SOFT} />
       <path d="M24 31s-9-5.2-9-11.6a5 5 0 0 1 9-3 5 5 0 0 1 9 3C33 25.8 24 31 24 31z" fill={DEEP} />
       <path d="M7 31c4 0 7 4 11 4h10c2 0 2-3 0-3h-6" stroke={MID} strokeWidth="3.4" strokeLinecap="round" strokeLinejoin="round" />
-      <circle cx="38" cy="11" r="3.5" fill={ACCENT} />
     </>
   ),
   // 사회복지사: 나란히 선 두 사람
@@ -24,7 +23,6 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M21 36c1-6.2 4.6-9.5 10-9.5s9 3.3 10 9.5z" fill={MID} />
       <circle cx="18" cy="18.5" r="6.5" fill={DEEP} />
       <path d="M6 41c1.4-7 5.8-10.5 12-10.5S28.6 34 30 41z" fill={DEEP} />
-      <circle cx="41" cy="8" r="3.5" fill={ACCENT} />
     </>
   ),
   // 조리사: 요리사 모자
@@ -35,7 +33,6 @@ const ICONS: Record<string, React.ReactNode> = {
       <circle cx="33" cy="20" r="8" fill={MID} />
       <rect x="14" y="20" width="20" height="14" fill={MID} />
       <rect x="14" y="33" width="20" height="7" rx="2" fill={DEEP} />
-      <circle cx="40" cy="40" r="3.5" fill={ACCENT} />
     </>
   ),
   // 간호조무사: 의료 십자
@@ -44,7 +41,6 @@ const ICONS: Record<string, React.ReactNode> = {
       <rect x="5" y="5" width="38" height="38" rx="11" fill={SOFT} />
       <rect x="19.5" y="12" width="9" height="24" rx="2.5" fill={DEEP} />
       <rect x="12" y="19.5" width="24" height="9" rx="2.5" fill={DEEP} />
-      <circle cx="39" cy="9" r="3.5" fill={ACCENT} />
     </>
   ),
   // 지게차: 상자를 든 지게차
@@ -66,7 +62,6 @@ const ICONS: Record<string, React.ReactNode> = {
     <>
       <circle cx="24" cy="24" r="20" fill={SOFT} />
       <path d="M27 6L13 27h9.5L19 42l16-22h-9.5z" fill={DEEP} />
-      <circle cx="38" cy="38" r="3.5" fill={ACCENT} />
     </>
   ),
 };

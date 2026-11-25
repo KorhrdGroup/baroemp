@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { ServiceIcon } from "@/features/home-draft/service-icons";
 import { SUPPORT_HIGHLIGHTS } from "@/features/home-draft/support-highlights-data";
 import { resolveOrganizationLogo } from "@/lib/support/organization-logo";
+import { LearningCardIllustration } from "./learning-card-illustration";
 
 /* 큰 카드로 세울 제도. 가장 많이 찾고 금액이 눈에 띄는 것. */
 const LEAD_ID = "support-002";
@@ -25,23 +25,23 @@ export function SupportBento() {
         href="/support"
         className="relative flex flex-col justify-between gap-6 overflow-hidden rounded-xl bg-[#EFF4FF] p-6 sm:p-8 lg:col-span-5"
       >
-        <div className="flex items-start justify-between gap-4">
+        {/* 배움카드 그림(공공기관 누리집식 평면 그림)을 오른쪽 아래 모서리 밖으로 크게 걸쳐 둔다 - 카드가 잘라 내 화면 밖으로 이어지는 느낌.
+            글은 그림 위로 올린다(relative). 좁은 휴대폰에서는 글과 겹쳐 빼 둔다. */}
+        <LearningCardIllustration className="pointer-events-none absolute -right-10 -bottom-6 hidden w-[21rem] sm:block" />
+        <div className="relative flex items-start justify-between gap-4">
           <div>
             {leadLogo ? (
-              <Image src={leadLogo} alt={lead.org} width={96} height={24} className="h-6 w-auto" />
+              <Image src={leadLogo} alt={lead.org} width={128} height={32} className="h-8 w-auto" />
             ) : (
               <p className="text-body-3 font-semibold text-slate-700">{lead.org}</p>
             )}
             <p className="mt-4 text-title-2 font-extrabold tracking-[-0.02em] text-slate-900">{lead.title}</p>
             <p className="mt-2 text-body-2 font-medium break-keep text-slate-700">{lead.summary}</p>
           </div>
-          <span aria-hidden className="hidden shrink-0 rounded-full bg-white p-4 sm:block [&>svg]:size-12">
-            <ServiceIcon id="support" />
-          </span>
         </div>
-        <p className="text-headline-3 font-extrabold tracking-[-0.02em] text-atomic-blue-600">{lead.amount}</p>
+        <p className="relative text-headline-3 font-extrabold tracking-[-0.02em] text-atomic-blue-600">{lead.amount}</p>
         {/* 오른쪽 목록 다섯 줄과 높이를 맞추느라 생기는 가운데 빈자리를, 금액과 신청 정보 한 줄로 나눠 채운다. */}
-        <div className="flex items-end justify-between gap-4 border-t border-[#DEE8FF] pt-5">
+        <div className="relative flex items-end justify-between gap-4 border-t border-[#DEE8FF] pt-5 sm:border-transparent">
           <dl className="flex gap-6 text-body-3">
             <div>
               <dt className="font-medium text-slate-600">신청 기간</dt>

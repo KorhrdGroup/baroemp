@@ -186,7 +186,7 @@ export function SupportTable() {
   );
 }
 
-export const SITUATIONS = [
+const SITUATIONS = [
   {
     icon: "beginner",
     title: "새로운 일을 찾아요",
