@@ -120,36 +120,50 @@ export function Draft3Heading({
 }
 
 /**
- * 상황별 서비스. /draft2 는 굵은 검정 윗줄 + 세로 칸막이 표였는데, /draft3 의 다른 구역(자격증 · 상담 판)처럼
- * 테두리 없는 회색 판 세 장으로 나눈다. 그림은 흰 원에 얹어 서비스 판과 결을 맞추고, 링크 사이는 옅은 줄만.
- * 세 판 모두 끝에 붙던 "1:1 취업컨설팅"은 뺀다 - 바로 아래 상담 구역과 겹쳐서, 판마다 그 상황에만 맞는 세 줄만 남긴다.
+ * 상황별 서비스. 상자 없이 상황마다 가로 한 줄: 그림 · 상황 이름 · 갈 곳 알약.
+ * 세 상황(새로 찾기 → 다시 일하기 → 지금 일하는 중)이 한 흐름으로 읽히게 그림 원들을 세로 선으로 잇는다.
+ * 선은 줄마다 둘로 나눠 긋는다(원 위 · 원 아래) - 휴대폰에서 알약이 줄바꿈돼 줄 높이가 달라도 원끼리 정확히 이어지게.
+ * "1:1 취업컨설팅"은 바로 아래 상담 구역과 겹쳐 뺀다.
  */
 export function Draft3SituationPanels() {
   return (
-    <ul className="mt-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-      {SITUATIONS.map((s) => (
-        <li key={s.title} className="rounded-xl bg-gov-surface p-6 sm:p-7">
-          <div className="flex items-center gap-3">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-white sm:size-14 [&>svg]:size-8 sm:[&>svg]:size-9">
-              <ServiceIcon id={s.icon} />
-            </span>
-            <h3 className="text-title-3 font-bold text-slate-900">{s.title}</h3>
-          </div>
-          <ul className="mt-5 flex flex-col divide-y divide-slate-200/70">
+    <ol className="mt-8">
+      {SITUATIONS.map((s, i) => (
+        <li
+          key={s.title}
+          className="relative grid grid-cols-[auto_1fr] gap-x-4 py-4 sm:gap-x-6 md:grid-cols-[auto_15rem_1fr] md:items-center md:py-7"
+        >
+          {/*
+            잇는 선: 원 가운데에서 위로 한 번 · 아래로 한 번 (첫 줄 위, 끝 줄 아래는 비운다).
+            좁은 화면은 원이 줄 맨 위에 붙어 원 가운데가 위 여백 + 반지름(1rem + 1.75rem / sm 2rem), 넓은 화면은 줄 가운데.
+          */}
+          {i > 0 && (
+            <span aria-hidden className="absolute top-0 left-7 h-[2.75rem] w-0.5 -translate-x-1/2 bg-[#7CA5FF] sm:left-8 sm:h-12 md:h-1/2" />
+          )}
+          {i < SITUATIONS.length - 1 && (
+            <span aria-hidden className="absolute top-[2.75rem] bottom-0 left-7 w-0.5 -translate-x-1/2 bg-[#7CA5FF] sm:top-12 sm:left-8 md:top-1/2" />
+          )}
+          <span className="relative row-span-2 flex size-14 shrink-0 items-center justify-center rounded-full bg-atomic-blue-50 ring-4 ring-white sm:size-16 md:row-span-1 [&>svg]:size-8 sm:[&>svg]:size-9">
+            <ServiceIcon id={s.icon} />
+          </span>
+          <h3 className="flex min-h-14 items-center text-body-1 font-bold text-slate-900 sm:min-h-16 sm:text-title-3 md:min-h-0">{s.title}</h3>
+          <ul className="col-start-2 mt-1 flex flex-wrap gap-2 md:col-start-3 md:mt-0">
             {s.links
               .filter((l) => l.href !== "/consulting")
               .map((l) => (
                 <li key={l.label}>
-                  <Link href={l.href} className="flex items-center justify-between py-3 text-body-1 font-medium text-slate-800">
+                  <Link
+                    href={l.href}
+                    className="inline-flex h-11 items-center rounded-full bg-gov-surface px-4.5 text-body-2 font-semibold whitespace-nowrap text-slate-800"
+                  >
                     {l.label}
-                    <ChevronRight className="size-4 text-slate-500" aria-hidden />
                   </Link>
                 </li>
               ))}
           </ul>
         </li>
       ))}
-    </ul>
+    </ol>
   );
 }
 
