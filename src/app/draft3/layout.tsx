@@ -19,7 +19,7 @@ export default async function Draft3Layout({ children }: { children: React.React
     // 회색 바탕 위에 흰 카드를 얹는다. 좁은 화면은 아래 탭(64px)에 푸터가 가리지 않게 그만큼 비운다.
     // 회색은 시안 전용 쿨그레이(globals.css 의 .draft-cool-grey)로 맞춘다.
     <div className="draft-cool-grey flex min-h-screen flex-col bg-gov-surface pb-16 lg:pb-0">
-      <SiteHeaderDraft user={user ? { name: user.name, email: user.email, role: user.role } : null} />
+      <SiteHeaderDraft look="draft3" user={user ? { name: user.name, email: user.email, role: user.role } : null} />
       <main className="flex-1">{children}</main>
       <SiteFooter />
       <BottomTabBar />

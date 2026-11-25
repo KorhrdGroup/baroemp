@@ -20,7 +20,13 @@ export interface SiteHeaderUser {
   role: AppRole;
 }
 
-export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
+/**
+ * look="draft3": /draft3 머리글 (시안 D). 메뉴 글을 한 단계 키우고 지금 보는 메뉴는 옅은 파랑 알약으로 감싼다(밑줄 대신).
+ * 검색은 동그란 단추 하나, 화면 크기는 "가" 세 글자로 줄여 같은 줄에 - 위 보조 줄을 없앤다. 단추는 남색 알약.
+ * 다른 화면(/draft · /draft2 · 운영)은 look 을 주지 않아 그대로다. 휴대폰 모양은 둘 다 같다.
+ */
+export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; look?: "draft3" }) {
+  const d3 = look === "draft3";
   const isAdmin = user ? isAdminRole(user.role) : false;
 
   // 하위 경로(/jobs/job-001, /resume/new 등)에서도 해당 메뉴를 선택 상태로 둔다.
@@ -48,7 +54,7 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
      * 붙는 높이(64px)가 바뀌면 화면마다 맞춰 둔 scroll-mt 값이 어긋난다.
      * 좁은 화면은 브라우저의 두 손가락 확대가 있어 넓은 화면에만 둔다.
      */}
-    <div className="hidden border-b border-border/70 bg-gov-surface lg:block">
+    <div className={cn("hidden border-b border-border/70 bg-gov-surface", !d3 && "lg:block")}>
       <div className="mx-auto flex h-9 max-w-7xl items-center justify-end px-8">
         <ScreenScaleControl />
       </div>
@@ -58,15 +64,15 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
       1/6을 먹어 붙이지 않는다 - 메뉴는 아래 탭이 늘 붙어 있다.
     */}
     <header className="z-50 w-full border-b border-border/70 bg-white lg:sticky lg:top-0">
-      <div className="mx-auto flex h-16 max-w-7xl items-center gap-6 px-4.5 lg:h-[72px] lg:gap-8 lg:px-8">
+      <div className={cn("mx-auto flex h-16 max-w-7xl items-center gap-6 px-4.5 lg:gap-8 lg:px-8", d3 ? "lg:h-20" : "lg:h-[72px]")}>
         <Link href="/" aria-label={siteConfig.name} className="flex shrink-0 items-center">
           {/* 같은 그림 한 장이라 두 번 그려도 요청은 하나다. 좁은 화면에서는 한 단계 작게. */}
           <Logo height={18} priority className="lg:hidden" />
-          <Logo height={20} priority className="hidden lg:block" />
+          <Logo height={d3 ? 22 : 20} priority className="hidden lg:block" />
         </Link>
 
         {/* 메뉴. 막대를 머리글 아래 선에 맞추려고 줄 높이만큼 늘린다. */}
-        <nav aria-label="주 메뉴" className="hidden h-full items-center lg:flex">
+        <nav aria-label="주 메뉴" className={cn("hidden h-full items-center lg:flex", d3 && "gap-1.5")}>
           {mainNavItems.map((item) => {
             const current = isCurrentNav(item.href);
             return (
@@ -75,35 +81,58 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
                   href={item.href}
                   aria-current={current ? "page" : undefined}
                   className={cn(
-                    "px-4 py-2 text-body-1 whitespace-nowrap xl:px-5",
-                    current ? "font-bold text-brand-blue-600" : "font-semibold text-slate-800",
+                    d3
+                      ? cn(
+                          "rounded-full px-5 py-2.5 text-title-3 whitespace-nowrap transition-colors duration-200",
+                          current ? "bg-[#EFF4FF] font-bold text-[#2469FF]" : "font-semibold text-slate-800",
+                        )
+                      : cn(
+                          "px-4 py-2 text-body-1 whitespace-nowrap xl:px-5",
+                          current ? "font-bold text-brand-blue-600" : "font-semibold text-slate-800",
+                        ),
                   )}
                 >
                   {item.label}
                 </Link>
-                {/* 막대가 왼쪽에서 오른쪽으로 채워지도록 scaleX를 쓴다(width 애니메이션은 리플로우를 유발). */}
-                <span
+                {/* 막대가 왼쪽에서 오른쪽으로 채워지도록 scaleX를 쓴다(width 애니메이션은 리플로우를 유발). draft3 은 알약이라 막대가 없다. */}
+                {!d3 && <span
                   aria-hidden
                   className={cn(
                     "absolute inset-x-3 bottom-0 h-[3px] origin-left transition-transform duration-200 ease-out",
                     current ? "bg-brand-blue-600" : "bg-slate-300 scale-x-0",
                     !current && !onAuthScreen && "group-focus-within:scale-x-100",
                   )}
-                />
+                />}
               </div>
             );
           })}
         </nav>
 
-        {showHeaderSearch && (
-          <SearchTrigger onOpen={() => setSearchOpen(true)} className="ml-auto hidden lg:flex" />
+        {d3 ? (
+          <div className="ml-auto hidden items-center gap-3 lg:flex">
+            <ScreenScaleControl compact />
+            {showHeaderSearch && (
+              <button
+                type="button"
+                onClick={() => setSearchOpen(true)}
+                aria-haspopup="dialog"
+                aria-label="일자리 검색"
+                title="일자리 검색"
+                className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#F3F5F8] text-slate-800"
+              >
+                <Search className="size-5" />
+              </button>
+            )}
+          </div>
+        ) : (
+          showHeaderSearch && <SearchTrigger onOpen={() => setSearchOpen(true)} className="ml-auto hidden lg:flex" />
         )}
 
         {/*
           좁은 화면의 메뉴는 아래 탭(BottomTabBar)이 맡는다. 그래서 햄버거가 없고,
           로그인한 회원의 버튼들도 lg 부터만 보인다 - 좁은 화면에서는 아래 탭의 "마이"가 같은 곳이다.
         */}
-        <div className={cn("ml-auto flex shrink-0 items-center gap-2", showHeaderSearch && "lg:ml-0")}>
+        <div className={cn("ml-auto flex shrink-0 items-center gap-2", (showHeaderSearch || d3) && "lg:ml-0")}>
           {user ? (
             <>
               {isAdmin && (
@@ -111,7 +140,11 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
                   <Link href="/admin">관리자</Link>
                 </Button>
               )}
-              <Button size="sm" className="hidden bg-brand-blue-600 lg:inline-flex" asChild>
+              <Button
+                size="sm"
+                className={cn("hidden lg:inline-flex", d3 ? "h-11 rounded-full bg-[#00184D] px-5 text-body-2 font-bold" : "bg-brand-blue-600")}
+                asChild
+              >
                 <Link href="/mypage">마이페이지</Link>
               </Button>
               <form action={signOutAction} className="hidden lg:inline-flex">
@@ -122,7 +155,11 @@ export function SiteHeaderDraft({ user }: { user: SiteHeaderUser | null }) {
             </>
           ) : (
             /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
-            <Button size="sm" className="bg-brand-blue-600" asChild>
+            <Button
+              size="sm"
+              className={cn(d3 ? "rounded-full bg-[#00184D] lg:h-11 lg:px-5 lg:text-body-2 lg:font-bold" : "bg-brand-blue-600")}
+              asChild
+            >
               <Link href={loginHref}>로그인/회원가입</Link>
             </Button>
           )}

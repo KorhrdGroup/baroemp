@@ -31,7 +31,18 @@ function subscribe(onChange: () => void) {
   return () => window.removeEventListener(CHANGE_EVENT, onChange);
 }
 
-export function ScreenScaleControl() {
+/**
+ * compact: /draft3 머리글용. "화면 크기" 글과 칸막이 단추 대신, 크기가 커지는 "가" 두 글자만 옅은 회색 알약 안에 둔다.
+ * 단계는 보통 · 크게(120%) 둘뿐 - 110% · 120% 는 차이가 작아 구분이 안 되고, 둘이면 켜고 끄는 것처럼 쉽다.
+ * 고른 글자만 흰 동그라미로 띄운다. 무엇인지는 각 단추 이름(화면 크기 보통 · 크게)과 말풍선(title)이 알려 준다.
+ * 다른 화면의 세 단계로 고른 110% 가 남아 있으면 "크게" 쪽으로 표시한다.
+ */
+const COMPACT_LEVELS = [
+  { value: "1", label: "보통", size: "text-[13px]" },
+  { value: "1.2", label: "크게", size: "text-[17px]" },
+];
+
+export function ScreenScaleControl({ compact = false }: { compact?: boolean }) {
   const scale = useSyncExternalStore(subscribe, readScale, () => "1");
 
   useEffect(() => {
@@ -46,6 +57,35 @@ export function ScreenScaleControl() {
     }
     window.dispatchEvent(new Event(CHANGE_EVENT));
   };
+
+  if (compact) {
+    return (
+      <div role="group" aria-label="화면 크기" className="flex items-center gap-0.5 rounded-full bg-[#F3F5F8] p-1">
+        {COMPACT_LEVELS.map((level) => {
+          const on = level.value === "1" ? scale === "1" : scale !== "1";
+          return (
+          <button
+            key={level.value}
+            type="button"
+            aria-pressed={on}
+            aria-label={`화면 크기 ${level.label}`}
+            title={`화면 크기 ${level.label}`}
+            onClick={() => choose(level.value)}
+            className={cn(
+              "flex size-8 cursor-pointer items-center justify-center rounded-full leading-none transition-colors duration-200",
+              level.size,
+              on
+                ? "bg-white font-bold text-[#00184D] shadow-[0_1px_3px_rgba(0,24,77,0.15)]"
+                : "font-semibold text-slate-500",
+            )}
+          >
+            가
+          </button>
+          );
+        })}
+      </div>
+    );
+  }
 
   return (
     <div role="group" aria-label="화면 크기" className="flex items-center gap-2">
