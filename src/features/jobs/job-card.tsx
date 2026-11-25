@@ -162,7 +162,7 @@ export function JobCard({
               </li>
             ))}
           </ul>
-          <span className={cn("shrink-0 text-caption-1", urgent ? "font-bold text-[#D04040]" : "font-medium text-slate-600")}>
+          <span className={cn("shrink-0 text-caption-1", urgent ? "font-bold text-baro-danger" : "font-medium text-slate-600")}>
             {deadlineLabel(left)}
           </span>
         </div>

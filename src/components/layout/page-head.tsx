@@ -43,7 +43,7 @@ export function PageHead({
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] in-[.draft3-theme]:bg-[#EFF4FF] in-[.draft3-theme]:bg-none",
+        "relative overflow-hidden bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] in-[.draft3-theme]:bg-baro-blue-50 in-[.draft3-theme]:bg-none",
         className,
       )}
     >

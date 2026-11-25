@@ -58,7 +58,7 @@ export function DiagnosisLanding({
   return (
     <div className="bg-white">
       {/* ① 첫 칸. 바탕은 화면 머리(PageHead)와 같은 옅은 하늘색. 아래로 흰색까지 풀어 다음 구역과 끊기지 않게. */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white in-[.draft3-theme]:bg-[#EFF4FF] in-[.draft3-theme]:bg-none">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white in-[.draft3-theme]:bg-baro-blue-50 in-[.draft3-theme]:bg-none">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-24 -right-24 size-[28rem] rounded-full bg-[radial-gradient(circle,rgba(0,73,229,0.12),transparent_65%)] in-[.draft3-theme]:hidden"
@@ -108,8 +108,8 @@ export function DiagnosisLanding({
               <li key={s.title} className="relative flex items-start gap-4 md:flex-col md:gap-4">
                 {i < steps.length - 1 && (
                   <>
-                    <span aria-hidden className="absolute top-6 left-6 h-[calc(100%+1.5rem)] w-0.5 -translate-x-1/2 bg-[#7CA5FF] md:hidden" />
-                    <span aria-hidden className="absolute top-6 left-6 hidden h-0.5 w-[calc(100%+1.5rem)] -translate-y-1/2 bg-[#7CA5FF] md:block" />
+                    <span aria-hidden className="absolute top-6 left-6 h-[calc(100%+1.5rem)] w-0.5 -translate-x-1/2 bg-baro-blue-300 md:hidden" />
+                    <span aria-hidden className="absolute top-6 left-6 hidden h-0.5 w-[calc(100%+1.5rem)] -translate-y-1/2 bg-baro-blue-300 md:block" />
                   </>
                 )}
                 <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full bg-atomic-blue-600 text-title-3 font-bold text-white ring-4 ring-white">
