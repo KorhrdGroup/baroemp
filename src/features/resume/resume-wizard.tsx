@@ -28,10 +28,11 @@ type Step = "template" | "sections" | "prefill";
   카드 자체는 흰 바탕에 얇은 선으로 두고, 색은 아이콘을 담은 작은 칸에만 쓴다.
 */
 const TEMPLATE_CARD_STYLES = [
-  { icon: FileText, tone: "bg-slate-50", iconTone: "text-slate-500" },
-  { icon: Briefcase, tone: "bg-sky-50", iconTone: "text-brand-blue-600" },
-  { icon: UserRound, tone: "bg-violet-50", iconTone: "text-violet-500" },
-  { icon: HeartHandshake, tone: "bg-emerald-50", iconTone: "text-emerald-600" },
+  /* /draft3 두 파랑: 아이콘은 모두 옅은 파랑 원에 파랑 선 그림. 양식은 그림 모양으로 가른다. */
+  { icon: FileText, tone: "bg-baro-blue-50", iconTone: "text-baro-blue" },
+  { icon: Briefcase, tone: "bg-baro-blue-50", iconTone: "text-baro-blue" },
+  { icon: UserRound, tone: "bg-baro-blue-50", iconTone: "text-baro-blue" },
+  { icon: HeartHandshake, tone: "bg-baro-blue-50", iconTone: "text-baro-blue" },
 ];
 
 /** 기본정보는 이력서가 이력서이기 위한 최소한이라 뺄 수 없다. */
@@ -91,7 +92,7 @@ function StepHeader({ step, title, description }: { step: 1 | 2; title: string; 
 }
 
 function WizardCard({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-3xl rounded-xl border border-border bg-white p-6 sm:p-10">{children}</div>;
+  return <div className="mx-auto max-w-3xl rounded-card bg-white p-6 sm:p-10">{children}</div>;
 }
 
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
@@ -243,9 +244,9 @@ export function ResumeWizard({
             const style = TEMPLATE_CARD_STYLES[idx % TEMPLATE_CARD_STYLES.length];
             const Icon = style.icon;
             return (
-              <div key={t.id} className="flex flex-col rounded-xl border border-border bg-white p-5 text-center sm:p-6">
+              <div key={t.id} className="flex flex-col rounded-card bg-white p-5 text-center sm:p-6">
                 <div className="flex justify-center">
-                  <span className={cn("flex size-12 items-center justify-center rounded-xl", style.tone)}>
+                  <span className={cn("flex size-14 items-center justify-center rounded-full", style.tone)}>
                     <Icon className={cn("size-7", style.iconTone)} />
                   </span>
                 </div>
@@ -290,7 +291,7 @@ export function ResumeWizard({
           <div>
             <FieldLabel>고른 양식</FieldLabel>
             <div className="flex items-center gap-3 rounded-xl border border-border bg-white px-4 py-3">
-              <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-lg", templateStyle.tone)}>
+              <span className={cn("flex size-9 shrink-0 items-center justify-center rounded-full", templateStyle.tone)}>
                 <templateStyle.icon className={cn("size-4", templateStyle.iconTone)} />
               </span>
               <div className="min-w-0 flex-1">

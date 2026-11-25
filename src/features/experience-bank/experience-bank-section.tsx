@@ -47,7 +47,7 @@ export function ExperienceBankSection({
     // sticky 헤더에 제목이 가리지 않도록 scroll-mt를 준다.
     <div
       id="experience-bank"
-      className={cn("scroll-mt-24", nested ? "mt-4 rounded-xl bg-gov-surface p-5" : "mt-10")}
+      className={cn("scroll-mt-24", nested ? "mt-4 rounded-card bg-white p-5" : "mt-10")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
@@ -76,7 +76,7 @@ export function ExperienceBankSection({
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-4 rounded-xl bg-white p-8 text-center">
+        <div className="mt-4 rounded-xl bg-gov-surface p-8 text-center">
           <p className="text-label-1 text-slate-500">
             아직 저장한 경험이 없어요. 미리 정리해두면 자기소개서 문항마다 골라 쓸 수 있어요.
           </p>
@@ -95,8 +95,8 @@ export function ExperienceBankSection({
             <div
               key={item.id}
               className={cn(
-                // 회색 판 위 흰 면만으로 띄운다 (테두리 · 호버 없이 - /draft3 구성).
-                "relative flex items-center justify-between gap-3 rounded-xl bg-white p-5",
+                // 흰 카드 안의 회색 면 (테두리 · 호버 없이 - /draft3 구성).
+                "relative flex items-center justify-between gap-3 rounded-xl bg-gov-surface p-5",
               )}
             >
               {/*
