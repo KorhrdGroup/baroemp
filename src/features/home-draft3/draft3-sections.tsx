@@ -4,6 +4,7 @@ import { QUALIFICATIONS } from "@/features/home-draft/qualification-section";
 import { ServiceIcon } from "@/features/home-draft/service-icons";
 import { labelRegion } from "@/lib/labels";
 import { ConsultIllustration } from "./consult-illustration";
+import { QualificationIcon } from "./qualification-icons";
 import type { Region, SupportProgram } from "@/types";
 
 /*
@@ -158,8 +159,9 @@ export function Draft3QualificationLinks() {
           <li key={name}>
             <Link
               href={`/jobs?keyword=${encodeURIComponent(name)}`}
-              className="flex h-full min-h-12 items-center justify-center rounded-lg bg-white px-3 text-body-2 font-semibold text-slate-800"
+              className="flex h-full min-h-12 items-center gap-3 rounded-lg bg-white px-4 text-body-2 font-semibold text-slate-800"
             >
+              <QualificationIcon name={name} />
               {name}
             </Link>
           </li>

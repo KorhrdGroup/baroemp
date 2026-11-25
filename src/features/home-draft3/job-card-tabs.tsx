@@ -10,12 +10,16 @@ import { splitSalary } from "@/lib/salary";
 import { cn } from "@/lib/utils";
 import type { Job } from "@/types";
 
-/** 넓은 화면은 3장 × 2줄, 휴대폰은 4장까지만(세로로 길어지지 않게). */
+/**
+ * 공고 6장을 가로 한 줄로 두고 왼쪽으로 천천히 흐르게 한다.
+ * 같은 6장을 한 번 더 이어 붙여 translateX(-50%) 로 돌리면 이음매 없이 반복된다(globals.css 의 marquee).
+ * 마우스를 올리거나 키보드로 들어오면 멈춘다 - 움직이는 카드는 누르기 어려워서.
+ * 휴대폰(sm 미만)과 움직임 줄이기 설정에서는 흐르지 않고 손으로 미는 가로 목록이 된다 - 휴대폰은 마우스를 올려 멈출 수가 없어서.
+ */
 const CARD_COUNT = 6;
-const MOBILE_COUNT = 4;
 
 /**
- * /draft3 공고 구역. 탭은 /draft2 의 밑줄 탭, 공고는 카드(아래 SimpleJobCard).
+ * /draft3 공고 구역. 탭은 /draft2 의 밑줄 탭, 공고는 가로로 흐르는 카드 한 줄(아래 SimpleJobCard).
  * 공고는 급여 · 지역 · 마감을 견줘 보는 것이라 표보다 카드가 한눈에 들어온다.
  */
 export function JobCardTabs({
@@ -58,13 +62,26 @@ export function JobCardTabs({
         })}
       </div>
 
-      <ul aria-label={`${active.label} 공고`} className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
-        {active.jobs.slice(0, CARD_COUNT).map((job, i) => (
-          <li key={job.id} className={i >= MOBILE_COUNT ? "hidden sm:block" : undefined}>
-            <SimpleJobCard job={job} isAuthenticated={isAuthenticated} isBookmarked={bookmarkedIds.includes(job.id)} />
-          </li>
-        ))}
-      </ul>
+      <div className="scrollbar-hidden -mx-4.5 mt-6 overflow-x-auto sm:mx-0 sm:[mask-image:linear-gradient(to_right,transparent,black_3%,black_97%,transparent)] sm:motion-safe:overflow-hidden">
+        <ul
+          key={active.key}
+          aria-label={`${active.label} 공고`}
+          className="flex w-max pr-4.5 pl-1.5 focus-within:[animation-play-state:paused] hover:[animation-play-state:paused] sm:px-0 sm:motion-safe:animate-[marquee_50s_linear_infinite]"
+        >
+          {[0, 1].map((copy) =>
+            active.jobs.slice(0, CARD_COUNT).map((job) => (
+              <li
+                key={`${copy}-${job.id}`}
+                aria-hidden={copy === 1 || undefined}
+                inert={copy === 1 || undefined}
+                className={cn("w-[17rem] shrink-0 pl-3 sm:w-[20rem] sm:pl-4", copy === 1 && "hidden sm:motion-safe:block")}
+              >
+                <SimpleJobCard job={job} isAuthenticated={isAuthenticated} isBookmarked={bookmarkedIds.includes(job.id)} />
+              </li>
+            )),
+          )}
+        </ul>
+      </div>
 
       <div className="mt-6 flex justify-center">
         <Link
