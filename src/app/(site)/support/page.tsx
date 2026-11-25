@@ -3,7 +3,6 @@ import { SupportFlow } from "@/features/support/support-flow";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { getSupportAssessmentSessionRepository } from "@/lib/repositories";
 import { getSupportShowcase } from "@/services/support-search.service";
-import { SupportShowcaseSection } from "@/features/support/support-showcase";
 
 export const metadata: Metadata = {
   title: "지원금 찾기 | 한평생 바로취업",
@@ -42,7 +41,7 @@ export default async function SupportPage({
     <div className="draft3-theme">
       {/* ?start=1: 이미 무엇을 하려는지 아는 경로(마이페이지 등)에서 소개 화면을 건너뛴다. */}
       <SupportFlow autoStart={start === "1"} isLoggedIn={Boolean(user)} latestResultSessionId={latestSession?.id}
-        showcase={showcase ? <SupportShowcaseSection data={showcase} asOf={asOf} /> : undefined}
+        showcase={showcase ? { data: showcase, asOf } : undefined}
       />
     </div>
   );

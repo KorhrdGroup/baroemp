@@ -8,10 +8,12 @@ import type { Crumb } from "./page-head";
   진단으로 시작하는 서비스(직업진단 · 지원금 찾기)의 첫 화면.
   다른 세부 화면은 "위치 줄 + 제목" 머리 아래 바로 내용이지만, 여기는 처음 온 사람이 무엇을 얻는지 보고
   시작 단추를 누르게 하는 곳이라 소개 화면처럼 짠다:
+  목적은 정보를 다 보여 주는 게 아니라 진단을 시작하게 하는 것. 그래서 위계는 약속 → 얻는 것 → 쉬움 → 맛보기 → 다시 시작:
   ① 첫 칸 - 왼쪽 큰 제목 · 시작 단추, 오른쪽 결과 예시 카드(받게 될 것을 미리 보여 준다)
-  ② 이렇게 진행돼요 - 큰 동그라미(아이콘 + N단계)를 가는 선으로 잇는다
-  ③ 알 수 있는 것 - 그림 붙은 칸
-  ④ 안내 글
+  ② 알 수 있는 것 - 그림 붙은 칸(진단하면 받는 것)
+  ③ 이렇게 진행돼요 - 큰 동그라미(아이콘 + N단계)를 가는 선으로 잇는다(부담 덜기)
+     + 화면별 맛보기 구역(extra, 예: 지원제도 모음)
+  ④ 마무리 - 남색 판에 시작 단추 한 번 더, 그 아래 안내 글
   무게: 굵기 800은 제목에만, 칸 제목은 700, 나머지는 500~600. 진한 파랑은 시작 단추와 핵심 숫자에만 -
   번호 · 표시까지 진하게 칠하면 화면이 무겁고 투박해진다. 모서리는 /draft3과 같게 카드 20px(rounded-card), 단추 12px, 표시는 알약.
   그림은 홈 서비스 그림처럼 면을 채운 두 톤(진한 파랑 + 옅은 파랑 + 노랑 한 점)으로 맞춘다.
@@ -44,6 +46,7 @@ export function DiagnosisLanding({
   items,
   note,
   extra,
+  closingTitle,
 }: {
   crumbs: Crumb[];
   /** 단추 아래 조용한 안내 한 줄(예: "무료", "약 3~5분"). */
@@ -60,6 +63,8 @@ export function DiagnosisLanding({
   note: React.ReactNode;
   /** 진행 순서 아래에 끼우는 화면별 구역(예: 지원금 찾기의 분야별 대표 지원제도). */
   extra?: React.ReactNode;
+  /** 맨 끝 시작 단추 판의 제목. 정보를 본 뒤 "내게 맞는 것은 진단으로"를 한 번 더 건넨다. */
+  closingTitle: React.ReactNode;
 }) {
   return (
     <div className="bg-white">
@@ -113,8 +118,41 @@ export function DiagnosisLanding({
         </div>
       </section>
 
+      {/* ② 진단으로 알 수 있는 것(얻는 것). 첫 칸 바로 아래에 둬 "해 보면 무엇을 받는지"를 먼저 보인다. /draft3처럼 폭을 꽉 채운 회색 띠 위에 흰 카드를 얹어 진행 순서와 구역을 나눈다.
+          그림은 홈 서비스 그림과 같은 화풍으로 직접 그린 것(landing-item-icons).
+          넓은 화면의 칸 수는 개수에 맞춘다 - 6개는 3칸 두 줄, 4개는 4칸 한 줄. 3칸에 4개를 놓으면 한 칸이 혼자 남는다.
+          칸이 좁아지는 4칸에서도 글이 눌리지 않게, 휴대폰이 아니면 그림을 글 위에 둔다. */}
+      <section className="bg-gov-surface">
+        <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
+          <Reveal className="group">
+            {/* 머리는 진행 순서 · 지원제도 모음과 같은 짜임(작은 머리말 + 제목). */}
+            <p className="text-body-3 font-semibold text-slate-600">진단 결과</p>
+            <h2 className="mt-1.5 text-title-2 font-extrabold tracking-[-0.02em] text-slate-900">{itemsTitle}</h2>
+            <ul className={`mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 ${items.length % 3 === 0 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
+              {/* 칸마다 차례로 떠오른다. 감싼 Reveal(group)의 data-reveal 을 따라간다(/draft3 소식 목록과 같은 방식). */}
+              {items.map(({ icon, title: itemTitle, desc }, i) => (
+                <li
+                  key={itemTitle}
+                  className="flex items-start gap-4 rounded-card bg-white p-5 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0 sm:flex-col sm:gap-4 sm:p-6"
+                  style={{ transitionDelay: `${150 + i * 80}ms` }}
+                >
+                  {/* 그림은 옅은 파랑 원에 얹는다 (/draft3 서비스 입구와 같은 방식). */}
+                  <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-baro-blue-50 sm:size-16 [&>svg]:size-9 sm:[&>svg]:size-10">
+                    <LandingItemIcon id={icon} />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-body-1 font-bold text-slate-900">{itemTitle}</p>
+                    <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{desc}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </Reveal>
+
+        </div>
+      </section>
       <div className="mx-auto max-w-6xl px-4.5 lg:px-8">
-        {/* ② 진행 순서. 경기 잡아바 "세부일정"처럼 큰 동그라미(아이콘 + "N단계")를 가는 파랑 선으로 잇고, 제목 · 설명은 그 아래 가운데에.
+        {/* ③ 진행 순서. 경기 잡아바 "세부일정"처럼 큰 동그라미(아이콘 + "N단계")를 가는 파랑 선으로 잇고, 제목 · 설명은 그 아래 가운데에.
             넓은 화면은 가로 한 줄, 휴대폰은 동그라미를 왼쪽에 두고 세로로 잇는다. 화면에 들어오면 한 단계씩 떠오른다. */}
         <Reveal className="group">
           <section className="py-14 sm:py-20">
@@ -153,36 +191,26 @@ export function DiagnosisLanding({
         {extra}
       </div>
 
-      {/* ③ 알 수 있는 것 + ④ 안내 글. /draft3처럼 폭을 꽉 채운 회색 띠 위에 흰 카드를 얹어 진행 순서와 구역을 나눈다.
-          그림은 홈 서비스 그림과 같은 화풍으로 직접 그린 것(landing-item-icons).
-          넓은 화면의 칸 수는 개수에 맞춘다 - 6개는 3칸 두 줄, 4개는 4칸 한 줄. 3칸에 4개를 놓으면 한 칸이 혼자 남는다.
-          칸이 좁아지는 4칸에서도 글이 눌리지 않게, 휴대폰이 아니면 그림을 글 위에 둔다. */}
+      {/* ⑤ 마무리. 정보는 여기까지 보여 주고, 내게 맞는 것은 진단으로 - 끝에서 한 번 더 시작 단추를 크게 건넨다.
+          남색 판은 머리글 마이페이지 단추와 같은 색. 안내 글은 판 아래 글만. */}
       <section className="bg-gov-surface">
         <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
-          <Reveal className="group">
-            <h2 className="text-title-2 font-extrabold text-slate-900">{itemsTitle}</h2>
-            <ul className={`mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 ${items.length % 3 === 0 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
-              {/* 칸마다 차례로 떠오른다. 감싼 Reveal(group)의 data-reveal 을 따라간다(/draft3 소식 목록과 같은 방식). */}
-              {items.map(({ icon, title: itemTitle, desc }, i) => (
-                <li
-                  key={itemTitle}
-                  className="flex items-start gap-4 rounded-card bg-white p-5 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0 sm:flex-col sm:gap-4 sm:p-6"
-                  style={{ transitionDelay: `${150 + i * 80}ms` }}
-                >
-                  {/* 그림은 옅은 파랑 원에 얹는다 (/draft3 서비스 입구와 같은 방식). */}
-                  <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-baro-blue-50 sm:size-16 [&>svg]:size-9 sm:[&>svg]:size-10">
-                    <LandingItemIcon id={icon} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-body-1 font-bold text-slate-900">{itemTitle}</p>
-                    <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{desc}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-
-          {/* ④ 안내 글. 회색 띠 위라 상자 없이 글만. */}
+          <div className="flex flex-col items-center rounded-card bg-baro-navy px-6 py-12 text-center sm:px-10 sm:py-16">
+            <h2 className="text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-balance text-white sm:text-title-1 max-sm:[&_br]:hidden">
+              {closingTitle}
+            </h2>
+            {badges.length > 0 && (
+              <ul className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-body-2 font-semibold text-white/85">
+                {badges.map((b) => (
+                  <li key={b} className="flex items-center gap-1.5">
+                    <Check aria-hidden strokeWidth={2.5} className="size-4 text-baro-blue-300" />
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-8 flex w-full justify-center">{actions}</div>
+          </div>
           <p className="mt-8 text-body-3 leading-relaxed font-medium break-keep text-slate-600">{note}</p>
         </div>
       </section>

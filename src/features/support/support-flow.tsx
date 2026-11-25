@@ -7,6 +7,8 @@ import { ArrowLeft, ArrowRight, Check, FileCheck, Loader2, Search, UserRound } f
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
+import { SupportShowcaseSection } from "./support-showcase";
+import type { SupportShowcase } from "@/services/support-search.service";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { ResumeSessionDialog } from "@/components/common/resume-session-dialog";
@@ -542,13 +544,14 @@ function SupportIntro({
   onStart: () => void;
   loading: boolean;
   latestResultSessionId?: string;
-  showcase?: React.ReactNode;
+  showcase?: { data: SupportShowcase; asOf: string };
 }) {
   return (
     // 직업진단 첫 화면과 같은 소개 틀(DiagnosisLanding): 첫 칸 · 진행 순서 · 알 수 있는 것 · 안내.
     <DiagnosisLanding
       crumbs={[{ label: "지원금 찾기" }]}
       badges={["무료", "약 2~3분", "결과 바로 확인"]}
+      closingTitle={<>조건 몇 가지만 고르면{" "}<br />내가 받을 수 있는 지원제도를 골라드려요</>}
       title={
         <>
           놓치고 있는
@@ -612,7 +615,7 @@ function SupportIntro({
           필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
         </>
       }
-      extra={showcase}
+      extra={showcase && <SupportShowcaseSection data={showcase.data} asOf={showcase.asOf} onStart={onStart} />}
     />
   );
 }
@@ -636,8 +639,8 @@ export function SupportFlow({
   isLoggedIn?: boolean;
   /** 이미 받은 진단이 있으면 그 결과 세션. 소개 화면에서 지난 결과로 가는 길을 보여준다. */
   latestResultSessionId?: string;
-  /** 소개 화면 진행 순서 아래 "분야별 대표 지원제도" 구역(서버에서 읽어 넘긴다). */
-  showcase?: React.ReactNode;
+  /** 소개 화면 진행 순서 아래 "지원제도 모음" 구역에 쓸 데이터(서버에서 읽어 넘긴다). */
+  showcase?: { data: SupportShowcase; asOf: string };
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");

@@ -37,6 +37,7 @@ export function AssessmentIntro({
     <DiagnosisLanding
       crumbs={[{ label: "직업진단" }]}
       badges={["무료", "약 3~5분", "결과 바로 확인"]}
+      closingTitle={<>몇 가지 질문에 답하면{" "}<br />나에게 맞는 직업을 알려드려요</>}
       title={
         <>
           지금 나에게 맞는 일,
