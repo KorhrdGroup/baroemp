@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { JobCurationResult, JobCurationTab } from "@/types";
 import { cn } from "@/lib/utils";
-import { filterPillClass, filterPillOffClass } from "@/lib/ui-classes";
+import { filterPillClass } from "@/lib/ui-classes";
 import { JobCard } from "./job-card";
 import {
   getAllJobCurationsAction,
@@ -213,7 +213,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
-    <section ref={sectionRef} className="mb-8 rounded-2xl bg-gov-surface p-5 pt-6 sm:p-6 sm:pt-8">
+    <section ref={sectionRef} className="mb-8 rounded-xl bg-gov-surface p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
       {/*
         제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
@@ -258,8 +258,10 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             onFocus={() => prefetchTab(t.key)}
             className={cn(
               filterPillClass,
-              /* 고른 탭은 파란 칩으로 (홈 시안 공고 판의 탭과 같은 표시). */
-              activeTab === t.key ? "border-atomic-blue-600 bg-atomic-blue-600 text-white" : filterPillOffClass,
+              /* 고른 탭은 남색 알약, 나머지는 테두리 없는 흰 알약 (/draft3 공고 판의 탭과 같은 표시). */
+              activeTab === t.key
+                ? "border-atomic-blue-900 bg-atomic-blue-900 font-bold text-white"
+                : "border-transparent bg-white font-semibold text-slate-700",
             )}
           >
             {t.label}
@@ -280,7 +282,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
           className="flex min-h-[var(--curation-row-h,250px)] items-start gap-4 overflow-hidden"
         >
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-xl border border-border bg-white/60", CARD_HEIGHT)} />
+            <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-xl bg-white/60", CARD_HEIGHT)} />
           ))}
         </div>
       )}
@@ -304,7 +306,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             {current.state === "NEEDS_ASSESSMENT" && (
               <Link
                 href="/assessment?start=1"
-                className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+                className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white"
               >
                 직업진단 시작하기
               </Link>
@@ -312,7 +314,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             {current.state === "NEEDS_PROFILE" && (
               <Link
                 href="/mypage/profile"
-                className="rounded-lg border border-border bg-white px-4 py-2 text-label-1 font-semibold text-slate-700 hover:bg-slate-50"
+                className="rounded-lg bg-white px-4 py-2 text-label-1 font-semibold text-slate-700"
               >
                 희망직무 설정하기
               </Link>

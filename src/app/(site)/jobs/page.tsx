@@ -146,6 +146,7 @@ export default async function JobsPage({
       바로 로그인 화면으로 밀지 않고 가입 안내 창을 띄운다 - 보던 것이 사라지면 대부분 떠난다.
     */
     <GuestGate active={!isAuthenticated}>
+    <div className="draft3-theme">
     {/* 화면 머리(위치 · 제목)는 세부 화면 공통. 무엇을 하는 화면인지는 아래 검색바가 말한다. */}
     <PageHead icon="jobs" crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
     <div className="mx-auto max-w-6xl px-4.5 py-8 lg:px-8">
@@ -207,9 +208,9 @@ export default async function JobsPage({
               페이지를 넘길 때마다 또 나오면 광고처럼 읽혀 첫 페이지에만 둔다.
             */}
             {page === 1 && recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
-              <div className="mt-6 rounded-2xl bg-amber-50/70 p-5 sm:p-6">
+              <div className="mt-6 rounded-xl bg-atomic-blue-50 p-5 sm:p-6">
                 <div className="flex items-center gap-2">
-                  <KeyRound className="size-5 text-amber-600" />
+                  <KeyRound className="size-5 text-atomic-blue-600" />
                   <h2 className="text-body-1 font-bold text-slate-900">
                     자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
                   </h2>
@@ -253,6 +254,7 @@ export default async function JobsPage({
         )}
       </div>
       </JobFiltersForm>
+    </div>
     </div>
     </GuestGate>
   );

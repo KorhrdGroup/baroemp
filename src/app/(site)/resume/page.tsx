@@ -72,7 +72,8 @@ export default async function ResumeListPage() {
   const coverLetterAtLimit = coverLetters.length >= MAX_COVER_LETTERS_PER_USER;
 
   return (
-    <>
+    // /draft3 색 구성 (globals.css .draft3-theme): 문서 카드는 테두리 없는 회색 면.
+    <div className="draft3-theme">
     <PageHead icon="resume"
       crumbs={[{ label: "이력서" }]}
       title="이력서 · 자기소개서"
@@ -109,8 +110,8 @@ export default async function ResumeListPage() {
           }
         />
         {resumes.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-10 text-center">
-            <FileText className="mx-auto size-8 text-slate-300" />
+          <div className="mt-4 rounded-xl bg-gov-surface p-10 text-center">
+            <FileText className="mx-auto size-8 text-slate-400" />
             <p className="mt-3 text-body-3 font-medium text-slate-600">아직 작성한 이력서가 없어요.</p>
             <Link
               href="/resume/new"
@@ -125,7 +126,7 @@ export default async function ResumeListPage() {
               <Link
                 key={resume.id}
                 href={`/resume/${resume.id}/edit`}
-                className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-white p-5"
+                className="flex flex-wrap items-center justify-between gap-3 rounded-xl bg-gov-surface p-5"
               >
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
@@ -133,7 +134,7 @@ export default async function ResumeListPage() {
                       {resume.title || "제목 없는 이력서"}
                     </p>
                     {resume.isPrimary && <Badge className="rounded-full bg-atomic-blue-600 text-caption-1 font-semibold">대표</Badge>}
-                    <Badge variant="outline" className="rounded-full text-caption-1 font-medium text-slate-700">
+                    <Badge variant="outline" className="rounded-full border-0 bg-white text-caption-1 font-medium text-slate-700">
                       {resume.status === "completed" ? "완성" : resume.status === "archived" ? "보관" : "작성중"}
                     </Badge>
                   </div>
@@ -156,7 +157,7 @@ export default async function ResumeListPage() {
                       "rounded-full text-caption-1 font-medium",
                       resume.completeness >= 100
                         ? "bg-brand-blue-50 text-brand-blue-700"
-                        : "bg-slate-100 text-slate-600",
+                        : "bg-white text-slate-600",
                     )}
                   >
                     완성도 {resume.completeness}%
@@ -210,7 +211,7 @@ export default async function ResumeListPage() {
           }
         />
         {coverLetters.length === 0 ? (
-          <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-8 text-center">
+          <div className="mt-4 rounded-xl bg-gov-surface p-8 text-center">
             <p className="text-body-3 font-medium text-slate-600">
               아직 작성한 자기소개서가 없어요. 경험뱅크를 먼저 채워두면 문항 작성이 훨씬 빨라요.
             </p>
@@ -224,7 +225,7 @@ export default async function ResumeListPage() {
               <Link
                 key={cl.id}
                 href={`/cover-letter/${cl.id}/edit`}
-                className="flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5"
+                className="flex items-center justify-between gap-3 rounded-xl bg-gov-surface p-5"
               >
                 <div>
                   <p className={cn("truncate text-body-2 font-semibold", cl.title ? "text-slate-900" : "text-slate-600")}>
@@ -256,6 +257,6 @@ export default async function ResumeListPage() {
         <ExperienceBankSection initialItems={experiences} nested />
       </div>
     </div>
-    </>
+    </div>
   );
 }

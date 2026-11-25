@@ -3,10 +3,13 @@
  * 홈 서비스 그림(service-icons.tsx)과 같은 화풍: 면을 채운 두 톤 - 진한 파랑은 윤곽, 옅은 파랑은 면, 노랑은 그림마다 한 군데.
  * 선만 그은 아이콘은 위쪽 서비스 그림과 따로 놀아 직접 그렸다.
  */
-const DEEP = "var(--atomic-blue-600)";
-const MID = "var(--atomic-blue-400)";
-const SOFT = "var(--atomic-blue-100)";
-const ACCENT = "#FFC043";
+// 색은 홈 서비스 그림과 같은 변수 고리를 읽는다 - 값을 정하지 않은 화면은 예전 색, /draft3 색 판에서는 두 파랑 + 남색 포인트.
+const DEEP = "var(--icon-deep, var(--atomic-blue-600))";
+const MID = "var(--icon-mid, var(--atomic-blue-400))";
+const SOFT = "var(--icon-soft, var(--atomic-blue-100))";
+const ACCENT = "var(--icon-accent, #FFC043)";
+/** 포인트 원 위에 긋는 확인 표시. 노랑 위에서는 파랑, 남색 포인트(/draft3 색 판)에서는 흰색. */
+const ON_ACCENT = "var(--icon-on-accent, var(--atomic-blue-600))";
 
 const ICONS: Record<string, React.ReactNode> = {
   // 나에게 맞는 직업: 사람과 확인 표시
@@ -16,7 +19,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <circle cx="24" cy="18.5" r="6.5" fill={DEEP} />
       <path d="M11.5 37c1.6-6.6 6.6-10 12.5-10s10.9 3.4 12.5 10z" fill={MID} />
       <circle cx="37" cy="36" r="7" fill={ACCENT} />
-      <path d="M33.8 36l2.3 2.3 4.2-4.6" stroke={DEEP} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M33.8 36l2.3 2.3 4.2-4.6" stroke={ON_ACCENT} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
   // 직업별 적합도: 막대그래프
@@ -105,7 +108,7 @@ const ICONS: Record<string, React.ReactNode> = {
       <rect x="12" y="23" width="16" height="3" rx="1.5" fill="white" />
       <rect x="12" y="29" width="9" height="3" rx="1.5" fill="white" />
       <circle cx="36" cy="37" r="8" fill={ACCENT} />
-      <path d="M32.3 37l2.6 2.6 4.8-5.2" stroke={DEEP} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M32.3 37l2.6 2.6 4.8-5.2" stroke={ON_ACCENT} strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
     </>
   ),
 };

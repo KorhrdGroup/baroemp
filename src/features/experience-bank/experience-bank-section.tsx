@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ExperienceBankItem } from "@/types";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass, sectionCountClass } from "@/lib/ui-classes";
+import { sectionCountClass } from "@/lib/ui-classes";
 import { DocumentMenu } from "@/components/common/document-menu";
 import { ExperienceFormDialog } from "./experience-form-dialog";
 import { deleteExperienceBankItemAction } from "./experience-bank-actions";
@@ -47,7 +47,7 @@ export function ExperienceBankSection({
     // sticky 헤더에 제목이 가리지 않도록 scroll-mt를 준다.
     <div
       id="experience-bank"
-      className={cn("scroll-mt-24", nested ? "mt-4 rounded-xl bg-slate-50 p-5" : "mt-10")}
+      className={cn("scroll-mt-24", nested ? "mt-4 rounded-xl bg-gov-surface p-5" : "mt-10")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
@@ -76,7 +76,7 @@ export function ExperienceBankSection({
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-8 text-center">
+        <div className="mt-4 rounded-xl bg-white p-8 text-center">
           <p className="text-label-1 text-slate-500">
             아직 저장한 경험이 없어요. 미리 정리해두면 자기소개서 문항마다 골라 쓸 수 있어요.
           </p>
@@ -84,7 +84,7 @@ export function ExperienceBankSection({
           <button
             type="button"
             onClick={openCreate}
-            className="mt-3 inline-block cursor-pointer text-label-1 font-semibold text-brand-blue-600 hover:underline"
+            className="mt-3 inline-block cursor-pointer text-label-1 font-semibold text-brand-blue-600"
           >
             경험 추가하기 →
           </button>
@@ -95,8 +95,8 @@ export function ExperienceBankSection({
             <div
               key={item.id}
               className={cn(
-                "relative flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5",
-                interactiveCardClass,
+                // 회색 판 위 흰 면만으로 띄운다 (테두리 · 호버 없이 - /draft3 구성).
+                "relative flex items-center justify-between gap-3 rounded-xl bg-white p-5",
               )}
             >
               {/*

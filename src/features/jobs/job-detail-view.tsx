@@ -96,8 +96,8 @@ function InfoRow({ label, value }: { label: string; value?: string }) {
   if (!value || value === "-") return null;
   return (
     <div className="grid grid-cols-[6.5rem_1fr] sm:grid-cols-[8rem_1fr]">
-      <dt className="bg-slate-50 px-4 py-3.5 text-body-3 font-semibold text-slate-700">{label}</dt>
-      <dd className="px-4 py-3.5 text-body-2 font-medium break-keep text-slate-900">{value}</dd>
+      <dt className="px-4 py-3.5 text-body-3 font-semibold text-slate-600 sm:px-5">{label}</dt>
+      <dd className="px-4 py-3.5 text-body-2 font-medium break-keep text-slate-900 sm:px-5">{value}</dd>
     </div>
   );
 }
@@ -170,7 +170,7 @@ export function JobDetailView({
           <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
             <span>{job.companyName}</span>
             {tags.map((t) => (
-              <span key={t} className="rounded bg-slate-100 px-2 py-0.5 text-body-3 font-medium text-slate-700">
+              <span key={t} className="rounded-full bg-white px-2.5 py-0.5 text-body-3 font-medium text-slate-700">
                 {t}
               </span>
             ))}
@@ -181,7 +181,8 @@ export function JobDetailView({
     <div className="mx-auto max-w-6xl px-4.5 pb-10 lg:px-8">
      <div className="max-w-3xl">
       <Section title="모집 요강">
-        <dl className="divide-y divide-border overflow-hidden rounded-xl border border-border">
+        {/* 테두리 표 대신 옅은 회색 판 + 흰 줄로 나눈다 (/draft3 구성). */}
+        <dl className="divide-y divide-white overflow-hidden rounded-xl bg-gov-surface">
           <InfoRow
             label="근무지역"
             value={job.address ?? job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
@@ -208,7 +209,7 @@ export function JobDetailView({
       )}
 
       <Section title="상세 설명">
-        <div className="rounded-xl border border-border p-5 sm:p-6">
+        <div className="rounded-xl bg-gov-surface p-5 sm:p-6">
           <p className="text-body-2-reading font-medium whitespace-pre-line text-slate-800">{job.description}</p>
           {job.qualificationRequirements && (
             <p className="mt-3 text-body-3 font-medium whitespace-pre-line text-slate-600">
@@ -274,7 +275,7 @@ export function JobDetailView({
                             href={prepUrl}
                             target="_blank"
                             rel="noreferrer noopener"
-                            className="flex items-center gap-1 rounded-md border border-border bg-white px-2.5 py-1 text-caption-1 font-semibold text-slate-700"
+                            className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-caption-1 font-semibold text-slate-700"
                           >
                             자격 준비하기
                             <ExternalLink className="size-3.5" />
@@ -310,7 +311,7 @@ export function JobDetailView({
         <Section title="이 공고에 필요한 준비" description="이 공고와 관련된 자격/교육 과정이에요.">
           <div className="grid gap-3 sm:grid-cols-2">
             {recommendedContents.map((content) => (
-              <div key={content.id} className="rounded-xl border border-border p-4">
+              <div key={content.id} className="rounded-xl bg-gov-surface p-4">
                 <p className="text-body-2 font-semibold text-slate-900">{content.title}</p>
                 <p className="mt-1 text-body-3 font-medium text-slate-600">{content.summary ?? content.shortDescription}</p>
               </div>
@@ -321,7 +322,7 @@ export function JobDetailView({
 
       <Link
         href={`/resume/new?job=${job.id}`}
-        className="mt-10 flex h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 text-body-2 font-semibold text-slate-800"
+        className="mt-10 flex h-12 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white text-body-2 font-semibold text-slate-800"
       >
         <FileText className="size-4" />이 공고에 맞는 이력서 만들기
       </Link>
@@ -331,7 +332,7 @@ export function JobDetailView({
         마이페이지 5단계가 완료로 바뀐다. 목록을 늘어놓는 대신 공고마다 이 한 줄이 기록 자리다.
       */}
       {isAuthenticated && (
-        <section className="mt-4 flex flex-col gap-3 rounded-xl border border-border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <section className="mt-4 flex flex-col gap-3 rounded-xl bg-gov-surface p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="min-w-0">
             <p className="text-body-2 font-semibold text-slate-900">이 공고에 지원하셨나요?</p>
             <p className="mt-0.5 text-body-3 font-medium text-slate-600">표시해 두면 마이페이지 취업 절차에 기록돼요. 면접·취업까지 이어지면 단계를 올려 주세요.</p>

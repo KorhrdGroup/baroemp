@@ -28,6 +28,7 @@ export interface LandingItem {
   desc: string;
 }
 
+/* /draft3 색 판(.draft3-theme) 안에서는 첫머리를 옅은 하늘색 한 면으로. 진행 순서는 선으로 이은 번호 원, 알 수 있는 것은 회색 판 + 흰 원 그림. */
 export function DiagnosisLanding({
   crumbs,
   badges,
@@ -57,10 +58,10 @@ export function DiagnosisLanding({
   return (
     <div className="bg-white">
       {/* ① 첫 칸. 바탕은 화면 머리(PageHead)와 같은 옅은 하늘색. 아래로 흰색까지 풀어 다음 구역과 끊기지 않게. */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white">
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white in-[.draft3-theme]:bg-[#EFF4FF] in-[.draft3-theme]:bg-none">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-24 -right-24 size-[28rem] rounded-full bg-[radial-gradient(circle,rgba(0,73,229,0.12),transparent_65%)]"
+          className="pointer-events-none absolute -top-24 -right-24 size-[28rem] rounded-full bg-[radial-gradient(circle,rgba(0,73,229,0.12),transparent_65%)] in-[.draft3-theme]:hidden"
         />
         <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4.5 pt-6 pb-12 sm:pt-8 sm:pb-16 lg:grid-cols-[1fr_26rem] lg:gap-16 lg:px-8">
           <div className="min-w-0">
@@ -81,7 +82,7 @@ export function DiagnosisLanding({
 
             <ul className="mt-8 flex flex-wrap gap-2 sm:mt-10">
               {badges.map((b) => (
-                <li key={b} className="rounded-lg bg-white/90 px-3 py-1 text-body-3 font-semibold text-slate-700">
+                <li key={b} className="rounded-lg bg-white/90 px-3 py-1 text-body-3 font-semibold text-slate-700 in-[.draft3-theme]:rounded-full in-[.draft3-theme]:bg-white">
                   {b}
                 </li>
               ))}
@@ -98,28 +99,26 @@ export function DiagnosisLanding({
       </section>
 
       <div className="mx-auto max-w-6xl px-4.5 lg:px-8">
-        {/* ② 진행 순서. 흰 바탕에 번호 · 선만 두면 떠 보여, 아래 "알 수 있는 것"과 같은 세 칸 격자에 옅은 파랑 판으로 앉힌다.
-            칸 사이 화살표로 순서를 잇는다(넓은 화면만). */}
+        {/* ② 진행 순서. 상자 없이 번호 원을 선으로 이어 "차례대로 간다"가 한눈에 보이게 한다 (/draft3 상황별 서비스와 같은 잇는 선).
+            넓은 화면은 가로로, 휴대폰은 세로로 잇는다. 선은 원 가운데에서 다음 원 가운데까지. */}
         <section className="mt-12 sm:mt-14">
           <h2 className="text-title-2 font-extrabold text-slate-900">이렇게 진행돼요</h2>
-          <ol className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3 md:gap-4">
+          <ol className="mt-7 grid grid-cols-1 gap-6 md:grid-cols-3">
             {steps.map((s, i) => (
-              <li key={s.title} className="relative flex items-start gap-4 rounded-xl bg-[#F1F6FF] p-5 md:flex-col md:gap-3 md:p-6">
-                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-body-1 font-bold text-atomic-blue-600">
+              <li key={s.title} className="relative flex items-start gap-4 md:flex-col md:gap-4">
+                {i < steps.length - 1 && (
+                  <>
+                    <span aria-hidden className="absolute top-6 left-6 h-[calc(100%+1.5rem)] w-0.5 -translate-x-1/2 bg-[#7CA5FF] md:hidden" />
+                    <span aria-hidden className="absolute top-6 left-6 hidden h-0.5 w-[calc(100%+1.5rem)] -translate-y-1/2 bg-[#7CA5FF] md:block" />
+                  </>
+                )}
+                <span className="relative flex size-12 shrink-0 items-center justify-center rounded-full bg-atomic-blue-600 text-title-3 font-bold text-white ring-4 ring-white">
                   {i + 1}
                 </span>
-                <div className="min-w-0 pt-1.5 md:pt-0">
-                  <p className="text-body-1 font-bold text-slate-900">{s.title}</p>
-                  <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{s.desc}</p>
+                <div className="min-w-0 pt-2.5 md:pt-0">
+                  <p className="text-body-1 font-bold text-slate-900 sm:text-title-3">{s.title}</p>
+                  <p className="mt-1 text-body-3 font-medium break-keep text-slate-600 sm:text-body-2">{s.desc}</p>
                 </div>
-                {i < steps.length - 1 && (
-                  <span
-                    aria-hidden
-                    className="absolute top-1/2 -right-[1.375rem] z-10 hidden size-7 -translate-y-1/2 items-center justify-center rounded-full border border-brand-blue-200 bg-white text-atomic-blue-600 md:flex"
-                  >
-                    <ChevronRight className="size-4" />
-                  </span>
-                )}
               </li>
             ))}
           </ol>
@@ -132,8 +131,11 @@ export function DiagnosisLanding({
           <h2 className="text-title-2 font-extrabold text-slate-900">{itemsTitle}</h2>
           <ul className={`mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 ${items.length % 3 === 0 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
             {items.map(({ icon, title: itemTitle, desc }) => (
-              <li key={itemTitle} className="flex items-start gap-4 rounded-xl border border-border p-5 sm:flex-col sm:gap-3 sm:p-6">
-                <LandingItemIcon id={icon} />
+              <li key={itemTitle} className="flex items-start gap-4 rounded-xl bg-gov-surface p-5 sm:flex-col sm:gap-4 sm:p-6">
+                {/* 그림은 흰 원에 얹어 회색 판 위에서 또렷하게 (/draft3 서비스 판과 같은 방식). */}
+                <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white sm:size-16 [&>svg]:size-9 sm:[&>svg]:size-10">
+                  <LandingItemIcon id={icon} />
+                </span>
                 <div className="min-w-0">
                   <p className="text-body-1 font-bold text-slate-900">{itemTitle}</p>
                   <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{desc}</p>
@@ -144,7 +146,7 @@ export function DiagnosisLanding({
         </section>
 
         {/* ④ 안내 글 */}
-        <p className="mt-12 mb-16 rounded-xl bg-slate-50 p-5 text-body-3 leading-relaxed font-medium text-slate-600 sm:mb-24">{note}</p>
+        <p className="mt-12 mb-16 rounded-xl bg-gov-surface p-5 text-body-3 leading-relaxed font-medium text-slate-600 sm:mb-24">{note}</p>
       </div>
     </div>
   );
@@ -158,7 +160,7 @@ export function PreviewCard({ label, title, children }: { label: string; title: 
   return (
     <div aria-hidden className="relative mx-auto w-full max-w-[26rem]">
       <div className="absolute inset-0 translate-x-3 translate-y-3 rotate-2 rounded-xl bg-brand-blue-100" />
-      <div className="relative rounded-xl border border-border bg-white p-6 shadow-[0_12px_32px_rgba(0,41,128,0.10)]">
+      <div className="relative rounded-xl border border-border bg-white p-6 shadow-[0_12px_32px_rgba(0,41,128,0.10)] in-[.draft3-theme]:border-0">
         <p className="inline-flex rounded-lg bg-slate-100 px-2 py-0.5 text-caption-1 font-semibold text-slate-600">{label}</p>
         <p className="mt-3 text-title-3 font-bold text-slate-900">{title}</p>
         <div className="mt-5">{children}</div>

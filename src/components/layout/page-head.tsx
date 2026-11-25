@@ -21,6 +21,7 @@ export interface Crumb {
  * 정부 누리집의 "현재 위치"를 빌렸다 - 어디서 들어왔든 지금 어디 있는지 먼저 알려 준다.
  * 바탕은 홈 시안 지원금 배너와 같은 옅은 하늘색 그라데이션 + 물결 선이고, 오른쪽에 그 서비스의 그림(icon)을 크게 둔다 -
  * 흰 바탕 · 얇은 선뿐인 세부 화면이 밋밋해 보여, 화면 첫머리에서만 꾸밈을 준다.
+ * /draft3 색 판(.draft3-theme) 안에서는 그라데이션 · 물결 없이 옅은 하늘색(#EFF4FF) 한 면으로 - 두 파랑 구성에 맞춘다.
  */
 export function PageHead({
   crumbs,
@@ -40,7 +41,12 @@ export function PageHead({
   children?: React.ReactNode;
 }) {
   return (
-    <div className={cn("relative overflow-hidden bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF]", className)}>
+    <div
+      className={cn(
+        "relative overflow-hidden bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] in-[.draft3-theme]:bg-[#EFF4FF] in-[.draft3-theme]:bg-none",
+        className,
+      )}
+    >
       <Waves />
       <div className="relative mx-auto flex max-w-6xl items-center gap-6 px-4.5 pt-6 pb-7 sm:pt-8 sm:pb-10 lg:px-8">
         <div className="min-w-0 flex-1">
@@ -70,7 +76,7 @@ export function PageHead({
         </div>
         {/* 그림은 흰 동그라미 위에. 휴대폰은 제목 자리가 좁아 감춘다. */}
         {icon && (
-          <div aria-hidden className="hidden size-28 shrink-0 items-center justify-center rounded-full bg-white/80 md:flex [&>svg]:size-16">
+          <div aria-hidden className="hidden size-28 shrink-0 items-center justify-center rounded-full bg-white/80 md:flex in-[.draft3-theme]:bg-white [&>svg]:size-16">
             <ServiceIcon id={icon} />
           </div>
         )}
@@ -86,7 +92,7 @@ function Waves() {
       aria-hidden
       viewBox="0 0 1200 200"
       preserveAspectRatio="none"
-      className="pointer-events-none absolute inset-0 h-full w-full text-brand-blue-400"
+      className="pointer-events-none absolute inset-0 h-full w-full text-brand-blue-400 in-[.draft3-theme]:hidden"
     >
       {Array.from({ length: 9 }, (_, i) => (
         <path

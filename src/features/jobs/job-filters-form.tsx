@@ -179,7 +179,7 @@ export function JobFiltersForm({
             value={region}
             onChange={(e) => selectRegion(e.target.value)}
             aria-label="시·도"
-            className="h-11 w-full appearance-none rounded-lg border border-border bg-white pr-9 pl-3 text-body-2 font-medium text-slate-900"
+            className="h-11 w-full appearance-none rounded-lg bg-white pr-9 pl-3 text-body-2 font-medium text-slate-900"
           >
             <option value="all">전국</option>
             {Object.entries(REGION_LABELS).map(([value, label]) => (
@@ -191,7 +191,7 @@ export function JobFiltersForm({
           <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-slate-500" />
         </div>
         {regionActive && (
-          <div className="mt-2 max-h-56 overflow-y-auto rounded-lg border border-border">
+          <div className="mt-2 max-h-56 overflow-y-auto rounded-lg bg-white">
             <CheckRow checked={sigungus.length === 0} onClick={() => setSigungus([])}>
               {REGION_LABELS[region as Region]} 전체
             </CheckRow>
@@ -248,14 +248,14 @@ export function JobFiltersForm({
       <button
         type="button"
         onClick={resetFilters}
-        className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-white px-3.5 py-3 text-label-1 font-medium text-slate-600 hover:bg-slate-50"
+        className="flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-3.5 py-3 text-label-1 font-medium text-slate-600"
       >
         <RotateCcw className="size-3.5" /> 초기화
       </button>
       <button
         type="button"
         onClick={applyFilters}
-        className="flex-1 rounded-lg bg-brand-blue-600 px-4 py-3 text-body-2 font-semibold text-white hover:bg-brand-blue-700"
+        className="flex-1 rounded-lg bg-brand-blue-600 px-4 py-3 text-body-2 font-semibold text-white"
       >
         적용하기
       </button>
@@ -270,7 +270,7 @@ export function JobFiltersForm({
           e.preventDefault();
           void submit();
         }}
-        className="flex h-14 items-center rounded-lg border-[1.5px] border-border bg-white sm:h-16"
+        className="flex h-14 items-center rounded-xl bg-gov-surface sm:h-16"
       >
         <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-2 pl-5 sm:pl-6">
           <Search className="size-[18px] shrink-0 text-slate-400" />
@@ -284,7 +284,7 @@ export function JobFiltersForm({
         </div>
         <button
           type="submit"
-          className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-lg bg-brand-blue-600 px-6 text-body-2 font-semibold text-white transition-colors hover:bg-brand-blue-700 sm:h-[52px] sm:px-8"
+          className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-lg bg-brand-blue-600 px-6 text-body-2 font-semibold text-white sm:h-[52px] sm:px-8"
         >
           <Search className="size-4" strokeWidth={2.2} />
           검색
@@ -295,7 +295,7 @@ export function JobFiltersForm({
       <button
         type="button"
         onClick={() => setSheetOpen(true)}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-white py-3 text-body-2 font-semibold text-slate-700 lg:hidden"
+        className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-gov-surface py-3 text-body-2 font-semibold text-slate-700 lg:hidden"
       >
         <SlidersHorizontal className="size-4" />
         지역·직종·조건 선택
@@ -306,12 +306,12 @@ export function JobFiltersForm({
 
       <div className="mt-8 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8">
         {/* 넓은 화면: 왼쪽에 늘 펼친 조건 판. 목록을 내려도 따라오도록 머리글 아래에 붙인다. */}
-        <aside className="sticky top-24 hidden max-h-[calc(100vh-7rem)] flex-col rounded-xl border border-border bg-white lg:flex">
-          <div className="flex items-center justify-between border-b border-border px-5 py-4">
+        <aside className="sticky top-24 hidden max-h-[calc(100vh-7rem)] flex-col rounded-xl bg-gov-surface lg:flex">
+          <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
             <h2 className="text-body-1 font-bold text-slate-900">조건 선택</h2>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-5">{filterPanel}</div>
-          <div className="border-t border-border p-4">{panelActions}</div>
+          <div className="border-t border-slate-200/70 p-4">{panelActions}</div>
         </aside>
 
         <div className="min-w-0">
@@ -374,8 +374,8 @@ export function JobFiltersForm({
             className="absolute inset-0 cursor-default bg-slate-900/30"
             onClick={() => setSheetOpen(false)}
           />
-          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-2xl bg-white shadow-[0_-8px_32px_rgba(15,40,90,0.18)]">
-            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-xl bg-gov-surface shadow-[0_-8px_32px_rgba(15,40,90,0.18)]">
+            <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
               <h2 className="text-body-1 font-bold text-slate-900">조건 선택</h2>
               <button
                 type="button"
@@ -387,7 +387,7 @@ export function JobFiltersForm({
               </button>
             </div>
             <div className="min-h-0 flex-1 overflow-y-auto px-5">{filterPanel}</div>
-            <div className="border-t border-border p-4">{panelActions}</div>
+            <div className="border-t border-slate-200/70 p-4">{panelActions}</div>
           </div>
         </div>
       )}
@@ -398,7 +398,7 @@ export function JobFiltersForm({
 /** 조건 판의 한 묶음(지역·직종·조건). 묶음 사이는 선으로 가른다. */
 function FilterGroup({ title, last, children }: { title: string; last?: boolean; children: React.ReactNode }) {
   return (
-    <section className={cn("py-5", !last && "border-b border-border")}>
+    <section className={cn("py-5", !last && "border-b border-slate-200/70")}>
       <h3 className="mb-2.5 text-body-2 font-bold text-slate-900">{title}</h3>
       {children}
     </section>
@@ -428,7 +428,7 @@ function CheckRow({
       disabled={disabled}
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left text-body-2 transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:text-slate-300 disabled:hover:bg-transparent",
+        "flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left text-body-2 disabled:cursor-not-allowed disabled:text-slate-300",
         checked ? "font-semibold text-slate-900" : "font-medium text-slate-700",
       )}
     >

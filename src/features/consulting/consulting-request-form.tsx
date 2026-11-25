@@ -38,7 +38,7 @@ export function ConsultingRequestForm() {
 
   if (submitted) {
     return (
-      <div className="flex flex-col items-center rounded-xl border border-border bg-white px-6 py-16 text-center">
+      <div className="flex flex-col items-center rounded-xl bg-gov-surface px-6 py-16 text-center">
         <span className="flex size-14 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
           <CheckCircle2 className="size-7" />
         </span>
@@ -64,7 +64,7 @@ export function ConsultingRequestForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-5 rounded-xl border border-border bg-white p-6 sm:p-8"
+      className="space-y-5 rounded-xl bg-gov-surface p-6 sm:p-8"
     >
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
@@ -75,7 +75,7 @@ export function ConsultingRequestForm() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="홍길동"
-            className="h-12 rounded-lg border-slate-300 text-body-2 font-medium md:text-body-2"
+            className="h-12 rounded-lg border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
           />
         </div>
         <div className="space-y-2">
@@ -86,14 +86,14 @@ export function ConsultingRequestForm() {
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="010-0000-0000"
-            className="h-12 rounded-lg border-slate-300 text-body-2 font-medium md:text-body-2"
+            className="h-12 rounded-lg border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
           />
         </div>
       </div>
 
       <div className="space-y-2">
         <Label className="text-body-3">상담 채널</Label>
-        <NativeSelect className="h-12 rounded-lg border-slate-300 text-body-2 font-medium md:text-body-2" value={channel} onChange={(e) => setChannel(e.target.value)}>
+        <NativeSelect className="h-12 rounded-lg border-slate-300 bg-white text-body-2 font-medium md:text-body-2" value={channel} onChange={(e) => setChannel(e.target.value)}>
           <option value="phone">전화 상담</option>
           <option value="video">화상 상담</option>
           <option value="in_person">방문 상담</option>
@@ -109,7 +109,7 @@ export function ConsultingRequestForm() {
           value={topic}
           onChange={(e) => setTopic(e.target.value)}
           placeholder="관심 직종, 경력, 취업 희망 시기 등을 자유롭게 적어주세요."
-          className="min-h-28 rounded-lg border-slate-300 text-body-2 font-medium md:text-body-2"
+          className="min-h-28 rounded-lg border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
         />
       </div>
 

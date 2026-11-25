@@ -28,7 +28,8 @@ export default async function SupportPage({
     : undefined;
 
   return (
-    <div>
+    // /draft3 색 구성 (globals.css .draft3-theme)
+    <div className="draft3-theme">
       {/* ?start=1: 이미 무엇을 하려는지 아는 경로(마이페이지 등)에서 소개 화면을 건너뛴다. */}
       <SupportFlow autoStart={start === "1"} isLoggedIn={Boolean(user)} latestResultSessionId={latestSession?.id} />
     </div>

@@ -32,14 +32,14 @@ export function JobRowCompact({
     <Link
       href={`/jobs/${job.id}`}
       className={cn(
-        // 호버는 배경만 연파랑으로. 테두리·제목 색까지 파래지면 목록에서 눈이 시끄럽다.
-        "group flex items-center gap-3 rounded-xl border border-border bg-white px-4 py-3 transition-colors hover:bg-brand-blue-50/40",
+        // 옅은 파랑 판 위에 흰 면만으로 띄운다 (테두리 · 호버 없이 - /draft3 구성).
+        "group flex items-center gap-3 rounded-xl bg-white px-4 py-3",
         className,
       )}
     >
       <div className="min-w-0 flex-1">
         <p className="truncate text-label-2 font-medium text-slate-400">{job.companyName}</p>
-        <p className="mt-0.5 truncate text-label-1 font-semibold text-slate-800 group-hover:underline">{job.title}</p>
+        <p className="mt-0.5 truncate text-label-1 font-semibold text-slate-800">{job.title}</p>
         <p className="mt-1 flex items-center gap-2 text-label-2 text-slate-500">
           <span className="font-semibold text-brand-blue-600">
             {salary.typeLabel && <span className="mr-1 font-medium text-slate-400">{salary.typeLabel}</span>}

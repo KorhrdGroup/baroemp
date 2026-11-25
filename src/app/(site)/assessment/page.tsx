@@ -37,5 +37,10 @@ export default async function AssessmentPage({
 
   // 이어하기 여부는 시작 버튼을 누르는 순간 팝업으로 묻는다 (StartAssessmentButton).
   // 화면 머리(PageHead)가 폭을 꽉 채우고 본문 폭은 소개 화면 안에서 잡으므로 여기서는 제한하지 않는다.
-  return <AssessmentIntro isLoggedIn={Boolean(user)} latestResultSessionId={latestResult?.sessionId} />;
+  // /draft3 색 구성 (globals.css .draft3-theme)
+  return (
+    <div className="draft3-theme">
+      <AssessmentIntro isLoggedIn={Boolean(user)} latestResultSessionId={latestResult?.sessionId} />
+    </div>
+  );
 }

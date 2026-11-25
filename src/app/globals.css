@@ -393,6 +393,46 @@
   }
 }
 
+/*
+ * /draft3 색 구성을 세부 화면에도 입히는 판. 파랑 #2469FF · 남색 #00184D 두 가지와 그 옅은 단계만 쓴다.
+ * 이 판 안에서만 파랑 변수를 덮어써, 판을 씌우지 않은 화면은 예전 색 그대로다.
+ * 공용 조각(PageHead · JobCard 등)은 in-[.draft3-theme]: 로 이 판 안에서만 모양을 바꾼다.
+ */
+.draft3-theme {
+  --atomic-blue-50: #EFF4FF;
+  --atomic-blue-100: #DEE8FF;
+  --atomic-blue-200: #BCD1FF;
+  --atomic-blue-300: #7CA5FF;
+  --atomic-blue-400: #2469FF;
+  --atomic-blue-500: #2469FF;
+  --atomic-blue-600: #2469FF;
+  --atomic-blue-700: #00184D;
+  --atomic-blue-800: #00184D;
+  --atomic-blue-900: #00184D;
+  --icon-mid: #7CA5FF;
+  --icon-soft: #DEE8FF;
+  --icon-accent: #00184D;
+  --icon-on-accent: #FFFFFF;
+}
+
+/* 키보드(Tab)로 움직일 때 지금 어디인지 굵은 파란 테두리로. 마우스로 누를 때는 나오지 않는다. */
+.draft3-theme :is(a, button, select, [role="checkbox"]):focus-visible {
+  outline: 3px solid #2469FF;
+  outline-offset: 2px;
+}
+
+/* /draft3 상황별 서비스: 상황 알약을 바꿀 때 카드가 살짝 아래에서 떠오른다 (situation-tabs.tsx). */
+@keyframes situation-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);
