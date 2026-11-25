@@ -21,7 +21,7 @@ export interface SiteHeaderUser {
 }
 
 /**
- * look="draft3": /draft3 머리글 (시안 D). 메뉴 글을 한 단계 키우고 지금 보는 메뉴는 옅은 파랑 알약으로 감싼다(밑줄 대신).
+ * look="draft3": /draft3 머리글 (시안 D). 메뉴는 다른 머리글과 같이 지금 보는 메뉴 아래에 파랑 막대(머리글 아래 선에 붙음).
  * 검색은 동그란 단추 하나, 화면 크기는 "가" 세 글자로 줄여 같은 줄에 - 위 보조 줄을 없앤다. 단추는 남색 알약.
  * 다른 화면(/draft · /draft2 · 운영)은 look 을 주지 않아 그대로다. 휴대폰 모양은 둘 다 같다.
  */
@@ -72,7 +72,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
         </Link>
 
         {/* 메뉴. 막대를 머리글 아래 선에 맞추려고 줄 높이만큼 늘린다. */}
-        <nav aria-label="주 메뉴" className={cn("hidden h-full items-center lg:flex", d3 && "gap-1.5")}>
+        <nav aria-label="주 메뉴" className="hidden h-full items-center lg:flex">
           {mainNavItems.map((item) => {
             const current = isCurrentNav(item.href);
             return (
@@ -81,28 +81,21 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
                   href={item.href}
                   aria-current={current ? "page" : undefined}
                   className={cn(
-                    d3
-                      ? cn(
-                          "rounded-full px-5 py-2.5 text-title-3 whitespace-nowrap transition-colors duration-200",
-                          current ? "bg-baro-blue-50 font-bold text-baro-blue" : "font-semibold text-slate-800",
-                        )
-                      : cn(
-                          "px-4 py-2 text-body-1 whitespace-nowrap xl:px-5",
-                          current ? "font-bold text-brand-blue-600" : "font-semibold text-slate-800",
-                        ),
+                    "px-4 py-2 text-body-1 whitespace-nowrap xl:px-5",
+                    current ? cn("font-bold", d3 ? "text-baro-blue" : "text-brand-blue-600") : "font-semibold text-slate-800",
                   )}
                 >
                   {item.label}
                 </Link>
-                {/* 막대가 왼쪽에서 오른쪽으로 채워지도록 scaleX를 쓴다(width 애니메이션은 리플로우를 유발). draft3 은 알약이라 막대가 없다. */}
-                {!d3 && <span
+                {/* 막대가 왼쪽에서 오른쪽으로 채워지도록 scaleX를 쓴다(width 애니메이션은 리플로우를 유발). */}
+                <span
                   aria-hidden
                   className={cn(
                     "absolute inset-x-3 bottom-0 h-[3px] origin-left transition-transform duration-200 ease-out",
-                    current ? "bg-brand-blue-600" : "bg-slate-300 scale-x-0",
+                    current ? (d3 ? "bg-baro-blue" : "bg-brand-blue-600") : "bg-slate-300 scale-x-0",
                     !current && !onAuthScreen && "group-focus-within:scale-x-100",
                   )}
-                />}
+                />
               </div>
             );
           })}
