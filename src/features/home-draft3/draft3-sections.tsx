@@ -58,7 +58,7 @@ export function Draft3ConsultBand() {
           <ConsultIllustration className="w-full max-w-[26rem]" />
         </div>
         <div className="p-6 sm:p-10 lg:p-14">
-          <p className="text-body-3 font-bold text-atomic-blue-600">무료 1:1 취업 상담</p>
+          <p className="text-body-3 font-semibold text-slate-600">무료 1:1 취업 상담</p>
           <h2 className="mt-2 text-title-2 leading-[1.35] font-bold tracking-[-0.02em] break-keep text-slate-900">
             혼자 찾기 어렵다면,
             <br />
@@ -80,7 +80,7 @@ export function Draft3ConsultBand() {
   );
 }
 
-/** 구역 제목. 머리말(파랑, 작게) → 제목(24px · 700). 머리말과 크기 차이를 줄여 덜 쾅쾅 찍히게. */
+/** 구역 제목. 머리말(회색, 작게) → 제목(24px · 700). 머리말과 크기 차이를 줄여 덜 쾅쾅 찍히게. */
 export function Draft3Heading({
   eyebrow,
   children,
@@ -93,7 +93,7 @@ export function Draft3Heading({
   return (
     <div className="flex items-end justify-between gap-4">
       <div>
-        <p className="text-body-3 font-bold text-atomic-blue-600">{eyebrow}</p>
+        <p className="text-body-3 font-semibold text-slate-600">{eyebrow}</p>
         <h2 className="mt-1.5 text-title-3 font-bold tracking-[-0.02em] break-keep text-slate-900 sm:text-title-2">{children}</h2>
       </div>
       {moreHref && (
@@ -144,17 +144,21 @@ export function Draft3NewsList({ programs }: { programs: SupportProgram[] }) {
   );
 }
 
-/** 자격증으로 찾기. 상자 없이 제목 + 바탕색만 있는 글자 단추. */
+/**
+ * 자격증으로 찾기. 옆 소식 목록과 높이를 맞춘 회색 판 - 글자 단추만 있으면 아래가 비어 보여서.
+ * 단추는 흰 바탕 두 줄 격자, 판 높이만큼 늘어나 아래가 비지 않게.
+ */
 export function Draft3QualificationLinks() {
   return (
-    <div>
-      <h3 className="border-b border-slate-300 pb-3 text-body-1 font-bold text-slate-900">자격증으로 찾기</h3>
-      <ul className="mt-4 flex flex-wrap gap-2">
+    <div className="flex h-full flex-col rounded-xl bg-gov-surface p-6 sm:p-7">
+      <h3 className="text-body-1 font-bold text-slate-900">자격증으로 찾기</h3>
+      <p className="mt-1 text-body-3 font-medium text-slate-600">가진 자격증으로 맞는 공고를 모아 봐요.</p>
+      <ul className="mt-5 grid flex-1 auto-rows-fr grid-cols-2 gap-2">
         {QUALIFICATIONS.map((name) => (
           <li key={name}>
             <Link
               href={`/jobs?keyword=${encodeURIComponent(name)}`}
-              className="block rounded-lg bg-gov-surface px-3.5 py-2 text-body-3 font-semibold text-slate-800"
+              className="flex h-full min-h-12 items-center justify-center rounded-lg bg-white px-3 text-body-2 font-semibold text-slate-800"
             >
               {name}
             </Link>

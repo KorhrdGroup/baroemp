@@ -23,7 +23,7 @@ export function SupportBento() {
     <div className="mt-8 grid grid-cols-1 gap-4 lg:grid-cols-12">
       <Link
         href="/support"
-        className="relative flex flex-col justify-between gap-8 overflow-hidden rounded-xl bg-gov-surface p-6 sm:p-8 lg:col-span-5"
+        className="relative flex flex-col justify-between gap-6 overflow-hidden rounded-xl bg-gov-surface p-6 sm:p-8 lg:col-span-5"
       >
         <div className="flex items-start justify-between gap-4">
           <div>
@@ -39,8 +39,19 @@ export function SupportBento() {
             <ServiceIcon id="support" />
           </span>
         </div>
-        <div className="flex items-end justify-between gap-4">
-          <p className="text-headline-3 font-extrabold tracking-[-0.02em] text-atomic-blue-600">{lead.amount}</p>
+        <p className="text-headline-3 font-extrabold tracking-[-0.02em] text-atomic-blue-600">{lead.amount}</p>
+        {/* 오른쪽 목록 다섯 줄과 높이를 맞추느라 생기는 가운데 빈자리를, 금액과 신청 정보 한 줄로 나눠 채운다. */}
+        <div className="flex items-end justify-between gap-4 border-t border-slate-200 pt-5">
+          <dl className="flex gap-6 text-body-3">
+            <div>
+              <dt className="font-medium text-slate-600">신청 기간</dt>
+              <dd className="mt-0.5 font-semibold text-slate-800">{lead.period}</dd>
+            </div>
+            <div>
+              <dt className="font-medium text-slate-600">지역</dt>
+              <dd className="mt-0.5 font-semibold text-slate-800">{lead.region}</dd>
+            </div>
+          </dl>
           <span className="inline-flex shrink-0 items-center gap-0.5 text-body-2 font-semibold text-slate-800">
             자세히
             <ChevronRight className="size-4" aria-hidden />
