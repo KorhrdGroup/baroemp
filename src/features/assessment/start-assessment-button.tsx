@@ -15,7 +15,11 @@ interface Resumable {
   updatedAt: string;
 }
 
-export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: boolean }) {
+/**
+ * 직업진단 시작 동작(로그인 확인 → 하다 만 진단이면 이어하기 팝업 → 새 세션).
+ * 시작 단추와 소개 화면 "직업 모음" 카드가 같이 쓴다. dialog 는 쓰는 쪽에서 한 번 그린다.
+ */
+export function useStartAssessment(isLoggedIn = true) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [resumable, setResumable] = useState<Resumable | null>(null);
@@ -67,11 +71,38 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
     await startNew();
   }
 
+  const dialog = (
+    <ResumeSessionDialog
+      open={Boolean(resumable)}
+      onOpenChange={(open) => {
+        if (!open) setResumable(null);
+      }}
+      answeredQuestions={resumable?.currentStep ?? 0}
+      totalQuestions={resumable?.totalSteps ?? 0}
+      updatedAt={resumable?.updatedAt}
+      busy={loading}
+      onResume={() => {
+        if (!resumable) return;
+        setLoading(true);
+        router.push(`/assessment/${resumable.sessionId}`);
+      }}
+      onRestart={() => {
+        setResumable(null);
+        void startNew();
+      }}
+    />
+  );
+
+  return { start: handleStart, loading, error, dialog };
+}
+
+export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: boolean }) {
+  const { start, loading, error, dialog } = useStartAssessment(isLoggedIn);
   return (
     <>
       <Button
         size="lg"
-        onClick={handleStart}
+        onClick={start}
         disabled={loading}
         className="h-14 w-full rounded-xl bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
       >
@@ -84,25 +115,7 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
         </p>
       ) : null}
 
-      <ResumeSessionDialog
-        open={Boolean(resumable)}
-        onOpenChange={(open) => {
-          if (!open) setResumable(null);
-        }}
-        answeredQuestions={resumable?.currentStep ?? 0}
-        totalQuestions={resumable?.totalSteps ?? 0}
-        updatedAt={resumable?.updatedAt}
-        busy={loading}
-        onResume={() => {
-          if (!resumable) return;
-          setLoading(true);
-          router.push(`/assessment/${resumable.sessionId}`);
-        }}
-        onRestart={() => {
-          setResumable(null);
-          void startNew();
-        }}
-      />
+      {dialog}
     </>
   );
 }

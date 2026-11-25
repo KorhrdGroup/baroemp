@@ -2,6 +2,8 @@ import Link from "next/link";
 import { BadgeCheck, ClipboardList, MessageCircleQuestion } from "lucide-react";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
 import { StartAssessmentButton } from "./start-assessment-button";
+import { AssessmentShowcase } from "./assessment-showcase";
+import type { OccupationShowcase } from "@/services/occupation-showcase.service";
 
 const STEPS = [
   { title: "경력·희망 조건 고르기", desc: "해 온 일과 원하는 지역·급여·근무형태를 골라요.", icon: ClipboardList },
@@ -28,10 +30,13 @@ const SAMPLE = [
 export function AssessmentIntro({
   isLoggedIn = true,
   latestResultSessionId,
+  showcase,
 }: {
   isLoggedIn?: boolean;
   /** 이미 받은 진단이 있으면 그 결과 세션. 다시 하라고만 권하면 지난 결과를 잃은 줄 안다. */
   latestResultSessionId?: string;
+  /** 진행 순서 아래 "직업 모음" 구역에 쓸 데이터(서버에서 읽어 넘긴다). */
+  showcase?: { data: OccupationShowcase; asOf: string };
 }) {
   return (
     <DiagnosisLanding
@@ -84,6 +89,7 @@ export function AssessmentIntro({
       steps={STEPS}
       itemsTitle="이 검사로 알 수 있는 것"
       items={ITEMS}
+      extra={showcase && <AssessmentShowcase data={showcase.data} asOf={showcase.asOf} isLoggedIn={isLoggedIn} />}
       note={
         <>
           검사 결과는 확정적인 취업 결과가 아닌 &quot;적합도&quot;와 &quot;준비도&quot;를 바탕으로 한 참고 정보입니다.
