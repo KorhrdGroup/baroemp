@@ -46,11 +46,11 @@ export function Draft3ServiceGrid() {
             {/* 처음 열 때 그림 · 이름이 왼쪽부터 차례로 아래에서 떠오른다(상황별 서비스 카드와 같은 situation-in). 움직임 줄이기면 끈다. */}
             <Link
               href={s.href}
-              className="flex flex-col items-center gap-2.5 px-2 py-5 motion-safe:animate-[situation-in_500ms_ease-out_backwards] sm:gap-3 sm:py-7"
+              className="group/svc flex flex-col items-center gap-2.5 px-2 py-5 motion-safe:animate-[situation-in_500ms_ease-out_backwards] sm:gap-3 sm:py-7"
               style={{ animationDelay: `${150 + i * 70}ms` }}
             >
-              {/* 그림을 옅은 파랑 원에 얹어 크기 · 무게를 고르게 맞춘다. */}
-              <span className="flex size-14 items-center justify-center rounded-full bg-brand-blue-50 sm:size-[4.5rem] [&>svg]:size-8 sm:[&>svg]:size-10">
+              {/* 그림을 옅은 파랑 원에 얹어 크기 · 무게를 고르게 맞춘다. 칸에 마우스를 올리면 원 둘레에 남색과 파랑 사이 빛 그림자가 살짝 진다. */}
+              <span className="flex size-14 items-center justify-center rounded-full bg-brand-blue-50 transition-shadow duration-200 group-hover/svc:shadow-[0_0_8px_rgba(18,65,166,0.32)] sm:size-[4.5rem] [&>svg]:size-8 sm:[&>svg]:size-10">
                 <ServiceIcon id={s.id} />
               </span>
               <span className="text-body-2 font-semibold whitespace-nowrap text-slate-800 sm:text-body-1">{s.label}</span>
@@ -70,27 +70,30 @@ export function Draft3ServiceGrid() {
 export function Draft3ConsultBand() {
   return (
     <section className="mx-auto max-w-7xl px-4.5 lg:px-8">
-      <div className="grid grid-cols-1 items-center overflow-hidden rounded-[20px] bg-gov-surface lg:grid-cols-2">
-        <div className="flex items-center justify-center bg-brand-blue-50 px-6 pt-8 pb-4 lg:h-full lg:min-h-[22rem] lg:p-10">
-          <ConsultIllustration className="w-full max-w-[26rem]" />
-        </div>
-        <div className="p-6 sm:p-10 lg:p-14">
-          <p className="text-body-3 font-semibold text-slate-600">무료 1:1 취업 상담</p>
-          <h2 className="mt-2 text-title-2 leading-[1.35] font-bold tracking-[-0.02em] break-keep text-slate-900">
+      {/* 남색 판 하나: 왼쪽 글 · 오른쪽 그림. 첫 화면과 같은 남색으로 페이지 처음과 끝을 맞춘다.
+          그림은 판 아래쪽에 붙여(바닥 그림자가 판 끝에 닿게) 떠 보이지 않게. 오른쪽 위에 옅은 파란 빛 한 점. */}
+      <div className="relative grid grid-cols-1 items-end overflow-hidden rounded-[20px] bg-[#00184D] lg:grid-cols-[1.1fr_1fr]">
+        <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(45%_70%_at_85%_30%,rgba(36,105,255,0.35),transparent_70%)]" />
+        <div className="relative self-center p-7 sm:p-10 lg:py-16 lg:pr-4 lg:pl-16">
+          <p className="text-body-2 font-semibold text-[#7CA5FF]">무료 1:1 취업 상담</p>
+          <h2 className="mt-3 text-headline-3 leading-[1.35] font-extrabold tracking-[-0.02em] break-keep text-white">
             혼자 찾기 어렵다면,
             <br />
             상담사가 같이 찾아드려요
           </h2>
-          <p className="mt-3 text-body-1 font-medium break-keep text-slate-700">
+          <p className="mt-4 text-body-1 font-medium break-keep text-white/75">
             경력 정리부터 이력서, 지원할 곳 고르기까지 한 번에 도와드려요.
           </p>
           <Link
             href="/consulting"
-            className="mt-8 inline-flex h-14 items-center gap-1 rounded-xl bg-atomic-blue-600 px-7 text-body-1 font-bold text-white"
+            className="mt-9 inline-flex h-14 items-center gap-1 rounded-xl bg-white px-7 text-body-1 font-bold text-[#00184D]"
           >
             상담 신청하기
             <ChevronRight className="size-5" aria-hidden />
           </Link>
+        </div>
+        <div className="relative flex justify-center px-6 lg:justify-end lg:pr-12">
+          <ConsultIllustration className="-mb-1 w-full max-w-[24rem]" />
         </div>
       </div>
     </section>
