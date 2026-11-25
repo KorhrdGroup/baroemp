@@ -10,9 +10,12 @@ import { cn } from "@/lib/utils";
 
 /**
  * 공고 게시판. 고용24 채용정보처럼 밑줄 탭 아래에 한 줄에 한 공고씩 늘어놓는다 -
- * 카드를 넘겨 보는 /draft 와 달리 아홉 건이 한눈에 보인다.
- * 넓은 화면은 표(공고명 · 회사 · 지역 · 급여 · 마감), 휴대폰은 줄마다 제목 아래 나머지를 한 줄로 접는다.
+ * 카드를 넘겨 보는 /draft 와 달리 여러 건이 한눈에 보인다.
+ * 줄마다 공고명 아래 지역 · 급여 한 줄만 둔다.
  */
+/** 게시판에 보여 줄 줄 수. 탭마다 아홉 건을 받지만 벤토 칸 높이에 맞춰 줄인다. */
+const BOARD_ROWS = 6;
+
 export function JobsBoard({ tabs }: { tabs: FeaturedJobsTab[] }) {
   const visibleTabs = tabs.filter((t) => t.jobs.length > 0);
   const [activeKey, setActiveKey] = useState(visibleTabs[0]?.key);
@@ -46,55 +49,40 @@ export function JobsBoard({ tabs }: { tabs: FeaturedJobsTab[] }) {
         })}
       </div>
 
-      <table className="w-full table-fixed text-left">
-        <caption className="sr-only">{active.label} 공고</caption>
-        <thead className="hidden border-b border-slate-300 bg-slate-50 lg:table-header-group">
-          <tr className="text-body-3 font-semibold text-slate-700">
-            <th scope="col" className="px-4 py-3">공고명</th>
-            <th scope="col" className="w-[18%] px-3 py-3">회사</th>
-            <th scope="col" className="w-[15%] px-3 py-3">지역</th>
-            <th scope="col" className="w-[17%] px-3 py-3">급여</th>
-            <th scope="col" className="w-[11%] px-3 py-3 text-center">마감</th>
-          </tr>
-        </thead>
-        <tbody>
-          {active.jobs.map((job) => {
-            const left = daysLeft(job);
-            const urgent = left !== null && left >= 0 && left <= 7;
-            const salary = splitSalary(job);
-            const location = shortLocation(job);
-            const deadline = (
-              <span className={cn("whitespace-nowrap", urgent ? "font-bold text-[#D04040]" : "font-medium text-slate-600")}>
-                {deadlineLabel(left)}
-              </span>
-            );
-            return (
-              <tr key={job.id} className="block border-b border-border py-3.5 lg:table-row lg:py-0">
-                <td className="block lg:table-cell lg:px-4 lg:py-4">
-                  <Link href={`/jobs/${job.id}`} className="line-clamp-1 text-body-1 font-semibold text-slate-900">
-                    {job.title}
-                  </Link>
-                  {/* 휴대폰: 제목 아래 회사 · 지역 · 급여 · 마감을 한 줄로. */}
-                  <p className="mt-1 flex min-w-0 items-center gap-1.5 text-body-3 text-slate-600 lg:hidden">
-                    <span className="truncate">{job.companyName}</span>
-                    {location && <Dot />}
-                    {location && <span className="shrink-0">{location}</span>}
-                    <Dot />
-                    {deadline}
-                  </p>
-                </td>
-                <td className="hidden truncate px-3 py-4 text-body-3 font-medium text-slate-700 lg:table-cell">{job.companyName}</td>
-                <td className="hidden truncate px-3 py-4 text-body-3 font-medium text-slate-700 lg:table-cell">{location}</td>
-                <td className="hidden truncate px-3 py-4 text-body-3 font-semibold text-slate-900 lg:table-cell">
-                  {salary.typeLabel && <span className="mr-1 font-medium text-slate-600">{salary.typeLabel}</span>}
-                  {salary.amount}
-                </td>
-                <td className="hidden px-3 py-4 text-center text-body-3 lg:table-cell">{deadline}</td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {/*
+        줄마다 두 덩어리만: 공고명 / 지역 · 급여. 회사 이름은 공고를 열면 보이고, 중장년에게는 어디서 일하는지가 먼저다.
+        마감은 "마감 임박" 탭에서는 빼고(탭 이름이 이미 말해 준다), 다른 탭에서는 7일 이내일 때만 오른쪽에 붙인다.
+        글자 크기는 그대로 두고 글의 양을 줄인다 - 작게 줄이면 읽기만 어려워진다.
+        검정(slate-900)은 탭 이름에만 두고, 공고명은 한 톤 옅게(800), 급여는 700 - 줄마다 진한 글이 두 덩어리씩 쌓여 무거웠다.
+      */}
+      <ul aria-label={`${active.label} 공고`}>
+        {active.jobs.slice(0, BOARD_ROWS).map((job) => {
+          const left = daysLeft(job);
+          const showDeadline = active.key !== "closing" && left !== null && left >= 0 && left <= 7;
+          const salary = splitSalary(job);
+          const location = shortLocation(job);
+          return (
+            <li key={job.id} className="flex items-center justify-between gap-4 border-b border-border py-4 sm:px-2">
+              <div className="min-w-0">
+                <Link href={`/jobs/${job.id}`} className="line-clamp-1 text-body-1 font-semibold text-slate-800">
+                  {job.title}
+                </Link>
+                <p className="mt-1 flex min-w-0 items-center gap-1.5 text-body-2 font-medium text-slate-600">
+                  {location && <span className="shrink-0">{location}</span>}
+                  {location && <Dot />}
+                  <span className="truncate font-semibold text-slate-700">
+                    {salary.typeLabel ? `${salary.typeLabel} ` : ""}
+                    {salary.amount}
+                  </span>
+                </p>
+              </div>
+              {showDeadline && (
+                <span className="shrink-0 text-body-3 font-bold whitespace-nowrap text-[#D04040]">{deadlineLabel(left)}</span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
 
       <div className="mt-4 flex justify-end">
         <Link href={active.href} className="inline-flex items-center gap-0.5 text-body-2 font-semibold text-slate-700">

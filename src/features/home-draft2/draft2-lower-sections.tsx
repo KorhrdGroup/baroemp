@@ -50,7 +50,7 @@ function regionText(p: SupportProgram): string {
   return labelRegion(p.regionScope as Region);
 }
 
-/** 공고 게시판 옆 "중장년 지원사업". 정부 누리집 공지사항 칸처럼 제목 아래 기관 · 지역만 한 줄씩. */
+/** 공고 게시판 옆 "중장년 지원사업". 정부 누리집 공지사항 칸처럼 제목 아래 주체(기관) · 지역 한 줄. 누가 하는 사업인지가 믿음을 준다. */
 export function SupportNewsList({ programs }: { programs: SupportProgram[] }) {
   return (
     <div className="flex h-full flex-col rounded-lg border border-border">
@@ -64,10 +64,10 @@ export function SupportNewsList({ programs }: { programs: SupportProgram[] }) {
         <ul className="flex-1 divide-y divide-border px-5">
           {programs.map((p) => (
             <li key={p.id} className="py-3.5">
-              <Link href={`/support/${p.id}`} className="line-clamp-1 text-body-2 font-semibold text-slate-900">
+              <Link href={`/support/${p.id}`} className="line-clamp-1 text-body-2 font-semibold text-slate-800">
                 {p.title}
               </Link>
-              <p className="mt-1 flex items-center gap-1.5 text-caption-1 font-medium text-slate-600">
+              <p className="mt-1 flex items-center gap-1.5 text-body-3 font-medium text-slate-600">
                 <span className="truncate">{p.organization}</span>
                 <span aria-hidden className="size-0.5 shrink-0 rounded-full bg-slate-400" />
                 <span className="shrink-0">{regionText(p)}</span>
@@ -82,12 +82,12 @@ export function SupportNewsList({ programs }: { programs: SupportProgram[] }) {
   );
 }
 
-/** 공고 게시판 아래 자격증 줄. /draft 의 자격증 카드 여섯 장을 글자 링크 한 줄로 줄였다. */
+/** 공고 구역의 자격증 칸. /draft 의 자격증 카드 여섯 장을 글자 링크 묶음으로 줄였다. */
 export function QualificationRow() {
   return (
-    <div className="mt-6 flex flex-col gap-3 rounded-lg bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:gap-5">
-      <p className="shrink-0 text-body-2 font-bold text-slate-900">자격증으로 찾기</p>
-      <ul className="flex flex-wrap gap-2">
+    <div className="rounded-lg border border-border p-5">
+      <p className="text-body-1 font-bold text-slate-900">자격증으로 찾기</p>
+      <ul className="mt-3 flex flex-wrap gap-2">
         {QUALIFICATIONS.map((name) => (
           <li key={name}>
             <Link
@@ -100,6 +100,33 @@ export function QualificationRow() {
         ))}
       </ul>
     </div>
+  );
+}
+
+/**
+ * 공고 구역 오른쪽 맨 위 숫자 칸. 첫 화면과 맨 아래 상담 띠의 남색을 한 칸 더 써서
+ * 흰 칸들 사이에 무게를 준다 - 포켓컴퍼니식 "큰 숫자 하나".
+ * 고용24처럼 아래에 입구(지역별 · 최신 · 급여순) 세 줄을 붙여 봤지만 칸이 정신없어져 숫자만 둔다.
+ */
+export function JobCountTile({ activeCount }: { activeCount: number }) {
+  return (
+    <Link href="/jobs" className="relative flex flex-col justify-between gap-6 overflow-hidden rounded-lg bg-atomic-blue-900 p-5 sm:p-6">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_90%_at_100%_0%,rgba(0,73,229,0.5),transparent_70%)]"
+      />
+      <div className="relative">
+        <p className="text-body-2 font-semibold text-[#7FAAFF]">지금 진행 중인 공고</p>
+        <p className="mt-1 text-headline-3 font-extrabold tracking-[-0.02em] text-white">
+          {activeCount.toLocaleString("ko-KR")}
+          <span className="ml-1 text-title-3 font-bold">건</span>
+        </p>
+      </div>
+      <span className="relative inline-flex items-center gap-0.5 text-body-2 font-semibold text-white">
+        전체 공고 보기
+        <ChevronRight className="size-4" aria-hidden />
+      </span>
+    </Link>
   );
 }
 
