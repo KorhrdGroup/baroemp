@@ -11,7 +11,7 @@ import type { Region, SupportProgram } from "@/types";
 /*
   /draft3 전용 조각. /draft2 의 같은 조각은 테두리 상자 안에 담겨 있어, 상자가 겹겹이 쌓이면 서류 양식처럼 딱딱해졌다.
   여기서는 테두리를 걷고 여백과 가는 구분선만으로 나눈다.
-  모서리는 두 가지만: 판 · 카드 20px(rounded-[20px]), 단추 · 글자 단추 12px(rounded-xl) - 경기 잡아바처럼 둥글게.
+  모서리는 두 가지만: 판 · 카드 20px(rounded-card), 단추 · 글자 단추 12px(rounded-xl) - 경기 잡아바처럼 둥글게.
 */
 
 const SERVICES = [
@@ -30,7 +30,7 @@ const SERVICES = [
 export function Draft3ServiceGrid() {
   return (
     <nav aria-label="자주 찾는 서비스" className="relative mx-auto -mt-14 max-w-7xl px-4.5 sm:-mt-20 lg:px-8">
-      <ul className="grid grid-cols-3 overflow-hidden rounded-[20px] bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_rgba(15,23,42,0.08)] lg:grid-cols-6">
+      <ul className="grid grid-cols-3 overflow-hidden rounded-card bg-white shadow-float lg:grid-cols-6">
         {SERVICES.map((s, i) => (
           <li
             key={s.id}
@@ -50,7 +50,7 @@ export function Draft3ServiceGrid() {
               style={{ animationDelay: `${150 + i * 70}ms` }}
             >
               {/* 그림을 옅은 파랑 원에 얹어 크기 · 무게를 고르게 맞춘다. 칸에 마우스를 올리면 원 둘레에 남색과 파랑 사이 빛 그림자가 살짝 진다. */}
-              <span className="flex size-14 items-center justify-center rounded-full bg-brand-blue-50 transition-shadow duration-200 group-hover/svc:shadow-[0_0_8px_rgba(18,65,166,0.32)] sm:size-[4.5rem] [&>svg]:size-8 sm:[&>svg]:size-10">
+              <span className="flex size-14 items-center justify-center rounded-full bg-brand-blue-50 transition-shadow duration-200 group-hover/svc:shadow-icon-hover sm:size-[4.5rem] [&>svg]:size-8 sm:[&>svg]:size-10">
                 <ServiceIcon id={s.id} />
               </span>
               <span className="text-body-2 font-semibold whitespace-nowrap text-slate-800 sm:text-body-1">{s.label}</span>
@@ -72,11 +72,11 @@ export function Draft3ConsultBand() {
     <section className="mx-auto max-w-7xl px-4.5 lg:px-8">
       {/* 파랑 가로 띠 하나: 낮은 높이로 왼쪽 작은 상담 그림 · 가운데 글 · 오른쪽 흰 단추를 한 줄에. 페이지 끝을 가볍게 맺는다.
           오른쪽 위에 옅은 흰 원 하나로 밋밋하지 않게. 휴대폰은 세로로 쌓고 가운데 정렬. */}
-      <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-[20px] bg-[#2469FF] px-7 py-8 sm:px-10 lg:flex-row lg:gap-10 lg:py-6 lg:pl-8">
+      <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-card bg-baro-blue px-7 py-8 sm:px-10 lg:flex-row lg:gap-10 lg:py-6 lg:pl-8">
         <div aria-hidden className="pointer-events-none absolute -top-24 -right-16 size-72 rounded-full bg-white/10" />
         <ConsultIllustration className="relative w-48 shrink-0 lg:w-56" />
         <div className="relative flex-1 text-center lg:text-left">
-          <p className="text-body-2 font-semibold text-[#DEE8FF]">무료 1:1 취업 상담</p>
+          <p className="text-body-2 font-semibold text-baro-blue-100">무료 1:1 취업 상담</p>
           <h2 className="mt-2 text-title-1 leading-[1.35] font-extrabold tracking-[-0.02em] break-keep text-white">
             혼자 찾기 어렵다면, 상담사가 같이 찾아드려요
           </h2>
@@ -86,7 +86,7 @@ export function Draft3ConsultBand() {
         </div>
         <Link
           href="/consulting"
-          className="relative inline-flex h-14 shrink-0 items-center gap-1 rounded-xl bg-white px-7 text-body-1 font-bold text-[#2469FF]"
+          className="relative inline-flex h-14 shrink-0 items-center gap-1 rounded-xl bg-white px-7 text-body-1 font-bold text-baro-blue"
         >
           상담 신청하기
           <ChevronRight className="size-5" aria-hidden />
@@ -171,7 +171,7 @@ export function Draft3NewsList({ programs }: { programs: SupportProgram[] }) {
  */
 export function Draft3QualificationLinks() {
   return (
-    <div className="flex h-full flex-col rounded-[20px] bg-[#EFF4FF] p-6 sm:p-7">
+    <div className="flex h-full flex-col rounded-card bg-baro-blue-50 p-6 sm:p-7">
       <h3 className="text-body-1 font-bold text-slate-900">자격증으로 찾기</h3>
       <p className="mt-1 text-body-3 font-medium text-slate-600">가진 자격증으로 맞는 공고를 모아 봐요.</p>
       <ul className="mt-5 grid flex-1 auto-rows-fr grid-cols-2 gap-2">
@@ -179,7 +179,7 @@ export function Draft3QualificationLinks() {
           <li key={name}>
             <Link
               href={`/jobs?keyword=${encodeURIComponent(name)}`}
-              className="flex h-full min-h-12 items-center gap-3 rounded-xl bg-white px-4 text-body-2 font-semibold text-slate-800 transition-shadow duration-200 hover:shadow-[0_0_10px_rgba(0,24,77,0.12)]"
+              className="flex h-full min-h-12 items-center gap-3 rounded-xl bg-white px-4 text-body-2 font-semibold text-slate-800 transition-shadow duration-200 hover:shadow-hover"
             >
               <QualificationIcon name={name} />
               {name}

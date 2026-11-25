@@ -31,14 +31,14 @@ import { getCurrentUser } from "@/lib/auth/session";
   공용 조각(단추 · 서비스 그림)은 색 변수를 읽으므로 이 판에서 변수만 덮어쓴다.
 */
 const TWO_BLUE =
-  "[--atomic-blue-600:#2469FF] [--atomic-blue-50:#EFF4FF] [--icon-mid:#7CA5FF] [--icon-soft:#DEE8FF] [--icon-accent:#00184D]";
+  "[--atomic-blue-600:var(--color-baro-blue)] [--atomic-blue-50:var(--color-baro-blue-50)] [--icon-mid:var(--color-baro-blue-300)] [--icon-soft:var(--color-baro-blue-100)] [--icon-accent:var(--color-baro-navy)]";
 
 /*
   키보드(Tab)로 움직일 때 지금 어디인지 굵은 파란 테두리로 보인다. 마우스로 누를 때는 나오지 않는다(focus-visible).
   둥근 모서리를 따라가고, 판 안쪽으로 2px 띄운다.
 */
 const FOCUS_RING =
-  "[&_:is(a,button):focus-visible]:outline-[3px] [&_:is(a,button):focus-visible]:outline-offset-2 [&_:is(a,button):focus-visible]:outline-[#2469FF]";
+  "[&_:is(a,button):focus-visible]:outline-[3px] [&_:is(a,button):focus-visible]:outline-offset-2 [&_:is(a,button):focus-visible]:outline-baro-blue";
 
 export default async function Draft3HomePage() {
   const [featuredTabs, activeCount, midlifeSupport, user] = await Promise.all([

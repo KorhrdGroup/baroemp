@@ -128,7 +128,7 @@ function SimpleJobCard({ job, isAuthenticated, isBookmarked }: { job: Job; isAut
   const urgent = left !== null && left >= 0 && left <= 7;
   return (
     <div className="relative h-full">
-      <Link href={`/jobs/${job.id}`} className="flex h-full flex-col rounded-[20px] bg-white p-5 transition-shadow duration-200 hover:shadow-[0_0_10px_rgba(0,24,77,0.12)] sm:p-6">
+      <Link href={`/jobs/${job.id}`} className="flex h-full flex-col rounded-card bg-white p-5 transition-shadow duration-200 hover:shadow-hover sm:p-6">
         <h3 className="line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-800">{job.title}</h3>
         <p className="mt-2 flex min-w-0 items-center gap-1.5 text-body-3 font-medium text-slate-600">
           <span className="truncate">{job.companyName}</span>
@@ -141,7 +141,7 @@ function SimpleJobCard({ job, isAuthenticated, isBookmarked }: { job: Job; isAut
             {salary.typeLabel && <span className="mr-1.5 text-body-3 font-medium text-slate-600">{salary.typeLabel}</span>}
             {salary.amount}
           </p>
-          <p className={cn("mt-4 text-body-3", urgent ? "font-bold text-[#D04040]" : "font-medium text-slate-600")}>
+          <p className={cn("mt-4 text-body-3", urgent ? "font-bold text-baro-danger" : "font-medium text-slate-600")}>
             {deadlineLabel(left)}
           </p>
         </div>

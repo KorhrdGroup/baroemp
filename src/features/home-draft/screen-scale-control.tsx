@@ -60,7 +60,7 @@ export function ScreenScaleControl({ compact = false }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <div role="group" aria-label="화면 크기" className="flex items-center gap-0.5 rounded-full bg-[#F3F5F8] p-1">
+      <div role="group" aria-label="화면 크기" className="flex items-center gap-0.5 rounded-full bg-baro-field p-1">
         {COMPACT_LEVELS.map((level) => {
           const on = level.value === "1" ? scale === "1" : scale !== "1";
           return (
@@ -75,7 +75,7 @@ export function ScreenScaleControl({ compact = false }: { compact?: boolean }) {
               "flex size-8 cursor-pointer items-center justify-center rounded-full leading-none transition-colors duration-200",
               level.size,
               on
-                ? "bg-white font-bold text-[#00184D] shadow-[0_1px_3px_rgba(0,24,77,0.15)]"
+                ? "bg-white font-bold text-baro-navy shadow-chip"
                 : "font-semibold text-slate-500",
             )}
           >

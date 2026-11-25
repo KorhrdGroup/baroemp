@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./baro-tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -399,19 +400,19 @@
  * 공용 조각(PageHead · JobCard 등)은 in-[.draft3-theme]: 로 이 판 안에서만 모양을 바꾼다.
  */
 .draft3-theme {
-  --atomic-blue-50: #EFF4FF;
-  --atomic-blue-100: #DEE8FF;
+  --atomic-blue-50: var(--color-baro-blue-50);
+  --atomic-blue-100: var(--color-baro-blue-100);
   --atomic-blue-200: #BCD1FF;
-  --atomic-blue-300: #7CA5FF;
-  --atomic-blue-400: #2469FF;
-  --atomic-blue-500: #2469FF;
-  --atomic-blue-600: #2469FF;
-  --atomic-blue-700: #00184D;
-  --atomic-blue-800: #00184D;
-  --atomic-blue-900: #00184D;
-  --icon-mid: #7CA5FF;
-  --icon-soft: #DEE8FF;
-  --icon-accent: #00184D;
+  --atomic-blue-300: var(--color-baro-blue-300);
+  --atomic-blue-400: var(--color-baro-blue);
+  --atomic-blue-500: var(--color-baro-blue);
+  --atomic-blue-600: var(--color-baro-blue);
+  --atomic-blue-700: var(--color-baro-navy);
+  --atomic-blue-800: var(--color-baro-navy);
+  --atomic-blue-900: var(--color-baro-navy);
+  --icon-mid: var(--color-baro-blue-300);
+  --icon-soft: var(--color-baro-blue-100);
+  --icon-accent: var(--color-baro-navy);
   --icon-on-accent: #FFFFFF;
 }
 

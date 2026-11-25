@@ -39,18 +39,18 @@ export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
             <span>{today} 기준</span>
             <span aria-hidden className="h-3 w-px bg-white/30" />
             <span>
-              진행 중인 공고 <CountUp value={activeCount} className="font-bold text-[#7CA5FF]" />건
+              진행 중인 공고 <CountUp value={activeCount} className="font-bold text-baro-blue-300" />건
             </span>
           </p>
         )}
         <h1 className="mt-5 text-headline-3 leading-[1.3] font-medium tracking-[-0.03em] break-keep text-white sm:text-headline-1 sm:leading-[1.3]">
           중장년 일자리, <strong className="font-extrabold">한 곳에서 찾고</strong>
           <br />
-          <strong className="font-extrabold text-[#7CA5FF]">바로 지원</strong>까지
+          <strong className="font-extrabold text-baro-blue-300">바로 지원</strong>까지
         </h1>
 
         {/* 정부 누리집처럼 폭 넓은 흰 검색 칸 하나. 일자리찾기(/jobs)가 keyword 로 받는다. */}
-        <form action="/jobs" className="mt-10 flex h-14 w-full max-w-3xl items-center rounded-2xl bg-white pl-5 outline-offset-2 has-[input:focus-visible]:outline-[3px] has-[input:focus-visible]:outline-[#7CA5FF] sm:h-16">
+        <form action="/jobs" className="mt-10 flex h-14 w-full max-w-3xl items-center rounded-2xl bg-white pl-5 outline-offset-2 has-[input:focus-visible]:outline-[3px] has-[input:focus-visible]:outline-baro-blue-300 sm:h-16">
           <label htmlFor="draft3-search" className="sr-only">
             일자리 검색
           </label>
@@ -78,7 +78,7 @@ export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
             <Link
               key={word}
               href={`/jobs?keyword=${encodeURIComponent(word)}`}
-              className="rounded-full bg-white/70 px-3.5 py-1 text-body-3 font-semibold text-[#00184D] motion-safe:animate-[situation-in_500ms_ease-out_backwards]"
+              className="rounded-full bg-white/70 px-3.5 py-1 text-body-3 font-semibold text-baro-navy motion-safe:animate-[situation-in_500ms_ease-out_backwards]"
               style={{ animationDelay: `${170 + i * 70}ms` }}
             >
               {word}

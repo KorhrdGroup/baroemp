@@ -140,7 +140,7 @@ export function SituationTabs() {
             className={cn(rise, switched && "motion-safe:animate-[situation-in_400ms_ease-out_backwards]")}
             style={{ transitionDelay: `${(i + 1) * STAGGER_MS}ms`, animationDelay: `${i * 60}ms` }}
           >
-            <Link href={c.href} className="flex h-full items-center gap-5 rounded-[20px] bg-white p-6 transition-shadow duration-200 hover:shadow-[0_0_10px_rgba(0,24,77,0.12)] sm:gap-7 sm:p-8">
+            <Link href={c.href} className="flex h-full items-center gap-5 rounded-card bg-white p-6 transition-shadow duration-200 hover:shadow-hover sm:gap-7 sm:p-8">
               <c.icon aria-hidden strokeWidth={1.5} className="size-10 shrink-0 text-atomic-blue-600 sm:size-11" />
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="text-body-1 font-bold break-keep text-slate-900 sm:text-title-3">{c.title}</span>

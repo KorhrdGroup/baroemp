@@ -24,7 +24,7 @@ export function SupportBento() {
       {/* 대표 카드는 위 · 아래 두 칸으로 나눈다.
           위 칸: 기관 · 제목 · 설명 · 금액을 왼쪽에 한 덩어리로 모으고, 배움카드 그림은 오른쪽 아래로 내려 아래 칸 경계선 · 오른쪽 끝에서 잘리게 둔다(책 아랫부분이 경계선 밑으로 들어간 느낌).
           아래 칸: 신청 기간 · 지역 · 자세히를 진한 파랑 띠 한 줄로(흰 글자) - 그림이 글을 덮지 않는다. 좁은 휴대폰에서는 그림을 뺀다. */}
-      <Link href="/support" className="flex flex-col overflow-hidden rounded-[20px] bg-[#EFF4FF] lg:col-span-5">
+      <Link href="/support" className="flex flex-col overflow-hidden rounded-card bg-baro-blue-50 lg:col-span-5">
         <div className="relative flex-1 overflow-hidden p-6 sm:p-8">
           <LearningCardIllustration className="pointer-events-none absolute -right-10 -bottom-7 hidden w-[21rem] sm:block" />
           <div className="relative">
@@ -38,7 +38,7 @@ export function SupportBento() {
             <p className="mt-6 text-headline-3 font-extrabold tracking-[-0.02em] text-atomic-blue-600">{lead.amount}</p>
           </div>
         </div>
-        <div className="relative flex items-center justify-between gap-4 bg-[#2469FF] px-6 py-4 sm:px-8">
+        <div className="relative flex items-center justify-between gap-4 bg-baro-blue px-6 py-4 sm:px-8">
           <dl className="flex gap-6 text-body-3">
             <div>
               <dt className="font-medium text-white/75">신청 기간</dt>

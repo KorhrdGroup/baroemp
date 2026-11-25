@@ -84,7 +84,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
                     d3
                       ? cn(
                           "rounded-full px-5 py-2.5 text-title-3 whitespace-nowrap transition-colors duration-200",
-                          current ? "bg-[#EFF4FF] font-bold text-[#2469FF]" : "font-semibold text-slate-800",
+                          current ? "bg-baro-blue-50 font-bold text-baro-blue" : "font-semibold text-slate-800",
                         )
                       : cn(
                           "px-4 py-2 text-body-1 whitespace-nowrap xl:px-5",
@@ -118,7 +118,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
                 aria-haspopup="dialog"
                 aria-label="일자리 검색"
                 title="일자리 검색"
-                className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-[#F3F5F8] text-slate-800"
+                className="flex size-11 cursor-pointer items-center justify-center rounded-full bg-baro-field text-slate-800"
               >
                 <Search className="size-5" />
               </button>
@@ -142,7 +142,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
               )}
               <Button
                 size="sm"
-                className={cn("hidden lg:inline-flex", d3 ? "h-11 rounded-full bg-[#00184D] px-5 text-body-2 font-bold" : "bg-brand-blue-600")}
+                className={cn("hidden lg:inline-flex", d3 ? "h-11 rounded-full bg-baro-navy px-5 text-body-2 font-bold" : "bg-brand-blue-600")}
                 asChild
               >
                 <Link href="/mypage">마이페이지</Link>
@@ -157,7 +157,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
             /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
             <Button
               size="sm"
-              className={cn(d3 ? "rounded-full bg-[#00184D] lg:h-11 lg:px-5 lg:text-body-2 lg:font-bold" : "bg-brand-blue-600")}
+              className={cn(d3 ? "rounded-full bg-baro-navy lg:h-11 lg:px-5 lg:text-body-2 lg:font-bold" : "bg-brand-blue-600")}
               asChild
             >
               <Link href={loginHref}>로그인/회원가입</Link>
