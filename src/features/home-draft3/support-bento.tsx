@@ -48,7 +48,7 @@ export function SupportBento() {
         </div>
       </Link>
 
-      <ul className="divide-y divide-border rounded-xl border border-border px-5 lg:col-span-7">
+      <ul className="divide-y divide-border border-y border-slate-300 lg:col-span-7 lg:ml-4">
         {rest.map((item) => (
           <li key={item.id}>
             <Link href="/support" className="flex items-center justify-between gap-4 py-4">

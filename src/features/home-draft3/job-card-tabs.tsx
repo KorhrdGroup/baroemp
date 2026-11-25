@@ -3,16 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { daysLeft, deadlineLabel, shortLocation } from "@/features/home-draft/draft-job-card";
 import type { FeaturedJobsTab } from "@/features/home-draft/featured-jobs-panel";
-import { JobCard } from "@/features/jobs/job-card";
+import { JobBookmarkButton } from "@/features/jobs/job-bookmark-button";
+import { splitSalary } from "@/lib/salary";
 import { cn } from "@/lib/utils";
+import type { Job } from "@/types";
 
 /** 넓은 화면은 3장 × 2줄, 휴대폰은 4장까지만(세로로 길어지지 않게). */
 const CARD_COUNT = 6;
 const MOBILE_COUNT = 4;
 
 /**
- * /draft3 공고 구역. 탭은 /draft2 의 밑줄 탭, 공고는 /draft 의 카드.
+ * /draft3 공고 구역. 탭은 /draft2 의 밑줄 탭, 공고는 카드(아래 SimpleJobCard).
  * 공고는 급여 · 지역 · 마감을 견줘 보는 것이라 표보다 카드가 한눈에 들어온다.
  */
 export function JobCardTabs({
@@ -58,7 +61,7 @@ export function JobCardTabs({
       <ul aria-label={`${active.label} 공고`} className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-3">
         {active.jobs.slice(0, CARD_COUNT).map((job, i) => (
           <li key={job.id} className={i >= MOBILE_COUNT ? "hidden sm:block" : undefined}>
-            <JobCard job={job} isAuthenticated={isAuthenticated} isBookmarked={bookmarkedIds.includes(job.id)} />
+            <SimpleJobCard job={job} isAuthenticated={isAuthenticated} isBookmarked={bookmarkedIds.includes(job.id)} />
           </li>
         ))}
       </ul>
@@ -72,6 +75,45 @@ export function JobCardTabs({
           <ChevronRight className="size-4" aria-hidden />
         </Link>
       </div>
+    </div>
+  );
+}
+
+/**
+ * /draft3 전용 공고 카드. 공용 JobCard 에서 태그 줄 · 동전 그림을 덜어 네 줄로 줄였다:
+ * 제목(늘 두 줄 높이) / 회사 · 지역 / 급여 / 마감 · 찜.
+ * 제목 칸 높이를 두 줄로 고정해, 제목이 한 줄인 카드와 두 줄인 카드가 섞여도 아래 줄들이 가로로 맞는다.
+ * 테두리 없이 회색 바탕 위 흰 카드로만 구분한다.
+ */
+function SimpleJobCard({ job, isAuthenticated, isBookmarked }: { job: Job; isAuthenticated: boolean; isBookmarked: boolean }) {
+  const salary = splitSalary(job);
+  const location = shortLocation(job);
+  const left = daysLeft(job);
+  const urgent = left !== null && left >= 0 && left <= 7;
+  return (
+    <div className="relative h-full">
+      <Link href={`/jobs/${job.id}`} className="flex h-full flex-col rounded-xl bg-white p-5 sm:p-6">
+        <h3 className="line-clamp-2 min-h-[2.8em] text-body-1 leading-[1.4] font-semibold break-keep text-slate-800">{job.title}</h3>
+        <p className="mt-2 flex min-w-0 items-center gap-1.5 text-body-3 font-medium text-slate-600">
+          <span className="truncate">{job.companyName}</span>
+          {location && <span aria-hidden className="size-0.5 shrink-0 rounded-full bg-slate-400" />}
+          {location && <span className="shrink-0 whitespace-nowrap">{location}</span>}
+        </p>
+        <p className="mt-4 truncate text-body-1 font-bold text-slate-900">
+          {salary.typeLabel && <span className="mr-1.5 text-body-3 font-medium text-slate-600">{salary.typeLabel}</span>}
+          {salary.amount}
+        </p>
+        <p className={cn("mt-auto pt-4 text-body-3", urgent ? "font-bold text-[#D04040]" : "font-medium text-slate-600")}>
+          {deadlineLabel(left)}
+        </p>
+      </Link>
+      <JobBookmarkButton
+        jobId={job.id}
+        jobCategory={job.jobCategory}
+        isAuthenticated={isAuthenticated}
+        initialBookmarked={isBookmarked}
+        className="absolute right-4 bottom-4"
+      />
     </div>
   );
 }
