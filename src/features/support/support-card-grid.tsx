@@ -12,12 +12,9 @@ const COLLAPSE_COUNT = 4;
 
 const FILTER_GRADES: SupportEligibilityGrade[] = ["HIGH", "MEDIUM", "CHECK_REQUIRED"];
 
-const PILL_CLASS: Record<SupportEligibilityGrade, { base: string; active: string }> = {
-  HIGH: { base: "border-emerald-200 text-emerald-700", active: "bg-emerald-50 border-emerald-300 text-emerald-700 ring-1 ring-emerald-200" },
-  MEDIUM: { base: "border-brand-blue-200 text-brand-blue-700", active: "bg-brand-blue-50 border-brand-blue-300 text-brand-blue-700 ring-1 ring-brand-blue-200" },
-  CHECK_REQUIRED: { base: "border-orange-200 text-orange-700", active: "bg-orange-50 border-orange-300 text-orange-700 ring-1 ring-orange-200" },
-  LOW: { base: "border-slate-200 text-slate-600", active: "bg-slate-100 border-slate-300 text-slate-600 ring-1 ring-slate-200" },
-};
+/* 등급 거르기 알약. /draft3 탭 알약처럼 안 고른 건 흰 알약, 고른 건 남색 알약 - 등급 색은 카드 배지에서만 보여 준다. */
+const PILL_BASE = "bg-white text-slate-700";
+const PILL_ACTIVE = "bg-baro-navy text-white";
 
 const CATEGORY_ICONS: Record<string, LucideIcon> = {
   employment: Briefcase,
@@ -64,18 +61,18 @@ function CollapsibleSection({
   return (
     <section ref={sectionRef} className="scroll-mt-20">
       <div className="mb-5 flex items-center gap-2.5">
-        <span className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-baro-blue">
           <Icon className="size-4" />
         </span>
         <h2 className="text-title-3 font-extrabold text-slate-900">{label}</h2>
-        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-caption-1 font-semibold text-slate-600">
+        <span className="rounded-full bg-white px-2 py-0.5 text-caption-1 font-semibold text-slate-600">
           {items.length}
         </span>
         {expanded && hasMore && (
           <button
             type="button"
             onClick={handleCollapse}
-            className="ml-auto flex cursor-pointer items-center gap-1 rounded-lg px-3 py-1.5 text-body-3 font-semibold text-slate-700"
+            className="ml-auto flex cursor-pointer items-center gap-1 rounded-xl px-3 py-1.5 text-body-3 font-semibold text-slate-700"
           >
             접기
             <ChevronUp className="size-4" />
@@ -98,7 +95,7 @@ function CollapsibleSection({
         <button
           type="button"
           onClick={() => (expanded ? handleCollapse() : setExpanded(true))}
-          className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-white text-body-3 font-semibold text-slate-800"
+          className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-white text-body-3 font-semibold text-slate-800"
         >
           {expanded ? "접기" : `${items.length - COLLAPSE_COUNT}개 더보기`}
           <ChevronDown className={cn("size-4", expanded && "rotate-180")} />
@@ -165,9 +162,10 @@ export function SupportResultSections({
               key={grade}
               type="button"
               onClick={() => setActiveGrade(isActive ? null : grade)}
+              aria-pressed={isActive}
               className={cn(
-                "rounded-full border px-4 py-2 text-body-3 font-semibold",
-                isActive ? PILL_CLASS[grade].active : PILL_CLASS[grade].base,
+                "h-11 rounded-full px-5 text-body-2 font-semibold transition-colors duration-300",
+                isActive ? PILL_ACTIVE : PILL_BASE,
               )}
             >
               {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]} {count}개

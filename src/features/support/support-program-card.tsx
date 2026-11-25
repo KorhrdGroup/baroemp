@@ -50,8 +50,9 @@ export function SupportProgramCard({
         일자리 카드(JobCard)와 같은 틀로 맞춘다. 테두리가 없으면 흰 바탕 위에서
         카드로 안 읽히고, h-full 이 없으면 한 줄에 나란히 선 카드끼리 키가 어긋난다.
         세부 화면 공통 바탕대로 호버 효과(면 물들이기 · 제목 밑줄)는 두지 않는다.
+        /draft3 색 판 안에서는 회색 띠 위의 흰 카드라 테두리를 걷고 모서리 20px.
       */
-      className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-white"
+      className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-white in-[.draft3-theme]:rounded-card in-[.draft3-theme]:border-0"
     >
       {/*
         오른쪽 끝은 겹쳐 놓은 찜 버튼 자리다. pr-14 로 비워 두지 않으면 적합등급 배지가

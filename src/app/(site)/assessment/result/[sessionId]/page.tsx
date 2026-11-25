@@ -72,8 +72,8 @@ export default async function AssessmentResultPage({
   );
 
   return (
-    // 세부 화면 공통 바탕: 흰 바탕 · 위치 줄과 큰 제목(ResultView 안의 PageHead) · 얇은 선으로 나눈 상자.
-    <div className="bg-white">
+    // /draft3 색 구성 (globals.css .draft3-theme): 옅은 하늘 머리(PageHead) 아래 회색 띠 위에 흰 카드.
+    <div className="draft3-theme bg-white">
       <ResultView
         sessionId={sessionId}
         result={result}

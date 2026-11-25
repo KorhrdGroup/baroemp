@@ -831,7 +831,8 @@ export function SupportFlow({
     // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다. 바탕은 세부 화면 공통대로 흰색.
     <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-white pb-32">
       {/* 진행 바 - 대분류 3칸 */}
-      <div className="sticky top-16 z-30">
+      {/* 넓은 화면은 머리글(80px)이 붙어 따라오므로 그 아래에, 휴대폰은 머리글이 붙지 않아 맨 위에 붙인다. */}
+      <div className="sticky top-0 z-30 lg:top-20">
         <div className="flex gap-1.5 bg-white px-4 pt-3">
           {GROUPS.map((g, i) => (
             <div key={g.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">

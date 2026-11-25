@@ -61,7 +61,9 @@ export function ResultView({
         description={result.summary}
       />
 
-    <div className="mx-auto max-w-6xl px-4.5 pb-28 lg:px-8">
+    {/* 본문은 /draft3처럼 회색 띠 위에 흰 카드(모서리 20px, 테두리 없음). 아래 고정 단추에 가리지 않게 띠 아래를 비운다. */}
+    <div className="bg-gov-surface">
+    <div className="mx-auto max-w-6xl px-4.5 pt-4 pb-28 lg:px-8">
      <div className="max-w-3xl space-y-6">
       {(top || result.generatedTags.length > 0) && (
         <div className="pt-6">
@@ -73,7 +75,7 @@ export function ResultView({
           {result.generatedTags.length > 0 && (
             <div className={top ? "mt-4 flex flex-wrap gap-2" : "flex flex-wrap gap-2"}>
               {result.generatedTags.map((tag) => (
-                <span key={tag} className="rounded-full bg-slate-100 px-3 py-1 text-body-3 font-medium text-slate-700">
+                <span key={tag} className="rounded-full bg-white px-3 py-1 text-body-3 font-medium text-slate-700">
                   #{tag}
                 </span>
               ))}
@@ -141,7 +143,7 @@ export function ResultView({
       )}
 
       {result.recommendations.length === 0 && (
-        <div className="rounded-xl border border-border p-10 text-center text-body-2 font-medium text-slate-600">
+        <div className="rounded-card bg-white p-10 text-center text-body-2 font-medium text-slate-600">
           조건에 맞는 추천 직업을 찾지 못했어요. 답변을 조금 더 넓혀서 다시 시도해보세요.
         </div>
       )}
@@ -170,7 +172,7 @@ export function ResultView({
                 }
                 target={content.externalUrl ? "_blank" : undefined}
                 rel={content.externalUrl ? "noopener noreferrer" : undefined}
-                className="rounded-xl border border-border p-4"
+                className="rounded-card bg-white p-5"
               >
                 <p className="flex items-center gap-1.5 text-body-2 font-semibold text-slate-800">
                   {content.title}
@@ -184,8 +186,8 @@ export function ResultView({
       )}
 
       {/* 안내문은 흐름 안에 남기고, 실제 동작은 아래 고정 바에서 한다. */}
-      <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-5 sm:p-6">
-        <UserPlus className="size-5 shrink-0 text-atomic-blue-600" />
+      <div className="flex items-center gap-3 rounded-card bg-baro-blue-50 p-5 sm:p-6">
+        <UserPlus className="size-5 shrink-0 text-baro-blue" />
         <p className="text-body-3 font-medium text-slate-700">
           {isAnonymous
             ? "회원가입하면 이 결과를 저장하고 1:1 상담을 받을 수 있어요."
@@ -195,6 +197,7 @@ export function ResultView({
 
      </div>
     </div>
+    </div>
 
       {/* ── 하단 고정 CTA (공고 상세와 같은 구성: 흰 바탕 + 위쪽 얇은 선, 그림자 없음) ── */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white">
@@ -202,14 +205,14 @@ export function ResultView({
           <div className="flex w-full max-w-3xl items-center gap-3">
             <Link
               href="/assessment"
-              className="flex h-12 shrink-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
+              className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
             >
               <RotateCcw className="size-4" />
               다시 진단하기
             </Link>
             <Link
               href="/mypage"
-              className="flex h-12 flex-1 items-center justify-center rounded-lg bg-atomic-blue-600 px-4 text-body-2 font-bold text-white"
+              className="flex h-12 flex-1 items-center justify-center rounded-xl bg-atomic-blue-600 px-4 text-body-2 font-bold text-white"
             >
               {isAnonymous ? "회원가입하고 저장하기" : "마이페이지로 이동"}
             </Link>

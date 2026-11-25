@@ -23,7 +23,11 @@ export default async function AssessmentPage({
   // 사용자가 직접 시작 버튼을 누르게 한다.
   if (start === "1") {
     await requireUser("/assessment");
-    return <AssessmentAutoStart />;
+    return (
+      <div className="draft3-theme">
+        <AssessmentAutoStart />
+      </div>
+    );
   }
 
   // 소개 화면은 비로그인도 볼 수 있다. 무엇을 하는 서비스인지 확인할 수 없으면

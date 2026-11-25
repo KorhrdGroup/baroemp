@@ -21,10 +21,11 @@ import {
 } from "@/lib/qualification";
 import { TrackedLink } from "./tracked-link";
 
+/* /draft3 두 파랑 구성: 잘 맞을수록 진한 파랑, 덜 맞으면 회색. 초록 · 주황은 쓰지 않는다. */
 const GRADE_STYLE: Record<OccupationRecommendation["grade"], string> = {
-  "매우 잘 맞아요": "bg-emerald-50 text-emerald-700",
-  "잘 맞아요": "bg-brand-blue-50 text-brand-blue-700",
-  "도전해볼 만해요": "bg-amber-50 text-amber-700",
+  "매우 잘 맞아요": "bg-baro-blue text-white",
+  "잘 맞아요": "bg-baro-blue-50 text-baro-blue",
+  "도전해볼 만해요": "bg-slate-100 text-slate-700",
   "준비가 더 필요해요": "bg-slate-100 text-slate-600",
 };
 
@@ -33,9 +34,9 @@ const GRADE_STYLE: Record<OccupationRecommendation["grade"], string> = {
  * 숫자만 늘 파랑이면 "준비가 더 필요해요"인 직업에서도 점수가 강조되어 신호가 어긋난다.
  */
 const GRADE_SCORE_STYLE: Record<OccupationRecommendation["grade"], string> = {
-  "매우 잘 맞아요": "text-emerald-700",
-  "잘 맞아요": "text-brand-blue-600",
-  "도전해볼 만해요": "text-amber-700",
+  "매우 잘 맞아요": "text-baro-blue",
+  "잘 맞아요": "text-baro-blue",
+  "도전해볼 만해요": "text-slate-700",
   "준비가 더 필요해요": "text-slate-600",
 };
 
@@ -126,15 +127,15 @@ export function OccupationRecommendationCard({
     <details
       open={defaultOpen}
       className={cn(
-        // 흰 바탕 위에 놓이므로 얇은 선으로 카드를 가른다. 순위는 왼쪽 번호 배지가 짚어준다.
-        "group rounded-xl border border-border bg-white",
+        // 회색 띠 위의 흰 카드(/draft3). 테두리 없이 바탕색으로 가른다. 순위는 왼쪽 번호 배지가 짚어준다.
+        "group rounded-card bg-white",
       )}
     >
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-5 py-5 sm:px-7 sm:py-6">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-card px-5 py-5 sm:px-7 sm:py-6">
         <div className="flex items-center gap-4">
           <span
             className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-xl text-body-2 font-bold",
+              "flex size-10 shrink-0 items-center justify-center rounded-full text-body-2 font-bold",
               // 준비 트랙은 순위 경쟁이 아니라 "열리는 가능성" 목록이므로 1위 강조를 하지 않는다.
               !isPreparation && rank === 1 ? "bg-atomic-blue-600 text-white" : "bg-slate-100 text-slate-600",
             )}
@@ -150,14 +151,14 @@ export function OccupationRecommendationCard({
           <span
             className={cn(
               "hidden rounded-full px-3 py-1 text-body-3 font-semibold sm:inline-flex",
-              isPreparation ? "bg-amber-50 text-amber-700" : GRADE_STYLE[rec.grade],
+              isPreparation ? "bg-slate-100 text-slate-700" : GRADE_STYLE[rec.grade],
             )}
           >
             {isPreparation ? "자격 취득 시 가능" : rec.grade}
           </span>
           {/* 준비 트랙의 총점에는 자격 미보유 감점이 섞여 있어, 여기서는 성향 적합도를 앞세운다. */}
           <div className="text-right">
-            <p className={cn("text-title-2 font-extrabold", isPreparation ? "text-brand-blue-600" : GRADE_SCORE_STYLE[rec.grade])}>
+            <p className={cn("text-title-2 font-extrabold", isPreparation ? "text-baro-blue" : GRADE_SCORE_STYLE[rec.grade])}>
               {isPreparation ? rec.dimensionFitScore : rec.totalScore}
             </p>
             <p className="text-caption-1 font-medium text-slate-600">{isPreparation ? "성향 적합도" : "적합도"}</p>
@@ -169,8 +170,8 @@ export function OccupationRecommendationCard({
       <div className="border-t border-border px-5 py-6 sm:px-7">
         <span
           className={cn(
-            "inline-flex rounded-full px-3 py-1 text-body-3 font-semibold ring-1 sm:hidden",
-            isPreparation ? "bg-amber-50 text-amber-700" : GRADE_STYLE[rec.grade],
+            "inline-flex rounded-full px-3 py-1 text-body-3 font-semibold sm:hidden",
+            isPreparation ? "bg-slate-100 text-slate-700" : GRADE_STYLE[rec.grade],
           )}
         >
           {isPreparation ? "자격 취득 시 가능" : rec.grade}
@@ -182,8 +183,8 @@ export function OccupationRecommendationCard({
 
         {/* 준비 트랙: 무엇을 채우면 열리는지 짚고, 갈 곳이 있으면 상담으로 보낸다. */}
         {isPreparation && missingRequiredNames.length > 0 && (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-amber-50/70 p-4">
-            <p className="flex items-center gap-1.5 text-body-3 font-semibold text-amber-800">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl bg-baro-blue-50 p-4">
+            <p className="flex items-center gap-1.5 text-body-3 font-semibold text-baro-navy">
               <KeyRound className="size-4" /> {missingRequiredNames.join(", ")} 취득 시 지원할 수 있어요
             </p>
             {consultCourse ? (
@@ -196,14 +197,14 @@ export function OccupationRecommendationCard({
                 href={consultCourse.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
+                className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
               >
                 상담받기
                 <ExternalLinkIcon className="size-3.5 text-slate-500" />
               </TrackedLink>
             ) : (
               recommendedCourse && (
-                <p className="w-full text-body-3 font-medium text-amber-700">
+                <p className="w-full text-body-3 font-medium text-slate-700">
                   추천 취득 과정: {recommendedCourse.contentTitle} — 아래 &quot;도움이 되는 자격 취득 과정&quot;에서
                   확인해보세요.
                 </p>
@@ -229,8 +230,8 @@ export function OccupationRecommendationCard({
           맞는 이유(파랑)와 걸리는 점(주황)을 색 있는 면으로 갈라 한눈에 구분되게 한다.
         */}
         <div className="mt-6 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-lg bg-brand-blue-50/60 p-4">
-            <p className="flex items-center gap-1.5 text-body-3 font-semibold text-brand-blue-700">
+          <div className="rounded-xl bg-baro-blue-50 p-4">
+            <p className="flex items-center gap-1.5 text-body-3 font-semibold text-baro-navy">
               <Sparkles className="size-4" /> 왜 추천되었나요
             </p>
             <ul className="mt-2 space-y-1 text-body-3 font-medium text-slate-600">
@@ -240,8 +241,8 @@ export function OccupationRecommendationCard({
             </ul>
           </div>
           {risks.length > 0 ? (
-            <div className="rounded-lg bg-orange-50/60 p-4">
-              <p className="flex items-center gap-1.5 text-body-3 font-semibold text-orange-600">
+            <div className="rounded-xl bg-slate-50 p-4">
+              <p className="flex items-center gap-1.5 text-body-3 font-semibold text-slate-800">
                 <AlertTriangle className="size-4" /> 고려할 점
               </p>
               <ul className="mt-2 space-y-1 text-body-3 font-medium text-slate-600">
@@ -252,8 +253,8 @@ export function OccupationRecommendationCard({
             </div>
           ) : (
             /* 비워두면 "안 뜬 건가?" 싶다. 걸리는 게 없다는 것도 알려줄 값이다. */
-            <div className="rounded-lg bg-emerald-50/60 p-4">
-              <p className="flex items-center gap-1.5 text-body-3 font-semibold text-emerald-700">
+            <div className="rounded-xl bg-slate-50 p-4">
+              <p className="flex items-center gap-1.5 text-body-3 font-semibold text-slate-800">
                 <CheckCircle2 className="size-4" /> 고려할 점
               </p>
               <p className="mt-2 text-body-3 font-medium text-slate-600">지금 조건에서 걸리는 점이 없어요.</p>
@@ -272,7 +273,7 @@ export function OccupationRecommendationCard({
           막는 조건(주황)이 아니라 갖추면 유리한 것이라는 신호를 따로 줘야 한다.
         */}
         {rec.requiredQualifications.length > 0 && (
-          <div className="mt-3 rounded-lg bg-slate-50 p-4">
+          <div className="mt-3 rounded-xl bg-slate-50 p-4">
             <p className="flex items-center gap-1.5 text-body-3 font-semibold text-slate-700">
               <ListChecks className="size-4 text-slate-500" /> 자격 요건
             </p>
@@ -285,11 +286,12 @@ export function OccupationRecommendationCard({
                     key={q}
                     className={cn(
                       "inline-flex items-center gap-1 rounded-full px-3 py-1 text-body-3 font-medium",
+                      // 보유는 파랑, 채워야 할 필수는 흰 바탕 테두리로 또렷하게, 우대는 회색.
                       !missing
-                        ? "bg-emerald-50 text-emerald-700"
+                        ? "bg-baro-blue-50 text-baro-blue"
                         : preferred
-                          ? "bg-brand-blue-50 text-brand-blue-700"
-                          : "bg-orange-50 text-orange-700",
+                          ? "bg-white text-slate-700 ring-1 ring-slate-200"
+                          : "bg-white text-baro-navy ring-1 ring-baro-blue-300",
                     )}
                   >
                     {!missing ? (
@@ -336,7 +338,7 @@ export function OccupationRecommendationCard({
              * 이름 검색은 제목·본문까지 훑어 코드가 다른 관련 공고도 함께 걸린다.
              */
             href={`/jobs?keyword=${encodeURIComponent(rec.occupationName)}`}
-            className="inline-flex h-12 items-center rounded-lg bg-atomic-blue-600 px-5 text-body-3 font-bold text-white"
+            className="inline-flex h-12 items-center rounded-xl bg-atomic-blue-600 px-5 text-body-3 font-bold text-white"
           >
             채용공고 보기
           </TrackedLink>
@@ -350,7 +352,7 @@ export function OccupationRecommendationCard({
         <div className="mt-3 flex flex-wrap justify-end gap-4">
           <Link
             href={`/resume/new?occupation=${rec.occupationId}&title=${encodeURIComponent(rec.occupationName)}`}
-            className="flex h-12 items-center gap-1 rounded-lg border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
+            className="flex h-12 items-center gap-1 rounded-xl border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
           >
             {rec.occupationName} 취업용 이력서 준비하기
             <ChevronRight className="size-4" />

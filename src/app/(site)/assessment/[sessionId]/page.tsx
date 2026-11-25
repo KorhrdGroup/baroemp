@@ -40,7 +40,8 @@ export default async function AssessmentSessionPage({
   const initialAnswers = buildPrefilledAnswers(loaded.orderedQuestions, careerProfile, heldQualificationNames);
 
   return (
-    <div>
+    // /draft3 색 구성 (globals.css .draft3-theme) - 소개 화면과 같은 두 파랑.
+    <div className="draft3-theme">
       <AssessmentWizard
         sessionId={session.id}
         sections={loaded.sections}
