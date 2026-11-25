@@ -155,3 +155,41 @@ export async function getSupportResultView(sessionId: string): Promise<SupportRe
 
   return { sessionId, gradeCounts, totalCount: matchResults.length, categories, employerPrograms };
 }
+
+export interface SupportShowcaseCategory {
+  category: SupportCategory;
+  label: string;
+  programs: Pick<SupportProgram, "id" | "title" | "organization" | "summary" | "supportAmountText">[];
+}
+
+export interface SupportShowcase {
+  /** 지금 찾아볼 수 있는(활성 · 취업 관련) 지원제도 수. */
+  totalCount: number;
+  categories: SupportShowcaseCategory[];
+}
+
+const SHOWCASE_CATEGORIES: SupportCategory[] = ["employment", "training", "living"];
+
+/**
+ * /support 소개 화면의 "분야별 대표 지원제도" 구역. 읽기만 한다(조회 기록을 남기지 않는다).
+ * 개수는 결과 화면과 같은 기준(활성 · 취업 관련도 기준 이상), 카드는 분야마다 개인 대상 최신 6개.
+ */
+export async function getSupportShowcase(): Promise<SupportShowcase> {
+  const repo = getSupportProgramRepository();
+  const base = { minCareerRelevanceScore: CAREER_RELEVANCE_THRESHOLD, sort: "latest" as const };
+  const [all, ...perCategory] = await Promise.all([
+    repo.search({ ...base, pageSize: 1 }),
+    ...SHOWCASE_CATEGORIES.map((category) => repo.search({ ...base, category, pageSize: 20 })),
+  ]);
+  return {
+    totalCount: all.total,
+    categories: SHOWCASE_CATEGORIES.map((category, i) => ({
+      category,
+      label: SUPPORT_CATEGORY_LABELS[category] ?? category,
+      programs: perCategory[i].items
+        .filter((p) => (p.audience ?? "personal") !== "business")
+        .slice(0, 6)
+        .map(({ id, title, organization, summary, supportAmountText }) => ({ id, title, organization, summary, supportAmountText })),
+    })).filter((c) => c.programs.length > 0),
+  };
+}

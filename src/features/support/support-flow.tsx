@@ -537,10 +537,12 @@ function SupportIntro({
   onStart,
   loading,
   latestResultSessionId,
+  showcase,
 }: {
   onStart: () => void;
   loading: boolean;
   latestResultSessionId?: string;
+  showcase?: React.ReactNode;
 }) {
   return (
     // 직업진단 첫 화면과 같은 소개 틀(DiagnosisLanding): 첫 칸 · 진행 순서 · 알 수 있는 것 · 안내.
@@ -610,6 +612,7 @@ function SupportIntro({
           필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
         </>
       }
+      extra={showcase}
     />
   );
 }
@@ -627,11 +630,14 @@ export function SupportFlow({
   autoStart = false,
   isLoggedIn = true,
   latestResultSessionId,
+  showcase,
 }: {
   autoStart?: boolean;
   isLoggedIn?: boolean;
   /** 이미 받은 진단이 있으면 그 결과 세션. 소개 화면에서 지난 결과로 가는 길을 보여준다. */
   latestResultSessionId?: string;
+  /** 소개 화면 진행 순서 아래 "분야별 대표 지원제도" 구역(서버에서 읽어 넘긴다). */
+  showcase?: React.ReactNode;
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");
@@ -733,7 +739,7 @@ export function SupportFlow({
     }
     return (
       <>
-        <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} latestResultSessionId={latestResultSessionId} />
+        <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} latestResultSessionId={latestResultSessionId} showcase={showcase} />
         <ResumeSessionDialog
           open={Boolean(resumable)}
           onOpenChange={(open) => {

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { Check, ChevronRight, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/features/home-draft3/reveal";
 import { LandingItemIcon } from "./landing-item-icons";
 import type { Crumb } from "./page-head";
@@ -43,9 +43,10 @@ export function DiagnosisLanding({
   itemsTitle,
   items,
   note,
+  extra,
 }: {
   crumbs: Crumb[];
-  /** 제목 위 작은 표시(예: "무료", "약 3~5분"). */
+  /** 단추 아래 조용한 안내 한 줄(예: "무료", "약 3~5분"). */
   badges: string[];
   title: React.ReactNode;
   description: React.ReactNode;
@@ -57,6 +58,8 @@ export function DiagnosisLanding({
   itemsTitle: string;
   items: LandingItem[];
   note: React.ReactNode;
+  /** 진행 순서 아래에 끼우는 화면별 구역(예: 지원금 찾기의 분야별 대표 지원제도). */
+  extra?: React.ReactNode;
 }) {
   return (
     <div className="bg-white">
@@ -66,43 +69,47 @@ export function DiagnosisLanding({
           aria-hidden
           className="pointer-events-none absolute -top-24 -right-24 size-[28rem] rounded-full bg-[radial-gradient(circle,rgba(0,73,229,0.12),transparent_65%)] in-[.draft3-theme]:hidden"
         />
-        <div className="relative mx-auto grid max-w-6xl items-center gap-10 px-4.5 pt-8 pb-16 sm:pt-10 sm:pb-24 lg:grid-cols-[1fr_26rem] lg:gap-20 lg:px-8">
-          <div className="min-w-0">
-            <nav aria-label="현재 위치">
-              <ol className="flex items-center gap-1 text-body-3 font-medium text-slate-600">
-                {[{ label: "홈", href: "/" }, ...crumbs].map((c, i, all) => (
-                  <li key={`${c.label}-${i}`} className="flex items-center gap-1">
-                    {i > 0 && <ChevronRight aria-hidden className="size-3.5 text-slate-500" />}
-                    {c.href && i < all.length - 1 ? (
-                      <Link href={c.href}>{c.label}</Link>
-                    ) : (
-                      <span aria-current="page" className="text-slate-900">{c.label}</span>
-                    )}
-                  </li>
-                ))}
-              </ol>
-            </nav>
-
-            <ul className="mt-8 flex flex-wrap gap-2 sm:mt-10">
-              {/* 처음 열 때 왼쪽부터 차례로 떠오른다(/draft3 인기 검색어와 같은 situation-in). */}
-              {badges.map((b, i) => (
-                <li
-                  key={b}
-                  className="rounded-full bg-white px-3 py-1 text-body-3 font-semibold text-slate-700 motion-safe:animate-[situation-in_500ms_ease-out_backwards]"
-                  style={{ animationDelay: `${150 + i * 70}ms` }}
-                >
-                  {b}
+        {/* 포켓컴퍼니 소개 머리처럼 덜어낸다: 위치 줄은 맨 위 한 줄로 떼고, 그 아래 여백을 크게 둔 두 칸.
+            왼쪽은 작은 머리말(서비스 이름) → 큰 제목 → 설명 → 단추 → 조용한 안내 한 줄(무료 · 소요 시간),
+            오른쪽은 결과 예시 카드 한 장. 알약 여러 개를 제목 위에 늘어놓지 않는다. */}
+        <div className="relative mx-auto max-w-6xl px-4.5 pt-6 pb-16 sm:pt-8 sm:pb-24 lg:px-8 lg:pb-28">
+          <nav aria-label="현재 위치">
+            <ol className="flex items-center gap-1 text-body-3 font-medium text-slate-600">
+              {[{ label: "홈", href: "/" }, ...crumbs].map((c, i, all) => (
+                <li key={`${c.label}-${i}`} className="flex items-center gap-1">
+                  {i > 0 && <ChevronRight aria-hidden className="size-3.5 text-slate-500" />}
+                  {c.href && i < all.length - 1 ? (
+                    <Link href={c.href}>{c.label}</Link>
+                  ) : (
+                    <span aria-current="page" className="text-slate-900">{c.label}</span>
+                  )}
                 </li>
               ))}
-            </ul>
-            <h1 className="mt-4 text-headline-3 leading-[1.3] font-extrabold tracking-[-0.03em] break-keep text-slate-900 sm:text-headline-1 sm:leading-[1.3]">
-              {title}
-            </h1>
-            <p className="mt-4 max-w-xl text-body-1 leading-[1.6] font-medium break-keep text-slate-700">{description}</p>
-            <div className="mt-8">{actions}</div>
-          </div>
+            </ol>
+          </nav>
 
-          {preview}
+          <div className="mt-10 grid items-center gap-12 sm:mt-14 lg:mt-16 lg:grid-cols-[1fr_26rem] lg:gap-24">
+            <div className="min-w-0 motion-safe:animate-[situation-in_600ms_ease-out_backwards]">
+              <p className="text-body-1 font-bold text-baro-blue">{crumbs[crumbs.length - 1]?.label}</p>
+              <h1 className="mt-3 text-headline-3 leading-[1.25] font-extrabold tracking-[-0.035em] break-keep text-slate-900 sm:text-headline-1 sm:leading-[1.25]">
+                {title}
+              </h1>
+              <p className="mt-6 max-w-lg text-body-1 leading-[1.65] font-medium break-keep text-slate-600">{description}</p>
+              <div className="mt-10">{actions}</div>
+              {badges.length > 0 && (
+                <ul className="mt-5 flex flex-wrap items-center gap-x-4 gap-y-1 text-body-3 font-semibold text-slate-600">
+                  {badges.map((b) => (
+                    <li key={b} className="flex items-center gap-1.5">
+                      <Check aria-hidden strokeWidth={2.5} className="size-4 text-baro-blue" />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+
+            <div className="motion-safe:animate-[situation-in_600ms_ease-out_backwards] [animation-delay:150ms]">{preview}</div>
+          </div>
         </div>
       </section>
 
@@ -143,6 +150,7 @@ export function DiagnosisLanding({
             </ol>
           </section>
         </Reveal>
+        {extra}
       </div>
 
       {/* ③ 알 수 있는 것 + ④ 안내 글. /draft3처럼 폭을 꽉 채운 회색 띠 위에 흰 카드를 얹어 진행 순서와 구역을 나눈다.
@@ -188,7 +196,7 @@ export function DiagnosisLanding({
  */
 export function PreviewCard({ label, title, children }: { label: string; title: string; children: React.ReactNode }) {
   return (
-    <div aria-hidden className="mx-auto w-full max-w-[26rem] rounded-card bg-white p-6 sm:p-7">
+    <div aria-hidden className="mx-auto w-full max-w-[26rem] rounded-card bg-white p-6 shadow-float sm:p-8">
       <p className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-caption-1 font-semibold text-slate-600">{label}</p>
       <p className="mt-3 text-title-3 font-bold text-slate-900">{title}</p>
       <div className="mt-5">{children}</div>
