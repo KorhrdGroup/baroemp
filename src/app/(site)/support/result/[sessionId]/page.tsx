@@ -4,10 +4,10 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Coins } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHead } from "@/components/layout/page-head";
 import { EmptyState } from "@/components/common/empty-state";
 import { SupportMatchViewTracker } from "@/features/support/support-match-view-tracker";
 import { SupportResultSections } from "@/features/support/support-card-grid";
+import { SupportResultHero } from "@/features/support/support-result-hero";
 import { getSupportResultView } from "@/services/support-search.service";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 
@@ -38,12 +38,10 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     }));
 
   return (
-    // 세부 화면 공통 바탕: 위치 줄과 큰 제목. 진단 결과 문장을 화면 제목으로 쓴다.
-    // /draft3 색 구성 (globals.css .draft3-theme): 옅은 하늘 머리 아래 회색 띠 위에 흰 카드.
-    <div className="draft3-theme bg-white">
+    // 머리는 파랑 판(경기 잡아바 지원사업 소개 판 참고): 회색 띠 위 위치 줄 → 파랑 판 → 흰 카드 목록.
+    <div className="draft3-theme bg-gov-surface">
       <SupportMatchViewTracker items={trackedItems} />
-      <PageHead icon="support"
-        crumbs={[{ label: "지원금 찾기", href: "/support" }, { label: "진단 결과" }]}
+      <SupportResultHero
         title={
           view.totalCount === 0
             ? "현재 조건에 맞는 지원제도를 찾지 못했습니다."
@@ -51,10 +49,11 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
               ? `${displayName}에게 해당 가능성이 높은 지원제도 ${likelyCount}개를 찾았습니다.`
               : `${displayName}, 조건 확인이 필요한 지원제도 ${view.totalCount}개를 찾았습니다.`
         }
-        description="입력하신 조건 기준의 참고 정보로, 최종 신청 가능 여부 확인은 각 운영기관에서 확인해야 합니다."
+        tags={view.categories.filter((c) => c.items.length > 0).map((c) => c.label)}
+        totalCount={view.totalCount}
+        gradeCounts={view.gradeCounts}
       />
 
-    <div className="bg-gov-surface">
     <div className="mx-auto max-w-6xl px-4.5 pt-4 pb-20 lg:px-8">
       {view.totalCount === 0 ? (
         <EmptyState
@@ -75,7 +74,6 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
           bookmarkedIds={bookmarkedIds}
         />
       )}
-    </div>
     </div>
     </div>
   );
