@@ -67,9 +67,9 @@ export function DiagnosisLanding({
   closingTitle: React.ReactNode;
 }) {
   return (
-    <div className="bg-white">
-      {/* ① 첫 칸. 바탕은 화면 머리(PageHead)와 같은 옅은 하늘색. 아래로 흰색까지 풀어 다음 구역과 끊기지 않게. */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white in-[.draft3-theme]:bg-baro-blue-50 in-[.draft3-theme]:bg-none">
+    <div className="bg-baro-page">
+      {/* ① 첫 칸. 바탕은 화면 머리(PageHead)와 같은 흰색 + 아래 선(draft3). 그 아래는 옅은 회색 바탕(baro-page)에 흰 카드. */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white in-[.draft3-theme]:border-b in-[.draft3-theme]:border-border in-[.draft3-theme]:bg-white in-[.draft3-theme]:bg-none">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-24 -right-24 size-[28rem] rounded-full bg-[radial-gradient(circle,rgba(0,73,229,0.12),transparent_65%)] in-[.draft3-theme]:hidden"
@@ -122,7 +122,7 @@ export function DiagnosisLanding({
           그림은 홈 서비스 그림과 같은 화풍으로 직접 그린 것(landing-item-icons).
           넓은 화면의 칸 수는 개수에 맞춘다 - 6개는 3칸 두 줄, 4개는 4칸 한 줄. 3칸에 4개를 놓으면 한 칸이 혼자 남는다.
           칸이 좁아지는 4칸에서도 글이 눌리지 않게, 휴대폰이 아니면 그림을 글 위에 둔다. */}
-      <section className="bg-gov-surface">
+      <section>
         <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
           <Reveal className="group">
             {/* 머리는 진행 순서 · 지원제도 모음과 같은 짜임(작은 머리말 + 제목). */}
@@ -174,7 +174,7 @@ export function DiagnosisLanding({
                         <span aria-hidden className="absolute top-16 left-1/2 hidden h-0.5 w-[calc(100%+1rem)] -translate-y-1/2 bg-baro-blue-300 md:block lg:top-[4.375rem]" />
                       </>
                     )}
-                    <span className="relative flex size-24 shrink-0 flex-col items-center justify-center gap-1 rounded-full bg-baro-blue-50 md:size-32 lg:size-35">
+                    <span className="relative flex size-24 shrink-0 flex-col items-center justify-center gap-1 rounded-full bg-white md:size-32 lg:size-35">
                       {Icon && <Icon aria-hidden strokeWidth={1.5} className="size-8 text-baro-blue md:size-10" />}
                       <span className="text-body-3 font-bold text-baro-blue md:text-body-2">{i + 1}단계</span>
                     </span>
@@ -193,7 +193,7 @@ export function DiagnosisLanding({
 
       {/* ⑤ 마무리. 정보는 여기까지 보여 주고, 내게 맞는 것은 진단으로 - 끝에서 한 번 더 시작 단추를 크게 건넨다.
           남색 판은 머리글 마이페이지 단추와 같은 색. 안내 글은 판 아래 글만. */}
-      <section className="bg-gov-surface">
+      <section>
         <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
           <div className="flex flex-col items-center rounded-card bg-baro-navy px-6 py-12 text-center sm:px-10 sm:py-16">
             <h2 className="text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-balance text-white sm:text-title-1 max-sm:[&_br]:hidden">

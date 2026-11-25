@@ -65,11 +65,11 @@ function CollapsibleSection({
   return (
     <section ref={sectionRef} className="scroll-mt-20">
       <div className="mb-5 flex items-center gap-2.5">
-        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-baro-blue-50 text-baro-blue">
+        <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-baro-blue">
           <Icon className="size-4" />
         </span>
         <h2 className="text-title-3 font-extrabold text-slate-900">{label}</h2>
-        <span className="rounded-full bg-gov-surface px-2 py-0.5 text-caption-1 font-semibold text-slate-600">
+        <span className="rounded-full bg-white px-2 py-0.5 text-caption-1 font-semibold text-slate-600">
           {items.length}
         </span>
         {expanded && hasMore && (
@@ -99,7 +99,7 @@ function CollapsibleSection({
         <button
           type="button"
           onClick={() => (expanded ? handleCollapse() : setExpanded(true))}
-          className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-gov-surface text-body-3 font-semibold text-slate-800"
+          className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-white text-body-3 font-semibold text-slate-800"
         >
           {expanded ? "접기" : `${items.length - COLLAPSE_COUNT}개 더보기`}
           <ChevronDown className={cn("size-4", expanded && "rotate-180")} />

@@ -752,7 +752,7 @@ export function ResumeEditor({
   */
   const sectionCards: Record<string, React.ReactNode> = {
     BASIC_INFO: (
-            <Card className="rounded-card border-0 shadow-card ring-0">
+            <Card className="rounded-card border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-title-3 font-extrabold text-slate-900">기본정보</CardTitle>
               </CardHeader>
@@ -892,7 +892,7 @@ export function ResumeEditor({
             </Card>
     ),
     SUMMARY: (
-            <Card className="rounded-card border-0 shadow-card ring-0">
+            <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 {/*
                   * 를 붙이지 않는다. 이 별표는 이름·이메일처럼 "이 칸을 비우면 안 된다"는
@@ -944,7 +944,7 @@ export function ResumeEditor({
             </Card>
     ),
     EXPERIENCE: (
-            <Card className="rounded-card border-0 shadow-card ring-0">
+            <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-title-3 font-extrabold text-slate-900">경력</CardTitle>
                 <Button
@@ -1084,7 +1084,7 @@ export function ResumeEditor({
             </Card>
     ),
     EDUCATION: (
-            <Card className="rounded-card border-0 shadow-card ring-0">
+            <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-title-3 font-extrabold text-slate-900">학력</CardTitle>
                 <Button
@@ -1227,7 +1227,7 @@ export function ResumeEditor({
             </Card>
     ),
     QUALIFICATION: (
-            <Card className="rounded-card border-0 shadow-card ring-0">
+            <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-title-3 font-extrabold text-slate-900">보유 자격</CardTitle>
                 <Button
@@ -1291,7 +1291,7 @@ export function ResumeEditor({
             </Card>
     ),
     SKILLS: (
-            <Card className="rounded-card border-0 shadow-card ring-0">
+            <Card className="rounded-card border-0 ring-0">
               <CardHeader>
                 <CardTitle className="text-title-3 font-extrabold text-slate-900">보유 스킬</CardTitle>
               </CardHeader>
@@ -1344,7 +1344,7 @@ export function ResumeEditor({
             </Card>
     ),
     TRAINING: (
-            <Card className="rounded-card border-0 shadow-card ring-0">
+            <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-title-3 font-extrabold text-slate-900">교육/훈련</CardTitle>
                 <Button
@@ -1418,7 +1418,7 @@ export function ResumeEditor({
             </Card>
     ),
     EXTRA: (
-            <Card className="rounded-card border-0 shadow-card ring-0">
+            <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-title-3 font-extrabold text-slate-900">봉사·수상 등 추가 경력</CardTitle>
                 <Button
@@ -1627,7 +1627,7 @@ export function ResumeEditor({
       )}
 
       <div className="space-y-4 print:hidden">
-        <div className="flex flex-wrap items-end justify-between gap-3 rounded-card bg-white p-5 shadow-card">
+        <div className="flex flex-wrap items-end justify-between gap-3 rounded-card bg-white p-5">
           <div className="min-w-48 flex-1">
             <Label htmlFor="resume-title" className="text-caption-1 text-slate-600">
               이력서 제목
@@ -1662,7 +1662,7 @@ export function ResumeEditor({
             완성도만 아래 고정바에 두면 "얼마나 남았는지"와 "무엇을 더 담을 수 있는지"가
             화면 양 끝으로 갈라져, 완성도를 올리려고 항목을 손보는 흐름이 끊긴다.
           */}
-          <nav className="rounded-card bg-white p-4 shadow-card lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+          <nav className="rounded-card bg-white p-4 lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
             <div className="flex items-baseline justify-between gap-2">
               <p className="text-body-3 font-bold text-slate-900">이력서 완성도</p>
               <p className="text-body-1 font-bold text-brand-blue-600">{liveCompleteness.score}%</p>

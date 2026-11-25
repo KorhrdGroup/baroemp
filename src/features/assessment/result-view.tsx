@@ -61,8 +61,8 @@ export function ResultView({
         description={result.summary}
       />
 
-    {/* 본문은 흰 바탕에 그림자 진 흰 카드(모서리 20px, 테두리 없음). 아래 고정 단추에 가리지 않게 아래를 비운다. */}
-    <div className="bg-white">
+    {/* 본문은 회색 바탕에 흰 카드(모서리 20px, 테두리 없음). 아래 고정 단추에 가리지 않게 아래를 비운다. */}
+    <div className="bg-baro-page">
     <div className="mx-auto max-w-6xl px-4.5 pt-4 pb-28 lg:px-8">
      <div className="max-w-3xl space-y-6">
       {(top || result.generatedTags.length > 0) && (
@@ -75,7 +75,7 @@ export function ResultView({
           {result.generatedTags.length > 0 && (
             <div className={top ? "mt-4 flex flex-wrap gap-2" : "flex flex-wrap gap-2"}>
               {result.generatedTags.map((tag) => (
-                <span key={tag} className="rounded-full bg-gov-surface px-3 py-1 text-body-3 font-medium text-slate-700">
+                <span key={tag} className="rounded-full bg-white px-3 py-1 text-body-3 font-medium text-slate-700">
                   #{tag}
                 </span>
               ))}
@@ -143,7 +143,7 @@ export function ResultView({
       )}
 
       {result.recommendations.length === 0 && (
-        <div className="rounded-card bg-white p-10 text-center text-body-2 font-medium text-slate-600 shadow-card">
+        <div className="rounded-card bg-white p-10 text-center text-body-2 font-medium text-slate-600">
           조건에 맞는 추천 직업을 찾지 못했어요. 답변을 조금 더 넓혀서 다시 시도해보세요.
         </div>
       )}
@@ -172,7 +172,7 @@ export function ResultView({
                 }
                 target={content.externalUrl ? "_blank" : undefined}
                 rel={content.externalUrl ? "noopener noreferrer" : undefined}
-                className="rounded-card bg-white p-5 shadow-card"
+                className="rounded-card bg-white p-5"
               >
                 <p className="flex items-center gap-1.5 text-body-2 font-semibold text-slate-800">
                   {content.title}

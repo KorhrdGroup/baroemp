@@ -102,9 +102,9 @@ function StepHeader({ step, title, description }: { step: 1 | 2; title: string; 
   );
 }
 
-/** 1단계·2단계를 감싸는 종이 한 장. 흰 바탕 위라 그림자(shadow-card)로 가른다. */
+/** 1단계·2단계를 감싸는 종이 한 장. 회색 바탕 위 흰 종이라 테두리 · 그림자 없이 바탕색으로 가른다. */
 function WizardCard({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-3xl rounded-card bg-white p-6 shadow-card sm:p-10">{children}</div>;
+  return <div className="mx-auto max-w-3xl rounded-card bg-white p-6 sm:p-10">{children}</div>;
 }
 
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
@@ -240,7 +240,7 @@ export function CoverLetterWizard({
             const style = TEMPLATE_CARD_STYLES[idx % TEMPLATE_CARD_STYLES.length];
             const Icon = style.icon;
             return (
-              <div key={t.id} className="flex flex-col rounded-card bg-white p-5 text-center shadow-card sm:p-7">
+              <div key={t.id} className="flex flex-col rounded-card bg-white p-5 text-center sm:p-7">
                 <div className="flex justify-center">
                   <span className={cn("flex size-14 items-center justify-center rounded-full", style.tone)}>
                     <Icon className={cn("size-7", style.iconTone)} />

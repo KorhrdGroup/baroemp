@@ -179,12 +179,12 @@ export function JobDetailView({
         }
       />
 
-    <div className="bg-white">
+    <div className="bg-baro-page">
     <div className="mx-auto max-w-6xl px-4.5 pb-10 lg:px-8">
      <div className="max-w-3xl">
       <Section title="모집 요강">
         {/* 테두리 표 대신 흰 판 + 옅은 줄로 나눈다 (/draft3 구성). */}
-        <dl className="divide-y divide-slate-100 overflow-hidden rounded-card bg-white shadow-card">
+        <dl className="divide-y divide-slate-100 overflow-hidden rounded-card bg-white">
           <InfoRow
             label="근무지역"
             value={job.address ?? job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
@@ -211,7 +211,7 @@ export function JobDetailView({
       )}
 
       <Section title="상세 설명">
-        <div className="rounded-card bg-white p-5 shadow-card sm:p-6">
+        <div className="rounded-card bg-white p-5 sm:p-6">
           <p className="text-body-2-reading font-medium whitespace-pre-line text-slate-800">{job.description}</p>
           {job.qualificationRequirements && (
             <p className="mt-3 text-body-3 font-medium whitespace-pre-line text-slate-600">
@@ -313,7 +313,7 @@ export function JobDetailView({
         <Section title="이 공고에 필요한 준비" description="이 공고와 관련된 자격/교육 과정이에요.">
           <div className="grid gap-3 sm:grid-cols-2">
             {recommendedContents.map((content) => (
-              <div key={content.id} className="rounded-card bg-white p-5 shadow-card">
+              <div key={content.id} className="rounded-card bg-white p-5">
                 <p className="text-body-2 font-semibold text-slate-900">{content.title}</p>
                 <p className="mt-1 text-body-3 font-medium text-slate-600">{content.summary ?? content.shortDescription}</p>
               </div>
@@ -334,7 +334,7 @@ export function JobDetailView({
         마이페이지 5단계가 완료로 바뀐다. 목록을 늘어놓는 대신 공고마다 이 한 줄이 기록 자리다.
       */}
       {isAuthenticated && (
-        <section className="mt-4 flex flex-col gap-3 rounded-card bg-white p-5 shadow-card sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <section className="mt-4 flex flex-col gap-3 rounded-card bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="min-w-0">
             <p className="text-body-2 font-semibold text-slate-900">이 공고에 지원하셨나요?</p>
             <p className="mt-0.5 text-body-3 font-medium text-slate-600">표시해 두면 마이페이지 취업 절차에 기록돼요. 면접·취업까지 이어지면 단계를 올려 주세요.</p>

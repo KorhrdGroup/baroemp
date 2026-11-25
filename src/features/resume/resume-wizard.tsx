@@ -92,7 +92,7 @@ function StepHeader({ step, title, description }: { step: 1 | 2; title: string; 
 }
 
 function WizardCard({ children }: { children: React.ReactNode }) {
-  return <div className="mx-auto max-w-3xl rounded-card bg-white p-6 shadow-card sm:p-10">{children}</div>;
+  return <div className="mx-auto max-w-3xl rounded-card bg-white p-6 sm:p-10">{children}</div>;
 }
 
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
@@ -244,7 +244,7 @@ export function ResumeWizard({
             const style = TEMPLATE_CARD_STYLES[idx % TEMPLATE_CARD_STYLES.length];
             const Icon = style.icon;
             return (
-              <div key={t.id} className="flex flex-col rounded-card bg-white p-5 text-center shadow-card sm:p-6">
+              <div key={t.id} className="flex flex-col rounded-card bg-white p-5 text-center sm:p-6">
                 <div className="flex justify-center">
                   <span className={cn("flex size-14 items-center justify-center rounded-full", style.tone)}>
                     <Icon className={cn("size-7", style.iconTone)} />

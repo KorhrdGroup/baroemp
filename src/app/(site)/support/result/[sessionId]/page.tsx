@@ -38,8 +38,8 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     }));
 
   return (
-    // 머리는 파랑 판(경기 잡아바 지원사업 소개 판 참고): 흰 바탕 위 위치 줄 → 파랑 판 → 그림자 진 흰 카드 목록.
-    <div className="draft3-theme bg-white">
+    // 머리는 파랑 판(경기 잡아바 지원사업 소개 판 참고): 흰 바탕 위 위치 줄 → 파랑 판 → 회색 바탕 위 흰 카드 목록.
+    <div className="draft3-theme bg-baro-page">
       <SupportMatchViewTracker items={trackedItems} />
       <SupportResultHero
         title={
@@ -57,7 +57,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     <div className="mx-auto max-w-6xl px-4.5 pt-4 pb-20 lg:px-8">
       {view.totalCount === 0 ? (
         <EmptyState
-          className="mt-5 rounded-card border-0 bg-white shadow-card"
+          className="mt-5 rounded-card border-0 bg-white"
           icon={Coins}
           title="조건에 맞는 지원제도를 찾지 못했어요"
           description="조건을 다시 입력하거나 잠시 후 다시 시도해주세요."

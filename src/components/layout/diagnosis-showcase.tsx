@@ -63,7 +63,7 @@ export function DiagnosisShowcase({
   };
 
   return (
-    <section className="border-t border-slate-100 py-14 sm:py-20">
+    <section className="border-t border-border py-14 sm:py-20">
       <div className="grid items-center gap-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-16">
         <div className="text-center lg:text-left">
           <p className="text-body-3 font-semibold text-slate-600">{eyebrow}</p>
@@ -115,7 +115,7 @@ export function DiagnosisShowcase({
                 <button
                   type="button"
                   onClick={onStart}
-                  className="flex h-full min-h-64 w-full flex-col rounded-card bg-baro-blue-50 p-6 text-left sm:p-7"
+                  className="flex h-full min-h-64 w-full flex-col rounded-card bg-white p-6 text-left sm:p-7"
                 >
                   <p className="text-body-3 font-bold text-baro-blue">{current.label}</p>
                   <p className="mt-2 line-clamp-2 text-title-3 leading-[1.4] font-bold break-keep text-slate-900">{c.title}</p>
@@ -136,7 +136,7 @@ export function DiagnosisShowcase({
                     </p>
                   )}
                   <span className="mt-auto pt-5">
-                    <span className="inline-flex h-11 items-center gap-1.5 rounded-full bg-white px-5 text-body-3 font-bold text-slate-900">
+                    <span className="inline-flex h-11 items-center gap-1.5 rounded-full bg-baro-blue-50 px-5 text-body-3 font-bold text-baro-blue">
                       내게 맞는지 확인하기
                       <ArrowRight aria-hidden className="size-4" />
                     </span>

@@ -43,7 +43,7 @@ export function PageHead({
   return (
     <div
       className={cn(
-        "relative overflow-hidden bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] in-[.draft3-theme]:bg-baro-blue-50 in-[.draft3-theme]:bg-none",
+        "relative overflow-hidden bg-gradient-to-r from-[#E4EEFF] via-[#EEF4FF] to-[#F6F9FF] in-[.draft3-theme]:border-b in-[.draft3-theme]:border-border in-[.draft3-theme]:bg-white in-[.draft3-theme]:bg-none",
         className,
       )}
     >
@@ -74,9 +74,9 @@ export function PageHead({
             {children}
           </div>
         </div>
-        {/* 그림은 흰 동그라미 위에. 휴대폰은 제목 자리가 좁아 감춘다. */}
+        {/* 그림은 흰 동그라미 위에(draft3 는 머리가 흰색이라 옅은 하늘 동그라미). 휴대폰은 제목 자리가 좁아 감춘다. */}
         {icon && (
-          <div aria-hidden className="hidden size-28 shrink-0 items-center justify-center rounded-full bg-white/80 md:flex in-[.draft3-theme]:bg-white [&>svg]:size-16">
+          <div aria-hidden className="hidden size-28 shrink-0 items-center justify-center rounded-full bg-white/80 md:flex in-[.draft3-theme]:bg-baro-blue-50 [&>svg]:size-16">
             <ServiceIcon id={icon} />
           </div>
         )}

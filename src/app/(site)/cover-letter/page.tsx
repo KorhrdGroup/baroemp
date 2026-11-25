@@ -15,7 +15,7 @@ export default async function CoverLetterListPage() {
   const coverLetters = await listCoverLettersForUser(user.id);
 
   return (
-    // 흰 바탕에 그림자 진 흰 카드(shadow-card). /draft3 색 구성 (globals.css .draft3-theme).
+    // 흰 머리 아래 회색 바탕에 흰 카드(테두리 · 그림자 없음). /draft3 색 구성 (globals.css .draft3-theme).
     <div className="draft3-theme">
       <PageHead icon="coverLetter"
         crumbs={[{ label: "자기소개서" }]}
@@ -29,10 +29,11 @@ export default async function CoverLetterListPage() {
         </Button>
       </PageHead>
 
+      <div className="bg-baro-page">
       <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
         <div className="space-y-3">
           {coverLetters.length === 0 ? (
-            <div className="rounded-card bg-white p-10 text-center shadow-card">
+            <div className="rounded-card bg-white p-10 text-center">
               <p className="text-body-3 font-medium text-slate-600">아직 작성한 자기소개서가 없어요.</p>
             </div>
           ) : (
@@ -40,7 +41,7 @@ export default async function CoverLetterListPage() {
               <Link
                 key={cl.id}
                 href={`/cover-letter/${cl.id}/edit`}
-                className="flex items-center justify-between gap-3 rounded-card bg-white p-5 shadow-card"
+                className="flex items-center justify-between gap-3 rounded-card bg-white p-5"
               >
                 <div>
                   <p className="text-body-2 font-semibold text-slate-900">{cl.title}</p>
@@ -51,6 +52,7 @@ export default async function CoverLetterListPage() {
             ))
           )}
         </div>
+      </div>
       </div>
     </div>
   );

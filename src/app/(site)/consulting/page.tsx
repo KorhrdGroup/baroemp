@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function ConsultingPage() {
   return (
-    // /draft3 색 구성 (globals.css .draft3-theme): 옅은 하늘 머리 아래 회색 띠 위에 흰 신청 카드.
+    // /draft3 색 구성 (globals.css .draft3-theme): 흰 머리 아래 회색 바탕에 흰 신청 카드.
     <div className="draft3-theme">
       {/*
        * 다른 세부 화면과 같은 흰 바탕 화면 머리를 쓴다.
@@ -27,7 +27,7 @@ export default function ConsultingPage() {
       </PageHead>
 
       {/* 폼은 한 줄이 너무 길어지지 않게 3xl 로 좁혀 둔다. */}
-      <div className="bg-white">
+      <div className="bg-baro-page">
         <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-16 sm:pb-20 lg:px-8">
           <div className="mx-auto max-w-3xl">
             <ConsultingRequestForm />

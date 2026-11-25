@@ -127,7 +127,7 @@ export function OccupationRecommendationCard({
       open={defaultOpen}
       className={cn(
         // 회색 띠 위의 흰 카드(/draft3). 테두리 없이 바탕색으로 가른다. 순위는 왼쪽 번호 배지가 짚어준다.
-        "group rounded-card bg-white shadow-card",
+        "group rounded-card bg-white",
       )}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-card px-5 py-5 sm:px-7 sm:py-6">

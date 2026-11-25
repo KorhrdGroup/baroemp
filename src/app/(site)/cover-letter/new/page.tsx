@@ -33,14 +33,14 @@ export default async function CoverLetterNewPage({
   if (existing.length >= MAX_COVER_LETTERS_PER_USER) redirect("/resume");
 
   return (
-    // 다른 세부 화면과 같이 흰 바탕에 화면 머리를 얹는다. 단계 카드는 얇은 선으로 나눈다.
-    // 흰 바탕에 그림자 진 흰 단계 카드. /draft3 색 구성 (globals.css .draft3-theme).
+    // 흰 머리 아래 회색 바탕에 흰 카드(테두리 · 그림자 없음). /draft3 색 구성 (globals.css .draft3-theme).
     <div className="draft3-theme">
       <PageHead icon="coverLetter"
         crumbs={[{ label: "자기소개서", href: "/cover-letter" }, { label: "새 자기소개서" }]}
         title="새 자기소개서"
         description="양식을 고르고 문항과 내 경험을 담으면, 편집 화면에서 AI 초안을 받을 수 있어요."
       />
+      <div className="bg-baro-page">
       <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
         <CoverLetterWizard
           templates={ordered.map((t) => ({
@@ -56,6 +56,7 @@ export default async function CoverLetterNewPage({
           resumeId={resume && resume.userId === user.id ? resume.id : undefined}
           targetOccupationId={targetOccupationId}
         />
+      </div>
       </div>
     </div>
   );

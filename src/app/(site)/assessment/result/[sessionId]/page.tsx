@@ -72,7 +72,7 @@ export default async function AssessmentResultPage({
   );
 
   return (
-    // /draft3 색 구성 (globals.css .draft3-theme): 옅은 하늘 머리(PageHead) 아래 회색 띠 위에 흰 카드.
+    // /draft3 색 구성 (globals.css .draft3-theme): 흰 머리(PageHead) 아래 회색 바탕에 흰 카드.
     <div className="draft3-theme bg-white">
       <ResultView
         sessionId={sessionId}

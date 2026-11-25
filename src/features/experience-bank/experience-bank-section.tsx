@@ -47,7 +47,7 @@ export function ExperienceBankSection({
     // sticky 헤더에 제목이 가리지 않도록 scroll-mt를 준다.
     <div
       id="experience-bank"
-      className={cn("scroll-mt-24", nested ? "mt-4 rounded-card bg-white p-5 shadow-card" : "mt-10")}
+      className={cn("scroll-mt-24", nested ? "mt-4 rounded-card bg-white p-5" : "mt-10")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">

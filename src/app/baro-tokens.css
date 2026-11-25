@@ -16,15 +16,15 @@
   --color-baro-blue-100: #DEE8FF; /* 그림의 옅은 면, 파랑 띠 위 머리말 */
   --color-baro-blue-50: #EFF4FF; /* 옅은 하늘 판(지원금 대표 · 자격증), 선택된 메뉴 알약 */
   --color-baro-field: #F3F5F8; /* 머리글의 둥근 검색 단추 · 화면 크기 알약 바탕 */
+  --color-baro-page: #F8F9FB; /* 세부 화면(흰 머리 아래) 본문 바탕. 흰 카드가 놓인다. gov-surface 보다 한 단계 옅게 */
   --color-baro-danger: #D04040; /* 마감 임박(7일 이내)만 */
 
   /* 모서리: 담는 것 20 · 누르는 네모 단추 12(rounded-xl) · 첫 화면 검색 칸 14(rounded-2xl) · 알약(rounded-full) */
   --radius-card: 20px;
 
-  /* 그림자: 이 다섯 곳에만 쓴다 */
+  /* 그림자: 이 네 곳에만 쓴다 */
   --shadow-float: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.08); /* 첫 화면에 걸친 서비스 입구 판 */
   --shadow-hover: 0 0 10px rgba(0, 24, 77, 0.12); /* 마우스를 올린 카드 · 자격증 단추. 위치 0,0 */
   --shadow-icon-hover: 0 0 8px rgba(18, 65, 166, 0.32); /* 마우스를 올린 서비스 입구 아이콘 원 */
   --shadow-chip: 0 1px 3px rgba(0, 24, 77, 0.15); /* 화면 크기 알약 안 고른 글자 */
-  --shadow-card: 0 1px 2px rgba(0, 24, 77, 0.04), 0 4px 16px rgba(0, 24, 77, 0.07); /* 세부 화면 흰 바탕 위 흰 카드. 회색 띠 대신 그림자로 가른다 */
 }
