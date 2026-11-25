@@ -82,7 +82,7 @@ export function JobCardTabs({
 /**
  * /draft3 전용 공고 카드. 공용 JobCard 에서 태그 줄 · 동전 그림을 덜어 네 줄로 줄였다:
  * 제목(늘 두 줄 높이) / 회사 · 지역 / 급여 / 마감 · 찜.
- * 제목 칸 높이를 두 줄로 고정해, 제목이 한 줄인 카드와 두 줄인 카드가 섞여도 아래 줄들이 가로로 맞는다.
+ * 넓은 화면은 제목 칸 높이를 두 줄로 고정해, 제목이 한 줄인 카드와 두 줄인 카드가 섞여도 아래 줄들이 가로로 맞는다(휴대폰은 한 줄에 한 장이라 고정하지 않는다).
  * 테두리 없이 회색 바탕 위 흰 카드로만 구분한다.
  */
 function SimpleJobCard({ job, isAuthenticated, isBookmarked }: { job: Job; isAuthenticated: boolean; isBookmarked: boolean }) {
@@ -93,7 +93,7 @@ function SimpleJobCard({ job, isAuthenticated, isBookmarked }: { job: Job; isAut
   return (
     <div className="relative h-full">
       <Link href={`/jobs/${job.id}`} className="flex h-full flex-col rounded-xl bg-white p-5 sm:p-6">
-        <h3 className="line-clamp-2 min-h-[2.8em] text-body-1 leading-[1.4] font-semibold break-keep text-slate-800">{job.title}</h3>
+        <h3 className="line-clamp-2 text-body-1 sm:min-h-[2.8em] leading-[1.4] font-semibold break-keep text-slate-800">{job.title}</h3>
         <p className="mt-2 flex min-w-0 items-center gap-1.5 text-body-3 font-medium text-slate-600">
           <span className="truncate">{job.companyName}</span>
           {location && <span aria-hidden className="size-0.5 shrink-0 rounded-full bg-slate-400" />}
