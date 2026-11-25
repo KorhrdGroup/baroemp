@@ -18,8 +18,9 @@ const TABS = [
   { label: "마이", href: "/mypage", icon: User },
 ];
 
-/** "홈"은 시안 안에서는 그 시안 첫 화면(/draft · /draft2)으로, 세부 화면에서는 누리집 첫 화면(/)으로 간다. */
+/** "홈"은 시안 안에서는 그 시안 첫 화면(/draft · /draft2 · /draft3)으로, 세부 화면에서는 누리집 첫 화면(/)으로 간다. */
 function homeHref(pathname: string): string {
+  if (pathname === "/draft3" || pathname.startsWith("/draft3/")) return "/draft3";
   if (pathname === "/draft2" || pathname.startsWith("/draft2/")) return "/draft2";
   if (pathname === "/draft" || pathname.startsWith("/draft/")) return "/draft";
   return "/";
