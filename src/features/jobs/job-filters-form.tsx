@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, ChevronLeft, Search, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, RotateCcw, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { filterPillClass, filterPillOffClass, filterPillOnClass } from "@/lib/ui-classes";
 import { REGION_LABELS } from "@/lib/labels";
@@ -82,6 +82,33 @@ export function JobFiltersForm({
   const router = useRouter();
   const [sortOpen, setSortOpen] = useState(false);
   const [picker, setPicker] = useState<"region" | "job" | null>(null);
+  /*
+    닫을 때도 부드럽게: 바로 지우지 않고 closing 으로 사라지는 움직임을 다 보인 뒤(onAnimationEnd) 지운다.
+    움직임 줄이기를 켠 분은 움직임이 없어 끝 신호가 오지 않으므로 바로 지운다.
+  */
+  const [pickerClosing, setPickerClosing] = useState(false);
+  const closePicker = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setPicker(null);
+      setPickerClosing(false);
+    } else {
+      setPickerClosing(true);
+    }
+  };
+  const openPicker = (which: "region" | "job") => {
+    setPicker(which);
+    setPickerClosing(false);
+  };
+  /* 고르기 판은 목록 위에 겹쳐 뜨므로, 검색바 · 판 바깥을 누르면 닫는다. */
+  const headRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!picker) return;
+    const close = (e: PointerEvent) => {
+      if (!headRef.current?.contains(e.target as Node)) closePicker();
+    };
+    document.addEventListener("pointerdown", close);
+    return () => document.removeEventListener("pointerdown", close);
+  }, [picker]);
   const [keyword, setKeyword] = useState(initial.keyword ?? "");
   const [region, setRegion] = useState(initial.region ?? "all");
   const [sigungus, setSigungus] = useState<string[]>(initial.regionSigungus ?? []);
@@ -131,7 +158,7 @@ export function JobFiltersForm({
   /* 조건을 걸어 목록을 다시 부른다. 알약 · 고르기 창 · 정렬이 모두 여기로 온다. */
   const submit = async (overrides: Partial<JobFiltersValue> = {}) => {
     setSortOpen(false);
-    setPicker(null);
+    if (picker) closePicker();
     const { next, params } = buildParams(overrides);
     setRegion(next.region ?? "all");
     setSigungus(next.regionSigungus ?? []);
@@ -157,20 +184,20 @@ export function JobFiltersForm({
   const pickerToggle = (which: "region" | "job", label: string, active: boolean, className?: string) => (
     <button
       type="button"
-      aria-expanded={picker === which}
+      aria-expanded={picker === which && !pickerClosing}
       aria-controls="job-filter-panel"
-      onClick={() => setPicker(picker === which ? null : which)}
-      className={cn(pickerButtonClass(active || picker === which), className)}
+      onClick={() => (picker === which && !pickerClosing ? closePicker() : openPicker(which))}
+      className={cn(pickerButtonClass(active || (picker === which && !pickerClosing)), className)}
     >
       <span className="truncate">{label}</span>
-      <ChevronDown aria-hidden className={cn("size-4 shrink-0 transition-transform", picker === which && "rotate-180")} strokeWidth={2.2} />
+      <ChevronDown aria-hidden className={cn("size-4 shrink-0 transition-transform", picker === which && !pickerClosing && "rotate-180")} strokeWidth={2.2} />
     </button>
   );
   const regionButton = (className?: string) => pickerToggle("region", regionPillLabel, regionActive, className);
   const jobButton = (className?: string) => pickerToggle("job", jobPillLabel, jobActive, className);
 
   const head = (
-    <div className="mt-5 sm:mt-6">
+    <div ref={headRef} className="relative mt-5 sm:mt-6">
       {/*
         검색바 하나에 검색어 | 지역 | 직종 | 검색 단추를 모은다(기존 job24 검색바 구성).
         지역 · 직종은 누르면 고르기 창이 뜨고 고르면 바로 걸린다. 고르기 창을 여는 것은 둘러보기라 비로그인에게도 열어 둔다.
@@ -212,19 +239,32 @@ export function JobFiltersForm({
 
       {/*
         고르기 판. 창(모달)을 띄우면 화면이 무겁게 바뀌어, 기존 job24 처럼 검색바 바로 아래로 펼친다.
-        머리(PageHead)가 overflow-hidden 이라 겹쳐 띄우지 않고 흐름 안에서 아래 목록을 밀어 내린다.
+        아래 목록을 밀어 내리면 화면이 들썩여, 목록 위에 겹쳐 띄운다(머리는 overflow-visible 로 연다).
+        모서리는 화면의 다른 판 · 카드와 같은 rounded-card(20px).
+        열릴 때는 살짝 위에서 내려오며 나타나고(0.2초), 닫힐 때는 거꾸로 올라가며 사라진다(0.15초).
+        움직임 줄이기를 켠 분께는 움직임 없이 바로 보이고 바로 사라진다.
       */}
       {picker && (
         <div
           id="job-filter-panel"
-          onKeyDown={(e) => e.key === "Escape" && setPicker(null)}
-          className="mt-3 flex max-h-[min(34rem,70vh)] flex-col overflow-hidden rounded-xl bg-white shadow-[0_12px_32px_rgba(15,40,90,0.10)] ring-1 ring-[#DDE3EC] ring-inset"
+          onKeyDown={(e) => e.key === "Escape" && closePicker()}
+          onAnimationEnd={(e) => {
+            if (e.target !== e.currentTarget || !pickerClosing) return;
+            setPicker(null);
+            setPickerClosing(false);
+          }}
+          className={cn(
+            "absolute inset-x-0 top-full z-30 mt-3 flex max-h-[min(34rem,70vh)] flex-col overflow-hidden rounded-card bg-white shadow-[0_12px_32px_rgba(15,40,90,0.10)] ring-1 ring-[#DDE3EC] ring-inset motion-reduce:animate-none",
+            pickerClosing
+              ? "pointer-events-none animate-out fill-mode-forwards duration-150 ease-in fade-out-0 slide-out-to-top-2"
+              : "animate-in duration-200 ease-out fade-in-0 slide-in-from-top-2",
+          )}
         >
           {picker === "region" && (
             <RegionPicker
               region={region}
               sigungus={sigungus}
-              onClose={() => setPicker(null)}
+              onClose={closePicker}
               onApply={(r, s) =>
                 void submit({ region: r === "all" ? undefined : r, regionSigungus: r === "all" || s.length === 0 ? undefined : s })
               }
@@ -234,7 +274,7 @@ export function JobFiltersForm({
             <JobPicker
               selected={jobCategories}
               nameOf={nameOfJob}
-              onClose={() => setPicker(null)}
+              onClose={closePicker}
               onApply={(keys) => void submit({ jobCategories: keys.length > 0 ? keys : undefined })}
             />
           )}
@@ -243,9 +283,78 @@ export function JobFiltersForm({
     </div>
   );
 
+  /*
+    고른 조건 줄. 조건이 걸렸을 때만 검색바 바로 아래에 띄운다(기존 job24 구성).
+    하나씩 ✕ 로 빼고, 끝의 "전체 초기화"로 한 번에 지운다. 초기화가 건수 줄에 있을 때는
+    검색바와 멀어 무엇을 지우는지 이어지지 않았다. 목록을 다시 부르는 단추라 문지기(data-guest-gated)에 걸린다.
+  */
+  const chips: { key: string; label: string; remove: Partial<JobFiltersValue> }[] = [];
+  if (regionActive) {
+    const sido = REGION_LABELS[region as Region];
+    if (sigungus.length === 0) {
+      chips.push({ key: "region", label: sido, remove: { region: undefined, regionSigungus: undefined } });
+    } else {
+      for (const s of sigungus) {
+        const rest = sigungus.filter((x) => x !== s);
+        chips.push({ key: `sgg-${s}`, label: `${sido} ${s}`, remove: { regionSigungus: rest.length > 0 ? rest : undefined } });
+      }
+    }
+  }
+  for (const c of jobCategories) {
+    const rest = jobCategories.filter((x) => x !== c);
+    chips.push({ key: `job-${c}`, label: nameOfJob(c), remove: { jobCategories: rest.length > 0 ? rest : undefined } });
+  }
+  if (beginnerOnly) chips.push({ key: "beginner", label: "신입가능만", remove: { isBeginnerFriendly: undefined } });
+  if (closingSoon) chips.push({ key: "closing", label: "마감임박만", remove: { closingSoon: undefined } });
+
+  const chipRow = anyActive && (
+    <div className="mt-3 flex flex-wrap items-center gap-2">
+      {chips.map((c) => (
+        <button
+          key={c.key}
+          type="button"
+          data-guest-gated
+          onClick={() => void submit(c.remove)}
+          aria-label={`${c.label} 조건 빼기`}
+          className={cn(filterPillClass, filterPillOnClass, "flex items-center gap-1.5 whitespace-nowrap")}
+        >
+          {c.label}
+          <X aria-hidden className="size-3.5" strokeWidth={2.6} />
+        </button>
+      ))}
+      <button
+        type="button"
+        data-guest-gated
+        onClick={() =>
+          void submit({
+            region: undefined,
+            regionSigungus: undefined,
+            jobCategories: undefined,
+            isBeginnerFriendly: undefined,
+            closingSoon: undefined,
+          })
+        }
+        className="ml-1 flex h-10 shrink-0 items-center gap-1 text-body-3 font-semibold whitespace-nowrap text-slate-700"
+      >
+        <RotateCcw aria-hidden className="size-3.5" strokeWidth={2.4} />
+        전체 초기화
+      </button>
+    </div>
+  );
+
   return (
     <>
-      <PageHead crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" footer={head} />
+      <PageHead
+        crumbs={[{ label: "일자리 찾기" }]}
+        title="일자리 찾기"
+        footer={
+          <>
+            {head}
+            {chipRow}
+          </>
+        }
+        className="overflow-visible"
+      />
 
       {/* 흰 머리 아래 회색 바탕에 흰 판 · 흰 카드(모서리 20px, 테두리 없음). */}
       <div className="bg-baro-page">
@@ -258,24 +367,6 @@ export function JobFiltersForm({
           */}
           <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {summary}
-            {anyActive && (
-              <button
-                type="button"
-                data-guest-gated
-                onClick={() =>
-                  void submit({
-                    region: undefined,
-                    regionSigungus: undefined,
-                    jobCategories: undefined,
-                    isBeginnerFriendly: undefined,
-                    closingSoon: undefined,
-                  })
-                }
-                className="h-10 shrink-0 text-body-3 font-semibold whitespace-nowrap text-slate-700 underline underline-offset-4"
-              >
-                조건 초기화
-              </button>
-            )}
             <div className="ml-auto flex items-center gap-2">
             <button
               type="button"
@@ -420,7 +511,7 @@ function RegionPicker({
             시·도 다시 고르기
           </button>
         }
-        note={`시·군·구는 ${MAX_SIGUNGU}곳까지 고를 수 있어요.`}
+        note={`${MAX_SIGUNGU}곳까지 고를 수 있어요.`}
         onClose={onClose}
       />
       <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto px-5 pb-4 sm:grid-cols-4 sm:px-6 lg:grid-cols-6">
@@ -428,7 +519,7 @@ function RegionPicker({
           type="button"
           data-guest-gated
           onClick={() => onApply(sido, [])}
-          className={cn(choiceClass, "col-span-2", picked.length === 0 ? choiceOnClass : choiceOffClass)}
+          className={cn(choiceClass, picked.length === 0 ? choiceOnClass : choiceOffClass)}
         >
           {sidoLabel} 전체
         </button>
