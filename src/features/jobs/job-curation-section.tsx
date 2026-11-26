@@ -209,11 +209,12 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
 
   return (
     /*
-      옅은 회색 판을 깔아 아래 검색 결과 목록과 갈라 놓는다 (파란 판은 화면을 너무 파랗게 했다).
+      옅은 하늘색 판 위에 흰 카드를 놓아 아래 검색 결과 목록과 갈라 놓는다.
+      흰 판 위 회색 카드였을 때는 회색 바탕 화면에 묻혀 추천 상자인 줄 잘 안 보였다.
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
-    <section ref={sectionRef} className="mb-8 rounded-card bg-white p-5 pt-6 sm:p-6 sm:pt-8">
+    <section ref={sectionRef} className="mb-8 rounded-card bg-baro-blue-100 p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
       {/*
         제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
@@ -234,14 +235,14 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-baro-blue-100 to-transparent transition-opacity",
             tabFade.start ? "opacity-100" : "opacity-0",
           )}
         />
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-baro-blue-100 to-transparent transition-opacity",
             tabFade.end ? "opacity-100" : "opacity-0",
           )}
         />
@@ -258,10 +259,10 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             onFocus={() => prefetchTab(t.key)}
             className={cn(
               filterPillClass,
-              /* 고른 탭은 남색 알약, 나머지는 테두리 없는 회색 알약 (흰 판 위라 /draft3 공고 판의 흰 알약 대신). */
+              /* 고른 탭은 파란 알약, 나머지는 테두리 없는 흰 알약 (하늘색 판 위). */
               activeTab === t.key
-                ? "border-atomic-blue-900 bg-atomic-blue-900 font-bold text-white"
-                : "border-transparent bg-gov-surface font-semibold text-slate-700",
+                ? "border-baro-blue bg-baro-blue font-bold text-white"
+                : "border-transparent bg-white font-semibold text-slate-700",
             )}
           >
             {t.label}
@@ -282,7 +283,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
           className="flex min-h-[var(--curation-row-h,250px)] items-start gap-4 overflow-hidden"
         >
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-card bg-gov-surface", CARD_HEIGHT)} />
+            <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-card bg-white", CARD_HEIGHT)} />
           ))}
         </div>
       )}
@@ -292,7 +293,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div className="flex min-h-[var(--curation-row-h,250px)] items-start">
           <div
             className={cn(
-              "flex w-full flex-col items-center justify-center gap-3 rounded-card bg-gov-surface px-6 text-center text-body-3 font-medium break-keep text-slate-600",
+              "flex w-full flex-col items-center justify-center gap-3 rounded-card bg-white px-6 text-center text-body-3 font-medium break-keep text-slate-600",
               CARD_HEIGHT,
             )}
           >
@@ -314,7 +315,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             {current.state === "NEEDS_PROFILE" && (
               <Link
                 href="/mypage/profile"
-                className="flex h-12 items-center rounded-xl bg-white px-5 text-body-2 font-semibold text-slate-800"
+                className="flex h-12 items-center rounded-xl bg-baro-blue-50 px-5 text-body-2 font-semibold text-slate-800"
               >
                 희망직무 설정하기
               </Link>
@@ -331,14 +332,14 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-white to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-baro-blue-100 to-transparent transition-opacity",
             fade.start ? "opacity-100" : "opacity-0",
           )}
         />
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-white to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-baro-blue-100 to-transparent transition-opacity",
             fade.end ? "opacity-100" : "opacity-0",
           )}
         />
@@ -370,7 +371,6 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
                   isAuthenticated
                   isBookmarked={bookmarkedIds.includes(item.job.id)}
                   readiness={item.readiness}
-                  borderless
                 />
               </div>
             );
