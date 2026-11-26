@@ -74,13 +74,14 @@ export function SupportProgramCard({
         )}
       </div>
 
-      {/* break-keep 이 없으면 한글이 음절 단위로 잘린다. 일자리 카드 제목과 같은 규칙. */}
+      {/*
+        break-keep 이 없으면 한글이 음절 단위로 잘린다. 일자리 카드 제목과 같은 규칙.
+        제목 아래 두 줄 설명(benefitDescription · summary)은 뺐다 - 원문을 그대로 잘라 붙인 것이라
+        "ㅇ … 1. 사업대상 : …"처럼 기호 · 번호가 섞인 채 중간에 끊겨 카드만 복잡해 보였다. 내용은 상세 화면에서 본다.
+      */}
       <h3 className="mt-3 line-clamp-2 break-keep px-5 text-balance text-body-1 leading-[1.4] font-bold text-slate-900">
         {program.title}
       </h3>
-      <p className="mt-2 px-5 line-clamp-2 text-body-3 font-medium text-slate-600">
-        {program.benefitDescription ?? program.summary}
-      </p>
 
       {/* 맨 아랫줄 글자는 일자리 카드의 회사 · 지역 줄과 같게 둔다(body-3 medium, slate-600). 같은 성격의 줄이 크기가 다르면 두 카드가 다른 규칙으로 보인다. */}
       <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pt-4 pb-5 text-body-3 font-medium text-slate-600">
