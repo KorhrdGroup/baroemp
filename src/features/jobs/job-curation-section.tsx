@@ -224,7 +224,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <h2 className="text-title-3 font-bold text-slate-900">이런 일자리 어때요?</h2>
         {/* 비로그인에게는 지금 보는 것이 전부가 아니라는 것과, 무엇을 더 볼 수 있는지 알린다. */}
         {!isAuthenticated && (
-          <p className="text-label-1 text-slate-600">
+          <p className="text-body-3 font-medium break-keep text-slate-600">
             로그인하시면 내 조건에 맞는 맞춤 공고를 보여드려요.
           </p>
         )}
@@ -292,7 +292,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div className="flex min-h-[var(--curation-row-h,250px)] items-start">
           <div
             className={cn(
-              "flex w-full flex-col items-center justify-center gap-3 rounded-card bg-gov-surface px-6 text-center text-label-1 text-slate-500",
+              "flex w-full flex-col items-center justify-center gap-3 rounded-card bg-gov-surface px-6 text-center text-body-3 font-medium break-keep text-slate-600",
               CARD_HEIGHT,
             )}
           >
@@ -306,7 +306,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             {current.state === "NEEDS_ASSESSMENT" && (
               <Link
                 href="/assessment?start=1"
-                className="rounded-xl bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white"
+                className="flex h-12 items-center rounded-xl bg-brand-blue-400 px-5 text-body-2 font-bold text-white"
               >
                 직업진단 시작하기
               </Link>
@@ -314,7 +314,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             {current.state === "NEEDS_PROFILE" && (
               <Link
                 href="/mypage/profile"
-                className="rounded-xl bg-white px-4 py-2 text-label-1 font-semibold text-slate-700"
+                className="flex h-12 items-center rounded-xl bg-white px-5 text-body-2 font-semibold text-slate-800"
               >
                 희망직무 설정하기
               </Link>

@@ -176,7 +176,7 @@ export function SignupView({ next }: { next: string }) {
         />
         {state.fieldErrors?.phone ? <HelpText tone="error">{state.fieldErrors.phone}</HelpText> : null}
 
-        <div className="flex flex-col gap-[11px] rounded-xl border border-slate-200 bg-white px-[18px] py-4">
+        <div className="flex flex-col gap-[11px] rounded-xl bg-gov-surface px-[18px] py-4">
           <Checkbox
             strong
             checked={agreeRequired && agreeMarketing}
@@ -195,7 +195,7 @@ export function SignupView({ next }: { next: string }) {
               <button
                 type="button"
                 onClick={() => openTermsPopup("/privacy")}
-                className="text-[12px] text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline"
+                className="relative tap-44 text-body-3 font-medium text-slate-600 underline underline-offset-2"
               >
                 보기
               </button>
@@ -210,7 +210,7 @@ export function SignupView({ next }: { next: string }) {
               <button
                 type="button"
                 onClick={() => openTermsPopup("/marketing-consent")}
-                className="text-[12px] text-slate-500 underline-offset-2 hover:text-slate-700 hover:underline"
+                className="relative tap-44 text-body-3 font-medium text-slate-600 underline underline-offset-2"
               >
                 보기
               </button>
@@ -218,7 +218,7 @@ export function SignupView({ next }: { next: string }) {
           >
             [선택] 마케팅 정보·알림톡 수신 동의
           </Checkbox>
-          <p className="-mt-1 pl-7 text-[12px] leading-relaxed break-keep text-slate-500">
+          <p className="-mt-1 pl-7 text-body-3 leading-relaxed font-medium break-keep text-slate-600">
             내 조건에 맞는 채용공고·지원금 소식을 카카오 알림톡으로 보내드려요. 무료이며 마이페이지에서 언제든 철회할 수 있어요.
           </p>
           {/* 서버 액션이 checkbox 값을 formData에서 읽으므로 실제 name 속성이 붙은 hidden input으로 동기화한다. */}

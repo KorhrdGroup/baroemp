@@ -52,7 +52,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
     {/*
      * 고용24처럼 머리글 위에 얇은 보조 줄을 둔다. 스크롤하면 같이 올라가고 머리글만 붙어 남는다 -
      * 붙는 높이(64px)가 바뀌면 화면마다 맞춰 둔 scroll-mt 값이 어긋난다.
-     * 좁은 화면은 브라우저의 두 손가락 확대가 있어 넓은 화면에만 둔다.
+     * 이 보조 줄은 넓은 화면에만 둔다. /draft3 머리글은 좁은 화면에도 "가 가" 단추를 로고 줄에 둔다.
      */}
     <div className={cn("hidden border-b border-border/70 bg-gov-surface", !d3 && "lg:block")}>
       <div className="mx-auto flex h-9 max-w-7xl items-center justify-end px-8">
@@ -63,8 +63,13 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
       넓은 화면은 한 줄이 붙어 따라온다. 휴대폰은 로고 줄 아래 검색 줄까지 두 줄이라 붙이면 화면의
       1/6을 먹어 붙이지 않는다 - 메뉴는 아래 탭이 늘 붙어 있다.
     */}
-    <header className="z-50 w-full border-b border-border/70 bg-white lg:sticky lg:top-0">
-      <div className={cn("mx-auto flex h-16 max-w-7xl items-center gap-6 px-4.5 lg:gap-8 lg:px-8", d3 ? "lg:h-20" : "lg:h-[72px]")}>
+    {/*
+      화면 크기를 키워도(zoom) 미디어 쿼리는 창 폭 그대로라 넓은 화면용 한 줄 머리글이 좁아진 자리에 그대로 그려진다.
+      창이 아주 넓지 않으면(1400px 미만) 메뉴와 단추가 오른쪽으로 넘쳐 잘리므로, 그 구간에서는 머리글만 확대를 되돌려 원래 크기로 둔다.
+      휴대폰도 같다 - 로고와 로그인 단추가 한 줄에 빠듯해 키우면 넘친다. 덕분에 "가 가" 단추가 누른 자리에 그대로 있다.
+    */}
+    <header className="z-50 w-full border-b border-border/70 bg-white lg:sticky lg:top-0 max-[1399px]:[zoom:calc(1/var(--screen-scale,1))]">
+      <div className={cn("mx-auto flex h-16 max-w-7xl items-center gap-6 px-4.5 lg:gap-4 lg:px-6 xl:gap-8 xl:px-8", d3 ? "lg:h-20" : "lg:h-[72px]")}>
         <Link href="/" aria-label={siteConfig.name} className="flex shrink-0 items-center">
           {/* 같은 그림 한 장이라 두 번 그려도 요청은 하나다. 좁은 화면에서는 한 단계 작게. */}
           <Logo height={18} priority className="lg:hidden" />
@@ -81,7 +86,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
                   href={item.href}
                   aria-current={current ? "page" : undefined}
                   className={cn(
-                    "px-4 py-2 text-body-1 whitespace-nowrap xl:px-5",
+                    "px-4 py-2 text-body-1 whitespace-nowrap lg:px-2.5 xl:px-5",
                     current ? cn("font-bold", d3 ? "text-baro-blue" : "text-brand-blue-600") : "font-semibold text-slate-800",
                   )}
                 >
@@ -91,7 +96,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute inset-x-3 bottom-0 h-[3px] origin-left transition-transform duration-200 ease-out",
+                    "absolute inset-x-3 bottom-0 h-[3px] origin-left lg:inset-x-2 xl:inset-x-3 transition-transform duration-200 ease-out",
                     current ? (d3 ? "bg-baro-blue" : "bg-brand-blue-600") : "bg-slate-300 scale-x-0",
                     !current && !onAuthScreen && "group-focus-within:scale-x-100",
                   )}
@@ -159,10 +164,15 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
         </div>
       </div>
 
-      {/* 휴대폰: 검색 단추를 로고 아래 한 줄로. 눌러도 같은 판이 내려온다. */}
-      {showHeaderSearch && (
-        <div className="px-4.5 pb-3 lg:hidden">
-          <SearchTrigger onOpen={() => setSearchOpen(true)} className="flex w-full" />
+      {/*
+        휴대폰: 검색 단추를 로고 아래 한 줄로. 눌러도 같은 판이 내려온다.
+        /draft3 는 그 옆에 화면 크기 단추를 둔다 - 로고 줄은 로그인 단추까지 있으면 자리가 없다.
+        검색 단추가 없는 화면(로그인 · 일자리찾기)에서는 화면 크기 단추만 오른쪽에 남는다.
+      */}
+      {(showHeaderSearch || d3) && (
+        <div className="flex items-center justify-end gap-2 px-4.5 pb-3 lg:hidden">
+          {showHeaderSearch && <SearchTrigger onOpen={() => setSearchOpen(true)} className="flex min-w-0 flex-1" />}
+          {d3 && <ScreenScaleControl compact />}
         </div>
       )}
 

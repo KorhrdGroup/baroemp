@@ -408,10 +408,10 @@ function StepBody({
                           type="button"
                           onClick={() => onChange({ currentJobCategory: opt.code })}
                           className={cn(
-                            "rounded-lg border px-3 py-2 text-body-3 font-medium",
+                            "min-h-11 rounded-xl border px-3 py-2 text-body-3 font-medium break-keep",
                             answers.currentJobCategory === opt.code
-                              ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-600"
-                              : "border-slate-200 bg-white text-slate-700",
+                              ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+                              : "border-border bg-white text-slate-700",
                           )}
                         >
                           {opt.label}

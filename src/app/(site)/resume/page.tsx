@@ -130,8 +130,9 @@ export default async function ResumeListPage() {
                 className="flex flex-wrap items-center justify-between gap-3 rounded-card bg-white p-5"
               >
                 <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className={cn("truncate text-body-2 font-semibold", resume.title ? "text-slate-900" : "text-slate-600")}>
+                  {/* 휴대폰 폭에서는 제목이 한 줄을 다 쓰고 배지가 아랫줄로 간다. 옆에 두면 제목이 몇 글자만 남고 잘린다. */}
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+                    <p className={cn("w-full truncate text-body-2 font-semibold sm:w-auto", resume.title ? "text-slate-900" : "text-slate-600")}>
                       {resume.title || "제목 없는 이력서"}
                     </p>
                     {resume.isPrimary && <Badge className="rounded-full bg-atomic-blue-600 text-caption-1 font-semibold">대표</Badge>}
@@ -157,7 +158,7 @@ export default async function ResumeListPage() {
                     className={cn(
                       "rounded-full text-caption-1 font-medium",
                       resume.completeness >= 100
-                        ? "bg-baro-blue-50 text-baro-blue"
+                        ? "bg-baro-blue-50 text-baro-blue-600"
                         : "bg-slate-100 text-slate-600",
                     )}
                   >
@@ -228,7 +229,8 @@ export default async function ResumeListPage() {
                 href={`/cover-letter/${cl.id}/edit`}
                 className="flex items-center justify-between gap-3 rounded-card bg-white p-5"
               >
-                <div>
+                {/* min-w-0 이 없으면 긴 제목이 줄어들지 않아 좁은 화면(큰글자 모드)에서 카드가 화면 밖으로 밀린다. */}
+                <div className="min-w-0">
                   <p className={cn("truncate text-body-2 font-semibold", cl.title ? "text-slate-900" : "text-slate-600")}>
                     {cl.title || "제목 없는 자기소개서"}
                   </p>

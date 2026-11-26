@@ -56,7 +56,7 @@ export function ExperienceBankSection({
             내 경험뱅크<span className={sectionCountClass}>{items.length}</span>
           </h2>
           {nested && (
-            <p className="mt-1 text-label-1 text-slate-500">
+            <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">
               여기 저장해둔 경험은 자기소개서 문항을 쓸 때 그대로 불러와 쓸 수 있어요.
             </p>
           )}
@@ -68,7 +68,7 @@ export function ExperienceBankSection({
         <Button
           variant="outline"
           size={nested ? "sm" : "default"}
-          className="text-slate-600"
+          className="rounded-xl border-slate-300 bg-white text-body-3 font-semibold text-slate-800"
           onClick={openCreate}
         >
           <Plus className="size-4" /> 내 경험 추가하기
@@ -77,14 +77,14 @@ export function ExperienceBankSection({
 
       {items.length === 0 ? (
         <div className="mt-4 rounded-xl bg-gov-surface p-8 text-center">
-          <p className="text-label-1 text-slate-500">
+          <p className="text-body-3 font-medium break-keep text-slate-600">
             아직 저장한 경험이 없어요. 미리 정리해두면 자기소개서 문항마다 골라 쓸 수 있어요.
           </p>
           {/* 다른 섹션의 빈 상태 CTA와 같은 텍스트 링크 형태. 이동이 아니라 모달을 열어야 해서 button이다. */}
           <button
             type="button"
             onClick={openCreate}
-            className="mt-3 inline-block cursor-pointer text-label-1 font-semibold text-brand-blue-600"
+            className="mt-3 inline-block cursor-pointer text-body-3 font-semibold text-brand-blue-600"
           >
             경험 추가하기 →
           </button>
@@ -112,7 +112,7 @@ export function ExperienceBankSection({
               />
               <div className="pointer-events-none relative min-w-0">
                 <p className="truncate text-body-2 font-semibold text-slate-900">{item.title}</p>
-                <p className="mt-1 text-label-1 text-slate-400">
+                <p className="mt-1 text-body-3 font-medium text-slate-600">
                   {item.skills.length > 0 ? `${item.skills.slice(0, 3).join(" · ")} · ` : ""}
                   최근수정 {new Date(item.updatedAt).toLocaleDateString("ko-KR")}
                 </p>

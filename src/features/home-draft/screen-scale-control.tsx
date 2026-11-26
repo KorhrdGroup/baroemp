@@ -47,6 +47,8 @@ export function ScreenScaleControl({ compact = false }: { compact?: boolean }) {
 
   useEffect(() => {
     document.documentElement.style.zoom = scale === "1" ? "" : scale;
+    // 머리글이 이 값으로 자기 확대를 되돌린다 (site-header-draft.tsx). 미디어 쿼리는 zoom 을 모르기 때문이다.
+    document.documentElement.style.setProperty("--screen-scale", scale);
   }, [scale]);
 
   const choose = (value: string) => {
@@ -72,7 +74,7 @@ export function ScreenScaleControl({ compact = false }: { compact?: boolean }) {
             title={`화면 크기 ${level.label}`}
             onClick={() => choose(level.value)}
             className={cn(
-              "flex size-8 cursor-pointer items-center justify-center rounded-full leading-none transition-colors duration-200",
+              "relative tap-44 flex size-8 cursor-pointer items-center justify-center rounded-full leading-none transition-colors duration-200",
               level.size,
               on
                 ? "bg-white font-bold text-baro-navy shadow-chip"

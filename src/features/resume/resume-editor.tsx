@@ -1045,7 +1045,7 @@ export function ResumeEditor({
                       </AiButton>
                     </Field>
                     {rewriteTarget?.key === exp._key && (
-                      <div className="rounded-lg bg-white p-3 text-body-3 ring-1 ring-brand-blue-200">
+                      <div className="rounded-xl bg-baro-blue-50 p-3 text-body-3 font-medium">
                         <p className="text-slate-700">{rewriteTarget.text}</p>
                         <div className="mt-2 flex gap-2">
                           <Button
@@ -1333,7 +1333,7 @@ export function ResumeEditor({
                       <button
                         onClick={() => setSkills((prev) => prev.filter((x) => x._key !== s._key))}
                         aria-label={`${s.name} 삭제`}
-                        className="-mr-0.5 flex size-4 items-center justify-center rounded-full text-brand-blue-600"
+                        className="relative tap-44 -mr-0.5 flex size-4 items-center justify-center rounded-full text-baro-blue-600"
                       >
                         ×
                       </button>
@@ -1501,7 +1501,7 @@ export function ResumeEditor({
         <button
           type="button"
           onClick={() => setSectionSheetOpen(true)}
-          className="flex shrink-0 items-center gap-1 rounded-lg border border-border px-2.5 py-1.5 text-body-3 font-medium whitespace-nowrap text-slate-600"
+          className="flex shrink-0 items-center gap-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-body-3 font-semibold whitespace-nowrap text-slate-700"
         >
           <ArrowUpDown className="size-3.5" />
           항목 편집
@@ -1516,7 +1516,7 @@ export function ResumeEditor({
             className={cn(
               "shrink-0 rounded-lg px-3 py-2 text-body-3 whitespace-nowrap",
               activeSectionKey === item.key
-                ? "bg-brand-blue-50 font-semibold text-brand-blue-600"
+                ? "bg-brand-blue-50 font-semibold text-baro-blue-600"
                 : "font-medium text-slate-600",
             )}
           >
@@ -1544,7 +1544,7 @@ export function ResumeEditor({
                 type="button"
                 aria-label="항목 편집 닫기"
                 onClick={() => setSectionSheetOpen(false)}
-                className="-mr-2 rounded-lg p-2 text-slate-400"
+                className="-mr-2 rounded-lg p-2 text-slate-600"
               >
                 <X className="size-5" />
               </button>
@@ -1893,10 +1893,10 @@ export function ResumeEditor({
           setReviewPickerOpen(next);
         }}
       >
-        <DialogContent className="print:hidden sm:max-w-lg">
+        <DialogContent className="draft3-theme rounded-card print:hidden sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>어떤 기준으로 점검할까요?</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">어떤 기준으로 점검할까요?</DialogTitle>
+            <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
               고른 기준에 맞춰 AI가 이력서를 처음부터 끝까지 살펴봅니다.
             </DialogDescription>
           </DialogHeader>
@@ -1929,7 +1929,7 @@ export function ResumeEditor({
                       {agent.name}
                     </span>
                     {agent.description && (
-                      <span className="mt-0.5 block text-body-3 text-slate-600">{agent.description}</span>
+                      <span className="mt-0.5 block text-body-3 font-medium break-keep text-slate-600">{agent.description}</span>
                     )}
                   </span>
                 </button>
@@ -1937,10 +1937,10 @@ export function ResumeEditor({
             })}
           </div>
           <DialogFooter>
-            <Button variant="outline" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setReviewPickerOpen(false)}>
+            <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white px-5 text-body-2 font-semibold text-slate-800" onClick={() => setReviewPickerOpen(false)}>
               취소
             </Button>
-            <Button className="bg-atomic-blue-600 font-bold text-white" disabled={!pickedAgentId} onClick={handleReviewWithAgent}>
+            <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-bold text-white" disabled={!pickedAgentId} onClick={handleReviewWithAgent}>
               이 기준으로 점검
             </Button>
           </DialogFooter>
@@ -1948,15 +1948,15 @@ export function ResumeEditor({
       </Dialog>
 
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="print:hidden sm:max-w-4xl">
+        <DialogContent className="draft3-theme rounded-card print:hidden sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>미리보기</DialogTitle>
+            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">미리보기</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border">
+          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-gov-surface p-4">
             <ResumePreview detail={currentPreviewDetail()} />
           </div>
           <DialogFooter>
-            <Button variant="outline" className="border-slate-300 bg-white font-semibold text-slate-800" onClick={handlePopupPrint}>
+            <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white px-5 text-body-2 font-semibold text-slate-800" onClick={handlePopupPrint}>
               <Printer className="size-4" /> PDF로 저장/인쇄
             </Button>
           </DialogFooter>
@@ -2136,7 +2136,7 @@ function EntrySummaryCard({
         size="icon-xs"
         onClick={onEdit}
         aria-label={editLabel}
-        className="rounded-full text-slate-600"
+        className="relative tap-44 rounded-full text-slate-600"
       >
         <Pencil />
       </Button>

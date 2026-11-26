@@ -66,7 +66,7 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
         onClick={() => setEnabled((v) => !v)}
         aria-pressed={enabled}
         className={cn(
-          "flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-colors",
+          "flex w-full items-center gap-3 rounded-xl border p-4 text-left",
           enabled ? "border-brand-blue-200 bg-brand-blue-50/60" : "border-border bg-white hover:bg-slate-50",
         )}
       >
@@ -84,10 +84,10 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
           />
         </span>
         <span className="min-w-0">
-          <span className="block text-label-1 font-semibold text-slate-900">
+          <span className="block text-body-2 font-semibold text-slate-900">
             {enabled ? "공고 알림 받는 중" : "거주지 근처 공고 알림 받기"}
           </span>
-          <span className="block text-label-2 break-keep text-slate-500">
+          <span className="mt-0.5 block text-body-3 break-keep text-slate-600">
             새 공고가 있으면 매일 아침 10시, 카카오톡 알림톡으로 하루 1건만 보내드려요
             {phone ? ` (${phone})` : ""}. 언제든 끌 수 있어요.
           </span>
@@ -95,12 +95,12 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
       </button>
 
       {enabled && (
-        <div className="space-y-3 rounded-xl bg-slate-50 p-3">
-          <div className="grid gap-2 sm:grid-cols-2">
+        <div className="space-y-4 rounded-xl bg-gov-surface p-4">
+          <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="mb-1 block text-label-2 font-semibold text-slate-500">지역 (필수)</span>
+              <span className="mb-1.5 block text-body-3 font-semibold text-slate-700">지역 (필수)</span>
               <NativeSelect
-                className="h-10 bg-white text-label-1"
+                className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
                 value={region}
                 onChange={(e) => {
                   setRegion(e.target.value);
@@ -118,9 +118,9 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
               </NativeSelect>
             </label>
             <label className="block">
-              <span className="mb-1 block text-label-2 font-semibold text-slate-500">시·군·구 (선택)</span>
+              <span className="mb-1.5 block text-body-3 font-semibold text-slate-700">시·군·구 (선택)</span>
               <NativeSelect
-                className="h-10 bg-white text-label-1"
+                className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
                 value={sigungu}
                 onChange={(e) => setSigungu(e.target.value)}
                 disabled={!region || region === "all"}
@@ -136,10 +136,10 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
           </div>
 
           <div>
-            <span className="mb-1.5 block text-label-2 font-semibold text-slate-500">
+            <span className="mb-1.5 block text-body-3 font-semibold text-slate-700">
               관심 직종 (선택, 안 고르면 전체)
             </span>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {JOB_CATEGORY_GROUPS.map((g) => {
                 const on = categories.includes(g.key);
                 return (
@@ -149,10 +149,11 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
                     onClick={() => toggleCategory(g.key)}
                     aria-pressed={on}
                     className={cn(
-                      "flex items-center gap-1 rounded-full border px-3 py-1.5 text-label-1 transition-colors",
+                      /* 고른 직종은 파랑으로 채운다. 선만 바꾸면 고른 것과 안 고른 것이 잘 구별되지 않는다. */
+                      "flex h-10 cursor-pointer items-center gap-1 rounded-full border px-4 text-body-3",
                       on
-                        ? "border-brand-blue-400 bg-brand-blue-50 font-medium text-brand-blue-700"
-                        : "border-border bg-white text-slate-600 hover:border-brand-blue-200",
+                        ? "border-baro-blue bg-baro-blue font-bold text-white"
+                        : "border-slate-300 bg-white font-medium text-slate-700",
                     )}
                   >
                     {on && <Check className="size-3.5" />}
@@ -166,11 +167,11 @@ export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSett
       )}
 
       <div className="flex items-center gap-3">
-        <Button onClick={save} disabled={pending || !dirty} className="bg-brand-blue-600 hover:bg-brand-blue-700">
+        <Button onClick={save} disabled={pending || !dirty} className="h-12 rounded-xl bg-brand-blue-600 px-5 text-body-2 font-bold hover:bg-brand-blue-600">
           {pending ? <Loader2 className="size-4 animate-spin" /> : <BellRing className="size-4" />}
           설정 저장
         </Button>
-        {message && <p className="text-label-1 text-slate-600">{message}</p>}
+        {message && <p className="text-body-3 break-keep text-slate-600">{message}</p>}
       </div>
     </div>
   );

@@ -217,7 +217,7 @@ export default async function JobsPage({
                     자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
                   </h2>
                 </div>
-                <p className="mt-1 text-label-1 text-slate-600">
+                <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">
                   진단에서 성향이 잘 맞았던 직업이에요.
                   {recommendation.preparation.missingQualifications?.length
                     ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`

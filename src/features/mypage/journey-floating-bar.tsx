@@ -46,7 +46,8 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
         기준선은 화면 맨 위가 아니라 고정 헤더의 아래 끝이다. 1단계 카드로 점프하면 절차 판 아래 끝이
         헤더 뒤(0~64px)에 걸려 눈에는 안 보이는데 "아직 화면 안"으로 쳐서 띠가 사라졌다.
       */
-      const headerBottom = document.querySelector("header")?.getBoundingClientRect().bottom ?? 0;
+      // 좁은 화면(lg 미만)은 머리글이 고정이 아니라 같이 올라간다. 그때는 화면 맨 위(0)가 기준선이다 - 음수를 그대로 쓰면 띠가 영영 안 뜬다.
+      const headerBottom = Math.max(0, document.querySelector("header")?.getBoundingClientRect().bottom ?? 0);
       if (sentinel) setVisible(sentinel.getBoundingClientRect().bottom < headerBottom);
       const line = window.innerHeight * 0.35;
       let current: string | null = null;
@@ -75,7 +76,8 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
     <div
       aria-hidden={!visible}
       className={cn(
-        "pointer-events-none fixed inset-x-3 bottom-3 z-40 flex justify-center transition-all duration-300 sm:inset-x-6 sm:bottom-5",
+        /* lg 미만에서는 아래 탭 메뉴(h-16)가 고정돼 있어 그 위에 띄운다. */
+        "pointer-events-none fixed inset-x-3 bottom-[4.75rem] z-40 flex justify-center transition-all duration-300 sm:inset-x-6 lg:bottom-5",
         visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0",
       )}
     >
@@ -104,12 +106,12 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
                       /*
                         절차 판과 같은 톤 계층. 링은 쓰지 않고, "지금 보고 있는 단계"는 원을 한 단계 키워 표현.
                       */
-                      "flex shrink-0 items-center justify-center rounded-full text-label-1 font-bold leading-none transition-all",
+                      "flex shrink-0 items-center justify-center rounded-full text-body-3 font-bold leading-none transition-all",
                       s.done
                         ? "bg-brand-blue-400 text-white"
                         : isNext
                           ? "bg-brand-blue-100 text-brand-blue-700"
-                          : "bg-slate-100 text-slate-500",
+                          : "bg-slate-100 text-slate-600",
                       /* 활성/비활성 크기 차이를 확 벌려 스크롤 위치가 한눈에 잡히게. */
                       isActive ? "size-11 sm:size-12" : "size-8 sm:size-9",
                     )}
@@ -119,8 +121,8 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
                   {/* 좁은 화면에서는 원만 남긴다. 제목 다섯 개까지 넣으면 버튼이 밀려난다. */}
                   <span
                     className={cn(
-                      "hidden truncate text-label-1 font-semibold group-hover:text-slate-900 md:inline",
-                      s.done || isNext || isActive ? "text-slate-800" : "text-slate-500",
+                      "hidden truncate text-body-3 font-semibold group-hover:text-slate-900 md:inline",
+                      s.done || isNext || isActive ? "text-slate-800" : "text-slate-600",
                     )}
                   >
                     {s.title}
@@ -131,7 +133,7 @@ export function JourneyFloatingBar({ steps, sentinelId }: JourneyFloatingBarProp
           })}
         </ol>
         {next && (
-          <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+          <Button className="shrink-0 rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
             <Link href={next.href} tabIndex={visible ? 0 : -1}>
               <span className="hidden sm:inline">{next.actionLabel}</span>
               <span className="sm:hidden">{next.step}단계</span>

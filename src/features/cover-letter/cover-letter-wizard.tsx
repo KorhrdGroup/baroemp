@@ -400,24 +400,25 @@ export function CoverLetterWizard({
         </WizardCard>
 
         <Dialog open={questionDraft !== null} onOpenChange={(next) => !next && setQuestionDraft(null)}>
-          <DialogContent className="sm:max-w-lg">
+          <DialogContent className="draft3-theme rounded-card sm:max-w-lg">
             <DialogHeader>
-              <DialogTitle>{questionDraft?.key ? "문항 수정하기" : "문항 직접 쓰기"}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">{questionDraft?.key ? "문항 수정하기" : "문항 직접 쓰기"}</DialogTitle>
+              <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
                 지원하는 곳에서 받은 질문을 그대로 옮겨 적으면 가장 좋아요.
               </DialogDescription>
             </DialogHeader>
             <Textarea
+              className="rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
               rows={3}
               value={questionDraft?.text ?? ""}
               onChange={(e) => setQuestionDraft((prev) => (prev ? { ...prev, text: e.target.value } : prev))}
               placeholder="예: 우리 기관에 지원하신 이유를 적어주세요."
             />
             <DialogFooter>
-              <Button variant="outline" onClick={() => setQuestionDraft(null)}>
+              <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white px-5 text-body-2 font-semibold text-slate-800" onClick={() => setQuestionDraft(null)}>
                 취소
               </Button>
-              <Button onClick={saveQuestionDraft} disabled={!questionDraft?.text.trim()}>
+              <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-bold text-white" onClick={saveQuestionDraft} disabled={!questionDraft?.text.trim()}>
                 {questionDraft?.key ? "수정 저장" : "문항 담기"}
               </Button>
             </DialogFooter>

@@ -152,7 +152,7 @@ export const metadata: Metadata = {
  * Card 기본 여백(--card-spacing 16px)은 목록이 여러 줄 들어가는 이 화면에서 글자가 테두리에
  * 붙어 꽉 찬 느낌이라, 여기서만 24px 로 키운다. 헤더·본문 좌우와 카드 위아래에 함께 먹는다.
  */
-const myPageCardClass = "rounded-xl border-0 ring-1 ring-border [--card-spacing:--spacing(6)]";
+const myPageCardClass = "rounded-card border-0 bg-white ring-0 [--card-spacing:--spacing(6)]";
 
 /**
  * 내 정보 카드의 한 줄. "라벨 · 값"을 한 문장으로 붙이면 전부 같은 회색이라 무엇이 값인지
@@ -170,8 +170,8 @@ function InfoRow({
 }) {
   return (
     <div className={cn("flex items-start gap-3", wide && "lg:col-span-2")}>
-      <dt className="w-20 shrink-0 text-label-1 leading-6 text-slate-400">{label}</dt>
-      <dd className="min-w-0 flex-1 break-keep text-label-1 leading-6 font-medium text-slate-800">{value}</dd>
+      <dt className="w-20 shrink-0 text-body-3 leading-6 text-slate-600">{label}</dt>
+      <dd className="min-w-0 flex-1 break-keep text-body-3 leading-6 font-medium text-slate-800">{value}</dd>
     </div>
   );
 }
@@ -193,12 +193,12 @@ function StepHeading({
 }) {
   return (
     <div className="mb-4 flex items-center justify-between gap-3">
-      <h2 className="flex items-center gap-2.5 text-title-3 font-bold text-slate-900">
+      <h2 className="flex items-center gap-2.5 text-title-3 font-extrabold text-slate-900">
         <span
           className={cn(
             /* leading-none: 줄 높이가 남으면 글자 상자가 원 가운데보다 살짝 위에 앉는다. */
             "flex size-8 shrink-0 items-center justify-center rounded-full text-body-2 font-bold leading-none",
-            done ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-500",
+            done ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-600",
           )}
         >
           {step}
@@ -380,12 +380,12 @@ export default async function MyPage() {
     <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
       <span className="min-w-0">
         <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
-        <span className="mt-1 flex min-w-0 items-center gap-1.5 text-label-2 text-slate-400">
+        <span className="mt-1 flex min-w-0 items-center gap-1.5 text-body-3 text-slate-600">
           <span className="truncate">
             {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
           </span>
           {outsideRegion && (
-            <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-label-2 font-semibold text-amber-700">
+            <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-caption-1 font-semibold text-amber-700">
               희망지역 밖
             </span>
           )}
@@ -414,7 +414,7 @@ export default async function MyPage() {
     return (
       <>
         {allOutside && (
-          <p className="mb-1.5 break-keep text-label-2 text-amber-700">
+          <p className="mb-1.5 break-keep text-body-3 text-amber-700">
             희망지역 {labelRegion(careerProfile?.region)}에는 아직 이 직종 공고가 없어 다른 지역 공고를 보여드려요.
           </p>
         )}
@@ -425,6 +425,8 @@ export default async function MyPage() {
 
   // 아래 여백(pb-32)은 떠 있는 절차 띠 높이만큼 더 준다. 마지막 카드가 띠에 가리지 않게.
   return (
+    // /draft3 색 구성 (globals.css .draft3-theme): 옅은 회색 바탕에 흰 카드(모서리 20px, 테두리 · 그림자 없음).
+    <div className="draft3-theme bg-baro-page">
     <div className="mx-auto max-w-5xl px-4.5 pt-10 pb-32 lg:px-8">
       {/*
         이름 제목은 따로 두지 않는다. 바로 아래 절차 판이 "하려선님, 이제 1단계 차례예요"로 이름을 부르므로
@@ -445,7 +447,7 @@ export default async function MyPage() {
             title="취업 프로필"
             done={stepDone.profile}
             action={
-              <Button variant="ghost" size="sm" asChild className="-my-2 h-auto py-2 pr-0 text-slate-500 hover:bg-transparent hover:text-slate-700">
+              <Button variant="ghost" size="sm" asChild className="-my-2 h-auto py-2 pr-0 text-slate-600 hover:bg-transparent hover:text-slate-700">
                 <Link href="/mypage/profile">정보 수정</Link>
               </Button>
             }
@@ -480,10 +482,10 @@ export default async function MyPage() {
                 {!hasCareerProfile ? (
                   /* "-" 줄 대신 왜 비었는지와 채우러 갈 길을 둔다. 버튼은 카드 아래에 붙여 옆 칸과 높이를 맞춘다. */
                   <div className="flex flex-1 flex-col gap-3">
-                    <p className="text-label-1 leading-relaxed text-slate-500">
+                    <p className="text-body-3 leading-relaxed text-slate-600">
                       아직 취업 프로필을 설정하지 않았어요. 희망 직종·지역을 알려주시면 맞춤 공고를 골라드려요.
                     </p>
-                    <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                    <Button className="mt-auto h-12 w-full rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
                       <Link href="/onboarding/profile">취업 프로필 채우기</Link>
                     </Button>
                   </div>
@@ -533,10 +535,10 @@ export default async function MyPage() {
               {/* 최근 받은 알림. 무엇을 보냈는지 회원도 알아야 "왜 이 공고가 왔지"가 풀린다. */}
               {myJobAlerts.length > 0 && (
                 <div className="border-t border-slate-100 pt-3">
-                  <p className="text-label-2 font-semibold text-slate-500">최근 받은 알림</p>
+                  <p className="text-body-3 font-semibold text-slate-600">최근 받은 알림</p>
                   <ul className="mt-2 space-y-1.5">
                     {myJobAlerts.map((a) => (
-                      <li key={`${a.sentAt}-${a.jobId ?? ""}`} className="flex items-start justify-between gap-3 text-label-1">
+                      <li key={`${a.sentAt}-${a.jobId ?? ""}`} className="flex items-start justify-between gap-3 text-body-3">
                         <span className="min-w-0">
                           {a.jobId ? (
                             <Link href={`/jobs/${a.jobId}`} className="line-clamp-1 font-medium text-slate-800 hover:underline">
@@ -545,9 +547,9 @@ export default async function MyPage() {
                           ) : (
                             <span className="line-clamp-1 text-slate-800">{a.jobTitle ?? "채용공고"}</span>
                           )}
-                          {a.companyName && <span className="block text-label-2 text-slate-400">{a.companyName}</span>}
+                          {a.companyName && <span className="block text-body-3 text-slate-600">{a.companyName}</span>}
                         </span>
-                        <span className="shrink-0 text-label-2 text-slate-400">
+                        <span className="shrink-0 text-body-3 text-slate-600">
                           {a.sentAt.slice(5, 10).replace("-", ".")}
                           {a.status === "failed" ? " · 문자 대체" : ""}
                         </span>
@@ -571,9 +573,9 @@ export default async function MyPage() {
                   <CardTitle className="flex items-center gap-1.5 text-body-1 font-semibold text-slate-700">
                     <Compass className="size-4" /> 최근 직업진단 결과
                   </CardTitle>
-                  <span className="shrink-0 text-label-1 text-slate-400">검사일 · {latestResult.completedAt.slice(0, 10)}</span>
+                  <span className="shrink-0 text-body-3 text-slate-600">검사일 · {latestResult.completedAt.slice(0, 10)}</span>
                 </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-body-3 text-slate-600">
                   {/*
                     결과 화면과 같은 두 트랙. 준비 트랙 총점에는 자격 미보유 감점이 섞여 있어 성향 적합도를 쓴다.
                     행은 회색 상자 없이 구분선으로만 가르고, 순위·트랙은 왼쪽 동그란 배지로 읽힌다.
@@ -584,7 +586,7 @@ export default async function MyPage() {
                       <div className="space-y-4">
                         {ready.length > 0 && (
                           <div>
-                            <p className="mb-1.5 text-label-1 font-semibold text-slate-500">지금 바로 지원할 수 있는 직업</p>
+                            <p className="mb-1.5 text-body-3 font-semibold text-slate-600">지금 바로 지원할 수 있는 직업</p>
                             <div>
                               {/* 행을 누르면 결과 화면에서 그 직업 카드가 열린 채로 보인다. */}
                               {ready.slice(0, 3).map((rec, i) => (
@@ -596,8 +598,8 @@ export default async function MyPage() {
                                   <span className="flex min-w-0 items-center gap-3">
                                     <span
                                       className={cn(
-                                        "flex size-7 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
-                                        i === 0 ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-500",
+                                        "flex size-7 shrink-0 items-center justify-center rounded-full text-caption-1 font-bold",
+                                        i === 0 ? "bg-brand-blue-400 text-white" : "bg-slate-100 text-slate-600",
                                       )}
                                     >
                                       {i + 1}
@@ -615,7 +617,7 @@ export default async function MyPage() {
                         )}
                         {preparation.length > 0 && (
                           <div>
-                            <p className="mb-1.5 text-label-1 font-semibold text-slate-500">준비하면 열리는 직업</p>
+                            <p className="mb-1.5 text-body-3 font-semibold text-slate-600">준비하면 열리는 직업</p>
                             <div>
                               {preparation.slice(0, 3).map((rec) => (
                                 <Link
@@ -629,7 +631,7 @@ export default async function MyPage() {
                                     </span>
                                     <span className="min-w-0">
                                       <span className="block truncate text-body-2 font-semibold text-slate-800">{rec.occupationName}</span>
-                                      <span className="mt-1 block text-label-2 text-amber-700">자격 취득 시 가능</span>
+                                      <span className="mt-1 block text-body-3 text-amber-700">자격 취득 시 가능</span>
                                     </span>
                                   </span>
                                   <span className="flex shrink-0 items-center gap-2">
@@ -646,10 +648,10 @@ export default async function MyPage() {
                   })()}
                   {/* 옆 지원금 카드와 같은 짝: 결과로 가는 쪽이 주 동작(파랑), 다시 하는 쪽은 보조다. */}
                   <div className="mt-auto flex flex-col gap-2 pt-1 sm:flex-row">
-                    <Button className="flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                    <Button className="min-h-12 flex-1 rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
                       <Link href={`/assessment/result/${latestResult.sessionId}`}>결과 다시보기</Link>
                     </Button>
-                    <Button variant="outline" className="flex-1" asChild>
+                    <Button variant="outline" className="min-h-12 flex-1 rounded-xl border-slate-300 bg-white text-body-2 font-semibold text-slate-800" asChild>
                       <Link href="/assessment?start=1">다시 검사</Link>
                     </Button>
                   </div>
@@ -662,9 +664,9 @@ export default async function MyPage() {
                     <Compass className="size-4" /> 직업진단
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-body-3 text-slate-600">
                   <p>아직 직업진단을 받지 않았어요. 몇 가지 질문으로 나에게 맞는 직업을 찾아드려요.</p>
-                  <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                  <Button className="mt-auto h-12 w-full rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
                     <Link href="/assessment?start=1">직업진단 시작</Link>
                   </Button>
                 </CardContent>
@@ -679,9 +681,9 @@ export default async function MyPage() {
                     <Gift className="size-4" /> 지원금 찾기
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-body-3 text-slate-600">
                   <p>아직 지원금 진단을 받지 않았어요. 몇 가지 조건만 입력하면 받을 수 있는 혜택을 찾아드려요.</p>
-                  <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                  <Button className="mt-auto h-12 w-full rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
                     <Link href="/support?start=1">지원금 찾기 시작하기</Link>
                   </Button>
                 </CardContent>
@@ -705,14 +707,14 @@ export default async function MyPage() {
                         <Gift className="size-4" /> 지원금 진단 결과
                       </CardTitle>
                       {supportData.latestCompletedAt && (
-                        <span className="shrink-0 text-label-1 text-slate-400">
+                        <span className="shrink-0 text-body-3 text-slate-600">
                           검사일 · {supportData.latestCompletedAt.slice(0, 10)}
                         </span>
                       )}
                     </CardHeader>
-                    <CardContent className="flex flex-1 flex-col space-y-5 text-label-1 text-slate-600">
+                    <CardContent className="flex flex-1 flex-col space-y-5 text-body-3 text-slate-600">
                       <div>
-                        <p className="mb-1.5 text-label-1 font-semibold text-slate-500">가능성이 높은 지원금</p>
+                        <p className="mb-1.5 text-body-3 font-semibold text-slate-600">가능성이 높은 지원금</p>
                         {preview.length > 0 ? (
                           <div>
                             {preview.map(({ program, grade }) => (
@@ -722,8 +724,8 @@ export default async function MyPage() {
                                   {grade && (
                                     <Badge
                                       className={cn(
-                                        "rounded-full border-0 text-label-2 font-semibold",
-                                        GRADE_BADGE_CLASS[grade as SupportEligibilityGrade] ?? "bg-slate-100 text-slate-500",
+                                        "rounded-full border-0 text-caption-1 font-semibold",
+                                        GRADE_BADGE_CLASS[grade as SupportEligibilityGrade] ?? "bg-slate-100 text-slate-600",
                                       )}
                                     >
                                       {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade as SupportEligibilityGrade] ?? grade}
@@ -741,9 +743,9 @@ export default async function MyPage() {
 
                       <div>
                         <div className="mb-1.5 flex items-center justify-between gap-2">
-                          <p className="text-label-1 font-semibold text-slate-500">찜한 지원제도</p>
+                          <p className="text-body-3 font-semibold text-slate-600">찜한 지원제도</p>
                           {supportData.bookmarkCount > 3 && (
-                            <Link href="/mypage/bookmarks#support" className="shrink-0 text-label-1 font-medium text-slate-500">
+                            <Link href="/mypage/bookmarks#support" className="relative tap-44 shrink-0 text-body-3 font-medium text-slate-600">
                               전체보기 →
                             </Link>
                           )}
@@ -756,7 +758,7 @@ export default async function MyPage() {
                                   <span className="line-clamp-2 break-keep text-body-2 font-semibold text-slate-800">
                                     {program.title}
                                   </span>
-                                  <span className="mt-1 block truncate text-label-2 text-slate-400">
+                                  <span className="mt-1 block truncate text-body-3 text-slate-600">
                                     {labelOrganization(program.organizationName ?? program.organization)}
                                   </span>
                                 </span>
@@ -770,9 +772,9 @@ export default async function MyPage() {
                           </div>
                         ) : (
                           /* 빈 줄 대신 회색 면으로 자리를 잡아, 아직 아무것도 고르지 않았음이 한눈에 보이게 한다. */
-                          <div className="rounded-lg bg-slate-50 px-4 py-5 text-center">
+                          <div className="rounded-xl bg-gov-surface px-4 py-5 text-center">
                             {/* 두 문장이 어절 중간에서 갈리지 않게 문장 사이에서만 접는다. */}
-                            <p className="break-keep text-label-1 text-slate-500">
+                            <p className="break-keep text-body-3 text-slate-600">
                               아직 찜한 지원제도가 없어요.
                               <br />
                               마음에 드는 것을 찜해 두면 여기 모입니다.
@@ -787,10 +789,10 @@ export default async function MyPage() {
                       </div>
 
                       <div className="mt-auto flex flex-col gap-2 pt-1 sm:flex-row">
-                        <Button className="flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                        <Button className="min-h-12 flex-1 rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
                           <Link href={`/support/result/${supportData.latestSessionId}`}>지원금 결과 보러가기</Link>
                         </Button>
-                        <Button variant="outline" className="flex-1" asChild>
+                        <Button variant="outline" className="min-h-12 flex-1 rounded-xl border-slate-300 bg-white text-body-2 font-semibold text-slate-800" asChild>
                           <Link href="/support?start=1">다시 진단하기</Link>
                         </Button>
                       </div>
@@ -809,7 +811,7 @@ export default async function MyPage() {
             title="일자리 알아보기"
             done={stepDone.jobs}
             action={
-              <Link href="/jobs" className="text-label-1 font-medium text-slate-500">
+              <Link href="/jobs" className="relative tap-44 text-body-3 font-medium text-slate-600">
                 일자리 찾기 →
               </Link>
             }
@@ -820,7 +822,7 @@ export default async function MyPage() {
             길어서 왼쪽에 세로로 크게 두고, 오른쪽에 맞춤·찜을 위아래로 배치해 균형을 맞춘다.
             대신 진단이 없는 회원(맞춤·찜만) 은 자연스럽게 오른쪽 두 카드만 그리드에 남는다.
           */}
-          <div className={cn("grid gap-4", assessmentJobs && (assessmentJobs.ready || assessmentJobs.preparation) ? "lg:grid-cols-2" : "")}>
+          <div className={cn("grid grid-cols-1 gap-4", assessmentJobs && (assessmentJobs.ready || assessmentJobs.preparation) ? "lg:grid-cols-2" : "")}>
             {/*
               왼쪽 열: 진단 기반 공고 (두 트랙이라 가장 김) - 오른쪽 열: 맞춤 일자리 + 찜한 일자리 (위아래).
               진단이 없는 회원은 왼쪽 wrapper 가 안 그려져 오른쪽 두 카드만 남는다. 좁은 화면에서는
@@ -844,11 +846,11 @@ export default async function MyPage() {
                   옆 열에 맞춰 카드가 늘어날 때 남는 높이는 트랙 사이로 흘려보낸다.
                   그냥 두면 남는 만큼이 마지막 줄 아래에 고여, 카드 위아래 여백이 달라 보였다.
                 */}
-                <CardContent className="flex flex-1 flex-col justify-between space-y-7 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col justify-between space-y-7 text-body-3 text-slate-600">
                   {assessmentJobs.ready && (
                     <div>
                       <div className="mb-1.5 flex items-center justify-between gap-2">
-                        <p className="min-w-0 truncate text-label-1 font-semibold text-slate-500">
+                        <p className="min-w-0 truncate text-body-3 font-semibold text-slate-600">
                           지금 바로 지원 · {assessmentJobs.ready.occupationName}
                         </p>
                         {/* 지역은 이 트랙이 희망지역 공고로 채워졌을 때만 건다. 아니면 눌러도 0건이다. */}
@@ -861,7 +863,7 @@ export default async function MyPage() {
                               ? undefined
                               : careerProfile?.region,
                           )}
-                          className="shrink-0 text-label-1 font-medium text-slate-500"
+                          className="relative tap-44 shrink-0 text-body-3 font-medium text-slate-600"
                         >
                           더보기 →
                         </Link>
@@ -872,11 +874,12 @@ export default async function MyPage() {
                   {assessmentJobs.preparation && (
                     <div>
                       <div className="mb-1.5 flex items-start justify-between gap-2">
-                        <p className="flex min-w-0 flex-wrap items-center gap-x-1.5 text-label-1 font-semibold text-slate-500">
-                          <KeyRound className="size-3.5 text-amber-600" />
+                        {/* 아이콘을 글 안에 넣는다. flex 로 나란히 두면 글이 길 때 아이콘만 윗줄에 혼자 남는다. */}
+                        <p className="min-w-0 text-body-3 font-semibold break-keep text-slate-600">
+                          <KeyRound className="mr-1.5 inline-block size-3.5 align-[-2px] text-amber-600" />
                           자격 따면 열리는 · {assessmentJobs.preparation.occupationName}
                           {assessmentJobs.preparation.missingQualifications?.length ? (
-                            <span className="font-medium text-amber-700">
+                            <span className="ml-1.5 font-medium text-amber-700">
                               ({assessmentJobs.preparation.missingQualifications.join(", ")} 취득 시)
                             </span>
                           ) : null}
@@ -890,7 +893,7 @@ export default async function MyPage() {
                               ? undefined
                               : careerProfile?.region,
                           )}
-                          className="shrink-0 text-label-1 font-medium text-slate-500"
+                          className="relative tap-44 shrink-0 text-body-3 font-medium text-slate-600"
                         >
                           더보기 →
                         </Link>
@@ -916,24 +919,30 @@ export default async function MyPage() {
                       (careerProfile?.desiredJobCategories ?? []).join(","),
                       careerProfile?.region,
                     )}
-                    className="shrink-0 text-label-1 font-medium text-slate-500"
+                    className="relative tap-44 shrink-0 text-body-3 font-medium text-slate-600"
                   >
                     더보기 →
                   </Link>
                 </CardHeader>
-                <CardContent className="text-label-1 text-slate-600">
+                <CardContent className="text-body-3 text-slate-600">
                   {jobData.recommended.map((job) => (
                     <Link key={job.id} href={`/jobs/${job.id}`} className={listRowClass}>
                       <span className="min-w-0">
                         <span className="block truncate text-body-2 font-semibold text-slate-800">{job.title}</span>
-                        <span className="mt-1 block truncate text-label-2 text-slate-400">
+                        <span className="mt-1 block truncate text-body-3 text-slate-600">
                           {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
                         </span>
+                        {/* 휴대폰 폭에서는 배지를 아랫줄에 둔다. 옆에 두면 배지가 자리를 먹어 공고 제목이 몇 글자만 남는다. */}
+                        {job.match?.reasons[0] && (
+                          <span className="mt-2 inline-block rounded-full bg-brand-blue-50 px-2.5 py-1 text-caption-1 font-semibold text-brand-blue-700 sm:hidden">
+                            {job.match.reasons[0].label}
+                          </span>
+                        )}
                       </span>
                       <span className="flex shrink-0 items-center gap-2">
                         {/* 점수 숫자는 회원에게 뜻이 없다. 가장 크게 맞은 조건(희망 직종 일치 등)을 대신 보여준다. */}
                         {job.match?.reasons[0] && (
-                          <span className="rounded-full bg-brand-blue-50 px-2.5 py-1 text-label-2 font-semibold text-brand-blue-700">
+                          <span className="hidden rounded-full bg-brand-blue-50 px-2.5 py-1 text-caption-1 font-semibold text-brand-blue-700 sm:inline">
                             {job.match.reasons[0].label}
                           </span>
                         )}
@@ -953,17 +962,17 @@ export default async function MyPage() {
                   </CardTitle>
                   {/* 카드에는 앞의 몇 건만 담긴다. 하나라도 있으면 전체 목록으로 가는 길을 항상 둔다. */}
                   {jobData.bookmarkCount > 0 && (
-                    <Link href="/mypage/bookmarks#jobs" className="shrink-0 text-label-1 font-medium text-slate-500">
+                    <Link href="/mypage/bookmarks#jobs" className="relative tap-44 shrink-0 text-body-3 font-medium text-slate-600">
                       전체보기 →
                     </Link>
                   )}
                 </CardHeader>
-                <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
+                <CardContent className="flex flex-1 flex-col space-y-3 text-body-3 text-slate-600">
                   {jobData.bookmarked.length === 0 ? (
                     /* 2단계 카드와 같은 모양: 안내 한 줄 + 아래 꽉 찬 버튼. 글자 링크는 카드 안에서 누를 곳으로 안 보였다. */
                     <>
                       <p>아직 찜한 일자리가 없어요. 내 조건에 맞는 공고를 둘러보고 마음에 드는 곳을 찜해 두세요.</p>
-                      <Button className="mt-auto w-full bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                      <Button className="mt-auto h-12 w-full rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
                         <Link href="/jobs">일자리 찾아보기</Link>
                       </Button>
                     </>
@@ -973,14 +982,14 @@ export default async function MyPage() {
                         <span className="min-w-0">
                           {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "모집합니 / 다." 처럼 끊긴다. */}
                           <span className="line-clamp-2 break-keep text-body-2 font-semibold text-slate-800">{job.title}</span>
-                          <span className="mt-1 block truncate text-label-2 text-slate-400">
+                          <span className="mt-1 block truncate text-body-3 text-slate-600">
                             {[job.companyName, job.regionSigungu ?? labelRegion(job.region)].filter(Boolean).join(" · ")}
                           </span>
                         </span>
                         <span className="flex shrink-0 flex-col items-end gap-0.5">
                           <span className="text-body-2 font-bold text-brand-blue-600">{formatSalary(job)}</span>
                           {job.applyDeadline && (
-                            <span className="text-label-2 text-slate-400">
+                            <span className="text-body-3 text-slate-600">
                               마감 {job.applyDeadline.slice(5, 10).replace("-", ".")}
                             </span>
                           )}
@@ -1001,13 +1010,13 @@ export default async function MyPage() {
             title="이력서 · 자기소개서"
             done={stepDone.documents}
             action={
-              <Link href="/resume" className="text-label-1 font-medium text-slate-500">
+              <Link href="/resume" className="relative tap-44 text-body-3 font-medium text-slate-600">
                 전체보기 →
               </Link>
             }
           />
           <Card className={myPageCardClass}>
-            <CardContent className="flex flex-1 flex-col space-y-3 text-label-1 text-slate-600">
+            <CardContent className="flex flex-1 flex-col space-y-3 text-body-3 text-slate-600">
               {/*
                 이력서·자기소개서를 각각 가장 최근에 손 본 것 한 건씩. 개수는 절차 띠에 있으므로
                 여기서는 "이어서 할 것"을 보여주고 누르면 그 자리로 간다.
@@ -1023,7 +1032,7 @@ export default async function MyPage() {
                         <span className="block truncate text-body-2 font-semibold text-slate-800">
                           {detail.resumeSummary.recentResume.title || "제목 없는 이력서"}
                         </span>
-                        <span className="mt-1 block text-label-2 text-slate-400">
+                        <span className="mt-1 block text-body-3 text-slate-600">
                           이력서 · 완성도 {detail.resumeSummary.recentResume.completeness}% · 최근수정{" "}
                           {detail.resumeSummary.recentResume.updatedAt.slice(0, 10)}
                         </span>
@@ -1037,14 +1046,14 @@ export default async function MyPage() {
                 {detail.resumeSummary.recentCoverLetter && (
                   <Link href={`/cover-letter/${detail.resumeSummary.recentCoverLetter.id}/edit`} className={listRowClass}>
                     <span className="flex min-w-0 items-center gap-3">
-                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                      <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
                         <FileText className="size-3.5" />
                       </span>
                       <span className="min-w-0">
                         <span className="block truncate text-body-2 font-semibold text-slate-800">
                           {detail.resumeSummary.recentCoverLetter.title || "제목 없는 자기소개서"}
                         </span>
-                        <span className="mt-1 block text-label-2 text-slate-400">
+                        <span className="mt-1 block text-body-3 text-slate-600">
                           자기소개서 · 최근수정 {detail.resumeSummary.recentCoverLetter.updatedAt.slice(0, 10)}
                         </span>
                       </span>
@@ -1057,16 +1066,16 @@ export default async function MyPage() {
               <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                 <Button
                   variant={resumeCount > 0 ? "outline" : "default"}
-                  className={resumeCount > 0 ? undefined : "bg-brand-blue-400 hover:bg-brand-blue-600"}
+                  className={cn("h-12 rounded-xl text-body-2", resumeCount > 0 ? "border-slate-300 bg-white font-semibold text-slate-800" : "bg-brand-blue-400 font-bold hover:bg-brand-blue-600")}
                   asChild
                 >
                   <Link href="/resume/new">이력서 만들기</Link>
                 </Button>
-                <Button variant="outline" asChild>
+                <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-semibold text-slate-800" asChild>
                   <Link href="/cover-letter/new">자기소개서 작성</Link>
                 </Button>
                 {/* 경험뱅크는 이력서·자소서 양쪽의 재료다. */}
-                <Button variant="outline" asChild>
+                <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-semibold text-slate-800" asChild>
                   <Link href="/resume#experience-bank">경험뱅크 관리</Link>
                 </Button>
               </div>
@@ -1083,21 +1092,21 @@ export default async function MyPage() {
                 {hiredCount > 0 ? (
                   <>
                     <p className="text-body-1 font-bold text-slate-900">취업을 축하드려요! 🎉</p>
-                    <p className="break-keep text-label-1 text-slate-600">
+                    <p className="break-keep text-body-3 text-slate-600">
                       새로운 시작을 응원합니다. 다음 기회를 위해 공고는 계속 둘러보실 수 있어요.
                     </p>
                   </>
                 ) : hasApplied ? (
                   <>
                     <p className="text-body-1 font-bold text-slate-900">지원하셨군요, 좋은 소식을 기다릴게요.</p>
-                    <p className="break-keep text-label-1 text-slate-600">
+                    <p className="break-keep text-body-3 text-slate-600">
                       {applyDetail}. 면접이나 합격 소식이 있으면 공고 화면에서 단계를 올려 주세요.
                     </p>
                   </>
                 ) : allReady ? (
                   <>
                     <p className="text-body-1 font-bold text-slate-900">준비가 끝났어요. 이제 지원할 차례예요!</p>
-                    <p className="break-keep text-label-1 text-slate-600">
+                    <p className="break-keep text-body-3 text-slate-600">
                       마음에 드는 공고에 지원해 보세요. 지원한 뒤 공고 화면에서 <strong className="font-semibold text-slate-700">지원했어요</strong>를
                       누르면 여기에 기록돼요. 한평생 바로취업이 응원합니다.
                     </p>
@@ -1105,21 +1114,21 @@ export default async function MyPage() {
                 ) : (
                   <>
                     <p className="text-body-1 font-bold text-slate-900">1~4단계를 마치면 지원할 준비가 끝나요.</p>
-                    <p className="break-keep text-label-1 text-slate-600">
+                    <p className="break-keep text-body-3 text-slate-600">
                       지금은 {nextReadyStep?.step}단계 {nextReadyStep?.title}부터 이어가 보세요. 차근차근 하면 돼요.
                     </p>
                   </>
                 )}
               </div>
               {allReady || hasApplied ? (
-                <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
+                <Button className="h-12 shrink-0 rounded-xl bg-brand-blue-400 px-5 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
                   <Link href={jobData.bookmarkCount > 0 ? "/mypage/bookmarks#jobs" : "/jobs"}>
                     {jobData.bookmarkCount > 0 ? "찜한 공고 보기" : "공고 찾아보기"}
                   </Link>
                 </Button>
               ) : (
                 nextReadyStep && (
-                  <Button variant="outline" className="shrink-0 text-brand-blue-600 hover:bg-brand-blue-50" asChild>
+                  <Button variant="outline" className="h-12 shrink-0 rounded-xl border-slate-300 bg-white px-5 text-body-2 font-semibold text-brand-blue-600 hover:bg-brand-blue-50" asChild>
                     <Link href={nextReadyStep.anchor}>{nextReadyStep.step}단계로 가기</Link>
                   </Button>
                 )
@@ -1128,6 +1137,7 @@ export default async function MyPage() {
           </Card>
         </section>
       </div>
+    </div>
     </div>
   );
 }

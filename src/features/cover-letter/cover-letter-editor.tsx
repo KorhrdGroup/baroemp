@@ -79,7 +79,9 @@ export function CoverLetterEditor({
   const [detail, setDetail] = useState(initialDetail);
   const [title, setTitle] = useState(initialDetail.coverLetter.title);
   const [sections, setSections] = useState<EditableSection[]>(
-    initialDetail.sections.map((s) => ({ ...s, _key: nextKey() })),
+    // 처음 받은 문항은 순서로 키를 정한다. 모듈 카운터는 서버에서 요청마다 계속 올라가
+    // 브라우저와 값이 어긋나고, 그게 data-strip-key 속성 불일치(hydration 경고)를 낸다.
+    initialDetail.sections.map((s, i) => ({ ...s, _key: `cl-section-init-${i}` })),
   );
   /** 한 번에 한 문항만 보여준다. 다섯 문항이 한 화면에 늘어서면 어디부터 쓸지 정하다 지친다. */
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -318,7 +320,7 @@ export function CoverLetterEditor({
               onClick={() => setActiveKey(section._key)}
               className={cn(
                 "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-body-3 whitespace-nowrap",
-                isActive ? "bg-brand-blue-50 font-semibold text-brand-blue-600" : "font-medium text-slate-600",
+                isActive ? "bg-brand-blue-50 font-semibold text-baro-blue-600" : "font-medium text-slate-600",
               )}
             >
               {written ? (
@@ -334,7 +336,7 @@ export function CoverLetterEditor({
           type="button"
           onClick={addSection}
           aria-label="문항 추가"
-          className="flex shrink-0 items-center rounded-lg border border-border p-2 text-slate-500"
+          className="flex shrink-0 items-center rounded-xl border border-slate-300 bg-white p-2.5 text-slate-700"
         >
           <Plus className="size-4" />
         </button>
@@ -382,7 +384,7 @@ export function CoverLetterEditor({
                         written
                           ? "bg-brand-blue-600 text-white"
                           : isActive
-                            ? "bg-white text-brand-blue-700 ring-1 ring-brand-blue-200"
+                            ? "bg-white text-brand-blue-700"
                             : "bg-slate-100 text-slate-600",
                       )}
                     >
@@ -469,11 +471,12 @@ export function CoverLetterEditor({
                   {active.characterLimit ? ` / ${active.characterLimit}자` : "자"}
                 </span>
                 <div className="flex gap-2">
-                  <AiButton size="xs" onClick={() => handleGenerateDraft(active)} loading={busyKey === active._key}>
+                  <AiButton size="xs" className="h-10 rounded-lg px-3 text-body-3" onClick={() => handleGenerateDraft(active)} loading={busyKey === active._key}>
                     AI 초안 만들기
                   </AiButton>
                   <AiButton
                     size="xs"
+                    className="h-10 rounded-lg px-3 text-body-3"
                     onClick={() => handleReviewSection(active)}
                     loading={busyKey === `review-${active._key}`}
                     /* 다듬을 글이 없으면 누를 수 없다. 빈 칸에서 눌러도 할 일이 없다. */
@@ -534,7 +537,7 @@ export function CoverLetterEditor({
                 </div>
                 <Link
                   href="/resume#experience-bank"
-                  className="text-body-3 font-medium text-brand-blue-600"
+                  className="relative tap-44 text-body-3 font-medium text-brand-blue-600"
                 >
                   경험뱅크 관리 →
                 </Link>
@@ -559,10 +562,11 @@ export function CoverLetterEditor({
                           })
                         }
                         className={cn(
-                          "flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-body-3 font-medium",
+                          /* 고른 경험은 파랑으로 채운다. 선만 바꾸면 고른 것과 안 고른 것이 잘 구별되지 않는다. */
+                          "flex h-10 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-body-3",
                           checked
-                            ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-700"
-                            : "border-border bg-white text-slate-600",
+                            ? "border-baro-blue bg-baro-blue font-bold text-white"
+                            : "border-slate-300 bg-white font-medium text-slate-700",
                         )}
                       >
                         {checked && <Check className="size-3.5" />}
@@ -636,15 +640,15 @@ export function CoverLetterEditor({
 
       {/* 이력서와 같은 방식. 입력 폭을 좁히지 않도록 팝업으로 띄우고 인쇄로 PDF 저장한다. */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="print:hidden sm:max-w-4xl">
+        <DialogContent className="draft3-theme rounded-card print:hidden sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>미리보기</DialogTitle>
+            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">미리보기</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border">
+          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-gov-surface p-4">
             <CoverLetterPreview detail={currentPreviewDetail()} applicantName={applicantName} />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handlePopupPrint}>
+            <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white px-5 text-body-2 font-semibold text-slate-800" onClick={handlePopupPrint}>
               <Printer className="size-4" /> PDF로 저장/인쇄
             </Button>
           </DialogFooter>
@@ -653,10 +657,10 @@ export function CoverLetterEditor({
 
       {/* 문항 통째로 바꾸기. 쓴 내용은 그대로 두고 질문만 갈아끼운다. */}
       <Dialog open={swapOpen} onOpenChange={setSwapOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
+        <DialogContent className="draft3-theme max-h-[80vh] overflow-y-auto rounded-card sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>어떤 문항으로 바꿀까요?</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">어떤 문항으로 바꿀까요?</DialogTitle>
+            <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
               이미 쓴 내용은 지워지지 않아요. 질문만 바뀝니다.
             </DialogDescription>
           </DialogHeader>

@@ -2,7 +2,7 @@ import type { CoverLetter, CoverLetterInput } from "@/types";
 import type { CoverLetterRepository } from "../cover-letter-repository";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { throwDataSourceError } from "@/lib/data/errors";
-import { unwrapList, unwrapMaybe } from "./query-helpers";
+import { isUuid, unwrapList, unwrapMaybe } from "./query-helpers";
 
 function mapRow(row: Record<string, unknown>): CoverLetter {
   return {
@@ -47,6 +47,7 @@ export function createSupabaseCoverLetterRepository(): CoverLetterRepository | n
       return rows.map((row) => mapRow(row as Record<string, unknown>));
     },
     async findById(id) {
+      if (!isUuid(id)) return null;
       const result = await client.from("cover_letters").select("*").eq("id", id).maybeSingle();
       const row = unwrapMaybe("CoverLetterRepository.findById", result);
       return row ? mapRow(row as Record<string, unknown>) : null;

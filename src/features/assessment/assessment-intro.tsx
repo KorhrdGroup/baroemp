@@ -72,7 +72,7 @@ export function AssessmentIntro({
               <li key={s.name}>
                 <div className="flex items-center justify-between gap-2">
                   <span className="flex items-center gap-2 text-body-2 font-semibold text-slate-900">
-                    <span className="flex size-6 items-center justify-center rounded-full bg-baro-blue-50 text-caption-1 font-semibold text-baro-blue">{i + 1}</span>
+                    <span className="flex size-6 items-center justify-center rounded-full bg-baro-blue-50 text-caption-1 font-semibold text-baro-blue-600">{i + 1}</span>
                     {s.name}
                   </span>
                   <span className="text-body-2 font-bold text-baro-blue">{s.fit}%</span>

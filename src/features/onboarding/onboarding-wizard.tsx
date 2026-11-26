@@ -114,28 +114,28 @@ function ChipButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
+        "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium",
         indicator === "none" ? "px-4" : "px-11",
         selected
-          ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-          : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+          ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+          : "border-border text-slate-700",
       )}
     >
       {indicator === "radio" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-full border-2 transition-colors",
-            selected ? "border-brand-blue-400" : "border-slate-300",
+            "absolute left-4 flex size-5 items-center justify-center rounded-full border-2",
+            selected ? "border-brand-blue-600" : "border-slate-300",
           )}
         >
-          {selected && <span className="size-2.5 rounded-full bg-brand-blue-400" />}
+          {selected && <span className="size-2.5 rounded-full bg-brand-blue-600" />}
         </span>
       )}
       {indicator === "check" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2 transition-colors",
-            selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
+            "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2",
+            selected ? "border-brand-blue-600 bg-brand-blue-600 text-white" : "border-slate-300",
           )}
         >
           {selected && <Check className="size-3.5" />}
@@ -147,7 +147,7 @@ function ChipButton({
 }
 
 const NUMBER_INPUT_CLASS =
-  "h-14 w-32 rounded-xl border border-border px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none";
+  "h-14 w-32 rounded-xl border border-slate-300 bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none";
 
 export function OnboardingWizard({
   careerProfile,
@@ -283,13 +283,13 @@ export function OnboardingWizard({
 
   return (
     // data-wizard: 한 번에 하나만 묻는 화면이라 globals.css에서 푸터를 숨긴다.
-    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
+    <div data-wizard="true" className="draft3-theme min-h-[calc(100vh-4rem)] bg-white pb-32">
       <div className="sticky top-16 z-30">
-        <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
+        <div className="flex gap-1.5 bg-white px-4 pt-3">
           {progressGroups.map((g, i) => (
             <div key={g.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
               <div
-                className="h-full rounded-full bg-brand-blue-400 transition-[width] duration-300"
+                className="h-full rounded-full bg-atomic-blue-600 transition-[width] duration-300"
                 style={{ width: `${segmentFill(i)}%` }}
               />
             </div>
@@ -300,13 +300,13 @@ export function OnboardingWizard({
           오른쪽은 진단과 달리 "나중에 하기"가 들어간다. 입력이 선택이라는 걸 어느 단계에서든
           알 수 있어야 해서 화면마다 노출한다.
         */}
-        <div className="relative mx-auto flex max-w-[24.5rem] items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
+        <div className="relative mx-auto flex max-w-[24.5rem] items-center bg-white/90 px-4 py-3 backdrop-blur">
           <button
             type="button"
             onClick={handlePrev}
             disabled={stepIndex === 0 || submitting}
             aria-label="이전 단계"
-            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowLeft className="size-5" />
           </button>
@@ -314,14 +314,14 @@ export function OnboardingWizard({
             좌우 버튼 폭이 달라(화살표 36px vs "나중에 하기") flex로 나눠서는 가운데가 맞지 않는다.
             컨테이너 기준 절대 중앙에 놓고, 좌우 버튼과 겹치지 않게 폭만 제한한다.
           */}
-          <span className="pointer-events-none absolute left-1/2 max-w-[45%] -translate-x-1/2 truncate text-label-1 font-semibold text-brand-blue-600">
+          <span className="pointer-events-none absolute left-1/2 max-w-[45%] -translate-x-1/2 truncate text-body-3 font-semibold text-brand-blue-600">
             {groups[groupIndex]?.label}
           </span>
           <button
             type="button"
             onClick={handleSkip}
             disabled={submitting}
-            className="-mr-2 ml-auto shrink-0 rounded-lg px-2 py-1.5 text-label-1 font-medium text-slate-500 transition-colors hover:bg-atomic-mono-200 disabled:opacity-40"
+            className="relative tap-44 -mr-2 ml-auto shrink-0 rounded-lg px-2 py-1.5 text-body-3 font-medium text-slate-600 disabled:opacity-40"
           >
             나중에 하기
           </button>
@@ -334,12 +334,12 @@ export function OnboardingWizard({
           알려준다. 한 줄 텍스트로 두면 곧바로 이어지는 문항에 묻혀 읽히지 않아 카드로 감싼다.
         */}
         {stepIndex === 0 && (
-          <div className="mb-7 rounded-xl border border-brand-blue-200 bg-white px-4 py-3.5 text-center">
-            <p className="flex items-center justify-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
+          <div className="mb-7 rounded-xl bg-baro-blue-50 px-4 py-3.5 text-center">
+            <p className="flex items-center justify-center gap-1.5 text-body-3 font-semibold text-brand-blue-700">
               <CheckCircle2 className="size-4 shrink-0" />
               {justSignedUp ? "가입이 완료되었어요" : "취업 프로필 채우기"}
             </p>
-            <p className="mt-1.5 text-label-1 break-keep text-slate-500">
+            <p className="mt-1.5 text-body-3 font-medium break-keep text-slate-600">
               몇 가지만 알려주시면 맞춤 채용공고와 받을 수 있는 지원금을 찾아드려요. 지금 넘어가셔도 괜찮아요.
             </p>
           </div>
@@ -353,29 +353,29 @@ export function OnboardingWizard({
         {/* 진단·지원금 위저드와 같은 규칙: 어절 중간 잘림 방지 + 두 줄 길이 균형 + 살짝 여유 있는 줄간격. */}
         <h2
           className={cn(
-            "text-center text-title-2 leading-[1.4] font-bold break-keep text-balance text-slate-900",
+            "text-center text-title-2 leading-[1.4] font-extrabold break-keep text-balance text-slate-900",
             groupSteps.length > 1 && "mt-3",
           )}
         >
           {step.title}
         </h2>
         {step.description && (
-          <p className="mt-3 text-center text-body-2-reading break-keep text-slate-500">{step.description}</p>
+          <p className="mt-3 text-center text-body-2-reading font-medium break-keep text-slate-600">{step.description}</p>
         )}
 
         <div className="mt-10">
           <StepBody answers={answers} step={step} needsPhone={needsPhone} needsEmail={needsEmail} needsMarketingConsent={needsMarketingConsent} onChange={update} />
         </div>
 
-        {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
+        {error && <p className="mt-6 text-center text-body-3 font-medium text-red-500">{error}</p>}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-atomic-mono-50 via-atomic-mono-50 to-transparent pt-6">
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-white via-white to-transparent pt-6">
         <div className="mx-auto max-w-[24.5rem] px-4 pb-8">
           <Button
             onClick={handleNext}
             disabled={submitting}
-            className="h-14 w-full rounded-lg bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold text-white"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "저장하고 시작하기" : "다음"}
           </Button>
@@ -429,10 +429,10 @@ function StepBody({
               type="button"
               onClick={() => onChange({ region: code })}
               className={cn(
-                "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
+                "min-h-12 rounded-xl border bg-white px-3 py-3 text-body-2 font-medium",
                 answers.region === code
-                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-                  : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                  ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+                  : "border-border text-slate-700",
               )}
             >
               {label}
@@ -471,7 +471,7 @@ function StepBody({
             className={NUMBER_INPUT_CLASS}
             placeholder="최소"
           />
-          <span className="text-slate-400">~</span>
+          <span className="text-slate-600">~</span>
           <input
             type="number"
             min={0}
@@ -482,7 +482,7 @@ function StepBody({
             className={NUMBER_INPUT_CLASS}
             placeholder="최대"
           />
-          <span className="text-body-2 text-slate-500">만원</span>
+          <span className="text-body-2 font-medium text-slate-600">만원</span>
         </div>
       );
 
@@ -606,7 +606,7 @@ function StepBody({
               aria-label="휴대전화번호"
               value={answers.phone}
               onChange={(e) => onChange({ phone: e.target.value })}
-              className="h-14 w-full rounded-xl border border-border bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+              className="h-14 w-full rounded-xl border border-slate-300 bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
               placeholder="010-1234-5678"
             />
           )}
@@ -619,14 +619,14 @@ function StepBody({
                 aria-label="이메일"
                 value={answers.email}
                 onChange={(e) => onChange({ email: e.target.value })}
-                className="h-14 w-full rounded-xl border border-border bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+                className="h-14 w-full rounded-xl border border-slate-300 bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
                 placeholder="이메일 (선택)"
               />
-              <p className="mt-1.5 text-center text-label-2 text-slate-400">이력서에 적히는 연락용 이메일이에요. 나중에 채워도 괜찮아요.</p>
+              <p className="mt-1.5 text-center text-body-3 font-medium break-keep text-slate-600">이력서에 적히는 연락용 이메일이에요. 나중에 채워도 괜찮아요.</p>
             </div>
           )}
           {needsMarketingConsent && (
-            <label className="flex items-start gap-2.5 rounded-xl border border-border bg-white px-4 py-3.5 text-label-1 break-keep text-slate-700">
+            <label className="flex items-start gap-2.5 rounded-xl bg-gov-surface px-4 py-3.5 text-body-3 font-medium break-keep text-slate-700">
               <Checkbox
                 className="mt-0.5"
                 checked={answers.marketingConsent}

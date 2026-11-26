@@ -22,7 +22,8 @@ export function SiteBottomTabs() {
   const pathname = usePathname();
   if (HIDDEN_PATTERNS.some((p) => p.test(pathname))) return null;
   return (
-    <div className="site-bottom-tabs lg:hidden">
+    // draft3-theme: 고른 탭의 파랑이 세부 화면과 같은 바로취업 파랑으로 나오게 한다 (레이아웃에서 그려져 화면의 테마 밖이다).
+    <div className="site-bottom-tabs draft3-theme lg:hidden">
       {/* 탭 줄(64px)이 푸터 끝을 가리지 않게 그만큼 비운다. */}
       <div aria-hidden className="h-16" />
       <BottomTabBar />

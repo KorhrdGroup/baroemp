@@ -104,7 +104,7 @@ function RailItemRow({
         <span
           className={cn(
             "shrink-0 text-caption-1 font-extrabold",
-            item.done ? "text-emerald-600" : item.severity === "required" ? "text-orange-600" : "text-violet-500",
+            item.done ? "text-emerald-600" : item.severity === "required" ? "text-orange-600" : "text-baro-blue",
           )}
         >
           {item.done ? "완료" : `+${item.gain}`}
@@ -118,7 +118,7 @@ function RailItemRow({
               AI가 완성 문장까지 준 항목. 문장을 미리 보여주고 '적용하기'로 칸에 넣는다.
               적용 후에도 칸에서 자유롭게 고칠 수 있으니 여기서는 확인만 시킨다.
             */
-            <div className="mt-2 rounded-lg border border-brand-blue-100 bg-white p-2.5">
+            <div className="mt-2 rounded-xl bg-white p-3">
               <p className="flex items-center gap-1 text-caption-1 font-bold text-atomic-blue-600">
                 <Sparkles className="size-3.5" /> AI가 이렇게 고쳐드릴게요
               </p>
@@ -127,14 +127,14 @@ function RailItemRow({
                 <button
                   type="button"
                   onClick={onApplyFix}
-                  className="h-8 rounded-lg bg-atomic-blue-600 px-3 text-body-3 font-bold text-white"
+                  className="h-10 rounded-lg bg-atomic-blue-600 px-3.5 text-body-3 font-bold text-white"
                 >
                   적용하기
                 </button>
                 <button
                   type="button"
                   onClick={onToggleDone}
-                  className="h-8 rounded-lg border border-slate-300 bg-white px-3 text-body-3 font-semibold text-slate-800"
+                  className="h-10 rounded-lg border border-slate-300 bg-white px-3.5 text-body-3 font-semibold text-slate-800"
                 >
                   직접 고쳤어요
                 </button>
@@ -144,7 +144,7 @@ function RailItemRow({
             <button
               type="button"
               onClick={onToggleDone}
-              className="mt-2 h-8 rounded-lg border border-emerald-200 bg-white px-3 text-body-3 font-semibold text-emerald-700"
+              className="mt-2 h-10 rounded-lg border border-emerald-200 bg-white px-3.5 text-body-3 font-semibold text-emerald-700"
             >
               고쳤어요 ✓
             </button>

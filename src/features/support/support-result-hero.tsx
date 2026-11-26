@@ -78,7 +78,7 @@ export function SupportResultHero({
         </div>
 
         {shown.length > 0 && (
-          <ul className="flex shrink-0 gap-4 sm:gap-6" aria-label="가능성별 개수">
+          <ul className="flex shrink-0 gap-3 sm:gap-6" aria-label="가능성별 개수">
             {shown.map((g) => (
               <li key={g} className="flex flex-col items-center">
                 <span className="flex size-20 items-center justify-center rounded-full bg-white sm:size-24">

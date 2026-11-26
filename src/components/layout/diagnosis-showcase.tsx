@@ -136,7 +136,7 @@ export function DiagnosisShowcase({
                     </p>
                   )}
                   <span className="mt-auto pt-5">
-                    <span className="inline-flex h-11 items-center gap-1.5 rounded-full bg-baro-blue-50 px-5 text-body-3 font-bold text-baro-blue">
+                    <span className="inline-flex h-11 items-center gap-1.5 rounded-full bg-baro-blue-50 px-5 text-body-3 font-bold text-baro-blue-600">
                       내게 맞는지 확인하기
                       <ArrowRight aria-hidden className="size-4" />
                     </span>

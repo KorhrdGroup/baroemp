@@ -90,7 +90,7 @@ export function JobBookmarkButton({
       aria-label={bookmarked ? "찜 취소" : "찜하기"}
       aria-pressed={bookmarked}
       className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors",
+        "relative tap-44 flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors",
         bookmarked
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-600"
           : "border-border bg-white text-slate-400",

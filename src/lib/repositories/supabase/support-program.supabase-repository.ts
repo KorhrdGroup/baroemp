@@ -2,7 +2,7 @@ import type { SupportProgram, SupportProgramInput, SupportSearchFilter, SupportS
 import type { SupportProgramRepository } from "../support-program-repository";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { throwDataSourceError } from "@/lib/data/errors";
-import { unwrapList, unwrapMaybe } from "./query-helpers";
+import { isUuid, unwrapList, unwrapMaybe } from "./query-helpers";
 
 function mapRow(row: Record<string, unknown>): SupportProgram {
   return {
@@ -144,6 +144,7 @@ export function createSupabaseSupportProgramRepository(): SupportProgramReposito
       return rows.map((row) => mapRow(row as Record<string, unknown>));
     },
     async findById(id) {
+      if (!isUuid(id)) return null;
       const result = await client.from("support_programs").select("*").eq("id", id).maybeSingle();
       const row = unwrapMaybe("SupportProgramRepository.findById", result);
       return row ? mapRow(row as Record<string, unknown>) : null;

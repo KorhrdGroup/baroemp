@@ -277,7 +277,7 @@ export function JobDetailView({
                             href={prepUrl}
                             target="_blank"
                             rel="noreferrer noopener"
-                            className="flex items-center gap-1 rounded-full bg-white px-3 py-1 text-caption-1 font-semibold text-slate-700"
+                            className="relative tap-44 flex items-center gap-1 rounded-full bg-white px-3 py-1 text-caption-1 font-semibold text-slate-700"
                           >
                             자격 준비하기
                             <ExternalLink className="size-3.5" />

@@ -62,7 +62,7 @@ export function JobApplicationStatusControl({
         size="sm"
         disabled={pending}
         onClick={() => report("applied")}
-        className="shrink-0 text-brand-blue-600 hover:bg-brand-blue-50"
+        className="h-11 shrink-0 rounded-xl border-slate-300 bg-white px-4 text-body-3 font-semibold text-brand-blue-600 hover:bg-white"
       >
         지원했어요
       </Button>
@@ -87,11 +87,12 @@ export function JobApplicationStatusControl({
             disabled={pending}
             onClick={() => report(value)}
             className={cn(
+              "h-11 rounded-xl px-4 text-body-3",
               active
-                ? "bg-brand-blue-400 hover:bg-brand-blue-600"
+                ? "bg-brand-blue-400 font-bold text-white hover:bg-brand-blue-400"
                 : passed
-                  ? "text-brand-blue-600 hover:bg-brand-blue-50"
-                  : "text-slate-600 hover:bg-slate-50",
+                  ? "border-slate-300 bg-white font-semibold text-brand-blue-600 hover:bg-white"
+                  : "border-slate-300 bg-white font-semibold text-slate-700 hover:bg-white",
             )}
           >
             {(active || passed) && <Check className="size-3.5" />}
@@ -105,7 +106,7 @@ export function JobApplicationStatusControl({
         variant="ghost"
         disabled={pending}
         onClick={clear}
-        className="text-slate-400 hover:bg-transparent hover:text-slate-600"
+        className="h-11 text-body-3 font-medium text-slate-600 hover:bg-transparent hover:text-slate-600"
       >
         표시 취소
       </Button>

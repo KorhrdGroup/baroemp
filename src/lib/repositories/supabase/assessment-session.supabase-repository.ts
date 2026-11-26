@@ -5,7 +5,7 @@ import type {
 } from "../assessment-repository";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { throwDataSourceError } from "@/lib/data/errors";
-import { unwrapList, unwrapMaybe } from "./query-helpers";
+import { isUuid, unwrapList, unwrapMaybe } from "./query-helpers";
 
 function mapRow(row: Record<string, unknown>): AssessmentSession {
   return {
@@ -50,6 +50,7 @@ export function createSupabaseAssessmentSessionRepository(): AssessmentSessionRe
       return mapRow(data as Record<string, unknown>);
     },
     async findById(id) {
+      if (!isUuid(id)) return null;
       const result = await client.from("assessment_sessions").select("*").eq("id", id).maybeSingle();
       const row = unwrapMaybe("AssessmentSessionRepository.findById", result);
       return row ? mapRow(row as Record<string, unknown>) : null;

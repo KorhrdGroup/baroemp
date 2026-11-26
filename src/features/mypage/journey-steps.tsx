@@ -41,13 +41,13 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
 
   return (
     <>
-    <section id={sentinelId} aria-label="취업 절차" className="rounded-2xl bg-brand-blue-50 p-5 sm:p-8">
+    <section id={sentinelId} aria-label="취업 절차" className="rounded-card bg-white p-5 sm:p-8">
       <div className="flex flex-wrap items-end justify-between gap-2">
         {/* 이 줄이 화면의 제목이다 (위에 이름 제목을 따로 두지 않는다). 제목 크기로 키운다. */}
-        <h2 className="text-title-3 font-bold text-slate-900 sm:text-title-2">
+        <h2 className="text-title-3 font-extrabold break-keep text-slate-900 sm:text-title-2">
           {next ? `${userName}님, 이제 ${next.step}단계 차례예요` : `${userName}님, ${completedTitle ?? "준비를 모두 마치셨어요"}`}
         </h2>
-        <p className="text-label-1 font-semibold text-brand-blue-700">
+        <p className="text-body-3 font-semibold text-brand-blue-700">
           {doneCount} / {steps.length} 단계 완료
         </p>
       </div>
@@ -75,20 +75,20 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
                     ? "bg-brand-blue-400 text-white"
                     : isNext
                       ? "bg-brand-blue-100 text-brand-blue-700"
-                      : "bg-slate-100 text-slate-400",
+                      : "bg-slate-100 text-slate-600",
                 )}
               >
                 {s.done ? <Check className="size-5 sm:size-6" /> : s.step}
               </Link>
               <p
                 className={cn(
-                  "mt-2 break-keep text-label-2 font-semibold sm:text-label-1",
-                  s.done || isNext ? "text-slate-800" : "text-slate-500",
+                  "mt-2 break-keep text-caption-1 font-semibold sm:text-body-3",
+                  s.done || isNext ? "text-slate-800" : "text-slate-600",
                 )}
               >
                 {s.title}
               </p>
-              <p className="mt-0.5 hidden break-keep text-label-2 text-slate-500 sm:block">{s.detail}</p>
+              <p className="mt-0.5 hidden break-keep text-caption-1 text-slate-600 sm:block">{s.detail}</p>
             </li>
           );
         })}
@@ -96,9 +96,9 @@ export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsPr
 
       {/* 다음 할 일 하나만 크게. 다섯 개를 다 권하면 하나도 안 하게 된다. */}
       {next && (
-        <div className="mt-6 flex flex-col gap-3 rounded-xl bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="mt-6 flex flex-col gap-3 rounded-xl bg-baro-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <p className="break-keep text-body-2 text-slate-700">{next.todoMessage}</p>
-          <Button className="shrink-0 bg-brand-blue-400 hover:bg-brand-blue-600" size="lg" asChild>
+          <Button className="shrink-0 rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" size="lg" asChild>
             <Link href={next.href}>
               {next.actionLabel}
               <ArrowRight className="size-4" />

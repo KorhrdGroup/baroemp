@@ -23,7 +23,7 @@ export function SupportLongText({ text, className }: { text: string; className?:
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="mt-2 cursor-pointer text-body-3 font-semibold text-atomic-blue-600"
+          className="relative tap-44 mt-2 cursor-pointer text-body-3 font-semibold text-atomic-blue-600"
         >
           {expanded ? "접기" : "더보기"}
         </button>

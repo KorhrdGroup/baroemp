@@ -448,6 +448,16 @@
  * 스크롤 자체는 그대로라 트랙패드·키보드 조작에는 영향이 없다.
  * 접근성을 위해 키보드 포커스가 안으로 들어왔을 때(focus-within)도 함께 드러낸다.
  */
+/* 겉모습은 그대로 두고 누르는 영역만 44px까지 넓힌다(작은 단추 · 글자 링크용).
+   위치 기준이 있어야 해서, 위치가 없는 요소에는 relative 를 함께 붙인다. */
+@utility tap-44 {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: min(0px, calc((100% - 44px) / 2));
+  }
+}
+
 @utility scrollbar-hidden {
   /* 가로로 미는 줄 중에서 스크롤바까지 보일 필요가 없는 것(탭 알약 줄 등). */
   scrollbar-width: none;

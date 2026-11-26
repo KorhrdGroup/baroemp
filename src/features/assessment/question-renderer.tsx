@@ -58,7 +58,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium",
                 selected
-                  ? "border-brand-blue-600 bg-brand-blue-50 text-brand-blue-600"
+                  ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
                   : "border-border text-slate-700",
               )}
             >
@@ -97,7 +97,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium",
                 selected
-                  ? "border-brand-blue-600 bg-brand-blue-50 text-brand-blue-600"
+                  ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
                   : "border-border text-slate-700",
               )}
             >
@@ -224,7 +224,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               className={cn(
                 "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium",
                 selected
-                  ? "border-brand-blue-600 bg-brand-blue-50 text-brand-blue-600"
+                  ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
                   : "border-border text-slate-700",
               )}
             >
@@ -253,7 +253,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             className="h-14 w-32 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
             placeholder="최소"
           />
-          <span className="text-slate-400">~</span>
+          <span className="text-slate-600">~</span>
           <input
             type="number"
             min={0}

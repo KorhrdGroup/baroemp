@@ -59,7 +59,7 @@ export function ExperienceFormDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[85vh] overflow-y-auto rounded-card sm:max-w-lg">
+      <DialogContent className="draft3-theme max-h-[85vh] overflow-y-auto rounded-card sm:max-w-lg">
         <DialogHeader>
           <DialogTitle className="text-title-3 font-extrabold text-slate-900">{editing ? "경험 수정하기" : "내 경험 추가하기"}</DialogTitle>
           <DialogDescription className="text-body-3 font-medium text-slate-600">
@@ -141,7 +141,8 @@ function ExperienceForm({
         {error && <p role="alert" className="text-body-3 font-medium text-rose-600">{error}</p>}
       </div>
 
-      <DialogFooter>
+      {/* 좁은 화면에서는 창이 화면보다 길어진다. 단추 줄을 창 아래에 붙여 두어 스크롤하지 않아도 저장 단추가 보이게 한다. */}
+      <DialogFooter className="sticky -bottom-4 z-10 bg-white">
         <Button variant="outline" className="h-12 rounded-full border-slate-300 bg-white px-6 font-semibold text-slate-800" onClick={onClose} disabled={isSaving}>
           취소
         </Button>
