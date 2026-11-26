@@ -5,7 +5,7 @@ import { PageHead } from "@/components/layout/page-head";
  * 일자리찾기 목록을 서버에서 불러오는 동안 보여주는 화면.
  *
  * 공고 검색은 수 초가 걸릴 수 있는데, 이 파일이 없으면 메뉴를 눌러도 이전 화면이 그대로 남아
- * 눌리지 않은 것처럼 보였다. 제목은 page.tsx 와 같은 문구로 바로 띄우고, 나머지는 같은 틀(머리 속 검색창 · 조건 줄 + 온 폭 목록)로 자리만 잡는다.
+ * 눌리지 않은 것처럼 보였다. 제목은 page.tsx 와 같은 문구로 바로 띄우고, 나머지는 같은 틀(머리 속 검색바 + 온 폭 목록)로 자리만 잡는다.
  */
 export default function JobsLoading() {
   return (
@@ -16,12 +16,11 @@ export default function JobsLoading() {
       title="일자리 찾기"
       footer={
         <div className="mt-5 sm:mt-6">
-          {/* 검색바 · 조건 줄 */}
+          {/* 검색바(넓은 화면은 지역 · 직종까지 한 줄, 좁은 화면은 아래 두 칸) */}
           <Skeleton className="h-14 w-full rounded-xl sm:h-16" />
-          <div className="mt-3 flex gap-2 overflow-hidden">
-            {[0, 1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-11 w-28 shrink-0 rounded-full" />
-            ))}
+          <div className="mt-2 grid grid-cols-2 gap-2 sm:hidden">
+            <Skeleton className="h-12 rounded-xl" />
+            <Skeleton className="h-12 rounded-xl" />
           </div>
         </div>
       }

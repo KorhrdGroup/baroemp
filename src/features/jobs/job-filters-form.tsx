@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, ChevronLeft, Search } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { filterPillClass, filterPillOffClass } from "@/lib/ui-classes";
+import { filterPillClass, filterPillOffClass, filterPillOnClass } from "@/lib/ui-classes";
 import { REGION_LABELS } from "@/lib/labels";
 import { SIGUNGU_BY_REGION } from "@/lib/regions/sigungu-list";
 import type { Region } from "@/types";
@@ -12,7 +12,6 @@ import { JOB_CATEGORY_GROUPS, jobCategoryLabel as labelOfJobCategory } from "@/l
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { trackJobFilterChangedAction, trackJobSearchAction } from "@/features/jobs/job-actions";
 import { PageHead } from "@/components/layout/page-head";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { JobSortOrder } from "@/types";
 
 /** 한 번에 고를 수 있는 시·군·구 수. */
@@ -25,14 +24,9 @@ const SORT_OPTIONS: { value: JobSortOrder; label: string }[] = [
   { value: "salary_desc", label: "급여높은순" },
 ];
 
-/* 조건 줄의 알약 단추. 걸린 조건만 남색으로 채워, 무엇이 걸려 있는지 한눈에 보이게 한다. */
-const pillClass = "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-body-2 whitespace-nowrap";
-const pillOnClass = "bg-baro-navy font-bold text-white";
-const pillOffClass = "bg-white font-semibold text-slate-800 ring-1 ring-slate-300 ring-inset";
-
 /* 고르기 창 안의 칸. 고른 칸은 옅은 파랑 바탕 + 파란 테두리 + 체크. */
 const choiceClass =
-  "flex h-14 items-center justify-center gap-1.5 rounded-xl px-3 text-body-2 break-keep disabled:opacity-40";
+  "flex h-12 items-center justify-center gap-1.5 rounded-xl px-3 text-body-2 break-keep disabled:opacity-40";
 const choiceOnClass = "bg-baro-blue-50 font-bold text-baro-blue-600 ring-2 ring-baro-blue ring-inset";
 const choiceOffClass = "bg-white font-semibold text-slate-800 ring-1 ring-slate-300 ring-inset";
 
@@ -51,10 +45,10 @@ export interface JobFiltersValue {
 /**
  * 일자리찾기 화면의 틀: 머리(제목 · 검색창 · 조건 줄) + 회색 바탕의 목록.
  *
- * 왼쪽에 조건 판을 늘 펼쳐 두던 것을 걷고, 검색창 아래 한 줄로 모았다.
+ * 왼쪽에 조건 판을 늘 펼쳐 두던 것을 걷고, 지역 · 직종은 검색바 안에, 신입가능만 · 마감임박만은 건수 줄 오른쪽에 둔다.
  * 조건 판이 목록 폭을 1/4 가까이 차지해 카드가 두 장씩만 놓였고, 화면에 고를 것이 너무 많아 보였다.
  * 지역 · 직종은 누르면 큰 고르기 창이 뜨고, 고르면 바로 목록에 걸린다("전국" · "○○ 전체" · "직종 전체"는 누르는 즉시).
- * 신입 가능 · 7일 안에 마감은 누를 때마다 바로 켜고 끈다.
+ * 신입가능만 · 마감임박만(7일 안)은 누를 때마다 바로 켜고 끈다.
  * 제출 시 서버 컴포넌트(/jobs)가 다시 렌더링되도록 쿼리스트링 기반 네비게이션을 사용한다.
  */
 export function JobFiltersForm({
@@ -153,15 +147,41 @@ export function JobFiltersForm({
     router.push(`/jobs${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
+  /* 검색바 안 지역 · 직종 칸. 고른 값이 있으면 파랑 굵은 글자로 걸려 있음을 보인다. */
+  const pickerButtonClass = (active: boolean) =>
+    cn(
+      "flex min-w-0 items-center gap-1.5 text-body-2 whitespace-nowrap",
+      active ? "font-bold text-baro-blue-600" : "font-semibold text-slate-800",
+    );
+  /* 누르면 검색바 아래로 고르기 판이 펼쳐지고, 다시 누르면 접힌다. */
+  const pickerToggle = (which: "region" | "job", label: string, active: boolean, className?: string) => (
+    <button
+      type="button"
+      aria-expanded={picker === which}
+      aria-controls="job-filter-panel"
+      onClick={() => setPicker(picker === which ? null : which)}
+      className={cn(pickerButtonClass(active || picker === which), className)}
+    >
+      <span className="truncate">{label}</span>
+      <ChevronDown aria-hidden className={cn("size-4 shrink-0 transition-transform", picker === which && "rotate-180")} strokeWidth={2.2} />
+    </button>
+  );
+  const regionButton = (className?: string) => pickerToggle("region", regionPillLabel, regionActive, className);
+  const jobButton = (className?: string) => pickerToggle("job", jobPillLabel, jobActive, className);
+
   const head = (
     <div className="mt-5 sm:mt-6">
-      {/* 검색어. 지역·직종은 아래 조건 줄이 맡아 검색바는 글자만 받는다. 흰 머리 위라 옅은 테두리로 칸을 보인다. */}
+      {/*
+        검색바 하나에 검색어 | 지역 | 직종 | 검색 단추를 모은다(기존 job24 검색바 구성).
+        지역 · 직종은 누르면 고르기 창이 뜨고 고르면 바로 걸린다. 고르기 창을 여는 것은 둘러보기라 비로그인에게도 열어 둔다.
+        좁은 화면은 한 줄에 다 안 들어가 지역 · 직종을 검색바 아래 두 칸으로 내린다.
+      */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           void submit();
         }}
-        className="flex h-14 items-center rounded-xl bg-white ring-1 ring-[#DDE3EC] ring-inset sm:h-16"
+        className="flex h-14 items-center rounded-xl bg-white shadow-[0_4px_16px_rgba(15,40,90,0.06)] ring-1 ring-[#DDE3EC] ring-inset sm:h-16"
       >
         <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-2 pl-5 sm:pl-6">
           <Search className="size-[18px] shrink-0 text-slate-500" />
@@ -173,6 +193,10 @@ export function JobFiltersForm({
             className="w-full min-w-0 border-0 bg-transparent text-body-2 font-medium text-slate-900 outline-none placeholder:text-slate-500"
           />
         </div>
+        <span aria-hidden className="hidden h-7 w-px shrink-0 bg-slate-200 sm:block" />
+        {regionButton("hidden h-full max-w-56 px-5 sm:flex")}
+        <span aria-hidden className="hidden h-7 w-px shrink-0 bg-slate-200 sm:block" />
+        {jobButton("hidden h-full max-w-56 px-5 sm:flex")}
         <button
           type="submit"
           className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand-blue-600 px-6 text-body-2 font-semibold text-white sm:h-[52px] sm:px-8"
@@ -181,59 +205,41 @@ export function JobFiltersForm({
           검색
         </button>
       </form>
+      <div className="mt-2 grid grid-cols-2 gap-2 sm:hidden">
+        {regionButton("h-12 justify-between rounded-xl bg-white px-4 ring-1 ring-[#DDE3EC] ring-inset")}
+        {jobButton("h-12 justify-between rounded-xl bg-white px-4 ring-1 ring-[#DDE3EC] ring-inset")}
+      </div>
 
       {/*
-        조건 줄. 좁은 화면에서는 옆으로 밀어 본다(줄을 바꾸면 머리가 길어진다).
-        고르기 창을 여는 것은 둘러보기라 비로그인에게도 열어 두고, 목록을 다시 부르는 단추만 문지기(data-guest-gated)에 걸린다.
+        고르기 판. 창(모달)을 띄우면 화면이 무겁게 바뀌어, 기존 job24 처럼 검색바 바로 아래로 펼친다.
+        머리(PageHead)가 overflow-hidden 이라 겹쳐 띄우지 않고 흐름 안에서 아래 목록을 밀어 내린다.
       */}
-      <div className="-mx-4.5 mt-3 flex items-center gap-2 overflow-x-auto px-4.5 py-0.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden">
-        <button type="button" onClick={() => setPicker("region")} className={cn(pillClass, regionActive ? pillOnClass : pillOffClass)}>
-          {regionPillLabel}
-          <ChevronDown aria-hidden className="size-4" strokeWidth={2.2} />
-        </button>
-        <button type="button" onClick={() => setPicker("job")} className={cn(pillClass, jobActive ? pillOnClass : pillOffClass)}>
-          {jobPillLabel}
-          <ChevronDown aria-hidden className="size-4" strokeWidth={2.2} />
-        </button>
-        <button
-          type="button"
-          data-guest-gated
-          aria-pressed={beginnerOnly}
-          onClick={() => void submit({ isBeginnerFriendly: !beginnerOnly || undefined })}
-          className={cn(pillClass, beginnerOnly ? pillOnClass : pillOffClass)}
+      {picker && (
+        <div
+          id="job-filter-panel"
+          onKeyDown={(e) => e.key === "Escape" && setPicker(null)}
+          className="mt-3 flex max-h-[min(34rem,70vh)] flex-col overflow-hidden rounded-xl bg-white shadow-[0_12px_32px_rgba(15,40,90,0.10)] ring-1 ring-[#DDE3EC] ring-inset"
         >
-          {beginnerOnly && <Check aria-hidden className="size-4" strokeWidth={2.6} />}
-          신입 가능
-        </button>
-        <button
-          type="button"
-          data-guest-gated
-          aria-pressed={closingSoon}
-          onClick={() => void submit({ closingSoon: !closingSoon || undefined })}
-          className={cn(pillClass, closingSoon ? pillOnClass : pillOffClass)}
-        >
-          {closingSoon && <Check aria-hidden className="size-4" strokeWidth={2.6} />}
-          7일 안에 마감
-        </button>
-        {anyActive && (
-          <button
-            type="button"
-            data-guest-gated
-            onClick={() =>
-              void submit({
-                region: undefined,
-                regionSigungus: undefined,
-                jobCategories: undefined,
-                isBeginnerFriendly: undefined,
-                closingSoon: undefined,
-              })
-            }
-            className="h-11 shrink-0 px-2 text-body-3 font-semibold whitespace-nowrap text-slate-700 underline underline-offset-4"
-          >
-            조건 초기화
-          </button>
-        )}
-      </div>
+          {picker === "region" && (
+            <RegionPicker
+              region={region}
+              sigungus={sigungus}
+              onClose={() => setPicker(null)}
+              onApply={(r, s) =>
+                void submit({ region: r === "all" ? undefined : r, regionSigungus: r === "all" || s.length === 0 ? undefined : s })
+              }
+            />
+          )}
+          {picker === "job" && (
+            <JobPicker
+              selected={jobCategories}
+              nameOf={nameOfJob}
+              onClose={() => setPicker(null)}
+              onApply={(keys) => void submit({ jobCategories: keys.length > 0 ? keys : undefined })}
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 
@@ -246,10 +252,52 @@ export function JobFiltersForm({
         <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-16 lg:px-8">
           {curation}
 
-          {/* 건수는 왼쪽, 정렬은 오른쪽 끝. */}
-          <div className="flex flex-wrap items-center gap-3">
+          {/*
+            건수는 왼쪽, 신입가능만 · 마감임박만 · 정렬은 오른쪽 끝(기존 job24 구성). 두 거르기는 누를 때마다 바로 켜고 끈다.
+            목록을 다시 부르는 단추라 문지기(data-guest-gated)에 걸린다.
+          */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
             {summary}
-            <div className="relative ml-auto">
+            {anyActive && (
+              <button
+                type="button"
+                data-guest-gated
+                onClick={() =>
+                  void submit({
+                    region: undefined,
+                    regionSigungus: undefined,
+                    jobCategories: undefined,
+                    isBeginnerFriendly: undefined,
+                    closingSoon: undefined,
+                  })
+                }
+                className="h-10 shrink-0 text-body-3 font-semibold whitespace-nowrap text-slate-700 underline underline-offset-4"
+              >
+                조건 초기화
+              </button>
+            )}
+            <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              data-guest-gated
+              aria-pressed={beginnerOnly}
+              onClick={() => void submit({ isBeginnerFriendly: !beginnerOnly || undefined })}
+              className={cn(filterPillClass, beginnerOnly ? filterPillOnClass : filterPillOffClass, "flex items-center gap-1")}
+            >
+              {beginnerOnly && <Check aria-hidden className="size-3.5" strokeWidth={2.6} />}
+              신입가능만
+            </button>
+            <button
+              type="button"
+              data-guest-gated
+              aria-pressed={closingSoon}
+              onClick={() => void submit({ closingSoon: !closingSoon || undefined })}
+              className={cn(filterPillClass, closingSoon ? filterPillOnClass : filterPillOffClass, "flex items-center gap-1")}
+            >
+              {closingSoon && <Check aria-hidden className="size-3.5" strokeWidth={2.6} />}
+              마감임박만
+            </button>
+            <div className="relative">
               {sortOpen && (
                 <button
                   type="button"
@@ -288,32 +336,13 @@ export function JobFiltersForm({
                 </div>
               )}
             </div>
+            </div>
           </div>
 
           {children}
         </div>
       </div>
 
-      <Dialog open={picker !== null} onOpenChange={(open) => !open && setPicker(null)}>
-        <DialogContent className="draft3-theme flex max-h-[88vh] flex-col gap-0 overflow-hidden rounded-card p-0 sm:max-w-2xl">
-          {picker === "region" && (
-            <RegionPicker
-              region={region}
-              sigungus={sigungus}
-              onApply={(r, s) =>
-                void submit({ region: r === "all" ? undefined : r, regionSigungus: r === "all" || s.length === 0 ? undefined : s })
-              }
-            />
-          )}
-          {picker === "job" && (
-            <JobPicker
-              selected={jobCategories}
-              nameOf={nameOfJob}
-              onApply={(keys) => void submit({ jobCategories: keys.length > 0 ? keys : undefined })}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
     </>
   );
 }
@@ -327,10 +356,12 @@ function RegionPicker({
   region,
   sigungus,
   onApply,
+  onClose,
 }: {
   region: string;
   sigungus: string[];
   onApply: (region: string, sigungus: string[]) => void;
+  onClose: () => void;
 }) {
   const [sido, setSido] = useState<Region | null>(region === "all" ? null : (region as Region));
   const [picked, setPicked] = useState<string[]>(region === "all" ? [] : sigungus);
@@ -346,8 +377,8 @@ function RegionPicker({
   if (!sido) {
     return (
       <>
-        <PickerHead title="어느 지역 일자리를 볼까요?" />
-        <div className="grid min-h-0 grid-cols-3 gap-2 overflow-y-auto px-6 pb-6 sm:grid-cols-4 sm:px-7 sm:pb-7">
+        <PickerHead title="어느 지역 일자리를 볼까요?" onClose={onClose} />
+        <div className="grid min-h-0 grid-cols-3 gap-2 overflow-y-auto px-5 pb-5 sm:grid-cols-6 sm:px-6 sm:pb-6 lg:grid-cols-9">
           <button
             type="button"
             data-guest-gated
@@ -390,8 +421,9 @@ function RegionPicker({
           </button>
         }
         note={`시·군·구는 ${MAX_SIGUNGU}곳까지 고를 수 있어요.`}
+        onClose={onClose}
       />
-      <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto px-6 pb-4 sm:grid-cols-4 sm:px-7">
+      <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto px-5 pb-4 sm:grid-cols-4 sm:px-6 lg:grid-cols-6">
         <button
           type="button"
           data-guest-gated
@@ -427,10 +459,12 @@ function JobPicker({
   selected,
   nameOf,
   onApply,
+  onClose,
 }: {
   selected: string[];
   nameOf: (key: string) => string;
   onApply: (keys: string[]) => void;
+  onClose: () => void;
 }) {
   const [picked, setPicked] = useState<string[]>(selected);
   /* 직업진단에서 넘어온 코드처럼 묶음 목록에 없는 직종. 목록 맨 앞에 둔다. */
@@ -442,8 +476,8 @@ function JobPicker({
 
   return (
     <>
-      <PickerHead title="어떤 일을 찾으세요?" note="여러 개를 함께 고를 수 있어요." />
-      <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto px-6 pb-4 sm:grid-cols-3 sm:px-7">
+      <PickerHead title="어떤 일을 찾으세요?" note="여러 개를 함께 고를 수 있어요." onClose={onClose} />
+      <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto px-5 pb-4 sm:grid-cols-4 sm:px-6 lg:grid-cols-5">
         <button
           type="button"
           data-guest-gated
@@ -473,12 +507,30 @@ function JobPicker({
   );
 }
 
-function PickerHead({ title, back, note }: { title: string; back?: React.ReactNode; note?: string }) {
+function PickerHead({
+  title,
+  back,
+  note,
+  onClose,
+}: {
+  title: string;
+  back?: React.ReactNode;
+  note?: string;
+  onClose: () => void;
+}) {
   return (
-    <div className="shrink-0 px-6 pt-6 pb-4 sm:px-7 sm:pt-7">
+    <div className="relative shrink-0 px-5 pt-5 pb-4 sm:px-6">
       {back}
-      <DialogTitle className="pr-8 text-title-2 font-extrabold break-keep text-slate-900">{title}</DialogTitle>
+      <p className="pr-12 text-title-3 font-extrabold break-keep text-slate-900">{title}</p>
       {note && <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{note}</p>}
+      <button
+        type="button"
+        aria-label="닫기"
+        onClick={onClose}
+        className="absolute top-3 right-3 flex size-11 items-center justify-center rounded-full text-slate-600"
+      >
+        <X aria-hidden className="size-5" />
+      </button>
     </div>
   );
 }
@@ -486,14 +538,14 @@ function PickerHead({ title, back, note }: { title: string; back?: React.ReactNo
 /** 고르기 창 아래 "적용하기". 이 말은 비로그인 문지기(GuestGate)가 알아보는 말이라 바꾸지 않는다. */
 function PickerFoot({ disabled, count, unit, onApply }: { disabled: boolean; count: number; unit: string; onApply: () => void }) {
   return (
-    <div className="flex shrink-0 items-center gap-3 border-t border-slate-200 px-6 py-4 sm:px-7">
+    <div className="flex shrink-0 items-center gap-3 border-t border-slate-200 px-5 py-3 sm:px-6">
       <p className="flex-1 text-body-2 font-semibold text-slate-700">{count > 0 ? `${count}${unit} 골랐어요` : "골라 주세요"}</p>
       <button
         type="button"
         data-guest-gated
         disabled={disabled}
         onClick={onApply}
-        className="h-14 rounded-xl bg-baro-blue px-8 text-body-1 font-bold text-white disabled:bg-slate-300"
+        className="h-12 rounded-xl bg-baro-blue px-8 text-body-1 font-bold text-white disabled:bg-slate-300"
       >
         적용하기
       </button>
