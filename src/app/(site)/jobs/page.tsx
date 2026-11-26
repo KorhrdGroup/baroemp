@@ -23,7 +23,8 @@ export const metadata: Metadata = {
   title: "일자리 찾기 | 한평생 바로취업",
 };
 
-const PAGE_SIZE = 20;
+/** 넓은 화면 3장 · 중간 2장 줄이 마지막 줄까지 꽉 차게 2와 3의 배수로 둔다. */
+const PAGE_SIZE = 24;
 /** "자격 따면 열리는" 섹션을 전체 공고 몇 개 뒤에 끼울지. */
 const INTERLEAVE_AFTER = 6;
 
