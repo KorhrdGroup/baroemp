@@ -18,6 +18,12 @@ export interface ShowcaseCard {
 
 /** 카드가 저절로 넘어가는 간격. 카드 한 장(제목 + 두 줄)을 읽을 만큼 둔다. */
 const AUTO_ADVANCE_MS = 4000;
+/**
+ * 카드 줄 양 끝을 흐리게 하는 폭. 왼쪽은 넘긴 뒤 카드 한 장이 딱 맞춰 서므로, 그 카드의 글자(안쪽 여백 뒤)를 흐리지 않게 짧게 둔다.
+ * 오른쪽은 잘린 다음 카드가 걸쳐 있어 넓게 흐린다.
+ */
+const EDGE_FADE_START = 32;
+const EDGE_FADE_END = 64;
 
 /** 카드 한 장 폭(+ 사이 16px)만큼 옆으로 민다. */
 function scrollList(el: HTMLUListElement, dir: 1 | -1) {
@@ -53,6 +59,19 @@ export function DiagnosisShowcase({
   const listRef = useRef<HTMLUListElement>(null);
   /* 마우스가 올라가 있거나 초점이 안에 있으면 저절로 넘기지 않는다. 렌더를 다시 할 일이 아니라 ref 로 둔다. */
   const pausedRef = useRef(false);
+  /* 카드가 양옆으로 더 이어진다는 걸 보이려고 가장자리를 흐리게 한다. 끝에 닿은 쪽은 흐리지 않는다(첫 카드가 잘려 보이지 않게). */
+  const [edges, setEdges] = useState({ atStart: true, atEnd: false });
+  const updateEdges = () => {
+    const el = listRef.current;
+    if (!el) return;
+    setEdges({ atStart: el.scrollLeft <= 4, atEnd: el.scrollLeft + el.clientWidth >= el.scrollWidth - 4 });
+  };
+
+  useEffect(() => {
+    updateEdges();
+    window.addEventListener("resize", updateEdges);
+    return () => window.removeEventListener("resize", updateEdges);
+  }, [active]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -112,6 +131,11 @@ export function DiagnosisShowcase({
         key={current.key}
         /* 마우스를 올린 카드의 그림자가 가로 스크롤 상자 가장자리에서 잘리지 않게 사방 12px 여유를 두고 바깥 여백으로 되돌린다. */
         className="-mx-3 mt-2 flex snap-x snap-mandatory scroll-px-3 gap-4 overflow-x-auto px-3 py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        onScroll={updateEdges}
+        /* 바탕색을 덧칠하지 않고 마스크로 흐리게 해, 어느 바탕 위에서도 같은 모양이 된다. */
+        style={{
+          maskImage: `linear-gradient(to right, ${edges.atStart ? "#000" : "transparent"}, #000 ${edges.atStart ? 0 : EDGE_FADE_START}px, #000 calc(100% - ${edges.atEnd ? 0 : EDGE_FADE_END}px), ${edges.atEnd ? "#000" : "transparent"})`,
+        }}
       >
         {current.cards.map((c, i) => (
           <li
