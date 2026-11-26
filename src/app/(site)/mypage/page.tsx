@@ -63,8 +63,13 @@ export const metadata: Metadata = {
  * 빽빽하지 않게 글을 덜어 낸다: 다 한 일은 제목 한 줄에 결과 한 마디("8개 찾았어요")만 오른쪽에 회색으로,
  * 설명은 아직 안 한 줄에만 붙인다. 파랑 글자는 "지금 하기" 하나뿐이다.
  * 휴대폰은 오른쪽에 둘 자리가 없어 결과 한 마디를 제목 아래로 내린다.
+ *
+ * 넓은 화면(xl, 1280px 이상)에서는 한 줄이 1200px 넘게 늘어나 제목과 오른쪽 결과가 너무 멀어졌다.
+ * 그래서 다섯 단계를 카드 다섯 장으로 가로로 놓는다. 1024px 에서는 카드가 좁아 글이 꺾여 줄 모양을 그대로 둔다. 진행 막대와 같은 순서로 읽히고, 결과가 제목 바로 아래 붙는다.
+ * 다음에 할 단계는 옅은 파랑 바탕에 아래 "지금 하기".
  */
 function MenuRow({
+  step,
   href,
   icon: Icon,
   title,
@@ -74,6 +79,8 @@ function MenuRow({
   done,
   isNext,
 }: {
+  /** 넓은 화면 카드 위에 보이는 단계 번호. */
+  step: number;
   href: string;
   icon: LucideIcon;
   title: string;
@@ -87,36 +94,66 @@ function MenuRow({
   isNext: boolean;
 }) {
   return (
-    <li className="border-t border-slate-100 first:border-t-0">
-      <Link href={href} className={cn("flex items-center gap-4 px-5 py-6 sm:px-7", isNext && "bg-baro-blue-50")}>
-        <span
-          className={cn(
-            "flex size-11 shrink-0 items-center justify-center rounded-full",
-            done ? "bg-baro-blue text-white" : isNext ? "bg-white text-baro-blue" : "bg-slate-100 text-slate-500",
-          )}
-        >
-          <Icon className="size-5" />
+    <li className="border-t border-slate-100 first:border-t-0 xl:border-t-0">
+      <Link
+        href={href}
+        className={cn(
+          "flex items-center gap-4 px-5 py-6 sm:px-7 xl:h-full xl:flex-col xl:items-stretch xl:gap-0 xl:rounded-card xl:p-6",
+          isNext ? "bg-baro-blue-50" : "xl:bg-white",
+        )}
+      >
+        <span className="flex shrink-0 items-center justify-between">
+          <span
+            className={cn(
+              "flex size-11 shrink-0 items-center justify-center rounded-full",
+              done ? "bg-baro-blue text-white" : isNext ? "bg-white text-baro-blue" : "bg-slate-100 text-slate-500",
+            )}
+          >
+            <Icon className="size-5" />
+          </span>
+          <span
+            aria-hidden
+            /* 파랑은 다 한 동그라미 · 다음 할 카드 · "지금 하기"에만 쓴다. 단계 표시까지 파랑이면 화면이 파랗게 덮인다. */
+            className="hidden text-body-3 font-semibold text-slate-600 xl:inline"
+          >
+            {step}단계{done && " · 완료"}
+          </span>
         </span>
-        <span className="min-w-0 flex-1">
-          <span className="block text-body-1 font-bold text-slate-900">
+        <span className="min-w-0 flex-1 xl:mt-4 xl:flex-none">
+          <span className="block text-body-1 font-bold break-keep text-slate-900">
             {title}
             <span className="sr-only">{done ? " (완료)" : isNext ? " (다음에 할 일)" : ""}</span>
           </span>
           {done ? (
-            <span className="mt-0.5 block truncate text-body-2 font-medium text-slate-600 sm:hidden">{result}</span>
+            <span className="mt-0.5 block truncate text-body-2 font-medium text-slate-600 sm:hidden xl:mt-1.5 xl:block xl:font-semibold xl:break-keep xl:whitespace-normal">
+              {result}
+            </span>
           ) : (
-            <span className="mt-0.5 block text-body-2 font-medium break-keep text-slate-600">{description}</span>
+            <span className="mt-0.5 block text-body-2 font-medium break-keep text-slate-600 xl:mt-1.5">{description}</span>
           )}
         </span>
         <span
           className={cn(
-            "hidden shrink-0 text-body-2 sm:inline",
+            "hidden shrink-0 text-body-2 sm:inline xl:hidden",
             done ? "font-semibold text-slate-600" : isNext ? "font-bold text-baro-blue-600" : "font-bold text-slate-600",
           )}
         >
           {done ? result : isNext ? "지금 하기" : action}
         </span>
-        <ChevronRight aria-hidden className="size-5 shrink-0 text-slate-400" />
+        {/* 넓은 화면 카드는 맨 아래에 할 일 글자를 둔다. 다 한 카드는 결과가 이미 위에 있어 비운다. */}
+        {!done && (
+          <span
+            aria-hidden
+            className={cn(
+              "mt-auto hidden items-center gap-1 pt-4 text-body-2 font-bold xl:flex",
+              isNext ? "text-baro-blue-600" : "text-slate-600",
+            )}
+          >
+            {isNext ? "지금 하기" : action}
+            <ChevronRight className="size-4" />
+          </span>
+        )}
+        <ChevronRight aria-hidden className="size-5 shrink-0 text-slate-400 xl:hidden" />
       </Link>
     </li>
   );
@@ -128,7 +165,7 @@ function MenuRow({
  * 회원 화면에 안 쓰는 리드·지원제도 전체·추천 매칭은 빼서 가볍게 간다.
  *
  * 주 이용층인 5060 이 정신없지 않게 세 덩이로만 짠다:
- * ① 인사 · 진행 막대 · 다음 할 일 한 장  ② 나의 취업 준비 - 막대와 같은 다섯 단계를 한 줄씩  ③ 알림 - 공고 알림 한 줄.
+ * ① 인사 · 진행 막대 · 다음 할 일 한 장  ② 나의 취업 준비 - 막대와 같은 다섯 단계를 한 줄씩(넓은 화면은 카드 다섯 장)  ③ 알림 - 공고 알림 한 줄.
  * 진단 결과 · 공고 · 서류 목록은 여기 늘어놓지 않고 각 화면으로 보낸다. 줄마다 현황 한 줄이면 된다.
  */
 export default async function MyPage() {
@@ -144,7 +181,7 @@ export default async function MyPage() {
 
   if (!detail) {
     return (
-      <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
         <EmptyState icon={UserRound} title="프로필을 불러올 수 없습니다" description="잠시 후 다시 시도해주세요." />
       </div>
     );
@@ -290,7 +327,7 @@ export default async function MyPage() {
   return (
     // /draft3 색 구성 (globals.css .draft3-theme): 옅은 회색 바탕에 흰 카드(모서리 20px, 테두리 · 그림자 없음).
     <div className="draft3-theme bg-baro-page">
-      <div className="mx-auto max-w-[55rem] px-4.5 pt-10 pb-24 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-24 lg:px-8">
         <JourneySteps
           steps={steps}
           userName={userName}
@@ -306,8 +343,9 @@ export default async function MyPage() {
           <h2 id="mypage-ready" className="mb-3.5 text-title-3 font-extrabold text-slate-900">
             나의 취업 준비
           </h2>
-          <ul className="overflow-hidden rounded-card bg-white">
+          <ul className="overflow-hidden rounded-card bg-white xl:grid xl:grid-cols-5 xl:gap-4 xl:overflow-visible xl:rounded-none xl:bg-transparent">
             <MenuRow
+              step={1}
               href={hasCareerProfile ? "/mypage/profile" : "/onboarding/profile"}
               icon={UserRound}
               title="희망 조건"
@@ -318,6 +356,7 @@ export default async function MyPage() {
               isNext={nextStepId === "profile"}
             />
             <MenuRow
+              step={2}
               href={latestResult ? `/assessment/result/${latestResult.sessionId}` : "/assessment?start=1"}
               icon={Compass}
               title="직업진단"
@@ -328,6 +367,7 @@ export default async function MyPage() {
               isNext={nextStepId === "diagnosis"}
             />
             <MenuRow
+              step={3}
               href={supportData.latestSessionId ? `/support/result/${supportData.latestSessionId}` : "/support?start=1"}
               icon={Gift}
               title="지원금 찾기"
@@ -339,6 +379,7 @@ export default async function MyPage() {
             />
             {/* 맞춤 일자리를 둘러보는 것과 찜하는 것을 한 줄로. 찜했으면 찜 목록으로, 아니면 맞춤 공고 목록으로 간다. */}
             <MenuRow
+              step={4}
               href={jobBookmarkCount > 0 ? "/mypage/bookmarks#jobs" : jobsHref}
               icon={Briefcase}
               title="일자리 찜하기"
@@ -349,6 +390,7 @@ export default async function MyPage() {
               isNext={nextStepId === "jobs"}
             />
             <MenuRow
+              step={5}
               href={resumeCount + coverLetterCount > 0 ? "/resume" : "/resume/new"}
               icon={FileText}
               title="이력서 · 자기소개서"
