@@ -79,6 +79,11 @@ export interface JobCardProps {
   readiness?: JobReadiness;
   /** 회색 판 위에 놓일 때는 테두리 없이 흰 면만으로 띄운다. */
   borderless?: boolean;
+  /**
+   * 경력 · 고용형태 · 중장년 추천 태그를 보일지. 일자리 찾기 전체 목록은 카드를 가볍게 하려고 끄고,
+   * 자격 준비 배지(자격 필수 등)만 남긴다.
+   */
+  showTags?: boolean;
 }
 
 /**
@@ -96,12 +101,13 @@ export function JobCard({
   isBookmarked = false,
   readiness,
   borderless = false,
+  showTags = true,
 }: JobCardProps) {
   const salary = splitSalary(job);
   const location = shortLocation(job);
   const left = daysLeft(job);
   const urgent = left !== null && left >= 0 && left <= 7;
-  const tags = jobTags(job);
+  const tags = showTags ? jobTags(job) : [];
   return (
     // 찜 버튼은 카드 Link 안에 넣을 수 없어(버튼 중첩) 형제로 두고 위에 겹친다.
     <div className={cn("relative h-full", className)}>

@@ -1,4 +1,3 @@
-import { PageHead } from "@/components/layout/page-head";
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
 import { Briefcase, KeyRound } from "lucide-react";
@@ -147,11 +146,7 @@ export default async function JobsPage({
     */
     <GuestGate active={!isAuthenticated}>
     <div className="draft3-theme">
-    {/* 화면 머리(위치 · 제목)는 세부 화면 공통. 무엇을 하는 화면인지는 아래 검색바가 말한다. */}
-    <PageHead icon="jobs" crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
-    {/* 흰 머리 아래 회색 바탕에 흰 판 · 흰 카드(모서리 20px, 테두리 없음). */}
-    <div className="bg-baro-page">
-    <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-16 lg:px-8">
+    {/* 화면 머리(위치 · 제목 · 검색창 · 조건 줄)와 회색 바탕 판은 JobFiltersForm 이 그린다. */}
 
       <JobFiltersForm
         initial={{
@@ -191,12 +186,12 @@ export default async function JobsPage({
           />
         ) : (
           <>
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {result.items.slice(0, INTERLEAVE_AFTER).map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
-                  matchReasonLabel={job.match?.reasons[0]?.label}
+                  showTags={false}
                   isAuthenticated={isAuthenticated}
                   isBookmarked={bookmarkedSet.has(job.id)}
                   readiness={readinessMap.get(job.id)}
@@ -223,7 +218,7 @@ export default async function JobsPage({
                     ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
                     : ""}
                 </p>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                   {recommendation.preparation.jobs.map((job) => (
                     <JobRowCompact
                       key={`prep-${job.id}`}
@@ -237,12 +232,12 @@ export default async function JobsPage({
             )}
 
             {result.items.length > INTERLEAVE_AFTER && (
-              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {result.items.slice(INTERLEAVE_AFTER).map((job) => (
                   <JobCard
                     key={job.id}
                     job={job}
-                    matchReasonLabel={job.match?.reasons[0]?.label}
+                    showTags={false}
                     isAuthenticated={isAuthenticated}
                     isBookmarked={bookmarkedSet.has(job.id)}
                     readiness={readinessMap.get(job.id)}
@@ -256,8 +251,6 @@ export default async function JobsPage({
         )}
       </div>
       </JobFiltersForm>
-    </div>
-    </div>
     </div>
     </GuestGate>
   );

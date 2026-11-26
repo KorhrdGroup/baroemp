@@ -30,6 +30,7 @@ export function PageHead({
   icon,
   className,
   children,
+  footer,
 }: {
   crumbs: Crumb[];
   title: React.ReactNode;
@@ -39,6 +40,8 @@ export function PageHead({
   className?: string;
   /** 제목 줄 오른쪽(넓은 화면) 또는 아래(휴대폰)에 놓을 것. */
   children?: React.ReactNode;
+  /** 제목 아래 온 폭으로 놓을 것(일자리 찾기의 검색창 · 조건 줄처럼 머리와 한 덩어리로 읽혀야 하는 것). */
+  footer?: React.ReactNode;
 }) {
   return (
     <div
@@ -73,6 +76,7 @@ export function PageHead({
             </div>
             {children}
           </div>
+          {footer}
         </div>
         {/* 그림은 흰 동그라미 위에(draft3 는 머리가 흰색이라 옅은 하늘 동그라미). 휴대폰은 제목 자리가 좁아 감춘다. */}
         {icon && (

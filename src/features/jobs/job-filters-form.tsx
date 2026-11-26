@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Check, ChevronDown, RotateCcw, Search, SlidersHorizontal, X } from "lucide-react";
+import { Check, ChevronDown, ChevronLeft, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { filterPillClass, filterPillOffClass } from "@/lib/ui-classes";
 import { REGION_LABELS } from "@/lib/labels";
@@ -11,6 +11,8 @@ import type { Region } from "@/types";
 import { JOB_CATEGORY_GROUPS, jobCategoryLabel as labelOfJobCategory } from "@/lib/jobs/job-category-groups";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { trackJobFilterChangedAction, trackJobSearchAction } from "@/features/jobs/job-actions";
+import { PageHead } from "@/components/layout/page-head";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import type { JobSortOrder } from "@/types";
 
 /** 한 번에 고를 수 있는 시·군·구 수. */
@@ -22,6 +24,17 @@ const SORT_OPTIONS: { value: JobSortOrder; label: string }[] = [
   { value: "deadline", label: "마감임박순" },
   { value: "salary_desc", label: "급여높은순" },
 ];
+
+/* 조건 줄의 알약 단추. 걸린 조건만 남색으로 채워, 무엇이 걸려 있는지 한눈에 보이게 한다. */
+const pillClass = "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full px-4 text-body-2 whitespace-nowrap";
+const pillOnClass = "bg-baro-navy font-bold text-white";
+const pillOffClass = "bg-white font-semibold text-slate-800 ring-1 ring-slate-300 ring-inset";
+
+/* 고르기 창 안의 칸. 고른 칸은 옅은 파랑 바탕 + 파란 테두리 + 체크. */
+const choiceClass =
+  "flex h-14 items-center justify-center gap-1.5 rounded-xl px-3 text-body-2 break-keep disabled:opacity-40";
+const choiceOnClass = "bg-baro-blue-50 font-bold text-baro-blue-600 ring-2 ring-baro-blue ring-inset";
+const choiceOffClass = "bg-white font-semibold text-slate-800 ring-1 ring-slate-300 ring-inset";
 
 export interface JobFiltersValue {
   keyword?: string;
@@ -36,12 +49,12 @@ export interface JobFiltersValue {
 }
 
 /**
- * 일자리찾기의 검색 틀 (왼쪽 조건 + 오른쪽 목록).
+ * 일자리찾기 화면의 틀: 머리(제목 · 검색창 · 조건 줄) + 회색 바탕의 목록.
  *
- * 넓은 화면은 지역·직종·조건을 왼쪽에 늘 펼쳐 둔다. 드롭다운 안에 숨겨 두면
- * 무엇으로 좁힐 수 있는지부터 찾아야 한다. 조건을 고른 뒤 "적용하기"로 한 번에 부른다 -
- * 칸 하나 누를 때마다 목록을 다시 부르면 구 다섯 개를 고르는 동안 화면이 다섯 번 바뀐다.
- * 좁은 화면은 같은 조건 판을 "조건 선택" 버튼으로 아래에서 올린다.
+ * 왼쪽에 조건 판을 늘 펼쳐 두던 것을 걷고, 검색창 아래 한 줄로 모았다.
+ * 조건 판이 목록 폭을 1/4 가까이 차지해 카드가 두 장씩만 놓였고, 화면에 고를 것이 너무 많아 보였다.
+ * 지역 · 직종은 누르면 큰 고르기 창이 뜨고, 고르면 바로 목록에 걸린다("전국" · "○○ 전체" · "직종 전체"는 누르는 즉시).
+ * 신입 가능 · 7일 안에 마감은 누를 때마다 바로 켜고 끈다.
  * 제출 시 서버 컴포넌트(/jobs)가 다시 렌더링되도록 쿼리스트링 기반 네비게이션을 사용한다.
  */
 export function JobFiltersForm({
@@ -53,14 +66,14 @@ export function JobFiltersForm({
   profileRegion,
 }: {
   initial: JobFiltersValue;
-  /** 공고 목록. 오른쪽 칸의 건수·정렬 줄 아래에 들어간다. */
+  /** 공고 목록. 건수·정렬 줄 아래에 들어간다. */
   children?: React.ReactNode;
-  /** 오른쪽 칸 맨 위에 둘 큐레이션 띠. */
+  /** 목록 맨 위에 둘 큐레이션 띠. */
   curation?: React.ReactNode;
   /** 결과 건수처럼 정렬 줄 왼쪽에 함께 놓을 요약 문구. */
   summary?: React.ReactNode;
   /**
-   * 직종 선택기 목록에 없는 코드로 들어온 경우의 이름.
+   * 직종 목록에 없는 코드로 들어온 경우의 이름.
    * 직업진단 결과에서 넘어오는 코드는 이 목록에 없어서, 없으면 필터가 걸렸는데도
    * 무엇으로 좁혀졌는지 알 수 없었다.
    */
@@ -73,8 +86,8 @@ export function JobFiltersForm({
   profileRegion?: string;
 }) {
   const router = useRouter();
-  const [sheetOpen, setSheetOpen] = useState(false);
   const [sortOpen, setSortOpen] = useState(false);
+  const [picker, setPicker] = useState<"region" | "job" | null>(null);
   const [keyword, setKeyword] = useState(initial.keyword ?? "");
   const [region, setRegion] = useState(initial.region ?? "all");
   const [sigungus, setSigungus] = useState<string[]>(initial.regionSigungus ?? []);
@@ -85,17 +98,18 @@ export function JobFiltersForm({
 
   const regionActive = region !== "all";
   const jobActive = jobCategories.length > 0;
-  /* 직업진단에서 넘어온 코드처럼 묶음 목록에 없는 직종. 목록 맨 위에 체크된 채로 보여 준다. */
-  const extraCategories = jobCategories.filter((key) => !JOB_CATEGORY_GROUPS.some((g) => g.key === key));
-  /* 좁은 화면의 "조건 선택" 버튼에 몇 가지가 걸려 있는지 센다. */
-  const appliedCount =
-    (initial.region ? 1 : 0) +
-    (initial.jobCategories?.length ?? 0) +
-    (initial.isBeginnerFriendly ? 1 : 0) +
-    (initial.closingSoon ? 1 : 0);
+  const anyActive = regionActive || jobActive || beginnerOnly || closingSoon;
+  const nameOfJob = (key: string) => labelOfJobCategory(key, jobCategoryLabel);
 
-  const toggleJobCategory = (key: string) =>
-    setJobCategories((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+  /* 알약에 적을 말. 여럿을 골랐으면 첫 것 + "외 n". */
+  const regionPillLabel = !regionActive
+    ? "지역 전체"
+    : sigungus.length === 0
+      ? REGION_LABELS[region as Region]
+      : `${REGION_LABELS[region as Region]} ${sigungus[0]}${sigungus.length > 1 ? ` 외 ${sigungus.length - 1}` : ""}`;
+  const jobPillLabel = !jobActive
+    ? "직종 전체"
+    : `${nameOfJob(jobCategories[0])}${jobCategories.length > 1 ? ` 외 ${jobCategories.length - 1}` : ""}`;
 
   const buildParams = (overrides: Partial<JobFiltersValue> = {}) => {
     const next: JobFiltersValue = {
@@ -120,10 +134,16 @@ export function JobFiltersForm({
     return { next, params };
   };
 
+  /* 조건을 걸어 목록을 다시 부른다. 알약 · 고르기 창 · 정렬이 모두 여기로 온다. */
   const submit = async (overrides: Partial<JobFiltersValue> = {}) => {
-    setSheetOpen(false);
     setSortOpen(false);
+    setPicker(null);
     const { next, params } = buildParams(overrides);
+    setRegion(next.region ?? "all");
+    setSigungus(next.regionSigungus ?? []);
+    setJobCategories(next.jobCategories ?? []);
+    setBeginnerOnly(Boolean(next.isBeginnerFriendly));
+    setClosingSoon(Boolean(next.closingSoon));
     const anonymousId = getOrCreateAnonymousId();
     if (Object.keys(overrides).length > 0) {
       await trackJobFilterChangedAction({ anonymousId, filter: next as Record<string, unknown> });
@@ -133,153 +153,24 @@ export function JobFiltersForm({
     router.push(`/jobs${params.toString() ? `?${params.toString()}` : ""}`);
   };
 
-  /* 조건 판의 "적용하기". 판에서 고른 것을 모두 실어 보내 필터 변경으로 기록한다. */
-  const applyFilters = () =>
-    void submit({
-      region: region === "all" ? undefined : region,
-      regionSigungus: region === "all" || sigungus.length === 0 ? undefined : sigungus,
-      jobCategories: jobCategories.length > 0 ? jobCategories : undefined,
-      isBeginnerFriendly: beginnerOnly || undefined,
-      closingSoon: closingSoon || undefined,
-    });
-
-  const resetFilters = () => {
-    setRegion("all");
-    setSigungus([]);
-    setJobCategories([]);
-    setBeginnerOnly(false);
-    setClosingSoon(false);
-  };
-
-  /* 시·도를 바꾸면 앞서 고른 구는 그 시·도의 것이 아니라 지워야 한다. */
-  function selectRegion(next: string) {
-    setRegion(next);
-    setSigungus([]);
-  }
-
-  /*
-    구는 다섯까지만 고르게 한다. 여섯 이상을 한 번에 보고 싶은 사람은
-    대개 시·도 전체를 보는 편이 빠르다.
-  */
-  function toggleSigungu(name: string) {
-    setSigungus((prev) => {
-      if (prev.includes(name)) return prev.filter((n) => n !== name);
-      if (prev.length >= MAX_SIGUNGU) return prev;
-      return [...prev, name];
-    });
-  }
-
-  /* 넓은 화면의 왼쪽 칸과 좁은 화면의 시트가 함께 쓰는 조건 판. */
-  const filterPanel = (
-    <div className="flex flex-col">
-      <FilterGroup title="지역">
-        {/* 시·도는 열일곱 개라 체크 목록으로 펼치면 판이 너무 길다. 한 개만 고르므로 고르기 상자로 둔다. */}
-        <div className="relative">
-          <select
-            value={region}
-            onChange={(e) => selectRegion(e.target.value)}
-            aria-label="시·도"
-            className="h-11 w-full appearance-none rounded-lg bg-white pr-9 pl-3 text-body-2 font-medium text-slate-900"
-          >
-            <option value="all">전국</option>
-            {Object.entries(REGION_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-          <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-slate-500" />
-        </div>
-        {regionActive && (
-          <div className="mt-2 max-h-56 overflow-y-auto rounded-lg bg-white">
-            <CheckRow checked={sigungus.length === 0} onClick={() => setSigungus([])}>
-              {REGION_LABELS[region as Region]} 전체
-            </CheckRow>
-            {SIGUNGU_BY_REGION[region as Region].map((name) => {
-              const picked = sigungus.includes(name);
-              return (
-                <CheckRow
-                  key={name}
-                  checked={picked}
-                  disabled={!picked && sigungus.length >= MAX_SIGUNGU}
-                  onClick={() => toggleSigungu(name)}
-                >
-                  {name}
-                </CheckRow>
-              );
-            })}
-          </div>
-        )}
-        {sigungus.length >= MAX_SIGUNGU && (
-          <p className="mt-1.5 text-body-3 font-medium text-slate-600">시·군·구는 {MAX_SIGUNGU}개까지 고를 수 있어요</p>
-        )}
-      </FilterGroup>
-
-      <FilterGroup title="직종">
-        <CheckRow checked={!jobActive} onClick={() => setJobCategories([])}>
-          직종 전체
-        </CheckRow>
-        {extraCategories.map((key) => (
-          <CheckRow key={key} checked onClick={() => toggleJobCategory(key)}>
-            {labelOfJobCategory(key, jobCategoryLabel)}
-          </CheckRow>
-        ))}
-        {JOB_CATEGORY_GROUPS.map((group) => (
-          <CheckRow key={group.key} checked={jobCategories.includes(group.key)} onClick={() => toggleJobCategory(group.key)}>
-            {group.label}
-          </CheckRow>
-        ))}
-      </FilterGroup>
-
-      <FilterGroup title="조건" last>
-        <CheckRow checked={beginnerOnly} onClick={() => setBeginnerOnly(!beginnerOnly)}>
-          신입 가능
-        </CheckRow>
-        <CheckRow checked={closingSoon} onClick={() => setClosingSoon(!closingSoon)}>
-          7일 안에 마감
-        </CheckRow>
-      </FilterGroup>
-    </div>
-  );
-
-  /* 초기화·적용하기. 라벨 "적용하기"는 비로그인 문지기(GuestGate)가 알아보는 말이라 바꾸지 않는다. */
-  const panelActions = (
-    <div className="flex gap-2">
-      <button
-        type="button"
-        onClick={resetFilters}
-        className="flex shrink-0 items-center gap-1.5 rounded-xl bg-white px-3.5 py-3 text-body-3 font-semibold text-slate-700"
-      >
-        <RotateCcw className="size-3.5" /> 초기화
-      </button>
-      <button
-        type="button"
-        onClick={applyFilters}
-        className="flex-1 rounded-lg bg-brand-blue-600 px-4 py-3 text-body-2 font-semibold text-white"
-      >
-        적용하기
-      </button>
-    </div>
-  );
-
-  return (
-    <div>
-      {/* 검색어. 지역·직종은 아래 조건 판이 맡아 검색바는 글자만 받는다. */}
+  const head = (
+    <div className="mt-5 sm:mt-6">
+      {/* 검색어. 지역·직종은 아래 조건 줄이 맡아 검색바는 글자만 받는다. 흰 머리 위라 옅은 테두리로 칸을 보인다. */}
       <form
         onSubmit={(e) => {
           e.preventDefault();
           void submit();
         }}
-        className="flex h-14 items-center rounded-xl bg-white sm:h-16"
+        className="flex h-14 items-center rounded-xl bg-white ring-1 ring-[#DDE3EC] ring-inset sm:h-16"
       >
         <div className="flex min-w-0 flex-1 items-center gap-2.5 pr-2 pl-5 sm:pl-6">
-          <Search className="size-[18px] shrink-0 text-slate-400" />
+          <Search className="size-[18px] shrink-0 text-slate-500" />
           <input
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             placeholder="예: 요양보호사, 경비, 조리"
             aria-label="검색어"
-            className="w-full min-w-0 border-0 bg-transparent text-body-2 text-slate-900 font-medium outline-none placeholder:text-slate-500"
+            className="w-full min-w-0 border-0 bg-transparent text-body-2 font-medium text-slate-900 outline-none placeholder:text-slate-500"
           />
         </div>
         <button
@@ -291,30 +182,68 @@ export function JobFiltersForm({
         </button>
       </form>
 
-      {/* 좁은 화면: 조건 판을 여는 버튼. 몇 가지가 걸려 있는지 함께 적는다. */}
-      <button
-        type="button"
-        onClick={() => setSheetOpen(true)}
-        className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl bg-white py-3 text-body-2 font-semibold text-slate-700 lg:hidden"
-      >
-        <SlidersHorizontal className="size-4" />
-        지역·직종·조건 선택
-        {appliedCount > 0 && (
-          <span className="rounded-full bg-brand-blue-600 px-2 py-0.5 text-caption-1 font-semibold text-white">{appliedCount}</span>
+      {/*
+        조건 줄. 좁은 화면에서는 옆으로 밀어 본다(줄을 바꾸면 머리가 길어진다).
+        고르기 창을 여는 것은 둘러보기라 비로그인에게도 열어 두고, 목록을 다시 부르는 단추만 문지기(data-guest-gated)에 걸린다.
+      */}
+      <div className="-mx-4.5 mt-3 flex items-center gap-2 overflow-x-auto px-4.5 py-0.5 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden">
+        <button type="button" onClick={() => setPicker("region")} className={cn(pillClass, regionActive ? pillOnClass : pillOffClass)}>
+          {regionPillLabel}
+          <ChevronDown aria-hidden className="size-4" strokeWidth={2.2} />
+        </button>
+        <button type="button" onClick={() => setPicker("job")} className={cn(pillClass, jobActive ? pillOnClass : pillOffClass)}>
+          {jobPillLabel}
+          <ChevronDown aria-hidden className="size-4" strokeWidth={2.2} />
+        </button>
+        <button
+          type="button"
+          data-guest-gated
+          aria-pressed={beginnerOnly}
+          onClick={() => void submit({ isBeginnerFriendly: !beginnerOnly || undefined })}
+          className={cn(pillClass, beginnerOnly ? pillOnClass : pillOffClass)}
+        >
+          {beginnerOnly && <Check aria-hidden className="size-4" strokeWidth={2.6} />}
+          신입 가능
+        </button>
+        <button
+          type="button"
+          data-guest-gated
+          aria-pressed={closingSoon}
+          onClick={() => void submit({ closingSoon: !closingSoon || undefined })}
+          className={cn(pillClass, closingSoon ? pillOnClass : pillOffClass)}
+        >
+          {closingSoon && <Check aria-hidden className="size-4" strokeWidth={2.6} />}
+          7일 안에 마감
+        </button>
+        {anyActive && (
+          <button
+            type="button"
+            data-guest-gated
+            onClick={() =>
+              void submit({
+                region: undefined,
+                regionSigungus: undefined,
+                jobCategories: undefined,
+                isBeginnerFriendly: undefined,
+                closingSoon: undefined,
+              })
+            }
+            className="h-11 shrink-0 px-2 text-body-3 font-semibold whitespace-nowrap text-slate-700 underline underline-offset-4"
+          >
+            조건 초기화
+          </button>
         )}
-      </button>
+      </div>
+    </div>
+  );
 
-      <div className="mt-8 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:items-start lg:gap-8">
-        {/* 넓은 화면: 왼쪽에 늘 펼친 조건 판. 목록을 내려도 따라오도록 머리글 아래에 붙인다. */}
-        <aside className="sticky top-24 hidden max-h-[calc(100vh-7rem)] flex-col rounded-card bg-white lg:flex">
-          <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
-            <h2 className="text-body-1 font-bold text-slate-900">조건 선택</h2>
-          </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5">{filterPanel}</div>
-          <div className="border-t border-slate-200/70 p-4">{panelActions}</div>
-        </aside>
+  return (
+    <>
+      <PageHead crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" footer={head} />
 
-        <div className="min-w-0">
+      {/* 흰 머리 아래 회색 바탕에 흰 판 · 흰 카드(모서리 20px, 테두리 없음). */}
+      <div className="bg-baro-page">
+        <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-16 lg:px-8">
           {curation}
 
           {/* 건수는 왼쪽, 정렬은 오른쪽 끝. */}
@@ -365,82 +294,209 @@ export function JobFiltersForm({
         </div>
       </div>
 
-      {/* 좁은 화면의 조건 시트. 헤더(z-50) 위로 올려 그늘이 화면 전체를 덮게 한다. */}
-      {sheetOpen && (
-        <div className="fixed inset-0 z-[60] lg:hidden">
-          <button
-            type="button"
-            aria-label="조건 선택 닫기"
-            className="absolute inset-0 cursor-default bg-slate-900/30"
-            onClick={() => setSheetOpen(false)}
-          />
-          <div className="absolute inset-x-0 bottom-0 flex max-h-[85vh] flex-col rounded-t-xl bg-gov-surface shadow-[0_-8px_32px_rgba(15,40,90,0.18)]">
-            <div className="flex items-center justify-between border-b border-slate-200/70 px-5 py-4">
-              <h2 className="text-body-1 font-bold text-slate-900">조건 선택</h2>
-              <button
-                type="button"
-                aria-label="조건 선택 닫기"
-                onClick={() => setSheetOpen(false)}
-                className="-mr-2 rounded-lg p-2 text-slate-600"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-            <div className="min-h-0 flex-1 overflow-y-auto px-5">{filterPanel}</div>
-            <div className="border-t border-slate-200/70 p-4">{panelActions}</div>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-/** 조건 판의 한 묶음(지역·직종·조건). 묶음 사이는 선으로 가른다. */
-function FilterGroup({ title, last, children }: { title: string; last?: boolean; children: React.ReactNode }) {
-  return (
-    <section className={cn("py-5", !last && "border-b border-slate-200/70")}>
-      <h3 className="mb-2.5 text-body-2 font-bold text-slate-900">{title}</h3>
-      {children}
-    </section>
+      <Dialog open={picker !== null} onOpenChange={(open) => !open && setPicker(null)}>
+        <DialogContent className="draft3-theme flex max-h-[88vh] flex-col gap-0 overflow-hidden rounded-card p-0 sm:max-w-2xl">
+          {picker === "region" && (
+            <RegionPicker
+              region={region}
+              sigungus={sigungus}
+              onApply={(r, s) =>
+                void submit({ region: r === "all" ? undefined : r, regionSigungus: r === "all" || s.length === 0 ? undefined : s })
+              }
+            />
+          )}
+          {picker === "job" && (
+            <JobPicker
+              selected={jobCategories}
+              nameOf={nameOfJob}
+              onApply={(keys) => void submit({ jobCategories: keys.length > 0 ? keys : undefined })}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
 
 /**
- * 체크 한 줄. 기본 체크박스는 작아 누르기 어렵다 - 줄 전체를 누르는 자리로 둔다.
- * 고르지 않은 줄에도 네모를 남겨, 여러 개를 고를 수 있다는 것이 보이게 한다.
+ * 지역 고르기 창. 먼저 시·도(전국 + 17)를 큰 칸으로 고르고, 시·도를 누르면 그 안의 시·군·구로 넘어간다.
+ * "전국"과 "○○ 전체"는 누르는 즉시 걸린다. 시·군·구는 다섯까지 골라 "적용하기"로 건다.
+ * 이미 시·도가 걸려 있으면 그 시·도의 시·군·구 화면에서 연다.
  */
-function CheckRow({
-  checked,
-  disabled,
-  onClick,
-  children,
+function RegionPicker({
+  region,
+  sigungus,
+  onApply,
 }: {
-  checked: boolean;
-  disabled?: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
+  region: string;
+  sigungus: string[];
+  onApply: (region: string, sigungus: string[]) => void;
 }) {
+  const [sido, setSido] = useState<Region | null>(region === "all" ? null : (region as Region));
+  const [picked, setPicked] = useState<string[]>(region === "all" ? [] : sigungus);
+
+  function toggle(name: string) {
+    setPicked((prev) => {
+      if (prev.includes(name)) return prev.filter((n) => n !== name);
+      if (prev.length >= MAX_SIGUNGU) return prev;
+      return [...prev, name];
+    });
+  }
+
+  if (!sido) {
+    return (
+      <>
+        <PickerHead title="어느 지역 일자리를 볼까요?" />
+        <div className="grid min-h-0 grid-cols-3 gap-2 overflow-y-auto px-6 pb-6 sm:grid-cols-4 sm:px-7 sm:pb-7">
+          <button
+            type="button"
+            data-guest-gated
+            onClick={() => onApply("all", [])}
+            className={cn(choiceClass, region === "all" ? choiceOnClass : choiceOffClass)}
+          >
+            전국
+          </button>
+          {(Object.entries(REGION_LABELS) as [Region, string][]).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => {
+                setSido(value);
+                setPicked(value === region ? sigungus : []);
+              }}
+              className={cn(choiceClass, value === region ? choiceOnClass : choiceOffClass)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </>
+    );
+  }
+
+  const sidoLabel = REGION_LABELS[sido];
   return (
-    <button
-      type="button"
-      role="checkbox"
-      aria-checked={checked}
-      disabled={disabled}
-      onClick={onClick}
-      className={cn(
-        "flex w-full items-center gap-2.5 rounded-md px-2 py-2 text-left text-body-2 disabled:cursor-not-allowed disabled:text-slate-300",
-        checked ? "font-semibold text-slate-900" : "font-medium text-slate-700",
-      )}
-    >
-      <span
-        className={cn(
-          "flex size-5 shrink-0 items-center justify-center rounded border transition-colors",
-          checked ? "border-brand-blue-600 bg-brand-blue-600 text-white" : "border-slate-300 bg-white",
-        )}
+    <>
+      <PickerHead
+        title={`${sidoLabel}에서 어디를 볼까요?`}
+        back={
+          <button
+            type="button"
+            onClick={() => setSido(null)}
+            className="-ml-2 flex h-10 items-center gap-0.5 px-2 text-body-3 font-semibold text-slate-700"
+          >
+            <ChevronLeft aria-hidden className="size-4" />
+            시·도 다시 고르기
+          </button>
+        }
+        note={`시·군·구는 ${MAX_SIGUNGU}곳까지 고를 수 있어요.`}
+      />
+      <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto px-6 pb-4 sm:grid-cols-4 sm:px-7">
+        <button
+          type="button"
+          data-guest-gated
+          onClick={() => onApply(sido, [])}
+          className={cn(choiceClass, "col-span-2", picked.length === 0 ? choiceOnClass : choiceOffClass)}
+        >
+          {sidoLabel} 전체
+        </button>
+        {SIGUNGU_BY_REGION[sido].map((name) => {
+          const on = picked.includes(name);
+          return (
+            <button
+              key={name}
+              type="button"
+              aria-pressed={on}
+              disabled={!on && picked.length >= MAX_SIGUNGU}
+              onClick={() => toggle(name)}
+              className={cn(choiceClass, on ? choiceOnClass : choiceOffClass)}
+            >
+              {on && <Check aria-hidden className="size-4 shrink-0" strokeWidth={2.6} />}
+              {name}
+            </button>
+          );
+        })}
+      </div>
+      <PickerFoot disabled={picked.length === 0} count={picked.length} unit="곳" onApply={() => onApply(sido, picked)} />
+    </>
+  );
+}
+
+/** 직종 고르기 창. "직종 전체"는 누르는 즉시 걸리고, 여러 직종은 골라서 "적용하기"로 건다. */
+function JobPicker({
+  selected,
+  nameOf,
+  onApply,
+}: {
+  selected: string[];
+  nameOf: (key: string) => string;
+  onApply: (keys: string[]) => void;
+}) {
+  const [picked, setPicked] = useState<string[]>(selected);
+  /* 직업진단에서 넘어온 코드처럼 묶음 목록에 없는 직종. 목록 맨 앞에 둔다. */
+  const keys = [
+    ...selected.filter((key) => !JOB_CATEGORY_GROUPS.some((g) => g.key === key)),
+    ...JOB_CATEGORY_GROUPS.map((g) => g.key),
+  ];
+  const toggle = (key: string) => setPicked((prev) => (prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]));
+
+  return (
+    <>
+      <PickerHead title="어떤 일을 찾으세요?" note="여러 개를 함께 고를 수 있어요." />
+      <div className="grid min-h-0 grid-cols-2 gap-2 overflow-y-auto px-6 pb-4 sm:grid-cols-3 sm:px-7">
+        <button
+          type="button"
+          data-guest-gated
+          onClick={() => onApply([])}
+          className={cn(choiceClass, picked.length === 0 ? choiceOnClass : choiceOffClass)}
+        >
+          직종 전체
+        </button>
+        {keys.map((key) => {
+          const on = picked.includes(key);
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={on}
+              onClick={() => toggle(key)}
+              className={cn(choiceClass, on ? choiceOnClass : choiceOffClass)}
+            >
+              {on && <Check aria-hidden className="size-4 shrink-0" strokeWidth={2.6} />}
+              {nameOf(key)}
+            </button>
+          );
+        })}
+      </div>
+      <PickerFoot disabled={picked.length === 0} count={picked.length} unit="개" onApply={() => onApply(picked)} />
+    </>
+  );
+}
+
+function PickerHead({ title, back, note }: { title: string; back?: React.ReactNode; note?: string }) {
+  return (
+    <div className="shrink-0 px-6 pt-6 pb-4 sm:px-7 sm:pt-7">
+      {back}
+      <DialogTitle className="pr-8 text-title-2 font-extrabold break-keep text-slate-900">{title}</DialogTitle>
+      {note && <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{note}</p>}
+    </div>
+  );
+}
+
+/** 고르기 창 아래 "적용하기". 이 말은 비로그인 문지기(GuestGate)가 알아보는 말이라 바꾸지 않는다. */
+function PickerFoot({ disabled, count, unit, onApply }: { disabled: boolean; count: number; unit: string; onApply: () => void }) {
+  return (
+    <div className="flex shrink-0 items-center gap-3 border-t border-slate-200 px-6 py-4 sm:px-7">
+      <p className="flex-1 text-body-2 font-semibold text-slate-700">{count > 0 ? `${count}${unit} 골랐어요` : "골라 주세요"}</p>
+      <button
+        type="button"
+        data-guest-gated
+        disabled={disabled}
+        onClick={onApply}
+        className="h-14 rounded-xl bg-baro-blue px-8 text-body-1 font-bold text-white disabled:bg-slate-300"
       >
-        {checked && <Check className="size-3.5" strokeWidth={3} />}
-      </span>
-      {children}
-    </button>
+        적용하기
+      </button>
+    </div>
   );
 }
