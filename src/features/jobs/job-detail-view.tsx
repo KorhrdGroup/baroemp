@@ -229,6 +229,8 @@ export function JobDetailView({
       */}
       {(match || showRequirements) && (
         <Section title="이 공고와 내 조건 비교" description="희망하신 근무조건과 공고가 요구하는 조건을 함께 봤어요.">
+          {/* 위 구역들처럼 흰 판에 담는다. 연한 초록 · 분홍 상자가 회색 바탕에 바로 놓이면 밝기가 비슷해 경계와 글자가 흐려 보였다. */}
+          <div className="rounded-card bg-white p-5 sm:p-6">
           {visibleComparisons.length > 0 && match && (
             <div>
               <p className="text-body-3 font-semibold text-slate-700">희망 근무조건</p>
@@ -295,6 +297,7 @@ export function JobDetailView({
               </div>
             </div>
           )}
+          </div>
         </Section>
       )}
 
