@@ -180,8 +180,9 @@ export function JobDetailView({
       />
 
     <div className="bg-baro-page">
-    <div className="mx-auto max-w-7xl px-4.5 pb-10 lg:px-8">
-     <div className="max-w-3xl">
+    {/* 넓은 화면은 2단: 왼쪽 본문, 오른쪽에 따라 내려오는 요약 카드(지원 · 찜 단추 포함). 머리글 폭(1280px)을 다 채운다. */}
+    <div className="mx-auto max-w-7xl px-4.5 pb-10 lg:grid lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:items-start lg:gap-8 lg:px-8">
+     <div className="max-w-3xl lg:max-w-none">
       <Section title="모집 요강">
         {/* 테두리 표 대신 흰 판 + 옅은 줄로 나눈다 (/draft3 구성). */}
         <dl className="divide-y divide-slate-100 overflow-hidden rounded-card bg-white">
@@ -333,8 +334,9 @@ export function JobDetailView({
         지원은 외부 사이트에서 이뤄져 우리가 알 수 없다. 지원하고 돌아온 회원이 여기서 직접 표시하면
         마이페이지 5단계가 완료로 바뀐다. 목록을 늘어놓는 대신 공고마다 이 한 줄이 기록 자리다.
       */}
+      {/* 넓은 화면에서는 지원 단추 옆(오른쪽 요약 카드)에 두므로 여기서는 좁은 화면만. */}
       {isAuthenticated && (
-        <section className="mt-4 flex flex-col gap-3 rounded-card bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <section className="mt-4 flex flex-col lg:hidden gap-3 rounded-card bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="min-w-0">
             <p className="text-body-2 font-semibold text-slate-900">이 공고에 지원하셨나요?</p>
             <p className="mt-0.5 text-body-3 font-medium text-slate-600">표시해 두면 마이페이지 취업 절차에 기록돼요. 면접·취업까지 이어지면 단계를 올려 주세요.</p>
@@ -349,14 +351,57 @@ export function JobDetailView({
         </p>
       )}
 
-      {/* 하단 고정 CTA가 마지막 내용을 가리지 않도록 비워둔다. */}
-      <div className="h-24" />
+      {/* 하단 고정 CTA가 마지막 내용을 가리지 않도록 비워둔다. 넓은 화면은 CTA가 오른쪽 카드에 있어 필요 없다. */}
+      <div className="h-24 lg:hidden" />
      </div>
+
+     {/* ── 넓은 화면 오른쪽 요약 카드: 첫 구역 제목 높이에서 시작해 화면을 내려도 따라온다. ── */}
+     <aside className="sticky top-24 mt-10 hidden lg:block">
+      <div className="rounded-card bg-white p-6">
+        <p className="text-body-3 font-semibold text-slate-600">급여</p>
+        <p className="mt-1 text-title-3 font-extrabold break-keep text-slate-900">{formatSalary(job)}</p>
+        <dl className="mt-5 space-y-3 text-body-3">
+          {[
+            ["마감일", job.applyDeadline ? job.applyDeadline.slice(0, 10) : "상시채용"],
+            ["고용형태", labelWorkType(job.workType)],
+            ["근무지역", [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")],
+          ]
+            .filter(([, value]) => value && value !== "-")
+            .map(([label, value]) => (
+              <div key={label} className="flex justify-between gap-3">
+                <dt className="shrink-0 font-semibold text-slate-600">{label}</dt>
+                <dd className="text-right font-semibold break-keep text-slate-900">{value}</dd>
+              </div>
+            ))}
+        </dl>
+        <div className="mt-6 flex flex-col gap-2">
+          <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold" />
+          <JobBookmarkButton
+            jobId={job.id}
+            jobCategory={job.jobCategory}
+            variant="full"
+            isAuthenticated={isAuthenticated}
+            initialBookmarked={isBookmarked}
+            className="h-12 w-full rounded-xl text-body-2"
+          />
+        </div>
+        {/* 지원은 바깥 사이트에서 해 우리가 알 수 없다. 지원 단추 바로 아래에 두어 다녀온 뒤 표시하기 쉽게 한다. */}
+        {isAuthenticated && (
+          <div className="mt-6 border-t border-slate-100 pt-5">
+            <p className="text-body-2 font-semibold text-slate-900">이 공고에 지원하셨나요?</p>
+            <p className="mt-0.5 text-body-3 font-medium break-keep text-slate-600">표시해 두면 마이페이지에 기록돼요.</p>
+            <div className="mt-3">
+              <JobApplicationStatusControl jobId={job.id} status={applicationStatus} layout="block" />
+            </div>
+          </div>
+        )}
+      </div>
+     </aside>
     </div>
     </div>
 
-    {/* ── 하단 고정 CTA ── */}
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white">
+    {/* ── 하단 고정 CTA (좁은 화면) ── */}
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white lg:hidden">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4.5 py-3 lg:px-8">
         <div className="flex w-full max-w-3xl items-center gap-3">
         <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 rounded-xl bg-atomic-blue-600 text-body-1 font-bold" />
