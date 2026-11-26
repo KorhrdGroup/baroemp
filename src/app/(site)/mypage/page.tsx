@@ -323,7 +323,7 @@ export default async function MyPage() {
         ? {
             label: "지원 현황",
             title: "좋은 소식을 기다릴게요",
-            message: `지원 ${applications.length}건${interviewCount > 0 ? ` · 면접 ${interviewCount}회` : ""}. 면접이나 합격 소식이 있으면 공고 화면에서 표시해 주세요.`,
+            message: `지원 ${applications.length}건${interviewCount > 0 ? ` · 면접 ${interviewCount}회` : ""}. 면접이나 합격 소식이 있으면 아래 지원한 공고에서 바로 바꿔 주세요.`,
             href: applyHref,
             actionLabel: "공고 더 보기",
           }
