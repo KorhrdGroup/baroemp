@@ -11,7 +11,6 @@ import { Logo } from "@/components/layout/logo";
 import { ScreenScaleControl } from "./screen-scale-control";
 import { cn } from "@/lib/utils";
 import { signOutAction } from "@/features/auth/auth-actions";
-import { isAdminRole } from "@/lib/auth/roles";
 import type { AppRole } from "@/types";
 
 export interface SiteHeaderUser {
@@ -27,7 +26,6 @@ export interface SiteHeaderUser {
  */
 export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; look?: "draft3" }) {
   const d3 = look === "draft3";
-  const isAdmin = user ? isAdminRole(user.role) : false;
 
   // 하위 경로(/jobs/job-001, /resume/new 등)에서도 해당 메뉴를 선택 상태로 둔다.
   const pathname = usePathname();
@@ -133,11 +131,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
         <div className={cn("ml-auto flex shrink-0 items-center gap-2", (showHeaderSearch || d3) && "lg:ml-0")}>
           {user ? (
             <>
-              {isAdmin && (
-                <Button variant="ghost" size="sm" className="hidden text-slate-700 lg:inline-flex" asChild>
-                  <Link href="/admin">관리자</Link>
-                </Button>
-              )}
+              {/* 관리자 화면은 머리글에 두지 않는다. 관리자는 /admin 주소로 바로 들어간다. */}
               <Button
                 size="sm"
                 className={cn("hidden lg:inline-flex", d3 ? "h-11 rounded-full bg-baro-navy px-5 text-body-2 font-bold" : "bg-brand-blue-600")}
