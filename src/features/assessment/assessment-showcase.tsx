@@ -15,29 +15,15 @@ function qualificationNote(qualifications: string[]) {
 /** 직업진단 소개의 "직업 모음" 구역. 카드를 누르면 시작 단추와 같은 동작으로 진단을 시작한다. */
 export function AssessmentShowcase({
   data,
-  asOf,
   isLoggedIn,
 }: {
   data: OccupationShowcase;
-  asOf: string;
   isLoggedIn: boolean;
 }) {
   const { start, dialog } = useStartAssessment(isLoggedIn);
   return (
     <>
       <DiagnosisShowcase
-        eyebrow="직업 모음"
-        title={
-          <>
-            이 중 <span className="text-baro-blue">나에게 맞는 직업</span>을
-            <br />
-            진단으로 골라드려요
-          </>
-        }
-        asOf={asOf}
-        count={data.totalCount}
-        unit="개"
-        note="아래는 분야별 예시예요. 경력 · 성향 · 희망 조건에 따라 잘 맞는 직업이 달라요."
         listTitle={
           <>
             분야별 <strong className="font-extrabold text-baro-blue">직업 예시</strong>

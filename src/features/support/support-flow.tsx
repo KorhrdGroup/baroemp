@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
 import { SupportShowcaseSection } from "./support-showcase";
+import { ShowcaseCount } from "@/components/layout/diagnosis-showcase";
 import type { SupportShowcase } from "@/services/support-search.service";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
@@ -559,7 +560,17 @@ function SupportIntro({
           <span className="text-atomic-blue-600">취업·교육 혜택</span>을 찾아보세요
         </>
       }
-      description="몇 가지 조건만 고르면 지금 상황에 맞는 정부·지자체 지원제도와 신청 방법을 찾아드립니다."
+      description={
+        showcase ? (
+          <>
+            <ShowcaseCount asOf={showcase.asOf} label="지원제도" count={showcase.data.totalCount} /> 가운데
+            <br />
+            지금 상황에 맞는 것을 골라드려요.
+          </>
+        ) : (
+          "몇 가지 조건만 고르면 지금 상황에 맞는 정부·지자체 지원제도와 신청 방법을 찾아드립니다."
+        )
+      }
       actions={
         /* 이미 결과가 있으면 두 단추를 나란히 세운다. 작은 글줄로는 눈에 띄지 않았다. */
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -589,25 +600,37 @@ function SupportIntro({
         </div>
       }
       preview={
-        <PreviewCard label="결과 예시" title="받을 수 있는 지원제도">
-          <ul className="flex flex-col divide-y divide-border">
-            {SAMPLE.map((s) => (
-              <li key={s.name} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-                <div className="min-w-0">
-                  <p className="truncate text-body-2 font-semibold text-slate-900">{s.name}</p>
-                  <p className="mt-0.5 text-caption-1 font-medium text-slate-600">{s.org}</p>
-                </div>
-                <div className="shrink-0 text-right">
-                  <p className="text-body-2 font-bold text-baro-blue">{s.amount}</p>
-                  <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-emerald-700" : "text-amber-700"}`}>{s.grade}</p>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </PreviewCard>
+        showcase ? (
+          <SupportShowcaseSection data={showcase.data} onStart={onStart} />
+        ) : (
+          <PreviewCard label="결과 예시" title="받을 수 있는 지원제도">
+            <ul className="flex flex-col divide-y divide-border">
+              {SAMPLE.map((s) => (
+                <li key={s.name} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <p className="truncate text-body-2 font-semibold text-slate-900">{s.name}</p>
+                    <p className="mt-0.5 text-caption-1 font-medium text-slate-600">{s.org}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-body-2 font-bold text-baro-blue">{s.amount}</p>
+                    <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-emerald-700" : "text-amber-700"}`}>{s.grade}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </PreviewCard>
+        )
       }
       steps={INTRO_STEPS}
-      itemsTitle="이 진단으로 확인할 수 있는 것"
+      itemsTitle={
+        <>
+          이 진단으로
+          <br />
+          확인할 수 있는 것
+        </>
+      }
+      itemsDescription="조건을 고르면 아래 네 가지를 한 번에 볼 수 있어요."
+      stepsDescription="세 단계면 끝나요. 약 2~3분 걸려요."
       items={RESULT_ITEMS}
       note={
         <>
@@ -615,7 +638,6 @@ function SupportIntro({
           필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
         </>
       }
-      extra={showcase && <SupportShowcaseSection data={showcase.data} asOf={showcase.asOf} onStart={onStart} />}
     />
   );
 }

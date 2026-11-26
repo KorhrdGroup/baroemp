@@ -9,10 +9,11 @@ import type { Crumb } from "./page-head";
   다른 세부 화면은 "위치 줄 + 제목" 머리 아래 바로 내용이지만, 여기는 처음 온 사람이 무엇을 얻는지 보고
   시작 단추를 누르게 하는 곳이라 소개 화면처럼 짠다:
   목적은 정보를 다 보여 주는 게 아니라 진단을 시작하게 하는 것. 그래서 위계는 약속 → 얻는 것 → 쉬움 → 맛보기 → 다시 시작:
-  ① 첫 칸 - 왼쪽 큰 제목 · 시작 단추, 오른쪽 결과 예시 카드(받게 될 것을 미리 보여 준다)
-  ② 알 수 있는 것 - 그림 붙은 칸(진단하면 받는 것)
-  ③ 이렇게 진행돼요 - 큰 동그라미(아이콘 + N단계)를 가는 선으로 잇는다(부담 덜기)
-     + 화면별 맛보기 구역(extra, 예: 지원제도 모음)
+  ① 첫 칸(옅은 하늘색 한 면) - 왼쪽 큰 제목 · 설명 두 줄(게시 수를 그 안에) · 시작 단추, 오른쪽 분야 탭 + 모음 카드 줄
+     (모음 데이터가 없으면 결과 예시 카드)
+  ②~③은 왼쪽 제목 칸 + 오른쪽 내용 칸(첫 칸과 같은 짜임):
+  ② 알 수 있는 것 - 회색 바탕에 흰 원 그림 + 글(진단하면 받는 것)
+  ③ 이렇게 진행돼요 - 흰 띠, 단계를 세로로 쌓은 카드(부담 덜기)
   ④ 마무리 - 남색 판에 시작 단추 한 번 더, 그 아래 안내 글
   무게: 굵기 800은 제목에만, 칸 제목은 700, 나머지는 500~600. 진한 파랑은 시작 단추와 핵심 숫자에만 -
   번호 · 표시까지 진하게 칠하면 화면이 무겁고 투박해진다. 모서리는 /draft3과 같게 카드 20px(rounded-card), 단추 12px, 표시는 알약.
@@ -43,9 +44,10 @@ export function DiagnosisLanding({
   preview,
   steps,
   itemsTitle,
+  itemsDescription,
   items,
+  stepsDescription,
   note,
-  extra,
   closingTitle,
 }: {
   crumbs: Crumb[];
@@ -55,28 +57,30 @@ export function DiagnosisLanding({
   description: React.ReactNode;
   /** 시작 단추들. */
   actions: React.ReactNode;
-  /** 오른쪽 결과 예시 카드. */
+  /** 오른쪽 칸. 모음 데이터가 있으면 분야 탭 + 카드 줄(DiagnosisShowcase), 없으면 결과 예시 카드. */
   preview: React.ReactNode;
   steps: LandingStep[];
-  itemsTitle: string;
+  itemsTitle: React.ReactNode;
+  /** 알 수 있는 것 제목 아래 설명 한 줄. */
+  itemsDescription: React.ReactNode;
   items: LandingItem[];
+  /** 진행 순서 제목 아래 설명 한 줄(예: 걸리는 시간). */
+  stepsDescription: React.ReactNode;
   note: React.ReactNode;
-  /** 진행 순서 아래에 끼우는 화면별 구역(예: 지원금 찾기의 분야별 대표 지원제도). */
-  extra?: React.ReactNode;
   /** 맨 끝 시작 단추 판의 제목. 정보를 본 뒤 "내게 맞는 것은 진단으로"를 한 번 더 건넨다. */
   closingTitle: React.ReactNode;
 }) {
   return (
     <div className="bg-baro-page">
-      {/* ① 첫 칸. 바탕은 화면 머리(PageHead)와 같은 흰색 + 아래 선(draft3). 그 아래는 옅은 회색 바탕(baro-page)에 흰 카드. */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white in-[.draft3-theme]:border-b in-[.draft3-theme]:border-border in-[.draft3-theme]:bg-white in-[.draft3-theme]:bg-none">
+      {/* ① 첫 칸. 옅은 하늘색 한 면(draft3) 위에 흰 카드. 그 아래는 회색 · 흰색 띠가 번갈아 온다. */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white in-[.draft3-theme]:bg-baro-blue-50 in-[.draft3-theme]:bg-none">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-24 -right-24 size-[28rem] rounded-full bg-[radial-gradient(circle,rgba(0,73,229,0.12),transparent_65%)] in-[.draft3-theme]:hidden"
         />
         {/* 포켓컴퍼니 소개 머리처럼 덜어낸다: 위치 줄은 맨 위 한 줄로 떼고, 그 아래 여백을 크게 둔 두 칸.
-            왼쪽은 작은 머리말(서비스 이름) → 큰 제목 → 설명 → 단추 → 조용한 안내 한 줄(무료 · 소요 시간),
-            오른쪽은 결과 예시 카드 한 장. 알약 여러 개를 제목 위에 늘어놓지 않는다. */}
+            왼쪽은 큰 제목 → 설명 → 단추 → 조용한 안내 한 줄(무료 · 소요 시간)만. 서비스 이름은 위치 줄에 있어 머리말로 되풀이하지 않는다.
+            오른쪽은 모음 카드 줄(또는 결과 예시 카드). 알약 여러 개를 제목 위에 늘어놓지 않는다. */}
         <div className="relative mx-auto max-w-6xl px-4.5 pt-6 pb-16 sm:pt-8 sm:pb-24 lg:px-8 lg:pb-28">
           <nav aria-label="현재 위치">
             <ol className="flex items-center gap-1 text-body-3 font-medium text-slate-600">
@@ -93,10 +97,9 @@ export function DiagnosisLanding({
             </ol>
           </nav>
 
-          <div className="mt-10 grid items-center gap-12 sm:mt-14 lg:mt-16 lg:grid-cols-[1fr_26rem] lg:gap-24">
+          <div className="mt-10 grid grid-cols-[minmax(0,1fr)] items-center gap-12 sm:mt-14 lg:mt-16 lg:grid-cols-[25rem_minmax(0,1fr)] lg:gap-16">
             <div className="min-w-0 motion-safe:animate-[situation-in_600ms_ease-out_backwards]">
-              <p className="text-body-1 font-bold text-baro-blue">{crumbs[crumbs.length - 1]?.label}</p>
-              <h1 className="mt-3 text-headline-3 leading-[1.25] font-extrabold tracking-[-0.035em] break-keep text-slate-900 sm:text-headline-1 sm:leading-[1.25]">
+              <h1 className="text-headline-3 leading-[1.25] font-extrabold tracking-[-0.035em] break-keep text-slate-900 sm:text-headline-1 sm:leading-[1.25]">
                 {title}
               </h1>
               <p className="mt-6 max-w-lg text-body-1 leading-[1.65] font-medium break-keep text-slate-600">{description}</p>
@@ -122,76 +125,80 @@ export function DiagnosisLanding({
           그림은 홈 서비스 그림과 같은 화풍으로 직접 그린 것(landing-item-icons).
           넓은 화면의 칸 수는 개수에 맞춘다 - 6개는 3칸 두 줄, 4개는 4칸 한 줄. 3칸에 4개를 놓으면 한 칸이 혼자 남는다.
           칸이 좁아지는 4칸에서도 글이 눌리지 않게, 휴대폰이 아니면 그림을 글 위에 둔다. */}
+      {/* ②~③은 첫 칸과 같은 짜임: 왼쪽 칸에 머리말 · 두 줄 제목 · 설명, 오른쪽 칸에 내용.
+          바탕은 하늘색(첫 칸) → 회색(알 수 있는 것) → 흰색(진행 순서) → 회색(마무리)으로 번갈아 구역을 나눈다. */}
       <section>
         <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
           <Reveal className="group">
-            {/* 머리는 진행 순서 · 지원제도 모음과 같은 짜임(작은 머리말 + 제목). */}
-            <p className="text-body-3 font-semibold text-slate-600">진단 결과</p>
-            <h2 className="mt-1.5 text-title-2 font-extrabold tracking-[-0.02em] text-slate-900">{itemsTitle}</h2>
-            <ul className={`mt-8 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 ${items.length % 3 === 0 ? "lg:grid-cols-3" : "lg:grid-cols-4"}`}>
-              {/* 칸마다 차례로 떠오른다. 감싼 Reveal(group)의 data-reveal 을 따라간다(/draft3 소식 목록과 같은 방식). */}
-              {items.map(({ icon, title: itemTitle, desc }, i) => (
-                <li
-                  key={itemTitle}
-                  className="flex items-start gap-4 rounded-card bg-white p-5 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0 sm:flex-col sm:gap-4 sm:p-6"
-                  style={{ transitionDelay: `${150 + i * 80}ms` }}
-                >
-                  {/* 그림은 옅은 파랑 원에 얹는다 (/draft3 서비스 입구와 같은 방식). */}
-                  <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-baro-blue-50 sm:size-16 [&>svg]:size-9 sm:[&>svg]:size-10">
-                    <LandingItemIcon id={icon} />
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-body-1 font-bold text-slate-900">{itemTitle}</p>
+            <div className="grid items-center gap-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-16">
+              <SplitHead eyebrow="진단 결과" title={itemsTitle} description={itemsDescription} />
+              {/* 칸마다 상자를 두지 않고 회색 바탕에 흰 원 그림 + 글만 놓는다(상자 여러 개의 무게를 덜기).
+                  여섯 개는 3열 두 줄, 네 개는 2열 두 줄 - 3열에 네 개를 놓으면 하나가 혼자 남는다. */}
+              <ul className={`grid grid-cols-2 gap-x-5 gap-y-8 sm:gap-x-7 sm:gap-y-9 ${items.length % 3 === 0 ? "sm:grid-cols-3" : ""}`}>
+                {/* 칸마다 차례로 떠오른다. 감싼 Reveal(group)의 data-reveal 을 따라간다(/draft3 소식 목록과 같은 방식). */}
+                {items.map(({ icon, title: itemTitle, desc }, i) => (
+                  <li
+                    key={itemTitle}
+                    className="min-w-0 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0"
+                    style={{ transitionDelay: `${150 + i * 80}ms` }}
+                  >
+                    <span className="flex size-14 items-center justify-center rounded-full bg-white [&>svg]:size-9">
+                      <LandingItemIcon id={icon} />
+                    </span>
+                    <p className="mt-3 text-body-2 font-bold break-keep text-slate-900">{itemTitle}</p>
                     <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{desc}</p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </Reveal>
-
         </div>
       </section>
-      <div className="mx-auto max-w-6xl px-4.5 lg:px-8">
-        {/* ③ 진행 순서. 경기 잡아바 "세부일정"처럼 큰 동그라미(아이콘 + "N단계")를 가는 파랑 선으로 잇고, 제목 · 설명은 그 아래 가운데에.
-            넓은 화면은 가로 한 줄, 휴대폰은 동그라미를 왼쪽에 두고 세로로 잇는다. 화면에 들어오면 한 단계씩 떠오른다. */}
-        <Reveal className="group">
-          <section className="py-14 sm:py-20">
-            <p className="text-body-3 font-semibold text-slate-600">진행 순서</p>
-            <h2 className="mt-1.5 text-title-2 font-extrabold tracking-[-0.02em] text-slate-900">이렇게 진행돼요</h2>
-            <ol className={`mt-8 grid grid-cols-1 gap-6 md:mt-12 md:gap-4 ${steps.length === 4 ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
-              {steps.map((s, i) => {
-                const Icon = s.icon;
-                return (
-                  <li
-                    key={s.title}
-                    className="relative flex items-center gap-5 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0 md:flex-col md:gap-0 md:text-center"
-                    style={{ transitionDelay: `${150 + i * 90}ms` }}
-                  >
-                    {/* 다음 동그라미까지 잇는 선. 동그라미 가운데에서 시작해 동그라미 뒤로 숨는다. */}
-                    {i < steps.length - 1 && (
-                      <>
-                        <span aria-hidden className="absolute top-12 left-12 h-[calc(100%+1.5rem)] w-0.5 -translate-x-1/2 bg-baro-blue-300 md:hidden" />
-                        <span aria-hidden className="absolute top-16 left-1/2 hidden h-0.5 w-[calc(100%+1rem)] -translate-y-1/2 bg-baro-blue-300 md:block lg:top-[4.375rem]" />
-                      </>
-                    )}
-                    <span className="relative flex size-24 shrink-0 flex-col items-center justify-center gap-1 rounded-full bg-white md:size-32 lg:size-35">
-                      {Icon && <Icon aria-hidden strokeWidth={1.5} className="size-8 text-baro-blue md:size-10" />}
-                      <span className="text-body-3 font-bold text-baro-blue md:text-body-2">{i + 1}단계</span>
-                    </span>
-                    <div className="min-w-0 md:mt-5">
-                      <p className="text-body-1 font-bold break-keep text-slate-900 sm:text-title-3">{s.title}</p>
-                      <p className="mt-1.5 text-body-3 font-medium break-keep text-slate-600 sm:text-body-2 md:mx-auto md:max-w-60">{s.desc}</p>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </section>
-        </Reveal>
-        {extra}
-      </div>
 
-      {/* ⑤ 마무리. 정보는 여기까지 보여 주고, 내게 맞는 것은 진단으로 - 끝에서 한 번 더 시작 단추를 크게 건넨다.
+      {/* ③ 진행 순서. 흰 띠 위, 오른쪽 칸에 단계를 세로로 쌓는다(옅은 회색 카드 + 흰 원 아이콘). 화면에 들어오면 한 단계씩 떠오른다. */}
+      <section className="bg-white">
+        <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
+          <Reveal className="group">
+            <div className="grid items-center gap-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-16">
+              <SplitHead
+                eyebrow="진행 순서"
+                title={
+                  <>
+                    이렇게
+                    <br />
+                    진행돼요
+                  </>
+                }
+                description={stepsDescription}
+              />
+              <ol className="flex flex-col gap-3">
+                {steps.map((s, i) => {
+                  const Icon = s.icon;
+                  return (
+                    <li
+                      key={s.title}
+                      className="flex items-center gap-4 rounded-card bg-gov-surface px-5 py-5 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0 sm:gap-5 sm:px-6"
+                      style={{ transitionDelay: `${150 + i * 90}ms` }}
+                    >
+                      <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white sm:size-16">
+                        {Icon && <Icon aria-hidden strokeWidth={1.5} className="size-7 text-baro-blue sm:size-8" />}
+                      </span>
+                      <div className="min-w-0">
+                        <p className="text-body-3 font-bold text-baro-blue-600">{i + 1}단계</p>
+                        <p className="mt-0.5 text-body-1 font-bold break-keep text-slate-900">{s.title}</p>
+                        <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{s.desc}</p>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          </Reveal>
+        </div>
+      </section>
+
+
+      {/* ④ 마무리. 정보는 여기까지 보여 주고, 내게 맞는 것은 진단으로 - 끝에서 한 번 더 시작 단추를 크게 건넨다.
           남색 판은 머리글 마이페이지 단추와 같은 색. 안내 글은 판 아래 글만. */}
       <section>
         <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
@@ -228,6 +235,17 @@ export function PreviewCard({ label, title, children }: { label: string; title: 
       <p className="inline-flex rounded-full bg-slate-100 px-2.5 py-0.5 text-caption-1 font-semibold text-slate-600">{label}</p>
       <p className="mt-3 text-title-3 font-bold text-slate-900">{title}</p>
       <div className="mt-5">{children}</div>
+    </div>
+  );
+}
+
+/** 왼쪽 제목 칸. 모음 구역(DiagnosisShowcase) 왼쪽 칸과 같은 머리말 · 두 줄 제목 · 설명. 휴대폰은 가운데 맞춤. */
+function SplitHead({ eyebrow, title, description }: { eyebrow: string; title: React.ReactNode; description: React.ReactNode }) {
+  return (
+    <div className="text-center lg:text-left">
+      <p className="text-body-3 font-semibold text-slate-600">{eyebrow}</p>
+      <h2 className="mt-1.5 text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-slate-900">{title}</h2>
+      <p className="mt-4 text-body-2 font-medium break-keep text-slate-600">{description}</p>
     </div>
   );
 }

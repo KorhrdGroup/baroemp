@@ -3,6 +3,7 @@ import { BadgeCheck, ClipboardList, MessageCircleQuestion } from "lucide-react";
 import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
 import { StartAssessmentButton } from "./start-assessment-button";
 import { AssessmentShowcase } from "./assessment-showcase";
+import { ShowcaseCount } from "@/components/layout/diagnosis-showcase";
 import type { OccupationShowcase } from "@/services/occupation-showcase.service";
 
 const STEPS = [
@@ -35,7 +36,7 @@ export function AssessmentIntro({
   isLoggedIn?: boolean;
   /** 이미 받은 진단이 있으면 그 결과 세션. 다시 하라고만 권하면 지난 결과를 잃은 줄 안다. */
   latestResultSessionId?: string;
-  /** 진행 순서 아래 "직업 모음" 구역에 쓸 데이터(서버에서 읽어 넘긴다). */
+  /** 첫 칸 오른쪽 "직업 모음"(분야 탭 + 카드)과 왼쪽 큰 숫자에 쓸 데이터(서버에서 읽어 넘긴다). */
   showcase?: { data: OccupationShowcase; asOf: string };
 }) {
   return (
@@ -50,7 +51,17 @@ export function AssessmentIntro({
           <span className="text-atomic-blue-600">3분이면</span> 찾을 수 있어요
         </>
       }
-      description="경력, 희망조건, 성향을 바탕으로 지금 도전하기 좋은 직업과 준비할 것을 알려드립니다."
+      description={
+        showcase ? (
+          <>
+            <ShowcaseCount asOf={showcase.asOf} label="직업" count={showcase.data.totalCount} /> 가운데
+            <br />
+            경력 · 성향에 맞는 일을 골라드려요.
+          </>
+        ) : (
+          "경력, 희망조건, 성향을 바탕으로 지금 도전하기 좋은 직업과 준비할 것을 알려드립니다."
+        )
+      }
       actions={
         /* 이미 결과가 있으면 두 단추를 나란히 세운다. 작은 글줄로는 눈에 띄지 않았다. */
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -66,30 +77,41 @@ export function AssessmentIntro({
         </div>
       }
       preview={
-        <PreviewCard label="결과 예시" title="회원님께 잘 맞는 직업">
-          <ul className="flex flex-col gap-4">
-            {SAMPLE.map((s, i) => (
-              <li key={s.name}>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="flex items-center gap-2 text-body-2 font-semibold text-slate-900">
-                    <span className="flex size-6 items-center justify-center rounded-full bg-baro-blue-50 text-caption-1 font-semibold text-baro-blue-600">{i + 1}</span>
-                    {s.name}
-                  </span>
-                  <span className="text-body-2 font-bold text-baro-blue">{s.fit}%</span>
-                </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-baro-blue-50">
-                  <div className="h-full rounded-full bg-baro-blue" style={{ width: `${s.fit}%` }} />
-                </div>
-                <p className={`mt-1.5 text-caption-1 font-semibold ${s.ready === "바로 지원 가능" ? "text-emerald-700" : "text-amber-700"}`}>{s.ready}</p>
-              </li>
-            ))}
-          </ul>
-        </PreviewCard>
+        showcase ? (
+          <AssessmentShowcase data={showcase.data} isLoggedIn={isLoggedIn} />
+        ) : (
+          <PreviewCard label="결과 예시" title="회원님께 잘 맞는 직업">
+            <ul className="flex flex-col gap-4">
+              {SAMPLE.map((s, i) => (
+                <li key={s.name}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-2 text-body-2 font-semibold text-slate-900">
+                      <span className="flex size-6 items-center justify-center rounded-full bg-baro-blue-50 text-caption-1 font-semibold text-baro-blue-600">{i + 1}</span>
+                      {s.name}
+                    </span>
+                    <span className="text-body-2 font-bold text-baro-blue">{s.fit}%</span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-baro-blue-50">
+                    <div className="h-full rounded-full bg-baro-blue" style={{ width: `${s.fit}%` }} />
+                  </div>
+                  <p className={`mt-1.5 text-caption-1 font-semibold ${s.ready === "바로 지원 가능" ? "text-emerald-700" : "text-amber-700"}`}>{s.ready}</p>
+                </li>
+              ))}
+            </ul>
+          </PreviewCard>
+        )
       }
       steps={STEPS}
-      itemsTitle="이 검사로 알 수 있는 것"
+      itemsTitle={
+        <>
+          이 검사로
+          <br />
+          알 수 있는 것
+        </>
+      }
+      itemsDescription="진단을 마치면 아래 여섯 가지를 한 번에 알려드려요."
+      stepsDescription="세 단계면 끝나요. 약 3~5분 걸려요."
       items={ITEMS}
-      extra={showcase && <AssessmentShowcase data={showcase.data} asOf={showcase.asOf} isLoggedIn={isLoggedIn} />}
       note={
         <>
           검사 결과는 확정적인 취업 결과가 아닌 &quot;적합도&quot;와 &quot;준비도&quot;를 바탕으로 한 참고 정보입니다.
