@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { JobCurationResult, JobCurationTab } from "@/types";
 import { cn } from "@/lib/utils";
 import { filterPillClass } from "@/lib/ui-classes";
@@ -15,13 +16,14 @@ import {
 } from "./job-actions";
 
 /** 탭 순서. 기준은 job-curation.service (신규 3일 · 마감임박 7일 · 개인화 탭은 희망 직종/지역 후보군). */
-const TABS: { key: JobCurationTab; label: string }[] = [
-  { key: "matched", label: "맞춤 추천" },
-  { key: "assessment_matched", label: "진단 맞춤 공고" },
-  { key: "ready_to_apply", label: "지금 지원가능" },
-  { key: "unlockable", label: "자격 따면 열리는 공고" },
-  { key: "new", label: "신규 일자리" },
-  { key: "closing_soon", label: "마감임박" },
+/* 이모지는 홈 추천 공고 탭처럼 라벨 앞에 두고 읽기에서는 뺀다(aria-hidden). */
+const TABS: { key: JobCurationTab; label: string; emoji: string }[] = [
+  { key: "matched", label: "맞춤 추천", emoji: "✨" },
+  { key: "assessment_matched", label: "진단 맞춤 공고", emoji: "🧭" },
+  { key: "ready_to_apply", label: "지금 지원가능", emoji: "✅" },
+  { key: "unlockable", label: "자격 따면 열리는 공고", emoji: "🎓" },
+  { key: "new", label: "신규 일자리", emoji: "🆕" },
+  { key: "closing_soon", label: "마감임박", emoji: "⏰" },
 ];
 
 
@@ -35,8 +37,13 @@ const TABS: { key: JobCurationTab; label: string }[] = [
  * 탭 라벨이 이미 무엇을 고른 결과인지 말하고, 자격 조건은 카드 배지에 적혀 있어 겹쳤다.
  */
 const CARD_HEIGHT = "min-h-[218px]";
-/** 위 클래스와 같은 값. 줄 높이를 계산할 때 쓴다. */
-const CARD_HEIGHT_PX = 218;
+/**
+ * 카드 폭. 줄 폭에 딱 맞게 넓은 화면 3장 · 중간 2장이 들어가고(아래 전체 공고 격자와 같은 수),
+ * 마지막 카드 오른쪽 선이 줄 끝과 맞아떨어져 화살표가 그 선에 걸친다. 4장이면 한 장이 280px 로 좁아져
+ * 아랫줄(자격 배지 · 고용형태 · 남은 날 · 찜)이 넘친다.
+ * 휴대폰은 다음 카드가 조금 보이게 85% 로 두어 옆으로 밀 수 있다는 것을 보인다. 사이 틈(gap-4 = 1rem)을 빼고 나눈다.
+ */
+const CARD_WIDTH = "w-[85%] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]";
 
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
@@ -72,30 +79,23 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
   const [loadingTabs, setLoadingTabs] = useState<Set<JobCurationTab>>(new Set());
 
   /*
-   * 가로 목록 좌우 끝을 흰색으로 흐린다. 카드가 뚝 잘려 보이는 대신 이어지는 느낌을 준다.
-   * 갈 곳이 있는 쪽만 켜야 한다. 양쪽을 늘 켜두면 더 볼 게 없는데도 잘린 것처럼 보인다.
+   * 카드 줄이 어느 쪽으로 더 넘어갈 수 있는지. 그쪽에만 화살표를 띄운다.
+   * (예전에는 이 기준으로 좌우 끝을 흐렸는데, 카드가 줄 폭에 딱 맞게 바뀌어 흐림은 걷었다 - 카드 선을 흐려 화살표가 떠 보였다.)
    */
   const rowRef = useRef<HTMLDivElement>(null);
   const [fade, setFade] = useState({ start: false, end: false });
 
   /*
-    카드 줄 높이 = 카드 + 가로 스크롤바가 차지하는 자리.
-    스크롤바는 넘칠 때만 생겨, 카드가 한 장뿐인 탭이 그만큼 낮아 탭을 옮길 때 판이 덜컹였다.
-    두께는 기기마다 다르다 - 데스크톱은 11px 남짓, 모바일은 화면 위에 겹쳐 떠서 0 이다.
-    같은 규격(scrollbar-on-hover)의 자를 하나 만들어 재 두고, 그만큼만 더 잡는다.
-    (scrollbar-gutter 는 세로 스크롤바에만 자리를 잡아줘 가로 줄에는 듣지 않는다.)
+    넓은 화면은 스크롤바 대신 좌우 화살표로 넘긴다. 호버해야 보이는 얇은 막대는 옆에 더 있는 줄 모르고 지나치기 쉽고 잡기도 어려웠다.
+    한 번에 보이는 카드 묶음(줄 폭 + 틈 16px)만큼 넘겨, 넘긴 뒤에도 카드 선이 줄 끝과 맞는다.
+    움직임 줄이기를 켠 분께는 바로 옮긴다. 휴대폰은 손가락으로 민다.
   */
-  const sectionRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const probe = document.createElement("div");
-    probe.className = "scrollbar-on-hover";
-    probe.style.cssText = "position:absolute;visibility:hidden;overflow-x:scroll;width:100px;height:100px";
-    document.body.appendChild(probe);
-    const thickness = probe.offsetHeight - probe.clientHeight;
-    probe.remove();
-    /* 값은 상태가 아니라 CSS 변수로 흘린다. 그려진 판의 규격을 재서 판에 되돌려주는 일이다. */
-    sectionRef.current?.style.setProperty("--curation-row-h", `${CARD_HEIGHT_PX + thickness}px`);
-  }, []);
+  function scrollRow(direction: -1 | 1) {
+    const row = rowRef.current;
+    if (!row) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    row.scrollBy({ left: direction * (row.clientWidth + 16), behavior: reduce ? "auto" : "smooth" });
+  }
   const tabRowRef = useRef<HTMLDivElement>(null);
   const [tabFade, setTabFade] = useState({ start: false, end: false });
 
@@ -214,7 +214,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
-    <section ref={sectionRef} className="mb-8 rounded-card bg-baro-blue-100 p-5 pt-6 sm:p-6 sm:pt-8">
+    <section className="mb-8 rounded-card bg-baro-blue-100 p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
       {/*
         제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
@@ -259,12 +259,14 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             onFocus={() => prefetchTab(t.key)}
             className={cn(
               filterPillClass,
+              "flex items-center gap-1.5 whitespace-nowrap",
               /* 고른 탭은 파란 알약, 나머지는 테두리 없는 흰 알약 (하늘색 판 위). */
               activeTab === t.key
                 ? "border-baro-blue bg-baro-blue font-bold text-white"
                 : "border-transparent bg-white font-semibold text-slate-700",
             )}
           >
+            <span aria-hidden>{t.emoji}</span>
             {t.label}
             </button>
           ))}
@@ -280,17 +282,17 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div
           aria-busy="true"
           aria-label="불러오는 중"
-          className="flex min-h-[var(--curation-row-h,250px)] items-start gap-4 overflow-hidden"
+          className="flex min-h-[218px] items-start gap-4 overflow-hidden"
         >
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-card bg-white", CARD_HEIGHT)} />
+            <div key={i} className={cn("shrink-0 animate-pulse rounded-card bg-white", CARD_WIDTH, CARD_HEIGHT)} />
           ))}
         </div>
       )}
 
       {current && current.items.length === 0 && (
         /* 카드 줄과 같은 높이로 세워, 빈 탭으로 옮겨도 판이 들썩이지 않게 한다. */
-        <div className="flex min-h-[var(--curation-row-h,250px)] items-start">
+        <div className="flex min-h-[218px] items-start">
           <div
             className={cn(
               "flex w-full flex-col items-center justify-center gap-3 rounded-card bg-white px-6 text-center text-body-3 font-medium break-keep text-slate-600",
@@ -325,32 +327,38 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
       )}
 
       {current && current.items.length > 0 && (
-        /* 높이는 바깥 칸이 잡는다. 안쪽 스크롤 줄에 걸면 카드까지 늘어나, 스크롤바가 없는
-           탭에서만 카드가 11px 더 길어진다. */
-        <div className="relative min-h-[var(--curation-row-h,250px)]">
-        {/* 페이드는 스크롤을 가리면 안 되므로 클릭·스크롤을 통과시킨다. */}
-        <div
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-baro-blue-100 to-transparent transition-opacity",
-            fade.start ? "opacity-100" : "opacity-0",
-          )}
-        />
-        <div
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-baro-blue-100 to-transparent transition-opacity",
-            fade.end ? "opacity-100" : "opacity-0",
-          )}
-        />
+        /* 높이는 바깥 칸이 잡는다(빈 상태 · 자리지킴 카드와 같은 높이). */
+        <div className="relative min-h-[218px]">
         {/*
-          스크롤바는 넓은 화면에서 밀리는 줄임을 알려주는 표시라 남긴다(호버하면 드러난다).
-          스크롤바가 차지하는 자리가 곧 카드 아래 여백이라 padding 은 주지 않는다.
+          좌우 화살표. 넘길 것이 남은 쪽에만 띄운다. 넓은 화면만 - 휴대폰은 손가락으로 민다.
+          지름 40px 의 한가운데가 줄 끝(= 카드 선)에 오도록 -left-5 · -right-5 로 반쯤 걸친다.
+          남은 쪽이 없으면 안 보이게만 하지 않고 지워서, 키보드 이동에서도 빠지게 한다.
         */}
+        {fade.start && (
+          <button
+            type="button"
+            onClick={() => scrollRow(-1)}
+            aria-label="이전 공고 보기"
+            className="absolute top-1/2 -left-5 z-20 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-800 shadow-[0_4px_12px_rgba(15,40,90,0.16)] sm:flex"
+          >
+            <ChevronLeft aria-hidden className="size-5" strokeWidth={2.4} />
+          </button>
+        )}
+        {fade.end && (
+          <button
+            type="button"
+            onClick={() => scrollRow(1)}
+            aria-label="다음 공고 보기"
+            className="absolute top-1/2 -right-5 z-20 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-800 shadow-[0_4px_12px_rgba(15,40,90,0.16)] sm:flex"
+          >
+            <ChevronRight aria-hidden className="size-5" strokeWidth={2.4} />
+          </button>
+        )}
+        {/* 스크롤바는 화살표가 대신하므로 숨긴다. 스크롤바 자리가 없어져 카드 아래 여백도 판 여백 그대로다. */}
         <div
           ref={rowRef}
           onScroll={syncFade}
-          className="scrollbar-on-hover flex gap-4 overflow-x-auto"
+          className="scrollbar-hidden flex snap-x snap-mandatory gap-4 overflow-x-auto"
         >
           {current.items.map((item) => {
             return (
@@ -358,7 +366,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
                 key={item.job.id}
                 /* 한 장뿐인 탭에서는 옆에 늘어날 카드가 없어 내용 높이로 주저앉는다.
                    탭을 옮길 때마다 띠 높이가 널뛰지 않게 여기서도 최소 높이를 준다. */
-                className={cn("w-80 shrink-0", CARD_HEIGHT)}
+                className={cn("shrink-0 snap-start", CARD_WIDTH, CARD_HEIGHT)}
                 onClickCapture={(e) => {
                   const t = e.target as HTMLElement;
                   if (t.closest("button")) return;
