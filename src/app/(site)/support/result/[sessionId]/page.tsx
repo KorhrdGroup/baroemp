@@ -8,6 +8,9 @@ import { EmptyState } from "@/components/common/empty-state";
 import { SupportMatchViewTracker } from "@/features/support/support-match-view-tracker";
 import { SupportResultSections } from "@/features/support/support-card-grid";
 import { SupportResultHero } from "@/features/support/support-result-hero";
+import { SupportProgramCard } from "@/features/support/support-program-card";
+import { getSupportProgramRepository } from "@/lib/repositories";
+import type { SupportEligibilityGrade, SupportProgram } from "@/types";
 import { getSupportResultView } from "@/services/support-search.service";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 
@@ -25,6 +28,15 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     getUserSupportBookmarkIdsAction(),
   ]);
   if (!view) notFound();
+  /*
+    찜한 지원금을 결과 맨 위에 모은다. 마이페이지 3단계 카드가 이 화면으로 오므로, 찜해 둔 것을 따로 찾으러 가지 않게.
+    이번 결과에 없는 것(지원금 목록 · 상세에서 찜한 것)도 있어 결과에서 고르지 않고 따로 불러온다.
+    이번 결과에 있는 것은 같은 적합 등급 · 맞은 근거를 붙인다.
+  */
+  const bookmarkedPrograms = (
+    await Promise.all(bookmarkedIds.map((id) => getSupportProgramRepository().findById(id)))
+  ).filter((program): program is SupportProgram => Boolean(program));
+  const matchById = new Map(view.categories.flatMap((c) => c.items).map((item) => [item.program.id, item.matchResult]));
   const likelyCount = view.gradeCounts.HIGH + view.gradeCounts.MEDIUM;
   const displayName = user.name ? `${user.name}님` : "회원님";
 
@@ -55,6 +67,33 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
       />
 
     <div className="mx-auto max-w-7xl px-4.5 pt-4 pb-20 lg:px-8">
+      {bookmarkedPrograms.length > 0 && (
+        <section aria-labelledby="support-bookmarks" className="mt-5 border-b border-slate-200 pb-10">
+          <div className="mb-5 flex items-center gap-2.5">
+            <h2 id="support-bookmarks" className="text-title-3 font-extrabold text-slate-900">
+              찜한 지원금
+            </h2>
+            <span className="rounded-full bg-white px-2 py-0.5 text-caption-1 font-semibold text-slate-600">
+              {bookmarkedPrograms.length}
+            </span>
+          </div>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            {bookmarkedPrograms.map((program) => {
+              const match = matchById.get(program.id);
+              return (
+                <SupportProgramCard
+                  key={program.id}
+                  program={program}
+                  grade={match ? ((match.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade) : undefined}
+                  reasons={match?.reasons}
+                  isAuthenticated
+                  isBookmarked
+                />
+              );
+            })}
+          </div>
+        </section>
+      )}
       {view.totalCount === 0 ? (
         <EmptyState
           className="mt-5 rounded-card border-0 bg-white"

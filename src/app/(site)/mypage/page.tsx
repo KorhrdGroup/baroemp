@@ -9,6 +9,7 @@ import {
   getSupportAssessmentSessionRepository,
 } from "@/lib/repositories";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
+import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
 import { JourneySteps, type JourneyStep } from "@/features/mypage/journey-steps";
 import { JobAlertPanel } from "@/features/mypage/job-alert-panel";
@@ -193,8 +194,9 @@ export default async function MyPage() {
   */
   const { profile, careerProfile, assessmentResults } = detail;
   const latestResult = assessmentResults[0];
-  const [jobBookmarkIds, supportData, applications] = await Promise.all([
+  const [jobBookmarkIds, supportBookmarkIds, supportData, applications] = await Promise.all([
     getUserJobBookmarkIdsAction().catch(() => [] as string[]),
+    getUserSupportBookmarkIdsAction().catch(() => [] as string[]),
     loadMyPageSupportData(user.id),
     // 회원이 직접 표시한 지원·면접·취업. 외부 지원이라 다섯 단계를 마친 뒤 맨 위 카드의 근거가 된다.
     getJobApplicationRepository()
@@ -202,6 +204,7 @@ export default async function MyPage() {
       .catch(() => [] as JobApplication[]),
   ]);
   const jobBookmarkCount = jobBookmarkIds.length;
+  const supportBookmarkCount = supportBookmarkIds.length;
 
   /*
     가입 때 career_profiles 행은 빈 값으로 먼저 생긴다. 온보딩을 건너뛰면 행은 있지만 알맹이가 없다.
@@ -293,7 +296,7 @@ export default async function MyPage() {
   /* 지원의 근거는 회원이 공고 상세에서 직접 표시한 값(job_applications)뿐이다. */
   const hiredCount = applications.filter((a) => a.status === "hired").length;
   const interviewCount = applications.filter((a) => a.status === "interview" || a.status === "hired").length;
-  const applyHref = jobBookmarkCount > 0 ? "/mypage/bookmarks#jobs" : jobsHref;
+  const applyHref = jobBookmarkCount > 0 ? "/mypage/bookmarks" : jobsHref;
   /* 다섯 단계를 다 마친 뒤 맨 위 카드. 취업까지 표시했으면 카드 없이 제목이 축하한다. */
   const goal =
     hiredCount > 0
@@ -371,7 +374,8 @@ export default async function MyPage() {
               href={supportData.latestSessionId ? `/support/result/${supportData.latestSessionId}` : "/support?start=1"}
               icon={Gift}
               title="지원금 찾기"
-              result={`${supportData.highCount > 0 ? supportData.highCount : supportData.matchCount}개 찾았어요`}
+              /* 찜한 지원금도 4단계 일자리처럼 결과 줄에 함께 센다 - 찜해 둔 것이 마이페이지 어디에도 안 보였다. */
+              result={`${supportData.highCount > 0 ? supportData.highCount : supportData.matchCount}개 찾았어요${supportBookmarkCount > 0 ? ` · ${supportBookmarkCount}개 찜했어요` : ""}`}
               description="받을 수 있는 지원금을 찾아드려요"
               action="찾아보기"
               done={stepDone.support}
@@ -380,7 +384,7 @@ export default async function MyPage() {
             {/* 맞춤 일자리를 둘러보는 것과 찜하는 것을 한 줄로. 찜했으면 찜 목록으로, 아니면 맞춤 공고 목록으로 간다. */}
             <MenuRow
               step={4}
-              href={jobBookmarkCount > 0 ? "/mypage/bookmarks#jobs" : jobsHref}
+              href={jobBookmarkCount > 0 ? "/mypage/bookmarks" : jobsHref}
               icon={Briefcase}
               title="일자리 찜하기"
               result={`${jobBookmarkCount}개 찜했어요`}

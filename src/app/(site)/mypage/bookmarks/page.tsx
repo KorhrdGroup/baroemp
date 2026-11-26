@@ -10,7 +10,6 @@ import { getUserSupportBookmarkIdsAction } from "@/features/support/support-acti
 import { getJobRepository, getSupportProgramRepository } from "@/lib/repositories";
 import { requireUser } from "@/lib/auth/session";
 import type { Job, SupportProgram } from "@/types";
-import { sectionCountClass } from "@/lib/ui-classes";
 import { PageHead } from "@/components/layout/page-head";
 import { cn } from "@/lib/utils";
 
@@ -18,14 +17,18 @@ export const metadata: Metadata = {
   title: "찜한 목록 | 한평생 바로취업",
 };
 
+type BookmarkTab = "jobs" | "support";
+
 /**
- * 찜한 일자리·지원제도 전체 목록.
+ * 찜한 일자리·지원금 전체 목록.
  *
  * 마이페이지 카드에는 앞의 몇 건만 보여주므로 전체를 볼 자리가 없었다.
- * 일자리와 지원제도를 한 화면에 두는 이유는 회원에게는 둘 다 "찜해둔 것"이기 때문이다.
- * 마이페이지의 두 카드가 각각 이 화면의 제 자리로 데려온다.
+ * 둘 다 회원에게는 "찜해둔 것"이라 한 화면에 두되, 탭으로 나눠 한 번에 한 가지만 보인다 -
+ * 위아래로 이어 두었더니 "일자리 찜하기"로 들어온 회원이 지원금 카드까지 일자리로 읽었다.
+ * 탭은 주소(?tab=support)로 고른다. 없으면 일자리 탭이다.
  */
-export default async function BookmarksPage() {
+export default async function BookmarksPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const tab: BookmarkTab = (await searchParams).tab === "support" ? "support" : "jobs";
   // 찜 목록은 액션이 로그인 사용자 기준으로만 읽으므로, 여기서는 로그인만 확인한다.
   await requireUser("/mypage/bookmarks");
 
@@ -49,16 +52,40 @@ export default async function BookmarksPage() {
     <PageHead
       crumbs={[{ label: "마이페이지", href: "/mypage" }, { label: "찜한 목록" }]}
       title="찜한 목록"
-      description="일자리와 지원제도에서 찜해두신 것을 모두 모았어요."
+      description="일자리와 지원금에서 찜해두신 것을 모았어요."
     />
     <div className="bg-baro-page">
     <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
-      {/* 마이페이지 카드의 더보기가 각각 이 자리로 데려온다. 헤더에 가리지 않게 여백을 둔다. */}
-      <section id="jobs" className="scroll-mt-24">
-        <h2 className="mb-4 text-title-3 font-extrabold text-slate-900">
-          찜한 일자리<span className={cn(sectionCountClass, "text-slate-600")}>{bookmarkedJobs.length}</span>
-        </h2>
-        {bookmarkedJobs.length === 0 ? (
+      {/* 고른 탭만 남색 밑줄 · 굵은 글자, 개수는 파랑. 탭을 바꿔도 화면이 위로 튀지 않게 scroll={false}. */}
+      <nav aria-label="찜한 종류" className="mb-6 flex gap-7 border-b border-slate-200">
+        {(
+          [
+            { key: "jobs", label: "일자리", count: bookmarkedJobs.length, href: "/mypage/bookmarks" },
+            { key: "support", label: "지원금", count: bookmarkedPrograms.length, href: "/mypage/bookmarks?tab=support" },
+          ] as const
+        ).map((t) => {
+          const on = tab === t.key;
+          return (
+            <Link
+              key={t.key}
+              href={t.href}
+              replace
+              scroll={false}
+              aria-current={on ? "page" : undefined}
+              className={cn(
+                "-mb-px flex h-14 items-center gap-2 border-b-[3px] px-1 text-title-3",
+                on ? "border-baro-navy font-extrabold text-slate-900" : "border-transparent font-semibold text-slate-600",
+              )}
+            >
+              {t.label}
+              <span className={cn("text-body-1 font-bold", on ? "text-baro-blue-600" : "text-slate-600")}>{t.count}</span>
+            </Link>
+          );
+        })}
+      </nav>
+
+      {tab === "jobs" ? (
+        bookmarkedJobs.length === 0 ? (
           <EmptyState
             className="rounded-card border-0 bg-white"
             icon={Briefcase}
@@ -76,18 +103,12 @@ export default async function BookmarksPage() {
               <JobCard key={job.id} job={job} isAuthenticated isBookmarked />
             ))}
           </div>
-        )}
-      </section>
-
-      <section id="support" className="mt-16 scroll-mt-24">
-        <h2 className="mb-4 text-title-3 font-extrabold text-slate-900">
-          찜한 지원제도<span className={cn(sectionCountClass, "text-slate-600")}>{bookmarkedPrograms.length}</span>
-        </h2>
-        {bookmarkedPrograms.length === 0 ? (
+        )
+      ) : bookmarkedPrograms.length === 0 ? (
           <EmptyState
             className="rounded-card border-0 bg-white"
             icon={Gift}
-            title="아직 찜한 지원제도가 없어요"
+            title="아직 찜한 지원금이 없어요"
             description="받을 수 있는 지원금을 찾아 찜해두면 여기 모입니다."
             action={
               <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-bold text-white" asChild>
@@ -102,7 +123,6 @@ export default async function BookmarksPage() {
             ))}
           </div>
         )}
-      </section>
     </div>
     </div>
     </div>
