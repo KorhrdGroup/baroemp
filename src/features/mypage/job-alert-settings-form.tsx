@@ -14,8 +14,17 @@ import type { JobAlertSettings } from "@/services/job-alert.service";
  * 마이페이지 "거주지 근처 공고 알림" 설정.
  * 켜는 것이 곧 알림톡 수신 동의라, 무엇을 언제 어떻게 보내는지 켜기 전에 보여준다.
  */
-export function JobAlertSettingsForm({ initial, phone }: { initial: JobAlertSettings; phone?: string }) {
-  const [enabled, setEnabled] = useState(initial.enabled);
+export function JobAlertSettingsForm({
+  initial,
+  phone,
+  startEnabled = false,
+}: {
+  initial: JobAlertSettings;
+  phone?: string;
+  /** "켜기"를 눌러 열었으면 스위치를 켠 채로 시작한다. 저장해야 실제로 켜진다. */
+  startEnabled?: boolean;
+}) {
+  const [enabled, setEnabled] = useState(startEnabled || initial.enabled);
   const [region, setRegion] = useState(initial.region ?? "");
   const [sigungu, setSigungu] = useState(initial.regionSigungu ?? "");
   const [categories, setCategories] = useState<string[]>(initial.jobCategories);

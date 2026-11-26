@@ -1,20 +1,14 @@
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { JourneyFloatingBar } from "./journey-floating-bar";
+import { ArrowRight } from "lucide-react";
 
 /**
  * 마이페이지 취업 절차 한 단계.
- * 가입한 사람이 "그다음 뭘 하지"를 고민하지 않게, 다섯 단계를 순서대로 보여주고
- * 아직 안 한 첫 단계를 다음 할 일로 세운다.
+ * 가입한 사람이 "그다음 뭘 하지"를 고민하지 않게, 다섯 단계 가운데 아직 안 한 첫 단계를 다음 할 일로 세운다.
  */
 export interface JourneyStep {
   id: string;
   step: number;
   title: string;
-  /** 단계 아래 한 줄. "이력서 3 · 자기소개서 2"처럼 현황을 적는다. */
-  detail: string;
   done: boolean;
   /** 이 단계를 하러 갈 곳 */
   href: string;
@@ -22,8 +16,15 @@ export interface JourneyStep {
   actionLabel: string;
   /** 다음 할 일 안내문 */
   todoMessage: string;
-  /** 페이지 안에서 이 단계 카드가 있는 자리 */
-  anchor: string;
+}
+
+/** 단계를 다 마친 뒤 다음 할 일 카드 자리에 둘 것(예: 이제 지원할 차례예요). */
+export interface JourneyGoal {
+  label: string;
+  title: string;
+  message: string;
+  href: string;
+  actionLabel: string;
 }
 
 interface JourneyStepsProps {
@@ -31,84 +32,60 @@ interface JourneyStepsProps {
   userName: string;
   /** 다섯 단계를 다 마쳤을 때 제목. 취업까지 표시했으면 축하로 바꾼다. */
   completedTitle?: string;
+  /** 다섯 단계를 다 마쳤을 때 카드. 없으면 카드 없이 제목만. */
+  goal?: JourneyGoal;
 }
 
-export function JourneySteps({ steps, userName, completedTitle }: JourneyStepsProps) {
+/*
+  화면 맨 위: 인사 · 얇은 진행 막대 · 다음 할 일 한 장.
+  전에는 다섯 단계 동그라미 + 설명 + 아래 떠 있는 띠 + 구역마다 번호까지 같은 단계를 세 번 보여 줘
+  5060 회원에게 정신없었다. 단계는 막대 하나로 줄이고, 할 일은 하나만 크게 짚는다.
+*/
+export function JourneySteps({ steps, userName, completedTitle, goal }: JourneyStepsProps) {
   const next = steps.find((s) => !s.done) ?? null;
   const doneCount = steps.filter((s) => s.done).length;
-
-  const sentinelId = "journey-steps";
+  const card = next
+    ? { label: `다음에 할 일 · ${next.step}단계`, title: next.title, message: next.todoMessage, href: next.href, actionLabel: next.actionLabel }
+    : goal;
 
   return (
-    <>
-    <section id={sentinelId} aria-label="취업 절차" className="rounded-card bg-white p-5 sm:p-8">
-      <div className="flex flex-wrap items-end justify-between gap-2">
-        {/* 이 줄이 화면의 제목이다 (위에 이름 제목을 따로 두지 않는다). 제목 크기로 키운다. */}
-        <h2 className="text-title-3 font-extrabold break-keep text-slate-900 sm:text-title-2">
-          {next ? `${userName}님, 이제 ${next.step}단계 차례예요` : `${userName}님, ${completedTitle ?? "준비를 모두 마치셨어요"}`}
-        </h2>
-        <p className="text-body-3 font-semibold text-brand-blue-700">
-          {doneCount} / {steps.length} 단계 완료
+    <section aria-label="취업 준비">
+      <h1 className="text-title-2 font-extrabold tracking-[-0.02em] break-keep text-slate-900 sm:text-headline-3">
+        {next ? `${userName}님, 반가워요` : `${userName}님, ${completedTitle ?? "준비를 모두 마치셨어요"}`}
+      </h1>
+      <div className="mt-3 flex items-center gap-3.5">
+        <p className="shrink-0 text-body-2 font-semibold text-slate-600">
+          취업 준비 {doneCount} / {steps.length} 단계
         </p>
+        <div
+          role="progressbar"
+          aria-label="취업 준비 단계"
+          aria-valuemin={0}
+          aria-valuemax={steps.length}
+          aria-valuenow={doneCount}
+          className="h-2.5 max-w-70 flex-1 overflow-hidden rounded-full bg-slate-200"
+        >
+          <div className="h-full rounded-full bg-baro-blue" style={{ width: `${(doneCount / steps.length) * 100}%` }} />
+        </div>
       </div>
 
-      {/*
-        동그라미 다섯 개를 선으로 잇는다. 누르면 그 단계 카드로 내려간다.
-        좁은 화면에서는 설명을 감추고 제목만 남긴다 - 다섯 칸에 두 줄씩 넣으면 글자가 깨진다.
-      */}
-      <ol className="relative mt-6 grid grid-cols-5 gap-1 sm:gap-2">
-        <span aria-hidden className="pointer-events-none absolute left-[10%] right-[10%] top-5 h-px bg-brand-blue-200 sm:top-6" />
-        {steps.map((s) => {
-          const isNext = next?.id === s.id;
-          return (
-            <li key={s.id} className="flex flex-col items-center text-center">
-              <Link
-                href={s.anchor}
-                aria-label={`${s.step}단계 ${s.title}${s.done ? " (완료)" : isNext ? " (다음 할 일)" : ""}`}
-                className={cn(
-                  /*
-                    링을 쓰지 않는다. 완료(진한 파랑 채움) > 다음 할 일(연한 파랑 채움 + 진한 파란 글자) >
-                    아직(회색) 세 톤으로 상태를 갈라 두면 링 없이도 다음 할 일이 확 잡힌다.
-                  */
-                  "relative z-10 flex size-10 items-center justify-center rounded-full text-body-2 font-bold leading-none transition-colors sm:size-12 sm:text-body-1",
-                  s.done
-                    ? "bg-brand-blue-400 text-white"
-                    : isNext
-                      ? "bg-brand-blue-100 text-brand-blue-700"
-                      : "bg-slate-100 text-slate-600",
-                )}
-              >
-                {s.done ? <Check className="size-5 sm:size-6" /> : s.step}
-              </Link>
-              <p
-                className={cn(
-                  "mt-2 break-keep text-caption-1 font-semibold sm:text-body-3",
-                  s.done || isNext ? "text-slate-800" : "text-slate-600",
-                )}
-              >
-                {s.title}
-              </p>
-              <p className="mt-0.5 hidden break-keep text-caption-1 text-slate-600 sm:block">{s.detail}</p>
-            </li>
-          );
-        })}
-      </ol>
-
-      {/* 다음 할 일 하나만 크게. 다섯 개를 다 권하면 하나도 안 하게 된다. */}
-      {next && (
-        <div className="mt-6 flex flex-col gap-3 rounded-xl bg-baro-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
-          <p className="break-keep text-body-2 text-slate-700">{next.todoMessage}</p>
-          <Button className="shrink-0 rounded-xl bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" size="lg" asChild>
-            <Link href={next.href}>
-              {next.actionLabel}
-              <ArrowRight className="size-4" />
-            </Link>
-          </Button>
+      {/* 다음 할 일 하나만 크게. 다섯 개를 다 권하면 하나도 안 하게 된다. 다 마쳤으면 그다음(지원)을 같은 자리에서 권한다. */}
+      {card && (
+        <div className="mt-6 flex flex-col gap-5 rounded-card bg-baro-navy p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div className="min-w-0">
+            <p className="text-body-2 font-bold text-baro-blue-300">{card.label}</p>
+            <h2 className="mt-1.5 text-title-2 font-extrabold tracking-[-0.02em] break-keep text-white">{card.title}</h2>
+            <p className="mt-2 text-body-1 font-medium break-keep text-slate-200">{card.message}</p>
+          </div>
+          <Link
+            href={card.href}
+            className="flex h-14 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-baro-blue px-7 text-body-1 font-bold text-white"
+          >
+            {card.actionLabel}
+            <ArrowRight className="size-5" />
+          </Link>
         </div>
       )}
     </section>
-    {/* 판이 화면 밖으로 나가면 아래에 작은 띠로 단계를 이어 보여준다. */}
-    <JourneyFloatingBar steps={steps} sentinelId={sentinelId} />
-    </>
   );
 }
