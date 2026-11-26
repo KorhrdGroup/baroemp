@@ -48,7 +48,7 @@ export function PageHead({
       )}
     >
       <Waves />
-      <div className="relative mx-auto flex max-w-6xl items-center gap-6 px-4.5 pt-6 pb-7 sm:pt-8 sm:pb-10 lg:px-8">
+      <div className="relative mx-auto flex max-w-7xl items-center gap-6 px-4.5 pt-6 pb-7 sm:pt-8 sm:pb-10 lg:px-8">
         <div className="min-w-0 flex-1">
           <nav aria-label="현재 위치">
             <ol className="flex flex-wrap items-center gap-1 text-body-3 font-medium text-slate-600">

@@ -63,7 +63,7 @@ export function ResultView({
 
     {/* 본문은 회색 바탕에 흰 카드(모서리 20px, 테두리 없음). 아래 고정 단추에 가리지 않게 아래를 비운다. */}
     <div className="bg-baro-page">
-    <div className="mx-auto max-w-6xl px-4.5 pt-4 pb-28 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pt-4 pb-28 lg:px-8">
      <div className="max-w-3xl space-y-6">
       {(top || result.generatedTags.length > 0) && (
         <div className="pt-6">
@@ -201,7 +201,7 @@ export function ResultView({
 
       {/* ── 하단 고정 CTA (공고 상세와 같은 구성: 흰 바탕 + 위쪽 얇은 선, 그림자 없음) ── */}
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white">
-        <div className="mx-auto flex max-w-6xl items-center px-4.5 py-3 lg:px-8">
+        <div className="mx-auto flex max-w-7xl items-center px-4.5 py-3 lg:px-8">
           <div className="flex w-full max-w-3xl items-center gap-3">
             <Link
               href="/assessment"

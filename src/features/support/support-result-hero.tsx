@@ -31,7 +31,7 @@ export function SupportResultHero({
 }) {
   const shown = SHOWN_GRADES.filter((g) => gradeCounts[g] > 0);
   return (
-    <div className="mx-auto max-w-6xl px-4.5 pt-6 sm:pt-8 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pt-6 sm:pt-8 lg:px-8">
       <nav aria-label="현재 위치">
         <ol className="flex flex-wrap items-center gap-1 text-body-3 font-medium text-slate-600">
           <li><Link href="/">홈</Link></li>

@@ -40,7 +40,7 @@ export default async function ResumeNewPage({
         description="양식을 고르고 담을 항목과 불러올 정보를 정하면, 편집 화면으로 넘어가요."
       />
       <div className="bg-baro-page">
-      <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
         <ResumeWizard
           templates={ordered.map((t) => ({
             id: t.id,

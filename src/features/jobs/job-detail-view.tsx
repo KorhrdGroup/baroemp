@@ -180,7 +180,7 @@ export function JobDetailView({
       />
 
     <div className="bg-baro-page">
-    <div className="mx-auto max-w-6xl px-4.5 pb-10 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pb-10 lg:px-8">
      <div className="max-w-3xl">
       <Section title="모집 요강">
         {/* 테두리 표 대신 흰 판 + 옅은 줄로 나눈다 (/draft3 구성). */}
@@ -357,7 +357,7 @@ export function JobDetailView({
 
     {/* ── 하단 고정 CTA ── */}
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white">
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4.5 py-3 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4.5 py-3 lg:px-8">
         <div className="flex w-full max-w-3xl items-center gap-3">
         <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 rounded-xl bg-atomic-blue-600 text-body-1 font-bold" />
         <JobBookmarkButton

@@ -118,7 +118,7 @@ export function SupportDetailView({
       />
 
     <div className="bg-baro-page">
-    <div className="mx-auto max-w-6xl px-4.5 pb-10 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pb-10 lg:px-8">
      <div className="max-w-3xl">
       <Section title="지원 요강">
         <dl className="divide-y divide-slate-100 overflow-hidden rounded-card bg-white">
@@ -251,7 +251,7 @@ export function SupportDetailView({
 
     {/* ── 하단 고정 CTA ── */}
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white">
-      <div className="mx-auto flex max-w-6xl items-center gap-3 px-4.5 py-3 lg:px-8">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4.5 py-3 lg:px-8">
         <div className="flex w-full max-w-3xl items-center gap-3">
         <SupportApplyButton
           supportProgramId={program.id}

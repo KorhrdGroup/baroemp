@@ -52,7 +52,7 @@ export default async function BookmarksPage() {
       description="일자리와 지원제도에서 찜해두신 것을 모두 모았어요."
     />
     <div className="bg-baro-page">
-    <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
       {/* 마이페이지 카드의 더보기가 각각 이 자리로 데려온다. 헤더에 가리지 않게 여백을 둔다. */}
       <section id="jobs" className="scroll-mt-24">
         <h2 className="mb-4 text-title-3 font-extrabold text-slate-900">

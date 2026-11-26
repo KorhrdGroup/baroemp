@@ -80,7 +80,7 @@ export default async function ResumeListPage() {
       description="내 경력/자격/희망직무 정보를 불러와 이력서를 빠르게 작성하고, AI 첨삭으로 다듬을 수 있어요."
     />
     <div className="bg-baro-page">
-    <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
       <div>
         <SectionHeader
           title="내 이력서"

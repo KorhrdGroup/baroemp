@@ -81,7 +81,7 @@ export function DiagnosisLanding({
         {/* 포켓컴퍼니 소개 머리처럼 덜어낸다: 위치 줄은 맨 위 한 줄로 떼고, 그 아래 여백을 크게 둔 두 칸.
             왼쪽은 큰 제목 → 설명 → 단추 → 조용한 안내 한 줄(무료 · 소요 시간)만. 서비스 이름은 위치 줄에 있어 머리말로 되풀이하지 않는다.
             오른쪽은 모음 카드 줄(또는 결과 예시 카드). 알약 여러 개를 제목 위에 늘어놓지 않는다. */}
-        <div className="relative mx-auto max-w-6xl px-4.5 pt-6 pb-16 sm:pt-8 sm:pb-24 lg:px-8 lg:pb-28">
+        <div className="relative mx-auto max-w-7xl px-4.5 pt-6 pb-16 sm:pt-8 sm:pb-24 lg:px-8 lg:pb-28">
           <nav aria-label="현재 위치">
             <ol className="flex items-center gap-1 text-body-3 font-medium text-slate-600">
               {[{ label: "홈", href: "/" }, ...crumbs].map((c, i, all) => (
@@ -128,7 +128,7 @@ export function DiagnosisLanding({
       {/* ②~③은 첫 칸과 같은 짜임: 왼쪽 칸에 머리말 · 두 줄 제목 · 설명, 오른쪽 칸에 내용.
           바탕은 하늘색(첫 칸) → 회색(알 수 있는 것) → 흰색(진행 순서) → 회색(마무리)으로 번갈아 구역을 나눈다. */}
       <section>
-        <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4.5 py-14 sm:py-20 lg:px-8">
           <Reveal className="group">
             <div className="grid items-center gap-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-16">
               <SplitHead eyebrow="진단 결과" title={itemsTitle} description={itemsDescription} />
@@ -157,7 +157,7 @@ export function DiagnosisLanding({
 
       {/* ③ 진행 순서. 흰 띠 위, 오른쪽 칸에 단계를 세로로 쌓는다(옅은 회색 카드 + 흰 원 아이콘). 화면에 들어오면 한 단계씩 떠오른다. */}
       <section className="bg-white">
-        <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4.5 py-14 sm:py-20 lg:px-8">
           <Reveal className="group">
             <div className="grid items-center gap-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-16">
               <SplitHead
@@ -201,7 +201,7 @@ export function DiagnosisLanding({
       {/* ④ 마무리. 정보는 여기까지 보여 주고, 내게 맞는 것은 진단으로 - 끝에서 한 번 더 시작 단추를 크게 건넨다.
           남색 판은 머리글 마이페이지 단추와 같은 색. 안내 글은 판 아래 글만. */}
       <section>
-        <div className="mx-auto max-w-6xl px-4.5 py-14 sm:py-20 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4.5 py-14 sm:py-20 lg:px-8">
           <div className="flex flex-col items-center rounded-card bg-baro-navy px-6 py-12 text-center sm:px-10 sm:py-16">
             <h2 className="text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-balance text-white sm:text-title-1 max-sm:[&_br]:hidden">
               {closingTitle}

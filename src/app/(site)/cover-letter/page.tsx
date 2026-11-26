@@ -30,7 +30,7 @@ export default async function CoverLetterListPage() {
       </PageHead>
 
       <div className="bg-baro-page">
-      <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
         <div className="space-y-3">
           {coverLetters.length === 0 ? (
             <div className="rounded-card bg-white p-10 text-center">

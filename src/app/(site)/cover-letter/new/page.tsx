@@ -41,7 +41,7 @@ export default async function CoverLetterNewPage({
         description="양식을 고르고 문항과 내 경험을 담으면, 편집 화면에서 AI 초안을 받을 수 있어요."
       />
       <div className="bg-baro-page">
-      <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-20 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
         <CoverLetterWizard
           templates={ordered.map((t) => ({
             id: t.id,

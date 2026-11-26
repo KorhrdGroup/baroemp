@@ -13,7 +13,7 @@ export default function JobsLoading() {
     <div className="draft3-theme" aria-busy="true" aria-label="채용공고를 불러오는 중">
     <PageHead icon="jobs" crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
     <div className="bg-baro-page">
-    <div className="mx-auto max-w-6xl px-4.5 pt-8 pb-16 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-16 lg:px-8">
 
       {/* 검색바 */}
       <Skeleton className="h-14 w-full rounded-card bg-white sm:h-16" />

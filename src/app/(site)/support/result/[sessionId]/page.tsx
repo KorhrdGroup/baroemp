@@ -54,7 +54,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
         gradeCounts={view.gradeCounts}
       />
 
-    <div className="mx-auto max-w-6xl px-4.5 pt-4 pb-20 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pt-4 pb-20 lg:px-8">
       {view.totalCount === 0 ? (
         <EmptyState
           className="mt-5 rounded-card border-0 bg-white"

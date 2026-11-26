@@ -151,7 +151,7 @@ export default async function JobsPage({
     <PageHead icon="jobs" crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
     {/* 흰 머리 아래 회색 바탕에 흰 판 · 흰 카드(모서리 20px, 테두리 없음). */}
     <div className="bg-baro-page">
-    <div className="mx-auto max-w-6xl px-4.5 pt-8 pb-16 lg:px-8">
+    <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-16 lg:px-8">
 
       <JobFiltersForm
         initial={{

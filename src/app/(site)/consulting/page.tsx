@@ -28,7 +28,7 @@ export default function ConsultingPage() {
 
       {/* 폼은 한 줄이 너무 길어지지 않게 3xl 로 좁혀 둔다. */}
       <div className="bg-baro-page">
-        <div className="mx-auto max-w-6xl px-4.5 pt-10 pb-16 sm:pb-20 lg:px-8">
+        <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-16 sm:pb-20 lg:px-8">
           <div className="mx-auto max-w-3xl">
             <ConsultingRequestForm />
           </div>
