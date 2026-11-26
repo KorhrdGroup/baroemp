@@ -70,7 +70,7 @@ const COMPARISON_GROUPS = [
  * 경험·스킬처럼 자격이 연결되지 않은 요건과 운전면허(OTHER)는 안내하지 않는다.
  */
 const QUALIFICATION_PREP_URL: Record<string, string> = {
-  NATIONAL_LICENSE: "https://www.hpsedu.co.kr/",
+  NATIONAL_LICENSE: "https://www.hancyber.co.kr/main/main.asp",
   PRIVATE_CERTIFICATE: "https://www.korhrd.co.kr/",
 };
 
