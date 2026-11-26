@@ -72,7 +72,7 @@ export function DiagnosisLanding({
 }) {
   return (
     <div className="bg-baro-page">
-      {/* ① 첫 칸. 옅은 하늘색 한 면(draft3) 위에 흰 카드. 그 아래는 회색 · 흰색 띠가 번갈아 온다. */}
+      {/* ① 첫 칸. 옅은 하늘색 한 면(draft3) 위에 흰 카드. 그 아래는 흰색 · 회색 띠가 번갈아 온다. */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#E4EEFF] via-[#EEF4FF] to-white in-[.draft3-theme]:bg-baro-blue-50 in-[.draft3-theme]:bg-none">
         <div
           aria-hidden
@@ -126,13 +126,14 @@ export function DiagnosisLanding({
           넓은 화면의 칸 수는 개수에 맞춘다 - 6개는 3칸 두 줄, 4개는 4칸 한 줄. 3칸에 4개를 놓으면 한 칸이 혼자 남는다.
           칸이 좁아지는 4칸에서도 글이 눌리지 않게, 휴대폰이 아니면 그림을 글 위에 둔다. */}
       {/* ②~③은 첫 칸과 같은 짜임: 왼쪽 칸에 머리말 · 두 줄 제목 · 설명, 오른쪽 칸에 내용.
-          바탕은 하늘색(첫 칸) → 회색(알 수 있는 것) → 흰색(진행 순서) → 회색(마무리)으로 번갈아 구역을 나눈다. */}
-      <section>
+          바탕은 하늘색(첫 칸) → 흰색(알 수 있는 것) → 회색(진행 순서) → 흰색(마무리)으로 번갈아 구역을 나눈다.
+          하늘색 바로 아래가 회색이면 두 옅은 색이 붙어 탁해 보여 흰색부터 둔다. */}
+      <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4.5 py-14 sm:py-20 lg:px-8">
           <Reveal className="group">
             <div className="grid items-center gap-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-16">
               <SplitHead eyebrow="진단 결과" title={itemsTitle} description={itemsDescription} />
-              {/* 칸마다 상자를 두지 않고 회색 바탕에 흰 원 그림 + 글만 놓는다(상자 여러 개의 무게를 덜기).
+              {/* 칸마다 상자를 두지 않고 흰 바탕에 회색 원 그림 + 글만 놓는다(상자 여러 개의 무게를 덜기).
                   여섯 개는 3열 두 줄, 네 개는 2열 두 줄 - 3열에 네 개를 놓으면 하나가 혼자 남는다. */}
               <ul className={`grid grid-cols-2 gap-x-5 gap-y-8 sm:gap-x-7 sm:gap-y-9 ${items.length % 3 === 0 ? "sm:grid-cols-3" : ""}`}>
                 {/* 칸마다 차례로 떠오른다. 감싼 Reveal(group)의 data-reveal 을 따라간다(/draft3 소식 목록과 같은 방식). */}
@@ -142,7 +143,7 @@ export function DiagnosisLanding({
                     className="min-w-0 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0"
                     style={{ transitionDelay: `${150 + i * 80}ms` }}
                   >
-                    <span className="flex size-14 items-center justify-center rounded-full bg-white [&>svg]:size-9">
+                    <span className="flex size-14 items-center justify-center rounded-full bg-gov-surface [&>svg]:size-9">
                       <LandingItemIcon id={icon} />
                     </span>
                     <p className="mt-3 text-body-2 font-bold break-keep text-slate-900">{itemTitle}</p>
@@ -155,8 +156,8 @@ export function DiagnosisLanding({
         </div>
       </section>
 
-      {/* ③ 진행 순서. 흰 띠 위, 오른쪽 칸에 단계를 세로로 쌓는다(옅은 회색 카드 + 흰 원 아이콘). 화면에 들어오면 한 단계씩 떠오른다. */}
-      <section className="bg-white">
+      {/* ③ 진행 순서. 회색 띠 위, 오른쪽 칸에 단계를 세로로 쌓는다(흰 카드 + 옅은 회색 원 아이콘). 화면에 들어오면 한 단계씩 떠오른다. */}
+      <section>
         <div className="mx-auto max-w-7xl px-4.5 py-14 sm:py-20 lg:px-8">
           <Reveal className="group">
             <div className="grid items-center gap-10 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-16">
@@ -177,10 +178,10 @@ export function DiagnosisLanding({
                   return (
                     <li
                       key={s.title}
-                      className="flex items-center gap-4 rounded-card bg-gov-surface px-5 py-5 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0 sm:gap-5 sm:px-6"
+                      className="flex items-center gap-4 rounded-card bg-white px-5 py-5 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0 sm:gap-5 sm:px-6"
                       style={{ transitionDelay: `${150 + i * 90}ms` }}
                     >
-                      <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-white sm:size-16">
+                      <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-gov-surface sm:size-16">
                         {Icon && <Icon aria-hidden strokeWidth={1.5} className="size-7 text-baro-blue sm:size-8" />}
                       </span>
                       <div className="min-w-0">
@@ -200,8 +201,10 @@ export function DiagnosisLanding({
 
       {/* ④ 마무리. 정보는 여기까지 보여 주고, 내게 맞는 것은 진단으로 - 끝에서 한 번 더 시작 단추를 크게 건넨다.
           남색 판은 머리글 마이페이지 단추와 같은 색. 안내 글은 판 아래 글만. */}
-      <section>
+      <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4.5 py-14 sm:py-20 lg:px-8">
+          {/* 위 구역들처럼 화면에 들어올 때 살짝 떠오른다(홈 상담 띠와 같은 방식). */}
+          <Reveal>
           <div className="flex flex-col items-center rounded-card bg-baro-navy px-6 py-12 text-center sm:px-10 sm:py-16">
             <h2 className="text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-balance text-white sm:text-title-1 max-sm:[&_br]:hidden">
               {closingTitle}
@@ -218,6 +221,7 @@ export function DiagnosisLanding({
             )}
             <div className="mt-8 flex w-full justify-center">{actions}</div>
           </div>
+          </Reveal>
           <p className="mt-8 text-body-3 leading-relaxed font-medium break-keep text-slate-600">{note}</p>
         </div>
       </section>
