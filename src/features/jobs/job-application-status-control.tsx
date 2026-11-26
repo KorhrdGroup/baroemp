@@ -21,11 +21,14 @@ export function JobApplicationStatusControl({
   jobId,
   status: initialStatus,
   layout = "inline",
+  showClear = true,
 }: {
   jobId: string;
   status: JobApplicationStatus | null;
   /** block: 좁은 카드(공고 상세 오른쪽 요약 카드) 폭을 꽉 채운다 - 단추 한 줄 또는 세 칸 묶음 + 아래 "표시 취소". */
   layout?: "inline" | "block";
+  /** block 에서 "표시 취소"를 둘지. 마이페이지 목록은 단계만 바꾸고, 취소는 공고 상세에서 한다. */
+  showClear?: boolean;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState<JobApplicationStatus | null>(initialStatus);
@@ -108,16 +111,18 @@ export function JobApplicationStatusControl({
             );
           })}
         </div>
-        <div className="mt-1 text-right">
-          <button
-            type="button"
-            disabled={pending}
-            onClick={clear}
-            className="tap-44 relative text-body-3 font-medium text-slate-600"
-          >
-            표시 취소
-          </button>
-        </div>
+        {showClear && (
+          <div className="mt-1 text-right">
+            <button
+              type="button"
+              disabled={pending}
+              onClick={clear}
+              className="tap-44 relative text-body-3 font-medium text-slate-600"
+            >
+              표시 취소
+            </button>
+          </div>
+        )}
       </div>
     );
   }

@@ -5,6 +5,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { labelJobCategory, labelRegion, labelWorkType } from "@/lib/labels";
 import {
   getJobApplicationRepository,
+  getJobRepository,
   getMatchResultRepository,
   getSupportAssessmentSessionRepository,
 } from "@/lib/repositories";
@@ -18,6 +19,7 @@ import { requireUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 import { formatPhone } from "@/lib/utils/phone";
 import type { JobApplication } from "@/types";
+import { JobApplicationStatusControl } from "@/features/jobs/job-application-status-control";
 import { getJobAlertSettings, listMyJobAlerts } from "@/services/job-alert.service";
 
 interface MyPageSupportData {
@@ -53,6 +55,11 @@ async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData>
 export const metadata: Metadata = {
   title: "마이페이지 | 한평생 바로취업",
 };
+
+/** ISO 시각을 한국 날짜 "11.26" 으로. 서버는 UTC 라 그대로 자르면 아침 9시 전 표시가 하루 앞 날짜가 된다. */
+function formatKstMonthDay(iso: string) {
+  return new Date(new Date(iso).getTime() + 9 * 60 * 60 * 1000).toISOString().slice(5, 10).replace("-", ".");
+}
 
 /**
  * "나의 취업 준비" 목록의 한 줄. 휴대폰 설정 화면처럼 줄 전체가 누르는 자리다.
@@ -203,6 +210,17 @@ export default async function MyPage() {
       .findAllByUser(user.id)
       .catch(() => [] as JobApplication[]),
   ]);
+  /* "지원한 공고" 칸에 쓸 공고 제목 · 회사. 회원이 손으로 표시한 것이라 건수가 적어 한 건씩 불러온다. 공고가 지워졌으면 뺀다. */
+  const appliedJobs = (
+    await Promise.all(
+      applications.map(async (a) => {
+        const job = await getJobRepository()
+          .findById(a.jobId)
+          .catch(() => null);
+        return job ? { application: a, job } : null;
+      }),
+    )
+  ).filter((row) => row !== null);
   const jobBookmarkCount = jobBookmarkIds.length;
   const supportBookmarkCount = supportBookmarkIds.length;
 
@@ -406,6 +424,52 @@ export default async function MyPage() {
             />
           </ul>
         </section>
+
+        {/*
+          회원이 공고 상세에서 "지원했어요"로 표시한 공고. 예전에는 다섯 단계를 다 마친 뒤 맨 위 카드에 건수만 보여
+          어디에 지원했는지 돌아볼 곳이 없었다. 표시한 게 없으면 칸째 그리지 않는다.
+          단계는 줄마다 세 칸 묶음으로 여기서 바로 바꾼다(공고 상세 오른쪽 카드와 같은 모양). 표시 취소는 공고 상세에서만.
+          한 줄 전체를 링크로 두면 안에 단추를 넣을 수 없어, 공고로 가는 링크는 제목 쪽에만 둔다.
+        */}
+        {appliedJobs.length > 0 && (
+          <section aria-labelledby="mypage-applied" className="mt-11">
+            {/* 안내 한 줄은 제목 바로 아래 둔다. 목록 밑에 두면 카드 안 글자(안쪽 여백)와 왼쪽 끝이 어긋나 보였다. */}
+            <div className="flex items-baseline gap-2">
+              <h2 id="mypage-applied" className="text-title-3 font-extrabold text-slate-900">
+                지원한 공고
+              </h2>
+              <span className="text-title-3 font-extrabold text-baro-blue-600">{appliedJobs.length}</span>
+            </div>
+            <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">
+              면접이나 합격 소식이 있으면 여기서 바로 단계를 바꿔 주세요.
+            </p>
+            <ul className="mt-3.5 divide-y divide-slate-100 overflow-hidden rounded-card bg-white">
+              {appliedJobs.map(({ application, job }) => (
+                <li
+                  key={application.id}
+                  className="flex flex-col gap-3.5 px-5 py-5 sm:flex-row sm:items-center sm:gap-6 sm:px-6"
+                >
+                  {/* 화살표만 따로 두면 제목 길이에 따라 줄 가운데 떠 보여, 회사 줄 끝에 "공고 보기"로 붙인다. */}
+                  <Link href={`/jobs/${job.id}`} className="min-w-0 flex-1">
+                    <p className="line-clamp-2 text-body-1 leading-snug font-bold break-keep text-slate-900 sm:line-clamp-1">{job.title}</p>
+                    <p className="mt-1.5 flex items-center gap-3 text-body-3 font-medium text-slate-600">
+                      <span className="truncate">
+                        {job.companyName} · {formatKstMonthDay(application.createdAt)} 지원
+                      </span>
+                      <span className="flex shrink-0 items-center font-semibold text-slate-700">
+                        공고 보기
+                        <ChevronRight aria-hidden className="size-4" />
+                      </span>
+                    </p>
+                  </Link>
+                  <div className="shrink-0 sm:w-80">
+                    <JobApplicationStatusControl jobId={job.id} status={application.status} layout="block" showClear={false} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         <section aria-labelledby="mypage-alert" className="mt-11">
           <h2 id="mypage-alert" className="mb-3.5 text-title-3 font-extrabold text-slate-900">
