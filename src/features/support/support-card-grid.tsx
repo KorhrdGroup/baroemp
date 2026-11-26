@@ -8,7 +8,8 @@ import { SupportProgramCard } from "./support-program-card";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 import type { SupportEligibilityGrade, SupportProgram, MatchReasonDetail } from "@/types";
 
-const COLLAPSE_COUNT = 4;
+/** 분야마다 처음 보이는 카드 수. 넓은 화면 3장 · 중간 2장 줄이 꽉 차게 2와 3의 배수로 둔다. */
+const COLLAPSE_COUNT = 6;
 
 const FILTER_GRADES: SupportEligibilityGrade[] = ["HIGH", "MEDIUM", "CHECK_REQUIRED"];
 
@@ -83,7 +84,7 @@ function CollapsibleSection({
           </button>
         )}
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {visible.map(({ program, matchResult }) => (
           <SupportProgramCard
             key={program.id}

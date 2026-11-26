@@ -98,7 +98,7 @@ export default async function BookmarksPage({ searchParams }: { searchParams: Pr
             }
           />
         ) : (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {bookmarkedJobs.map((job) => (
               <JobCard key={job.id} job={job} isAuthenticated isBookmarked />
             ))}
@@ -117,7 +117,7 @@ export default async function BookmarksPage({ searchParams }: { searchParams: Pr
             }
           />
         ) : (
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {bookmarkedPrograms.map((program) => (
               <SupportProgramCard key={program.id} program={program} isAuthenticated isBookmarked />
             ))}

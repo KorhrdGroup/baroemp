@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SupportBookmarkButton } from "./support-bookmark-button";
 import { guessRegionFromText, labelOrganization, REGION_LABELS } from "@/lib/labels";
@@ -75,8 +76,16 @@ export function SupportProgramCard({
         )}
       </p>
 
-      {/* 결과 화면에서 맞은 근거 한 줄. 일자리 카드의 맞춤 근거와 같은 파란 글자. */}
-      {topReason && <p className="mt-3 truncate text-body-3 font-semibold text-atomic-blue-600">✓ {topReason}</p>}
+      {/*
+        결과 화면에서 맞은 근거 한 줄. 카드마다 파란 글자가 있으면 목록 전체가 파래져 회색으로 둔다.
+        체크는 글꼴 기호(✓)마다 모양 · 굵기가 달라 그림(lucide Check)으로 그린다.
+      */}
+      {topReason && (
+        <p className="mt-3 flex min-w-0 items-center gap-1 text-body-3 font-medium text-slate-600">
+          <Check aria-hidden className="size-3.5 shrink-0" strokeWidth={2.6} />
+          <span className="truncate">{topReason}</span>
+        </p>
+      )}
 
       {/*
         아랫줄: 왼쪽은 적합등급(내부 점수는 회원에게 의미가 없어 라벨만), 오른쪽은 신청기간 → 찜 버튼 순.
