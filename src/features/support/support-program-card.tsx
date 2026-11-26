@@ -47,70 +47,57 @@ export function SupportProgramCard({
     <Link
       href={`/support/${program.id}`}
       /*
-        일자리 카드(JobCard)와 같은 틀로 맞춘다. 테두리가 없으면 흰 바탕 위에서
-        카드로 안 읽히고, h-full 이 없으면 한 줄에 나란히 선 카드끼리 키가 어긋난다.
-        세부 화면 공통 바탕대로 호버 효과(면 물들이기 · 제목 밑줄)는 두지 않는다.
-        /draft3 색 판 안에서는 회색 띠 위의 흰 카드라 테두리를 걷고 모서리 20px.
+        일자리 카드(JobCard)와 같은 틀 · 같은 차례로 둔다: 제목(굵게) → 기관 · 지역 → 맞은 근거 → 아랫줄(등급 · 신청기간 · 찜).
+        예전에는 기관 · 등급 알약이 맨 위에 있어 제목이 두 번째 줄로 밀리고, 두 카드가 서로 다른 규칙으로 보였다.
+        세부 화면 공통 바탕대로 호버 효과는 두지 않는다. /draft3 색 판 안에서는 회색 띠 위의 흰 카드라 테두리를 걷고 모서리 20px.
       */
-      className="flex h-full flex-col overflow-hidden rounded-xl border border-border bg-white in-[.draft3-theme]:rounded-card in-[.draft3-theme]:border-0"
+      className="flex h-full flex-col rounded-2xl border border-border bg-white p-5 in-[.draft3-theme]:rounded-card in-[.draft3-theme]:border-0"
     >
-      {/*
-        오른쪽 끝은 겹쳐 놓은 찜 버튼 자리다. pr-14 로 비워 두지 않으면 적합등급 배지가
-        버튼 밑으로 들어간다. 기관 로고 - 등급 배지 - (빈자리) 순으로 선다.
-      */}
-      <div className="flex items-center justify-between gap-2 px-5 pt-5 pr-14">
-        {/* 로고가 없으면 일자리 카드의 회사명과 같은 글자로 둔다. 태그로 묶으면 같은 자리에
-            로고와 칩이 번갈아 나와 목록이 두 규칙으로 보인다. */}
-        {logo ? (
-          <Image src={logo} alt={orgName} width={80} height={20} className="h-5 w-auto object-contain" />
-        ) : (
-          <p className="min-w-0 truncate text-body-3 font-medium text-slate-600">{orgName}</p>
-        )}
-        {/* 내부 매칭 점수는 회원에게 의미가 없는 숫자라 등급 라벨만 보여준다. */}
-        {grade && (
-          <span className={cn("shrink-0 rounded-full px-3 py-1.5 text-body-3 font-bold", GRADE_BADGE_CLASS[grade])}>
-            {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]}
-          </span>
-        )}
-      </div>
-
       {/*
         break-keep 이 없으면 한글이 음절 단위로 잘린다. 일자리 카드 제목과 같은 규칙.
         제목 아래 두 줄 설명(benefitDescription · summary)은 뺐다 - 원문을 그대로 잘라 붙인 것이라
         "ㅇ … 1. 사업대상 : …"처럼 기호 · 번호가 섞인 채 중간에 끊겨 카드만 복잡해 보였다. 내용은 상세 화면에서 본다.
       */}
-      <h3 className="mt-3 line-clamp-2 break-keep px-5 text-balance text-body-1 leading-[1.4] font-bold text-slate-900">
-        {program.title}
-      </h3>
+      <h3 className="line-clamp-2 text-body-1 leading-[1.4] font-semibold break-keep text-slate-900">{program.title}</h3>
 
-      {/* 맨 아랫줄 글자는 일자리 카드의 회사 · 지역 줄과 같게 둔다(body-3 medium, slate-600). 같은 성격의 줄이 크기가 다르면 두 카드가 다른 규칙으로 보인다. */}
-      <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 px-5 pt-4 pb-5 text-body-3 font-medium text-slate-600">
-        {topReason && (
-          <>
-            <span>✓ {topReason}</span>
-            <span aria-hidden className="text-slate-400">|</span>
-          </>
+      {/* 기관 · 지역을 한 줄로(일자리 카드의 회사 · 지역 줄). 로고가 있으면 로고, 없으면 이름. 기관 이름이 길면 기관 쪽 끝을 줄인다. */}
+      <p className="mt-1 flex min-w-0 items-center gap-1.5 text-body-3 font-medium text-slate-600">
+        {logo ? (
+          <Image src={logo} alt={orgName} width={80} height={20} className="h-4 w-auto shrink-0 object-contain" />
+        ) : (
+          <span className="truncate">{orgName}</span>
         )}
         {region && (
           <>
-            <span>{region}</span>
-            <span aria-hidden className="text-slate-400">|</span>
+            <span aria-hidden className="size-0.5 shrink-0 rounded-full bg-slate-400" />
+            <span className="shrink-0 whitespace-nowrap">{region}</span>
           </>
         )}
-        <span>{program.applicationPeriod ?? "상시"}</span>
+      </p>
+
+      {/* 결과 화면에서 맞은 근거 한 줄. 일자리 카드의 맞춤 근거와 같은 파란 글자. */}
+      {topReason && <p className="mt-3 truncate text-body-3 font-semibold text-atomic-blue-600">✓ {topReason}</p>}
+
+      {/*
+        아랫줄: 왼쪽은 적합등급(내부 점수는 회원에게 의미가 없어 라벨만), 오른쪽은 신청기간 → 찜 버튼 순.
+        찜 버튼은 링크 밖에 겹쳐 놓아 그 폭(pr-9)만큼 비워 둔다. 일자리 카드의 태그 · 남은 날 줄과 같은 크기.
+      */}
+      <div className="mt-auto flex items-center gap-2 pt-4 pr-9">
+        <div className="flex h-6 min-w-0 flex-1">
+          {grade && (
+            <span className={cn("flex h-6 items-center rounded px-2 pt-px text-caption-1 font-semibold", GRADE_BADGE_CLASS[grade])}>
+              {SUPPORT_ELIGIBILITY_GRADE_LABELS[grade]}
+            </span>
+          )}
+        </div>
+        <span className="max-w-[60%] truncate text-caption-1 font-medium text-slate-600">{program.applicationPeriod ?? "상시"}</span>
       </div>
     </Link>
-
-    {/*
-      머리줄 배지와 세로 가운데를 맞춘다. 카드 위 여백이 20px(pt-5)이고 버튼이 32px 라
-      top-5 로 두면 버튼 가운데(36px)가 적합등급 배지 가운데와 같은 자리에 온다.
-      top-3.5 로 두면 4px 떠서 배지와 짝지어 보이지 않는다.
-    */}
     <SupportBookmarkButton
       supportProgramId={program.id}
       isAuthenticated={isAuthenticated}
       initialBookmarked={isBookmarked}
-      className="absolute right-4 top-5"
+      className="absolute right-3 bottom-4"
     />
     </div>
   );

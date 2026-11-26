@@ -13,7 +13,7 @@ const GRADE_NUMBER_CLASS: Partial<Record<SupportEligibilityGrade, string>> = {
 const SHOWN_GRADES: SupportEligibilityGrade[] = ["HIGH", "MEDIUM", "CHECK_REQUIRED"];
 
 /**
- * 지원금 진단 결과의 머리. 경기 잡아바 지원사업 소개 판처럼 파랑 판 하나에
+ * 지원금 진단 결과의 머리. 경기 잡아바 지원사업 소개 판처럼 남색 판 하나에(밝은 파랑은 화면에서 너무 튀어 남색으로)
  * 왼쪽은 해시태그(찾은 분야) · 결과 문장 · 기준 한 줄 · 안내, 오른쪽은 등급별 개수를 흰 동그라미로.
  * 위치 줄은 판 위 회색 띠에 둔다.
  */
@@ -46,7 +46,7 @@ export function SupportResultHero({
         </ol>
       </nav>
 
-      <section className="mt-4 flex flex-col gap-8 rounded-card bg-baro-blue px-6 py-8 sm:px-10 sm:py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+      <section className="mt-4 flex flex-col gap-8 rounded-card bg-baro-navy px-6 py-8 sm:px-10 sm:py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
         <div className="min-w-0">
           {tags.length > 0 && (
             <ul className="flex flex-wrap gap-2">
@@ -55,7 +55,8 @@ export function SupportResultHero({
                   key={t}
                   className={cn(
                     "rounded-full px-3.5 py-1.5 text-body-3 font-bold",
-                    i === 0 ? "bg-white text-baro-blue" : "bg-baro-navy text-white",
+                    /* 남색 판 위라 둘째부터는 남색 알약 대신 반투명 흰 알약(남색끼리 겹치면 안 보인다). */
+                    i === 0 ? "bg-white text-baro-blue-600" : "bg-white/20 text-white",
                   )}
                 >
                   #{t.replace(/\s/g, "")}
