@@ -14,7 +14,7 @@ export const SALARY_FILTER_UNITS: { key: SalaryFilterUnit; label: string }[] = [
   { key: "annual", label: "연봉" },
 ];
 
-/** 최소 금액 칸. 시급 첫 칸은 올해 최저시급. */
+/** 최소 금액 칸. 시급 첫 칸은 올해 최저시급(10,320원) - 칸 안에서 두 줄로 꺾이지 않게 금액은 적지 않는다. */
 export const SALARY_FILTER_AMOUNTS: Record<SalaryFilterUnit, { value: number; label: string }[]> = {
   monthly: [
     { value: 2_000_000, label: "200만 원" },
@@ -24,7 +24,7 @@ export const SALARY_FILTER_AMOUNTS: Record<SalaryFilterUnit, { value: number; la
     { value: 4_000_000, label: "400만 원" },
   ],
   hourly: [
-    { value: 10_320, label: "최저시급(10,320원)" },
+    { value: 10_320, label: "최저시급" },
     { value: 11_000, label: "1만 1천 원" },
     { value: 12_000, label: "1만 2천 원" },
     { value: 15_000, label: "1만 5천 원" },
@@ -66,6 +66,5 @@ export function salaryFilterShortLabel(unit: SalaryFilterUnit, atLeast?: number)
   const unitLabel = SALARY_FILTER_UNITS.find((u) => u.key === unit)!.label;
   const amount = SALARY_FILTER_AMOUNTS[unit].find((a) => a.value === atLeast);
   if (!amount) return unitLabel;
-  /* 최저시급은 괄호 속 금액을 빼야 칸에 들어간다. */
-  return `${unitLabel} ${amount.label.replace(/\(.*\)/, "").replace(/ 원$/, "")} 이상`;
+  return `${unitLabel} ${amount.label.replace(/ 원$/, "")} 이상`;
 }

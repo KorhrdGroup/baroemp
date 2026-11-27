@@ -97,7 +97,10 @@ export function JobFiltersForm({
     움직임 줄이기를 켠 분은 움직임이 없어 끝 신호가 오지 않으므로 바로 지운다.
   */
   const [pickerClosing, setPickerClosing] = useState(false);
+  /* 판을 바꿔 열 때 닫는 움직임이 끝나면 열 판. */
+  const nextPicker = useRef<"region" | "job" | "salary" | null>(null);
   const closePicker = () => {
+    nextPicker.current = null;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setPicker(null);
       setPickerClosing(false);
@@ -105,7 +108,17 @@ export function JobFiltersForm({
       setPickerClosing(true);
     }
   };
+  /*
+    다른 판이 열려 있을 때 바로 내용만 갈아 끼우면 높이 · 내용이 한 번에 툭 바뀌었다.
+    열린 판을 먼저 닫는 움직임으로 보내고, 다 닫히면(onAnimationEnd) 새 판을 여는 움직임으로 띄운다.
+  */
   const openPicker = (which: "region" | "job" | "salary") => {
+    if (picker && picker !== which && !window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      nextPicker.current = which;
+      setPickerClosing(true);
+      return;
+    }
+    nextPicker.current = null;
     setPicker(which);
     setPickerClosing(false);
   };
@@ -277,7 +290,8 @@ export function JobFiltersForm({
           onKeyDown={(e) => e.key === "Escape" && closePicker()}
           onAnimationEnd={(e) => {
             if (e.target !== e.currentTarget || !pickerClosing) return;
-            setPicker(null);
+            setPicker(nextPicker.current);
+            nextPicker.current = null;
             setPickerClosing(false);
           }}
           className={cn(
@@ -686,15 +700,10 @@ function PickerFoot({ disabled, count, unit, onApply }: { disabled: boolean; cou
   );
 }
 
-/* 급여 판의 알약. 받는 방식 · 금액 두 줄이 같은 모양으로 읽히게 한 벌을 쓴다. */
-const salaryPillClass = "h-9 rounded-full border px-4 text-body-3 whitespace-nowrap";
-const salaryPillOnClass = "border-baro-blue bg-baro-blue-50 font-bold text-baro-blue-600";
-const salaryPillOffClass = "border-slate-300 bg-white font-semibold text-slate-700";
-
 /**
  * 급여 고르기 판. 받는 방식(월급 · 시급 · 일급 · 연봉)을 먼저 고르고 그 안에서 최소 금액을 고른다 - lib/jobs/salary-filter.
  * 방식을 바꾸면 금액은 "상관없음"으로 돌아간다(시급 1만 원 칸이 월급에 남으면 안 된다).
- * 지역 · 직종 판보다 고를 것이 적어 칸 대신 작은 알약으로, 이름은 왼쪽에 둔다.
+ * 칸 모양 · 고른 표시(체크)는 지역 · 직종 판과 같게 - 판을 바꿔 열어도 한 벌로 읽힌다.
  * 지금 공고는 모두 금액이 적혀 있어(협의 · 내규 0건) "금액 없는 공고 포함" 같은 선택지는 두지 않는다.
  */
 function SalaryPicker({
@@ -713,10 +722,10 @@ function SalaryPicker({
 
   return (
     <>
-      <PickerHead title="급여" onClose={onClose} />
-      <div className="grid min-h-0 items-center gap-x-5 gap-y-3 overflow-y-auto px-5 pb-5 sm:grid-cols-[4.5rem_1fr] sm:px-6">
-        <p className="text-body-3 font-bold text-slate-700">받는 방식</p>
-        <div className="flex flex-wrap gap-2">
+      <PickerHead title="얼마를 받고 싶으세요?" note="받는 방식을 먼저 고르고, 최소 금액을 골라 주세요." onClose={onClose} />
+      <div className="min-h-0 overflow-y-auto px-5 pb-4 sm:px-6">
+        <p className="mb-2 text-body-3 font-bold text-slate-700">받는 방식</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
           {SALARY_FILTER_UNITS.map((u) => {
             const on = u.key === draftUnit;
             return (
@@ -729,7 +738,7 @@ function SalaryPicker({
                   setDraftUnit(u.key);
                   setDraftAtLeast(undefined);
                 }}
-                className={cn(salaryPillClass, on ? salaryPillOnClass : salaryPillOffClass)}
+                className={cn(choiceClass, "whitespace-nowrap", on ? choiceOnClass : choiceOffClass)}
               >
                 {u.label}
               </button>
@@ -737,8 +746,8 @@ function SalaryPicker({
           })}
         </div>
 
-        <p className="mt-1 text-body-3 font-bold text-slate-700 sm:mt-0">최소 금액</p>
-        <div className="flex flex-wrap gap-2">
+        <p className="mt-5 mb-2 text-body-3 font-bold text-slate-700">최소 금액</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
           {[undefined, ...SALARY_FILTER_AMOUNTS[draftUnit].map((a) => a.value)].map((value) => {
             const on = value === draftAtLeast;
             const label = SALARY_FILTER_AMOUNTS[draftUnit].find((a) => a.value === value)?.label;
@@ -748,7 +757,7 @@ function SalaryPicker({
                 type="button"
                 aria-pressed={on}
                 onClick={() => setDraftAtLeast(value)}
-                className={cn(salaryPillClass, on ? salaryPillOnClass : salaryPillOffClass)}
+                className={cn(choiceClass, "whitespace-nowrap", on ? choiceOnClass : choiceOffClass)}
               >
                 {label ? `${label} 이상` : "상관없음"}
               </button>
