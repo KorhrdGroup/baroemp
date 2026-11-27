@@ -17,7 +17,7 @@ export function SupportBanner() {
       <Waves />
 
       <div className="relative min-w-0">
-        <p className="text-body-1 font-bold break-keep text-slate-900 @2xl:text-title-2">
+        <p className="text-body-1 font-semibold break-keep text-slate-900 @2xl:text-title-2 @2xl:font-bold">
           국민내일배움카드로 훈련비 <span className="whitespace-nowrap text-brand-blue-600">최대 500만원</span>
         </p>
         {/* 하늘색 바탕 위 흰 알약. 테두리 없이 면 색만으로 띄운다. */}

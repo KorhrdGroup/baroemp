@@ -72,8 +72,24 @@ export async function startAssessmentSession(
     : await getActiveDefaultAssessment();
   if (!assessment) throw new Error("활성화된 검사를 찾을 수 없습니다.");
 
+  /*
+    새로 시작하면 하다 만 진단은 그만둔 것으로 닫는다(abandoned). 닫지 않으면 "처음부터 다시"를 골라도
+    예전 진단이 계속 in_progress 로 남아, 새 진단을 끝낸 뒤에도 이어하기 창에 예전 것이 다시 뜬다.
+  */
+  const sessionRepo = getAssessmentSessionRepository();
+  if (params.userId || params.anonymousId) {
+    const previous = await sessionRepo.findAll(
+      params.userId ? { userId: params.userId } : { anonymousId: params.anonymousId },
+    );
+    await Promise.all(
+      previous
+        .filter((s) => s.status === "in_progress" || s.status === "started")
+        .map((s) => sessionRepo.update(s.id, { status: "abandoned" })),
+    );
+  }
+
   const sections = [...assessment.sections].sort((a, b) => a.order - b.order);
-  const session = await getAssessmentSessionRepository().create({
+  const session = await sessionRepo.create({
     assessmentId: assessment.id,
     userId: params.userId,
     anonymousId: params.anonymousId,

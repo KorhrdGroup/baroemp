@@ -154,7 +154,7 @@ export function SituationTabs() {
             <Link href={c.href} className="flex h-full items-center gap-5 rounded-card bg-white p-6 transition-shadow duration-200 hover:shadow-hover sm:gap-7 sm:p-8">
               <c.icon aria-hidden strokeWidth={1.5} className="size-10 shrink-0 text-atomic-blue-600 sm:size-11" />
               <span className="flex min-w-0 flex-1 flex-col">
-                <span className="text-body-1 font-bold break-keep text-slate-900 sm:text-title-3">{c.title}</span>
+                <span className="text-body-1 font-semibold break-keep text-slate-900 sm:text-title-3 sm:font-bold">{c.title}</span>
                 <span className="mt-1.5 text-body-3 font-medium text-balance break-keep text-slate-600 sm:text-body-2">{c.desc}</span>
                 <span className="mt-auto inline-flex items-center gap-0.5 pt-4 text-body-2 font-semibold text-slate-600">
                   {c.cta}

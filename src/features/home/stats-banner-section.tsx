@@ -67,7 +67,7 @@ function CountUpStat({ stat, started }: { stat: StatItem; started: boolean }) {
           단위만 아랫줄로 떨어져 두 줄이 됐다. 줄바꿈을 막고, 대신 그 폭에서는 글자를
           한 단계 낮춰 두 칸이 나란히 들어가게 한다.
         */}
-        <p className="text-body-1 font-extrabold whitespace-nowrap text-white min-[360px]:text-title-3 sm:text-title-2">
+        <p className="text-body-1 font-semibold whitespace-nowrap text-white min-[360px]:text-title-3 min-[360px]:font-bold sm:text-title-2 sm:font-extrabold">
           <span className="relative inline-block">
             <span className="invisible">{finalFormatted}</span>
             <span className="absolute inset-0 text-right">{count.toLocaleString()}</span>

@@ -150,7 +150,7 @@ export function OccupationRecommendationCard({
             {isPreparation ? <KeyRound className="size-4.5" /> : rank}
           </span>
           <div>
-            <p className="text-body-1 font-bold text-slate-900 sm:text-title-3">{rec.occupationName}</p>
+            <p className="text-body-1 font-semibold text-slate-900 sm:text-title-3 sm:font-bold">{rec.occupationName}</p>
             <p className="mt-1 text-body-3 font-medium text-slate-600">{occupation?.category ?? "추천 직업"}</p>
           </div>
         </div>
