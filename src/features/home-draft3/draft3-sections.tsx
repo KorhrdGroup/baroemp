@@ -76,7 +76,7 @@ export function Draft3ConsultBand() {
         <div aria-hidden className="pointer-events-none absolute -top-24 -right-16 size-72 rounded-full bg-white/10" />
         <ConsultIllustration className="relative w-48 shrink-0 lg:w-56" />
         <div className="relative flex-1 text-center lg:text-left">
-          <p className="text-body-2 font-semibold text-baro-blue-100">무료 1:1 취업 상담</p>
+          <p className="text-body-2 font-semibold text-baro-blue-100">1:1 취업 상담</p>
           <h2 className="mt-2 text-title-1 leading-[1.35] font-extrabold tracking-[-0.02em] break-keep text-white">
             혼자 찾기 어렵다면, 상담사가 같이 찾아드려요
           </h2>

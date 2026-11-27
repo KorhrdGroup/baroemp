@@ -129,8 +129,11 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
           로그인한 회원의 버튼들도 lg 부터만 보인다 - 좁은 화면에서는 아래 탭의 "마이"가 같은 곳이다.
         */}
         <div className={cn("ml-auto flex shrink-0 items-center gap-2", (showHeaderSearch || d3) && "lg:ml-0")}>
-          {/* 검색 단추가 없는 화면(로그인 · 일자리찾기)의 휴대폰은 아랫줄을 두지 않고 화면 크기 단추를 로고 줄로 올린다. */}
-          {d3 && !showHeaderSearch && (
+          {/*
+            검색 단추가 없는 화면(일자리찾기)의 휴대폰은 아랫줄을 두지 않고 화면 크기 단추를 로고 줄로 올린다.
+            로그인한 회원만 - 비회원은 이 줄에 로그인 단추가 있어 둘을 같이 두면 375px 화면을 11px 넘친다.
+          */}
+          {d3 && !showHeaderSearch && user && (
             <div className="lg:hidden">
               <ScreenScaleControl compact />
             </div>
@@ -167,11 +170,12 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
       {/*
         휴대폰: 검색 단추를 로고 아래 한 줄로. 눌러도 같은 판이 내려온다.
         /draft3 는 그 옆에 화면 크기 단추를 둔다 - 로고 줄은 로그인 단추까지 있으면 자리가 없다.
-        검색 단추가 없는 화면(로그인 · 일자리찾기)은 이 줄 없이 화면 크기 단추를 로고 줄에 둔다 - 단추 하나만 오른쪽에 남아 왼쪽이 비어 보였다.
+        검색 단추가 없는 화면(로그인 · 일자리찾기): 회원은 이 줄 없이 화면 크기 단추를 로고 줄에 둔다 - 단추 하나만 오른쪽에 남아 왼쪽이 비어 보였다.
+        비회원은 로고 줄에 로그인 단추가 있어 자리가 없으므로, 화면 크기 단추만 이 줄 오른쪽에 둔다.
       */}
-      {showHeaderSearch && (
+      {(showHeaderSearch || (d3 && !user)) && (
         <div className="flex items-center justify-end gap-2 px-4.5 pb-3 lg:hidden">
-          <SearchTrigger onOpen={() => setSearchOpen(true)} className="flex min-w-0 flex-1" />
+          {showHeaderSearch && <SearchTrigger onOpen={() => setSearchOpen(true)} className="flex min-w-0 flex-1" />}
           {d3 && <ScreenScaleControl compact />}
         </div>
       )}
