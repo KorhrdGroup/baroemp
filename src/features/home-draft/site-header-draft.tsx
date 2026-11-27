@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { isAuthPath } from "@/lib/auth/redirect";
-import { Search, X } from "lucide-react";
+import { ChevronRight, Menu, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { mainNavItems, siteConfig } from "@/lib/site-config";
 import { Logo } from "@/components/layout/logo";
@@ -47,6 +47,8 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
   const showHeaderSearch = !onAuthScreen && pathname !== "/jobs";
   /* 잡아바처럼 머리글에는 작은 검색 단추만 두고, 누르면 위에서 검색 판이 내려온다. */
   const [searchOpen, setSearchOpen] = useState(false);
+  /* 휴대폰 메뉴 판. 아래 탭이 없는 화면(진단 · 온보딩 진행 중)에서도 다른 메뉴로 갈 길이 된다. */
+  const [menuOpen, setMenuOpen] = useState(false);
   return (
     <>
     {/*
@@ -166,6 +168,16 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
               <Link href={loginHref}>로그인/회원가입</Link>
             </Button>
           )}
+          {/* 휴대폰 메뉴 단추. 넓은 화면은 위에 메뉴가 늘 보인다. */}
+          <button
+            type="button"
+            onClick={() => setMenuOpen(true)}
+            aria-haspopup="dialog"
+            aria-label="메뉴 열기"
+            className="-mr-2 flex size-11 shrink-0 cursor-pointer items-center justify-center rounded-lg text-slate-800 lg:hidden"
+          >
+            <Menu className="size-6" />
+          </button>
         </div>
       </div>
 
@@ -184,6 +196,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
 
     </header>
     {showHeaderSearch && <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />}
+    <MenuPanel open={menuOpen} onClose={() => setMenuOpen(false)} isCurrent={isCurrentNav} user={user} loginHref={loginHref} />
     </>
   );
 }
@@ -302,6 +315,98 @@ function SearchPanel({ open, onClose }: { open: boolean; onClose: () => void }) 
               </Link>
             ))}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * 휴대폰 메뉴 판. 검색 판과 같이 위에서 내려온다.
+ * 아래 탭과 같은 메뉴에 직업진단을 더해 한곳에 모은다. 회원에게는 마이페이지 · 로그아웃, 비회원에게는 로그인.
+ */
+function MenuPanel({
+  open,
+  onClose,
+  isCurrent,
+  user,
+  loginHref,
+}: {
+  open: boolean;
+  onClose: () => void;
+  isCurrent: (href: string) => boolean;
+  user: SiteHeaderUser | null;
+  loginHref: string;
+}) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, onClose]);
+
+  const items = [...mainNavItems, user ? { href: "/mypage", label: "마이페이지" } : { href: loginHref, label: "로그인/회원가입" }];
+
+  return (
+    <div className={cn("fixed inset-0 z-[70] lg:hidden", open ? "visible" : "invisible delay-300")} aria-hidden={!open}>
+      <button
+        type="button"
+        aria-label="메뉴 닫기"
+        tabIndex={-1}
+        onClick={onClose}
+        className={cn(
+          "absolute inset-0 cursor-default bg-slate-900/40 transition-opacity duration-300 motion-reduce:transition-none",
+          open ? "opacity-100" : "opacity-0",
+        )}
+      />
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="메뉴"
+        className={cn(
+          "absolute inset-x-0 top-0 bg-white shadow-[0_8px_24px_rgba(15,23,42,0.12)] transition-transform duration-300 ease-out motion-reduce:transition-none",
+          open ? "translate-y-0" : "-translate-y-full",
+        )}
+      >
+        <div className="px-4.5 pt-3 pb-5">
+          <div className="flex h-11 items-center justify-between">
+            <h2 className="text-title-3 font-bold text-slate-900">메뉴</h2>
+            <button type="button" aria-label="메뉴 닫기" onClick={onClose} className="-mr-2 flex size-11 items-center justify-center rounded-lg text-slate-600">
+              <X className="size-6" />
+            </button>
+          </div>
+          <nav aria-label="주 메뉴" className="mt-2">
+            <ul className="divide-y divide-slate-100">
+              {items.map((item) => {
+                const current = isCurrent(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      onClick={onClose}
+                      aria-current={current ? "page" : undefined}
+                      className={cn(
+                        "flex h-14 items-center justify-between text-body-1 font-semibold",
+                        current ? "text-baro-blue-600" : "text-slate-900",
+                      )}
+                    >
+                      {item.label}
+                      <ChevronRight aria-hidden className="size-5 text-slate-400" />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+          {user && (
+            <form action={signOutAction} className="mt-3 border-t border-slate-100 pt-3">
+              <button type="submit" className="flex h-12 w-full cursor-pointer items-center text-body-2 font-medium text-slate-600">
+                로그아웃
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </div>
