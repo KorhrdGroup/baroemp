@@ -147,7 +147,7 @@ export default async function JobsPage({
     */
     <GuestGate active={!isAuthenticated}>
     <div className="draft3-theme">
-    {/* 화면 머리(위치 · 제목 · 검색창 · 조건 줄)와 회색 바탕 판은 JobFiltersForm 이 그린다. */}
+    {/* 화면 머리(위치 · 제목)와 회색 바탕 판(추천 → 검색창 · 조건 줄 → 목록)은 JobFiltersForm 이 그린다. */}
 
       <JobFiltersForm
         initial={{

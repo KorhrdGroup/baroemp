@@ -43,7 +43,7 @@ export interface JobFiltersValue {
 }
 
 /**
- * 일자리찾기 화면의 틀: 머리(제목 · 검색창 · 조건 줄) + 회색 바탕의 목록.
+ * 일자리찾기 화면의 틀: 머리(제목) + 회색 바탕(추천 → 검색창 · 조건 줄 → 목록).
  *
  * 왼쪽에 조건 판을 늘 펼쳐 두던 것을 걷고, 지역 · 직종은 검색바 안에, 신입가능만 · 마감임박만은 건수 줄 오른쪽에 둔다.
  * 조건 판이 목록 폭을 1/4 가까이 차지해 카드가 두 장씩만 놓였고, 화면에 고를 것이 너무 많아 보였다.
@@ -197,7 +197,7 @@ export function JobFiltersForm({
   const jobButton = (className?: string) => pickerToggle("job", jobPillLabel, jobActive, className);
 
   const head = (
-    <div ref={headRef} className="relative mt-5 sm:mt-6">
+    <div ref={headRef} className="relative">
       {/*
         검색바 하나에 검색어 | 지역 | 직종 | 검색 단추를 모은다(기존 job24 검색바 구성).
         지역 · 직종은 누르면 고르기 창이 뜨고 고르면 바로 걸린다. 고르기 창을 여는 것은 둘러보기라 비로그인에게도 열어 둔다.
@@ -254,7 +254,7 @@ export function JobFiltersForm({
             setPickerClosing(false);
           }}
           className={cn(
-            "absolute inset-x-0 top-full z-30 mt-3 flex max-h-[min(34rem,70vh)] flex-col overflow-hidden rounded-card bg-white shadow-[0_12px_32px_rgba(15,40,90,0.10)] ring-1 ring-[#DDE3EC] ring-inset motion-reduce:animate-none",
+            "absolute inset-x-0 top-full z-50 mt-3 flex max-h-[min(34rem,70vh)] flex-col overflow-hidden rounded-card bg-white shadow-[0_12px_32px_rgba(15,40,90,0.10)] ring-1 ring-[#DDE3EC] ring-inset motion-reduce:animate-none",
             pickerClosing
               ? "pointer-events-none animate-out fill-mode-forwards duration-150 ease-in fade-out-0 slide-out-to-top-2"
               : "animate-in duration-200 ease-out fade-in-0 slide-in-from-top-2",
@@ -344,22 +344,20 @@ export function JobFiltersForm({
 
   return (
     <>
-      <PageHead
-        crumbs={[{ label: "일자리 찾기" }]}
-        title="일자리 찾기"
-        footer={
-          <>
-            {head}
-            {chipRow}
-          </>
-        }
-        className="overflow-visible"
-      />
+      <PageHead crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
 
-      {/* 흰 머리 아래 회색 바탕에 흰 판 · 흰 카드(모서리 20px, 테두리 없음). */}
+      {/*
+        흰 머리 아래 회색 바탕에 흰 판 · 흰 카드(모서리 20px, 테두리 없음).
+        차례는 지금 운영 중인 사이트와 같게: 추천(이런 일자리 어때요?) → 검색바 · 고른 조건 줄 → 전체 공고.
+        검색바가 머리에 있을 때는 추천이 첫 화면 밖으로 밀려, 들어오자마자 볼 거리가 없었다.
+      */}
       <div className="bg-baro-page">
         <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-16 lg:px-8">
           {curation}
+          <div className="mb-8">
+            {head}
+            {chipRow}
+          </div>
 
           {/*
             건수는 왼쪽, 신입가능만 · 마감임박만 · 정렬은 오른쪽 끝(기존 job24 구성). 두 거르기는 누를 때마다 바로 켜고 끈다.
