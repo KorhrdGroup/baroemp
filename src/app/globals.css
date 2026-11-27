@@ -434,6 +434,104 @@
   }
 }
 
+/*
+ * 진단 첫 화면 "알 수 있는 것" 그림 속 작은 움직임 (landing-item-icons.tsx). 칸이 떠오른 뒤 한 번만 움직이고 멈춘다.
+ * 칸마다 늦춤(--li-delay)을 달리해 차례로 살아난다. 감싼 PlayWhenSeen 이 화면에 충분히 들어와
+ * data-play="on" 이 붙어야 시작한다(그 전에는 멈춘 그림). 움직임 줄이기를 켠 사람에게는 처음부터 멈춘 그림.
+ */
+.li-anim {
+  transform-box: fill-box;
+  animation-delay: var(--li-delay, 0ms);
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1);
+}
+/* 조상 중에 data-play="on" 이 없는 그림 조각은 멈춰 둔다. */
+.li-anim:not([data-play="on"] .li-anim) {
+  animation-name: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .li-anim {
+    animation-name: none !important;
+  }
+}
+/* 확인 표시가 선을 따라 그려진다(path 에 pathLength=1). */
+.li-draw {
+  stroke-dasharray: 1;
+  /* 줄여 쓰기(animation:)는 .li-anim 의 늦춤 · 채움을 지워서 이름과 길이만 따로 준다. */
+  animation-name: li-draw;
+  animation-duration: 520ms;
+}
+@keyframes li-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+/* 지갑에서 지폐가 톡 튀어나왔다 들어간다. */
+.li-pop {
+  transform-origin: center bottom;
+  animation-name: li-pop;
+  animation-duration: 700ms;
+}
+@keyframes li-pop {
+  0% { transform: translateY(6px); }
+  45% { transform: translateY(-5px); }
+  70% { transform: translateY(1px); }
+  100% { transform: none; }
+}
+/* 지도 핀이 위에서 떨어져 살짝 튕긴다. */
+.li-drop {
+  animation-name: li-drop;
+  animation-duration: 760ms;
+}
+@keyframes li-drop {
+  0% { transform: translateY(-14px); opacity: 0; }
+  50% { transform: translateY(1.5px); opacity: 1; }
+  72% { transform: translateY(-2.5px); }
+  100% { transform: none; }
+}
+/* 별 · 포인트가 반짝 커졌다 제자리. */
+.li-twinkle {
+  transform-origin: center;
+  animation-name: li-twinkle;
+  animation-duration: 640ms;
+}
+@keyframes li-twinkle {
+  0% { transform: scale(0) rotate(-40deg); }
+  60% { transform: scale(1.3) rotate(8deg); }
+  100% { transform: none; }
+}
+/* 막대가 바닥에서 자란다. */
+.li-grow {
+  transform-origin: center bottom;
+  animation-name: li-grow;
+  animation-duration: 620ms;
+}
+@keyframes li-grow {
+  from { transform: scaleY(0); }
+  to { transform: none; }
+}
+/* 학사모 술이 흔들리다 선다. */
+.li-swing {
+  transform-origin: center top;
+  animation-name: li-swing;
+  animation-duration: 900ms;
+}
+@keyframes li-swing {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(14deg); }
+  55% { transform: rotate(-9deg); }
+  80% { transform: rotate(4deg); }
+  100% { transform: none; }
+}
+/* 깃발까지 이어진 점선이 앞으로 흐른다. */
+.li-flow {
+  animation-name: li-flow;
+  animation-duration: 900ms;
+}
+@keyframes li-flow {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);

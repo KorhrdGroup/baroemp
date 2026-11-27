@@ -4,6 +4,7 @@ import { Reveal } from "@/features/home-draft3/reveal";
 import { LandingItemIcon } from "./landing-item-icons";
 import type { Crumb } from "./page-head";
 import { FirstQuestionCard } from "./first-question-card";
+import { PlayWhenSeen } from "./play-when-seen";
 
 /*
   진단으로 시작하는 서비스(직업진단 · 지원금 찾기)의 첫 화면.
@@ -142,15 +143,18 @@ export function DiagnosisLanding({
               <SplitHead eyebrow="진단 결과" title={itemsTitle} description={itemsDescription} />
               {/* 칸마다 상자를 두지 않고 흰 바탕에 회색 원 그림 + 글만 놓는다(상자 여러 개의 무게를 덜기).
                   여섯 개는 3열 두 줄, 네 개는 2열 두 줄 - 3열에 네 개를 놓으면 하나가 혼자 남는다. */}
+              <PlayWhenSeen>
               <ul className={`grid grid-cols-2 gap-x-5 gap-y-8 sm:gap-x-7 sm:gap-y-9 ${items.length % 3 === 0 ? "sm:grid-cols-3" : ""}`}>
                 {/* 칸마다 차례로 떠오른다. 감싼 Reveal(group)의 data-reveal 을 따라간다(/draft3 소식 목록과 같은 방식). */}
+                {/* 칸이 떠오른 뒤 그림 속 조각이 한 번 움직인다(--li-delay, landing-item-icons · globals.css). */}
                 {items.map(({ icon, title: itemTitle, desc }, i) => (
                   <li
                     key={itemTitle}
                     className="min-w-0 transition-[opacity,translate] duration-500 ease-out group-data-[reveal=hidden]:translate-y-6 group-data-[reveal=hidden]:opacity-0"
-                    style={{ transitionDelay: `${150 + i * 80}ms` }}
+                    style={{ transitionDelay: `${150 + i * 80}ms`, ["--li-delay" as string]: `${450 + i * 120}ms` }}
                   >
-                    <span className="flex size-14 items-center justify-center rounded-full bg-gov-surface [&>svg]:size-9">
+                    {/* 그림 속 움직임이 잘 보이게 원과 그림을 크게 둔다(원 64px → 넓은 화면 80px). */}
+                    <span className="flex size-16 items-center justify-center rounded-full bg-gov-surface sm:size-20 [&>svg]:size-11 sm:[&>svg]:size-14">
                       <LandingItemIcon id={icon} />
                     </span>
                     <p className="mt-3 text-body-2 font-bold break-keep text-slate-900">{itemTitle}</p>
@@ -158,6 +162,7 @@ export function DiagnosisLanding({
                   </li>
                 ))}
               </ul>
+              </PlayWhenSeen>
             </div>
           </Reveal>
         </div>
@@ -189,7 +194,7 @@ export function DiagnosisLanding({
                       style={{ transitionDelay: `${150 + i * 90}ms` }}
                     >
                       <span className="flex size-14 shrink-0 items-center justify-center rounded-full bg-gov-surface sm:size-16">
-                        {Icon && <Icon aria-hidden strokeWidth={1.5} className="size-7 text-baro-blue sm:size-8" />}
+                        {Icon && <Icon aria-hidden strokeWidth={1.5} className="size-7 text-baro-navy sm:size-8" />}
                       </span>
                       <div className="min-w-0">
                         <p className="text-body-3 font-bold text-baro-blue-600">{i + 1}단계</p>
