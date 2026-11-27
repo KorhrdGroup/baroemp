@@ -68,21 +68,32 @@ export function SituationTabs() {
 
   /*
     구역이 처음 화면에 들어올 때 제목 → 카드가 차례로 아래에서 떠오른다(한 번만).
-    처음부터 보이는 위치거나 움직임 줄이기면 건드리지 않는다. 숨김은 data-reveal 로만 걸어 스크립트가 없어도 내용은 보인다.
+    넓은 화면은 이 구역이 처음부터 화면 안에 들어와 있어 전에는 아무 움직임이 없었다 - 그때도 숨겼다가 바로 떠오르게 한다.
+    움직임 줄이기면 건드리지 않는다. 숨김은 data-reveal 로만 걸어 스크립트가 없어도 내용은 보인다.
     위치로 판단해 End 키 등으로 건너뛴 경우에도 보이게 된다.
   */
   useEffect(() => {
     const el = rootRef.current;
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    if (el.getBoundingClientRect().top < window.innerHeight * 0.9) return;
+    /* 숨길 때는 움직이지 않고 바로 숨긴다 - 이미 보이던 것이 스르르 사라졌다 다시 떠오르면 깜빡임으로 보인다.
+       transition-property 만 잠깐 끄고 되돌린다(카드마다 건 transitionDelay 는 그대로 둔다). */
+    const movers = [...el.querySelectorAll<HTMLElement>("[class*='transition-']")];
+    movers.forEach((m) => (m.style.transitionProperty = "none"));
     el.dataset.reveal = "hidden";
+    void el.offsetHeight;
+    movers.forEach((m) => (m.style.transitionProperty = ""));
     const check = () => {
       if (el.getBoundingClientRect().top > window.innerHeight * 0.85) return;
       el.dataset.reveal = "shown";
       window.removeEventListener("scroll", check);
     };
     window.addEventListener("scroll", check, { passive: true });
-    return () => window.removeEventListener("scroll", check);
+    /* 숨긴 모습이 한 번 그려진 뒤 확인해야 떠오르는 움직임이 보인다(처음부터 보이는 위치일 때). */
+    const frame = requestAnimationFrame(() => requestAnimationFrame(check));
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", check);
+    };
   }, []);
 
   function select(key: string) {
