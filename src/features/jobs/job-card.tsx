@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { createLucideIcon } from "lucide-react";
+import { Check, createLucideIcon } from "lucide-react";
 import { labelCareerRequirement, labelRegion, labelWorkType } from "@/lib/labels";
 import { splitSalary } from "@/lib/salary";
 import { cn } from "@/lib/utils";
@@ -142,7 +142,13 @@ export function JobCard({
             {salary.amount}
           </span>
         </p>
-        {matchReasonLabel && <p className="mt-1.5 truncate text-body-3 font-semibold text-atomic-blue-600">✓ {matchReasonLabel}</p>}
+        {/* 체크는 글꼴 기호(✓)로 쓰면 기기마다 모양 · 굵기가 달라 그림(lucide Check)으로 그린다. 지원금 카드와 같게. */}
+        {matchReasonLabel && (
+          <p className="mt-1.5 flex min-w-0 items-center gap-1 text-body-3 font-semibold text-atomic-blue-600">
+            <Check aria-hidden className="size-3.5 shrink-0" strokeWidth={2.6} />
+            <span className="truncate">{matchReasonLabel}</span>
+          </p>
+        )}
 
         {/*
           아래 줄: 왼쪽은 조건 태그(한 줄만, 넘치면 감춤), 오른쪽은 남은 날 → 찜 버튼 순.

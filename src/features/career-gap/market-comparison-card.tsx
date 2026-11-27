@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
-import { BarChart3, ChevronRight } from "lucide-react";
+import { ArrowRight, BarChart3, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { ResumeMarketComparisonView } from "@/types";
@@ -90,8 +90,10 @@ export function MarketComparisonCard({ view, source }: MarketComparisonCardProps
             {typeof item.projectedEligibleJobCount === "number" && (
               <p className="text-slate-600">
                 충족 시 회원님 조건과 일치하는 공고{" "}
-                <span className="font-semibold text-brand-blue-700">
-                  {item.currentEligibleJobCount}건 → {item.projectedEligibleJobCount}건
+                <span className="inline-flex items-center gap-1 align-middle font-semibold text-brand-blue-700">
+                  {item.currentEligibleJobCount}건
+                  <ArrowRight aria-label="에서" className="size-3.5" strokeWidth={2.4} />
+                  {item.projectedEligibleJobCount}건
                 </span>
               </p>
             )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ExperienceBankItem } from "@/types";
 import { cn } from "@/lib/utils";
@@ -84,9 +84,10 @@ export function ExperienceBankSection({
           <button
             type="button"
             onClick={openCreate}
-            className="mt-3 inline-block cursor-pointer text-body-3 font-semibold text-brand-blue-600"
+            className="mt-3 inline-flex cursor-pointer items-center gap-0.5 text-body-3 font-semibold text-brand-blue-600"
           >
-            경험 추가하기 →
+            경험 추가하기
+            <ChevronRight aria-hidden className="size-4" />
           </button>
         </div>
       ) : (

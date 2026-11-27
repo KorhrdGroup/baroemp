@@ -22,7 +22,7 @@ const TABS: { key: JobCurationTab; label: string; emoji: string }[] = [
   { key: "assessment_matched", label: "진단 맞춤 공고", emoji: "🧭" },
   { key: "ready_to_apply", label: "지금 지원가능", emoji: "✅" },
   { key: "unlockable", label: "자격 따면 열리는 공고", emoji: "🎓" },
-  { key: "new", label: "신규 일자리", emoji: "🆕" },
+  { key: "new", label: "신규 일자리", emoji: "🌱" },
   { key: "closing_soon", label: "마감임박", emoji: "⏰" },
 ];
 

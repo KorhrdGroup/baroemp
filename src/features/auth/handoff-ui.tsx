@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Check, Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { cn } from "@/lib/utils";
 import { formatPhoneInput } from "@/lib/utils/phone";
@@ -258,7 +258,7 @@ export function Checkbox({
             : "border-[1.5px] border-slate-300 text-transparent",
         ].join(" ")}
       >
-        ✓
+        <Check className="size-3.5" strokeWidth={3} />
       </span>
       <span
         className={

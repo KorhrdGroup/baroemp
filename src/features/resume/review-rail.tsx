@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Sparkles, X } from "lucide-react";
+import { Check, ChevronDown, ChevronUp, Sparkles, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { AIReviewAutoFix } from "@/types";
 
@@ -84,7 +84,7 @@ function RailItemRow({
             item.done ? "bg-emerald-600 text-white" : active ? "bg-atomic-blue-600 text-white" : "bg-slate-100 text-slate-600",
           )}
         >
-          {item.done ? "✓" : index + 1}
+          {item.done ? <Check className="size-3" strokeWidth={3.2} /> : index + 1}
         </span>
         <span className="min-w-0 flex-1">
           <span
@@ -144,9 +144,10 @@ function RailItemRow({
             <button
               type="button"
               onClick={onToggleDone}
-              className="mt-2 h-10 rounded-lg border border-emerald-200 bg-white px-3.5 text-body-3 font-semibold text-emerald-700"
+              className="mt-2 flex h-10 items-center gap-1 rounded-lg border border-emerald-200 bg-white px-3.5 text-body-3 font-semibold text-emerald-700"
             >
-              고쳤어요 ✓
+              고쳤어요
+              <Check aria-hidden className="size-4" strokeWidth={2.6} />
             </button>
           )}
         </div>
@@ -271,11 +272,14 @@ export function ReviewRail({
               className="flex w-full items-center gap-1.5"
               aria-expanded={strengthsOpen}
             >
-              <span className="flex size-[17px] items-center justify-center rounded-full bg-emerald-600 text-[10px] font-extrabold text-white">
-                ✓
+              <span className="flex size-[17px] items-center justify-center rounded-full bg-emerald-600 text-white">
+                <Check className="size-3" strokeWidth={3.2} />
               </span>
               <span className="text-body-3 font-bold text-emerald-800">잘하신 부분 {strengths.length}가지</span>
-              <span className="ml-auto text-caption-1 font-medium text-emerald-700">{strengthsOpen ? "접기 ▴" : "펼치기 ▾"}</span>
+              <span className="ml-auto flex items-center gap-0.5 text-caption-1 font-medium text-emerald-700">
+                {strengthsOpen ? "접기" : "펼치기"}
+                {strengthsOpen ? <ChevronUp aria-hidden className="size-3.5" /> : <ChevronDown aria-hidden className="size-3.5" />}
+              </span>
             </button>
             {strengthsOpen && (
               <ul className="mt-2.5 flex flex-col gap-2 pl-1">
