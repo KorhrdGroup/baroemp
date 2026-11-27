@@ -34,7 +34,7 @@ export default async function CoverLetterNewPage({
 
   return (
     // 흰 머리 아래 회색 바탕에 흰 카드(테두리 · 그림자 없음). /draft3 색 구성 (globals.css .draft3-theme).
-    <div className="draft3-theme">
+    <div className="draft3-theme page-gray">
       <PageHead icon="coverLetter"
         crumbs={[{ label: "자기소개서", href: "/cover-letter" }, { label: "새 자기소개서" }]}
         title="새 자기소개서"

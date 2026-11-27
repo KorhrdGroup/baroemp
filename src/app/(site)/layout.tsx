@@ -20,7 +20,11 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       <SessionSync serverHasUser={Boolean(user)} />
       {user && <BookmarkMergeOnLogin />}
       {/* 내용이 짧은 화면도 푸터 위까지 바탕색이 차게: 바로 아래에 .page-fill 을 둔 화면만 세로로 늘린다(다른 화면 배치는 그대로). */}
-      <main className="flex-1 has-[>.page-fill]:flex has-[>.page-fill]:flex-col">{children}</main>
+      {/*
+        .page-gray: 회색 바탕으로 끝나는 화면이 스스로 붙이는 표시. 키 큰 화면에서 내용이 짧으면 내용과 푸터 사이에
+        흰 바탕이 드러나서, 그 화면에서는 main 바탕을 같은 회색으로 깐다. 화면 배치는 건드리지 않는다.
+      */}
+      <main className="flex-1 has-[.page-gray]:bg-baro-page has-[>.page-fill]:flex has-[>.page-fill]:flex-col">{children}</main>
       <SiteFooterGate>
         <SiteFooter />
       </SiteFooterGate>

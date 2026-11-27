@@ -107,7 +107,7 @@ export function SupportDetailView({
   return (
     // 세부 화면 공통 바탕: 흰 머리 아래 옅은 회색 바탕에 흰 카드(테두리 · 그림자 없음). 신청 동작은 하단에 고정한다. 공고 상세와 같은 틀.
     // /draft3 색 구성 (globals.css .draft3-theme)
-    <div className="draft3-theme bg-white">
+    <div className="draft3-theme page-gray bg-white">
       <SupportViewTracker supportProgramId={program.id} matchScore={match?.score} eligibilityGrade={match?.grade} />
       <PageHead icon="support"
         crumbs={[{ label: "지원금 찾기", href: "/support" }, { label: "지원제도 상세" }]}

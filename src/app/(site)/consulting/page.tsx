@@ -17,7 +17,8 @@ export default async function ConsultingPage() {
 
   return (
     // /draft3 색 구성 (globals.css .draft3-theme): 흰 머리 아래 회색 바탕에 흰 신청 카드.
-    <div className="draft3-theme">
+    // page-fill: 내용이 짧아도 회색 바탕이 푸터까지 이어지게 남은 높이를 채운다(찜한 목록 · 희망 조건 화면과 같은 틀).
+    <div className="draft3-theme page-fill flex flex-1 flex-col">
       {/*
        * 다른 세부 화면과 같은 흰 바탕 화면 머리를 쓴다.
        * 유일한 유료 서비스라는 점은 진한 띠 대신 제목 옆 "유료 서비스" 표시와 폼 안 안내문으로 알린다.
@@ -34,7 +35,7 @@ export default async function ConsultingPage() {
       </PageHead>
 
       {/* 폼은 한 줄이 너무 길어지지 않게 3xl 로 좁혀 둔다. */}
-      <div className="bg-baro-page">
+      <div className="flex-1 bg-baro-page">
         <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-16 sm:pb-20 lg:px-8">
           <div className="mx-auto max-w-3xl">
             <ConsultingRequestForm defaultName={profile?.name ?? ""} defaultPhone={formatPhoneInput(profile?.phone ?? "")} />
