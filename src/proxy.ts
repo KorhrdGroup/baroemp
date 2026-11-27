@@ -57,6 +57,17 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(buildLoginRedirectUrl(pathname, request.nextUrl.search, request.url));
   }
 
+  /*
+    로그인 화면에서 내보낼 때만 Auth 서버로 한 번 더 확인한다. 서버에서 이미 끝난 세션(다른 곳에서 로그아웃,
+    비밀번호 변경 등)도 JWT 서명은 만료 전까지 유효해 getClaims() 는 로그인으로 본다. 그대로 /mypage 로
+    보내면 페이지의 getUser() 는 비로그인으로 보고 다시 /login 으로 보내 무한 반복된다.
+    getUser() 가 실패하면 쿠키도 지워진다(setAll).
+  */
+  if (isAuthPath(pathname) && user && !(await supabase.auth.getUser()).data.user) {
+    captureAcquisitionTouch(request, response);
+    return response;
+  }
+
   if (isAuthPath(pathname) && user) {
     const next = request.nextUrl.searchParams.get("next");
     const target = next && next.startsWith("/") && !next.startsWith("//") ? next : "/mypage";

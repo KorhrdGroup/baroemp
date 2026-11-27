@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronRight, ClipboardCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CountUp } from "@/features/home-draft3/count-up";
 import { SUPPORT_ELIGIBILITY_GRADE_LABELS } from "@/types";
 import type { SupportEligibilityGrade } from "@/types";
 
@@ -13,8 +14,9 @@ const GRADE_NUMBER_CLASS: Partial<Record<SupportEligibilityGrade, string>> = {
 const SHOWN_GRADES: SupportEligibilityGrade[] = ["HIGH", "MEDIUM", "CHECK_REQUIRED"];
 
 /**
- * 지원금 진단 결과의 머리. 경기 잡아바 지원사업 소개 판처럼 남색 판 하나에(밝은 파랑은 화면에서 너무 튀어 남색으로)
+ * 지원금 진단 결과의 머리. 마이페이지 "다음 할 일" 판과 같은 밝은 하늘색 판 하나에
  * 왼쪽은 해시태그(찾은 분야) · 결과 문장 · 기준 한 줄 · 안내, 오른쪽은 등급별 개수를 흰 동그라미로.
+ * 동그라미는 들어올 때 하나씩 톡 떠오르고(globals.css .sr-pop) 숫자는 0부터 올라간다. 움직임 줄이기면 둘 다 멈춘다.
  * 위치 줄은 판 위 회색 띠에 둔다.
  */
 export function SupportResultHero({
@@ -46,7 +48,7 @@ export function SupportResultHero({
         </ol>
       </nav>
 
-      <section className="mt-4 flex flex-col gap-8 rounded-card bg-baro-navy px-6 py-8 sm:px-10 sm:py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
+      <section className="mt-4 flex flex-col gap-8 rounded-card bg-[linear-gradient(115deg,#EEF4FF_0%,#D6E5FF_55%,#B9D2FF_100%)] px-6 py-8 sm:px-10 sm:py-10 lg:flex-row lg:items-center lg:justify-between lg:gap-12">
         <div className="min-w-0">
           {tags.length > 0 && (
             <ul className="flex flex-wrap gap-2">
@@ -55,8 +57,8 @@ export function SupportResultHero({
                   key={t}
                   className={cn(
                     "rounded-full px-3.5 py-1.5 text-body-3 font-semibold",
-                    /* 남색 판 위라 둘째부터는 남색 알약 대신 반투명 흰 알약(남색끼리 겹치면 안 보인다). */
-                    i === 0 ? "bg-white text-baro-blue-600" : "bg-white/20 text-white",
+                    /* 첫째는 흰 알약에 파란 글자, 둘째부터는 반투명 흰 알약에 회색 글자로 한 단계 눅인다. */
+                    i === 0 ? "bg-white text-baro-blue-600" : "bg-white/60 text-slate-700",
                   )}
                 >
                   #{t.replace(/\s/g, "")}
@@ -64,30 +66,31 @@ export function SupportResultHero({
               ))}
             </ul>
           )}
-          <h1 className="mt-4 text-title-2 leading-[1.35] font-extrabold tracking-[-0.02em] break-keep text-white sm:text-title-1">
+          <h1 className="mt-4 text-title-2 leading-[1.35] font-extrabold tracking-[-0.02em] break-keep text-baro-navy sm:text-title-1">
             {title}
           </h1>
           {totalCount > 0 && (
-            <p className="mt-2.5 flex items-start gap-1.5 text-body-2 font-semibold text-baro-blue-100">
+            <p className="mt-2.5 flex items-start gap-1.5 text-body-2 font-semibold text-baro-blue-600">
               <ClipboardCheck aria-hidden className="mt-0.5 size-4.5 shrink-0" />
               입력하신 조건으로 지원제도 {totalCount}개를 살펴봤어요
             </p>
           )}
-          <p className="mt-5 max-w-2xl text-body-2 leading-relaxed font-medium break-keep text-white/90">
+          <p className="mt-5 max-w-2xl text-body-2 leading-relaxed font-medium break-keep text-slate-700">
             입력하신 조건 기준의 참고 정보로, 최종 신청 가능 여부는 각 운영기관에서 확인해야 해요.
           </p>
         </div>
 
         {shown.length > 0 && (
           <ul className="flex shrink-0 gap-3 sm:gap-6" aria-label="가능성별 개수">
-            {shown.map((g) => (
-              <li key={g} className="flex flex-col items-center">
-                <span className="flex size-20 items-center justify-center rounded-full bg-white sm:size-24">
-                  <span className={cn("text-title-1 font-extrabold sm:text-headline-3", GRADE_NUMBER_CLASS[g])}>
-                    {gradeCounts[g]}
-                  </span>
+            {shown.map((g, i) => (
+              <li key={g} className="sr-pop flex flex-col items-center" style={{ ["--sr-i" as string]: i }}>
+                <span className="flex size-20 items-center justify-center rounded-full bg-white shadow-[0_8px_24px_rgba(37,83,180,0.14)] sm:size-24">
+                  <CountUp
+                    value={gradeCounts[g]}
+                    className={cn("text-title-1 font-extrabold sm:text-headline-3", GRADE_NUMBER_CLASS[g])}
+                  />
                 </span>
-                <span className="mt-2.5 text-body-2 font-semibold whitespace-nowrap text-white">
+                <span className="mt-2.5 text-body-2 font-semibold whitespace-nowrap text-slate-700">
                   {SUPPORT_ELIGIBILITY_GRADE_LABELS[g]}
                 </span>
               </li>
