@@ -152,6 +152,20 @@ const STEPS: StepConfig[] = [
   },
 ];
 
+/**
+ * 저장된 답이 첫 문항(출생연도 · 거기서 나온 연령대) 말고는 프로필에서 미리 채운 값과 같은지.
+ * 출생연도는 프로필에 없어 늘 직접 답하므로, 그것만 답하고 나간 진단은 사실상 시작 전이다.
+ */
+function onlyPrefilled(answers: SupportAssessmentAnswers, prefill: Partial<SupportAssessmentAnswers>): boolean {
+  return Object.entries(answers).every(
+    ([key, value]) =>
+      key === "birthYear" ||
+      key === "ageGroup" ||
+      value === undefined ||
+      JSON.stringify(value) === JSON.stringify(prefill[key as keyof SupportAssessmentAnswers]),
+  );
+}
+
 function isStepFilled(step: StepConfig, answers: SupportAssessmentAnswers): boolean {
   if (!step.required) return true;
   switch (step.id) {
@@ -734,30 +748,28 @@ export function SupportFlow({
       return;
     }
     setLoadingPrefill(true);
-    // 하다 만 진단이 있으면 새로 시작하기 전에 팝업으로 물어본다.
-    try {
-      const found = await getResumableSupportSessionAction({
-        anonymousId: getOrCreateAnonymousId() || undefined,
-      });
-      if (found) {
-        setResumable(found);
-        setLoadingPrefill(false);
-        return;
-      }
-    } catch {
+    const anonymousId = getOrCreateAnonymousId() || undefined;
+    const [found, prefill] = await Promise.all([
       // 조회 실패는 진단 시작을 막지 않는다 - 새로 시작한다.
+      getResumableSupportSessionAction({ anonymousId }).catch(() => null),
+      // 프리필 실패도 진단 진행을 막지 않는다 - 빈 값으로 시작한다.
+      getSupportAssessmentPrefillAction({ anonymousId }).catch(() => ({})),
+    ]);
+
+    /*
+      하다 만 진단이 있으면 새로 시작하기 전에 팝업으로 물어본다. 다만 첫 문항(출생연도)만 답하고 나머지가
+      프로필에서 미리 채운 값 그대로면 이어서 할 것이 없다 - 묻지 않고 그 진단을 첫 문항부터, 채운 값을 보이며 시작한다.
+    */
+    if (found && !onlyPrefilled(found.answers, prefill)) {
+      setResumable(found);
+      setLoadingPrefill(false);
+      return;
     }
 
-    try {
-      const anonymousId = getOrCreateAnonymousId();
-      const prefill = await getSupportAssessmentPrefillAction({ anonymousId: anonymousId || undefined });
-      setAnswers((prev) => ({ ...prev, ...prefill }));
-    } catch {
-      // 프리필 실패는 진단 진행을 막지 않는다 - 빈 값으로 시작한다.
-    } finally {
-      setLoadingPrefill(false);
-      setPhase("wizard");
-    }
+    setAnswers((prev) => ({ ...prev, ...prefill, ...(found?.answers ?? {}) }));
+    if (found) setSessionId(found.sessionId);
+    setLoadingPrefill(false);
+    setPhase("wizard");
   }
 
   if (phase === "intro") {
