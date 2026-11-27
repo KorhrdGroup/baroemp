@@ -37,7 +37,6 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
     await Promise.all(bookmarkedIds.map((id) => getSupportProgramRepository().findById(id)))
   ).filter((program): program is SupportProgram => Boolean(program));
   const matchById = new Map(view.categories.flatMap((c) => c.items).map((item) => [item.program.id, item.matchResult]));
-  const likelyCount = view.gradeCounts.HIGH + view.gradeCounts.MEDIUM;
   const displayName = user.name ? `${user.name}님` : "회원님";
 
   const trackedItems = view.categories
@@ -57,9 +56,15 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
         title={
           view.totalCount === 0
             ? "지금 조건에 맞는 지원제도를 찾지 못했어요."
-            : likelyCount > 0
-              ? `${displayName}에게 해당 가능성이 높은 지원제도 ${likelyCount}개를 찾았어요.`
-              : `${displayName}, 조건 확인이 필요한 지원제도 ${view.totalCount}개를 찾았어요.`
+            : /*
+                제목 숫자는 바로 옆 원의 숫자와 같은 등급 하나만 센다. "높은 가능성" 과 "가능성 있음" 을 더해
+                "가능성이 높은 39개" 라고 하면 옆의 "높은 가능성 4" 와 어긋난다. 마이페이지도 같은 순서로 센다.
+              */
+              view.gradeCounts.HIGH > 0
+              ? `${displayName}에게 가능성이 높은 지원제도 ${view.gradeCounts.HIGH}개를 찾았어요.`
+              : view.gradeCounts.MEDIUM > 0
+                ? `${displayName}에게 가능성이 있는 지원제도 ${view.gradeCounts.MEDIUM}개를 찾았어요.`
+                : `${displayName}, 조건 확인이 필요한 지원제도 ${view.totalCount}개를 찾았어요.`
         }
         tags={view.categories.filter((c) => c.items.length > 0).map((c) => c.label)}
         totalCount={view.totalCount}

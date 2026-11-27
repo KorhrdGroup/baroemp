@@ -49,7 +49,16 @@ export function SupportBookmarkedSection({ initial, pool }: { initial: Bookmarke
       </div>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {items.map(({ program, grade, reasons }) => (
-          <SupportProgramCard key={program.id} program={program} grade={grade} reasons={reasons} isAuthenticated isBookmarked />
+          <SupportProgramCard
+            key={program.id}
+            program={program}
+            grade={grade}
+            reasons={reasons}
+            isAuthenticated
+            isBookmarked
+            // 등급이 없으면 이번 진단 결과에 없는 제도다(지금 조건과 맞지 않거나, 목록 · 상세에서 찜한 것).
+            note={grade ? undefined : "이번 진단 결과에는 없어요"}
+          />
         ))}
       </div>
     </section>

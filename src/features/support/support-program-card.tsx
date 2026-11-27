@@ -51,12 +51,15 @@ export function SupportProgramCard({
   reasons,
   isAuthenticated = false,
   isBookmarked = false,
+  note,
 }: {
   program: SupportProgram;
   grade?: SupportEligibilityGrade;
   reasons?: MatchReasonDetail[];
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
+  /** 맞은 조건 줄 대신 적을 한 줄(예: 찜했지만 이번 진단 결과에 없는 제도). */
+  note?: string;
 }) {
   const matchedNames = reasonNames(reasons);
   const organization = program.organizationName ?? program.organization;
@@ -103,7 +106,8 @@ export function SupportProgramCard({
         칩으로 두면 아래 등급 표시와 모양이 겹쳐 따로 놀아, 다른 카드처럼 글자 줄로 둔다. 길면 한 줄 끝에서 줄인다.
         카드마다 파란 글자가 있으면 목록 전체가 파래져 회색으로 둔다.
       */}
-      {matchedNames.length > 0 && (
+      {note && <p className="mt-3 truncate text-body-3 font-medium text-slate-600">{note}</p>}
+      {!note && matchedNames.length > 0 && (
         <p className="mt-3 truncate text-body-3 font-medium text-slate-600">
           <span className="font-semibold text-slate-800">{matchedNames.join(", ")}</span> 조건이 맞아요
         </p>

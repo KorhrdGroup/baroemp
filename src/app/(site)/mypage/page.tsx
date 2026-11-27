@@ -24,9 +24,11 @@ import { getJobAlertSettings, listMyJobAlerts } from "@/services/job-alert.servi
 
 interface MyPageSupportData {
   latestSessionId?: string;
-  /** 진단 결과 가운데 "가능성 높음" 건수와 전체 건수. 결과 화면과 같은 값(마지막 진단의 match_results)을 읽는다. */
-  highCount: number;
-  matchCount: number;
+  /**
+   * 결과 줄에 적을 건수. 결과 화면 제목과 같은 순서로 센다: 높은 가능성 → 없으면 가능성 있음 → 없으면 전체.
+   * 결과 화면과 같은 값(마지막 진단의 match_results)을 읽는다.
+   */
+  headlineCount: number;
 }
 
 async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData> {
@@ -38,11 +40,13 @@ async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData>
     const latestSession = [...sessions].sort((a, b) => ((a.completedAt ?? "") < (b.completedAt ?? "") ? 1 : -1))[0];
     return {
       latestSessionId: latestSession?.id,
-      highCount: matches.filter((m) => m.grade === "HIGH").length,
-      matchCount: matches.length,
+      headlineCount:
+        matches.filter((m) => m.grade === "HIGH").length ||
+        matches.filter((m) => m.grade === "MEDIUM").length ||
+        matches.length,
     };
   } catch {
-    return { highCount: 0, matchCount: 0 };
+    return { headlineCount: 0 };
   }
 }
 
@@ -421,7 +425,7 @@ export default async function MyPage() {
               icon={Gift}
               title="지원금 찾기"
               /* 찜한 지원금도 4단계 일자리처럼 결과 줄에 함께 센다 - 찜해 둔 것이 마이페이지 어디에도 안 보였다. */
-              result={`${supportData.highCount > 0 ? supportData.highCount : supportData.matchCount}개 찾았어요${supportBookmarkCount > 0 ? ` · ${supportBookmarkCount}개 찜했어요` : ""}`}
+              result={`${supportData.headlineCount}개 찾았어요${supportBookmarkCount > 0 ? ` · ${supportBookmarkCount}개 찜했어요` : ""}`}
               description="받을 수 있는 지원금을 찾아드려요"
               action="찾아보기"
               done={stepDone.support}
