@@ -552,6 +552,36 @@
   }
 }
 
+/*
+  마이페이지 들어올 때 한 번(mypage/page.tsx · journey-steps.tsx).
+  A: 인사 → 진행 막대 줄 → 다음 할 일 판 → 다섯 단계 카드(왼쪽부터) → 아래 구역 순으로 떠오른다. 순서는 --mp-d(지연).
+  B: 진행 막대가 0에서 제 길이까지 차오르고, 다 한 단계의 파란 동그라미가 카드가 떠오른 뒤 차례로 톡 켜진다.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .mp-rise {
+    animation: jc-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--mp-d, 0ms);
+  }
+  .mp-fill {
+    animation: mp-fill 900ms cubic-bezier(0.33, 0, 0.2, 1) 300ms both;
+  }
+  .mp-pop {
+    animation: mp-pop 420ms cubic-bezier(0.33, 0, 0.2, 1) both;
+    animation-delay: calc(var(--mp-d, 0ms) + 260ms);
+  }
+}
+
+/* to 를 비워 두면 인라인 width(제 길이)까지 자란다. */
+@keyframes mp-fill {
+  from { width: 0; }
+}
+
+@keyframes mp-pop {
+  0% { background-color: var(--color-slate-100); color: var(--color-slate-500); transform: scale(1); }
+  55% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
 @keyframes jc-rise {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: none; }

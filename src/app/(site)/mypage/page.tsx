@@ -12,7 +12,7 @@ import {
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
-import { JourneySteps, type JourneyStep } from "@/features/mypage/journey-steps";
+import { JourneyProgress, JourneySteps, type JourneyStep } from "@/features/mypage/journey-steps";
 import { JobAlertPanel } from "@/features/mypage/job-alert-panel";
 import { getMyPageDetail } from "@/services/user-crm.service";
 import { requireUser } from "@/lib/auth/session";
@@ -102,7 +102,8 @@ function MenuRow({
   isNext: boolean;
 }) {
   return (
-    <li className="border-t border-slate-100 first:border-t-0 xl:border-t-0">
+    /* 들어올 때 단계 순서대로 떠오르고(.mp-rise), 다 한 단계 동그라미는 뒤이어 톡 켜진다(.mp-pop) - globals.css. */
+    <li className="mp-rise border-t border-slate-100 first:border-t-0 xl:border-t-0" style={{ ["--mp-d" as string]: `${280 + (step - 1) * 80}ms` }}>
       <Link
         href={href}
         className={cn(
@@ -114,7 +115,7 @@ function MenuRow({
           <span
             className={cn(
               "flex size-11 shrink-0 items-center justify-center rounded-full",
-              done ? "bg-baro-blue text-white" : isNext ? "bg-white text-baro-blue" : "bg-slate-100 text-slate-500",
+              done ? "mp-pop bg-baro-blue text-white" : isNext ? "bg-white text-baro-blue" : "bg-slate-100 text-slate-500",
             )}
           >
             <Icon className="size-5" />
@@ -361,9 +362,16 @@ export default async function MyPage() {
           제목 옆에 "몇 개 했어요"는 두지 않는다 - 바로 위 진행 막대와 같은 말이다.
         */}
         <section aria-labelledby="mypage-ready" className="mt-11">
-          <h2 id="mypage-ready" className="mb-3.5 text-title-3 font-extrabold text-slate-900">
-            나의 취업 준비
-          </h2>
+          {/* 진행 막대는 제목 오른쪽에 - 막대가 세는 다섯 단계가 바로 아래 카드다. 좁은 화면은 제목 아래로 내려간다. */}
+          <div
+            className="mp-rise mb-3.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2"
+            style={{ ["--mp-d" as string]: "160ms" }}
+          >
+            <h2 id="mypage-ready" className="text-title-3 font-extrabold text-slate-900">
+              나의 취업 준비
+            </h2>
+            <JourneyProgress doneCount={steps.filter((s) => s.done).length} total={steps.length} />
+          </div>
           <ul className="overflow-hidden rounded-card bg-white xl:grid xl:grid-cols-5 xl:gap-4 xl:overflow-visible xl:rounded-none xl:bg-transparent">
             <MenuRow
               step={1}
@@ -432,7 +440,7 @@ export default async function MyPage() {
           한 줄 전체를 링크로 두면 안에 단추를 넣을 수 없어, 공고로 가는 링크는 제목 쪽에만 둔다.
         */}
         {appliedJobs.length > 0 && (
-          <section aria-labelledby="mypage-applied" className="mt-11">
+          <section aria-labelledby="mypage-applied" className="mp-rise mt-11" style={{ ["--mp-d" as string]: "720ms" }}>
             {/* 안내 한 줄은 제목 바로 아래 둔다. 목록 밑에 두면 카드 안 글자(안쪽 여백)와 왼쪽 끝이 어긋나 보였다. */}
             <div className="flex items-baseline gap-2">
               <h2 id="mypage-applied" className="text-title-3 font-extrabold text-slate-900">
@@ -471,7 +479,7 @@ export default async function MyPage() {
           </section>
         )}
 
-        <section aria-labelledby="mypage-alert" className="mt-11">
+        <section aria-labelledby="mypage-alert" className="mp-rise mt-11" style={{ ["--mp-d" as string]: "800ms" }}>
           <h2 id="mypage-alert" className="mb-3.5 text-title-3 font-extrabold text-slate-900">
             알림
           </h2>
