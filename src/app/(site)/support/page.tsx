@@ -34,7 +34,8 @@ export default async function SupportPage({
     getSupportShowcase().catch(() => null),
   ]);
   const now = new Date();
-  const asOf = `${String(now.getFullYear()).slice(2)}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}`;
+  // 홈 첫 화면과 같은 "11.27 기준" 꼴(월.일, 한국 시간).
+  const asOf = now.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit", timeZone: "Asia/Seoul" }).replace(/\.\s?/g, ".").replace(/\.$/, "");
 
   return (
     // /draft3 색 구성 (globals.css .draft3-theme)

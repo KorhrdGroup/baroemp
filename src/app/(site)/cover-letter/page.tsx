@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PageHead } from "@/components/layout/page-head";
 
 export const metadata: Metadata = {
-  title: "자기소개서 Builder | 한평생 바로취업",
+  title: "자기소개서 | 한평생 바로취업",
 };
 
 export default async function CoverLetterListPage() {
@@ -20,7 +20,7 @@ export default async function CoverLetterListPage() {
       <PageHead icon="coverLetter"
         crumbs={[{ label: "자기소개서" }]}
         title="자기소개서"
-        description="문항을 자유롭게 추가/삭제/순서변경하고, AI 초안/첨삭을 받아보세요."
+        description="문항을 자유롭게 더하고 빼고 순서를 바꿀 수 있어요. AI 초안과 첨삭도 받아보세요."
       >
         <Button asChild className="h-12 shrink-0 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-semibold text-white">
           <Link href="/cover-letter/new">

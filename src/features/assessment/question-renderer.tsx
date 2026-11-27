@@ -56,7 +56,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               aria-checked={selected}
               onClick={() => onChange({ type: "SINGLE", optionId: option.id })}
               className={cn(
-                "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium",
+                "flex min-h-14 items-center justify-start gap-3 rounded-xl border bg-white px-4 py-3.5 text-left text-body-2 font-medium break-keep",
                 selected
                   ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
                   : "border-border text-slate-700",
@@ -64,7 +64,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             >
               <span
                 className={cn(
-                  "absolute left-4 flex size-5 shrink-0 items-center justify-center rounded-full border-2",
+                  "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
                   selected ? "border-brand-blue-600" : "border-slate-300",
                 )}
               >
@@ -95,7 +95,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 onChange({ type: "MULTI", optionIds: next, customTexts });
               }}
               className={cn(
-                "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium",
+                "flex min-h-14 items-center justify-start gap-3 rounded-xl border bg-white px-4 py-3.5 text-left text-body-2 font-medium break-keep",
                 selected
                   ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
                   : "border-border text-slate-700",
@@ -103,7 +103,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             >
               <span
                 className={cn(
-                  "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2",
+                  "flex size-5 shrink-0 items-center justify-center rounded-sm border-2",
                   selected ? "border-brand-blue-600 bg-brand-blue-600 text-white" : "border-slate-300",
                 )}
               >

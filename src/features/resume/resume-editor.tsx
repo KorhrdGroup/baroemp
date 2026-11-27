@@ -56,6 +56,8 @@ import { ResumePreview } from "./resume-preview";
 import { ReviewRail, type RailItem } from "./review-rail";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
+import { formatPhoneInput } from "@/lib/utils/phone";
+import { TitleField } from "@/components/common/title-field";
 import { REGION_LABELS } from "@/lib/labels";
 
 let keySeq = 0;
@@ -366,7 +368,7 @@ export function ResumeEditor({
         desiredRegion: initialDetail.resume.desiredRegion ?? "",
         name: initialDetail.resume.name ?? "",
         email: initialDetail.resume.email ?? "",
-        phone: initialDetail.resume.phone ?? "",
+        phone: formatPhoneInput(initialDetail.resume.phone ?? ""),
         address: initialDetail.resume.address ?? "",
         addressDetail: initialDetail.resume.addressDetail ?? "",
         birthDate: initialDetail.resume.birthDate ?? "",
@@ -833,7 +835,7 @@ export function ResumeEditor({
                   </NativeSelect>
                 </Field>
                 <Field label="전화번호" required>
-                  <CompactInput value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))} />
+                  <CompactInput type="tel" inputMode="numeric" value={form.phone} onChange={(e) => setForm((f) => ({ ...f, phone: formatPhoneInput(e.target.value) }))} />
                 </Field>
                 <Field label="이메일" required className="sm:col-span-2">
                   <CompactInput value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
@@ -1512,11 +1514,11 @@ export function ResumeEditor({
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <label className="min-w-0 flex-1">
               <span className="sr-only">이력서 제목</span>
-              <input
+              <TitleField
                 id="resume-title"
                 placeholder="이력서 제목을 입력해주세요"
                 value={form.title}
-                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                onChange={(title) => setForm((f) => ({ ...f, title }))}
                 className="w-full max-w-3xl border-0 bg-transparent px-0 py-1 text-title-1 font-extrabold tracking-[-0.02em] text-slate-900 outline-none placeholder:text-slate-400 sm:text-headline-3"
               />
               {/* 밑줄로 고칠 수 있는 칸이라는 것을 알린다. 누르고 있을 때만 파랑. */}
@@ -1540,11 +1542,11 @@ export function ResumeEditor({
         채우는지도, 다른 항목으로 건너갈 길도 없었다. 좁은 화면은 헤더가 따라오지 않아 화면 맨 위에 붙여 두고
         스크롤 위치에 따라 지금 항목을 짚어 준다. 넓은 화면은 왼쪽 목록이 그 일을 한다.
       */}
-      <div
-        ref={stripRef}
-        className="scrollbar-hidden sticky top-0 z-30 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur print:hidden lg:hidden"
-      >
-        {/* 항목을 다루는 동작이라 항목 이름들 옆이 제자리다. 누르면 편집 시트가 올라온다. */}
+      <div className="sticky top-0 z-30 flex items-center border-b border-border bg-white/95 py-2 pl-4.5 backdrop-blur print:hidden lg:hidden">
+        {/*
+          항목을 다루는 동작이라 항목 이름들 옆이 제자리다. 누르면 편집 시트가 올라온다.
+          띠와 함께 밀리면 지금 항목을 짚어 줄 때 왼쪽으로 잘려 나가서, 단추는 붙박고 항목 이름만 옆으로 민다.
+        */}
         <button
           type="button"
           onClick={() => setSectionSheetOpen(true)}
@@ -1553,7 +1555,8 @@ export function ResumeEditor({
           <ArrowUpDown className="size-3.5" />
           항목 편집
         </button>
-        <span aria-hidden className="mx-1 h-5 w-px shrink-0 bg-border" />
+        <span aria-hidden className="mx-2 h-5 w-px shrink-0 bg-border" />
+        <div ref={stripRef} className="scrollbar-hidden relative flex min-w-0 flex-1 items-center gap-1 overflow-x-auto pr-4.5">
         {navItems.map((item) => (
           <button
             key={item.key}
@@ -1570,6 +1573,7 @@ export function ResumeEditor({
             {item.label}
           </button>
         ))}
+        </div>
       </div>
 
       {/*

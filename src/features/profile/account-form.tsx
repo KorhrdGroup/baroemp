@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { updateAccountAction, type AccountFormState } from "./account-actions";
+import { formatPhoneInput } from "@/lib/utils/phone";
 import type { Profile } from "@/types";
 
 const initialState: AccountFormState = {};
@@ -39,7 +40,9 @@ export function AccountForm({ profile }: { profile: Profile }) {
           <Label htmlFor="phone" className="mb-1.5 text-body-3 font-semibold text-slate-700">
             휴대전화번호
           </Label>
-          <Input id="phone" name="phone" type="tel" defaultValue={profile.phone} placeholder="010-1234-5678" className={inputClass} />
+          <Input id="phone" name="phone" type="tel" defaultValue={formatPhoneInput(profile.phone ?? "")}
+            onChange={(e) => { e.target.value = formatPhoneInput(e.target.value); }}
+            placeholder="010-1234-5678" className={inputClass} />
           {state.fieldErrors?.phone ? (
             <p className="mt-1 text-body-3 font-medium text-red-600">{state.fieldErrors.phone}</p>
           ) : (

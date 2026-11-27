@@ -112,7 +112,7 @@ export function AssessmentIntro({
       steps={STEPS}
       itemsTitle={
         <>
-          이 검사로
+          이 검사로{" "}
           <br />
           알 수 있는 것
         </>

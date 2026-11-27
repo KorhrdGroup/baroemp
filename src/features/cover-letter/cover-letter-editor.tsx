@@ -25,6 +25,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { AiButton } from "@/components/common/ai-button";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
+import { TitleField } from "@/components/common/title-field";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
 import type { QuestionCatalogEntry } from "@/lib/cover-letter/questions";
 import { questionHeading } from "@/lib/cover-letter/questions";
@@ -324,10 +325,10 @@ export function CoverLetterEditor({
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <label className="min-w-0 flex-1">
               <span className="sr-only">자기소개서 이름</span>
-              <input
+              <TitleField
                 placeholder="제목을 입력해주세요"
                 value={title}
-                onChange={(e) => setTitle(e.target.value)}
+                onChange={setTitle}
                 className="w-full max-w-3xl border-0 bg-transparent px-0 py-1 text-title-1 font-extrabold tracking-[-0.02em] text-slate-900 outline-none placeholder:text-slate-400 sm:text-headline-3"
               />
               {/* 밑줄로 고칠 수 있는 칸이라는 것을 알린다. 누르고 있을 때만 파랑. */}

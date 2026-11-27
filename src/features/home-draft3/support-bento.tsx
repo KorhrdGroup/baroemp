@@ -68,7 +68,8 @@ export function SupportBento() {
               <div className="min-w-0">
                 <p className="truncate text-body-1 font-semibold text-slate-800">{item.title}</p>
                 <p className="mt-1 text-body-3 font-medium text-slate-600">
-                  {item.org} · {item.region}
+                  {/* "서울특별시 · 서울"처럼 기관 이름에 지역이 이미 있으면 지역은 한 번만. */}
+                  {item.org.startsWith(item.region) ? item.org : `${item.org} · ${item.region}`}
                 </p>
               </div>
               <p className="shrink-0 text-body-1 font-semibold text-slate-900">

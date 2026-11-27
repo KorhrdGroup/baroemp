@@ -28,7 +28,7 @@ export default async function AssessmentResultPage({
   // 마이페이지에서 특정 직업 행을 누르고 온 경우, 그 직업 카드를 열어서 보여준다.
   const { focus } = await searchParams;
   // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
-  await requireUser(`/assessment/result/${sessionId}`);
+  const user = await requireUser(`/assessment/result/${sessionId}`);
   const found = await getAssessmentResultBySession(sessionId);
   if (!found) notFound();
   const { result } = found;
@@ -86,6 +86,7 @@ export default async function AssessmentResultPage({
         externalCourses={externalCourses}
         focusOccupationId={focus}
         jobCounts={jobCounts}
+        userName={user.name}
       />
     </div>
   );

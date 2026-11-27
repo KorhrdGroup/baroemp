@@ -18,7 +18,7 @@ import { deleteCoverLetterAction } from "@/features/cover-letter/cover-letter-ac
 import { PageHead } from "@/components/layout/page-head";
 
 export const metadata: Metadata = {
-  title: "이력서 Builder | 한평생 바로취업",
+  title: "이력서 · 자기소개서 | 한평생 바로취업",
 };
 
 /*
@@ -83,7 +83,7 @@ export default async function ResumeListPage() {
         icon="resume"
         crumbs={[{ label: "이력서" }]}
         title="이력서 · 자기소개서"
-        description="내 경력/자격/희망직무 정보를 불러와 이력서를 빠르게 작성하고, AI 첨삭으로 다듬을 수 있어요."
+        description="내 경력 · 자격 · 희망 직무를 불러와 이력서를 빠르게 작성하고, AI 첨삭으로 다듬을 수 있어요."
       />
       <div className="bg-baro-page">
         <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">

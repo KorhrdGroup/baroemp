@@ -181,7 +181,8 @@ export function SupportResultSections({
 
   return (
     <>
-      <div className="mt-5 flex flex-wrap gap-2">
+      {/* 휴대폰에서는 줄바꿈 대신 옆으로 밀어 본다. 줄바꿈하면 마지막 하나만 둘째 줄에 남았다. */}
+      <div className="scrollbar-hidden -mx-4.5 mt-5 flex gap-2 overflow-x-auto px-4.5 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
         {FILTER_GRADES.map((grade) => {
           const isActive = activeGrade === grade;
           const count = gradeCounts[grade];
@@ -193,7 +194,7 @@ export function SupportResultSections({
               onClick={() => setActiveGrade(isActive ? null : grade)}
               aria-pressed={isActive}
               className={cn(
-                "h-11 rounded-full border px-5 text-body-2 font-semibold transition-colors duration-300",
+                "h-11 shrink-0 rounded-full border px-5 text-body-2 font-semibold transition-colors duration-300",
                 isActive ? PILL_CLASS[grade].active : PILL_CLASS[grade].base,
               )}
             >

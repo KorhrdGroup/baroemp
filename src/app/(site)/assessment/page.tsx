@@ -42,7 +42,8 @@ export default async function AssessmentPage({
     getOccupationShowcase().catch(() => null),
   ]);
   const now = new Date();
-  const asOf = `${String(now.getFullYear()).slice(2)}.${String(now.getMonth() + 1).padStart(2, "0")}.${String(now.getDate()).padStart(2, "0")}`;
+  // 홈 첫 화면과 같은 "11.27 기준" 꼴(월.일, 한국 시간).
+  const asOf = now.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit", timeZone: "Asia/Seoul" }).replace(/\.\s?/g, ".").replace(/\.$/, "");
 
   // 이어하기 여부는 시작 버튼을 누르는 순간 팝업으로 묻는다 (StartAssessmentButton).
   // 화면 머리(PageHead)가 폭을 꽉 채우고 본문 폭은 소개 화면 안에서 잡으므로 여기서는 제한하지 않는다.

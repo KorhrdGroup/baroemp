@@ -53,7 +53,7 @@ export function ScrollMoreHint({ label = "아래에 선택지가 더 있어요" 
   return (
     // 힌트는 안내일 뿐이라 클릭을 가로채지 않는다.
     <div className="pointer-events-none fixed inset-x-0 bottom-28 z-40 flex justify-center px-4">
-      <span className="flex animate-bounce items-center gap-1 rounded-full bg-slate-900/85 px-4 py-2 text-label-2 font-medium text-white shadow-lg backdrop-blur-sm">
+      <span className="flex animate-bounce items-center gap-1 rounded-full bg-slate-900/85 px-4 py-2 text-body-3 font-semibold text-white shadow-lg backdrop-blur-sm">
         <ChevronDown className="size-4" aria-hidden />
         {label}
       </span>

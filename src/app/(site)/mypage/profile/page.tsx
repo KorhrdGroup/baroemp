@@ -33,7 +33,7 @@ export default async function MyPageProfileEditPage() {
       <PageHead
         crumbs={[{ label: "마이페이지", href: "/mypage" }, { label: "희망 조건" }]}
         title="희망 조건"
-        description="입력한 정보는 맞춤 직업/채용/지원제도 추천에 활용됩니다."
+        description="적어주신 조건으로 맞는 직업 · 일자리 · 지원금을 찾아드려요."
       />
       <div className="flex-1 bg-baro-page">
       <div className="mx-auto max-w-3xl px-4.5 pt-10 pb-20 lg:px-8">

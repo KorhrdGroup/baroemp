@@ -214,8 +214,9 @@ function ChipButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium",
-        indicator === "none" ? "px-4" : "px-11",
+        /* 표시(동그라미 · 네모)가 있으면 글자를 그 옆에 붙여 왼쪽부터 읽힌다(직업진단 · 온보딩과 같은 꼴). */
+        "flex min-h-14 items-center gap-3 rounded-xl border bg-white px-4 py-3.5 text-body-2 font-medium break-keep",
+        indicator === "none" ? "justify-center text-center" : "justify-start text-left",
         selected
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
           : "border-border text-slate-700",
@@ -225,7 +226,7 @@ function ChipButton({
       {indicator === "radio" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-full border-2",
+            "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
             selected ? "border-brand-blue-400" : "border-slate-300",
           )}
         >
@@ -235,7 +236,7 @@ function ChipButton({
       {indicator === "check" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2",
+            "flex size-5 shrink-0 items-center justify-center rounded-sm border-2",
             selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
           )}
         >
@@ -646,7 +647,7 @@ function SupportIntro({
       steps={INTRO_STEPS}
       itemsTitle={
         <>
-          이 진단으로
+          이 진단으로{" "}
           <br />
           확인할 수 있는 것
         </>

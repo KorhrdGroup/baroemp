@@ -177,7 +177,7 @@ export function DiagnosisLanding({
                 eyebrow="진행 순서"
                 title={
                   <>
-                    이렇게
+                    이렇게{" "}
                     <br />
                     진행돼요
                   </>
@@ -261,7 +261,7 @@ function SplitHead({ eyebrow, title, description }: { eyebrow: string; title: Re
   return (
     <div className="text-center lg:text-left">
       <p className="text-body-3 font-semibold text-slate-600">{eyebrow}</p>
-      <h2 className="mt-1.5 text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-slate-900">{title}</h2>
+      <h2 className="mt-1.5 text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-slate-900 max-lg:[&_br]:hidden">{title}</h2>
       <p className="mt-4 text-body-2 font-medium break-keep text-slate-600">{description}</p>
     </div>
   );

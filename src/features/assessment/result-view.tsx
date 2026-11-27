@@ -19,6 +19,8 @@ interface ResultViewProps {
   /** 마이페이지 등에서 특정 직업을 보러 온 경우, 그 카드를 열어서 보여준다. */
   focusOccupationId?: string;
   jobCounts?: Record<string, { total: number; highMatchCount: number }>;
+  /** 제목에서 부를 이름. 지원금 결과처럼 "김미영님", 없으면 "회원님". */
+  userName?: string;
 }
 
 export function ResultView({
@@ -30,6 +32,7 @@ export function ResultView({
   externalCourses = [],
   focusOccupationId,
   jobCounts,
+  userName,
 }: ResultViewProps) {
   /** 지목된 카드가 있으면 그 카드만, 없으면 첫 카드를 열어둔다. */
   const isCardOpen = (occupationId: string, isFirstDefault: boolean) =>
@@ -59,7 +62,7 @@ export function ResultView({
       {/* 세부 화면 공통 머리: 위치 줄 → 큰 제목 → 결과 요약. */}
       <PageHead icon="assessment"
         crumbs={[{ label: "직업진단", href: "/assessment" }, { label: "진단 결과" }]}
-        title="회원님께 잘 맞는 직업을 찾았어요"
+        title={`${userName ? `${userName}님` : "회원님"}께 잘 맞는 직업을 찾았어요`}
         description={result.summary}
       />
 

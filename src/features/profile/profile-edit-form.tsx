@@ -90,10 +90,10 @@ export function ProfileEditForm({
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <Label htmlFor="employmentStatus" className="mb-1.5 text-body-3 font-semibold text-slate-700">
-              취업상태
+              취업 상태
             </Label>
             <SelectField id="employmentStatus" name="employmentStatus" defaultValue={careerProfile?.employmentStatus ?? ""}>
-              <option value="">선택 안함</option>
+              <option value="">선택 안 함</option>
               {Object.entries(EMPLOYMENT_STATUS_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
@@ -104,10 +104,10 @@ export function ProfileEditForm({
 
           <div>
             <Label htmlFor="region" className="mb-1.5 text-body-3 font-semibold text-slate-700">
-              희망지역
+              희망 지역
             </Label>
             <SelectField id="region" name="region" defaultValue={careerProfile?.region ?? ""}>
-              <option value="">선택 안함</option>
+              <option value="">선택 안 함</option>
               {Object.entries(REGION_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
@@ -118,10 +118,10 @@ export function ProfileEditForm({
 
           <div>
             <Label htmlFor="desiredStartTiming" className="mb-1.5 text-body-3 font-semibold text-slate-700">
-              희망 취업시기
+              희망 취업 시기
             </Label>
             <SelectField id="desiredStartTiming" name="desiredStartTiming" defaultValue={careerProfile?.desiredStartTiming ?? ""}>
-              <option value="">선택 안함</option>
+              <option value="">선택 안 함</option>
               {Object.entries(DESIRED_START_TIMING_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
@@ -133,7 +133,7 @@ export function ProfileEditForm({
           <div className="flex gap-2">
             <div className="flex-1">
               <Label htmlFor="desiredSalaryMin" className="mb-1.5 text-body-3 font-semibold text-slate-700">
-                희망급여(만원, 최소)
+                희망 월급 최소(만원)
               </Label>
               <Input
                 id="desiredSalaryMin"
@@ -146,7 +146,7 @@ export function ProfileEditForm({
             </div>
             <div className="flex-1">
               <Label htmlFor="desiredSalaryMax" className="mb-1.5 text-body-3 font-semibold text-slate-700">
-                최대
+                최대(만원)
               </Label>
               <Input
                 id="desiredSalaryMax"
@@ -161,7 +161,7 @@ export function ProfileEditForm({
         </div>
 
         <div>
-          <Label className="mb-2 text-body-3 font-semibold text-slate-700">희망 근무형태</Label>
+          <Label className="mb-2 text-body-3 font-semibold text-slate-700">희망 근무 형태</Label>
           <div className="flex flex-wrap gap-2">
             {Object.entries(WORK_TYPE_LABELS).map(([code, label]) => {
               const value = code as WorkType;
