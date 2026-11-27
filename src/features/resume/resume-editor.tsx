@@ -823,7 +823,7 @@ export function ResumeEditor({
                 </Field>
                 <Field label="성별">
                   <NativeSelect
-                    className="h-10 text-body-3"
+                    className="h-12 text-body-3"
                     value={form.gender}
                     onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value }))}
                   >
@@ -852,7 +852,7 @@ export function ResumeEditor({
                       <Button
                         type="button"
                         variant="outline"
-                        className="h-10 shrink-0 border-slate-300 bg-white font-semibold text-slate-800"
+                        className="h-12 shrink-0 border-slate-300 bg-white font-semibold text-slate-800"
                         onClick={() => openPostcodeSearch((address) => setForm((f) => ({ ...f, address })))}
                       >
                         주소 검색
@@ -875,7 +875,7 @@ export function ResumeEditor({
                 */}
                 <Field label="희망근무지역">
                   <NativeSelect
-                    className="h-10 text-body-3"
+                    className="h-12 text-body-3"
                     value={form.desiredRegion ?? ""}
                     onChange={(e) => setForm((f) => ({ ...f, desiredRegion: e.target.value }))}
                   >
@@ -1145,7 +1145,7 @@ export function ResumeEditor({
                       <div className="grid gap-2 sm:grid-cols-6">
                         <Field label="학교구분" className="sm:col-span-2">
                           <NativeSelect
-                            className="h-10 text-body-3"
+                            className="h-12 text-body-3"
                             value={isGed ? "고등학교" : (edu.educationType ?? "")}
                             onChange={(e) => updateAt(setEducations, edu._key, { educationType: e.target.value })}
                           >
@@ -1175,7 +1175,7 @@ export function ResumeEditor({
                         {!isGed && (
                           <Field label="졸업상태" className="sm:col-span-2">
                             <NativeSelect
-                              className="h-10 text-body-3"
+                              className="h-12 text-body-3"
                               value={edu.graduationStatus ?? ""}
                               onChange={(e) => updateAt(setEducations, edu._key, { graduationStatus: e.target.value })}
                             >
@@ -1312,7 +1312,7 @@ export function ResumeEditor({
                   <Button
                     variant="outline"
                     size="sm"
-                    className="border-slate-300 bg-white font-semibold text-slate-800"
+                    className="h-12 border-slate-300 bg-white font-semibold text-slate-800"
                     onClick={() => {
                       if (!skillDraft.trim()) return;
                       setSkills((prev) => [...prev, { _key: nextKey("skill"), name: skillDraft.trim(), orderIndex: prev.length }]);
@@ -1444,7 +1444,7 @@ export function ResumeEditor({
                     className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[9rem_1fr_1.6fr_auto]"
                   >
                     <NativeSelect
-                      className="h-10 text-body-3"
+                      className="h-12 text-body-3"
                       value={item.sectionType}
                       onChange={(e) => updateAt(setItems, item._key, { sectionType: e.target.value as ResumeItemSectionType })}
                     >
@@ -2097,7 +2097,7 @@ function MonthPicker({
     <div className="flex gap-2">
       <div className="flex-1">
         <NativeSelect
-          className="h-10 text-body-3"
+          className="h-12 text-body-3"
           value={year}
           disabled={disabled}
           onChange={(e) => e.target.value && onChange(`${e.target.value}-${month || "01"}`)}
@@ -2112,7 +2112,7 @@ function MonthPicker({
       </div>
       <div className="w-24">
         <NativeSelect
-          className="h-10 text-body-3"
+          className="h-12 text-body-3"
           value={month}
           disabled={disabled}
           onChange={(e) => e.target.value && onChange(`${year || String(thisYear)}-${e.target.value}`)}
@@ -2129,9 +2129,9 @@ function MonthPicker({
   );
 }
 
-/** 편집 폼은 짧은 값 입력칸이 많아 기본(h-12)보다 낮은 높이로 밀도를 높인다. 회색 항목 박스 위에서도 입력칸은 흰색을 유지한다. */
+/** 편집 폼 입력칸. 40px 은 좁아 보여 기본과 같은 48px(h-12)로 둔다. 회색 항목 박스 위에서도 입력칸은 흰색을 유지한다. */
 function CompactInput({ className, ...props }: React.ComponentProps<typeof Input>) {
-  return <Input {...props} className={cn("h-10 bg-white", className)} />;
+  return <Input {...props} className={cn("h-12 bg-white", className)} />;
 }
 
 /** 카카오(다음) 우편번호 서비스. 키 없이 스크립트만 얹으면 되는 공개 위젯이다. */
