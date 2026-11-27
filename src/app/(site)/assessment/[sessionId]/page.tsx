@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
 import { notFound, redirect } from "next/navigation";
+import { isSessionOwner } from "@/lib/auth/session-ownership";
 import { loadAssessment } from "@/features/assessment-engine/question-loader";
 import { buildPrefilledAnswers } from "@/features/assessment/answer-prefill";
 import { AssessmentWizard } from "@/features/assessment/assessment-wizard";
@@ -23,7 +24,7 @@ export default async function AssessmentSessionPage({
   // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
   await requireUser(`/assessment/${sessionId}`);
   const session = await getAssessmentSessionRepository().findById(sessionId);
-  if (!session) notFound();
+  if (!session || !(await isSessionOwner(session))) notFound();
 
   if (session.status === "completed") {
     redirect(`/assessment/result/${sessionId}`);

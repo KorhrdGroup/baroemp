@@ -3,8 +3,16 @@
 import { logActivityEvent } from "@/lib/activity/event-logger";
 import { extractSupportInterestTags } from "@/lib/support/support-tag-rules";
 import { getCurrentUser, requireSessionUser } from "@/lib/auth/session";
+import { isSessionOwner } from "@/lib/auth/session-ownership";
+import { getSupportAssessmentSessionRepository } from "@/lib/repositories";
 import { findCareerProfileByUserId, getSupportBookmarkRepository, getSupportProgramRepository } from "@/lib/repositories";
 import { recalculateLeadScore } from "@/services/lead-score.service";
+
+/** 화면이 넘긴 세션 번호가 지금 사람의 진단인지 확인한다. 남의 진단에 답을 덮어쓰거나 완료시키지 못하게. */
+async function assertOwnSupportSession(sessionId: string, anonymousId?: string): Promise<void> {
+  const session = await getSupportAssessmentSessionRepository().findById(sessionId);
+  if (!session || !(await isSessionOwner(session, anonymousId))) throw new Error("진단을 찾을 수 없습니다.");
+}
 
 /** 활동 로그용 userId/anonymousId를 결정한다. 클라이언트가 넘긴 userId는 신뢰하지 않고 항상 세션을 우선한다. */
 async function resolveActorIds(anonymousId?: string): Promise<{ userId?: string; anonymousId?: string }> {
@@ -59,6 +67,7 @@ export async function saveSupportProgressAction(input: {
   answers: Partial<SupportAssessmentAnswers>;
 }): Promise<{ sessionId: string }> {
   const actor = await resolveActorIds(input.anonymousId);
+  if (input.sessionId) await assertOwnSupportSession(input.sessionId, input.anonymousId);
   const sessionId =
     input.sessionId ??
     (await startSupportAssessment({ userId: actor.userId, anonymousId: actor.anonymousId })).id;
@@ -103,6 +112,7 @@ export async function submitSupportAssessmentAction(
   input: SubmitSupportAssessmentInput,
 ): Promise<SubmitSupportAssessmentResult> {
   const actor = await resolveActorIds(input.anonymousId);
+  if (input.sessionId) await assertOwnSupportSession(input.sessionId, input.anonymousId);
   const sessionId =
     input.sessionId ??
     (await startSupportAssessment({ userId: actor.userId, anonymousId: actor.anonymousId })).id;

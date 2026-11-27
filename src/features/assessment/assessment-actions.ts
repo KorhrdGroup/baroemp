@@ -9,6 +9,8 @@ import {
   submitAssessmentAnswer,
 } from "@/features/assessment-engine/assessment-service";
 import { getCurrentUser } from "@/lib/auth/session";
+import { isSessionOwner } from "@/lib/auth/session-ownership";
+import { getAssessmentSessionRepository } from "@/lib/repositories";
 
 /**
  * userId는 클라이언트 입력을 신뢰하지 않고 항상 서버 세션(getCurrentUser)에서 도출한다.
@@ -46,6 +48,12 @@ export async function startAssessmentSessionAction(params: { anonymousId?: strin
   return { sessionId: session.id, assessmentId: assessment.id };
 }
 
+/** 화면이 넘긴 세션 번호가 지금 사람의 검사인지 확인한다. 남의 검사에 답을 넣거나 완료시키지 못하게. */
+async function assertOwnAssessmentSession(sessionId: string): Promise<void> {
+  const session = await getAssessmentSessionRepository().findById(sessionId);
+  if (!session || !(await isSessionOwner(session))) throw new Error("검사 세션을 찾을 수 없습니다.");
+}
+
 export async function submitAssessmentAnswerAction(params: {
   sessionId: string;
   questionId: string;
@@ -53,11 +61,13 @@ export async function submitAssessmentAnswerAction(params: {
   optionIds?: string[];
   rawValue?: unknown;
 }) {
+  await assertOwnAssessmentSession(params.sessionId);
   const session = await submitAssessmentAnswer(params);
   return { currentStep: session.currentStep, currentSection: session.currentSection, status: session.status };
 }
 
 export async function completeAssessmentSessionAction(sessionId: string) {
+  await assertOwnAssessmentSession(sessionId);
   const result = await completeAssessmentSession(sessionId);
   return { resultId: result.id, sessionId: result.sessionId };
 }

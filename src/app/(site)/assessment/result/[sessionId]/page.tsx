@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
 import { notFound } from "next/navigation";
+import { isSessionOwner } from "@/lib/auth/session-ownership";
 import {
   getAssessmentResultBySession,
   getContentRecommendationsForResult,
@@ -31,6 +32,8 @@ export default async function AssessmentResultPage({
   const found = await getAssessmentResultBySession(sessionId);
   if (!found) notFound();
   const { result } = found;
+  // 남의 결과는 없는 화면으로 보인다(있는지조차 알리지 않는다).
+  if (!(await isSessionOwner(result))) notFound();
 
   /*
     조회 기록은 화면을 그리는 데 필요한 값이 아니다. 기다리면 그만큼 화면이 늦게 뜬다.

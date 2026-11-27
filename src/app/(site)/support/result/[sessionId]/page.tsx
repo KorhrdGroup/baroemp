@@ -9,7 +9,8 @@ import { SupportMatchViewTracker } from "@/features/support/support-match-view-t
 import { SupportResultSections } from "@/features/support/support-card-grid";
 import { SupportResultHero } from "@/features/support/support-result-hero";
 import { SupportBookmarkedSection } from "@/features/support/support-bookmarked-section";
-import { getSupportProgramRepository } from "@/lib/repositories";
+import { getSupportAssessmentSessionRepository, getSupportProgramRepository } from "@/lib/repositories";
+import { isSessionOwner } from "@/lib/auth/session-ownership";
 import type { SupportEligibilityGrade, SupportProgram } from "@/types";
 import { getSupportResultView } from "@/services/support-search.service";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
@@ -23,6 +24,9 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
   const { sessionId } = await params;
   // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
   const user = await requireUser(`/support/result/${sessionId}`);
+  // 남의 진단 결과는 없는 화면으로 보인다(있는지조차 알리지 않는다).
+  const session = await getSupportAssessmentSessionRepository().findById(sessionId);
+  if (!session || !(await isSessionOwner(session))) notFound();
   const [view, bookmarkedIds] = await Promise.all([
     getSupportResultView(sessionId),
     getUserSupportBookmarkIdsAction(),
