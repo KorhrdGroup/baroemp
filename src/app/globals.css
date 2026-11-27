@@ -532,6 +532,39 @@
   to { stroke-dashoffset: 0; }
 }
 
+/*
+  일자리 찾기 "이런 일자리 어때요?" 들어올 때 한 번(job-curation-section 의 data-intro).
+  카드가 왼쪽부터 차례로 떠오르고 → 오른쪽 화살표가 톡 밀려 넘겨 볼 수 있음을 알린다. 탭을 바꿀 때도 카드는 다시 떠오른다.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  /* 탭을 바꿀 때: 새 카드가 바로 차례로 떠오른다. */
+  .jc-rise {
+    animation: jc-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--jc-i, 0) * 70ms);
+  }
+  /* 처음 들어올 때: 판이 자리 잡을 틈을 조금 두고 한 장씩 천천히. */
+  [data-intro="on"] .jc-rise {
+    animation-duration: 560ms;
+    animation-delay: calc(120ms + var(--jc-i, 0) * 100ms);
+  }
+  [data-intro="on"] .jc-nudge {
+    animation: jc-nudge 900ms cubic-bezier(0.33, 0, 0.2, 1) 900ms both;
+  }
+}
+
+@keyframes jc-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes jc-nudge {
+  0%, 100% { transform: none; }
+  22% { transform: translateX(5px); }
+  44% { transform: none; }
+  62% { transform: translateX(3px); }
+  80% { transform: none; }
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);

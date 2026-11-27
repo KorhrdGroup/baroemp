@@ -319,7 +319,8 @@ export function JobFiltersForm({
           className={cn(filterPillClass, filterPillOnClass, "flex items-center gap-1.5 whitespace-nowrap")}
         >
           {c.label}
-          <X aria-hidden className="size-3.5" strokeWidth={2.6} />
+          {/* 글자 먹 가운데가 X 보다 0.3px 위에 있어 X 가 처져 보였다 - 반 픽셀 올려 맞춘다. */}
+          <X aria-hidden className="size-3.5 -translate-y-[0.5px]" strokeWidth={2.6} />
         </button>
       ))}
       <button
@@ -344,16 +345,19 @@ export function JobFiltersForm({
 
   return (
     <>
-      <PageHead crumbs={[{ label: "일자리 찾기" }]} title="일자리 찾기" />
-
       {/*
-        흰 머리 아래 회색 바탕에 흰 판 · 흰 카드(모서리 20px, 테두리 없음).
         차례는 지금 운영 중인 사이트와 같게: 추천(이런 일자리 어때요?) → 검색바 · 고른 조건 줄 → 전체 공고.
-        검색바가 머리에 있을 때는 추천이 첫 화면 밖으로 밀려, 들어오자마자 볼 거리가 없었다.
+        추천은 흰 머리 안 제목 아래에 둔다 - 들어오자마자 볼 거리가 첫 화면에 있게. 판의 아래 여백(mb-8)은 머리 여백과 겹쳐 뺀다.
       */}
+      <PageHead
+        crumbs={[{ label: "일자리 찾기" }]}
+        title="일자리 찾기"
+        footer={curation && <div className="mt-6 sm:mt-8 [&>section]:mb-0">{curation}</div>}
+      />
+
+      {/* 흰 머리 아래 회색 바탕: 검색바 · 고른 조건 줄 → 전체 공고(흰 카드, 모서리 20px, 테두리 없음). */}
       <div className="bg-baro-page">
         <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-16 lg:px-8">
-          {curation}
           <div className="mb-8">
             {head}
             {chipRow}

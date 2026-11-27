@@ -84,6 +84,12 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
    */
   const rowRef = useRef<HTMLDivElement>(null);
   const [fade, setFade] = useState({ start: false, end: false });
+  /* 들어올 때 한 번: 카드 떠오르기 → 오른쪽 화살표 톡. 끝나면 표시를 떼어, 탭을 바꿀 때는 카드만 조금 빠르게 다시 떠오른다(globals.css .jc-rise). */
+  const [intro, setIntro] = useState(true);
+  useEffect(() => {
+    const id = setTimeout(() => setIntro(false), 2400);
+    return () => clearTimeout(id);
+  }, []);
 
   /*
     넓은 화면은 스크롤바 대신 좌우 화살표로 넘긴다. 호버해야 보이는 얇은 막대는 옆에 더 있는 줄 모르고 지나치기 쉽고 잡기도 어려웠다.
@@ -214,7 +220,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
-    <section className="mb-8 rounded-card bg-baro-blue-100 p-5 pt-6 sm:p-6 sm:pt-8">
+    <section data-intro={intro ? "on" : undefined} className="mb-8 rounded-card bg-baro-blue-100 p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
       {/*
         제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
@@ -349,7 +355,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             type="button"
             onClick={() => scrollRow(1)}
             aria-label="다음 공고 보기"
-            className="absolute top-1/2 -right-5 z-20 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-800 shadow-[0_4px_12px_rgba(15,40,90,0.16)] sm:flex"
+            className="jc-nudge absolute top-1/2 -right-5 z-20 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-800 shadow-[0_4px_12px_rgba(15,40,90,0.16)] sm:flex"
           >
             <ChevronRight aria-hidden className="size-5" strokeWidth={2.4} />
           </button>
@@ -360,13 +366,15 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
           onScroll={syncFade}
           className="scrollbar-hidden flex snap-x snap-mandatory gap-4 overflow-x-auto"
         >
-          {current.items.map((item) => {
+          {current.items.map((item, i) => {
             return (
               <div
-                key={item.job.id}
+                /* 탭마다 새로 그려 카드가 다시 떠오르게 한다 - 두 탭에 같은 공고가 있어도 그대로 남지 않게 탭 이름을 붙인다. */
+                key={`${activeTab}-${item.job.id}`}
+                style={{ ["--jc-i" as string]: Math.min(i, 3) }}
                 /* 한 장뿐인 탭에서는 옆에 늘어날 카드가 없어 내용 높이로 주저앉는다.
                    탭을 옮길 때마다 띠 높이가 널뛰지 않게 여기서도 최소 높이를 준다. */
-                className={cn("shrink-0 snap-start", CARD_WIDTH, CARD_HEIGHT)}
+                className={cn("jc-rise shrink-0 snap-start", CARD_WIDTH, CARD_HEIGHT)}
                 onClickCapture={(e) => {
                   const t = e.target as HTMLElement;
                   if (t.closest("button")) return;
