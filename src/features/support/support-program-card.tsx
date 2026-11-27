@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SupportBookmarkButton } from "./support-bookmark-button";
 import { guessRegionFromText, labelOrganization, REGION_LABELS } from "@/lib/labels";
@@ -23,6 +22,29 @@ function regionLabel(program: SupportProgram, organization: string): string | un
   return guessRegionFromText(organization) === program.regionScope ? undefined : label;
 }
 
+/* 카드에 쓸 짧은 조건 이름. 판정 문구("거주지역 조건 일치")를 그대로 쓰지 않는다. 여기 없는 근거는 카드에 보이지 않는다. */
+const REASON_NAME: Record<string, string> = {
+  region_match: "지역",
+  employment_status: "취업 상태",
+  qualification: "자격",
+  job_category: "경력",
+  training_willingness: "교육 의향",
+  age_range: "나이",
+  age_group: "나이",
+  region_national: "전국 대상",
+};
+/* 판정은 늘 연령부터라 그대로 두면 맨 앞이 다 "나이"가 된다. 사람을 더 가르는 조건부터 보인다. */
+const REASON_ORDER = Object.keys(REASON_NAME);
+
+/** 맞은 근거 → 조건 이름(겹치는 이름은 한 번만). */
+function reasonNames(reasons: MatchReasonDetail[] = []): string[] {
+  const names = reasons
+    .filter((r) => REASON_NAME[r.ruleKey])
+    .sort((a, b) => REASON_ORDER.indexOf(a.ruleKey) - REASON_ORDER.indexOf(b.ruleKey))
+    .map((r) => REASON_NAME[r.ruleKey]);
+  return names.filter((n, i) => names.indexOf(n) === i);
+}
+
 export function SupportProgramCard({
   program,
   grade,
@@ -36,7 +58,7 @@ export function SupportProgramCard({
   isAuthenticated?: boolean;
   isBookmarked?: boolean;
 }) {
-  const topReason = reasons?.[0]?.label;
+  const matchedNames = reasonNames(reasons);
   const organization = program.organizationName ?? program.organization;
   const orgName = labelOrganization(organization);
   const logo = resolveOrganizationLogo(organization);
@@ -50,9 +72,9 @@ export function SupportProgramCard({
       /*
         일자리 카드(JobCard)와 같은 틀 · 같은 차례로 둔다: 제목(굵게) → 기관 · 지역 → 맞은 근거 → 아랫줄(등급 · 신청기간 · 찜).
         예전에는 기관 · 등급 알약이 맨 위에 있어 제목이 두 번째 줄로 밀리고, 두 카드가 서로 다른 규칙으로 보였다.
-        세부 화면 공통 바탕대로 호버 효과는 두지 않는다. /draft3 색 판 안에서는 회색 띠 위의 흰 카드라 테두리를 걷고 모서리 20px.
+        마우스를 올리면 일자리 카드와 같은 그림자(shadow-hover). /draft3 색 판 안에서는 회색 띠 위의 흰 카드라 테두리를 걷고 모서리 20px.
       */
-      className="flex h-full flex-col rounded-2xl border border-border bg-white p-5 in-[.draft3-theme]:rounded-card in-[.draft3-theme]:border-0"
+      className="flex h-full flex-col rounded-2xl border border-border bg-white p-5 transition-shadow duration-200 hover:shadow-hover in-[.draft3-theme]:rounded-card in-[.draft3-theme]:border-0"
     >
       {/*
         break-keep 이 없으면 한글이 음절 단위로 잘린다. 일자리 카드 제목과 같은 규칙.
@@ -77,13 +99,13 @@ export function SupportProgramCard({
       </p>
 
       {/*
-        결과 화면에서 맞은 근거 한 줄. 카드마다 파란 글자가 있으면 목록 전체가 파래져 회색으로 둔다.
-        체크는 글꼴 기호(✓)마다 모양 · 굵기가 달라 그림(lucide Check)으로 그린다.
+        결과 화면에서 맞은 조건 한 줄: "지역, 교육 의향, 나이 조건이 맞아요". 조건 이름만 조금 진하게.
+        칩으로 두면 아래 등급 표시와 모양이 겹쳐 따로 놀아, 다른 카드처럼 글자 줄로 둔다. 길면 한 줄 끝에서 줄인다.
+        카드마다 파란 글자가 있으면 목록 전체가 파래져 회색으로 둔다.
       */}
-      {topReason && (
-        <p className="mt-3 flex min-w-0 items-center gap-1 text-body-3 font-medium text-slate-600">
-          <Check aria-hidden className="size-3.5 shrink-0" strokeWidth={2.6} />
-          <span className="truncate">{topReason}</span>
+      {matchedNames.length > 0 && (
+        <p className="mt-3 truncate text-body-3 font-medium text-slate-600">
+          <span className="font-semibold text-slate-800">{matchedNames.join(", ")}</span> 조건이 맞아요
         </p>
       )}
 

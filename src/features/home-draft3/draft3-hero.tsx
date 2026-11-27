@@ -39,7 +39,7 @@ export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
             <span>{today} 기준</span>
             <span aria-hidden className="h-3 w-px bg-white/30" />
             <span>
-              진행 중인 공고 <CountUp value={activeCount} className="font-bold text-baro-blue-300" />건
+              진행 중인 공고 <CountUp value={activeCount} className="font-semibold text-baro-blue-300" />건
             </span>
           </p>
         )}
@@ -62,7 +62,7 @@ export function Draft3Hero({ activeCount }: { activeCount: number | null }) {
           />
           <button
             type="submit"
-            className="m-1.5 flex h-[calc(100%-12px)] shrink-0 items-center gap-1.5 rounded-xl bg-atomic-blue-600 px-5 text-body-1 font-bold text-white sm:px-7"
+            className="m-1.5 flex h-[calc(100%-12px)] shrink-0 items-center gap-1.5 rounded-xl bg-atomic-blue-600 px-5 text-body-1 font-semibold text-white sm:px-7"
           >
             <Search className="size-5" aria-hidden />
             검색

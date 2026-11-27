@@ -8,7 +8,7 @@ import { EmptyState } from "@/components/common/empty-state";
 import { SupportMatchViewTracker } from "@/features/support/support-match-view-tracker";
 import { SupportResultSections } from "@/features/support/support-card-grid";
 import { SupportResultHero } from "@/features/support/support-result-hero";
-import { SupportProgramCard } from "@/features/support/support-program-card";
+import { SupportBookmarkedSection } from "@/features/support/support-bookmarked-section";
 import { getSupportProgramRepository } from "@/lib/repositories";
 import type { SupportEligibilityGrade, SupportProgram } from "@/types";
 import { getSupportResultView } from "@/services/support-search.service";
@@ -67,33 +67,24 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
       />
 
     <div className="mx-auto max-w-7xl px-4.5 pt-4 pb-20 lg:px-8">
-      {bookmarkedPrograms.length > 0 && (
-        <section aria-labelledby="support-bookmarks" className="mt-5 border-b border-slate-200 pb-10">
-          <div className="mb-5 flex items-center gap-2.5">
-            <h2 id="support-bookmarks" className="text-title-3 font-extrabold text-slate-900">
-              찜한 지원금
-            </h2>
-            <span className="rounded-full bg-white px-2 py-0.5 text-caption-1 font-semibold text-slate-600">
-              {bookmarkedPrograms.length}
-            </span>
-          </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {bookmarkedPrograms.map((program) => {
-              const match = matchById.get(program.id);
-              return (
-                <SupportProgramCard
-                  key={program.id}
-                  program={program}
-                  grade={match ? ((match.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade) : undefined}
-                  reasons={match?.reasons}
-                  isAuthenticated
-                  isBookmarked
-                />
-              );
-            })}
-          </div>
-        </section>
-      )}
+      {/* 찜한 지원금은 결과 맨 위에. 아래 카드에서 찜하면 새로 고치지 않아도 바로 여기 붙는다. */}
+      <SupportBookmarkedSection
+        initial={bookmarkedPrograms.map((program) => {
+          const match = matchById.get(program.id);
+          return {
+            program,
+            grade: match ? ((match.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade) : undefined,
+            reasons: match?.reasons,
+          };
+        })}
+        pool={view.categories.flatMap((c) =>
+          c.items.map(({ program, matchResult }) => ({
+            program,
+            grade: (matchResult.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade,
+            reasons: matchResult.reasons,
+          })),
+        )}
+      />
       {view.totalCount === 0 ? (
         <EmptyState
           className="mt-5 rounded-card border-0 bg-white"
@@ -101,7 +92,7 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
           title="조건에 맞는 지원제도를 찾지 못했어요"
           description="조건을 다시 입력하거나 잠시 후 다시 시도해주세요."
           action={
-            <Button className="h-12 rounded-xl bg-atomic-blue-600 px-6 text-body-2 font-bold text-white" asChild>
+            <Button className="h-12 rounded-xl bg-atomic-blue-600 px-6 text-body-2 font-semibold text-white" asChild>
               <Link href="/support">다시 진단하기</Link>
             </Button>
           }

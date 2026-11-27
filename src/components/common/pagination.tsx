@@ -76,7 +76,7 @@ export function Pagination({
             className={cn(
               "flex size-10 items-center justify-center rounded-md text-label-1 transition-colors duration-200",
               current
-                ? "bg-brand-blue-400 font-bold text-white"
+                ? "bg-brand-blue-400 font-semibold text-white"
                 : "font-medium text-slate-600 hover:bg-slate-200 hover:text-slate-900",
             )}
           >

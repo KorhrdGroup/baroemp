@@ -51,7 +51,7 @@ export async function ProgressStepsSection() {
                   <p className="text-label-1 font-semibold text-brand-blue-600">
                     {user?.name ?? "회원"}님, 이런 일자리 어떠세요?
                   </p>
-                  <p className="mt-2 text-body-2 font-bold text-slate-900">{recommended.title}</p>
+                  <p className="mt-2 text-body-2 font-semibold text-slate-900">{recommended.title}</p>
                   <p className="mt-1 text-label-1 text-slate-500">
                     {recommended.companyName}
                     {/* 점수 숫자는 회원에게 뜻이 없다. 가장 크게 맞은 조건을 대신 적는다 (마이페이지·일자리와 같은 원칙). */}

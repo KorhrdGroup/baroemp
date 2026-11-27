@@ -36,7 +36,7 @@ export function ChipToggle({
         /* 고른 칩은 파랑으로 채운다. 선만 바꾸면 고른 것과 안 고른 것이 잘 구별되지 않는다. */
         "h-10 cursor-pointer rounded-full border px-4 text-body-3",
         selected
-          ? "border-baro-blue bg-baro-blue font-bold text-white"
+          ? "border-baro-blue bg-baro-blue font-semibold text-white"
           : "border-slate-300 bg-white font-medium text-slate-700",
       )}
     >

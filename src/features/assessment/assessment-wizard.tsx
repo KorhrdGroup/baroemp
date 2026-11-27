@@ -232,7 +232,7 @@ export function AssessmentWizard({
       {/* 문항 */}
       <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
         {/* 분류 안에서 몇 번째 문항인지 - 질문과 함께 읽히는 정보라 질문 위에 둔다. */}
-        <p className="text-center text-body-2 font-bold text-slate-900">
+        <p className="text-center text-body-2 font-semibold text-slate-900">
           {posInSection + 1}/{sectionTotal}
         </p>
         {/*
@@ -282,7 +282,7 @@ export function AssessmentWizard({
           <Button
             onClick={handleNext}
             disabled={submitting || (question.required && !canProceed)}
-            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold text-white"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold text-white"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

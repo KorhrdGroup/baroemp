@@ -374,7 +374,7 @@ export function CoverLetterEditor({
               {written ? (
                 <Check className="size-3.5 text-brand-blue-600" />
               ) : (
-                <span className="text-caption-1 font-bold text-slate-600">{idx + 1}</span>
+                <span className="text-caption-1 font-semibold text-slate-600">{idx + 1}</span>
               )}
               {questionHeading(section.questionType, section.question)}
             </button>
@@ -397,8 +397,8 @@ export function CoverLetterEditor({
       <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-28 lg:grid lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:items-start lg:gap-8 lg:px-8 lg:pb-20">
         <aside className="hidden rounded-card bg-white p-5 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:block">
           <div className="flex items-baseline justify-between gap-2">
-            <p className="text-body-2 font-bold text-slate-900">채운 문항</p>
-            <p className="text-title-3 font-extrabold text-baro-blue-600">
+            <p className="text-body-2 font-semibold text-slate-900">채운 문항</p>
+            <p className="text-title-3 font-bold text-baro-blue-600">
               {writtenCount} / {sections.length}
             </p>
           </div>
@@ -418,7 +418,7 @@ export function CoverLetterEditor({
               <Eye className="size-4" /> 미리보기
             </Button>
             <Button
-              className="h-12 rounded-xl bg-baro-navy text-body-2 font-bold text-white"
+              className="h-12 rounded-xl bg-baro-navy text-body-2 font-semibold text-white"
               onClick={() => void handleSave()}
               disabled={isSaving || !isDirty}
             >
@@ -433,8 +433,8 @@ export function CoverLetterEditor({
           </Link>
 
           <div className="mt-3 border-t border-border pt-4">
-          <p className="px-1 pb-1 text-caption-1 font-semibold text-slate-600">문항 {sections.length}개</p>
-          <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+          <p className="px-1 pb-2 text-caption-1 font-semibold text-slate-600">문항 {sections.length}개</p>
+          <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:gap-1 lg:overflow-visible">
             {sections.map((section, idx) => {
               const written = Boolean(section.content?.trim());
               const isActive = section._key === active?._key;
@@ -446,13 +446,13 @@ export function CoverLetterEditor({
                     aria-current={isActive}
                     className={cn(
                       // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
-                      "flex w-full max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-body-3 lg:max-w-none",
-                      isActive ? "bg-baro-blue-50 font-bold text-baro-blue-600" : "font-semibold text-slate-800",
+                      "flex w-full max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-body-3 lg:max-w-none lg:gap-3 lg:rounded-xl lg:px-3 lg:py-3",
+                      isActive ? "bg-baro-blue-50 font-semibold text-baro-blue-600" : "font-semibold text-slate-800",
                     )}
                   >
                     <span
                       className={cn(
-                        "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-bold",
+                        "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-semibold",
                         written
                           ? "bg-brand-blue-600 text-white"
                           : isActive
@@ -470,7 +470,7 @@ export function CoverLetterEditor({
           </ul>
           <Button
             variant="outline"
-            className="mt-2 h-11 w-full rounded-xl border-slate-300 bg-white text-body-3 font-semibold text-slate-700"
+            className="mt-3 h-12 w-full rounded-xl border-slate-300 bg-white text-body-3 font-semibold text-slate-700"
             onClick={addSection}
           >
             <Plus className="size-4" /> 문항 추가
@@ -534,10 +534,10 @@ export function CoverLetterEditor({
               {/*
                 Textarea 는 field-sizing-content 라 rows 를 무시하고 내용만큼만 커진다.
                 빈 칸이 두 줄짜리로 보이면 한 문단 쓰는 자리로 안 읽혀서 최소 높이를 직접 준다.
-                글자도 기본값(md:text-label-1, 14px)이면 길게 쓰는 칸치고 작아 16px로 올린다.
+                글자도 기본값(md:text-label-1, 14px)이면 길게 쓰는 칸치고 작아, 좁은 화면 16px · 넓은 화면 18px, 줄 간격 1.7로 둔다.
               */}
               <Textarea
-                className="mt-2 min-h-80 border-slate-300 bg-white text-body-2 leading-relaxed font-medium md:text-body-2"
+                className="mt-2 min-h-80 border-slate-300 bg-white text-body-2 leading-[1.7] font-medium md:text-body-1 md:leading-[1.7]"
                 value={active.content ?? ""}
                 onChange={(e) => updateSection(active._key, { content: e.target.value })}
                 placeholder="이 질문에 대한 답변을 작성해주세요."
@@ -571,7 +571,7 @@ export function CoverLetterEditor({
                       <p className="whitespace-pre-line text-slate-700">{suggestion.text}</p>
                       <Button
                         size="sm"
-                        className="mt-2 bg-atomic-blue-600 font-bold text-white"
+                        className="mt-2 bg-atomic-blue-600 font-semibold text-white"
                         onClick={() => {
                           updateSection(active._key, { content: suggestion.text });
                           setSuggestions((prev) => {
@@ -643,7 +643,7 @@ export function CoverLetterEditor({
                           /* 고른 경험은 파랑으로 채운다. 선만 바꾸면 고른 것과 안 고른 것이 잘 구별되지 않는다. */
                           "flex h-10 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-body-3",
                           checked
-                            ? "border-baro-blue bg-baro-blue font-bold text-white"
+                            ? "border-baro-blue bg-baro-blue font-semibold text-white"
                             : "border-slate-300 bg-white font-medium text-slate-700",
                         )}
                       >
@@ -703,7 +703,7 @@ export function CoverLetterEditor({
               <Eye className="size-4" /> 미리보기
             </Button>
             {/* 넓은 화면에서만 넉넉히 잡는다. 좁은 화면에서는 이 폭 때문에 줄이 넘쳤다. */}
-            <Button size="sm" className="h-12 bg-atomic-blue-600 font-bold text-white sm:min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
+            <Button size="sm" className="h-12 bg-atomic-blue-600 font-semibold text-white sm:min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
               {isSaving && <Loader2 className="size-4 animate-spin" />}
               {isSaving || isDirty ? "저장" : "저장됨"}
             </Button>
@@ -720,7 +720,7 @@ export function CoverLetterEditor({
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="draft3-theme rounded-card print:hidden sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">미리보기</DialogTitle>
+            <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">미리보기</DialogTitle>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-gov-surface p-4">
             <CoverLetterPreview detail={currentPreviewDetail()} applicantName={applicantName} />
@@ -737,7 +737,7 @@ export function CoverLetterEditor({
       <Dialog open={swapOpen} onOpenChange={setSwapOpen}>
         <DialogContent className="draft3-theme max-h-[80vh] overflow-y-auto rounded-card sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">어떤 문항으로 바꿀까요?</DialogTitle>
+            <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">어떤 문항으로 바꿀까요?</DialogTitle>
             <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
               이미 쓴 내용은 지워지지 않아요. 질문만 바뀝니다.
             </DialogDescription>

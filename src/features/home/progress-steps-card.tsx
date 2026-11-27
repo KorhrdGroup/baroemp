@@ -74,7 +74,7 @@ export function ProgressStepsCard({
                   aria-pressed={active}
                   aria-label={`${step.title} 단계 안내 보기`}
                   className={
-                    "relative z-10 mx-auto flex size-9 cursor-pointer items-center justify-center rounded-full text-label-1 font-bold transition-all duration-300 sm:size-10 " +
+                    "relative z-10 mx-auto flex size-9 cursor-pointer items-center justify-center rounded-full text-label-1 font-semibold transition-all duration-300 sm:size-10 " +
                     (done
                       ? "bg-brand-blue-400 text-white"
                       : active

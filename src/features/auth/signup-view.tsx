@@ -219,7 +219,7 @@ export function SignupView({ next }: { next: string }) {
             [선택] 마케팅 정보·알림톡 수신 동의
           </Checkbox>
           <p className="-mt-1 pl-7 text-body-3 leading-relaxed font-medium break-keep text-slate-600">
-            내 조건에 맞는 채용공고·지원금 소식을 카카오 알림톡으로 보내드려요. 무료이며 마이페이지에서 언제든 철회할 수 있어요.
+            받을 수 있는 지원금·교육 안내와 서비스 소식을 카카오 알림톡으로 보내드려요. 무료이며 마이페이지에서 언제든 철회할 수 있어요.
           </p>
           {/* 서버 액션이 checkbox 값을 formData에서 읽으므로 실제 name 속성이 붙은 hidden input으로 동기화한다. */}
           <input type="hidden" name="privacyConsent" value={agreeRequired ? "on" : ""} />

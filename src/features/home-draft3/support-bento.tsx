@@ -71,7 +71,7 @@ export function SupportBento() {
                   {item.org} · {item.region}
                 </p>
               </div>
-              <p className="shrink-0 text-body-1 font-bold text-slate-900">
+              <p className="shrink-0 text-body-1 font-semibold text-slate-900">
                 <AmountText amount={item.amount} />
               </p>
             </Link>

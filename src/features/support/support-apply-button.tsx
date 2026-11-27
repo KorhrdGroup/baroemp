@@ -26,7 +26,7 @@ export function SupportApplyButton({
     <Button
       type="button"
       size="lg"
-      className={className ?? "h-12 w-full bg-atomic-blue-600 font-bold"}
+      className={className ?? "h-12 w-full bg-atomic-blue-600 font-semibold"}
       onClick={() => void handleClick()}
     >
       <ExternalLink className="size-4" />

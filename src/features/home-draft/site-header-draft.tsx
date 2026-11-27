@@ -85,7 +85,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
                   aria-current={current ? "page" : undefined}
                   className={cn(
                     "px-4 py-2 text-body-1 whitespace-nowrap lg:px-2.5 xl:px-5",
-                    current ? cn("font-bold", d3 ? "text-baro-blue" : "text-brand-blue-600") : "font-semibold text-slate-800",
+                    current ? cn("font-semibold", d3 ? "text-baro-blue" : "text-brand-blue-600") : "font-semibold text-slate-800",
                   )}
                 >
                   {item.label}
@@ -134,7 +134,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
               {/* 관리자 화면은 머리글에 두지 않는다. 관리자는 /admin 주소로 바로 들어간다. */}
               <Button
                 size="sm"
-                className={cn("hidden lg:inline-flex", d3 ? "h-11 rounded-full bg-baro-navy px-5 text-body-2 font-bold" : "bg-brand-blue-600")}
+                className={cn("hidden lg:inline-flex", d3 ? "h-11 rounded-full bg-baro-navy px-5 text-body-2 font-semibold" : "bg-brand-blue-600")}
                 asChild
               >
                 <Link href="/mypage">마이페이지</Link>
@@ -149,7 +149,7 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
             /* 버튼 하나로 합쳤다. 회원가입은 로그인 화면 하단 링크로 이어진다. */
             <Button
               size="sm"
-              className={cn(d3 ? "rounded-full bg-baro-navy lg:h-11 lg:px-5 lg:text-body-2 lg:font-bold" : "bg-brand-blue-600")}
+              className={cn(d3 ? "rounded-full bg-baro-navy lg:h-11 lg:px-5 lg:text-body-2 lg:font-semibold" : "bg-brand-blue-600")}
               asChild
             >
               <Link href={loginHref}>로그인/회원가입</Link>

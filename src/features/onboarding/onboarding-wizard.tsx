@@ -79,7 +79,7 @@ const STEPS: StepConfig[] = [
     id: "contact",
     group: "contact",
     title: "맞춤 정보를 알림톡으로 받아보시겠어요?",
-    description: "조건에 맞는 새 공고·지원금이 열릴 때 먼저 알려드려요.",
+    description: "받을 수 있는 지원금·교육 제도가 열릴 때 먼저 알려드려요.",
   },
 ];
 
@@ -346,7 +346,7 @@ export function OnboardingWizard({
         )}
         {/* 한 단계뿐인 분류에서 "1/1"은 알려주는 게 없다. */}
         {groupSteps.length > 1 && (
-          <p className="text-center text-body-2 font-bold text-slate-900">
+          <p className="text-center text-body-2 font-semibold text-slate-900">
             {posInGroup + 1}/{groupSteps.length}
           </p>
         )}
@@ -375,7 +375,7 @@ export function OnboardingWizard({
           <Button
             onClick={handleNext}
             disabled={submitting}
-            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold text-white"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold text-white"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "저장하고 시작하기" : "다음"}
           </Button>
@@ -632,7 +632,7 @@ function StepBody({
                 checked={answers.marketingConsent}
                 onCheckedChange={(v) => onChange({ marketingConsent: v === true })}
               />
-              <span>맞춤 채용공고·지원금 정보를 알림톡으로 받는 데 동의합니다. (선택, 언제든 해지 가능)</span>
+              <span>지원금·교육훈련 안내와 서비스 소식을 알림톡으로 받는 데 동의합니다. (선택, 언제든 해지 가능)</span>
             </label>
           )}
         </div>

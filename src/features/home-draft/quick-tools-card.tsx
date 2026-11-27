@@ -26,7 +26,7 @@ export function QuickToolsCard() {
         className="col-span-2 flex items-center justify-between gap-4 rounded-2xl bg-brand-blue-50 px-5 py-4 lg:px-6"
       >
         <span className="flex flex-col items-start">
-          <span className="text-body-1 font-bold text-slate-900">{main.label}</span>
+          <span className="text-body-1 font-semibold text-slate-900">{main.label}</span>
           <span className="mt-0.5 text-body-3 font-medium text-slate-700">{main.desc}</span>
           {/* 누르는 곳임이 보이게 흰 알약 단추 모양으로. 링크는 카드 전체다. */}
           <span className="mt-2.5 inline-flex items-center gap-0.5 rounded-full bg-white py-1 pr-2 pl-3 text-body-3 font-semibold text-brand-blue-600">

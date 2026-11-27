@@ -77,7 +77,7 @@ export function ScreenScaleControl({ compact = false }: { compact?: boolean }) {
               "relative tap-44 flex size-8 cursor-pointer items-center justify-center rounded-full leading-none transition-colors duration-200",
               level.size,
               on
-                ? "bg-white font-bold text-baro-navy shadow-chip"
+                ? "bg-white font-semibold text-baro-navy shadow-chip"
                 : "font-semibold text-slate-500",
             )}
           >

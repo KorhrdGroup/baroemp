@@ -78,7 +78,7 @@ export function FirstQuestionCard({ step, q, options, start }: { step: string; q
 
   return (
     <div className="mx-auto w-full max-w-[26rem] translate-y-6 rounded-t-card bg-white p-6 pb-10 shadow-float">
-      <div className="flex items-center justify-between text-caption-1 font-bold">
+      <div className="flex items-center justify-between text-caption-1 font-semibold">
         <span className="text-baro-blue-600">{step}</span>
         <span className="text-slate-600">첫 질문</span>
       </div>

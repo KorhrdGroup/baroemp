@@ -108,7 +108,7 @@ function InfoRow({ label, value }: { label: string; value?: string }) {
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
     <section className="mt-10">
-      <h2 className="text-title-3 font-extrabold text-slate-900">{title}</h2>
+      <h2 className="text-title-3 font-bold text-slate-900">{title}</h2>
       {description && <p className="mt-1 text-body-3 font-medium text-slate-600">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>
@@ -307,7 +307,7 @@ export function JobDetailView({
           <p className="text-body-2 font-semibold break-keep text-slate-800">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
           <Link
             href="/assessment"
-            className="inline-flex h-11 shrink-0 items-center rounded-xl bg-atomic-blue-600 px-5 text-body-3 font-bold text-white"
+            className="inline-flex h-11 shrink-0 items-center rounded-xl bg-atomic-blue-600 px-5 text-body-3 font-semibold text-white"
           >
             내게 맞는 직업 찾기
           </Link>
@@ -363,7 +363,7 @@ export function JobDetailView({
      <aside className="sticky top-24 mt-10 hidden lg:block">
       <div className="rounded-card bg-white p-6">
         <p className="text-body-3 font-semibold text-slate-600">급여</p>
-        <p className="mt-1 text-title-3 font-extrabold break-keep text-slate-900">{formatSalary(job)}</p>
+        <p className="mt-1 text-title-3 font-bold break-keep text-slate-900">{formatSalary(job)}</p>
         <dl className="mt-5 space-y-3 text-body-3">
           {[
             ["마감일", job.applyDeadline ? job.applyDeadline.slice(0, 10) : "상시채용"],
@@ -379,7 +379,7 @@ export function JobDetailView({
             ))}
         </dl>
         <div className="mt-6 flex flex-col gap-2">
-          <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold" />
+          <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold" />
           <JobBookmarkButton
             jobId={job.id}
             jobCategory={job.jobCategory}
@@ -408,7 +408,7 @@ export function JobDetailView({
     <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white lg:hidden">
       <div className="mx-auto flex max-w-7xl items-center gap-3 px-4.5 py-3 lg:px-8">
         <div className="flex w-full max-w-3xl items-center gap-3">
-        <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 rounded-xl bg-atomic-blue-600 text-body-1 font-bold" />
+        <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 rounded-xl bg-atomic-blue-600 text-body-1 font-semibold" />
         <JobBookmarkButton
           jobId={job.id}
           jobCategory={job.jobCategory}

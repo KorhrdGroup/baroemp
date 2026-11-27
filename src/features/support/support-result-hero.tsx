@@ -54,7 +54,7 @@ export function SupportResultHero({
                 <li
                   key={t}
                   className={cn(
-                    "rounded-full px-3.5 py-1.5 text-body-3 font-bold",
+                    "rounded-full px-3.5 py-1.5 text-body-3 font-semibold",
                     /* 남색 판 위라 둘째부터는 남색 알약 대신 반투명 흰 알약(남색끼리 겹치면 안 보인다). */
                     i === 0 ? "bg-white text-baro-blue-600" : "bg-white/20 text-white",
                   )}
@@ -87,7 +87,7 @@ export function SupportResultHero({
                     {gradeCounts[g]}
                   </span>
                 </span>
-                <span className="mt-2.5 text-body-2 font-bold whitespace-nowrap text-white">
+                <span className="mt-2.5 text-body-2 font-semibold whitespace-nowrap text-white">
                   {SUPPORT_ELIGIBILITY_GRADE_LABELS[g]}
                 </span>
               </li>

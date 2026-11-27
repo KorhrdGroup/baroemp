@@ -19,7 +19,8 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
       {/* 세션이 끊기거나 다른 탭에서 바뀌어도 헤더가 서버 상태 그대로 남지 않게 한다. */}
       <SessionSync serverHasUser={Boolean(user)} />
       {user && <BookmarkMergeOnLogin />}
-      <main className="flex-1">{children}</main>
+      {/* 내용이 짧은 화면도 푸터 위까지 바탕색이 차게: 바로 아래에 .page-fill 을 둔 화면만 세로로 늘린다(다른 화면 배치는 그대로). */}
+      <main className="flex-1 has-[>.page-fill]:flex has-[>.page-fill]:flex-col">{children}</main>
       <SiteFooterGate>
         <SiteFooter />
       </SiteFooterGate>

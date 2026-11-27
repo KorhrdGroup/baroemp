@@ -36,7 +36,7 @@ function fmt(iso: string) {
 function SectionHeader({ title, count, description }: { title: string; count: number; description?: string }) {
   return (
     <div className="min-w-0">
-      <h2 className="text-title-3 font-extrabold text-slate-900">
+      <h2 className="text-title-3 font-bold text-slate-900">
         {title}
         <span className={cn(sectionCountClass, "text-slate-600")}>{count}</span>
       </h2>
@@ -52,7 +52,7 @@ function NewCard({ href, label, hint, locked, lockedMessage }: { href: string; l
       <span className="flex size-14 items-center justify-center rounded-full bg-baro-blue-50 text-baro-blue-600">
         <Plus className="size-6" strokeWidth={2.4} />
       </span>
-      <span className="mt-4 text-body-1 font-bold text-slate-900">{label}</span>
+      <span className="mt-4 text-body-1 font-semibold text-slate-900">{label}</span>
       <span className="mt-1 px-6 text-center text-body-3 font-medium break-keep text-slate-600">
         {locked ? lockedMessage : hint}
       </span>
@@ -98,7 +98,7 @@ export default async function ResumeListPage() {
             {resumes.map((r) => {
               const done = r.completeness >= 100;
               return (
-                <Link key={r.id} href={`/resume/${r.id}/edit`} className="relative flex min-h-[12rem] flex-col rounded-card bg-white p-5">
+                <Link key={r.id} href={`/resume/${r.id}/edit`} className="relative flex min-h-[12rem] flex-col rounded-card bg-white p-5 transition-shadow duration-200 hover:shadow-hover">
                                     <div className="absolute top-4 right-4">
                     <DocumentMenu
                       label="이력서"
@@ -117,13 +117,13 @@ export default async function ResumeListPage() {
                   </div>
                   <div className="flex items-center gap-1.5">
                     {r.isPrimary && (
-                      <span className="rounded-full bg-baro-blue px-2.5 py-0.5 text-caption-1 font-bold text-white">대표</span>
+                      <span className="rounded-full bg-baro-blue px-2.5 py-0.5 text-caption-1 font-semibold text-white">대표</span>
                     )}
                     <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-caption-1 font-semibold text-slate-700">
                       {r.status === "completed" ? "완성" : r.status === "archived" ? "보관" : "작성중"}
                     </span>
                   </div>
-                  <h3 className={cn("mt-2 line-clamp-2 pr-2 text-body-1 leading-snug font-bold break-keep", r.title ? "text-slate-900" : "text-slate-600")}>
+                  <h3 className={cn("mt-2 line-clamp-2 pr-2 text-body-1 leading-snug font-semibold break-keep", r.title ? "text-slate-900" : "text-slate-600")}>
                     {r.title || "제목 없는 이력서"}
                   </h3>
                   <p className="mt-1 truncate text-body-3 font-medium text-slate-600">
@@ -159,7 +159,7 @@ export default async function ResumeListPage() {
                 lockedMessage={COVER_LETTER_LIMIT_MESSAGE}
               />
               {coverLetters.map((cl) => (
-                <Link key={cl.id} href={`/cover-letter/${cl.id}/edit`} className="relative flex min-h-[12rem] flex-col rounded-card bg-white p-5">
+                <Link key={cl.id} href={`/cover-letter/${cl.id}/edit`} className="relative flex min-h-[12rem] flex-col rounded-card bg-white p-5 transition-shadow duration-200 hover:shadow-hover">
                                     <div className="absolute top-4 right-4">
                     <DocumentMenu
                       label="자기소개서"
@@ -171,7 +171,7 @@ export default async function ResumeListPage() {
                       }}
                     />
                   </div>
-                  <h3 className={cn("line-clamp-2 pr-8 text-body-1 leading-snug font-bold break-keep", cl.title ? "text-slate-900" : "text-slate-600")}>
+                  <h3 className={cn("line-clamp-2 pr-8 text-body-1 leading-snug font-semibold break-keep", cl.title ? "text-slate-900" : "text-slate-600")}>
                     {cl.title || "제목 없는 자기소개서"}
                   </h3>
                   <p className="mt-1 text-body-3 font-medium text-slate-600">{fmt(cl.updatedAt)} 수정</p>

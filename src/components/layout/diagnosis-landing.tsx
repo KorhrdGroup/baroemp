@@ -157,7 +157,7 @@ export function DiagnosisLanding({
                     <span className="flex size-16 items-center justify-center rounded-full bg-gov-surface sm:size-20 [&>svg]:size-11 sm:[&>svg]:size-14">
                       <LandingItemIcon id={icon} />
                     </span>
-                    <p className="mt-3 text-body-2 font-bold break-keep text-slate-900">{itemTitle}</p>
+                    <p className="mt-3 text-body-2 font-semibold break-keep text-slate-900">{itemTitle}</p>
                     <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{desc}</p>
                   </li>
                 ))}
@@ -197,8 +197,8 @@ export function DiagnosisLanding({
                         {Icon && <Icon aria-hidden strokeWidth={1.5} className="size-7 text-baro-navy sm:size-8" />}
                       </span>
                       <div className="min-w-0">
-                        <p className="text-body-3 font-bold text-baro-blue-600">{i + 1}단계</p>
-                        <p className="mt-0.5 text-body-1 font-bold break-keep text-slate-900">{s.title}</p>
+                        <p className="text-body-3 font-semibold text-baro-blue-600">{i + 1}단계</p>
+                        <p className="mt-0.5 text-body-1 font-semibold break-keep text-slate-900">{s.title}</p>
                         <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{s.desc}</p>
                       </div>
                     </li>

@@ -55,7 +55,7 @@ export function GuestGate({ active, children }: { active: boolean; children: Rea
             <span className="mb-1 flex size-12 items-center justify-center rounded-full bg-brand-blue-50 text-brand-blue-600">
               <UserRoundPlus className="size-6" />
             </span>
-            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">회원가입하고 무료로 이용해보세요</DialogTitle>
+            <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">회원가입하고 무료로 이용해보세요</DialogTitle>
             <DialogDescription className="text-body-2 leading-relaxed font-medium break-keep text-slate-600">
               가입하시면 공고 자세히 보기와 찜하기,
               <br />내 조건에 맞는 맞춤 공고까지 모두 무료입니다.
@@ -65,7 +65,7 @@ export function GuestGate({ active, children }: { active: boolean; children: Rea
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-1">
-            <Button size="lg" className="w-full rounded-xl bg-baro-blue text-body-2 font-bold text-white hover:bg-baro-blue" asChild>
+            <Button size="lg" className="w-full rounded-xl bg-baro-blue text-body-2 font-semibold text-white hover:bg-baro-blue" asChild>
               <Link href="/signup?next=/jobs">무료로 회원가입</Link>
             </Button>
             <Button variant="ghost" className="h-10 w-full text-body-3 font-medium text-slate-600 hover:bg-transparent hover:text-slate-600" asChild>

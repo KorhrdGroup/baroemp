@@ -36,9 +36,9 @@ export function MarketingConsentDialog() {
           <span className="mb-1 flex size-12 items-center justify-center rounded-full bg-baro-blue-50 text-baro-blue">
             <BellRing className="size-6" />
           </span>
-          <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">맞춤 정보를 알림톡으로 받아보시겠어요?</DialogTitle>
+          <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">맞춤 정보를 알림톡으로 받아보시겠어요?</DialogTitle>
           <DialogDescription className="break-keep text-body-2 leading-relaxed font-medium text-slate-600">
-            내 조건에 맞는 새 공고와 지원금 소식을
+            받을 수 있는 지원금 · 교육 안내와 서비스 소식을
             <br />
             카카오 알림톡으로 보내드려요.
             {/* 부가 설명은 한 단계 작고 옅게. 본문과 같은 크기면 세 줄이 한 덩어리로 읽힌다. */}
@@ -58,7 +58,7 @@ export function MarketingConsentDialog() {
         </DialogHeader>
         {/* DialogFooter 의 회색 띠·윗선을 쓰지 않는다. 창 하나가 흰 판 하나로 읽히게. */}
         <div className="flex flex-col gap-1">
-          <Button size="lg" className="w-full rounded-xl bg-baro-blue text-body-2 font-bold text-white hover:bg-baro-blue" onClick={agree} disabled={pending}>
+          <Button size="lg" className="w-full rounded-xl bg-baro-blue text-body-2 font-semibold text-white hover:bg-baro-blue" onClick={agree} disabled={pending}>
             {pending ? "저장 중..." : "네, 받아볼게요"}
           </Button>
           {/* 보조 버튼은 주 버튼만큼 높을 이유가 없다. 위아래를 줄여 주 버튼에 붙인다. */}

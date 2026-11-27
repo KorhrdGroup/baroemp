@@ -86,7 +86,7 @@ export function Draft3ConsultBand() {
         </div>
         <Link
           href="/consulting"
-          className="relative inline-flex h-14 shrink-0 items-center gap-1 rounded-xl bg-white px-7 text-body-1 font-bold text-baro-blue"
+          className="relative inline-flex h-14 shrink-0 items-center gap-1 rounded-xl bg-white px-7 text-body-1 font-semibold text-baro-blue"
         >
           상담 신청하기
           <ChevronRight className="size-5" aria-hidden />
@@ -132,7 +132,7 @@ export function Draft3NewsList({ programs }: { programs: SupportProgram[] }) {
   return (
     <div>
       <div className="flex items-center justify-between border-b border-slate-300 pb-3">
-        <h3 className="text-body-1 font-bold text-slate-900">중장년 지원사업</h3>
+        <h3 className="text-body-1 font-semibold text-slate-900">중장년 지원사업</h3>
         <Link href="/support" className="inline-flex items-center gap-0.5 text-body-3 font-semibold text-slate-700">
           전체
           <ChevronRight className="size-4" aria-hidden />
@@ -172,7 +172,7 @@ export function Draft3NewsList({ programs }: { programs: SupportProgram[] }) {
 export function Draft3QualificationLinks() {
   return (
     <div className="flex h-full flex-col rounded-card bg-baro-blue-50 p-6 sm:p-7">
-      <h3 className="text-body-1 font-bold text-slate-900">자격증으로 찾기</h3>
+      <h3 className="text-body-1 font-semibold text-slate-900">자격증으로 찾기</h3>
       <p className="mt-1 text-body-3 font-medium text-slate-600">가진 자격증으로 맞는 공고를 모아 봐요.</p>
       <ul className="mt-5 grid flex-1 auto-rows-fr grid-cols-2 gap-2">
         {QUALIFICATIONS.map((name) => (

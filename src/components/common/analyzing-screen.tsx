@@ -13,7 +13,7 @@ import { Check, Loader2 } from "lucide-react";
 export function AnalyzingScreen({
   steps,
   durationMs = 2500,
-  title = "분석 중입니다",
+  title = "분석하고 있어요",
 }: {
   /** 순서대로 보여줄 단계 문구 */
   steps: string[];

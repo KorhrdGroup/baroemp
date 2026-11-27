@@ -34,7 +34,7 @@ const SORT_OPTIONS: { value: JobSortOrder; label: string }[] = [
 /* 고르기 창 안의 칸. 고른 칸은 옅은 파랑 바탕 + 파란 테두리 + 체크. */
 const choiceClass =
   "flex h-12 items-center justify-center gap-1.5 rounded-xl px-3 text-body-2 break-keep disabled:opacity-40";
-const choiceOnClass = "bg-baro-blue-50 font-bold text-baro-blue-600 ring-2 ring-baro-blue ring-inset";
+const choiceOnClass = "bg-baro-blue-50 font-semibold text-baro-blue-600 ring-2 ring-baro-blue ring-inset";
 const choiceOffClass = "bg-white font-semibold text-slate-800 ring-1 ring-slate-300 ring-inset";
 
 export interface JobFiltersValue {
@@ -212,7 +212,7 @@ export function JobFiltersForm({
   const pickerButtonClass = (active: boolean) =>
     cn(
       "flex min-w-0 items-center gap-1.5 text-body-2 whitespace-nowrap",
-      active ? "font-bold text-baro-blue-600" : "font-semibold text-slate-800",
+      active ? "font-semibold text-baro-blue-600" : "font-semibold text-slate-800",
     );
   /* 누르면 검색바 아래로 고르기 판이 펼쳐지고, 다시 누르면 접힌다. */
   const pickerToggle = (which: "region" | "job" | "salary", label: string, active: boolean, className?: string) => (
@@ -668,7 +668,7 @@ function PickerHead({
   return (
     <div className="relative shrink-0 px-5 pt-5 pb-4 sm:px-6">
       {back}
-      <p className="pr-12 text-title-3 font-extrabold break-keep text-slate-900">{title}</p>
+      <p className="pr-12 text-title-3 font-bold break-keep text-slate-900">{title}</p>
       {note && <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">{note}</p>}
       <button
         type="button"
@@ -692,7 +692,7 @@ function PickerFoot({ disabled, count, unit, onApply }: { disabled: boolean; cou
         data-guest-gated
         disabled={disabled}
         onClick={onApply}
-        className="h-12 rounded-xl bg-baro-blue px-8 text-body-1 font-bold text-white disabled:bg-slate-300"
+        className="h-12 rounded-xl bg-baro-blue px-8 text-body-1 font-semibold text-white disabled:bg-slate-300"
       >
         적용하기
       </button>
@@ -724,7 +724,7 @@ function SalaryPicker({
     <>
       <PickerHead title="얼마를 받고 싶으세요?" note="받는 방식을 먼저 고르고, 최소 금액을 골라 주세요." onClose={onClose} />
       <div className="min-h-0 overflow-y-auto px-5 pb-4 sm:px-6">
-        <p className="mb-2 text-body-3 font-bold text-slate-700">받는 방식</p>
+        <p className="mb-2 text-body-3 font-semibold text-slate-700">받는 방식</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
           {SALARY_FILTER_UNITS.map((u) => {
             const on = u.key === draftUnit;
@@ -746,7 +746,7 @@ function SalaryPicker({
           })}
         </div>
 
-        <p className="mt-5 mb-2 text-body-3 font-bold text-slate-700">최소 금액</p>
+        <p className="mt-5 mb-2 text-body-3 font-semibold text-slate-700">최소 금액</p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
           {[undefined, ...SALARY_FILTER_AMOUNTS[draftUnit].map((a) => a.value)].map((value) => {
             const on = value === draftAtLeast;
@@ -772,7 +772,7 @@ function SalaryPicker({
           type="button"
           data-guest-gated
           onClick={() => onApply(draftUnit, draftAtLeast)}
-          className="h-12 rounded-xl bg-baro-blue px-8 text-body-1 font-bold text-white"
+          className="h-12 rounded-xl bg-baro-blue px-8 text-body-1 font-semibold text-white"
         >
           적용하기
         </button>

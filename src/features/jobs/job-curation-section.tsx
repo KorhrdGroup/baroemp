@@ -269,7 +269,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
               "flex items-center gap-1.5 whitespace-nowrap",
               /* 고른 탭은 파란 알약, 나머지는 테두리 없는 흰 알약 (하늘색 판 위). */
               activeTab === t.key
-                ? "border-baro-blue bg-baro-blue font-bold text-white"
+                ? "border-baro-blue bg-baro-blue font-semibold text-white"
                 : "border-transparent bg-white font-semibold text-slate-700",
             )}
           >
@@ -316,7 +316,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             {current.state === "NEEDS_ASSESSMENT" && (
               <Link
                 href="/assessment?start=1"
-                className="flex h-12 items-center rounded-xl bg-brand-blue-400 px-5 text-body-2 font-bold text-white"
+                className="flex h-12 items-center rounded-xl bg-brand-blue-400 px-5 text-body-2 font-semibold text-white"
               >
                 직업진단 시작하기
               </Link>

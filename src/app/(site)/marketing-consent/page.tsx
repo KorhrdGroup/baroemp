@@ -7,8 +7,9 @@ export const metadata: Metadata = {
 
 /**
  * [선택] 마케팅 정보·알림톡 수신 동의의 내용.
- * 가입 화면의 "보기", 마이페이지 정보 수정, 소셜 가입 직후 동의 창에서 연다.
+ * 가입 화면의 "보기", 마이페이지 내 정보, 소셜 가입 직후 동의 창에서 연다.
  * 광고성 정보를 보내려면 누가·무엇을·어떻게 보내고 어떻게 철회하는지를 동의 전에 보여줘야 한다.
+ * 맞춤 공고 알림은 이 동의와 따로다 - 회원이 마이페이지 "알림"에서 직접 켜고 지역·직종을 고르는 알림(job_alert_settings).
  */
 export default function MarketingConsentPage() {
   return (
@@ -18,10 +19,13 @@ export default function MarketingConsentPage() {
       </Article>
       <Article heading="2. 보내는 내용">
         <ol>
-          <li>회원의 희망 직종·지역·자격 등 취업 프로필에 맞는 새 채용공고</li>
           <li>받을 수 있는 정부 지원금·교육훈련 제도 안내</li>
           <li>직업진단·이력서 첨삭 등 서비스 소식과 이벤트 (광고성 정보 포함)</li>
         </ol>
+        <p>
+          맞춤 채용공고 알림은 이 동의와 별개입니다. 마이페이지 &gt; 알림에서 직접 켜고 지역·직종을 고를 수
+          있으며, 이 동의를 하지 않거나 철회해도 공고 알림은 따로 받을 수 있습니다.
+        </p>
       </Article>
       <Article heading="3. 보내는 방법">
         <p>카카오 알림톡(휴대전화번호 기준). 알림톡을 받을 수 없는 경우 문자 또는 이메일로 보낼 수 있습니다.</p>
@@ -35,15 +39,15 @@ export default function MarketingConsentPage() {
       </Article>
       <Article heading="6. 철회 방법">
         <ol>
-          <li>마이페이지 &gt; 정보 수정에서 &ldquo;알림톡으로 받기&rdquo; 체크를 해제</li>
+          <li>마이페이지 &gt; 내 정보에서 &ldquo;마케팅 정보 · 알림톡 받기&rdquo;를 끄기</li>
           <li>이메일 korhrdpartners@naver.com 으로 철회 요청</li>
         </ol>
         <p>철회 즉시 발송이 중단되며, 철회 후에도 서비스는 그대로 이용할 수 있습니다.</p>
       </Article>
       <Article heading="7. 동의하지 않을 권리">
         <p>
-          이 동의는 선택 사항입니다. 동의하지 않아도 회원 가입과 서비스 이용에 불이익이 없으며, 다만 맞춤
-          채용공고·지원금 소식을 알림으로 받아볼 수 없습니다.
+          이 동의는 선택 사항입니다. 동의하지 않아도 회원 가입과 서비스 이용에 불이익이 없으며, 다만 지원금·교육훈련
+          안내와 서비스 소식을 알림으로 받아볼 수 없습니다.
         </p>
       </Article>
     </PolicyArticle>

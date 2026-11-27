@@ -88,12 +88,12 @@ function SupportCard({ item }: { item: (typeof highlights)[number] }) {
             {item.org}
           </Badge>
         )}
-        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-label-2 font-bold text-emerald-700">
+        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-label-2 font-semibold text-emerald-700">
           신청가능
         </span>
       </div>
 
-      <h3 className="mt-4 text-body-1 font-bold text-slate-900">{item.title}</h3>
+      <h3 className="mt-4 text-body-1 font-semibold text-slate-900">{item.title}</h3>
 
       <p className="mt-3 text-title-2 font-extrabold tracking-tight text-brand-blue-600">
         {item.amount}

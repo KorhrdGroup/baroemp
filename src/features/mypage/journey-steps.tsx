@@ -44,7 +44,7 @@ interface JourneyStepsProps {
 export function JourneySteps({ steps, userName, completedTitle, goal }: JourneyStepsProps) {
   const next = steps.find((s) => !s.done) ?? null;
   const card = next
-    ? { label: `다음에 할 일 · ${next.step}단계`, title: next.title, message: next.todoMessage, href: next.href, actionLabel: next.actionLabel }
+    ? { label: "다음에 할 일", title: next.title, message: next.todoMessage, href: next.href, actionLabel: next.actionLabel }
     : goal;
 
   return (
@@ -58,15 +58,16 @@ export function JourneySteps({ steps, userName, completedTitle, goal }: JourneyS
       {card && (
         <div
           style={{ ["--mp-d" as string]: "80ms" }}
-          className="mp-rise mt-6 flex flex-col gap-5 rounded-card bg-baro-navy p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          /* 흰 띠 위의 밝은 하늘색 판: 왼쪽 옅은 하늘에서 오른쪽 맑은 파랑으로 번진다. */
+          className="mp-rise mt-6 flex flex-col gap-5 rounded-card bg-[linear-gradient(115deg,#EEF4FF_0%,#D6E5FF_55%,#B9D2FF_100%)] p-6 sm:flex-row sm:items-center sm:justify-between sm:p-9">
           <div className="min-w-0">
-            <p className="text-body-2 font-bold text-baro-blue-300">{card.label}</p>
-            <h2 className="mt-1.5 text-title-2 font-extrabold tracking-[-0.02em] break-keep text-white">{card.title}</h2>
-            <p className="mt-2 text-body-1 font-medium break-keep text-slate-200">{card.message}</p>
+            <p className="inline-flex -translate-y-1 rounded-full bg-white px-3 py-1 text-body-3 font-semibold text-baro-blue-600">{card.label}</p>
+            <h2 className="mt-2 text-title-2 font-extrabold tracking-[-0.02em] break-keep text-baro-navy">{card.title}</h2>
+            <p className="mt-2 text-body-1 font-medium break-keep text-slate-700">{card.message}</p>
           </div>
           <Link
             href={card.href}
-            className="flex h-14 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-baro-blue px-7 text-body-1 font-bold text-white"
+            className="flex h-14 shrink-0 items-center justify-center gap-1.5 rounded-xl bg-baro-blue px-7 text-body-1 font-semibold text-white"
           >
             {card.actionLabel}
             <ArrowRight className="size-5" />

@@ -67,7 +67,7 @@ export function AssessmentIntro({
             경력 · 성향에 맞는 일을 골라드려요.
           </>
         ) : (
-          "경력, 희망조건, 성향을 바탕으로 지금 도전하기 좋은 직업과 준비할 것을 알려드립니다."
+          "경력, 희망 조건, 성향을 바탕으로 지금 도전하기 좋은 직업과 준비할 것을 알려드려요."
         )
       }
       actions={
@@ -97,7 +97,7 @@ export function AssessmentIntro({
                       <span className="flex size-6 items-center justify-center rounded-full bg-baro-blue-50 text-caption-1 font-semibold text-baro-blue-600">{i + 1}</span>
                       {s.name}
                     </span>
-                    <span className="text-body-2 font-bold text-baro-blue">{s.fit}%</span>
+                    <span className="text-body-2 font-semibold text-baro-blue">{s.fit}%</span>
                   </div>
                   <div className="mt-2 h-2 overflow-hidden rounded-full bg-baro-blue-50">
                     <div className="h-full rounded-full bg-baro-blue" style={{ width: `${s.fit}%` }} />
@@ -122,8 +122,8 @@ export function AssessmentIntro({
       items={ITEMS}
       note={
         <>
-          검사 결과는 확정적인 취업 결과가 아닌 &quot;적합도&quot;와 &quot;준비도&quot;를 바탕으로 한 참고 정보입니다.
-          검사 진행 중 입력하신 정보는 맞춤 추천을 위한 Career 정보로 활용되며, 마케팅 수신동의와는 별도로 관리됩니다.
+          검사 결과는 취업을 약속하는 것이 아니라 &quot;적합도&quot;와 &quot;준비도&quot;를 바탕으로 한 참고 정보예요.
+          검사 중에 입력하신 정보는 맞춤 추천에만 쓰이고, 마케팅 수신 동의와는 따로 관리돼요.
         </>
       }
     />

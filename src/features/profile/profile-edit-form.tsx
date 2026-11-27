@@ -14,7 +14,6 @@ import {
 } from "@/lib/labels";
 import { ChipToggle, JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "./profile-form-fields";
 import { CustomQualificationInput } from "./custom-qualification-input";
-import { WithdrawButton } from "./withdraw-button";
 
 /*
   고르는 칸. 창은 OS 기본 피커를 그대로 쓴다 - 모바일에서 커스텀 목록보다 그편이 낫다.
@@ -49,16 +48,14 @@ function SelectField({
   );
 }
 import { updateProfileAction, type ProfileEditFormState } from "./profile-actions";
-import type { CareerProfile, Profile, WorkType } from "@/types";
+import type { CareerProfile, WorkType } from "@/types";
 
 const initialState: ProfileEditFormState = {};
 
 export function ProfileEditForm({
-  profile,
   careerProfile,
   heldQualificationNames = [],
 }: {
-  profile: Profile;
   careerProfile: CareerProfile | null;
   /** Career DB(user_qualifications)에 등록된 보유 자격. 선택지에 있는 것만 체크 상태로 보인다. */
   heldQualificationNames?: string[];
@@ -88,32 +85,7 @@ export function ProfileEditForm({
       )}
 
       <section className="space-y-4">
-        <h2 className="text-body-1 font-extrabold text-slate-900">내 정보</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="name" className="mb-1.5 text-body-3 font-semibold text-slate-700">
-              이름
-            </Label>
-            <Input id="name" name="name" defaultValue={profile.name} required className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2" />
-            {state.fieldErrors?.name && <p className="mt-1 text-body-3 font-medium text-red-600">{state.fieldErrors.name}</p>}
-          </div>
-          <div>
-            <Label htmlFor="phone" className="mb-1.5 text-body-3 font-semibold text-slate-700">
-              휴대전화번호
-            </Label>
-            <Input id="phone" name="phone" type="tel" defaultValue={profile.phone} placeholder="010-1234-5678" className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2" />
-            {state.fieldErrors?.phone && <p className="mt-1 text-body-3 font-medium text-red-600">{state.fieldErrors.phone}</p>}
-          </div>
-          <div>
-            <Label className="mb-1.5 text-body-3 font-semibold text-slate-700">이메일</Label>
-            <Input value={profile.email ?? ""} disabled className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2" />
-            <p className="mt-1 text-body-3 font-medium text-slate-600">이메일은 변경할 수 없습니다.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-4 border-t border-slate-100 pt-6">
-        <h2 className="text-body-1 font-extrabold text-slate-900">취업 프로필</h2>
+        <h2 className="text-body-1 font-semibold text-slate-900">취업 프로필</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
@@ -273,13 +245,9 @@ export function ProfileEditForm({
         </label>
       </section>
 
-      {/*
-        저장은 오른쪽 끝, 탈퇴는 왼쪽 끝. 같은 줄에 두되 서로 멀리 떼어 놓아야
-        되돌릴 수 없는 쪽이 손에 잘못 걸리지 않는다.
-      */}
-      <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-6">
-        <WithdrawButton />
-        <Button type="submit" disabled={pending} className="h-12 rounded-xl bg-brand-blue-400 px-6 text-body-2 font-bold hover:bg-brand-blue-600">
+      {/* 이름 · 연락처 · 탈퇴는 내 정보(/mypage/account)로 옮겼다. 여기는 희망 조건만. */}
+      <div className="flex justify-end border-t border-slate-100 pt-6">
+        <Button type="submit" disabled={pending} className="h-12 rounded-xl bg-brand-blue-400 px-6 text-body-2 font-semibold hover:bg-brand-blue-600">
           {pending ? "저장 중..." : "저장하기"}
         </Button>
       </div>

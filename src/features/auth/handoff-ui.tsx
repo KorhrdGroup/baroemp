@@ -68,7 +68,7 @@ export function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-[9px] block text-body-3 font-bold text-slate-900"
+      className="mb-[9px] block text-body-3 font-semibold text-slate-900"
     >
       {children}
     </label>
@@ -190,7 +190,7 @@ export function PrimaryButton({
   return (
     <button
       {...props}
-      className="h-[58px] w-full rounded-xl bg-brand-blue-400 text-body-2 font-bold text-white transition-colors hover:bg-brand-blue-600 disabled:bg-slate-300 disabled:text-white"
+      className="h-[58px] w-full rounded-xl bg-brand-blue-400 text-body-2 font-semibold text-white transition-colors hover:bg-brand-blue-600 disabled:bg-slate-300 disabled:text-white"
     >
       {children}
     </button>
@@ -204,7 +204,7 @@ export function SocialButtons({ next }: { next?: string }) {
     <div className="mt-4 flex flex-col gap-2">
       <a
         href={`/auth/login/naver${q}`}
-        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#03C75A] text-body-3 font-bold text-white transition-colors hover:bg-[#02B351]"
+        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#03C75A] text-body-3 font-semibold text-white transition-colors hover:bg-[#02B351]"
       >
         <svg viewBox="0 0 20 20" aria-hidden="true" className="size-3.5" fill="currentColor">
           <path d="M13.5 10.7 6.2 0H0v20h6.5V9.3L13.8 20H20V0h-6.5z" />
@@ -213,7 +213,7 @@ export function SocialButtons({ next }: { next?: string }) {
       </a>
       <a
         href={`/auth/login/kakao${q}`}
-        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FEE500] text-body-3 font-bold text-[#191600] transition-colors hover:bg-[#F2DA00]"
+        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FEE500] text-body-3 font-semibold text-[#191600] transition-colors hover:bg-[#F2DA00]"
       >
         {/*
           네이버 N 은 상자를 꽉 채우고 카카오 말풍선은 위쪽에 몰려 있어, 같은 크기로 두면
@@ -263,7 +263,7 @@ export function Checkbox({
       <span
         className={
           strong
-            ? "text-body-3 font-bold break-keep text-slate-900"
+            ? "text-body-3 font-semibold break-keep text-slate-900"
             : "text-body-3 font-medium break-keep text-slate-700"
         }
       >
@@ -288,7 +288,7 @@ export function BottomLinks({
             href={it.href}
             className={
               it.strong
-                ? "relative tap-44 font-bold text-slate-900 no-underline"
+                ? "relative tap-44 font-semibold text-slate-900 no-underline"
                 : "relative tap-44 font-medium text-slate-600 no-underline hover:text-slate-900"
             }
           >

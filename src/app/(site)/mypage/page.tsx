@@ -86,8 +86,9 @@ function MenuRow({
   action,
   done,
   isNext,
+  doneAction,
 }: {
-  /** 넓은 화면 카드 위에 보이는 단계 번호. */
+  /** 단계 순서(들어올 때 떠오르는 차례). */
   step: number;
   href: string;
   icon: LucideIcon;
@@ -100,6 +101,8 @@ function MenuRow({
   action: string;
   done: boolean;
   isNext: boolean;
+  /** 다 했을 때 넓은 화면 카드 맨 아래 글자(다시 볼 곳). */
+  doneAction: string;
 }) {
   return (
     /* 들어올 때 단계 순서대로 떠오르고(.mp-rise), 다 한 단계 동그라미는 뒤이어 톡 켜진다(.mp-pop) - globals.css. */
@@ -107,61 +110,71 @@ function MenuRow({
       <Link
         href={href}
         className={cn(
-          "flex items-center gap-4 px-5 py-6 sm:px-7 xl:h-full xl:flex-col xl:items-stretch xl:gap-0 xl:rounded-card xl:p-6",
-          isNext ? "bg-baro-blue-50" : "xl:bg-white",
+          "flex items-center gap-4 px-5 py-6 sm:px-7 xl:h-full xl:min-h-64 xl:flex-col xl:items-stretch xl:gap-0 xl:rounded-card xl:p-7 xl:transition-shadow xl:duration-200",
+          /* 넓은 화면에서 옅은 파랑 판은 회색 바탕에 묻혀, 다음 할 카드도 흰 카드로 두고 파란 기운 그림자(위치 0,0)로만 살짝 띄운다. */
+          /* 마우스를 올리면 다른 카드와 같은 그림자(shadow-hover). 다음 할 카드는 원래 그림자를 조금 더 진하게. */
+          isNext
+            ? "bg-baro-blue-50 xl:bg-white xl:shadow-[0_0_16px_rgba(36,105,255,0.16)] xl:hover:shadow-[0_0_16px_rgba(36,105,255,0.26)]"
+            : "xl:bg-white xl:hover:shadow-hover",
         )}
       >
         <span className="flex shrink-0 items-center justify-between">
           <span
             className={cn(
-              "flex size-11 shrink-0 items-center justify-center rounded-full",
-              done ? "mp-pop bg-baro-blue text-white" : isNext ? "bg-white text-baro-blue" : "bg-slate-100 text-slate-500",
+              "flex size-11 shrink-0 items-center justify-center rounded-full xl:size-12",
+              done ? "mp-pop bg-baro-blue text-white" : isNext ? "bg-white text-baro-blue xl:bg-baro-blue-50" : "bg-slate-100 text-slate-500",
             )}
           >
             <Icon className="size-5" />
           </span>
-          <span
-            aria-hidden
-            /* 파랑은 다 한 동그라미 · 다음 할 카드 · "지금 하기"에만 쓴다. 단계 표시까지 파랑이면 화면이 파랗게 덮인다. */
-            className="hidden text-body-3 font-semibold text-slate-600 xl:inline"
-          >
-            {step}단계{done && " · 완료"}
-          </span>
+          {isNext ? (
+            <span aria-hidden className="hidden text-body-3 font-semibold text-baro-blue-600 xl:inline">
+              지금 할 차례
+            </span>
+          ) : (
+            /* "N단계" 번호는 두지 않는다 - 순서는 카드 줄 순서로 충분하다. 다 한 카드만 "완료"를 적는다. */
+            done && (
+              <span aria-hidden className="hidden text-body-3 font-semibold text-slate-600 xl:inline">
+                완료
+              </span>
+            )
+          )}
         </span>
-        <span className="min-w-0 flex-1 xl:mt-4 xl:flex-none">
-          <span className="block text-body-1 font-bold break-keep text-slate-900">
+        <span className="min-w-0 flex-1 xl:mt-7 xl:flex-none">
+          <span className="block text-body-1 font-semibold break-keep text-slate-900">
             {title}
             <span className="sr-only">{done ? " (완료)" : isNext ? " (다음에 할 일)" : ""}</span>
           </span>
           {done ? (
-            <span className="mt-0.5 block truncate text-body-2 font-medium text-slate-600 sm:hidden xl:mt-1.5 xl:block xl:font-semibold xl:break-keep xl:whitespace-normal">
+            <span className="mt-0.5 block truncate text-body-2 font-medium text-slate-600 sm:hidden xl:mt-2 xl:block xl:leading-relaxed xl:font-semibold xl:break-keep xl:whitespace-normal">
               {result}
             </span>
           ) : (
-            <span className="mt-0.5 block text-body-2 font-medium break-keep text-slate-600 xl:mt-1.5">{description}</span>
+            <span className="mt-0.5 block text-body-2 font-medium break-keep text-slate-600 xl:mt-2 xl:leading-relaxed">{description}</span>
           )}
         </span>
         <span
           className={cn(
             "hidden shrink-0 text-body-2 sm:inline xl:hidden",
-            done ? "font-semibold text-slate-600" : isNext ? "font-bold text-baro-blue-600" : "font-bold text-slate-600",
+            done ? "font-semibold text-slate-600" : isNext ? "font-semibold text-baro-blue-600" : "font-semibold text-slate-600",
           )}
         >
           {done ? result : isNext ? "지금 하기" : action}
         </span>
         {/* 넓은 화면 카드는 맨 아래에 할 일 글자를 둔다. 다 한 카드는 결과가 이미 위에 있어 비운다. */}
-        {!done && (
-          <span
-            aria-hidden
-            className={cn(
-              "mt-auto hidden items-center gap-1 pt-4 text-body-2 font-bold xl:flex",
-              isNext ? "text-baro-blue-600" : "text-slate-600",
-            )}
-          >
-            {isNext ? "지금 하기" : action}
+        {/* 다 한 카드도 같은 자리에 다시 볼 곳(doneAction)을 적어, 몇 단계를 했든 다섯 장의 아랫줄이 맞는다. */}
+        <span
+          aria-hidden
+          className={cn(
+            "mt-auto hidden pt-6 text-body-2 font-semibold xl:block",
+            isNext ? "text-white" : "text-slate-600",
+          )}
+        >
+          <span className={cn("inline-flex items-center gap-1", isNext && "h-11 rounded-full bg-baro-blue px-5")}>
+            {done ? doneAction : isNext ? "지금 하기" : action}
             <ChevronRight className="size-4" />
           </span>
-        )}
+        </span>
         <ChevronRight aria-hidden className="size-5 shrink-0 text-slate-400 xl:hidden" />
       </Link>
     </li>
@@ -349,30 +362,35 @@ export default async function MyPage() {
   return (
     // /draft3 색 구성 (globals.css .draft3-theme): 옅은 회색 바탕에 흰 카드(모서리 20px, 테두리 · 그림자 없음).
     <div className="draft3-theme bg-baro-page">
+      {/* 인사 · 다음 할 일은 흰 띠 위에(다른 화면의 흰 머리와 같은 결), 그 아래 단계 카드부터 회색 바탕. */}
+      <div className="bg-white">
+        <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-10 sm:pb-12 lg:px-8">
+          <JourneySteps
+            steps={steps}
+            userName={userName}
+            completedTitle={hiredCount > 0 ? "취업을 축하드려요!" : undefined}
+            goal={goal}
+          />
+        </div>
+      </div>
       <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-24 lg:px-8">
-        <JourneySteps
-          steps={steps}
-          userName={userName}
-          completedTitle={hiredCount > 0 ? "취업을 축하드려요!" : undefined}
-          goal={goal}
-        />
 
         {/*
           진행 막대와 같은 다섯 단계를 같은 순서로. 다 한 줄은 파랑으로 채운 동그라미라 몇 개 했는지 바로 센다.
           제목 옆에 "몇 개 했어요"는 두지 않는다 - 바로 위 진행 막대와 같은 말이다.
         */}
-        <section aria-labelledby="mypage-ready" className="mt-11">
+        <section aria-labelledby="mypage-ready">
           {/* 진행 막대는 제목 오른쪽에 - 막대가 세는 다섯 단계가 바로 아래 카드다. 좁은 화면은 제목 아래로 내려간다. */}
           <div
             className="mp-rise mb-3.5 flex flex-wrap items-center justify-between gap-x-6 gap-y-2"
             style={{ ["--mp-d" as string]: "160ms" }}
           >
-            <h2 id="mypage-ready" className="text-title-3 font-extrabold text-slate-900">
+            <h2 id="mypage-ready" className="text-title-3 font-bold text-slate-900">
               나의 취업 준비
             </h2>
             <JourneyProgress doneCount={steps.filter((s) => s.done).length} total={steps.length} />
           </div>
-          <ul className="overflow-hidden rounded-card bg-white xl:grid xl:grid-cols-5 xl:gap-4 xl:overflow-visible xl:rounded-none xl:bg-transparent">
+          <ul className="overflow-hidden rounded-card bg-white xl:grid xl:grid-cols-5 xl:gap-5 xl:overflow-visible xl:rounded-none xl:bg-transparent">
             <MenuRow
               step={1}
               href={hasCareerProfile ? "/mypage/profile" : "/onboarding/profile"}
@@ -383,6 +401,7 @@ export default async function MyPage() {
               action="채우기"
               done={stepDone.profile}
               isNext={nextStepId === "profile"}
+              doneAction="수정하기"
             />
             <MenuRow
               step={2}
@@ -394,6 +413,7 @@ export default async function MyPage() {
               action="시작하기"
               done={stepDone.diagnosis}
               isNext={nextStepId === "diagnosis"}
+              doneAction="결과 보기"
             />
             <MenuRow
               step={3}
@@ -406,6 +426,7 @@ export default async function MyPage() {
               action="찾아보기"
               done={stepDone.support}
               isNext={nextStepId === "support"}
+              doneAction="결과 보기"
             />
             {/* 맞춤 일자리를 둘러보는 것과 찜하는 것을 한 줄로. 찜했으면 찜 목록으로, 아니면 맞춤 공고 목록으로 간다. */}
             <MenuRow
@@ -418,6 +439,7 @@ export default async function MyPage() {
               action="보러 가기"
               done={stepDone.jobs}
               isNext={nextStepId === "jobs"}
+              doneAction="찜한 공고 보기"
             />
             <MenuRow
               step={5}
@@ -429,6 +451,7 @@ export default async function MyPage() {
               action="만들기"
               done={stepDone.documents}
               isNext={nextStepId === "documents"}
+              doneAction="내 서류 보기"
             />
           </ul>
         </section>
@@ -443,10 +466,10 @@ export default async function MyPage() {
           <section aria-labelledby="mypage-applied" className="mp-rise mt-11" style={{ ["--mp-d" as string]: "720ms" }}>
             {/* 안내 한 줄은 제목 바로 아래 둔다. 목록 밑에 두면 카드 안 글자(안쪽 여백)와 왼쪽 끝이 어긋나 보였다. */}
             <div className="flex items-baseline gap-2">
-              <h2 id="mypage-applied" className="text-title-3 font-extrabold text-slate-900">
+              <h2 id="mypage-applied" className="text-title-3 font-bold text-slate-900">
                 지원한 공고
               </h2>
-              <span className="text-title-3 font-extrabold text-baro-blue-600">{appliedJobs.length}</span>
+              <span className="text-title-3 font-bold text-baro-blue-600">{appliedJobs.length}</span>
             </div>
             <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">
               면접이나 합격 소식이 있으면 여기서 바로 단계를 바꿔 주세요.
@@ -459,7 +482,7 @@ export default async function MyPage() {
                 >
                   {/* 화살표만 따로 두면 제목 길이에 따라 줄 가운데 떠 보여, 회사 줄 끝에 "공고 보기"로 붙인다. */}
                   <Link href={`/jobs/${job.id}`} className="min-w-0 flex-1">
-                    <p className="line-clamp-2 text-body-1 leading-snug font-bold break-keep text-slate-900 sm:line-clamp-1">{job.title}</p>
+                    <p className="line-clamp-2 text-body-1 leading-snug font-semibold break-keep text-slate-900 sm:line-clamp-1">{job.title}</p>
                     <p className="mt-1.5 flex items-center gap-3 text-body-3 font-medium text-slate-600">
                       <span className="truncate">
                         {job.companyName} · {formatKstMonthDay(application.createdAt)} 지원
@@ -479,16 +502,47 @@ export default async function MyPage() {
           </section>
         )}
 
-        <section aria-labelledby="mypage-alert" className="mp-rise mt-11" style={{ ["--mp-d" as string]: "800ms" }}>
-          <h2 id="mypage-alert" className="mb-3.5 text-title-3 font-extrabold text-slate-900">
+        {/*
+          내 계정: 내 정보(이름 · 연락처 · 마케팅 소식 받기 · 탈퇴). 희망 조건(취업 프로필)과 나눠, 희망 조건을 채우기 전에도 늘 보인다.
+          마케팅(광고성) 소식 받기 스위치와 탈퇴는 여기 두지 않고 내 정보 화면에만 둔다.
+        */}
+        <section aria-labelledby="mypage-account" className="mp-rise mt-11" style={{ ["--mp-d" as string]: "800ms" }}>
+          <h2 id="mypage-account" className="mb-3.5 text-title-3 font-bold text-slate-900">
+            내 계정
+          </h2>
+          <ul className="overflow-hidden rounded-card bg-white">
+            <li>
+              <Link href="/mypage/account" className="flex items-center gap-4 px-5 py-5 sm:px-7">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                  <UserRound className="size-5" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block text-body-1 font-semibold text-slate-900">내 정보</span>
+                  <span className="mt-0.5 block text-body-2 font-medium text-slate-600">이름 · 연락처 · 소식 받기</span>
+                </span>
+                <span className="hidden shrink-0 text-body-2 font-semibold text-slate-600 sm:inline">
+                  {[profile.name, maskPhone(profile.phone)].filter(Boolean).join(" · ")}
+                </span>
+                <ChevronRight aria-hidden className="size-5 shrink-0 text-slate-400" />
+              </Link>
+            </li>
+          </ul>
+        </section>
+
+        <section aria-labelledby="mypage-alert" className="mp-rise mt-11" style={{ ["--mp-d" as string]: "880ms" }}>
+          <h2 id="mypage-alert" className="mb-3.5 text-title-3 font-bold text-slate-900">
             알림
           </h2>
           <div>
-            <JobAlertPanel settings={jobAlertSettings} phone={profile.phone ? formatPhone(profile.phone) : undefined}>
+            <JobAlertPanel
+              settings={jobAlertSettings}
+              phone={profile.phone ? formatPhone(profile.phone) : undefined}
+              suggestedRegion={careerProfile?.region}
+            >
               {/* 최근 받은 알림. 무엇을 보냈는지 회원도 알아야 "왜 이 공고가 왔지"가 풀린다. */}
               {myJobAlerts.length > 0 && (
-                <div className="border-t border-slate-100 pt-4">
-                  <p className="text-body-2 font-bold text-slate-700">최근 받은 알림</p>
+                <div>
+                  <p className="text-body-2 font-semibold text-slate-700">최근 받은 알림</p>
                   <ul className="mt-2 space-y-2">
                     {myJobAlerts.map((a) => (
                       <li key={`${a.sentAt}-${a.jobId ?? ""}`} className="flex items-start justify-between gap-3 text-body-3 font-medium">
@@ -517,4 +571,9 @@ export default async function MyPage() {
       </div>
     </div>
   );
+}
+
+/** "010-****-5678". 마이페이지 한 줄에 번호를 다 드러내지 않는다(고치는 화면에는 다 보인다). */
+function maskPhone(phone: string | undefined): string | undefined {
+  return phone ? formatPhone(phone).replace(/-\d{3,4}-/, "-****-") : undefined;
 }

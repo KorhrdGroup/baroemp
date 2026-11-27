@@ -53,7 +53,7 @@ export function WithdrawButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="relative tap-44 text-body-3 font-medium text-slate-600 underline underline-offset-4"
+        className="relative tap-44 text-body-3 font-medium text-slate-500 underline underline-offset-4"
       >
         탈퇴하기
       </button>
@@ -61,7 +61,7 @@ export function WithdrawButton() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-h-[85vh] overflow-y-auto rounded-card sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-title-3 font-extrabold text-slate-900">정말 탈퇴하시겠어요?</DialogTitle>
+            <DialogTitle className="text-title-3 font-bold text-slate-900">정말 탈퇴하시겠어요?</DialogTitle>
             <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
               계정과 함께 이력서·자기소개서, 찜한 일자리·지원제도, 직업진단·지원금 진단 결과가 모두 삭제됩니다.
               삭제한 정보는 되돌릴 수 없어요.
@@ -82,7 +82,7 @@ export function WithdrawButton() {
                     /* 고른 이유는 파랑으로 채운다. 이 창은 .draft3-theme 바깥에 그려져 색 토큰을 직접 쓴다. */
                     "h-10 cursor-pointer rounded-full border px-4 text-body-3",
                     reason === r
-                      ? "border-baro-blue bg-baro-blue font-bold text-white"
+                      ? "border-baro-blue bg-baro-blue font-semibold text-white"
                       : "border-slate-300 bg-white font-medium text-slate-700",
                   )}
                 >
@@ -108,7 +108,7 @@ export function WithdrawButton() {
               돌아가기
             </Button>
             <Button
-              className="h-12 rounded-xl bg-red-600 text-body-2 font-bold text-white hover:bg-red-700"
+              className="h-12 rounded-xl bg-red-600 text-body-2 font-semibold text-white hover:bg-red-700"
               onClick={handleWithdraw}
               disabled={pending}
             >

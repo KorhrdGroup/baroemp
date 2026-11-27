@@ -37,7 +37,7 @@ export function CoreServicesSection() {
                 </span>
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-1.5">
-                    <p className="text-body-2 font-bold break-keep text-slate-900">{service.title}</p>
+                    <p className="text-body-2 font-semibold break-keep text-slate-900">{service.title}</p>
                     {service.badge && (
                       <Badge
                         className={cn(

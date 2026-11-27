@@ -74,7 +74,7 @@ function StepHeader({ step, title, description }: { step: 1 | 2; title: string; 
           <div key={n} className="flex items-center gap-2">
             <span
               className={cn(
-                "flex size-7 items-center justify-center rounded-full text-caption-1 font-bold",
+                "flex size-7 items-center justify-center rounded-full text-caption-1 font-semibold",
                 n <= step ? "bg-atomic-blue-600 text-white" : "bg-slate-200 text-slate-600",
               )}
             >
@@ -85,7 +85,7 @@ function StepHeader({ step, title, description }: { step: 1 | 2; title: string; 
         ))}
       </div>
       {/* 화면의 큰 제목(h1)은 위의 화면 머리가 맡는다. 단계 제목은 구역 제목 크기로 둔다. */}
-      <h2 className="mt-5 text-title-3 font-extrabold text-slate-900">{title}</h2>
+      <h2 className="mt-5 text-title-3 font-bold text-slate-900">{title}</h2>
       <p className="mt-2 whitespace-pre-line text-body-2 font-medium text-slate-600">{description}</p>
     </div>
   );
@@ -98,7 +98,7 @@ function WizardCard({ children }: { children: React.ReactNode }) {
 function FieldLabel({ children, hint }: { children: React.ReactNode; hint?: string }) {
   return (
     <div className="mb-2">
-      <Label className="text-body-2 font-bold text-slate-900">{children}</Label>
+      <Label className="text-body-2 font-semibold text-slate-900">{children}</Label>
       {hint && <p className="mt-1 text-body-3 font-medium text-slate-600">{hint}</p>}
     </div>
   );
@@ -233,7 +233,7 @@ export function ResumeWizard({
     return (
       <div>
         <div className="text-center">
-          <h2 className="text-title-3 font-extrabold text-slate-900">어떤 이력서를 만들까요?</h2>
+          <h2 className="text-title-3 font-bold text-slate-900">어떤 이력서를 만들까요?</h2>
           <p className="mt-2 text-body-2 font-medium text-slate-600">
             골라주시면 그에 맞는 항목을 미리 담아드려요. 항목은 다음 단계에서 바꿀 수 있어요.
           </p>
@@ -250,12 +250,12 @@ export function ResumeWizard({
                     <Icon className={cn("size-7", style.iconTone)} />
                   </span>
                 </div>
-                <p className="mt-4 break-keep text-body-1 font-bold text-slate-900">{t.name}</p>
+                <p className="mt-4 break-keep text-body-1 font-semibold text-slate-900">{t.name}</p>
                 {/* break-keep 이 없으면 한글이 음절 단위로 잘려 "이력서입니 / 다." 처럼 끊긴다. */}
                 <p className="mt-2 flex-1 break-keep text-body-2 leading-relaxed font-medium text-slate-600">{t.description}</p>
                 <p className="mt-3 text-caption-1 font-medium text-slate-600">항목 {t.sections.length}개</p>
                 {/* 좁은 화면에서는 카드 폭을 채운다. 가운데 뜬 작은 알약은 손가락으로 겨누기 어렵다. */}
-                <Button className="mt-4 h-11 self-stretch rounded-full bg-atomic-blue-600 px-7 font-bold text-white sm:self-center" onClick={() => startWithTemplate(t)}>
+                <Button className="mt-4 h-11 self-stretch rounded-full bg-atomic-blue-600 px-7 font-semibold text-white sm:self-center" onClick={() => startWithTemplate(t)}>
                   시작하기
                 </Button>
               </div>
@@ -340,7 +340,7 @@ export function ResumeWizard({
                         "flex h-10 items-center gap-1.5 rounded-full border px-4 text-body-3",
                         fixed ? "cursor-default" : "cursor-pointer",
                         isPicked
-                          ? "border-baro-blue bg-baro-blue font-bold text-white"
+                          ? "border-baro-blue bg-baro-blue font-semibold text-white"
                           : "border-slate-300 bg-white font-medium text-slate-700",
                       )}
                     >
@@ -356,7 +356,7 @@ export function ResumeWizard({
             <div className="mt-4 divide-y divide-border rounded-xl border border-border">
               {picked.map((option, idx) => (
                 <div key={option.code} className="flex items-center gap-3 px-4 py-3">
-                  <span className="shrink-0 text-body-3 font-bold text-slate-600">항목 {idx + 1}</span>
+                  <span className="shrink-0 text-body-3 font-semibold text-slate-600">항목 {idx + 1}</span>
                   <span className="min-w-0 flex-1 truncate text-body-3 font-medium text-slate-800">
                     {option.label}
                     {!option.required && <span className="ml-2 text-caption-1 text-slate-600">없어도 괜찮아요</span>}
@@ -394,7 +394,7 @@ export function ResumeWizard({
           <Button variant="outline" className="h-12 min-w-32 rounded-full border-slate-300 bg-white font-semibold text-slate-800" onClick={() => goToStep("template")}>
             이전
           </Button>
-          <Button className="h-12 min-w-32 rounded-full bg-atomic-blue-600 font-bold text-white" onClick={() => goToStep("prefill")}>
+          <Button className="h-12 min-w-32 rounded-full bg-atomic-blue-600 font-semibold text-white" onClick={() => goToStep("prefill")}>
             다음
           </Button>
         </div>
@@ -470,7 +470,7 @@ export function ResumeWizard({
         >
           이전
         </Button>
-        <Button className="h-12 min-w-44 rounded-full bg-atomic-blue-600 font-bold text-white" disabled={isCreating} onClick={handleCreate}>
+        <Button className="h-12 min-w-44 rounded-full bg-atomic-blue-600 font-semibold text-white" disabled={isCreating} onClick={handleCreate}>
           {isCreating ? <Loader2 className="size-4 animate-spin" /> : <Sparkles className="size-4" />}
           이력서 만들기
         </Button>

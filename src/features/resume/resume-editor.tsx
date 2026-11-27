@@ -754,7 +754,7 @@ export function ResumeEditor({
     BASIC_INFO: (
             <Card className="rounded-card border-0 ring-0">
               <CardHeader>
-                <CardTitle className="text-title-3 font-extrabold text-slate-900">기본정보</CardTitle>
+                <CardTitle className="text-title-3 font-bold text-slate-900">기본정보</CardTitle>
               </CardHeader>
               {/*
                 실제 이력서 헤더와 같은 골격으로 배치한다: 사진은 왼쪽 세로 블록,
@@ -823,7 +823,7 @@ export function ResumeEditor({
                 </Field>
                 <Field label="성별">
                   <NativeSelect
-                    className="h-12 text-body-3"
+                    className="h-12 text-body-2 md:text-body-2"
                     value={form.gender}
                     onChange={(e) => setForm((f) => ({ ...f, gender: e.target.value }))}
                   >
@@ -875,7 +875,7 @@ export function ResumeEditor({
                 */}
                 <Field label="희망근무지역">
                   <NativeSelect
-                    className="h-12 text-body-3"
+                    className="h-12 text-body-2 md:text-body-2"
                     value={form.desiredRegion ?? ""}
                     onChange={(e) => setForm((f) => ({ ...f, desiredRegion: e.target.value }))}
                   >
@@ -899,7 +899,7 @@ export function ResumeEditor({
                   뜻으로 쓰는데, 한 줄 소개는 항목 자체를 뺄 수 있다. 담은 동안 채워야 하는 건
                   경력·학력과 똑같고, 그쪽에도 별표는 없다.
                 */}
-                <CardTitle className="text-title-3 font-extrabold text-slate-900">한 줄 소개</CardTitle>
+                <CardTitle className="text-title-3 font-bold text-slate-900">한 줄 소개</CardTitle>
                 {/*
                   이 버튼은 이 칸에 쓴 글을 고치는 것이 아니라, 경력·자격·스킬을 재료로
                   문장을 만들어 제안한다. "다듬기"라고 부르면 쓴 글을 손봐주는 줄 알고
@@ -916,6 +916,7 @@ export function ResumeEditor({
               </CardHeader>
               <CardContent>
                 <Textarea
+                  className="leading-relaxed md:text-body-2"
                   placeholder="예) 사무·고객응대 경력 8년, 사회복지 분야로 직무전환을 준비하는 지원자"
                   value={form.summary}
                   onChange={(e) => setForm((f) => ({ ...f, summary: e.target.value }))}
@@ -931,7 +932,7 @@ export function ResumeEditor({
                   <div className="mt-2 rounded-lg bg-brand-blue-50 p-3 text-body-3">
                     <p className="text-slate-700">{summarySuggestion}</p>
                     <div className="mt-2 flex gap-2">
-                      <Button size="sm" className="bg-atomic-blue-600 font-bold text-white" onClick={() => { setForm((f) => ({ ...f, summary: summarySuggestion })); setSummarySuggestion(null); }}>
+                      <Button size="sm" className="bg-atomic-blue-600 font-semibold text-white" onClick={() => { setForm((f) => ({ ...f, summary: summarySuggestion })); setSummarySuggestion(null); }}>
                         적용
                       </Button>
                       <Button size="sm" variant="ghost" onClick={() => setSummarySuggestion(null)}>
@@ -946,7 +947,7 @@ export function ResumeEditor({
     EXPERIENCE: (
             <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-title-3 font-extrabold text-slate-900">경력</CardTitle>
+                <CardTitle className="text-title-3 font-bold text-slate-900">경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -1012,7 +1013,7 @@ export function ResumeEditor({
                     </label>
                     <Field label="어떤 일을 하셨나요? (예: 고객상담, 거래처 관리, 문서작성)" required>
                       <Textarea
-                        className="bg-white"
+                        className="bg-white leading-relaxed md:text-body-2"
                         value={exp.responsibilities ?? ""}
                         onChange={(e) => updateAt(setExperiences, exp._key, { responsibilities: e.target.value })}
                         rows={2}
@@ -1029,7 +1030,7 @@ export function ResumeEditor({
                     </Field>
                     <Field label="기억나는 성과가 있나요? (숫자가 없어도 괜찮습니다)">
                       <Textarea
-                        className="bg-white"
+                        className="bg-white leading-relaxed md:text-body-2"
                         value={exp.achievements ?? ""}
                         onChange={(e) => updateAt(setExperiences, exp._key, { achievements: e.target.value })}
                         rows={2}
@@ -1050,7 +1051,7 @@ export function ResumeEditor({
                         <div className="mt-2 flex gap-2">
                           <Button
                             size="sm"
-                            className="bg-atomic-blue-600 font-bold text-white"
+                            className="bg-atomic-blue-600 font-semibold text-white"
                             onClick={() => {
                               updateAt(setExperiences, exp._key, { [rewriteTarget.field]: rewriteTarget.text });
                               setRewriteTarget(null);
@@ -1086,7 +1087,7 @@ export function ResumeEditor({
     EDUCATION: (
             <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-title-3 font-extrabold text-slate-900">학력</CardTitle>
+                <CardTitle className="text-title-3 font-bold text-slate-900">학력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -1145,7 +1146,7 @@ export function ResumeEditor({
                       <div className="grid gap-2 sm:grid-cols-6">
                         <Field label="학교구분" className="sm:col-span-2">
                           <NativeSelect
-                            className="h-12 text-body-3"
+                            className="h-12 text-body-2 md:text-body-2"
                             value={isGed ? "고등학교" : (edu.educationType ?? "")}
                             onChange={(e) => updateAt(setEducations, edu._key, { educationType: e.target.value })}
                           >
@@ -1175,7 +1176,7 @@ export function ResumeEditor({
                         {!isGed && (
                           <Field label="졸업상태" className="sm:col-span-2">
                             <NativeSelect
-                              className="h-12 text-body-3"
+                              className="h-12 text-body-2 md:text-body-2"
                               value={edu.graduationStatus ?? ""}
                               onChange={(e) => updateAt(setEducations, edu._key, { graduationStatus: e.target.value })}
                             >
@@ -1229,7 +1230,7 @@ export function ResumeEditor({
     QUALIFICATION: (
             <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-title-3 font-extrabold text-slate-900">보유 자격</CardTitle>
+                <CardTitle className="text-title-3 font-bold text-slate-900">보유 자격</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -1293,7 +1294,7 @@ export function ResumeEditor({
     SKILLS: (
             <Card className="rounded-card border-0 ring-0">
               <CardHeader>
-                <CardTitle className="text-title-3 font-extrabold text-slate-900">보유 스킬</CardTitle>
+                <CardTitle className="text-title-3 font-bold text-slate-900">보유 스킬</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
@@ -1346,7 +1347,7 @@ export function ResumeEditor({
     TRAINING: (
             <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-title-3 font-extrabold text-slate-900">교육/훈련</CardTitle>
+                <CardTitle className="text-title-3 font-bold text-slate-900">교육/훈련</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -1420,7 +1421,7 @@ export function ResumeEditor({
     EXTRA: (
             <Card className="rounded-card border-0 ring-0">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-title-3 font-extrabold text-slate-900">봉사·수상 등 추가 경력</CardTitle>
+                <CardTitle className="text-title-3 font-bold text-slate-900">봉사·수상 등 추가 경력</CardTitle>
                 <Button
                   variant="outline"
                   size="sm"
@@ -1444,7 +1445,7 @@ export function ResumeEditor({
                     className="grid gap-2 rounded-xl bg-slate-50 p-3 sm:grid-cols-[9rem_1fr_1.6fr_auto]"
                   >
                     <NativeSelect
-                      className="h-12 text-body-3"
+                      className="h-12 text-body-2 md:text-body-2"
                       value={item.sectionType}
                       onChange={(e) => updateAt(setItems, item._key, { sectionType: e.target.value as ResumeItemSectionType })}
                     >
@@ -1585,7 +1586,7 @@ export function ResumeEditor({
           />
           <div className="fixed inset-x-0 bottom-0 z-50 rounded-t-2xl bg-white pb-4 shadow-[0_-8px_32px_rgba(15,40,90,0.18)]">
             <div className="flex items-center justify-between px-5 pt-5">
-              <span className="text-body-2 font-bold text-slate-900">이력서 항목</span>
+              <span className="text-body-2 font-semibold text-slate-900">이력서 항목</span>
               <button
                 type="button"
                 aria-label="항목 편집 닫기"
@@ -1601,7 +1602,7 @@ export function ResumeEditor({
                 <li key={row.key} className="flex items-center gap-2 rounded-lg bg-slate-50 py-1.5 pr-2 pl-3">
                   <span
                     className={cn(
-                      "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-bold",
+                      "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-semibold",
                       !row.included ? "text-slate-300" : row.filled ? "bg-brand-blue-100 text-brand-blue-600" : "bg-white text-slate-600",
                     )}
                   >
@@ -1663,7 +1664,7 @@ export function ResumeEditor({
               <button
                 type="button"
                 onClick={() => setSectionSheetOpen(false)}
-                className="w-full rounded-xl bg-atomic-blue-600 px-5 py-2.5 text-body-3 font-bold text-white"
+                className="w-full rounded-xl bg-atomic-blue-600 px-5 py-2.5 text-body-3 font-semibold text-white"
               >
                 완료
               </button>
@@ -1689,8 +1690,8 @@ export function ResumeEditor({
           */}
           <aside className="mb-4 rounded-card bg-white p-5 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:mb-0">
             <div className="flex items-baseline justify-between gap-2">
-              <p className="text-body-2 font-bold text-slate-900">이력서 완성도</p>
-              <p className="text-title-3 font-extrabold text-baro-blue-600">{liveCompleteness.score}%</p>
+              <p className="text-body-2 font-semibold text-slate-900">이력서 완성도</p>
+              <p className="text-title-3 font-bold text-baro-blue-600">{liveCompleteness.score}%</p>
             </div>
             <Progress value={liveCompleteness.score} className="mt-2 h-2" />
             <p className="mt-2 text-body-3 font-medium break-keep text-slate-600">
@@ -1706,7 +1707,7 @@ export function ResumeEditor({
             */}
             {/* 이 화면에서 가장 먼저 권하는 동작이라, 다른 AI 버튼과 달리 채운 파랑으로 둔다. */}
             <AiButton
-              className="mt-5 h-12 w-full rounded-xl bg-atomic-blue-600 text-body-2 font-bold text-white"
+              className="mt-5 h-12 w-full rounded-xl bg-atomic-blue-600 text-body-2 font-semibold text-white"
               onClick={() => setReviewPickerOpen(true)}
               loading={isReviewing || isChangingTemplate}
             >
@@ -1724,7 +1725,7 @@ export function ResumeEditor({
               </Button>
               {/* 고친 것이 없으면 누를 수 있어도 아무 일도 일어나지 않아 저장 여부가 헷갈린다. */}
               <Button
-                className="h-12 rounded-xl bg-baro-navy text-body-2 font-bold text-white"
+                className="h-12 rounded-xl bg-baro-navy text-body-2 font-semibold text-white"
                 onClick={() => void handleSave()}
                 disabled={isSaving || !isDirty}
               >
@@ -1759,13 +1760,13 @@ export function ResumeEditor({
                           !row.included
                             ? "text-slate-600"
                             : activeSectionKey === row.key
-                              ? "cursor-pointer bg-baro-blue-50 font-bold text-baro-blue-600"
+                              ? "cursor-pointer bg-baro-blue-50 font-semibold text-baro-blue-600"
                               : "cursor-pointer font-semibold text-slate-800",
                         )}
                       >
                         <span
                           className={cn(
-                            "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-bold",
+                            "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-semibold",
                             !row.included
                               ? "text-slate-300"
                               : row.filled
@@ -1940,7 +1941,7 @@ export function ResumeEditor({
             </Button>
             {/* 고친 것이 없으면 누를 수 있어도 아무 일도 일어나지 않아 저장 여부가 헷갈린다. */}
             {/* 넓은 화면에서만 넉넉히 잡는다. 좁은 화면에서는 이 폭 때문에 줄이 넘쳤다. */}
-            <Button size="sm" className="bg-atomic-blue-600 font-bold text-white sm:min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
+            <Button size="sm" className="bg-atomic-blue-600 font-semibold text-white sm:min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
               {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
               {isSaving ? "저장" : isDirty ? "저장" : "저장됨"}
             </Button>
@@ -1958,7 +1959,7 @@ export function ResumeEditor({
       >
         <DialogContent className="draft3-theme rounded-card print:hidden sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">어떤 기준으로 점검할까요?</DialogTitle>
+            <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">어떤 기준으로 점검할까요?</DialogTitle>
             <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
               고른 기준에 맞춰 AI가 이력서를 처음부터 끝까지 살펴봅니다.
             </DialogDescription>
@@ -2003,7 +2004,7 @@ export function ResumeEditor({
             <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white px-5 text-body-2 font-semibold text-slate-800" onClick={() => setReviewPickerOpen(false)}>
               취소
             </Button>
-            <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-bold text-white" disabled={!pickedAgentId} onClick={handleReviewWithAgent}>
+            <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-semibold text-white" disabled={!pickedAgentId} onClick={handleReviewWithAgent}>
               이 기준으로 점검
             </Button>
           </DialogFooter>
@@ -2013,7 +2014,7 @@ export function ResumeEditor({
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
         <DialogContent className="draft3-theme rounded-card print:hidden sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">미리보기</DialogTitle>
+            <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">미리보기</DialogTitle>
           </DialogHeader>
           <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-gov-surface p-4">
             <ResumePreview detail={currentPreviewDetail()} />
@@ -2097,7 +2098,7 @@ function MonthPicker({
     <div className="flex gap-2">
       <div className="flex-1">
         <NativeSelect
-          className="h-12 text-body-3"
+          className="h-12 text-body-2 md:text-body-2"
           value={year}
           disabled={disabled}
           onChange={(e) => e.target.value && onChange(`${e.target.value}-${month || "01"}`)}
@@ -2112,7 +2113,7 @@ function MonthPicker({
       </div>
       <div className="w-24">
         <NativeSelect
-          className="h-12 text-body-3"
+          className="h-12 text-body-2 md:text-body-2"
           value={month}
           disabled={disabled}
           onChange={(e) => e.target.value && onChange(`${year || String(thisYear)}-${e.target.value}`)}
@@ -2129,9 +2130,12 @@ function MonthPicker({
   );
 }
 
-/** 편집 폼 입력칸. 40px 은 좁아 보여 기본과 같은 48px(h-12)로 둔다. 회색 항목 박스 위에서도 입력칸은 흰색을 유지한다. */
+/**
+ * 편집 폼 입력칸. 40px 은 좁아 보여 기본과 같은 48px(h-12)로 둔다. 회색 항목 박스 위에서도 입력칸은 흰색을 유지한다.
+ * 글자는 넓은 화면에서도 16px(공통 입력칸은 넓은 화면에서 14px로 줄어 이력서 쓰기에는 작다).
+ */
 function CompactInput({ className, ...props }: React.ComponentProps<typeof Input>) {
-  return <Input {...props} className={cn("h-12 bg-white", className)} />;
+  return <Input {...props} className={cn("h-12 bg-white md:text-body-2", className)} />;
 }
 
 /** 카카오(다음) 우편번호 서비스. 키 없이 스크립트만 얹으면 되는 공개 위젯이다. */

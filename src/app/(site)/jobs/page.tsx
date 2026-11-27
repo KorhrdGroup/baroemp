@@ -222,7 +222,7 @@ export default async function JobsPage({
               <div className="mt-6 rounded-card bg-atomic-blue-50 p-5 sm:p-6">
                 <div className="flex items-center gap-2">
                   <KeyRound className="size-5 text-atomic-blue-600" />
-                  <h2 className="text-body-1 font-bold text-slate-900">
+                  <h2 className="text-body-1 font-semibold text-slate-900">
                     자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
                   </h2>
                 </div>

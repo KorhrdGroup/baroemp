@@ -68,7 +68,7 @@ export function JobCardTabs({
               className={cn(
                 // 알약 색이 툭 바뀌지 않고 천천히 넘어가게.
                 "inline-flex h-11 shrink-0 items-center gap-1.5 rounded-full pr-5 pl-4 text-body-2 whitespace-nowrap transition-colors duration-300 ease-out sm:text-body-1",
-                selected ? "bg-atomic-blue-900 font-bold text-white" : "bg-white font-semibold text-slate-700",
+                selected ? "bg-atomic-blue-900 font-semibold text-white" : "bg-white font-semibold text-slate-700",
               )}
             >
               <JobTabIcon id={tab.key} />
@@ -137,11 +137,11 @@ function SimpleJobCard({ job, isAuthenticated, isBookmarked }: { job: Job; isAut
         </p>
         {/* 급여 · 마감은 카드 아래에 붙여, 제목이 한 줄이든 두 줄이든 카드끼리 아래 줄이 가로로 맞는다. */}
         <div className="mt-auto pt-4">
-          <p className="truncate text-body-1 font-bold text-slate-900">
+          <p className="truncate text-body-1 font-semibold text-slate-900">
             {salary.typeLabel && <span className="mr-1.5 text-body-3 font-medium text-slate-600">{salary.typeLabel}</span>}
             {salary.amount}
           </p>
-          <p className={cn("mt-4 text-body-3", urgent ? "font-bold text-baro-danger" : "font-medium text-slate-600")}>
+          <p className={cn("mt-4 text-body-3", urgent ? "font-semibold text-baro-danger" : "font-medium text-slate-600")}>
             {deadlineLabel(left)}
           </p>
         </div>

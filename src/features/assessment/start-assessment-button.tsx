@@ -104,7 +104,7 @@ export function StartAssessmentButton({ isLoggedIn = true }: { isLoggedIn?: bool
         size="lg"
         onClick={start}
         disabled={loading}
-        className="h-14 w-full rounded-xl bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
+        className="h-14 w-full rounded-xl bg-atomic-blue-600 px-8 text-body-2 font-semibold text-white sm:w-auto"
       >
         {loading ? <Loader2 className="size-5 animate-spin" /> : <>직업진단 시작하기 <ArrowRight className="size-5" /></>}
       </Button>

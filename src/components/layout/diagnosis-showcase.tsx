@@ -116,7 +116,7 @@ export function DiagnosisShowcase({
                 listRef.current?.scrollTo({ left: 0 });
               }}
               className={cn(
-                "h-10 shrink-0 rounded-full px-4 text-body-3 font-bold whitespace-nowrap transition-colors duration-200",
+                "h-10 shrink-0 rounded-full px-4 text-body-3 font-semibold whitespace-nowrap transition-colors duration-200",
                 i === active ? "bg-baro-blue text-white" : "text-slate-600",
               )}
             >
@@ -152,11 +152,11 @@ export function DiagnosisShowcase({
               onClick={onStart}
               className="flex h-full min-h-64 w-full flex-col rounded-card bg-white p-6 text-left transition-shadow duration-200 hover:shadow-hover sm:p-7"
             >
-              <p className="text-body-3 font-bold text-baro-blue">{current.label}</p>
+              <p className="text-body-3 font-semibold text-baro-blue">{current.label}</p>
               <p className="mt-2 line-clamp-2 text-title-3 leading-[1.4] font-bold break-keep text-slate-900">{c.title}</p>
               {c.sub && <p className="mt-1.5 truncate text-body-3 font-medium text-slate-600">{c.sub}</p>}
               {c.highlight ? (
-                <p className="mt-4 line-clamp-2 text-body-1 font-extrabold break-keep text-baro-blue">{c.highlight}</p>
+                <p className="mt-4 line-clamp-2 text-body-1 font-semibold break-keep text-baro-blue">{c.highlight}</p>
               ) : (
                 c.body && <p className="mt-4 line-clamp-2 text-body-3 font-medium break-keep text-slate-700">{c.body}</p>
               )}
@@ -171,7 +171,7 @@ export function DiagnosisShowcase({
                 </p>
               )}
               <span className="mt-auto pt-5">
-                <span className="inline-flex h-11 items-center gap-1.5 rounded-full bg-slate-50 px-5 text-body-3 font-bold text-slate-600">
+                <span className="inline-flex h-11 items-center gap-1.5 rounded-full bg-slate-50 px-5 text-body-3 font-semibold text-slate-600">
                   내게 맞는지 확인하기
                   <ArrowRight aria-hidden className="size-4" />
                 </span>
@@ -207,7 +207,7 @@ export function DiagnosisShowcase({
 export function ShowcaseCount({ asOf, label, count }: { asOf: string; label: string; count: number }) {
   return (
     <>
-      {asOf} 기준 {label} <strong className="font-bold text-baro-blue-600">{count.toLocaleString("ko-KR")}개</strong>
+      {asOf} 기준 {label} <strong className="font-semibold text-baro-blue-600">{count.toLocaleString("ko-KR")}개</strong>
     </>
   );
 }

@@ -56,7 +56,18 @@ function CollapsibleSection({
   const sectionRef = useRef<HTMLElement>(null);
   const Icon = CATEGORY_ICONS[category] ?? Landmark;
   const hasMore = items.length > COLLAPSE_COUNT;
-  const visible = expanded ? items : items.slice(0, COLLAPSE_COUNT);
+  const first = items.slice(0, COLLAPSE_COUNT);
+  const rest = items.slice(COLLAPSE_COUNT);
+  const renderCard = ({ program, matchResult }: ResultItem) => (
+    <SupportProgramCard
+      key={program.id}
+      program={program}
+      grade={(matchResult.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade}
+      reasons={matchResult.reasons}
+      isAuthenticated
+      isBookmarked={bookmarkedSet.has(program.id)}
+    />
+  );
 
   const handleCollapse = () => {
     setExpanded(false);
@@ -69,7 +80,7 @@ function CollapsibleSection({
         <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-baro-blue">
           <Icon className="size-4" />
         </span>
-        <h2 className="text-title-3 font-extrabold text-slate-900">{label}</h2>
+        <h2 className="text-title-3 font-bold text-slate-900">{label}</h2>
         <span className="rounded-full bg-white px-2 py-0.5 text-caption-1 font-semibold text-slate-600">
           {items.length}
         </span>
@@ -84,18 +95,31 @@ function CollapsibleSection({
           </button>
         )}
       </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {visible.map(({ program, matchResult }) => (
-          <SupportProgramCard
-            key={program.id}
-            program={program}
-            grade={(matchResult.grade ?? "CHECK_REQUIRED") as SupportEligibilityGrade}
-            reasons={matchResult.reasons}
-            isAuthenticated
-            isBookmarked={bookmarkedSet.has(program.id)}
-          />
-        ))}
-      </div>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{first.map(renderCard)}</div>
+      {/*
+        더보기로 늘어나는 카드는 미리 그려 두고 높이를 0 → 제 높이로 부드럽게 연다(grid-rows 0fr → 1fr, 모든 브라우저에서 동작).
+        닫혀 있을 때는 inert 로 초점 · 읽기에서 뺀다. 카드 호버 그림자가 잘리지 않게 사방 12px 여유를 두고 바깥 여백으로 되돌린다.
+      */}
+      {hasMore && (
+        <div
+          inert={!expanded}
+          className={cn(
+            "grid transition-[grid-template-rows] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+          )}
+        >
+          <div className="-mx-3 -mb-3 min-h-0 overflow-hidden px-3 pb-3">
+            <div
+              className={cn(
+                "grid grid-cols-1 gap-4 pt-4 transition-opacity duration-500 motion-reduce:transition-none sm:grid-cols-2 lg:grid-cols-3",
+                expanded ? "opacity-100" : "opacity-0",
+              )}
+            >
+              {rest.map(renderCard)}
+            </div>
+          </div>
+        </div>
+      )}
       {hasMore && (
         <button
           type="button"
@@ -103,7 +127,7 @@ function CollapsibleSection({
           className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-white text-body-3 font-semibold text-slate-800"
         >
           {expanded ? "접기" : `${items.length - COLLAPSE_COUNT}개 더보기`}
-          <ChevronDown className={cn("size-4", expanded && "rotate-180")} />
+          <ChevronDown className={cn("size-4 transition-transform duration-300 motion-reduce:transition-none", expanded && "rotate-180")} />
         </button>
       )}
     </section>

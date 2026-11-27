@@ -39,7 +39,7 @@ export function ConfirmDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="draft3-theme rounded-card sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-title-3 font-extrabold break-keep text-slate-900">{title}</DialogTitle>
+          <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">{title}</DialogTitle>
           <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">{description}</DialogDescription>
         </DialogHeader>
         {/*
@@ -59,7 +59,7 @@ export function ConfirmDialog({
           <Button
             onClick={onConfirm}
             disabled={pending}
-            className="h-12 min-w-24 rounded-xl bg-destructive text-body-2 font-bold text-white hover:bg-destructive/90 active:bg-destructive/80"
+            className="h-12 min-w-24 rounded-xl bg-destructive text-body-2 font-semibold text-white hover:bg-destructive/90 active:bg-destructive/80"
           >
             {pending ? <Loader2 className="animate-spin" /> : confirmLabel}
           </Button>

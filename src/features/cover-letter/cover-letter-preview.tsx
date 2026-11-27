@@ -38,7 +38,7 @@ export function CoverLetterPreview({
 
       {ordered.map((section) => (
         <div key={section.id} className="mb-8">
-          <h2 className="mb-3 border-b border-slate-300 pb-1.5 text-body-2 font-bold tracking-wide text-slate-900">
+          <h2 className="mb-3 border-b border-slate-300 pb-1.5 text-body-2 font-semibold tracking-wide text-slate-900">
             {questionHeading(section.questionType, section.question)}
           </h2>
           {section.content?.trim() ? (

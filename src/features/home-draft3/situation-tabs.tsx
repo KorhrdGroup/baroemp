@@ -128,7 +128,7 @@ export function SituationTabs() {
                 onClick={() => select(s.key)}
                 className={cn(
                   "inline-flex h-11 shrink-0 items-center rounded-full px-5 text-body-2 whitespace-nowrap transition-colors duration-300 ease-out sm:text-body-1",
-                  selected ? "bg-atomic-blue-900 font-bold text-white" : "bg-white font-semibold text-slate-700",
+                  selected ? "bg-atomic-blue-900 font-semibold text-white" : "bg-white font-semibold text-slate-700",
                 )}
               >
                 {s.label}
@@ -156,7 +156,7 @@ export function SituationTabs() {
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="text-body-1 font-bold break-keep text-slate-900 sm:text-title-3">{c.title}</span>
                 <span className="mt-1.5 text-body-3 font-medium text-balance break-keep text-slate-600 sm:text-body-2">{c.desc}</span>
-                <span className="mt-auto inline-flex items-center gap-0.5 pt-4 text-body-2 font-bold text-slate-600">
+                <span className="mt-auto inline-flex items-center gap-0.5 pt-4 text-body-2 font-semibold text-slate-600">
                   {c.cta}
                   <ChevronRight className="size-4" aria-hidden />
                 </span>

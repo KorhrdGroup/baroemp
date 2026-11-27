@@ -44,6 +44,6 @@ export function StatusScreen({
 
 /** StatusScreen 안 단추 모양. 링크(<Link>)와 단추(<button>)가 같은 클래스를 쓴다. */
 export const statusPrimaryClass =
-  "flex h-12 cursor-pointer items-center justify-center rounded-xl bg-baro-blue px-6 text-body-2 font-bold text-white";
+  "flex h-12 cursor-pointer items-center justify-center rounded-xl bg-baro-blue px-6 text-body-2 font-semibold text-white";
 export const statusSecondaryClass =
   "flex h-12 cursor-pointer items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800";

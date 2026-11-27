@@ -102,7 +102,11 @@
   --text-caption-1: 13px;
   --text-caption-1--line-height: 18.2px;
 
-  /* 굵기 체계. Semibold(600)는 HDS에 없는 프로젝트 확장값 */
+  /*
+   * 굵기 체계. Semibold(600)는 HDS에 없는 프로젝트 확장값.
+   * 위계: 800 = 24px 이상 페이지 제목, 700 = 20px 구역 제목 · 큰 숫자, 600 = 18px 이하 제목 · 라벨 · 단추 · 강조, 500 = 본문.
+   * 18px 이하에 700 · 800 을 쓰면 화면 전체가 굵어져 강조가 강조로 안 보인다.
+   */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -234,8 +238,9 @@
   --atomic-mono-500: #919191;
   --atomic-mono-600: #656565;
   --atomic-mono-700: #3D3D3D;
-  --atomic-mono-800: #1D1D1D;
-  --atomic-mono-900: #010101;
+  /* 900 은 원래 #010101(순검정)이었다. 흰 바탕에서 굵은 글자가 너무 무거워 한 단계 눅이고, 800 은 900 과 구분되게 둔다. */
+  --atomic-mono-800: #303030;
+  --atomic-mono-900: #222222;
   --atomic-blue-50: #E5EDFF;
   --atomic-blue-100: #B2CAFF;
   --atomic-blue-200: #7FA8FF;
@@ -279,8 +284,9 @@
   --atomic-mono-500: #8E949E;
   --atomic-mono-600: #626873;
   --atomic-mono-700: #3B4049;
-  --atomic-mono-800: #1C1F25;
-  --atomic-mono-900: #010204;
+  /* 글자색 900 · 800 은 기본 판과 같게(순검정에 가깝던 것을 눅임). 회색 단계만 쿨그레이. */
+  --atomic-mono-800: #303030;
+  --atomic-mono-900: #222222;
   --border: #E8EBEF;
 }
 
@@ -625,5 +631,25 @@
 
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/*
+  펼치고 접는 <details>(직업진단 결과 카드 등)를 부드럽게. 높이를 auto 까지 옮기려면 interpolate-size 가 필요하다.
+  이 기능이 없는 브라우저(사파리 등)는 지금처럼 바로 펼쳐진다. 움직임 줄이기를 켠 기기에서도 바로 펼친다.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .smooth-details {
+    interpolate-size: allow-keywords;
+  }
+  .smooth-details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 360ms cubic-bezier(0.22, 1, 0.36, 1),
+      content-visibility 360ms allow-discrete;
+  }
+  .smooth-details[open]::details-content {
+    block-size: auto;
   }
 }

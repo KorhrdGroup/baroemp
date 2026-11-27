@@ -34,7 +34,7 @@ function InfoRow({ label, value }: { label: string; value?: string }) {
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
     <section className="mt-10">
-      <h2 className="text-title-3 font-extrabold text-slate-900">{title}</h2>
+      <h2 className="text-title-3 font-bold text-slate-900">{title}</h2>
       {description && <p className="mt-1 text-body-3 font-medium text-slate-600">{description}</p>}
       <div className="mt-4">{children}</div>
     </section>
@@ -111,7 +111,7 @@ export function SupportDetailView({
             </span>
             {/* 목록 카드와 같은 이유로 내부 매칭 점수는 숨기고 등급 라벨만 보여준다. */}
             {match && (
-              <span className={cn("rounded-full px-2.5 py-0.5 text-body-3 font-bold", GRADE_BADGE_CLASS[match.grade])}>
+              <span className={cn("rounded-full px-2.5 py-0.5 text-body-3 font-semibold", GRADE_BADGE_CLASS[match.grade])}>
                 {SUPPORT_ELIGIBILITY_GRADE_LABELS[match.grade]}
               </span>
             )}
@@ -204,7 +204,7 @@ export function SupportDetailView({
             <p className="text-body-2 font-semibold break-keep text-slate-800">지원금 진단을 받으면 이 제도와 내 조건을 비교해볼 수 있어요.</p>
             <Link
               href="/support"
-              className="inline-flex h-12 shrink-0 items-center rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-bold text-white"
+              className="inline-flex h-12 shrink-0 items-center rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-semibold text-white"
             >
               지원금 찾기 진단하기
             </Link>
@@ -259,7 +259,7 @@ export function SupportDetailView({
         {program.supportAmountText && (
           <div className="mb-5">
             <p className="text-body-3 font-semibold text-slate-600">지원 내용</p>
-            <p className="mt-1 line-clamp-3 text-title-3 font-extrabold break-keep text-slate-900">{program.supportAmountText}</p>
+            <p className="mt-1 line-clamp-3 text-title-3 font-bold break-keep text-slate-900">{program.supportAmountText}</p>
           </div>
         )}
         <dl className="space-y-3 text-body-3">
@@ -278,7 +278,7 @@ export function SupportDetailView({
           <SupportApplyButton
             supportProgramId={program.id}
             sourceUrl={program.sourceUrl ?? program.applyUrl}
-            className="h-12 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold"
+            className="h-12 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold"
           />
           <SupportBookmarkButton
             supportProgramId={program.id}
@@ -300,7 +300,7 @@ export function SupportDetailView({
         <SupportApplyButton
           supportProgramId={program.id}
           sourceUrl={program.sourceUrl ?? program.applyUrl}
-          className="h-12 min-w-0 flex-1 rounded-xl bg-atomic-blue-600 px-3 text-body-2 font-bold sm:px-4 sm:text-body-1"
+          className="h-12 min-w-0 flex-1 rounded-xl bg-atomic-blue-600 px-3 text-body-2 font-semibold sm:px-4 sm:text-body-1"
         />
         <SupportBookmarkButton
           supportProgramId={program.id}

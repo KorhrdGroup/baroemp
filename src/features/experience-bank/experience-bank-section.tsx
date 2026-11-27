@@ -52,7 +52,7 @@ export function ExperienceBankSection({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           {/* 안에 들여 넣을 때도 한 단계만 낮춘다. 두 단계를 내리면 설명글이 각주처럼 작아진다. */}
-          <h2 className={cn("font-bold text-slate-900", nested ? "text-body-2" : "text-body-1")}>
+          <h2 className={cn("font-semibold text-slate-900", nested ? "text-body-2" : "text-body-1")}>
             내 경험뱅크<span className={sectionCountClass}>{items.length}</span>
           </h2>
           {nested && (

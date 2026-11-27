@@ -42,7 +42,7 @@ export function AssessmentAutoStart() {
         <>
           <p className="text-body-3 font-medium text-rose-600">{error}</p>
           <Button
-            className="mt-4 h-12 rounded-lg bg-atomic-blue-600 px-6 font-bold text-white"
+            className="mt-4 h-12 rounded-lg bg-atomic-blue-600 px-6 font-semibold text-white"
             onClick={() => router.replace("/assessment")}
           >
             소개 화면으로

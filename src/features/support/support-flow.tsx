@@ -450,7 +450,7 @@ function StepBody({
                 type="button"
                 onClick={() => onChange({ trainingWillingness: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border bg-white text-body-1 font-bold",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border bg-white text-body-1 font-semibold",
                   answers.trainingWillingness === n
                     ? "border-brand-blue-400 bg-brand-blue-400 text-white"
                     : "border-border text-slate-700",
@@ -586,7 +586,7 @@ function SupportIntro({
             size="lg"
             onClick={onStart}
             disabled={loading}
-            className="h-14 w-full rounded-xl bg-atomic-blue-600 px-8 text-body-2 font-bold text-white sm:w-auto"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 px-8 text-body-2 font-semibold text-white sm:w-auto"
           >
             {loading ? (
               <Loader2 className="size-5 animate-spin" />
@@ -620,7 +620,7 @@ function SupportIntro({
                     <p className="mt-0.5 text-caption-1 font-medium text-slate-600">{s.org}</p>
                   </div>
                   <div className="shrink-0 text-right">
-                    <p className="text-body-2 font-bold text-baro-blue">{s.amount}</p>
+                    <p className="text-body-2 font-semibold text-baro-blue">{s.amount}</p>
                     <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-emerald-700" : "text-amber-700"}`}>{s.grade}</p>
                   </div>
                 </li>
@@ -916,7 +916,7 @@ export function SupportFlow({
       {/* 문항 */}
       <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
         {/* 분류 안에서 몇 번째 문항인지 - 질문과 함께 읽히는 정보라 질문 위에 둔다. */}
-        <p className="text-center text-body-2 font-bold text-slate-900">
+        <p className="text-center text-body-2 font-semibold text-slate-900">
           {posInGroup + 1}/{groupSteps.length}
         </p>
         {/* 진단·온보딩 위저드와 같은 규칙: 어절 중간 잘림 방지 + 두 줄 길이 균형 + 살짝 여유 있는 줄간격. */}
@@ -941,7 +941,7 @@ export function SupportFlow({
           <Button
             onClick={() => void handleNext()}
             disabled={submitting || (step.required && !canProceed)}
-            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold text-white"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold text-white"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

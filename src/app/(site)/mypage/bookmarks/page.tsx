@@ -12,6 +12,7 @@ import { requireUser } from "@/lib/auth/session";
 import type { Job, SupportProgram } from "@/types";
 import { PageHead } from "@/components/layout/page-head";
 import { cn } from "@/lib/utils";
+import { BookmarkTabCount } from "@/features/mypage/bookmark-tab-count";
 
 export const metadata: Metadata = {
   title: "찜한 목록 | 한평생 바로취업",
@@ -48,13 +49,13 @@ export default async function BookmarksPage({ searchParams }: { searchParams: Pr
   return (
     // 흰 머리 아래 회색 바탕에 흰 카드(테두리 · 그림자 없음). /draft3 색 구성 (globals.css .draft3-theme).
     // "마이페이지"로 돌아가는 길은 머리의 현재 위치(홈 › 마이페이지 › 찜한 목록)가 맡는다.
-    <div className="draft3-theme">
+    <div className="draft3-theme page-fill flex flex-1 flex-col">
     <PageHead
       crumbs={[{ label: "마이페이지", href: "/mypage" }, { label: "찜한 목록" }]}
       title="찜한 목록"
       description="일자리와 지원금에서 찜해두신 것을 모았어요."
     />
-    <div className="bg-baro-page">
+    <div className="flex-1 bg-baro-page">
     <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
       {/* 고른 탭만 남색 밑줄 · 굵은 글자, 개수는 파랑. 탭을 바꿔도 화면이 위로 튀지 않게 scroll={false}. */}
       <nav aria-label="찜한 종류" className="mb-6 flex gap-7 border-b border-slate-200">
@@ -74,11 +75,11 @@ export default async function BookmarksPage({ searchParams }: { searchParams: Pr
               aria-current={on ? "page" : undefined}
               className={cn(
                 "-mb-px flex h-14 items-center gap-2 border-b-[3px] px-1 text-title-3",
-                on ? "border-baro-navy font-extrabold text-slate-900" : "border-transparent font-semibold text-slate-600",
+                on ? "border-baro-navy font-semibold text-slate-900" : "border-transparent font-semibold text-slate-600",
               )}
             >
               {t.label}
-              <span className={cn("text-body-1 font-bold", on ? "text-baro-blue-600" : "text-slate-600")}>{t.count}</span>
+              <BookmarkTabCount kind={t.key} initial={t.count} className={cn("text-body-1 font-semibold", on ? "text-baro-blue-600" : "text-slate-600")} />
             </Link>
           );
         })}
@@ -92,7 +93,7 @@ export default async function BookmarksPage({ searchParams }: { searchParams: Pr
             title="아직 찜한 일자리가 없어요"
             description="마음에 드는 일자리를 찜해두면 여기 모입니다."
             action={
-              <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-bold text-white" asChild>
+              <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-semibold text-white" asChild>
                 <Link href="/jobs">일자리 찾아보기</Link>
               </Button>
             }
@@ -111,7 +112,7 @@ export default async function BookmarksPage({ searchParams }: { searchParams: Pr
             title="아직 찜한 지원금이 없어요"
             description="받을 수 있는 지원금을 찾아 찜해두면 여기 모입니다."
             action={
-              <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-bold text-white" asChild>
+              <Button className="h-12 rounded-xl bg-atomic-blue-600 px-5 text-body-2 font-semibold text-white" asChild>
                 <Link href="/support">지원금 찾아보기</Link>
               </Button>
             }

@@ -42,12 +42,12 @@ export function ConsultingRequestForm() {
         <span className="flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
           <CheckCircle2 className="size-7" />
         </span>
-        <h3 className="mt-5 text-title-3 font-extrabold text-slate-900">상담 신청이 접수되었습니다</h3>
+        <h3 className="mt-5 text-title-3 font-bold text-slate-900">상담 신청이 접수되었습니다</h3>
         <p className="mt-2 max-w-md text-body-2-reading font-medium text-slate-600">
           담당 컨설턴트가 확인 후 남겨주신 연락처로 연락드립니다.
         </p>
         <Button
-          className="mt-6 h-12 rounded-xl bg-atomic-blue-600 px-6 font-bold text-white"
+          className="mt-6 h-12 rounded-xl bg-atomic-blue-600 px-6 font-semibold text-white"
           onClick={() => {
             setSubmitted(false);
             setName("");
@@ -121,7 +121,7 @@ export function ConsultingRequestForm() {
 
       <Button
         type="submit"
-        className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-bold text-white"
+        className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold text-white"
       >
         상담 신청하기
       </Button>

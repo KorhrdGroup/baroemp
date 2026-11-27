@@ -36,8 +36,8 @@ const STORY_STEPS = STEPS.slice(1);
 /* 흰 창 위에 회색 면을 깔면 탁해서 흰 바탕 + 옅은 푸른빛 회색 테두리로 칸 자리만 보이게 한다. */
 const fieldClass =
   "mt-5 rounded-xl border-[#DDE3EC] bg-white px-4 text-body-1 font-medium shadow-none md:text-body-1";
-const smallTitleClass = "text-body-2 font-bold text-slate-600";
-const primaryButtonClass = "h-14 flex-1 rounded-xl bg-baro-blue text-body-1 font-bold text-white";
+const smallTitleClass = "text-body-2 font-semibold text-slate-600";
+const primaryButtonClass = "h-14 flex-1 rounded-xl bg-baro-blue text-body-1 font-semibold text-white";
 const secondaryButtonClass = "h-14 w-28 rounded-xl border-slate-300 bg-white text-body-1 font-semibold text-slate-800";
 
 function toForm(item: ExperienceBankItem | null): FormState {
@@ -334,7 +334,7 @@ function ExperienceWizard({
         >
           <div className="h-full rounded-full bg-baro-blue transition-[width] duration-300" style={{ width: `${((step + 1) / STEPS.length) * 100}%` }} />
         </div>
-        <p className="shrink-0 text-body-2 font-bold text-baro-blue-600">
+        <p className="shrink-0 text-body-2 font-semibold text-baro-blue-600">
           {step + 1} <span className="font-semibold text-slate-500">/ {STEPS.length}</span>
         </p>
       </div>
@@ -426,7 +426,7 @@ function ExperienceDetail({
           return (
             <li key={s.key} className="border-b border-slate-100 py-4.5">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-body-2 font-bold break-keep text-slate-800">
+                <p className="text-body-2 font-semibold break-keep text-slate-800">
                   <span className="mr-1.5 text-baro-blue-600">{i + 1}</span>
                   {s.question}
                 </p>
@@ -441,7 +441,7 @@ function ExperienceDetail({
                     type="button"
                     aria-label={`${s.question} 쓰기`}
                     onClick={() => setEditingStep(s)}
-                    className="inline-flex h-10 shrink-0 items-center gap-1 rounded-full bg-baro-blue-50 px-3.5 text-body-3 font-bold text-baro-blue-600"
+                    className="inline-flex h-10 shrink-0 items-center gap-1 rounded-full bg-baro-blue-50 px-3.5 text-body-3 font-semibold text-baro-blue-600"
                   >
                     <Pencil aria-hidden className="size-4" />
                     쓰기
@@ -466,7 +466,7 @@ function EditButton({ label, onClick }: { label: string; onClick: () => void }) 
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="inline-flex h-10 shrink-0 items-center gap-1 rounded-full border border-slate-300 bg-white px-3.5 text-body-3 font-bold text-slate-600"
+      className="inline-flex h-10 shrink-0 items-center gap-1 rounded-full border border-slate-300 bg-white px-3.5 text-body-3 font-semibold text-slate-600"
     >
       <Pencil aria-hidden className="size-4" />
       고치기

@@ -122,7 +122,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             onChange={(next) => onChange({ type: "MULTI", optionIds: current, customTexts: next })}
           />
         )}
-        <p className="mt-2 text-center text-body-3 font-medium text-slate-600">해당하는 항목이 없다면 선택하지 않고 다음으로 넘어가셔도 됩니다.</p>
+        <p className="mt-2 text-center text-body-3 font-medium text-slate-600">해당하는 항목이 없으면 고르지 않고 다음으로 넘어가도 돼요.</p>
       </div>
     );
   }
@@ -163,7 +163,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 type="button"
                 onClick={() => onChange({ type: "SCALE", value: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-bold",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-semibold",
                   selected
                     ? "border-brand-blue-600 bg-brand-blue-600 text-white"
                     : "border-border text-slate-700",

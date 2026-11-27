@@ -98,8 +98,9 @@ export function JobApplicationStatusControl({
                 onClick={() => report(value)}
                 className={cn(
                   "flex h-10 items-center justify-center gap-1 rounded-lg text-body-3 whitespace-nowrap",
+                  /* 고른 칸은 흰 판으로 띄운다(분절 단추의 흔한 꼴). 파랑으로 채우면 화면의 다른 파란 단추와 무게가 겹친다. */
                   active
-                    ? "bg-brand-blue-400 font-bold text-white"
+                    ? "bg-white font-semibold text-baro-blue-600 shadow-[0_1px_3px_rgba(15,40,90,0.12)]"
                     : passed
                       ? "font-semibold text-brand-blue-600"
                       : "font-semibold text-slate-700",
@@ -145,7 +146,7 @@ export function JobApplicationStatusControl({
             className={cn(
               "h-11 rounded-xl px-4 text-body-3",
               active
-                ? "bg-brand-blue-400 font-bold text-white hover:bg-brand-blue-400"
+                ? "bg-brand-blue-400 font-semibold text-white hover:bg-brand-blue-400"
                 : passed
                   ? "border-slate-300 bg-white font-semibold text-brand-blue-600 hover:bg-white"
                   : "border-slate-300 bg-white font-semibold text-slate-700 hover:bg-white",

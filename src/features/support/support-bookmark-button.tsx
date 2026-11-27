@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore, useTransition } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, useTransition } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,13 @@ import {
   toggleLocalSupportBookmark,
 } from "@/lib/support/support-bookmark-local";
 import { toggleSupportBookmarkAction, trackAnonymousSupportBookmarkAction } from "@/features/support/support-actions";
+
+/* 찜이 바뀌면 화면 안 다른 곳(같은 지원금의 다른 찜 단추, 찜한 목록 위 개수)도 바로 따라 바뀌게 알린다. */
+export const SUPPORT_BOOKMARK_SYNC_EVENT = "support-bookmark-sync";
+type SyncDetail = { supportProgramId: string; bookmarked: boolean };
+function broadcast(detail: SyncDetail) {
+  window.dispatchEvent(new CustomEvent<SyncDetail>(SUPPORT_BOOKMARK_SYNC_EVENT, { detail }));
+}
 
 /**
  * 지원제도 찜 버튼. JobBookmarkButton과 동일한 철학.
@@ -35,6 +42,16 @@ export function SupportBookmarkButton({
   const [dbBookmarked, setDbBookmarked] = useState(initialBookmarked);
   const [pending, startTransition] = useTransition();
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const onSync = (e: Event) => {
+      const { detail } = e as CustomEvent<SyncDetail>;
+      if (detail.supportProgramId === supportProgramId) setDbBookmarked(detail.bookmarked);
+    };
+    window.addEventListener(SUPPORT_BOOKMARK_SYNC_EVENT, onSync);
+    return () => window.removeEventListener(SUPPORT_BOOKMARK_SYNC_EVENT, onSync);
+  }, [isAuthenticated, supportProgramId]);
+
   const getSnapshot = useCallback(() => isLocalSupportBookmarked(supportProgramId), [supportProgramId]);
   const getServerSnapshot = useCallback(() => false, []);
   const localBookmarked = useSyncExternalStore(subscribeLocalSupportBookmarks, getSnapshot, getServerSnapshot);
@@ -44,12 +61,12 @@ export function SupportBookmarkButton({
   const handleClick = () => {
     if (isAuthenticated) {
       const next = !dbBookmarked;
-      setDbBookmarked(next);
+      broadcast({ supportProgramId, bookmarked: next });
       startTransition(async () => {
         try {
           await toggleSupportBookmarkAction({ supportProgramId, action: next ? "add" : "remove" });
         } catch {
-          setDbBookmarked(!next);
+          broadcast({ supportProgramId, bookmarked: !next });
         }
       });
       return;

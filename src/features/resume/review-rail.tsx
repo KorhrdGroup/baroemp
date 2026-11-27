@@ -80,7 +80,7 @@ function RailItemRow({
       <button type="button" onClick={onSelect} className="flex w-full items-start gap-2.5 px-2.5 py-3 text-left">
         <span
           className={cn(
-            "mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[5px] text-[10.5px] font-extrabold",
+            "mt-0.5 flex size-[18px] shrink-0 items-center justify-center rounded-[5px] text-[10.5px] font-semibold",
             item.done ? "bg-emerald-600 text-white" : active ? "bg-atomic-blue-600 text-white" : "bg-slate-100 text-slate-600",
           )}
         >
@@ -89,7 +89,7 @@ function RailItemRow({
         <span className="min-w-0 flex-1">
           <span
             className={cn(
-              "block text-body-3 font-bold break-keep",
+              "block text-body-3 font-semibold break-keep",
               item.done ? "text-slate-600 line-through" : active ? "text-brand-blue-700" : "text-slate-700",
             )}
           >
@@ -97,13 +97,13 @@ function RailItemRow({
           </span>
         </span>
         {!item.done && item.severity === "required" && (
-          <span className="inline-flex h-[18px] shrink-0 items-center rounded bg-rose-50 px-1.5 text-[9.5px] font-extrabold text-rose-600">
+          <span className="inline-flex h-[18px] shrink-0 items-center rounded bg-rose-50 px-1.5 text-[9.5px] font-semibold text-rose-600">
             필수
           </span>
         )}
         <span
           className={cn(
-            "shrink-0 text-caption-1 font-extrabold",
+            "shrink-0 text-caption-1 font-semibold",
             item.done ? "text-emerald-600" : item.severity === "required" ? "text-orange-600" : "text-baro-blue",
           )}
         >
@@ -119,7 +119,7 @@ function RailItemRow({
               적용 후에도 칸에서 자유롭게 고칠 수 있으니 여기서는 확인만 시킨다.
             */
             <div className="mt-2 rounded-xl bg-white p-3">
-              <p className="flex items-center gap-1 text-caption-1 font-bold text-atomic-blue-600">
+              <p className="flex items-center gap-1 text-caption-1 font-semibold text-atomic-blue-600">
                 <Sparkles className="size-3.5" /> AI가 이렇게 고쳐드릴게요
               </p>
               <p className="mt-1 line-clamp-4 text-body-3 leading-relaxed font-medium break-keep text-slate-700">{item.fix.text}</p>
@@ -127,7 +127,7 @@ function RailItemRow({
                 <button
                   type="button"
                   onClick={onApplyFix}
-                  className="h-10 rounded-lg bg-atomic-blue-600 px-3.5 text-body-3 font-bold text-white"
+                  className="h-10 rounded-lg bg-atomic-blue-600 px-3.5 text-body-3 font-semibold text-white"
                 >
                   적용하기
                 </button>
@@ -199,7 +199,7 @@ export function ReviewRail({
     >
       <header className="shrink-0 border-b border-slate-100 px-[18px] pt-4 pb-4">
         <div className="mb-3 flex items-center justify-between">
-          <span className="inline-flex h-[22px] items-center rounded-md bg-brand-blue-50 px-2.5 text-caption-1 font-extrabold text-atomic-blue-600">
+          <span className="inline-flex h-[22px] items-center rounded-md bg-brand-blue-50 px-2.5 text-caption-1 font-semibold text-atomic-blue-600">
             AI 점검 결과
           </span>
           <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ export function ReviewRail({
           <span className="text-slate-600">
             {s.total}개 중 <b className="text-slate-900">{s.doneCount}개</b> 완료
           </span>
-          <span className="font-bold text-emerald-700">다 고치면 약 {s.projected}점</span>
+          <span className="font-semibold text-emerald-700">다 고치면 약 {s.projected}점</span>
         </div>
 
         {s.requiredLeft > 0 ? (
@@ -241,10 +241,10 @@ export function ReviewRail({
       <div className="min-h-0 flex-1 overflow-y-auto px-3 pt-3 pb-2">
         {items.length > 0 && (
           <div className="flex items-center gap-1.5 px-1 pb-2">
-            <span className="flex size-[17px] items-center justify-center rounded-[5px] bg-orange-500 text-[10px] font-extrabold text-white">
+            <span className="flex size-[17px] items-center justify-center rounded-[5px] bg-orange-500 text-[10px] font-semibold text-white">
               !
             </span>
-            <span className="text-body-3 font-bold text-slate-900">누르면 바로 고칠 수 있어요</span>
+            <span className="text-body-3 font-semibold text-slate-900">누르면 바로 고칠 수 있어요</span>
             <span className="ml-auto text-caption-1 font-medium text-slate-600">점수 영향 순</span>
           </div>
         )}
@@ -275,7 +275,7 @@ export function ReviewRail({
               <span className="flex size-[17px] items-center justify-center rounded-full bg-emerald-600 text-white">
                 <Check className="size-3" strokeWidth={3.2} />
               </span>
-              <span className="text-body-3 font-bold text-emerald-800">잘하신 부분 {strengths.length}가지</span>
+              <span className="text-body-3 font-semibold text-emerald-800">잘하신 부분 {strengths.length}가지</span>
               <span className="ml-auto flex items-center gap-0.5 text-caption-1 font-medium text-emerald-700">
                 {strengthsOpen ? "접기" : "펼치기"}
                 {strengthsOpen ? <ChevronUp aria-hidden className="size-3.5" /> : <ChevronDown aria-hidden className="size-3.5" />}
@@ -298,7 +298,7 @@ export function ReviewRail({
         <button
           type="button"
           onClick={onNext}
-          className="h-10 flex-1 rounded-[9px] bg-atomic-blue-600 text-body-3 font-bold text-white"
+          className="h-10 flex-1 rounded-[9px] bg-atomic-blue-600 text-body-3 font-semibold text-white"
         >
           다음 항목으로 이동
         </button>

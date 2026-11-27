@@ -24,7 +24,7 @@ export function SiteFooter() {
             <Link
               key={item.label + i}
               href={item.href}
-              className={item.label.includes("개인정보") ? "font-bold text-slate-900" : undefined}
+              className={item.label.includes("개인정보") ? "font-semibold text-slate-900" : undefined}
             >
               {item.label}
             </Link>

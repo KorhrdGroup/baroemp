@@ -36,11 +36,11 @@ export function ResumeSessionDialog({
       <DialogContent className="draft3-theme gap-0 rounded-card p-0 sm:max-w-[480px]">
         <div className="px-6 pb-5 pt-6">
           <DialogHeader className="space-y-0 text-left">
-            <DialogTitle className="pr-6 text-title-3 font-extrabold leading-[1.4] tracking-[-0.01em] break-keep text-slate-900">
-              이전에 하던 진단이 있습니다
+            <DialogTitle className="pr-6 text-title-3 font-bold leading-[1.4] tracking-[-0.01em] break-keep text-slate-900">
+              이전에 하던 진단이 있어요
             </DialogTitle>
             <DialogDescription className="mt-2.5 text-body-3 leading-[1.65] font-medium break-keep text-slate-600">
-              이어서 진행하시겠습니까? 처음부터 다시 하면 이전 답변은 사용되지 않습니다.
+              이어서 할까요? 처음부터 다시 하면 이전 답변은 쓰지 않아요.
             </DialogDescription>
           </DialogHeader>
 
@@ -48,7 +48,7 @@ export function ResumeSessionDialog({
           <div className="mt-5 rounded-xl bg-gov-surface p-4">
             <div className="flex items-baseline justify-between">
               <span className="text-body-3 font-medium text-slate-600">진행 상황</span>
-              <span className="text-body-3 font-bold text-slate-900">
+              <span className="text-body-3 font-semibold text-slate-900">
                 <span className="text-brand-blue-600">{answeredQuestions}</span> / {totalQuestions} 문항
               </span>
             </div>
@@ -82,7 +82,7 @@ export function ResumeSessionDialog({
             type="button"
             onClick={onResume}
             disabled={busy}
-            className="h-[50px] flex-[1.35] rounded-xl bg-brand-blue-600 text-body-3 font-bold text-white disabled:opacity-50"
+            className="h-[50px] flex-[1.35] rounded-xl bg-brand-blue-600 text-body-3 font-semibold text-white disabled:opacity-50"
           >
             이어서 하기
           </button>

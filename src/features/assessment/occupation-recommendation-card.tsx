@@ -82,6 +82,14 @@ function findCourseForQualification(courses: ExternalCourseLink[], name: string)
   return courses.find((c) => c.title.includes(name) || name.includes(c.title));
 }
 
+/**
+ * 일자리 찾기에 넘길 검색어. "서비스직(매장관리)"처럼 괄호가 붙은 이름은 그대로 찾으면 공고 제목과 맞지 않아 0건이 된다.
+ * 괄호 안의 구체적인 일 이름(매장관리)으로 찾는다.
+ */
+export function jobSearchKeyword(occupationName: string): string {
+  return occupationName.match(/\(([^)]+)\)/)?.[1]?.trim() || occupationName;
+}
+
 export function OccupationRecommendationCard({
   rank,
   rec,
@@ -127,14 +135,14 @@ export function OccupationRecommendationCard({
       open={defaultOpen}
       className={cn(
         // 회색 띠 위의 흰 카드(/draft3). 테두리 없이 바탕색으로 가른다. 순위는 왼쪽 번호 배지가 짚어준다.
-        "group rounded-card bg-white",
+        "smooth-details group rounded-card bg-white",
       )}
     >
       <summary className="flex cursor-pointer list-none items-center justify-between gap-3 rounded-card px-5 py-5 sm:px-7 sm:py-6">
         <div className="flex items-center gap-4">
           <span
             className={cn(
-              "flex size-10 shrink-0 items-center justify-center rounded-full text-body-2 font-bold",
+              "flex size-10 shrink-0 items-center justify-center rounded-full text-body-2 font-semibold",
               // 준비 트랙은 순위 경쟁이 아니라 "열리는 가능성" 목록이므로 1위 강조를 하지 않는다.
               !isPreparation && rank === 1 ? "bg-atomic-blue-600 text-white" : "bg-slate-100 text-slate-600",
             )}
@@ -155,14 +163,17 @@ export function OccupationRecommendationCard({
           >
             {isPreparation ? "자격 취득 시 가능" : rec.grade}
           </span>
-          {/* 준비 트랙의 총점에는 자격 미보유 감점이 섞여 있어, 여기서는 성향 적합도를 앞세운다. */}
+          {/*
+            준비 트랙의 총점에는 자격 미보유 감점이 섞여 있어, 여기서는 성향 적합도를 보인다.
+            다만 위 "지금 바로 지원" 카드의 적합도보다 숫자가 큰 일이 잦아 순서가 뒤바뀐 듯 읽히므로, 작고 무채색으로 눌러 둔다.
+          */}
           <div className="text-right">
-            <p className={cn("text-title-2 font-extrabold", isPreparation ? "text-brand-blue-600" : GRADE_SCORE_STYLE[rec.grade])}>
+            <p className={cn(isPreparation ? "text-title-3 font-bold text-slate-700" : cn("text-title-2 font-extrabold", GRADE_SCORE_STYLE[rec.grade]))}>
               {isPreparation ? rec.dimensionFitScore : rec.totalScore}
             </p>
             <p className="text-caption-1 font-medium text-slate-600">{isPreparation ? "성향 적합도" : "적합도"}</p>
           </div>
-          <ChevronDown className="size-5 shrink-0 text-slate-500 group-open:rotate-180" />
+          <ChevronDown className="size-5 shrink-0 text-slate-500 transition-transform duration-300 group-open:rotate-180 motion-reduce:transition-none" />
         </div>
       </summary>
 
@@ -315,7 +326,13 @@ export function OccupationRecommendationCard({
           <div className="text-body-3 font-medium text-slate-600">
             <p className="flex items-center gap-1.5">
               <MapPin className="size-4 text-slate-500" />
-              {regionLabel ? `${regionLabel} 지역 ` : ""}현재 관련 채용공고 <strong className="text-slate-800">{postingCount}건</strong>
+              {postingCount > 0 ? (
+                <>
+                  {regionLabel ? `${regionLabel} 지역 ` : ""}현재 관련 채용공고 <strong className="text-slate-800">{postingCount}건</strong>
+                </>
+              ) : (
+                `${regionLabel ? `${regionLabel} 지역에는 ` : ""}지금 올라온 관련 공고가 없어요`
+              )}
             </p>
             {jobCount && jobCount.highMatchCount > 0 && (
               <p className="mt-1 text-body-3 font-medium text-brand-blue-600">
@@ -335,10 +352,15 @@ export function OccupationRecommendationCard({
              * 사용자가 검색어를 고쳐 넓히거나 좁힐 수도 없다.
              * 이름 검색은 제목·본문까지 훑어 코드가 다른 관련 공고도 함께 걸린다.
              */
-            href={`/jobs?keyword=${encodeURIComponent(rec.occupationName)}`}
-            className="inline-flex h-12 items-center rounded-xl bg-atomic-blue-600 px-5 text-body-3 font-bold text-white"
+            /* 일자리 찾기는 지역을 안 주면 내 희망 지역으로 좁힌다. 내 지역에 공고가 없을 때는 전국(region=all)으로 넘긴다. */
+            href={`/jobs?keyword=${encodeURIComponent(jobSearchKeyword(rec.occupationName))}${postingCount > 0 ? "" : "&region=all"}`}
+            /* 공고가 없을 때는 이름 검색으로 다른 지역 공고까지 보게 하되, 주된 행동처럼 파랗게 두지 않는다. */
+            className={cn(
+              "inline-flex h-12 items-center rounded-xl px-5 text-body-3 font-semibold",
+              postingCount > 0 ? "bg-atomic-blue-600 text-white" : "border border-slate-300 bg-white text-slate-800",
+            )}
           >
-            채용공고 보기
+            {postingCount > 0 ? "채용공고 보기" : "다른 지역 공고 보기"}
           </TrackedLink>
         </div>
 
