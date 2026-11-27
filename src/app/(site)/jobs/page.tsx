@@ -5,7 +5,6 @@ import { EmptyState } from "@/components/common/empty-state";
 import { compareUserToJobsRequirements } from "@/services/job-requirement-comparison.service";
 import { readinessFromComparison } from "@/features/jobs/job-readiness";
 import { JobCard } from "@/features/jobs/job-card";
-import { JobRowCompact } from "@/features/jobs/job-row-compact";
 import { GuestGate } from "@/features/jobs/guest-gate";
 import { JobFiltersForm } from "@/features/jobs/job-filters-form";
 import { JobCurationSection } from "@/features/jobs/job-curation-section";
@@ -19,7 +18,6 @@ import { findCareerProfileByUserId, getOccupationRepository } from "@/lib/reposi
 import type { JobSortOrder, Region } from "@/types";
 import { parseJobCategories, toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 import { parseSalaryAtLeast, parseSalaryUnit } from "@/lib/jobs/salary-filter";
-import { cn } from "@/lib/utils";
 import { objectParticle } from "@/lib/utils/korean";
 
 export const metadata: Metadata = {
@@ -234,14 +232,19 @@ export default async function JobsPage({
                     ? ` ${recommendation.preparation.missingQualifications.join(", ")}${objectParticle(recommendation.preparation.missingQualifications.at(-1) ?? "")} 취득하면 지원할 수 있어요.`
                     : ""}
                 </p>
-                {/* 네 장이면 넓은 화면에서 세 칸 줄에 한 장만 남아, 두 칸씩 두 줄로 채운다. */}
-                <div className={cn("mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2", recommendation.preparation.jobs.length % 3 === 1 ? "lg:grid-cols-2" : "lg:grid-cols-3")}>
+                {/*
+                  아래위 목록과 같은 카드(JobCard) · 같은 칸 수로 둔다. 촘촘한 한 줄짜리로 두면 같은 공고인데 모양이 달라 따로 놀았다.
+                  공고는 최대 4건: 넓은 화면(3칸)과 휴대폰(1칸)은 3장, 중간 화면(2칸)은 4장을 보여 줄이 비지 않는다.
+                */}
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 max-sm:[&>*:nth-child(n+4)]:hidden lg:[&>*:nth-child(n+4)]:hidden">
                   {recommendation.preparation.jobs.map((job) => (
-                    <JobRowCompact
+                    <JobCard
                       key={`prep-${job.id}`}
                       job={job}
+                      showTags={false}
+                      isAuthenticated={isAuthenticated}
+                      isBookmarked={bookmarkedSet.has(job.id)}
                       readiness={readinessMap.get(job.id)}
-                      outsideRegion={recommendation.preparation?.outsideRegionJobIds?.includes(job.id)}
                     />
                   ))}
                 </div>
