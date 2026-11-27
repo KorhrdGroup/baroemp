@@ -148,7 +148,7 @@ export function SupportDetailView({
 
       {/* ── 내 조건과 비교 ── */}
       {match ? (
-        <Section title="내 조건과 비교" description="입력하신 조건 기준의 참고 정보이며, 최종 신청 가능 여부는 운영기관에서 확인해야 합니다.">
+        <Section title="내 조건과 비교" description="입력하신 조건 기준의 참고 정보예요. 최종 신청 가능 여부는 운영기관에서 확인해야 해요.">
           {/* 흰 판에 담는다. 연한 초록 · 주황 · 분홍 상자가 회색 바탕에 바로 놓이면 밝기가 비슷해 흐려 보였다(공고 상세와 같은 이유). */}
           {/* 비어 있는 묶음은 빼므로 칸 수를 실제 묶음 수에 맞춘다. 늘 세 칸이면 두 묶음일 때 오른쪽 한 칸이 비었다. */}
           <div
@@ -245,7 +245,7 @@ export function SupportDetailView({
 
       {(program.sourceUrl ?? program.applyUrl) && (
         <p className="mt-10 text-center text-body-3 font-medium break-keep text-slate-600">
-          이 정보는 {orgName}에서 제공한 내용입니다. 신청 시 공식 페이지로 이동합니다.
+          이 정보는 {orgName}에서 제공한 내용이에요. 신청하면 공식 페이지로 이동해요.
         </p>
       )}
 

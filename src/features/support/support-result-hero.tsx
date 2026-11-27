@@ -74,7 +74,7 @@ export function SupportResultHero({
             </p>
           )}
           <p className="mt-5 max-w-2xl text-body-2 leading-relaxed font-medium break-keep text-white/90">
-            입력하신 조건 기준의 참고 정보로, 최종 신청 가능 여부는 각 운영기관에서 확인해야 합니다.
+            입력하신 조건 기준의 참고 정보로, 최종 신청 가능 여부는 각 운영기관에서 확인해야 해요.
           </p>
         </div>
 

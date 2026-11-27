@@ -56,10 +56,10 @@ export default async function SupportResultPage({ params }: { params: Promise<{ 
       <SupportResultHero
         title={
           view.totalCount === 0
-            ? "현재 조건에 맞는 지원제도를 찾지 못했습니다."
+            ? "지금 조건에 맞는 지원제도를 찾지 못했어요."
             : likelyCount > 0
-              ? `${displayName}에게 해당 가능성이 높은 지원제도 ${likelyCount}개를 찾았습니다.`
-              : `${displayName}, 조건 확인이 필요한 지원제도 ${view.totalCount}개를 찾았습니다.`
+              ? `${displayName}에게 해당 가능성이 높은 지원제도 ${likelyCount}개를 찾았어요.`
+              : `${displayName}, 조건 확인이 필요한 지원제도 ${view.totalCount}개를 찾았어요.`
         }
         tags={view.categories.filter((c) => c.items.length > 0).map((c) => c.label)}
         totalCount={view.totalCount}

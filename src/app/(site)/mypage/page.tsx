@@ -6,9 +6,9 @@ import { labelJobCategory, labelRegion, labelWorkType } from "@/lib/labels";
 import {
   getJobApplicationRepository,
   getJobRepository,
-  getMatchResultRepository,
   getSupportAssessmentSessionRepository,
 } from "@/lib/repositories";
+import { findCurrentSupportMatchResults } from "@/services/support-search.service";
 import { getUserJobBookmarkIdsAction } from "@/features/jobs/job-actions";
 import { getUserSupportBookmarkIdsAction } from "@/features/support/support-actions";
 import { splitRecommendationTracks } from "@/features/assessment/recommendation-tracks";
@@ -24,7 +24,7 @@ import { getJobAlertSettings, listMyJobAlerts } from "@/services/job-alert.servi
 
 interface MyPageSupportData {
   latestSessionId?: string;
-  /** 진단 결과 가운데 "가능성 높음" 건수와 전체 건수. 결과 화면과 같은 값(match_results)을 읽는다. */
+  /** 진단 결과 가운데 "가능성 높음" 건수와 전체 건수. 결과 화면과 같은 값(마지막 진단의 match_results)을 읽는다. */
   highCount: number;
   matchCount: number;
 }
@@ -33,7 +33,7 @@ async function loadMyPageSupportData(userId: string): Promise<MyPageSupportData>
   try {
     const [sessions, matches] = await Promise.all([
       getSupportAssessmentSessionRepository().findAll({ userId, status: "completed" }),
-      getMatchResultRepository().findAll({ sourceId: userId, targetType: "support_program" }),
+      findCurrentSupportMatchResults({ userId }),
     ]);
     const latestSession = [...sessions].sort((a, b) => ((a.completedAt ?? "") < (b.completedAt ?? "") ? 1 : -1))[0];
     return {
