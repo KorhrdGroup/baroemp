@@ -553,6 +553,14 @@ function SupportIntro({
       crumbs={[{ label: "지원금 찾기" }]}
       badges={["무료", "약 2~3분", "결과 바로 확인"]}
       closingTitle={<>조건 몇 가지만 고르면{" "}<br />내가 받을 수 있는 지원제도를 골라드려요</>}
+      closingLead="어렵지 않아요. 지금 상황부터 고르면 돼요."
+      /* 실제 흐름의 "현재 취업 상태는 어떤가요?" 문항과 선택지(EMPLOYMENT_STATUS_LABELS)를 그대로 쓴다. */
+      closingQuestion={{
+        step: "1단계 · 내 상황",
+        q: "현재 취업 상태는 어떤가요?",
+        options: Object.values(EMPLOYMENT_STATUS_LABELS),
+        start: 1,
+      }}
       title={
         <>
           놓치고 있는

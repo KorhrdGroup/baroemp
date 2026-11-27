@@ -3,6 +3,7 @@ import { Check, ChevronRight, type LucideIcon } from "lucide-react";
 import { Reveal } from "@/features/home-draft3/reveal";
 import { LandingItemIcon } from "./landing-item-icons";
 import type { Crumb } from "./page-head";
+import { FirstQuestionCard } from "./first-question-card";
 
 /*
   진단으로 시작하는 서비스(직업진단 · 지원금 찾기)의 첫 화면.
@@ -14,7 +15,7 @@ import type { Crumb } from "./page-head";
   ②~③은 왼쪽 제목 칸 + 오른쪽 내용 칸(첫 칸과 같은 짜임):
   ② 알 수 있는 것 - 회색 바탕에 흰 원 그림 + 글(진단하면 받는 것)
   ③ 이렇게 진행돼요 - 흰 띠, 단계를 세로로 쌓은 카드(부담 덜기)
-  ④ 마무리 - 남색 판에 시작 단추 한 번 더, 그 아래 안내 글
+  ④ 마무리 - 옅은 하늘 판에 시작 단추 한 번 더 + 첫 질문 카드(판 아래로 걸쳐 잘림), 그 아래 안내 글
   무게: 굵기 800은 제목에만, 칸 제목은 700, 나머지는 500~600. 진한 파랑은 시작 단추와 핵심 숫자에만 -
   번호 · 표시까지 진하게 칠하면 화면이 무겁고 투박해진다. 모서리는 /draft3과 같게 카드 20px(rounded-card), 단추 12px, 표시는 알약.
   그림은 홈 서비스 그림처럼 면을 채운 두 톤(진한 파랑 + 옅은 파랑 + 노랑 한 점)으로 맞춘다.
@@ -49,6 +50,8 @@ export function DiagnosisLanding({
   stepsDescription,
   note,
   closingTitle,
+  closingLead,
+  closingQuestion,
 }: {
   crumbs: Crumb[];
   /** 단추 아래 조용한 안내 한 줄(예: "무료", "약 3~5분"). */
@@ -69,6 +72,10 @@ export function DiagnosisLanding({
   note: React.ReactNode;
   /** 맨 끝 시작 단추 판의 제목. 정보를 본 뒤 "내게 맞는 것은 진단으로"를 한 번 더 건넨다. */
   closingTitle: React.ReactNode;
+  /** 마무리 제목 아래 한 줄(예: "어렵지 않아요. 해 온 일부터 고르면 돼요."). */
+  closingLead: string;
+  /** 마무리 판 오른쪽 첫 질문 카드. 실제로 무엇을 묻는지 미리 보여 준다. */
+  closingQuestion: { step: string; q: string; options: string[]; start: number };
 }) {
   return (
     <div className="bg-baro-page">
@@ -199,27 +206,28 @@ export function DiagnosisLanding({
       </section>
 
 
-      {/* ④ 마무리. 정보는 여기까지 보여 주고, 내게 맞는 것은 진단으로 - 끝에서 한 번 더 시작 단추를 크게 건넨다.
-          남색 판은 머리글 마이페이지 단추와 같은 색. 안내 글은 판 아래 글만. */}
+      {/* ④ 마무리. 정보는 여기까지 보여 주고, 내게 맞는 것은 진단으로 - 끝에서 한 번 더 시작 단추를 건넨다.
+          위쪽 첫 칸 · 알 수 있는 것이 이미 "무엇을 받는지 · 몇 분 걸리는지"를 말해서, 여기서는 되풀이하지 않고
+          위에서 안 보여 준 "실제로 무엇을 묻는지"를 첫 질문 카드로 보여 준다(누가 하나씩 눌러 보듯 움직인다).
+          카드는 판 아래로 걸쳐 잘려 "이어서 더 있다"가 보인다. 안내 글은 판 아래 글만. */}
       <section className="bg-white">
         <div className="mx-auto max-w-7xl px-4.5 py-14 sm:py-20 lg:px-8">
           {/* 위 구역들처럼 화면에 들어올 때 살짝 떠오른다(홈 상담 띠와 같은 방식). */}
           <Reveal>
-          <div className="flex flex-col items-center rounded-card bg-baro-navy px-6 py-12 text-center sm:px-10 sm:py-16">
-            <h2 className="text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-balance text-white sm:text-title-1 max-sm:[&_br]:hidden">
-              {closingTitle}
-            </h2>
-            {badges.length > 0 && (
-              <ul className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-1 text-body-2 font-semibold text-white/85">
-                {badges.map((b) => (
-                  <li key={b} className="flex items-center gap-1.5">
-                    <Check aria-hidden strokeWidth={2.5} className="size-4 text-baro-blue-300" />
-                    {b}
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="mt-8 flex w-full justify-center">{actions}</div>
+          <div className="relative overflow-hidden rounded-card bg-baro-blue-50 px-6 pt-12 sm:px-12 lg:pt-14">
+            <div className="grid items-end gap-10 lg:grid-cols-[minmax(0,1fr)_26rem]">
+              {/* 넓은 화면에서 글은 판 위쪽에 붙인다. 바닥에 맞추면 제목이 아래로 처져 보였다. 카드는 바닥에 걸쳐 둔다. */}
+              <div className="pb-12 text-center lg:self-start lg:pt-4 lg:pb-14 lg:text-left">
+                <h2 className="text-title-2 leading-[1.4] font-extrabold tracking-[-0.02em] break-keep text-balance text-slate-900 sm:text-title-1 max-sm:[&_br]:hidden">
+                  {closingTitle}
+                </h2>
+                <p className="mt-4 text-body-1 font-medium break-keep text-slate-700">{closingLead}</p>
+                <div className="mt-8 flex w-full justify-center lg:justify-start">{actions}</div>
+              </div>
+              <div aria-hidden>
+                <FirstQuestionCard {...closingQuestion} />
+              </div>
+            </div>
           </div>
           </Reveal>
           <p className="mt-8 text-body-3 leading-relaxed font-medium break-keep text-slate-600">{note}</p>
