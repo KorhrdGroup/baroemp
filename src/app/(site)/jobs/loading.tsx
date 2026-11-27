@@ -12,7 +12,7 @@ import { PageHead } from "@/components/layout/page-head";
 export default function JobsLoading() {
   return (
     // page.tsx 와 같은 머리 · 바탕(흰 머리 + 옅은 회색 바탕)이라 다 불러온 뒤 화면이 들썩이지 않는다.
-    <div className="draft3-theme" aria-busy="true" aria-label="채용공고를 불러오는 중">
+    <div className="draft3-theme page-gray" aria-busy="true" aria-label="채용공고를 불러오는 중">
     <PageHead
       crumbs={[{ label: "일자리 찾기" }]}
       title="일자리 찾기"

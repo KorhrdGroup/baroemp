@@ -365,7 +365,7 @@ export default async function MyPage() {
 
   return (
     // /draft3 색 구성 (globals.css .draft3-theme): 옅은 회색 바탕에 흰 카드(모서리 20px, 테두리 · 그림자 없음).
-    <div className="draft3-theme bg-baro-page">
+    <div className="draft3-theme page-gray bg-baro-page">
       {/* 인사 · 다음 할 일은 흰 띠 위에(다른 화면의 흰 머리와 같은 결), 그 아래 단계 카드부터 회색 바탕. */}
       <div className="bg-white">
         <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-10 sm:pb-12 lg:px-8">

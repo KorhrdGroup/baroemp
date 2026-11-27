@@ -78,7 +78,7 @@ export default async function ResumeListPage() {
   const coverLetterAtLimit = coverLetters.length >= MAX_COVER_LETTERS_PER_USER;
 
   return (
-    <div className="draft3-theme">
+    <div className="draft3-theme page-gray">
       <PageHead
         icon="resume"
         crumbs={[{ label: "이력서" }]}

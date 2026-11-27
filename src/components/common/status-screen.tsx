@@ -22,7 +22,7 @@ export function StatusScreen({
   className?: string;
 }) {
   return (
-    <div className={cn("draft3-theme flex flex-1 items-center justify-center bg-baro-page px-4.5 py-16 sm:py-24", className)}>
+    <div className={cn("draft3-theme page-gray flex flex-1 items-center justify-center bg-baro-page px-4.5 py-16 sm:py-24", className)}>
       <div className="w-full max-w-md rounded-card bg-white px-6 py-10 text-center sm:px-10 sm:py-12">
         <span aria-hidden className="mx-auto flex size-16 items-center justify-center rounded-full bg-baro-blue-50 text-baro-blue">
           <Icon className="size-8" />

@@ -159,7 +159,7 @@ export default async function JobsPage({
       바로 로그인 화면으로 밀지 않고 가입 안내 창을 띄운다 - 보던 것이 사라지면 대부분 떠난다.
     */
     <GuestGate active={!isAuthenticated}>
-    <div className="draft3-theme">
+    <div className="draft3-theme page-gray">
     {/* 화면 머리(위치 · 제목 · 추천)와 회색 바탕 판(검색창 · 조건 줄 → 목록)은 JobFiltersForm 이 그린다. */}
 
       <JobFiltersForm

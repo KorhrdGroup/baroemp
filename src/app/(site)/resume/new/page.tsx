@@ -33,7 +33,7 @@ export default async function ResumeNewPage({
 
   return (
     // /draft3 색 구성 (globals.css .draft3-theme): 흰 머리 아래 회색 바탕에 흰 단계 카드.
-    <div className="draft3-theme">
+    <div className="draft3-theme page-gray">
       <PageHead icon="resume"
         crumbs={[{ label: "이력서", href: "/resume" }, { label: "새 이력서" }]}
         title="새 이력서 만들기"

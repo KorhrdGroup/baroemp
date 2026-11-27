@@ -14,7 +14,7 @@ export function PolicyArticle({
   return (
     // 흰 머리 아래 회색 바탕에 흰 카드(테두리 · 그림자 없음). /draft3 색 구성 (globals.css .draft3-theme).
     // 카드 폭은 머리(제목)와 같은 max-w-7xl - 좁은 가운데 칸이면 제목과 왼쪽 선이 어긋나고 화면이 비어 보였다.
-    <div className="draft3-theme">
+    <div className="draft3-theme page-gray">
       <PageHead crumbs={[{ label: title }]} title={title} description={`시행일자: ${effectiveDate}`} />
       <div className="bg-baro-page">
       <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
