@@ -130,7 +130,13 @@ export function JobFiltersForm({
       if (!headRef.current?.contains(e.target as Node)) closePicker();
     };
     document.addEventListener("pointerdown", close);
-    return () => document.removeEventListener("pointerdown", close);
+    // 휴대폰 바텀시트가 열린 동안은 뒤 화면이 같이 밀리지 않게 한다.
+    const sheet = window.matchMedia("(max-width: 639px)").matches;
+    if (sheet) document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("pointerdown", close);
+      if (sheet) document.body.style.overflow = "";
+    };
   }, [picker]);
   const [keyword, setKeyword] = useState(initial.keyword ?? "");
   const [region, setRegion] = useState(initial.region ?? "all");
@@ -284,6 +290,23 @@ export function JobFiltersForm({
         열릴 때는 살짝 위에서 내려오며 나타나고(0.2초), 닫힐 때는 거꾸로 올라가며 사라진다(0.15초).
         움직임 줄이기를 켠 분께는 움직임 없이 바로 보이고 바로 사라진다.
       */}
+      {/*
+        휴대폰은 바텀시트로: 검색바 아래로 펼치면 판이 화면 밖으로 길게 내려가 닫기 · 적용하기가 손에서 멀었다.
+        화면 아래에 붙여 올리고(위 모서리만 둥글게, 높이는 화면의 85%까지) 뒤를 어둡게 덮는다. 덮개를 누르면 닫힌다.
+        넓은 화면은 지금처럼 검색바 아래로 펼친다.
+      */}
+      {picker && (
+        <button
+          type="button"
+          aria-label="닫기"
+          tabIndex={-1}
+          onClick={closePicker}
+          className={cn(
+            "fixed inset-0 z-[65] cursor-default bg-slate-900/40 motion-reduce:animate-none sm:hidden",
+            pickerClosing ? "animate-out fill-mode-forwards duration-200 fade-out-0" : "animate-in duration-200 fade-in-0",
+          )}
+        />
+      )}
       {picker && (
         <div
           id="job-filter-panel"
@@ -296,9 +319,10 @@ export function JobFiltersForm({
           }}
           className={cn(
             "absolute inset-x-0 top-full z-50 mt-3 flex max-h-[min(34rem,70vh)] flex-col overflow-hidden rounded-card bg-white shadow-[0_12px_32px_rgba(15,40,90,0.10)] ring-1 ring-[#DDE3EC] ring-inset motion-reduce:animate-none",
+            "max-sm:fixed max-sm:top-auto max-sm:bottom-0 max-sm:z-[70] max-sm:mt-0 max-sm:max-h-[85dvh] max-sm:rounded-b-none max-sm:pb-[env(safe-area-inset-bottom)] max-sm:shadow-[0_-8px_24px_rgba(15,23,42,0.12)] max-sm:ring-0",
             pickerClosing
-              ? "pointer-events-none animate-out fill-mode-forwards duration-150 ease-in fade-out-0 slide-out-to-top-2"
-              : "animate-in duration-200 ease-out fade-in-0 slide-in-from-top-2",
+              ? "pointer-events-none animate-out fill-mode-forwards duration-150 ease-in sm:fade-out-0 sm:slide-out-to-top-2 max-sm:duration-200 max-sm:slide-out-to-bottom-full"
+              : "animate-in duration-200 ease-out sm:fade-in-0 sm:slide-in-from-top-2 max-sm:duration-300 max-sm:slide-in-from-bottom-full",
           )}
         >
           {picker === "region" && (
@@ -449,7 +473,7 @@ export function JobFiltersForm({
                 <button
                   type="button"
                   aria-label="정렬 닫기"
-                  className="fixed inset-0 z-40 cursor-default"
+                  className="fixed inset-0 z-40 cursor-default max-sm:z-[65] max-sm:bg-slate-900/40"
                   onClick={() => setSortOpen(false)}
                 />
               )}
@@ -463,7 +487,9 @@ export function JobFiltersForm({
               </button>
 
               {sortOpen && (
-                <div className="absolute top-[calc(100%+8px)] right-0 z-50 w-40 rounded-xl border border-border bg-white p-1.5 shadow-[0_12px_32px_rgba(15,40,90,0.12)]">
+                /* 휴대폰은 고르기 판과 같은 바텀시트로. 넓은 화면은 단추 아래 작은 메뉴 그대로. */
+                <div className="absolute top-[calc(100%+8px)] right-0 z-50 w-40 rounded-xl border border-border bg-white p-1.5 shadow-[0_12px_32px_rgba(15,40,90,0.12)] max-sm:fixed max-sm:inset-x-0 max-sm:top-auto max-sm:bottom-0 max-sm:z-[70] max-sm:w-auto max-sm:animate-in max-sm:rounded-t-[20px] max-sm:rounded-b-none max-sm:border-0 max-sm:px-4 max-sm:pt-5 max-sm:pb-[calc(1.5rem+env(safe-area-inset-bottom))] max-sm:duration-300 max-sm:ease-out max-sm:slide-in-from-bottom-full motion-reduce:animate-none">
+                  <p className="px-1 pb-2 text-title-3 font-bold text-slate-900 sm:hidden">정렬</p>
                   {SORT_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
@@ -473,7 +499,7 @@ export function JobFiltersForm({
                         void submit({ sort: opt.value });
                       }}
                       className={cn(
-                        "block w-full rounded-lg px-3 py-2.5 text-left text-body-3",
+                        "block w-full rounded-lg px-3 py-2.5 text-left text-body-3 max-sm:h-14 max-sm:rounded-xl max-sm:px-4 max-sm:text-body-1",
                         sort === opt.value ? "bg-slate-100 font-semibold text-slate-900" : "font-medium text-slate-600 hover:bg-slate-50",
                       )}
                     >
