@@ -18,6 +18,7 @@ import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { findCareerProfileByUserId, getOccupationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
 import { parseJobCategories, toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
+import { parseSalaryAtLeast, parseSalaryUnit } from "@/lib/jobs/salary-filter";
 
 export const metadata: Metadata = {
   title: "일자리 찾기 | 한평생 바로취업",
@@ -36,6 +37,9 @@ interface JobsPageSearchParams {
   category?: string;
   beginner?: string;
   closingSoon?: string;
+  /** 급여 받는 방식(monthly · hourly · daily · annual)과 그 최소 금액(원). lib/jobs/salary-filter. */
+  pay?: string;
+  payMin?: string;
   sort?: string;
   page?: string;
 }
@@ -72,6 +76,9 @@ export default async function JobsPage({
   const region: Region | undefined =
     sp.region === "all" ? undefined : ((sp.region as Region | undefined) ?? careerProfile?.region);
 
+  const salaryType = parseSalaryUnit(sp.pay);
+  const salaryAtLeast = parseSalaryAtLeast(salaryType, sp.payMin);
+
   const filter: JobSearchParams = {
     keyword: sp.keyword,
     region,
@@ -81,6 +88,8 @@ export default async function JobsPage({
     jobCategoryPatterns: toJobCategoryPatterns(parseJobCategories(sp.category)),
     isBeginnerFriendly: sp.beginner === "1" ? true : undefined,
     closingWithinDays: sp.closingSoon === "1" ? 7 : undefined,
+    salaryType,
+    salaryAtLeast,
     sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
     activeOnly: true,
     page,
@@ -134,6 +143,8 @@ export default async function JobsPage({
     if (sp.category) params.set("category", sp.category);
     if (sp.beginner) params.set("beginner", sp.beginner);
     if (sp.closingSoon) params.set("closingSoon", sp.closingSoon);
+    if (sp.pay) params.set("pay", sp.pay);
+    if (sp.payMin) params.set("payMin", sp.payMin);
     if (sp.sort) params.set("sort", sp.sort);
     if (targetPage > 1) params.set("page", String(targetPage));
     const qs = params.toString();
@@ -157,6 +168,8 @@ export default async function JobsPage({
           jobCategories: parseJobCategories(sp.category),
           isBeginnerFriendly: sp.beginner === "1",
           closingSoon: sp.closingSoon === "1",
+          salaryType,
+          salaryAtLeast,
           sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
         }}
         jobCategoryLabel={jobCategoryLabel}

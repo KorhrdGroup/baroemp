@@ -100,7 +100,8 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
     const row = rowRef.current;
     if (!row) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    row.scrollBy({ left: direction * (row.clientWidth + 16), behavior: reduce ? "auto" : "smooth" });
+    // clientWidth 에는 그림자 틈(양쪽 12px)이 들어 있어 빼고 센다.
+    row.scrollBy({ left: direction * (row.clientWidth - 24 + 16), behavior: reduce ? "auto" : "smooth" });
   }
   const tabRowRef = useRef<HTMLDivElement>(null);
   const [tabFade, setTabFade] = useState({ start: false, end: false });
@@ -364,7 +365,8 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div
           ref={rowRef}
           onScroll={syncFade}
-          className="scrollbar-hidden flex snap-x snap-mandatory gap-4 overflow-x-auto"
+          /* 가로로 넘기는 줄은 위아래도 잘라 내어, 카드에 마우스를 올릴 때 그림자가 잘렸다. 둘레에 12px 틈을 두고 그만큼 바깥으로 당긴다(넘겨 멈추는 자리도 12px 안쪽). */
+          className="scrollbar-hidden -m-3 flex snap-x snap-mandatory scroll-px-3 gap-4 overflow-x-auto p-3"
         >
           {current.items.map((item, i) => {
             return (

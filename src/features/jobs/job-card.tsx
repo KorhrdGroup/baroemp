@@ -114,7 +114,7 @@ export function JobCard({
       <Link
         href={`/jobs/${job.id}`}
         className={cn(
-          "flex h-full flex-col rounded-2xl bg-white p-5 in-[.draft3-theme]:rounded-card",
+          "flex h-full flex-col rounded-2xl bg-white p-5 transition-shadow duration-200 hover:shadow-hover in-[.draft3-theme]:rounded-card",
           borderless ? "in-[.draft3-theme]:bg-gov-surface" : "border border-border in-[.draft3-theme]:border-0",
         )}
       >

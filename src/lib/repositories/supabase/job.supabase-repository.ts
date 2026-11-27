@@ -152,6 +152,10 @@ function applySearchFilters(query: any, filter: JobSearchFilter) {
   if (filter.isBeginnerFriendly !== undefined) q = q.eq("is_beginner_friendly", filter.isBeginnerFriendly);
   if (filter.salaryMin !== undefined) q = q.gte("salary_max", filter.salaryMin);
   if (filter.salaryMax !== undefined) q = q.lte("salary_min", filter.salaryMax);
+  if (filter.salaryType) q = q.eq("salary_type", filter.salaryType);
+  if (filter.salaryAtLeast !== undefined) {
+    q = q.or(`salary_min.gte.${filter.salaryAtLeast},salary_max.gte.${filter.salaryAtLeast}`);
+  }
   if (filter.closingWithinDays !== undefined) {
     const until = new Date(Date.now() + filter.closingWithinDays * 24 * 60 * 60 * 1000).toISOString();
     q = q.not("apply_deadline", "is", null).gte("apply_deadline", new Date().toISOString()).lte("apply_deadline", until);
@@ -202,6 +206,8 @@ function hasFiltersOutsideRpc(filter: JobSearchFilter): boolean {
     filter.isBeginnerFriendly === false ||
     filter.salaryMin !== undefined ||
     filter.salaryMax !== undefined ||
+    filter.salaryType !== undefined ||
+    filter.salaryAtLeast !== undefined ||
     (filter.preferentialCodes?.length ?? 0) > 0 ||
     (filter.tags?.length ?? 0) > 0
   );

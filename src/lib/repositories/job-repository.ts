@@ -54,6 +54,8 @@ function matchesFilter(job: Job, filter: JobSearchFilter): boolean {
   if (filter.isBeginnerFriendly !== undefined && job.isBeginnerFriendly !== filter.isBeginnerFriendly) return false;
   if (filter.salaryMin !== undefined && (job.salaryMax ?? job.salaryMin ?? 0) < filter.salaryMin) return false;
   if (filter.salaryMax !== undefined && (job.salaryMin ?? job.salaryMax ?? Infinity) > filter.salaryMax) return false;
+  if (filter.salaryType && job.salaryType !== filter.salaryType) return false;
+  if (filter.salaryAtLeast !== undefined && Math.max(job.salaryMin ?? 0, job.salaryMax ?? 0) < filter.salaryAtLeast) return false;
   if (filter.closingWithinDays !== undefined) {
     if (!job.applyDeadline) return false;
     const daysLeft = (new Date(job.applyDeadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24);

@@ -9,6 +9,13 @@ import { REGION_LABELS } from "@/lib/labels";
 import { SIGUNGU_BY_REGION } from "@/lib/regions/sigungu-list";
 import type { Region } from "@/types";
 import { JOB_CATEGORY_GROUPS, jobCategoryLabel as labelOfJobCategory } from "@/lib/jobs/job-category-groups";
+import {
+  SALARY_FILTER_AMOUNTS,
+  SALARY_FILTER_UNITS,
+  salaryFilterLabel,
+  salaryFilterShortLabel,
+  type SalaryFilterUnit,
+} from "@/lib/jobs/salary-filter";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { trackJobFilterChangedAction, trackJobSearchAction } from "@/features/jobs/job-actions";
 import { PageHead } from "@/components/layout/page-head";
@@ -39,6 +46,9 @@ export interface JobFiltersValue {
   regionSigungus?: string[];
   isBeginnerFriendly?: boolean;
   closingSoon?: boolean;
+  /** 급여 받는 방식과 그 최소 금액(원). 금액 없이 방식만 고르면 그 방식 공고를 모두 본다. */
+  salaryType?: SalaryFilterUnit;
+  salaryAtLeast?: number;
   sort?: JobSortOrder;
 }
 
@@ -81,7 +91,7 @@ export function JobFiltersForm({
 }) {
   const router = useRouter();
   const [sortOpen, setSortOpen] = useState(false);
-  const [picker, setPicker] = useState<"region" | "job" | null>(null);
+  const [picker, setPicker] = useState<"region" | "job" | "salary" | null>(null);
   /*
     닫을 때도 부드럽게: 바로 지우지 않고 closing 으로 사라지는 움직임을 다 보인 뒤(onAnimationEnd) 지운다.
     움직임 줄이기를 켠 분은 움직임이 없어 끝 신호가 오지 않으므로 바로 지운다.
@@ -95,7 +105,7 @@ export function JobFiltersForm({
       setPickerClosing(true);
     }
   };
-  const openPicker = (which: "region" | "job") => {
+  const openPicker = (which: "region" | "job" | "salary") => {
     setPicker(which);
     setPickerClosing(false);
   };
@@ -115,11 +125,14 @@ export function JobFiltersForm({
   const [jobCategories, setJobCategories] = useState<string[]>(initial.jobCategories ?? []);
   const [beginnerOnly, setBeginnerOnly] = useState(Boolean(initial.isBeginnerFriendly));
   const [closingSoon, setClosingSoon] = useState(Boolean(initial.closingSoon));
+  const [salaryType, setSalaryType] = useState<SalaryFilterUnit | undefined>(initial.salaryType);
+  const [salaryAtLeast, setSalaryAtLeast] = useState<number | undefined>(initial.salaryAtLeast);
   const [sort, setSort] = useState<JobSortOrder>(initial.sort ?? "recommended");
 
   const regionActive = region !== "all";
   const jobActive = jobCategories.length > 0;
-  const anyActive = regionActive || jobActive || beginnerOnly || closingSoon;
+  const salaryActive = salaryType !== undefined;
+  const anyActive = regionActive || jobActive || salaryActive || beginnerOnly || closingSoon;
   const nameOfJob = (key: string) => labelOfJobCategory(key, jobCategoryLabel);
 
   /* 알약에 적을 말. 여럿을 골랐으면 첫 것 + "외 n". */
@@ -140,6 +153,8 @@ export function JobFiltersForm({
       jobCategories: jobCategories.length > 0 ? jobCategories : undefined,
       isBeginnerFriendly: beginnerOnly || undefined,
       closingSoon: closingSoon || undefined,
+      salaryType,
+      salaryAtLeast,
       sort,
       ...overrides,
     };
@@ -151,6 +166,10 @@ export function JobFiltersForm({
     if (next.jobCategories?.length) params.set("category", next.jobCategories.join(","));
     if (next.isBeginnerFriendly) params.set("beginner", "1");
     if (next.closingSoon) params.set("closingSoon", "1");
+    if (next.salaryType) {
+      params.set("pay", next.salaryType);
+      if (next.salaryAtLeast !== undefined) params.set("payMin", String(next.salaryAtLeast));
+    }
     if (next.sort && next.sort !== "recommended") params.set("sort", next.sort);
     return { next, params };
   };
@@ -165,6 +184,8 @@ export function JobFiltersForm({
     setJobCategories(next.jobCategories ?? []);
     setBeginnerOnly(Boolean(next.isBeginnerFriendly));
     setClosingSoon(Boolean(next.closingSoon));
+    setSalaryType(next.salaryType);
+    setSalaryAtLeast(next.salaryType ? next.salaryAtLeast : undefined);
     const anonymousId = getOrCreateAnonymousId();
     if (Object.keys(overrides).length > 0) {
       await trackJobFilterChangedAction({ anonymousId, filter: next as Record<string, unknown> });
@@ -181,7 +202,7 @@ export function JobFiltersForm({
       active ? "font-bold text-baro-blue-600" : "font-semibold text-slate-800",
     );
   /* 누르면 검색바 아래로 고르기 판이 펼쳐지고, 다시 누르면 접힌다. */
-  const pickerToggle = (which: "region" | "job", label: string, active: boolean, className?: string) => (
+  const pickerToggle = (which: "region" | "job" | "salary", label: string, active: boolean, className?: string) => (
     <button
       type="button"
       aria-expanded={picker === which && !pickerClosing}
@@ -195,13 +216,15 @@ export function JobFiltersForm({
   );
   const regionButton = (className?: string) => pickerToggle("region", regionPillLabel, regionActive, className);
   const jobButton = (className?: string) => pickerToggle("job", jobPillLabel, jobActive, className);
+  const salaryButton = (className?: string) =>
+    pickerToggle("salary", salaryType ? salaryFilterShortLabel(salaryType, salaryAtLeast) : "급여", salaryActive, className);
 
   const head = (
     <div ref={headRef} className="relative">
       {/*
-        검색바 하나에 검색어 | 지역 | 직종 | 검색 단추를 모은다(기존 job24 검색바 구성).
+        검색바 하나에 검색어 | 지역 | 직종 | 급여 | 검색 단추를 모은다(기존 job24 검색바 구성에 급여를 더함).
         지역 · 직종은 누르면 고르기 창이 뜨고 고르면 바로 걸린다. 고르기 창을 여는 것은 둘러보기라 비로그인에게도 열어 둔다.
-        좁은 화면은 한 줄에 다 안 들어가 지역 · 직종을 검색바 아래 두 칸으로 내린다.
+        좁은 화면은 한 줄에 다 안 들어가 지역 · 직종 · 급여를 검색바 아래 세 칸으로 내린다.
       */}
       <form
         onSubmit={(e) => {
@@ -224,6 +247,8 @@ export function JobFiltersForm({
         {regionButton("hidden h-full max-w-56 px-5 sm:flex")}
         <span aria-hidden className="hidden h-7 w-px shrink-0 bg-slate-200 sm:block" />
         {jobButton("hidden h-full max-w-56 px-5 sm:flex")}
+        <span aria-hidden className="hidden h-7 w-px shrink-0 bg-slate-200 sm:block" />
+        {salaryButton("hidden h-full max-w-56 px-5 sm:flex")}
         <button
           type="submit"
           className="m-1.5 flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand-blue-600 px-6 text-body-2 font-semibold text-white sm:h-[52px] sm:px-8"
@@ -232,9 +257,11 @@ export function JobFiltersForm({
           검색
         </button>
       </form>
-      <div className="mt-2 grid grid-cols-2 gap-2 sm:hidden">
-        {regionButton("h-12 justify-between rounded-xl bg-white px-4 ring-1 ring-[#DDE3EC] ring-inset")}
-        {jobButton("h-12 justify-between rounded-xl bg-white px-4 ring-1 ring-[#DDE3EC] ring-inset")}
+      {/* 세 칸이라 휴대폰 폭에서는 글자를 한 단계 줄이고 옆 여백을 좁힌다. */}
+      <div className="mt-2 grid grid-cols-3 gap-2 sm:hidden">
+        {regionButton("h-12 justify-between rounded-xl bg-white px-3 text-body-3 ring-1 ring-[#DDE3EC] ring-inset")}
+        {jobButton("h-12 justify-between rounded-xl bg-white px-3 text-body-3 ring-1 ring-[#DDE3EC] ring-inset")}
+        {salaryButton("h-12 justify-between rounded-xl bg-white px-3 text-body-3 ring-1 ring-[#DDE3EC] ring-inset")}
       </div>
 
       {/*
@@ -278,6 +305,14 @@ export function JobFiltersForm({
               onApply={(keys) => void submit({ jobCategories: keys.length > 0 ? keys : undefined })}
             />
           )}
+          {picker === "salary" && (
+            <SalaryPicker
+              unit={salaryType}
+              atLeast={salaryAtLeast}
+              onClose={closePicker}
+              onApply={(u, a) => void submit({ salaryType: u, salaryAtLeast: a })}
+            />
+          )}
         </div>
       )}
     </div>
@@ -303,6 +338,9 @@ export function JobFiltersForm({
   for (const c of jobCategories) {
     const rest = jobCategories.filter((x) => x !== c);
     chips.push({ key: `job-${c}`, label: nameOfJob(c), remove: { jobCategories: rest.length > 0 ? rest : undefined } });
+  }
+  if (salaryType) {
+    chips.push({ key: "salary", label: salaryFilterLabel(salaryType, salaryAtLeast), remove: { salaryType: undefined, salaryAtLeast: undefined } });
   }
   if (beginnerOnly) chips.push({ key: "beginner", label: "신입가능만", remove: { isBeginnerFriendly: undefined } });
   if (closingSoon) chips.push({ key: "closing", label: "마감임박만", remove: { closingSoon: undefined } });
@@ -333,6 +371,8 @@ export function JobFiltersForm({
             jobCategories: undefined,
             isBeginnerFriendly: undefined,
             closingSoon: undefined,
+            salaryType: undefined,
+            salaryAtLeast: undefined,
           })
         }
         className="ml-1 flex h-10 shrink-0 items-center gap-1 text-body-3 font-semibold whitespace-nowrap text-slate-700"
@@ -643,5 +683,91 @@ function PickerFoot({ disabled, count, unit, onApply }: { disabled: boolean; cou
         적용하기
       </button>
     </div>
+  );
+}
+
+/* 급여 판의 알약. 받는 방식 · 금액 두 줄이 같은 모양으로 읽히게 한 벌을 쓴다. */
+const salaryPillClass = "h-9 rounded-full border px-4 text-body-3 whitespace-nowrap";
+const salaryPillOnClass = "border-baro-blue bg-baro-blue-50 font-bold text-baro-blue-600";
+const salaryPillOffClass = "border-slate-300 bg-white font-semibold text-slate-700";
+
+/**
+ * 급여 고르기 판. 받는 방식(월급 · 시급 · 일급 · 연봉)을 먼저 고르고 그 안에서 최소 금액을 고른다 - lib/jobs/salary-filter.
+ * 방식을 바꾸면 금액은 "상관없음"으로 돌아간다(시급 1만 원 칸이 월급에 남으면 안 된다).
+ * 지역 · 직종 판보다 고를 것이 적어 칸 대신 작은 알약으로, 이름은 왼쪽에 둔다.
+ * 지금 공고는 모두 금액이 적혀 있어(협의 · 내규 0건) "금액 없는 공고 포함" 같은 선택지는 두지 않는다.
+ */
+function SalaryPicker({
+  unit,
+  atLeast,
+  onClose,
+  onApply,
+}: {
+  unit?: SalaryFilterUnit;
+  atLeast?: number;
+  onClose: () => void;
+  onApply: (unit: SalaryFilterUnit, atLeast?: number) => void;
+}) {
+  const [draftUnit, setDraftUnit] = useState<SalaryFilterUnit>(unit ?? "monthly");
+  const [draftAtLeast, setDraftAtLeast] = useState<number | undefined>(unit ? atLeast : undefined);
+
+  return (
+    <>
+      <PickerHead title="급여" onClose={onClose} />
+      <div className="grid min-h-0 items-center gap-x-5 gap-y-3 overflow-y-auto px-5 pb-5 sm:grid-cols-[4.5rem_1fr] sm:px-6">
+        <p className="text-body-3 font-bold text-slate-700">받는 방식</p>
+        <div className="flex flex-wrap gap-2">
+          {SALARY_FILTER_UNITS.map((u) => {
+            const on = u.key === draftUnit;
+            return (
+              <button
+                key={u.key}
+                type="button"
+                aria-pressed={on}
+                onClick={() => {
+                  if (on) return;
+                  setDraftUnit(u.key);
+                  setDraftAtLeast(undefined);
+                }}
+                className={cn(salaryPillClass, on ? salaryPillOnClass : salaryPillOffClass)}
+              >
+                {u.label}
+              </button>
+            );
+          })}
+        </div>
+
+        <p className="mt-1 text-body-3 font-bold text-slate-700 sm:mt-0">최소 금액</p>
+        <div className="flex flex-wrap gap-2">
+          {[undefined, ...SALARY_FILTER_AMOUNTS[draftUnit].map((a) => a.value)].map((value) => {
+            const on = value === draftAtLeast;
+            const label = SALARY_FILTER_AMOUNTS[draftUnit].find((a) => a.value === value)?.label;
+            return (
+              <button
+                key={value ?? "any"}
+                type="button"
+                aria-pressed={on}
+                onClick={() => setDraftAtLeast(value)}
+                className={cn(salaryPillClass, on ? salaryPillOnClass : salaryPillOffClass)}
+              >
+                {label ? `${label} 이상` : "상관없음"}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+      {/* "적용하기"는 비로그인 문지기(GuestGate)가 알아보는 말이라 바꾸지 않는다(PickerFoot 와 같은 단추). */}
+      <div className="flex shrink-0 items-center gap-3 border-t border-slate-200 px-5 py-3 sm:px-6">
+        <p className="flex-1 text-body-2 font-semibold break-keep text-slate-700">{salaryFilterLabel(draftUnit, draftAtLeast)}</p>
+        <button
+          type="button"
+          data-guest-gated
+          onClick={() => onApply(draftUnit, draftAtLeast)}
+          className="h-12 rounded-xl bg-baro-blue px-8 text-body-1 font-bold text-white"
+        >
+          적용하기
+        </button>
+      </div>
+    </>
   );
 }

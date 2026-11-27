@@ -134,6 +134,12 @@ export interface JobSearchFilter {
   careerRequirement?: CareerRequirement;
   salaryMin?: number;
   salaryMax?: number;
+  /**
+   * 일자리 찾기 "급여" 필터. 시급 · 월급처럼 단위가 다르면 금액을 비교할 수 없어 단위를 먼저 고른다.
+   * salaryAtLeast 는 그 단위의 최소 금액(원). salary_max 는 상한을 안 적으면 0 이라, 하한 · 상한 중 하나라도 넘으면 걸린다.
+   */
+  salaryType?: SalaryType;
+  salaryAtLeast?: number;
   /** 마감일이 이 일수 이내인 공고만 (마감임박 필터) */
   closingWithinDays?: number;
   /** 중장년 우대(Work24 pfPreferential) 코드 필터. 예: ["14","B"] */
