@@ -42,7 +42,8 @@ export default async function OnboardingProfilePage({
       /* 소셜 가입은 이메일이 비어 있거나 합성 주소라, 연락처 단계에서 (선택으로) 함께 묻는다. */
       needsEmail={!profile?.email || isSyntheticEmail(profile.email)}
       initialEmail={profile?.email && !isSyntheticEmail(profile.email) ? profile.email : undefined}
-      needsMarketingConsent={!profile?.marketingConsent}
+      /* 방금 동의 창으로 물었으면 마지막 단계에서 또 묻지 않는다("나중에 할게요"를 눌렀어도). */
+      needsMarketingConsent={!profile?.marketingConsent && !askMarketingConsent}
       heldQualificationNames={heldQualifications.map((q) => q.name)}
     />
     </>
