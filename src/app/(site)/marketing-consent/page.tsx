@@ -36,7 +36,7 @@ export default function MarketingConsentPage() {
       <Article heading="6. 철회 방법">
         <ol>
           <li>마이페이지 &gt; 정보 수정에서 &ldquo;알림톡으로 받기&rdquo; 체크를 해제</li>
-          <li>고객센터 1588-1234 (평일 09:00 ~ 18:00)</li>
+          <li>이메일 korhrdpartners@naver.com 으로 철회 요청</li>
         </ol>
         <p>철회 즉시 발송이 중단되며, 철회 후에도 서비스는 그대로 이용할 수 있습니다.</p>
       </Article>

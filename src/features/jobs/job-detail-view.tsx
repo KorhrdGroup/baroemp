@@ -96,9 +96,10 @@ const REQUIREMENT_STATUS_STYLE: Record<
 function InfoRow({ label, value }: { label: string; value?: string }) {
   if (!value || value === "-") return null;
   return (
-    <div className="grid grid-cols-[6.5rem_1fr] sm:grid-cols-[8rem_1fr]">
-      <dt className="px-4 py-3.5 text-body-3 font-semibold text-slate-600 sm:px-5">{label}</dt>
-      <dd className="px-4 py-3.5 text-body-2 font-medium break-keep text-slate-900 sm:px-5">{value}</dd>
+    /* 줄이 빽빽해 보여 위아래 · 양옆을 넉넉하게(20px · 24~28px). 항목 이름과 값은 첫 줄 높이를 맞춘다. */
+    <div className="grid grid-cols-[6.5rem_1fr] items-baseline sm:grid-cols-[9rem_1fr]">
+      <dt className="py-5 pl-5 text-body-2 font-semibold text-slate-600 sm:pl-7">{label}</dt>
+      <dd className="py-5 pr-5 pl-3 text-body-1 leading-relaxed font-medium break-keep text-slate-900 sm:pr-7 sm:pl-4">{value}</dd>
     </div>
   );
 }
