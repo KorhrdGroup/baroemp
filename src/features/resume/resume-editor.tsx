@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, Check, ChevronRight, Eye, Loader2, Minus, Pencil, Plus, Printer, Trash2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -1335,7 +1335,7 @@ export function ResumeEditor({
                         aria-label={`${s.name} 삭제`}
                         className="relative tap-44 -mr-0.5 flex size-4 items-center justify-center rounded-full text-baro-blue-600"
                       >
-                        ×
+                        <X className="size-3.5" strokeWidth={2.6} />
                       </button>
                     </Badge>
                   ))}
@@ -1486,16 +1486,62 @@ export function ResumeEditor({
   return (
     <>
     {/* 인쇄 시 편집 화면은 display:none. 눈에만 숨기면(visibility) 높이가 남아 PDF가 빈 장으로 늘어난다. */}
-    <div className="space-y-6 print:hidden">
+    <div className="print:hidden">
+
+      {/*
+        화면 머리. 다른 화면(PageHead)과 같은 자리 · 같은 크기로 위치와 큰 제목을 두고,
+        제목은 그 큰 제목 자리에서 바로 고친다. 따로 제목 카드를 두면 머리와 같은 말이 두 번 보였다.
+        오른쪽은 저장 상태 - 저장은 직접 눌러야 해서, 고친 뒤 저장 안 한 것이 있는지를 늘 보여 준다.
+      */}
+      <div className="border-b border-border bg-white">
+        <div className="mx-auto max-w-7xl px-4.5 pt-6 pb-7 sm:pt-8 lg:px-8">
+          <nav aria-label="현재 위치">
+            <ol className="flex flex-wrap items-center gap-1 text-body-3 font-medium text-slate-600">
+              <li><Link href="/">홈</Link></li>
+              <li className="flex items-center gap-1">
+                <ChevronRight aria-hidden className="size-3.5 text-slate-500" />
+                <Link href="/resume">이력서</Link>
+              </li>
+              <li className="flex items-center gap-1">
+                <ChevronRight aria-hidden className="size-3.5 text-slate-500" />
+                <span aria-current="page" className="text-slate-900">편집</span>
+              </li>
+            </ol>
+          </nav>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <label className="min-w-0 flex-1">
+              <span className="sr-only">이력서 제목</span>
+              <input
+                id="resume-title"
+                placeholder="이력서 제목을 입력해주세요"
+                value={form.title}
+                onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
+                className="w-full max-w-3xl border-0 bg-transparent px-0 py-1 text-title-1 font-extrabold tracking-[-0.02em] text-slate-900 outline-none placeholder:text-slate-400 sm:text-headline-3"
+              />
+              {/* 밑줄로 고칠 수 있는 칸이라는 것을 알린다. 누르고 있을 때만 파랑. */}
+              <span aria-hidden className="mt-1 block h-0.5 max-w-3xl rounded-full bg-slate-200 [label:focus-within_&]:bg-baro-blue" />
+            </label>
+            <span
+              className={cn(
+                "flex shrink-0 items-center gap-1.5 self-start rounded-full px-3 py-1.5 text-body-3 font-semibold sm:self-auto",
+                isDirty ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700",
+              )}
+            >
+              {isDirty ? <Pencil className="size-3.5" /> : <Check className="size-4" strokeWidth={2.6} />}
+              {isDirty ? "저장하지 않은 내용이 있어요" : "저장됨"}
+            </span>
+          </div>
+        </div>
+      </div>
 
       {/*
         좁은 화면용 항목 띠. 항목이 세로로 길게 이어져 본문 한가운데서는 지금 무엇을
-        채우는지도, 다른 항목으로 건너갈 길도 없었다. 헤더(64px) 밑에 붙여 두고
+        채우는지도, 다른 항목으로 건너갈 길도 없었다. 좁은 화면은 헤더가 따라오지 않아 화면 맨 위에 붙여 두고
         스크롤 위치에 따라 지금 항목을 짚어 준다. 넓은 화면은 왼쪽 목록이 그 일을 한다.
       */}
       <div
         ref={stripRef}
-        className="scrollbar-hidden sticky top-16 z-30 -mx-4.5 -mt-10 mb-2 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur print:hidden lg:hidden"
+        className="scrollbar-hidden sticky top-0 z-30 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur print:hidden lg:hidden"
       >
         {/* 항목을 다루는 동작이라 항목 이름들 옆이 제자리다. 누르면 편집 시트가 올라온다. */}
         <button
@@ -1626,49 +1672,28 @@ export function ResumeEditor({
         </div>
       )}
 
-      <div className="space-y-4 print:hidden">
-        <div className="flex flex-wrap items-end justify-between gap-3 rounded-card bg-white p-5">
-          <div className="min-w-48 flex-1">
-            <Label htmlFor="resume-title" className="text-caption-1 text-slate-600">
-              이력서 제목
-            </Label>
-            <CompactInput
-              id="resume-title"
-              placeholder="이력서 제목을 입력해주세요"
-              value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="mt-1"
-            />
-          </div>
-        </div>
-
+      {/*
+        공고 상세와 같은 짜임: 왼쪽 넓은 칸에 채울 항목 카드, 오른쪽 22.5rem 에 따라 내려오는 요약 카드.
+        요약 카드는 완성도 → 단추(AI 점검 · 미리보기 · 저장) → 항목 목록 차례다. 카드가 길어 화면 아래가
+        잘려도 저장 · AI 단추는 늘 보이게 위로 올린다.
+        좁은 화면에서는 요약 카드(완성도 · AI 점검)가 항목 카드 위로 오고, 목록은 위 띠 · 저장은 아래 고정 줄이 맡는다.
+      */}
+      <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-28 print:hidden lg:grid lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:items-start lg:gap-8 lg:px-8 lg:pb-20">
         {/* 점검 결과는 인라인 카드 대신 플로팅 레일(아래 ReviewRail)로 띄운다. */}
 
-        {reviewResult && marketComparison && (
-          <MarketComparisonCard
-            key={marketComparison.analysisId ?? "no-analysis"}
-            view={marketComparison}
-            source="resume_review"
-          />
-        )}
 
-        {/*
-          왼쪽은 항목 목록, 오른쪽은 지금 채우는 항목 하나.
-          좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
-        */}
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
           {/*
             사이드바 한 곳에서 이력서의 상태(완성도)와 구성(항목)을 함께 본다.
             완성도만 아래 고정바에 두면 "얼마나 남았는지"와 "무엇을 더 담을 수 있는지"가
             화면 양 끝으로 갈라져, 완성도를 올리려고 항목을 손보는 흐름이 끊긴다.
           */}
-          <nav className="rounded-card bg-white p-4 lg:sticky lg:top-24 lg:w-72 lg:shrink-0">
+          <aside className="mb-4 rounded-card bg-white p-5 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:mb-0">
             <div className="flex items-baseline justify-between gap-2">
-              <p className="text-body-3 font-bold text-slate-900">이력서 완성도</p>
-              <p className="text-body-1 font-bold text-brand-blue-600">{liveCompleteness.score}%</p>
+              <p className="text-body-2 font-bold text-slate-900">이력서 완성도</p>
+              <p className="text-title-3 font-extrabold text-baro-blue-600">{liveCompleteness.score}%</p>
             </div>
             <Progress value={liveCompleteness.score} className="mt-2 h-2" />
-            <p className="mt-2 text-caption-1 text-slate-600">
+            <p className="mt-2 text-body-3 font-medium break-keep text-slate-600">
               {liveCompleteness.missing.length > 0
                 ? `다음은 ${liveCompleteness.missing[0].label} 차례예요.`
                 : `${form.name ? `${form.name} 회원님의 ` : ""}이력서가 다 채워졌어요!`}
@@ -1681,15 +1706,43 @@ export function ResumeEditor({
             */}
             {/* 이 화면에서 가장 먼저 권하는 동작이라, 다른 AI 버튼과 달리 채운 파랑으로 둔다. */}
             <AiButton
-              className="mt-4 w-full bg-atomic-blue-600 font-bold text-white"
+              className="mt-5 h-12 w-full rounded-xl bg-atomic-blue-600 text-body-2 font-bold text-white"
               onClick={() => setReviewPickerOpen(true)}
               loading={isReviewing || isChangingTemplate}
             >
               AI 이력서 점검 받기
             </AiButton>
 
+            {/* 넓은 화면의 저장 자리. 좁은 화면은 아래 고정 줄이 같은 일을 한다. */}
+            <div className="mt-2 hidden grid-cols-2 gap-2 lg:grid">
+              <Button
+                variant="outline"
+                className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-semibold text-slate-800"
+                onClick={() => setPreviewOpen(true)}
+              >
+                <Eye className="size-4" /> 미리보기
+              </Button>
+              {/* 고친 것이 없으면 누를 수 있어도 아무 일도 일어나지 않아 저장 여부가 헷갈린다. */}
+              <Button
+                className="h-12 rounded-xl bg-baro-navy text-body-2 font-bold text-white"
+                onClick={() => void handleSave()}
+                disabled={isSaving || !isDirty}
+              >
+                {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
+                {isSaving ? "저장" : isDirty ? "저장" : "저장됨"}
+              </Button>
+            </div>
+            {saveMessage && <p className="mt-2 hidden text-center text-caption-1 font-medium text-slate-600 lg:block">{saveMessage}</p>}
+            <Link
+              href="/resume"
+              className="mt-1 hidden h-11 items-center justify-center gap-1.5 text-body-3 font-semibold text-slate-600 lg:flex"
+            >
+              <ArrowLeft className="size-4" />
+              목록으로
+            </Link>
+
             {/* 좁은 화면에서는 위 항목 띠가 같은 목록을 보여주고, 편집은 시트로 한다. */}
-            <div className="mt-4 hidden border-t border-border pt-3 lg:block">
+            <div className="mt-3 hidden border-t border-border pt-4 lg:block">
               <p className="px-1 text-caption-1 font-semibold text-slate-600">이력서 항목 {navItems.length}/{sectionRows.length}</p>
 
               <ul className="mt-1 flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
@@ -1703,7 +1756,11 @@ export function ResumeEditor({
                         className={cn(
                           // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
                           "flex max-w-40 min-w-0 flex-1 items-center gap-2 rounded-lg px-2.5 py-2 text-left text-body-3 lg:max-w-none",
-                          row.included ? "cursor-pointer text-slate-800" : "text-slate-600",
+                          !row.included
+                            ? "text-slate-600"
+                            : activeSectionKey === row.key
+                              ? "cursor-pointer bg-baro-blue-50 font-bold text-baro-blue-600"
+                              : "cursor-pointer font-semibold text-slate-800",
                         )}
                       >
                         <span
@@ -1795,9 +1852,16 @@ export function ResumeEditor({
                 {reordering ? "순서 변경 끝내기" : "항목 순서 변경"}
               </Button>
             </div>
-          </nav>
+          </aside>
 
-          <div className="min-w-0 flex-1 space-y-4">
+          <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
+            {reviewResult && marketComparison && (
+              <MarketComparisonCard
+                key={marketComparison.analysisId ?? "no-analysis"}
+                view={marketComparison}
+                source="resume_review"
+              />
+            )}
             {navItems.map((item) => (
               /* 사이드바에서 누르면 이 자리로 내려온다. 헤더에 제목이 가리지 않게 여백을 둔다. */
               <div key={item.key} id={sectionAnchorId(item.key)} className="scroll-mt-32 lg:scroll-mt-24">
@@ -1805,7 +1869,6 @@ export function ResumeEditor({
               </div>
             ))}
           </div>
-        </div>
       </div>
 
       {/* AI 점검 결과 팝업. 항목을 누르면 그 섹션으로 이동하고, 고친 항목은 완료로 지워간다. */}
@@ -1837,7 +1900,7 @@ export function ResumeEditor({
         (미리보기 → 저장)을 모아 확정 동작인 저장 하나만 채운다. 삭제는 여기 두지 않는다 -
         편집 화면에서 되돌릴 수 없는 동작은 목록으로 나가서 하게 한다.
       */}
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden">
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur print:hidden lg:hidden">
         {/* 좁은 화면에서는 셋이 한 줄에 안 들어가 왼쪽 버튼이 잘렸다. 남는 자리를 가운데가 먹게 둔다. */}
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4.5 py-3 lg:px-8">
           <Button variant="outline" size="sm" className="shrink-0 border-slate-300 bg-white font-semibold text-slate-800" asChild>

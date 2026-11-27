@@ -42,10 +42,8 @@ export default async function ResumeEditPage({
   return (
     // 흰 머리 아래 회색 바탕에 흰 카드(테두리 · 그림자 없음). /draft3 색 구성 (globals.css .draft3-theme).
     <div className="draft3-theme min-h-screen bg-baro-page print:min-h-0 print:bg-transparent">
-      {/* 하단 고정 액션 바(fixed)에 마지막 카드가 가려지지 않도록 아래 여백을 크게 둔다. */}
-      <div className="mx-auto max-w-5xl px-4.5 pb-28 pt-10 lg:px-8">
-        <ResumeEditor initialDetail={detail} templates={templateOptions} sectionOptions={sectionOptions} />
-      </div>
+      {/* 화면 머리와 두 칸 짜임(폭 · 여백)은 편집기가 직접 잡는다 - 머리는 화면 끝까지, 본문은 max-w-7xl. */}
+      <ResumeEditor initialDetail={detail} templates={templateOptions} sectionOptions={sectionOptions} />
     </div>
   );
 }
