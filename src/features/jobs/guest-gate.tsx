@@ -50,7 +50,8 @@ export function GuestGate({ active, children }: { active: boolean; children: Rea
 
       <Dialog open={open} onOpenChange={setOpen}>
         {/* 알림톡 동의 창과 같은 모양: 동그란 아이콘 · 가운데 정렬 · 주 버튼 + 옅은 보조 버튼. */}
-        <DialogContent className="draft3-theme max-w-md gap-6 rounded-card px-5 pt-6 pb-4" showCloseButton={false}>
+        {/* 휴대폰 필터 · 정렬 바텀시트(z-70)에서 "적용하기"를 눌러도 시트 뒤에 깔리지 않게 그보다 위 층(z-80)에 띄운다. */}
+        <DialogContent overlayClassName="z-[80]" className="z-[80] draft3-theme max-w-md gap-6 rounded-card px-5 pt-6 pb-4" showCloseButton={false}>
           <DialogHeader className="items-center gap-3 text-center sm:text-center">
             <span className="mb-1 flex size-12 items-center justify-center rounded-full bg-brand-blue-50 text-brand-blue-600">
               <UserRoundPlus className="size-6" />
