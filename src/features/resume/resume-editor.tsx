@@ -1701,7 +1701,7 @@ export function ResumeEditor({
             <p className="mt-2 text-body-3 font-medium break-keep text-slate-600">
               {liveCompleteness.missing.length > 0
                 ? `다음은 ${liveCompleteness.missing[0].label} 차례예요.`
-                : `${form.name ? `${form.name} 회원님의 ` : ""}이력서가 다 채워졌어요!`}
+                : `${form.name ? `${form.name}님의 ` : ""}이력서가 다 채워졌어요!`}
             </p>
 
             {/*
@@ -1734,7 +1734,8 @@ export function ResumeEditor({
                 disabled={isSaving || !isDirty}
               >
                 {isSaving ? <Loader2 className="size-4 animate-spin" /> : null}
-                {isSaving ? "저장" : isDirty ? "저장" : "저장됨"}
+                {/* 저장 상태는 머리의 표시가 말한다. 여기까지 "저장됨"이면 같은 말이 한 화면에 두 번 나왔다. */}
+                저장
               </Button>
             </div>
             {saveMessage && <p className="mt-2 hidden text-center text-caption-1 font-medium text-slate-600 lg:block">{saveMessage}</p>}

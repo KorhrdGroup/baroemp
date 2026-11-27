@@ -147,7 +147,7 @@ export function ResultView({
       {contentRecs.length > 0 && (
         <section id="courses" className="scroll-mt-24 pt-4">
           <h2 className="text-title-3 font-bold text-slate-900">도움이 되는 자격 취득 과정</h2>
-          <p className="mt-1 text-body-3 font-medium text-slate-600">검사 결과와 회원님의 조건에 맞춰 고른 자격 과정이에요.</p>
+          <p className="mt-1 text-body-3 font-medium text-slate-600">진단 결과와 내 조건에 맞춰 고른 자격 과정이에요.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {contentRecs.map((content) => (
               <TrackedLink

@@ -347,7 +347,8 @@ function MenuPanel({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const items = [...mainNavItems, user ? { href: "/mypage", label: "마이페이지" } : { href: loginHref, label: "로그인/회원가입" }];
+  // 넓은 화면 메뉴는 자리가 좁아 "이력서 첨삭"으로 줄였지만, 이 판은 자리가 넉넉해 푸터와 같은 온전한 이름을 쓴다.
+  const items = [...mainNavItems.map((item) => (item.href === "/resume" ? { ...item, label: "이력서·자소서 첨삭" } : item)), user ? { href: "/mypage", label: "마이페이지" } : { href: loginHref, label: "로그인/회원가입" }];
 
   return (
     <div className={cn("fixed inset-0 z-[70] lg:hidden", open ? "visible" : "invisible delay-300")} aria-hidden={!open}>
