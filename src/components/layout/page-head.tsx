@@ -71,7 +71,7 @@ export function PageHead({
           </nav>
           <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
-              <h1 className="text-title-1 font-extrabold tracking-[-0.02em] break-keep text-slate-900 sm:text-headline-3">{title}</h1>
+              <h1 className="text-title-1 font-extrabold tracking-[-0.02em] break-keep text-balance text-slate-900 sm:text-headline-3">{title}</h1>
               {description && <p className="mt-2 text-body-2 font-medium break-keep text-slate-700 sm:text-body-1">{description}</p>}
             </div>
             {children}

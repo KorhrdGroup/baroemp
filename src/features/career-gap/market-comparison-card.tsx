@@ -89,7 +89,7 @@ export function MarketComparisonCard({ view, source }: MarketComparisonCardProps
             </p>
             {typeof item.projectedEligibleJobCount === "number" && (
               <p className="text-slate-600">
-                충족 시 회원님 조건과 일치하는 공고{" "}
+                충족하면 내 조건과 맞는 공고{" "}
                 <span className="inline-flex items-center gap-1 align-middle font-semibold text-brand-blue-700">
                   {item.currentEligibleJobCount}건
                   <ArrowRight aria-label="에서" className="size-3.5" strokeWidth={2.4} />

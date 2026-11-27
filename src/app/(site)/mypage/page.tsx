@@ -425,7 +425,8 @@ export default async function MyPage() {
               icon={Gift}
               title="지원금 찾기"
               /* 찜한 지원금도 4단계 일자리처럼 결과 줄에 함께 센다 - 찜해 둔 것이 마이페이지 어디에도 안 보였다. */
-              result={`${supportData.headlineCount}개 찾았어요${supportBookmarkCount > 0 ? ` · ${supportBookmarkCount}개 찜했어요` : ""}`}
+              // 줄이 넘치면 "3개 / 찜했어요"로 끊기지 않고 가운뎃점에서 나뉘게, 낱말 사이는 줄바꿈 없는 띄어쓰기로 둔다.
+              result={`${supportData.headlineCount}개\u00A0찾았어요${supportBookmarkCount > 0 ? ` · ${supportBookmarkCount}개\u00A0찜했어요` : ""}`}
               description="받을 수 있는 지원금을 찾아드려요"
               action="찾아보기"
               done={stepDone.support}

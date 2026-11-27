@@ -116,7 +116,7 @@ export function JobAlertPanel({
                 className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-baro-blue px-5 text-body-2 font-semibold text-white disabled:opacity-60"
               >
                 {pending && <Loader2 className="size-4 animate-spin" />}
-                {quickLabel} 공고 받기
+                {quickLabel} 공고 알림 켜기
               </button>
             )}
           </div>

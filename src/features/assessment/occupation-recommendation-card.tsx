@@ -336,7 +336,7 @@ export function OccupationRecommendationCard({
             </p>
             {jobCount && jobCount.highMatchCount > 0 && (
               <p className="mt-1 text-body-3 font-medium text-brand-blue-600">
-                회원님의 조건과 높은 일치 <strong>{jobCount.highMatchCount}건</strong>
+                내 조건과 높은 일치 <strong>{jobCount.highMatchCount}건</strong>
               </p>
             )}
           </div>
