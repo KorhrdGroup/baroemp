@@ -32,7 +32,7 @@ export function FindIdView() {
     const res = await findIdAction({ name, phone, verificationId });
     setPending(false);
     if (!res.ok || !res.maskedEmail) {
-      setError(res.error ?? "일치하는 회원 정보를 찾을 수 없습니다.");
+      setError(res.error ?? "일치하는 회원 정보를 찾지 못했어요.");
       return;
     }
     setResult({ maskedEmail: res.maskedEmail, joinedAt: res.joinedAt ?? "" });
@@ -40,7 +40,7 @@ export function FindIdView() {
 
   return (
     <AuthShell>
-      <PageTitle title="아이디 찾기" desc="가입 시 등록한 휴대전화번호로 확인합니다." />
+      <PageTitle title="아이디 찾기" desc="가입할 때 등록한 휴대전화번호로 확인해요." />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>

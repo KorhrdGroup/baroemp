@@ -55,9 +55,11 @@ function CollapsibleSection({
   const [expanded, setExpanded] = useState(false);
   const sectionRef = useRef<HTMLElement>(null);
   const Icon = CATEGORY_ICONS[category] ?? Landmark;
-  const hasMore = items.length > COLLAPSE_COUNT;
-  const first = items.slice(0, COLLAPSE_COUNT);
-  const rest = items.slice(COLLAPSE_COUNT);
+  // 한두 개만 가려지면 접지 않는다. "1개 더보기" 한 줄을 눌러 카드 하나를 여는 것은 수고만 든다.
+  const visibleCount = items.length <= COLLAPSE_COUNT + 2 ? items.length : COLLAPSE_COUNT;
+  const hasMore = items.length > visibleCount;
+  const first = items.slice(0, visibleCount);
+  const rest = items.slice(visibleCount);
   const renderCard = ({ program, matchResult }: ResultItem) => (
     <SupportProgramCard
       key={program.id}
@@ -126,7 +128,7 @@ function CollapsibleSection({
           onClick={() => (expanded ? handleCollapse() : setExpanded(true))}
           className="mt-3 flex h-12 w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-white text-body-3 font-semibold text-slate-800"
         >
-          {expanded ? "접기" : `${items.length - COLLAPSE_COUNT}개 더보기`}
+          {expanded ? "접기" : `${rest.length}개 더보기`}
           <ChevronDown className={cn("size-4 transition-transform duration-300 motion-reduce:transition-none", expanded && "rotate-180")} />
         </button>
       )}

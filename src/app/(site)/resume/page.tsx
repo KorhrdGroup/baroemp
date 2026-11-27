@@ -98,7 +98,7 @@ export default async function ResumeListPage() {
             {resumes.map((r) => {
               const done = r.completeness >= 100;
               return (
-                <Link key={r.id} href={`/resume/${r.id}/edit`} className="relative flex min-h-[12rem] flex-col rounded-card bg-white p-5 transition-shadow duration-200 hover:shadow-hover">
+                <Link key={r.id} href={`/resume/${r.id}/edit`} className="relative flex flex-col rounded-card bg-white p-5 sm:min-h-[12rem] transition-shadow duration-200 hover:shadow-hover">
                                     <div className="absolute top-4 right-4">
                     <DocumentMenu
                       label="이력서"
@@ -159,7 +159,7 @@ export default async function ResumeListPage() {
                 lockedMessage={COVER_LETTER_LIMIT_MESSAGE}
               />
               {coverLetters.map((cl) => (
-                <Link key={cl.id} href={`/cover-letter/${cl.id}/edit`} className="relative flex min-h-[12rem] flex-col rounded-card bg-white p-5 transition-shadow duration-200 hover:shadow-hover">
+                <Link key={cl.id} href={`/cover-letter/${cl.id}/edit`} className="relative flex flex-col rounded-card bg-white p-5 sm:min-h-[12rem] transition-shadow duration-200 hover:shadow-hover">
                                     <div className="absolute top-4 right-4">
                     <DocumentMenu
                       label="자기소개서"

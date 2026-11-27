@@ -60,8 +60,8 @@ export function SignupView({ next }: { next: string }) {
     }
     setEmailCheckMessage(
       result.available
-        ? { ok: true, text: "사용 가능한 이메일입니다." }
-        : { ok: false, text: "이미 가입된 이메일입니다." }
+        ? { ok: true, text: "쓸 수 있는 이메일이에요." }
+        : { ok: false, text: "이미 가입된 이메일이에요." }
     );
   }
 
@@ -161,7 +161,7 @@ export function SignupView({ next }: { next: string }) {
           />
           {pw2.length > 0 ? (
             <HelpText tone={pwMatch ? "ok" : "error"}>
-              {pwMatch ? "비밀번호가 일치합니다" : "비밀번호가 일치하지 않습니다"}
+              {pwMatch ? "비밀번호가 일치해요" : "비밀번호가 일치하지 않아요"}
             </HelpText>
           ) : null}
         </div>

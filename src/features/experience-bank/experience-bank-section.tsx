@@ -115,7 +115,7 @@ export function ExperienceBankSection({
                 <p className="truncate text-body-2 font-semibold text-slate-900">{item.title}</p>
                 <p className="mt-1 text-body-3 font-medium text-slate-600">
                   {item.skills.length > 0 ? `${item.skills.slice(0, 3).join(" · ")} · ` : ""}
-                  최근수정 {new Date(item.updatedAt).toLocaleDateString("ko-KR")}
+                  {new Date(item.updatedAt).toLocaleDateString("ko-KR")} 수정
                 </p>
               </div>
               {/* 이력서·자기소개서 목록과 같은 더보기 메뉴. 되돌릴 수 없는 삭제를 한 겹 안에 둔다. */}

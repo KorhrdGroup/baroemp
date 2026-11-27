@@ -609,7 +609,7 @@ export function CoverLetterEditor({
                   <p className="text-body-3 font-semibold text-slate-900">이 문항에 쓸 내 경험</p>
                   <p className="mt-0.5 text-caption-1 font-medium text-slate-600">
                     {experiencePool.length > 0
-                      ? "고른 경험을 재료로 AI가 초안을 씁니다. 이 문항과 안 맞는 것은 빼주세요."
+                      ? "고른 경험을 재료로 AI가 초안을 써요. 이 문항과 안 맞는 것은 빼주세요."
                       : "따로 정리한 경험이 없으면 이력서에 쓰신 경력을 재료로 초안을 만들어드려요."}
                   </p>
                 </div>

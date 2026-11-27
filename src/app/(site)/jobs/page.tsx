@@ -19,6 +19,8 @@ import { findCareerProfileByUserId, getOccupationRepository } from "@/lib/reposi
 import type { JobSortOrder, Region } from "@/types";
 import { parseJobCategories, toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
 import { parseSalaryAtLeast, parseSalaryUnit } from "@/lib/jobs/salary-filter";
+import { cn } from "@/lib/utils";
+import { objectParticle } from "@/lib/utils/korean";
 
 export const metadata: Metadata = {
   title: "일자리 찾기 | 한평생 바로취업",
@@ -229,10 +231,11 @@ export default async function JobsPage({
                 <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">
                   진단에서 성향이 잘 맞았던 직업이에요.
                   {recommendation.preparation.missingQualifications?.length
-                    ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
+                    ? ` ${recommendation.preparation.missingQualifications.join(", ")}${objectParticle(recommendation.preparation.missingQualifications.at(-1) ?? "")} 취득하면 지원할 수 있어요.`
                     : ""}
                 </p>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                {/* 네 장이면 넓은 화면에서 세 칸 줄에 한 장만 남아, 두 칸씩 두 줄로 채운다. */}
+                <div className={cn("mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2", recommendation.preparation.jobs.length % 3 === 1 ? "lg:grid-cols-2" : "lg:grid-cols-3")}>
                   {recommendation.preparation.jobs.map((job) => (
                     <JobRowCompact
                       key={`prep-${job.id}`}

@@ -342,7 +342,7 @@ export function PhoneVerificationField({
     const result = await sendPhoneCodeAction({ phone, purpose });
     setBusy(false);
     if (!result.ok) {
-      setError(result.error ?? "인증번호 발송에 실패했습니다.");
+      setError(result.error ?? "인증번호를 보내지 못했어요. 다시 시도해 주세요.");
       return;
     }
     setSent(true);
@@ -357,7 +357,7 @@ export function PhoneVerificationField({
     const result = await verifyPhoneCodeAction({ phone, code, purpose });
     setBusy(false);
     if (!result.ok || !result.verificationId) {
-      setError(result.error ?? "인증번호가 올바르지 않습니다.");
+      setError(result.error ?? "인증번호가 맞지 않아요.");
       return;
     }
     setVerified(true);
@@ -410,7 +410,7 @@ export function PhoneVerificationField({
             {verified ? "완료" : "확인"}
           </FieldActionButton>
         </div>
-        {verified ? <HelpText tone="ok">인증이 완료되었습니다</HelpText> : null}
+        {verified ? <HelpText tone="ok">인증을 마쳤어요</HelpText> : null}
         {!verified && sent ? <HelpText>남은 시간 {mmss}</HelpText> : null}
         {error ? <HelpText tone="error">{error}</HelpText> : null}
       </div>

@@ -234,7 +234,7 @@ export function ResumeWizard({
       <div>
         <div className="text-center">
           <h2 className="text-title-3 font-bold text-slate-900">어떤 이력서를 만들까요?</h2>
-          <p className="mt-2 text-body-2 font-medium text-slate-600">
+          <p className="mt-2 text-body-2 font-medium break-keep text-slate-600">
             골라주시면 그에 맞는 항목을 미리 담아드려요. 항목은 다음 단계에서 바꿀 수 있어요.
           </p>
         </div>

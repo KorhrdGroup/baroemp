@@ -417,7 +417,7 @@ function ExperienceDetail({
         <EditButton label="제목 고치기" onClick={() => setEditingStep(STEPS[0])} />
       </DialogHeader>
       <DialogDescription className="mt-1.5 text-body-3 font-medium text-slate-600">
-        {STORY_STEPS.length}칸 중 {filled}칸 썼어요 · 최근수정 {new Date(item.updatedAt).toLocaleDateString("ko-KR")}
+        {STORY_STEPS.length}칸 중 {filled}칸 썼어요 · {new Date(item.updatedAt).toLocaleDateString("ko-KR")} 수정
       </DialogDescription>
 
       <ol className="mt-5 border-t border-slate-100">

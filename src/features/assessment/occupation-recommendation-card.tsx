@@ -171,7 +171,7 @@ export function OccupationRecommendationCard({
             <p className={cn(isPreparation ? "text-title-3 font-bold text-slate-700" : cn("text-title-2 font-extrabold", GRADE_SCORE_STYLE[rec.grade]))}>
               {isPreparation ? rec.dimensionFitScore : rec.totalScore}
             </p>
-            <p className="text-caption-1 font-medium text-slate-600">{isPreparation ? "성향 적합도" : "적합도"}</p>
+            <p className="text-caption-1 font-medium whitespace-nowrap text-slate-600">{isPreparation ? "성향 적합도" : "적합도"}</p>
           </div>
           <ChevronDown className="size-5 shrink-0 text-slate-500 transition-transform duration-300 group-open:rotate-180 motion-reduce:transition-none" />
         </div>

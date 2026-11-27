@@ -226,11 +226,9 @@ export function CoverLetterWizard({
     return (
       <div>
         <div className="text-center">
-          <Sparkles className="mx-auto size-8 text-brand-blue-400" />
-          <h2 className="mt-5 text-title-2 font-extrabold text-slate-900 sm:text-headline-3">
-            어떤 자기소개서를 만들까요?
-          </h2>
-          <p className="mt-3 text-body-2 font-medium text-slate-600">
+          {/* 새 이력서 고르기 화면과 같은 크기 · 같은 모양. 큰 제목은 위 화면 머리가 이미 맡는다. */}
+          <h2 className="text-title-3 font-bold text-slate-900">어떤 자기소개서를 만들까요?</h2>
+          <p className="mt-2 text-body-2 font-medium break-keep text-slate-600">
             골라주시면 그에 맞는 문항을 미리 담아드려요. 문항은 다음 단계에서 바꿀 수 있어요.
           </p>
         </div>

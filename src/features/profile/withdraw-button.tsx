@@ -63,7 +63,7 @@ export function WithdrawButton() {
           <DialogHeader>
             <DialogTitle className="text-title-3 font-bold text-slate-900">정말 탈퇴하시겠어요?</DialogTitle>
             <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
-              계정과 함께 이력서·자기소개서, 찜한 일자리·지원제도, 직업진단·지원금 진단 결과가 모두 삭제됩니다.
+              계정과 함께 이력서·자기소개서, 찜한 일자리·지원제도, 직업진단·지원금 진단 결과가 모두 삭제돼요.
               삭제한 정보는 되돌릴 수 없어요.
             </DialogDescription>
           </DialogHeader>

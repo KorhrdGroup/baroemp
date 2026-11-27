@@ -19,7 +19,7 @@ export function AccountForm({ profile }: { profile: Profile }) {
     <form action={formAction} className="space-y-6">
       {state.success && (
         <div className="rounded-xl bg-emerald-50 px-4 py-3 text-body-3 font-medium text-emerald-700" role="status">
-          변경사항이 저장되었습니다.
+          바꾼 내용을 저장했어요.
         </div>
       )}
       {state.error && (
@@ -54,7 +54,7 @@ export function AccountForm({ profile }: { profile: Profile }) {
             이메일
           </Label>
           <Input id="email" value={profile.email ?? ""} disabled className={inputClass} />
-          <p className="mt-1 text-body-3 font-medium text-slate-600">이메일은 변경할 수 없습니다.</p>
+          <p className="mt-1 text-body-3 font-medium text-slate-600">이메일은 바꿀 수 없어요.</p>
         </div>
       </div>
 

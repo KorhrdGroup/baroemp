@@ -125,7 +125,8 @@ export function SupportProgramCard({
             </span>
           )}
         </div>
-        <span className="max-w-[60%] truncate text-caption-1 font-medium text-slate-600">{program.applicationPeriod ?? "상시"}</span>
+        {/* 한 줄에서 자르면 "매월 1일~7일(예산소진 시 …"처럼 정작 언제까지인지가 가려져 두 줄까지 보여 준다. */}
+        <span className="line-clamp-2 max-w-[62%] text-right text-caption-1 leading-snug font-medium break-keep text-slate-600">{program.applicationPeriod ?? "상시"}</span>
       </div>
     </Link>
     <SupportBookmarkButton

@@ -364,7 +364,8 @@ export function OnboardingWizard({
               {justSignedUp ? "가입이 완료되었어요" : "취업 프로필 채우기"}
             </p>
             <p className="mt-1.5 text-body-3 font-medium break-keep text-slate-600">
-              몇 가지만 알려주시면 맞춤 채용공고와 받을 수 있는 지원금을 찾아드려요. 지금 넘어가셔도 괜찮아요.
+              <span className="inline-block">몇 가지만 알려주시면 맞춤 채용공고와 받을 수 있는 지원금을 찾아드려요.</span>{" "}
+              <span className="inline-block">지금 넘어가셔도 괜찮아요.</span>
             </p>
           </div>
         )}

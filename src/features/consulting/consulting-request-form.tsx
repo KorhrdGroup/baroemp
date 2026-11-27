@@ -10,10 +10,10 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { trackActivityAction } from "@/features/activity/activity-actions";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 
-export function ConsultingRequestForm() {
+export function ConsultingRequestForm({ defaultName = "", defaultPhone = "" }: { defaultName?: string; defaultPhone?: string }) {
   const [submitted, setSubmitted] = useState(false);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
+  const [name, setName] = useState(defaultName);
+  const [phone, setPhone] = useState(defaultPhone);
   const [topic, setTopic] = useState("");
   const [channel, setChannel] = useState("phone");
 
@@ -42,9 +42,9 @@ export function ConsultingRequestForm() {
         <span className="flex size-14 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
           <CheckCircle2 className="size-7" />
         </span>
-        <h3 className="mt-5 text-title-3 font-bold text-slate-900">상담 신청이 접수되었습니다</h3>
+        <h3 className="mt-5 text-title-3 font-bold text-slate-900">상담 신청을 받았어요</h3>
         <p className="mt-2 max-w-md text-body-2-reading font-medium text-slate-600">
-          담당 컨설턴트가 확인 후 남겨주신 연락처로 연락드립니다.
+          담당 컨설턴트가 확인한 뒤 남겨주신 연락처로 연락드릴게요.
         </p>
         <Button
           className="mt-6 h-12 rounded-xl bg-atomic-blue-600 px-6 font-semibold text-white"
@@ -116,7 +116,7 @@ export function ConsultingRequestForm() {
       {/* 폼 안의 다른 컨트롤과 같은 rounded-xl(12px). 입력칸을 rounded-xl 로 맞췄으니 이 안내도 따라간다. */}
       {/* 두 줄로 접힐 때 "결제 / 안내" 처럼 붙어야 할 말이 갈렸다. 낱말을 지키고 줄 길이를 고르게 나눈다. */}
         <div className="rounded-xl bg-baro-blue-50 px-4 py-3 text-center text-body-3 font-medium break-keep text-balance text-baro-navy">
-        1:1 취업컨설팅은 유료 서비스입니다. 상담 시작 전 결제 안내를 드립니다.
+        1:1 취업컨설팅은 유료 서비스예요. 상담을 시작하기 전에 결제를 안내해 드려요.
       </div>
 
       <Button

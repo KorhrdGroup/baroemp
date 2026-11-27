@@ -188,7 +188,7 @@ export function AssessmentWizard({
       {/* 진행 바 - 전체 문항 기준 */}
       {/* 넓은 화면은 머리글(80px)이 붙어 따라오므로 그 아래에, 휴대폰은 머리글이 붙지 않아 맨 위에 붙인다. */}
       <div className="sticky top-0 z-30 lg:top-20">
-        <div className="flex gap-1.5 bg-white px-4 pt-3">
+        <div className="flex gap-1.5 bg-white px-4 pt-3 sm:px-[max(1rem,calc((100%-36rem)/2+1rem))]">
           {sections.map((s, i) => (
             <div key={s.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
               <div
@@ -202,7 +202,7 @@ export function AssessmentWizard({
           문항 영역과 같은 폭·패딩을 써서 뒤로가기 화살표가 아래 선택지 박스와 왼쪽 라인을 맞춘다.
           -ml-2는 아이콘 버튼의 안쪽 여백(36px 박스 안 20px 아이콘)을 상쇄해 아이콘 자체를 정렬시킨다.
         */}
-        <div className="mx-auto flex max-w-[24.5rem] items-center bg-white/90 px-4 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-xl items-center bg-white/90 px-4 py-3 backdrop-blur">
           <button
             type="button"
             onClick={handlePrev}
@@ -230,7 +230,7 @@ export function AssessmentWizard({
       </div>
 
       {/* 문항 */}
-      <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
+      <div className="mx-auto mt-8 max-w-xl px-4">
         {/* 분류 안에서 몇 번째 문항인지 - 질문과 함께 읽히는 정보라 질문 위에 둔다. */}
         <p className="text-center text-body-2 font-semibold text-slate-900">
           {posInSection + 1}/{sectionTotal}
@@ -278,7 +278,7 @@ export function AssessmentWizard({
 
       {/* 하단 고정 CTA */}
       <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-white via-white to-transparent pt-6">
-        <div className="mx-auto max-w-[24.5rem] px-4 pb-8">
+        <div className="mx-auto max-w-xl px-4 pb-8">
           <Button
             onClick={handleNext}
             disabled={submitting || (question.required && !canProceed)}

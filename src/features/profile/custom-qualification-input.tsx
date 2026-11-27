@@ -90,7 +90,7 @@ export function CustomQualificationInput({
             }
           }}
           maxLength={CUSTOM_QUALIFICATION_MAX_LENGTH}
-          placeholder="목록에 없는 자격증을 직접 적어 주세요"
+          placeholder="자격증 직접 적기"
           aria-label="자격증 직접 입력"
           className="h-12 flex-1 in-[.draft3-theme]:rounded-xl in-[.draft3-theme]:border-slate-300 in-[.draft3-theme]:bg-white in-[.draft3-theme]:text-body-2 in-[.draft3-theme]:font-medium"
         />

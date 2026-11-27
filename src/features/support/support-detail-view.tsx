@@ -16,15 +16,26 @@ import { PageHead } from "@/components/layout/page-head";
 import { GRADE_BADGE_CLASS } from "./grade-badge";
 
 /** 지원 요강 표의 한 줄. 정부 누리집 공고처럼 왼쪽 회색 칸에 항목 이름, 오른쪽에 값. 공고 상세와 같은 표. */
-function InfoRow({ label, value }: { label: string; value?: string }) {
-  if (!value) return null;
+/**
+ * 공공데이터 원문의 구분 기호를 읽기 좋게 바꾼다.
+ * "방문신청||직접입력" → "방문신청 · 직접입력", "청년정책팀/041-950-4542" → "청년정책팀 · 041-950-4542".
+ */
+function tidySourceText(value: string): string {
+  return value
+    .replace(/\s*\|\|\s*/g, " · ")
+    .replace(/\s*\/\s*(?=\d{2,4}-\d{3,4}-\d{4})/g, " · ");
+}
+
+function InfoRow({ label, value: rawValue, clamp = true }: { label: string; value?: string; clamp?: boolean }) {
+  if (!rawValue) return null;
+  const value = tidySourceText(rawValue);
   return (
     <div className="grid grid-cols-[6.5rem_1fr] sm:grid-cols-[8rem_1fr]">
       <dt className="px-4 py-3.5 text-body-3 font-semibold text-slate-600 sm:px-5">{label}</dt>
       {/* 실 API는 짧은 사실 필드에도 안내문 전체를 담아 보내는 경우가 있어 길이를 제한한다. */}
       {/* 줄 수 제한은 안쪽 span 에 건다. dd 에 직접 걸면 아래 여백 자리로 넷째 줄이 반쯤 비쳐 보인다. */}
       <dd className="px-4 py-3.5 text-body-2 font-medium break-keep text-slate-900 sm:px-5">
-        <span className="line-clamp-3">{value}</span>
+        <span className={cn(clamp && "line-clamp-3")}>{value}</span>
       </dd>
     </div>
   );
@@ -87,6 +98,12 @@ export function SupportDetailView({
   const regionText =
     program.regionScope === "national" || !program.regionScope ? "전국" : labelRegion(program.regionScope as Region);
 
+  /* 지원대상 원문이 요강의 지원대상과 같은 글이고 짧으면(120자 이하) 한 번만, 자르지 않고 보여 준다. */
+  const shortSameTarget =
+    !!program.eligibilityRaw &&
+    program.eligibilityRaw.trim() === program.targetDescription?.trim() &&
+    program.eligibilityRaw.length <= 120;
+
   return (
     // 세부 화면 공통 바탕: 흰 머리 아래 옅은 회색 바탕에 흰 카드(테두리 · 그림자 없음). 신청 동작은 하단에 고정한다. 공고 상세와 같은 틀.
     // /draft3 색 구성 (globals.css .draft3-theme)
@@ -125,7 +142,7 @@ export function SupportDetailView({
      <div className="max-w-3xl lg:max-w-none">
       <Section title="지원 요강">
         <dl className="divide-y divide-slate-100 overflow-hidden rounded-card bg-white">
-          <InfoRow label="지원대상" value={targetSummary(program)} />
+          <InfoRow label="지원대상" value={targetSummary(program)} clamp={!shortSameTarget} />
           <InfoRow label="지역" value={regionText} />
           <InfoRow label="지원내용" value={benefitSummary(program)} />
           <InfoRow label="신청기간" value={program.applicationPeriod ?? "상시"} />
@@ -219,7 +236,8 @@ export function SupportDetailView({
             {program.description && (
               <SupportLongText text={program.description} className="text-body-2-reading font-medium text-slate-800" />
             )}
-            {program.eligibilityRaw && (
+            {/* 위 요강의 지원대상과 같은 짧은 글이면 되풀이하지 않는다. 그때는 요강 줄을 자르지 않고 다 보여 준다. */}
+            {program.eligibilityRaw && !shortSameTarget && (
               <div className={cn("rounded-xl bg-gov-surface p-4", program.description && "mt-4")}>
                 <p className="mb-1 text-body-3 font-semibold text-slate-600">지원대상 원문</p>
                 <SupportLongText text={program.eligibilityRaw} className="text-body-3 font-medium text-slate-700" />

@@ -2194,11 +2194,14 @@ function EntrySummaryCard({
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-4">
       <div className="min-w-0 flex-1">
-        {/* 짧은 정보는 세로로 쌓지 않고 한 줄에 나열한다. 기간·상태는 오른쪽 끝으로 보낸다. */}
+        {/*
+          짧은 정보는 세로로 쌓지 않고 한 줄에 나열한다. 기간·상태는 넓은 화면에서 오른쪽 끝으로 보낸다.
+          휴대폰은 한 줄에 다 안 들어가 기간만 다음 줄 오른쪽에 혼자 떠서, 늘 제 줄을 차지하고 왼쪽에서 시작하게 한다.
+        */}
         <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <p className="text-body-3 font-semibold text-slate-900">{title}</p>
           {subtitle && <p className="text-caption-1 text-slate-600">{subtitle}</p>}
-          {meta && <p className="ml-auto text-caption-1 text-slate-600">{meta}</p>}
+          {meta && <p className="basis-full text-caption-1 text-slate-600 sm:ml-auto sm:basis-auto">{meta}</p>}
         </div>
         {body && <p className="mt-1 line-clamp-2 text-caption-1 leading-relaxed text-slate-600">{body}</p>}
       </div>

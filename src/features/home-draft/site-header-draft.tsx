@@ -37,7 +37,9 @@ export function SiteHeaderDraft({ user, look }: { user: SiteHeaderUser | null; l
   const onAuthScreen = isAuthPath(pathname);
   // 로그인 후 보던 화면으로 돌아오게 한다. 없으면 마이페이지로 떨어진다.
   const loginHref = onAuthScreen ? "/login" : `/login?next=${encodeURIComponent(pathname)}`;
-  const isCurrentNav = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  // 자기소개서 화면(/cover-letter/…)도 "이력서 첨삭" 메뉴에 속한다. 목록이 /resume 한 화면에 같이 있다.
+  const isCurrentNav = (href: string) =>
+    pathname === href || pathname.startsWith(`${href}/`) || (href === "/resume" && (pathname === "/cover-letter" || pathname.startsWith("/cover-letter/")));
   /*
    * 메뉴가 넷뿐이라 줄을 따로 쓰면 빈 줄이 된다. 로고 · 메뉴 · 검색 · 로그인을 한 줄에 모은다.
    * 일자리찾기 목록은 화면 안에 검색창이 이미 있어 둘이 되므로 뺀다.
