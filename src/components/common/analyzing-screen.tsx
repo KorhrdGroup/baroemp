@@ -13,7 +13,7 @@ import { Check, Loader2 } from "lucide-react";
 export function AnalyzingScreen({
   steps,
   durationMs = 2500,
-  title = "분석 중입니다",
+  title = "분석하고 있어요",
 }: {
   /** 순서대로 보여줄 단계 문구 */
   steps: string[];
@@ -41,11 +41,11 @@ export function AnalyzingScreen({
     <div
       role="status"
       aria-live="polite"
-      className="flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-atomic-mono-50 px-6"
+      className="draft3-theme flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center bg-white px-6"
     >
       <div className="w-full max-w-[24.5rem]">
-        <h2 className="text-center text-title-2 font-bold text-slate-900">{title}</h2>
-        <p className="mt-2.5 text-center text-body-2 text-slate-500">잠시만 기다려 주세요</p>
+        <h2 className="text-center text-title-2 font-extrabold break-keep text-slate-900">{title}</h2>
+        <p className="mt-2.5 text-center text-body-2 font-medium text-slate-600">잠시만 기다려 주세요</p>
 
         <div className="mt-8 h-2 overflow-hidden rounded-full bg-slate-200">
           <div
@@ -53,7 +53,7 @@ export function AnalyzingScreen({
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="mt-2 text-right text-label-2 font-semibold text-brand-blue-600">{Math.round(progress)}%</p>
+        <p className="mt-2 text-right text-caption-1 font-semibold text-brand-blue-600">{Math.round(progress)}%</p>
 
         <ul className="mt-7 flex flex-col gap-3.5">
           {steps.map((step, index) => {
@@ -76,7 +76,7 @@ export function AnalyzingScreen({
                 <span
                   className={[
                     "text-body-2",
-                    done ? "text-slate-400" : current ? "font-semibold text-slate-900" : "text-slate-400",
+                    done ? "font-medium text-slate-600" : current ? "font-semibold text-slate-900" : "font-medium text-slate-500",
                   ].join(" ")}
                 >
                   {step}

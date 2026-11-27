@@ -3,7 +3,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Eye, EyeOff } from "lucide-react";
+import { Check, Eye, EyeOff } from "lucide-react";
 import { Logo } from "@/components/layout/logo";
 import { cn } from "@/lib/utils";
 import { formatPhoneInput } from "@/lib/utils/phone";
@@ -18,9 +18,10 @@ export function AuthShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] w-full justify-center bg-slate-50 px-4.5 py-8 sm:py-14">
+    // /draft3 색 구성 (globals.css .draft3-theme): 옅은 회색 바탕에 흰 카드(모서리 20px, 테두리 · 그림자 없음).
+    <div className="draft3-theme flex min-h-[calc(100vh-4rem)] w-full justify-center bg-baro-page px-4.5 py-8 sm:py-14">
       <div className="w-full max-w-[460px]">
-        <div className="rounded-2xl bg-white px-6 py-8 sm:rounded-2xl sm:px-12 sm:py-12">
+        <div className="rounded-card bg-white px-6 py-8 sm:px-12 sm:py-12">
           {children}
         </div>
       </div>
@@ -45,11 +46,11 @@ export function PageTitle({
 }) {
   return (
     <div className="mb-7 sm:mb-8">
-      <h1 className="m-0 text-[26px] sm:text-[29px] font-bold leading-[1.3] tracking-[-0.035em] text-[#1c1a17]">
+      <h1 className="m-0 text-[26px] sm:text-[29px] font-extrabold leading-[1.3] tracking-[-0.02em] break-keep text-slate-900">
         {title}
       </h1>
       {desc ? (
-        <p className="mt-2.5 mb-0 text-[14px] sm:text-[14.5px] leading-[1.6] text-slate-500">
+        <p className="mt-2.5 mb-0 text-body-3 leading-[1.6] font-medium break-keep text-slate-600">
           {desc}
         </p>
       ) : null}
@@ -67,7 +68,7 @@ export function Label({
   return (
     <label
       htmlFor={htmlFor}
-      className="mb-[9px] block text-[13.5px] font-bold text-[#1c1a17]"
+      className="mb-[9px] block text-body-3 font-semibold text-slate-900"
     >
       {children}
     </label>
@@ -85,11 +86,11 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
         ref={ref}
         {...props}
         className={cn(
-          "h-14 w-full min-w-0 rounded-lg px-[18px] text-[16px] text-[#1c1a17] outline-none",
-          "placeholder:text-slate-400 transition-shadow",
+          "h-14 w-full min-w-0 rounded-xl px-[18px] text-body-2 font-medium text-slate-900 outline-none",
+          "placeholder:text-slate-500 transition-shadow",
           invalid
             ? "border-[1.5px] border-[#e5484d] bg-white"
-            : "border-[1.5px] border-slate-200 bg-white focus:border-brand-blue-400 focus:ring-2 focus:ring-[#1f5eff]/20",
+            : "border-[1.5px] border-slate-300 bg-white focus:border-brand-blue-400 focus:ring-2 focus:ring-baro-blue/20",
           className,
         )}
       />
@@ -107,7 +108,7 @@ export function PasswordInput({ className, ...props }: InputProps) {
         type="button"
         onClick={() => setVisible((v) => !v)}
         aria-label={visible ? "비밀번호 숨기기" : "비밀번호 표시"}
-        className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-400 transition-colors hover:text-slate-600"
+        className="tap-44 absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-slate-600 transition-colors hover:text-slate-600"
       >
         {visible ? <EyeOff className="size-5" aria-hidden /> : <Eye className="size-5" aria-hidden />}
       </button>
@@ -150,12 +151,12 @@ export function FieldActionButton({
       type="button"
       {...props}
       className={cn(
-        "absolute right-2 top-1/2 h-10 -translate-y-1/2 whitespace-nowrap rounded-md px-3.5",
-        "text-[13.5px] font-semibold transition-colors",
+        "absolute right-2 top-1/2 h-10 -translate-y-1/2 whitespace-nowrap rounded-lg px-3.5",
+        "text-body-3 font-semibold transition-colors",
         // 눌러야 진행되는 버튼이라 평소에도 활성 상태로 보이게 채워 둔다 (회색이면 비활성으로 읽힌다).
         tone === "ok"
           ? "bg-emerald-50 text-emerald-600"
-          : "bg-brand-blue-400 text-white hover:bg-brand-blue-600 disabled:bg-slate-200 disabled:text-slate-400",
+          : "bg-brand-blue-400 text-white hover:bg-brand-blue-600 disabled:bg-slate-200 disabled:text-slate-500",
         className,
       )}
     >
@@ -176,9 +177,9 @@ export function HelpText({
       ? "text-[#0f9d58]"
       : tone === "error"
       ? "text-[#e5484d]"
-      : "text-slate-500";
+      : "text-slate-600";
   return (
-    <p className={`mt-[9px] mb-0 text-[12.5px] ${color}`}>{children}</p>
+    <p className={`mt-[9px] mb-0 text-body-3 font-medium break-keep ${color}`}>{children}</p>
   );
 }
 
@@ -189,7 +190,7 @@ export function PrimaryButton({
   return (
     <button
       {...props}
-      className="h-[58px] w-full rounded-lg bg-brand-blue-400 text-[16px] font-bold text-white transition-colors hover:bg-brand-blue-600 disabled:bg-slate-300 disabled:text-white"
+      className="h-[58px] w-full rounded-xl bg-brand-blue-400 text-body-2 font-semibold text-white transition-colors hover:bg-brand-blue-600 disabled:bg-slate-300 disabled:text-white"
     >
       {children}
     </button>
@@ -203,7 +204,7 @@ export function SocialButtons({ next }: { next?: string }) {
     <div className="mt-4 flex flex-col gap-2">
       <a
         href={`/auth/login/naver${q}`}
-        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[#03C75A] text-[15px] font-bold text-white transition-colors hover:bg-[#02B351]"
+        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#03C75A] text-body-3 font-semibold text-white transition-colors hover:bg-[#02B351]"
       >
         <svg viewBox="0 0 20 20" aria-hidden="true" className="size-3.5" fill="currentColor">
           <path d="M13.5 10.7 6.2 0H0v20h6.5V9.3L13.8 20H20V0h-6.5z" />
@@ -212,7 +213,7 @@ export function SocialButtons({ next }: { next?: string }) {
       </a>
       <a
         href={`/auth/login/kakao${q}`}
-        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-[#FEE500] text-[15px] font-bold text-[#191600] transition-colors hover:bg-[#F2DA00]"
+        className="flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-[#FEE500] text-body-3 font-semibold text-[#191600] transition-colors hover:bg-[#F2DA00]"
       >
         {/*
           네이버 N 은 상자를 꽉 채우고 카카오 말풍선은 위쪽에 몰려 있어, 같은 크기로 두면
@@ -253,17 +254,17 @@ export function Checkbox({
         className={[
           "flex h-[22px] w-[22px] flex-none items-center justify-center rounded-md text-[12px] leading-none",
           checked
-            ? "bg-[#1f5eff] text-white"
+            ? "bg-baro-blue text-white"
             : "border-[1.5px] border-slate-300 text-transparent",
         ].join(" ")}
       >
-        ✓
+        <Check className="size-3.5" strokeWidth={3} />
       </span>
       <span
         className={
           strong
-            ? "text-[13.5px] font-bold text-[#1c1a17]"
-            : "text-[13px] text-[#4a463f]"
+            ? "text-body-3 font-semibold break-keep text-slate-900"
+            : "text-body-3 font-medium break-keep text-slate-700"
         }
       >
         {children}
@@ -279,7 +280,7 @@ export function BottomLinks({
   items: { label: string; href: string; strong?: boolean }[];
 }) {
   return (
-    <div className="mt-6 flex flex-wrap items-center justify-center gap-x-[14px] gap-y-1.5 text-[13px]">
+    <div className="mt-6 flex flex-wrap items-center justify-center gap-x-[14px] gap-y-1.5 text-body-3">
       {items.map((it, i) => (
         <React.Fragment key={it.href + it.label}>
           {i > 0 ? <span className="text-slate-300">·</span> : null}
@@ -287,8 +288,8 @@ export function BottomLinks({
             href={it.href}
             className={
               it.strong
-                ? "font-bold text-[#1c1a17] no-underline"
-                : "text-slate-500 no-underline hover:text-[#1c1a17]"
+                ? "relative tap-44 font-semibold text-slate-900 no-underline"
+                : "relative tap-44 font-medium text-slate-600 no-underline hover:text-slate-900"
             }
           >
             {it.label}
@@ -341,7 +342,7 @@ export function PhoneVerificationField({
     const result = await sendPhoneCodeAction({ phone, purpose });
     setBusy(false);
     if (!result.ok) {
-      setError(result.error ?? "인증번호 발송에 실패했습니다.");
+      setError(result.error ?? "인증번호를 보내지 못했어요. 다시 시도해 주세요.");
       return;
     }
     setSent(true);
@@ -356,7 +357,7 @@ export function PhoneVerificationField({
     const result = await verifyPhoneCodeAction({ phone, code, purpose });
     setBusy(false);
     if (!result.ok || !result.verificationId) {
-      setError(result.error ?? "인증번호가 올바르지 않습니다.");
+      setError(result.error ?? "인증번호가 맞지 않아요.");
       return;
     }
     setVerified(true);
@@ -409,7 +410,7 @@ export function PhoneVerificationField({
             {verified ? "완료" : "확인"}
           </FieldActionButton>
         </div>
-        {verified ? <HelpText tone="ok">인증이 완료되었습니다</HelpText> : null}
+        {verified ? <HelpText tone="ok">인증을 마쳤어요</HelpText> : null}
         {!verified && sent ? <HelpText>남은 시간 {mmss}</HelpText> : null}
         {error ? <HelpText tone="error">{error}</HelpText> : null}
       </div>

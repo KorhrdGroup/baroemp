@@ -18,7 +18,7 @@ function pageWindow(page: number, totalPages: number): number[] {
 }
 
 const CONTROL_CLASS =
-  "flex size-10 items-center justify-center rounded-md border border-border text-slate-600 transition-colors hover:bg-slate-50";
+  "flex size-10 items-center justify-center rounded-md border border-border bg-white text-slate-600 transition-colors hover:bg-slate-100";
 
 /**
  * KRDS 페이지네이션.
@@ -74,10 +74,10 @@ export function Pagination({
             aria-label={`${p} 페이지`}
             aria-current={current ? "page" : undefined}
             className={cn(
-              "flex size-10 items-center justify-center rounded-md text-label-1 transition-colors",
+              "flex size-10 items-center justify-center rounded-md text-label-1 transition-colors duration-200",
               current
-                ? "bg-brand-blue-400 font-bold text-white"
-                : "font-medium text-slate-600 hover:bg-slate-50",
+                ? "bg-brand-blue-400 font-semibold text-white"
+                : "font-medium text-slate-600 hover:bg-slate-200 hover:text-slate-900",
             )}
           >
             {p}

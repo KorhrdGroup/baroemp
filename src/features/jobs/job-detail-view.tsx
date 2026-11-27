@@ -1,20 +1,6 @@
 import Link from "next/link";
-import {
-  Briefcase,
-  Building2,
-  Calendar,
-  CheckCircle2,
-  Clock,
-  ExternalLink,
-  FileText,
-  GraduationCap,
-  HelpCircle,
-  MapPin,
-  Wallet,
-  XCircle,
-  type LucideIcon,
-} from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { CheckCircle2, ExternalLink, FileText, HelpCircle, XCircle, type LucideIcon } from "lucide-react";
+import { PageHead } from "@/components/layout/page-head";
 import { isMidlifeRecommended } from "./job-card";
 import { cn } from "@/lib/utils";
 import { formatSalary } from "@/lib/salary";
@@ -26,7 +12,6 @@ import { JobViewTracker } from "./job-view-tracker";
 import type { CareerContent, Job, JobApplicationStatus } from "@/types";
 import type { JobMatchDetail } from "@/services/job-match.service";
 import type { JobRequirementComparisonItem } from "@/services/job-requirement-comparison.service";
-import { BackButton } from "@/components/common/back-button";
 
 
 /**
@@ -48,21 +33,21 @@ const COMPARISON_GROUPS = [
     key: "fulfilled",
     label: "충족",
     icon: CheckCircle2,
-    box: "bg-emerald-50/60",
+    box: "bg-emerald-50",
     head: "text-emerald-700",
   },
   {
     key: "needsCheck",
     label: "확인 필요",
     icon: HelpCircle,
-    box: "bg-orange-50/60",
+    box: "bg-orange-50",
     head: "text-orange-600",
   },
   {
     key: "lacking",
     label: "부족",
     icon: XCircle,
-    box: "bg-rose-50/60",
+    box: "bg-rose-50",
     head: "text-rose-600",
   },
 ] as const satisfies readonly {
@@ -85,7 +70,7 @@ const COMPARISON_GROUPS = [
  * 경험·스킬처럼 자격이 연결되지 않은 요건과 운전면허(OTHER)는 안내하지 않는다.
  */
 const QUALIFICATION_PREP_URL: Record<string, string> = {
-  NATIONAL_LICENSE: "https://www.hpsedu.co.kr/",
+  NATIONAL_LICENSE: "https://www.hancyber.co.kr/main/main.asp",
   PRIVATE_CERTIFICATE: "https://www.korhrd.co.kr/",
 };
 
@@ -100,22 +85,33 @@ const REQUIREMENT_STATUS_STYLE: Record<
   string,
   { icon: LucideIcon; label: string; className: string; box: string }
 > = {
-  SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700", box: "bg-emerald-50/60" },
-  NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600", box: "bg-rose-50/60" },
-  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50/60" },
-  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50/60" },
+  // 상태 뜻이 있는 색이라 두 파랑으로 바꾸지 않는다. 회색 띠 위라 반투명 대신 꽉 찬 옅은 색.
+  SATISFIED: { icon: CheckCircle2, label: "충족", className: "text-emerald-700", box: "bg-emerald-50" },
+  NOT_SATISFIED: { icon: XCircle, label: "미충족", className: "text-rose-600", box: "bg-rose-50" },
+  CHECK_REQUIRED: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50" },
+  UNKNOWN: { icon: HelpCircle, label: "확인필요", className: "text-orange-600", box: "bg-orange-50" },
 };
 
-function InfoRow({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value?: string }) {
-  if (!value) return null;
+/** 모집 요강 표의 한 줄. 정부 누리집 공고처럼 왼쪽 회색 칸에 항목 이름, 오른쪽에 값. 값이 없으면("-" 포함) 줄째 뺀다. */
+function InfoRow({ label, value }: { label: string; value?: string }) {
+  if (!value || value === "-") return null;
   return (
-    <div className="flex items-start gap-3 text-label-1">
-      <Icon className="mt-0.5 size-4 shrink-0 text-slate-400" />
-      <div>
-        <p className="text-slate-400">{label}</p>
-        <p className="font-medium text-slate-800">{value}</p>
-      </div>
+    /* 줄이 빽빽해 보여 위아래 · 양옆을 넉넉하게(20px · 24~28px). 항목 이름과 값은 첫 줄 높이를 맞춘다. */
+    <div className="grid grid-cols-[6.5rem_1fr] items-baseline sm:grid-cols-[9rem_1fr]">
+      <dt className="py-5 pl-5 text-body-2 font-semibold text-slate-600 sm:pl-7">{label}</dt>
+      <dd className="py-5 pr-5 pl-3 text-body-1 leading-relaxed font-medium break-keep text-slate-900 sm:pr-7 sm:pl-4">{value}</dd>
     </div>
+  );
+}
+
+/** 상세 화면의 한 구역: 제목 + 내용. 구역끼리는 간격으로만 나눈다. */
+function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
+  return (
+    <section className="mt-10">
+      <h2 className="text-title-3 font-bold text-slate-900">{title}</h2>
+      {description && <p className="mt-1 text-body-3 font-medium text-slate-600">{description}</p>}
+      <div className="mt-4">{children}</div>
+    </section>
   );
 }
 
@@ -159,106 +155,93 @@ export function JobDetailView({
   // 비어 있지 않은 묶음만. 개수에 따라 열 수가 달라진다.
   const visibleComparisons = COMPARISON_GROUPS.filter((g) => preferenceItems[g.key].length > 0);
 
+  const tags = [
+    job.isBeginnerFriendly ? "신입가능" : null,
+    isMidlifeRecommended(job) ? "중장년 추천" : null,
+    job.externalSource ? `출처 · ${job.externalSource === "work24" ? "고용24" : job.externalSource}` : null,
+  ].filter((t): t is string => Boolean(t));
+
   return (
-    // 지원금 상세와 같은 뼈대: 회색 바탕 위에 흰 카드를 쌓고, 지원 동작은 하단에 고정한다.
-    <div className="min-h-screen bg-slate-50">
-    <div className="mx-auto max-w-3xl px-4.5 py-10 lg:px-8">
+    // 세부 화면 공통 바탕: 위치 줄과 큰 제목 아래 회색 띠 위에 흰 판(/draft3). 지원 동작은 하단에 고정한다.
+    <div className="bg-white">
       <JobViewTracker jobId={job.id} matchScore={match?.score} />
+      <PageHead icon="jobs"
+        crumbs={[{ label: "일자리 찾기", href: "/jobs" }, { label: "공고 상세" }]}
+        title={<span className="text-balance">{job.title}</span>}
+        description={
+          <span className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <span>{job.companyName}</span>
+            {tags.map((t) => (
+              <span key={t} className="rounded-full bg-white px-2.5 py-0.5 text-body-3 font-medium text-slate-700">
+                {t}
+              </span>
+            ))}
+          </span>
+        }
+      />
 
-      <div className="mb-4 -ml-2">
-        <BackButton fallbackHref="/jobs" label="목록으로 돌아가기" />
-      </div>
-
-      {/* 카드의 배지 줄과 같은 것을 같게 보여준다. 그림문자 규칙도 카드와 같다(JobCard 주석 참고). */}
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        {job.isBeginnerFriendly && (
-          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-            <span aria-hidden className="mr-0.5">🌱</span>
-            신입가능
-          </Badge>
-        )}
-        {isMidlifeRecommended(job) && (
-          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-            <span aria-hidden className="mr-0.5">🙌</span>
-            중장년 추천
-          </Badge>
-        )}
-        {job.externalSource && (
-          <Badge variant="outline" className="rounded-full text-label-2 text-slate-500">
-            출처 · {job.externalSource === "work24" ? "고용24" : job.externalSource}
-          </Badge>
-        )}
-      </div>
-
-      <h1 className="break-keep text-balance text-title-2 font-bold text-slate-900 sm:text-headline-3">{job.title}</h1>
-      <p className="mt-2 flex items-center gap-1.5 text-body-2 font-medium text-slate-500">
-        <Building2 className="size-4" />
-        {job.companyName}
-      </p>
-
-      <div className="mt-8 grid grid-cols-1 gap-4 rounded-xl bg-white p-6 sm:grid-cols-2">
-        <InfoRow
-          icon={MapPin}
-          label="근무지역"
-          value={job.address ?? job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
-        />
-        <InfoRow icon={Wallet} label="급여" value={formatSalary(job)} />
-        <InfoRow icon={Briefcase} label="고용형태" value={labelWorkType(job.workType)} />
-        <InfoRow icon={Briefcase} label="경력조건" value={labelCareerRequirement(job.careerRequirement)} />
-        <InfoRow icon={GraduationCap} label="학력" value={job.educationRequirement} />
-        <InfoRow icon={Clock} label="근무시간" value={[job.workHours, job.workDays].filter(Boolean).join(" · ") || undefined} />
-        <InfoRow
-          icon={Calendar}
-          label="마감일"
-          value={job.applyDeadline ? job.applyDeadline.slice(0, 10) : "상시채용"}
-        />
-      </div>
+    <div className="bg-baro-page">
+    {/* 넓은 화면은 2단: 왼쪽 본문, 오른쪽에 따라 내려오는 요약 카드(지원 · 찜 단추 포함). 머리글 폭(1280px)을 다 채운다. */}
+    <div className="mx-auto max-w-7xl px-4.5 pb-10 lg:grid lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:items-start lg:gap-8 lg:px-8">
+     <div className="max-w-3xl lg:max-w-none">
+      <Section title="모집 요강">
+        {/* 테두리 표 대신 흰 판 + 옅은 줄로 나눈다 (/draft3 구성). */}
+        <dl className="divide-y divide-slate-100 overflow-hidden rounded-card bg-white">
+          <InfoRow
+            label="근무지역"
+            value={job.address ?? job.locationDetail ?? [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")}
+          />
+          <InfoRow label="급여" value={formatSalary(job)} />
+          <InfoRow label="고용형태" value={labelWorkType(job.workType)} />
+          <InfoRow label="경력조건" value={labelCareerRequirement(job.careerRequirement)} />
+          <InfoRow label="학력" value={job.educationRequirement} />
+          <InfoRow label="근무시간" value={[job.workHours, job.workDays].filter(Boolean).join(" · ") || undefined} />
+          <InfoRow label="마감일" value={job.applyDeadline ? job.applyDeadline.slice(0, 10) : "상시채용"} />
+        </dl>
+      </Section>
 
       {job.preferredQualifications.length > 0 && (
-        <div className="mt-6 rounded-xl bg-white p-6">
-          <h2 className="text-body-1 font-bold text-slate-900">우대·필요 자격</h2>
-          <div className="mt-4 flex flex-wrap gap-2">
+        <Section title="우대·필요 자격">
+          <div className="flex flex-wrap gap-2">
             {job.preferredQualifications.map((code) => (
-              <span key={code} className="rounded-full bg-brand-blue-50 px-3 py-1 text-label-1 font-medium text-brand-blue-600">
+              <span key={code} className="rounded-full bg-white px-3 py-1.5 text-body-3 font-semibold text-baro-blue">
                 {labelQualification(code)}
               </span>
             ))}
           </div>
-        </div>
+        </Section>
       )}
 
-      <div className="mt-6 rounded-xl bg-white p-6">
-        <h2 className="text-body-1 font-bold text-slate-900">상세 설명</h2>
-        <p className="mt-3 whitespace-pre-line text-body-2-reading text-slate-600">{job.description}</p>
-        {job.qualificationRequirements && (
-          <p className="mt-3 whitespace-pre-line text-label-1 text-slate-500">
-            필요 자격요건: {job.qualificationRequirements}
-          </p>
-        )}
-      </div>
+      <Section title="상세 설명">
+        <div className="rounded-card bg-white p-5 sm:p-6">
+          <p className="text-body-2-reading font-medium whitespace-pre-line text-slate-800">{job.description}</p>
+          {job.qualificationRequirements && (
+            <p className="mt-3 text-body-3 font-medium whitespace-pre-line text-slate-600">
+              필요 자격요건: {job.qualificationRequirements}
+            </p>
+          )}
+        </div>
+      </Section>
 
       {/*
-        희망 조건과 공고 요구조건을 한 카드에 담는다.
+        희망 조건과 공고 요구조건을 한 묶음에 담는다.
         예전에는 두 섹션으로 나뉘어 있었는데 재료가 다를 뿐(프로필 매칭 vs 원문 요건 추출)
         "운전 가능 여부" 같은 항목이 양쪽에 나와 같은 말을 두 번 했다.
       */}
       {(match || showRequirements) && (
-        <div className="mt-6 rounded-xl bg-white p-6">
-          <h2 className="text-body-1 font-bold text-slate-900">이 공고와 내 조건 비교</h2>
-          <p className="mt-1 text-label-1 text-slate-400">
-            희망하신 근무조건과 공고가 요구하는 조건을 함께 봤어요.
-          </p>
-
+        <Section title="이 공고와 내 조건 비교" description="희망하신 근무조건과 공고가 요구하는 조건을 함께 봤어요.">
+          {/* 위 구역들처럼 흰 판에 담는다. 연한 초록 · 분홍 상자가 회색 바탕에 바로 놓이면 밝기가 비슷해 경계와 글자가 흐려 보였다. */}
+          <div className="rounded-card bg-white p-5 sm:p-6">
           {visibleComparisons.length > 0 && match && (
-            <div className="mt-5">
-              <p className="text-label-1 font-semibold text-slate-500">희망 근무조건</p>
+            <div>
+              <p className="text-body-3 font-semibold text-slate-700">희망 근무조건</p>
               <div className={cn("mt-2 grid gap-3", visibleComparisons.length > 1 && "sm:grid-cols-2")}>
                 {visibleComparisons.map(({ key, label, icon: Icon, box, head }) => (
-                  <div key={key} className={cn("rounded-lg p-4", box)}>
-                    <p className={cn("flex items-center gap-1.5 text-label-1 font-semibold", head)}>
+                  <div key={key} className={cn("rounded-xl p-4", box)}>
+                    <p className={cn("flex items-center gap-1.5 text-body-3 font-semibold", head)}>
                       <Icon className="size-4" /> {label}
                     </p>
-                    <ul className="mt-2 space-y-1 text-label-1 text-slate-600">
+                    <ul className="mt-2 space-y-1 text-body-3 font-medium text-slate-700">
                       {preferenceItems[key].map((f) => (
                         <li key={f}>· {f}</li>
                       ))}
@@ -270,8 +253,8 @@ export function JobDetailView({
           )}
 
           {showRequirements && (
-            <div className="mt-5">
-              <p className="text-label-1 font-semibold text-slate-500">공고 요구조건</p>
+            <div className={cn(visibleComparisons.length > 0 && match && "mt-5")}>
+              <p className="text-body-3 font-semibold text-slate-700">공고 요구조건</p>
               <div className="mt-2 space-y-2">
                 {requirementComparison!.map((item) => {
                   const style = REQUIREMENT_STATUS_STYLE[item.userStatus] ?? REQUIREMENT_STATUS_STYLE.UNKNOWN;
@@ -281,13 +264,13 @@ export function JobDetailView({
                     <div
                       key={item.requirementId}
                       className={cn(
-                        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-lg px-3 py-2.5 text-label-1",
+                        "flex flex-wrap items-center justify-between gap-x-3 gap-y-2 rounded-xl px-4 py-3 text-body-3",
                         style.box,
                       )}
                     >
-                      <span className="font-medium text-slate-700">
+                      <span className="font-semibold text-slate-800">
                         {item.requirementName}
-                        <span className="ml-1.5 text-label-2 font-normal text-slate-500">
+                        <span className="ml-1.5 text-caption-1 font-medium text-slate-600">
                           {item.jobLevel === "REQUIRED" ? "필수" : item.jobLevel === "PREFERRED" ? "우대" : "언급"}
                         </span>
                       </span>
@@ -298,7 +281,7 @@ export function JobDetailView({
                             href={prepUrl}
                             target="_blank"
                             rel="noreferrer noopener"
-                            className="flex items-center gap-1 rounded-md border border-border bg-white px-2.5 py-1 text-label-2 font-semibold text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900"
+                            className="relative tap-44 flex items-center gap-1 rounded-full bg-white px-3 py-1 text-caption-1 font-semibold text-slate-700"
                           >
                             자격 준비하기
                             <ExternalLink className="size-3.5" />
@@ -315,15 +298,16 @@ export function JobDetailView({
               </div>
             </div>
           )}
-        </div>
+          </div>
+        </Section>
       )}
 
       {!match && !hasCareerSignal && (
-        <div className="mt-6 rounded-xl bg-brand-blue-50/40 p-6 text-center">
-          <p className="text-label-1 text-slate-600">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
+        <div className="mt-10 flex flex-col items-start gap-3 rounded-card bg-baro-blue-50 p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <p className="text-body-2 font-semibold break-keep text-slate-800">직업진단을 받으면 이 공고와 내 조건을 비교해볼 수 있어요.</p>
           <Link
             href="/assessment"
-            className="mt-3 inline-block rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+            className="inline-flex h-11 shrink-0 items-center rounded-xl bg-atomic-blue-600 px-5 text-body-3 font-semibold text-white"
           >
             내게 맞는 직업 찾기
           </Link>
@@ -331,55 +315,100 @@ export function JobDetailView({
       )}
 
       {recommendedContents.length > 0 && (
-        <div className="mt-6 rounded-xl bg-white p-6">
-          <h2 className="text-body-1 font-bold text-slate-900">이 공고에 필요한 준비</h2>
-          <p className="mt-1 text-label-1 text-slate-400">이 공고와 관련된 자격/교육 과정이에요.</p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+        <Section title="이 공고에 필요한 준비" description="이 공고와 관련된 자격/교육 과정이에요.">
+          <div className="grid gap-3 sm:grid-cols-2">
             {recommendedContents.map((content) => (
-              <div key={content.id} className="rounded-xl border border-border p-4">
-                <p className="text-body-2 font-semibold text-slate-800">{content.title}</p>
-                <p className="mt-1 text-label-1 text-slate-500">{content.summary ?? content.shortDescription}</p>
+              <div key={content.id} className="rounded-card bg-white p-5">
+                <p className="text-body-2 font-semibold text-slate-900">{content.title}</p>
+                <p className="mt-1 text-body-3 font-medium text-slate-600">{content.summary ?? content.shortDescription}</p>
               </div>
             ))}
           </div>
-        </div>
+        </Section>
       )}
 
       <Link
         href={`/resume/new?job=${job.id}`}
-        className="mt-6 flex h-12 items-center justify-center gap-2 rounded-xl bg-white text-label-1 font-semibold text-brand-blue-700 hover:bg-brand-blue-50"
+        className="mt-10 flex h-12 items-center justify-center gap-2 rounded-xl bg-white text-body-2 font-semibold text-slate-800"
       >
         <FileText className="size-4" />이 공고에 맞는 이력서 만들기
       </Link>
-
-      {job.sourceUrl && (
-        <p className="mt-6 text-center text-label-2 text-slate-400">
-          이 공고는 {job.externalSource === "work24" ? "고용24" : "외부"}에서 제공한 정보입니다. 지원 시 원본 페이지로 이동합니다.
-        </p>
-      )}
 
       {/*
         지원은 외부 사이트에서 이뤄져 우리가 알 수 없다. 지원하고 돌아온 회원이 여기서 직접 표시하면
         마이페이지 5단계가 완료로 바뀐다. 목록을 늘어놓는 대신 공고마다 이 한 줄이 기록 자리다.
       */}
+      {/* 넓은 화면에서는 지원 단추 옆(오른쪽 요약 카드)에 두므로 여기서는 좁은 화면만. */}
       {isAuthenticated && (
-        <section className="mt-6 flex flex-col gap-3 rounded-xl bg-white p-6 sm:flex-row sm:items-center sm:justify-between">
+        <section className="mt-4 flex flex-col lg:hidden gap-3 rounded-card bg-white p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="min-w-0">
-            <p className="text-body-2 font-semibold text-slate-800">이 공고에 지원하셨나요?</p>
-            <p className="mt-0.5 text-label-2 text-slate-500">표시해 두면 마이페이지 취업 절차에 기록돼요. 면접·취업까지 이어지면 단계를 올려 주세요.</p>
+            <p className="text-body-2 font-semibold text-slate-900">이 공고에 지원하셨나요?</p>
+            <p className="mt-0.5 text-body-3 font-medium text-slate-600">표시해 두면 마이페이지 취업 절차에 기록돼요. 면접·취업까지 이어지면 단계를 올려 주세요.</p>
           </div>
           <JobApplicationStatusControl jobId={job.id} status={applicationStatus} />
         </section>
       )}
 
-      {/* 하단 고정 CTA가 마지막 내용을 가리지 않도록 비워둔다. */}
-      <div className="h-24" />
+      {job.sourceUrl && (
+        <p className="mt-6 text-center text-body-3 font-medium text-slate-600">
+          이 공고는 {job.externalSource === "work24" ? "고용24" : "외부"}에서 제공한 정보입니다. 지원 시 원본 페이지로 이동합니다.
+        </p>
+      )}
+
+      {/* 하단 고정 CTA가 마지막 내용을 가리지 않도록 비워둔다. 넓은 화면은 CTA가 오른쪽 카드에 있어 필요 없다. */}
+      <div className="h-24 lg:hidden" />
+     </div>
+
+     {/* ── 넓은 화면 오른쪽 요약 카드: 첫 구역 제목 높이에서 시작해 화면을 내려도 따라온다. ── */}
+     <aside className="sticky top-24 mt-10 hidden lg:block">
+      <div className="rounded-card bg-white p-6">
+        <p className="text-body-3 font-semibold text-slate-600">급여</p>
+        <p className="mt-1 text-title-3 font-bold break-keep text-slate-900">{formatSalary(job)}</p>
+        <dl className="mt-5 space-y-3 text-body-3">
+          {[
+            ["마감일", job.applyDeadline ? job.applyDeadline.slice(0, 10) : "상시채용"],
+            ["고용형태", labelWorkType(job.workType)],
+            ["근무지역", [labelRegion(job.region), job.regionSigungu].filter(Boolean).join(" ")],
+          ]
+            .filter(([, value]) => value && value !== "-")
+            .map(([label, value]) => (
+              <div key={label} className="flex justify-between gap-3">
+                <dt className="shrink-0 font-semibold text-slate-600">{label}</dt>
+                <dd className="text-right font-semibold break-keep text-slate-900">{value}</dd>
+              </div>
+            ))}
+        </dl>
+        <div className="mt-6 flex flex-col gap-2">
+          <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold" />
+          <JobBookmarkButton
+            jobId={job.id}
+            jobCategory={job.jobCategory}
+            variant="full"
+            isAuthenticated={isAuthenticated}
+            initialBookmarked={isBookmarked}
+            className="h-12 w-full rounded-xl text-body-2"
+          />
+        </div>
+        {/* 지원은 바깥 사이트에서 해 우리가 알 수 없다. 지원 단추 바로 아래에 두어 다녀온 뒤 표시하기 쉽게 한다. */}
+        {isAuthenticated && (
+          <div className="mt-6 border-t border-slate-100 pt-5">
+            <p className="text-body-2 font-semibold text-slate-900">이 공고에 지원하셨나요?</p>
+            <p className="mt-0.5 text-body-3 font-medium break-keep text-slate-600">표시해 두면 마이페이지에 기록돼요.</p>
+            <div className="mt-3">
+              <JobApplicationStatusControl jobId={job.id} status={applicationStatus} layout="block" />
+            </div>
+          </div>
+        )}
+      </div>
+     </aside>
+    </div>
     </div>
 
-    {/* ── 하단 고정 CTA ── */}
-    <div className="fixed inset-x-0 bottom-0 z-40 bg-white/95 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
-      <div className="mx-auto flex max-w-3xl items-center gap-3 px-4.5 py-3 lg:px-8">
-        <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" />
+    {/* ── 하단 고정 CTA (좁은 화면) ── */}
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white lg:hidden">
+      <div className="mx-auto flex max-w-7xl items-center gap-3 px-4.5 py-3 lg:px-8">
+        <div className="flex w-full max-w-3xl items-center gap-3">
+        <JobApplyButton jobId={job.id} sourceUrl={job.sourceUrl} className="h-12 flex-1 rounded-xl bg-atomic-blue-600 text-body-1 font-semibold" />
         <JobBookmarkButton
           jobId={job.id}
           jobCategory={job.jobCategory}
@@ -387,6 +416,7 @@ export function JobDetailView({
           isAuthenticated={isAuthenticated}
           initialBookmarked={isBookmarked}
         />
+        </div>
       </div>
     </div>
     </div>

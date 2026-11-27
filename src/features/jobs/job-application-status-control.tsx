@@ -20,9 +20,15 @@ import { clearJobApplicationAction, reportJobApplicationAction } from "./job-app
 export function JobApplicationStatusControl({
   jobId,
   status: initialStatus,
+  layout = "inline",
+  showClear = true,
 }: {
   jobId: string;
   status: JobApplicationStatus | null;
+  /** block: 좁은 카드(공고 상세 오른쪽 요약 카드) 폭을 꽉 채운다 - 단추 한 줄 또는 세 칸 묶음 + 아래 "표시 취소". */
+  layout?: "inline" | "block";
+  /** block 에서 "표시 취소"를 둘지. 마이페이지 목록은 단계만 바꾸고, 취소는 공고 상세에서 한다. */
+  showClear?: boolean;
 }) {
   const router = useRouter();
   const [status, setStatus] = useState<JobApplicationStatus | null>(initialStatus);
@@ -62,7 +68,10 @@ export function JobApplicationStatusControl({
         size="sm"
         disabled={pending}
         onClick={() => report("applied")}
-        className="shrink-0 text-brand-blue-600 hover:bg-brand-blue-50"
+        className={cn(
+          "shrink-0 rounded-xl border-slate-300 bg-white font-semibold text-brand-blue-600 hover:bg-white",
+          layout === "block" ? "h-12 w-full text-body-2" : "h-11 px-4 text-body-3",
+        )}
       >
         지원했어요
       </Button>
@@ -70,6 +79,54 @@ export function JobApplicationStatusControl({
   }
 
   const reached = JOB_APPLICATION_STATUS_ORDER.indexOf(status);
+
+  /* 세 단계를 한 판에 붙인 칸 묶음. 단추마다 폭이 달라 줄이 들쭉날쭉하던 것을 같은 폭 세 칸으로 맞춘다. */
+  if (layout === "block") {
+    return (
+      <div>
+        <div role="radiogroup" aria-label="지원 상태" className="grid grid-cols-3 gap-1 rounded-xl bg-slate-100 p-1">
+          {JOB_APPLICATION_STATUS_ORDER.map((value, i) => {
+            const active = value === status;
+            const passed = i < reached;
+            return (
+              <button
+                key={value}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                disabled={pending}
+                onClick={() => report(value)}
+                className={cn(
+                  "flex h-10 items-center justify-center gap-1 rounded-lg text-body-3 whitespace-nowrap",
+                  /* 고른 칸은 흰 판으로 띄운다(분절 단추의 흔한 꼴). 파랑으로 채우면 화면의 다른 파란 단추와 무게가 겹친다. */
+                  active
+                    ? "bg-white font-semibold text-baro-blue-600 shadow-[0_1px_3px_rgba(15,40,90,0.12)]"
+                    : passed
+                      ? "font-semibold text-brand-blue-600"
+                      : "font-semibold text-slate-700",
+                )}
+              >
+                {(active || passed) && <Check className="size-3.5" />}
+                {JOB_APPLICATION_STATUS_LABELS[value]}
+              </button>
+            );
+          })}
+        </div>
+        {showClear && (
+          <div className="mt-1 text-right">
+            <button
+              type="button"
+              disabled={pending}
+              onClick={clear}
+              className="tap-44 relative text-body-3 font-medium text-slate-600"
+            >
+              표시 취소
+            </button>
+          </div>
+        )}
+      </div>
+    );
+  }
   /* 사이트의 다른 버튼과 같은 Button 을 쓴다. 알약 묶음은 옆의 "지원했어요"·2단계 버튼들과 결이 달랐다. */
   return (
     <div role="radiogroup" aria-label="지원 상태" className="flex shrink-0 flex-wrap items-center gap-1.5">
@@ -87,11 +144,12 @@ export function JobApplicationStatusControl({
             disabled={pending}
             onClick={() => report(value)}
             className={cn(
+              "h-11 rounded-xl px-4 text-body-3",
               active
-                ? "bg-brand-blue-400 hover:bg-brand-blue-600"
+                ? "bg-brand-blue-400 font-semibold text-white hover:bg-brand-blue-400"
                 : passed
-                  ? "text-brand-blue-600 hover:bg-brand-blue-50"
-                  : "text-slate-600 hover:bg-slate-50",
+                  ? "border-slate-300 bg-white font-semibold text-brand-blue-600 hover:bg-white"
+                  : "border-slate-300 bg-white font-semibold text-slate-700 hover:bg-white",
             )}
           >
             {(active || passed) && <Check className="size-3.5" />}
@@ -105,7 +163,7 @@ export function JobApplicationStatusControl({
         variant="ghost"
         disabled={pending}
         onClick={clear}
-        className="text-slate-400 hover:bg-transparent hover:text-slate-600"
+        className="h-11 text-body-3 font-medium text-slate-600 hover:bg-transparent hover:text-slate-600"
       >
         표시 취소
       </Button>

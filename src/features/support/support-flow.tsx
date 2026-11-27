@@ -3,10 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Check, Clock, Coins, Loader2, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, FileCheck, Loader2, Search, UserRound } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NativeSelect } from "@/components/ui/native-select";
-import { IntroHero } from "@/components/common/intro-hero";
+import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
+import { SupportShowcaseSection } from "./support-showcase";
+import { ShowcaseCount } from "@/components/layout/diagnosis-showcase";
+import type { SupportShowcase } from "@/services/support-search.service";
 import { cn } from "@/lib/utils";
 import { getOrCreateAnonymousId } from "@/lib/anonymous/anonymous-id";
 import { ResumeSessionDialog } from "@/components/common/resume-session-dialog";
@@ -149,6 +152,20 @@ const STEPS: StepConfig[] = [
   },
 ];
 
+/**
+ * 저장된 답이 첫 문항(출생연도 · 거기서 나온 연령대) 말고는 프로필에서 미리 채운 값과 같은지.
+ * 출생연도는 프로필에 없어 늘 직접 답하므로, 그것만 답하고 나간 진단은 사실상 시작 전이다.
+ */
+function onlyPrefilled(answers: SupportAssessmentAnswers, prefill: Partial<SupportAssessmentAnswers>): boolean {
+  return Object.entries(answers).every(
+    ([key, value]) =>
+      key === "birthYear" ||
+      key === "ageGroup" ||
+      value === undefined ||
+      JSON.stringify(value) === JSON.stringify(prefill[key as keyof SupportAssessmentAnswers]),
+  );
+}
+
 function isStepFilled(step: StepConfig, answers: SupportAssessmentAnswers): boolean {
   if (!step.required) return true;
   switch (step.id) {
@@ -197,18 +214,19 @@ function ChipButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
-        indicator === "none" ? "px-4" : "px-11",
+        /* 표시(동그라미 · 네모)가 있으면 글자를 그 옆에 붙여 왼쪽부터 읽힌다(직업진단 · 온보딩과 같은 꼴). */
+        "flex min-h-14 items-center gap-3 rounded-xl border bg-white px-4 py-3.5 text-body-2 font-medium break-keep",
+        indicator === "none" ? "justify-center text-center" : "justify-start text-left",
         selected
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-          : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+          : "border-border text-slate-700",
         disabled && "pointer-events-none opacity-40",
       )}
     >
       {indicator === "radio" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-full border-2 transition-colors",
+            "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
             selected ? "border-brand-blue-400" : "border-slate-300",
           )}
         >
@@ -218,7 +236,7 @@ function ChipButton({
       {indicator === "check" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2 transition-colors",
+            "flex size-5 shrink-0 items-center justify-center rounded-sm border-2",
             selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
           )}
         >
@@ -265,7 +283,7 @@ function StepBody({
             </NativeSelect>
           </div>
           {answers.birthYear && (
-            <p className="text-label-1 text-slate-500">
+            <p className="text-body-3 font-medium text-slate-600">
               만 {new Date().getFullYear() - answers.birthYear}세 기준으로 연령 조건을 확인해 드려요.
             </p>
           )}
@@ -347,13 +365,13 @@ function StepBody({
             type="button"
             onClick={() => onChange({ householdTraits: noneSelected ? [] : ["none"] })}
             className={cn(
-              "mt-2 flex items-center justify-center gap-2 self-center rounded-lg px-3 py-2 text-body-2 font-medium transition-colors",
-              noneSelected ? "text-brand-blue-700" : "text-slate-500 hover:text-slate-700",
+              "mt-2 flex items-center justify-center gap-2 self-center rounded-lg px-3 py-2 text-body-2 font-medium",
+              noneSelected ? "text-brand-blue-700" : "text-slate-700",
             )}
           >
             <span
               className={cn(
-                "flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
                 noneSelected ? "border-brand-blue-400" : "border-slate-300",
               )}
             >
@@ -373,10 +391,10 @@ function StepBody({
               type="button"
               onClick={() => onChange({ region: code })}
               className={cn(
-                "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
+                "min-h-12 rounded-xl border bg-white px-3 py-3 text-body-2 font-medium",
                 answers.region === code
                   ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-                  : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                  : "border-border text-slate-700",
               )}
             >
               {label}
@@ -397,8 +415,8 @@ function StepBody({
               </ChipButton>
               {code === "employed" && answers.employmentStatus === "employed" && (
                 <div className="mt-1.5">
-                  <div className="rounded-xl bg-slate-50/60 px-2.5 pb-2.5 pt-3">
-                    <p className="mb-3 text-center text-body-2 font-medium text-slate-500">어떤 직종에서 일하고 계신가요? <span className="text-slate-400">(선택)</span></p>
+                  <div className="rounded-xl bg-slate-50 px-2.5 pb-2.5 pt-3">
+                    <p className="mb-3 text-center text-body-2 font-medium text-slate-600">어떤 직종에서 일하고 계신가요? (선택)</p>
                     <div className="grid grid-cols-2 gap-1.5">
                       {JOB_CATEGORY_OPTIONS.map((opt) => (
                         <button
@@ -406,10 +424,10 @@ function StepBody({
                           type="button"
                           onClick={() => onChange({ currentJobCategory: opt.code })}
                           className={cn(
-                            "rounded-lg border px-3 py-2 text-label-1 font-medium transition-colors",
+                            "min-h-11 rounded-xl border px-3 py-2 text-body-3 font-medium break-keep",
                             answers.currentJobCategory === opt.code
-                              ? "border-brand-blue-400 bg-brand-blue-50 text-brand-blue-600"
-                              : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50",
+                              ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+                              : "border-border bg-white text-slate-700",
                           )}
                         >
                           {opt.label}
@@ -447,17 +465,17 @@ function StepBody({
                 type="button"
                 onClick={() => onChange({ trainingWillingness: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-bold transition-colors",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border bg-white text-body-1 font-semibold",
                   answers.trainingWillingness === n
                     ? "border-brand-blue-400 bg-brand-blue-400 text-white"
-                    : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                    : "border-border text-slate-700",
                 )}
               >
                 {n}
               </button>
             ))}
           </div>
-          <div className="mt-2 flex justify-between text-label-1 text-slate-400">
+          <div className="mt-2 flex justify-between text-body-3 font-medium text-slate-600">
             <span>{TRAINING_WILLINGNESS_LABELS[1]}</span>
             <span>{TRAINING_WILLINGNESS_LABELS[5]}</span>
           </div>
@@ -492,7 +510,7 @@ function StepBody({
                 className="h-14 w-40 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
                 placeholder="0"
               />
-              <span className="text-body-2 text-slate-500">개월 정도</span>
+              <span className="text-body-2 font-medium text-slate-600">개월 정도</span>
             </div>
           )}
         </div>
@@ -513,52 +531,77 @@ function StepBody({
   }
 }
 
-const INFO_ITEMS = [
-  { icon: Clock, label: "약 2~3분" },
-  { icon: Sparkles, label: "결과 즉시 확인" },
+const INTRO_STEPS = [
+  { title: "내 상황 고르기", desc: "나이 · 사는 곳 · 일하는 상태를 골라요.", icon: UserRound },
+  { title: "맞는 제도 찾기", desc: "정부 · 지자체 지원제도 가운데 조건에 맞는 것을 찾아요.", icon: Search },
+  { title: "신청 방법 확인", desc: "받을 가능성과 신청 방법 · 서류를 알려드려요.", icon: FileCheck },
 ];
 
-const RESULT_ITEMS = ["받을 수 있는 취업·훈련 지원금", "생활·지역 지원제도", "지원 가능성 등급", "신청 방법과 서류"];
+const RESULT_ITEMS = [
+  { icon: "wallet", title: "취업·훈련 지원금", desc: "구직 · 직업훈련에 받을 수 있는 돈을 찾아요." },
+  { icon: "region", title: "생활·지역 지원제도", desc: "사는 지역에서 받을 수 있는 제도도 함께 봐요." },
+  { icon: "grade", title: "지원 가능성 등급", desc: "조건이 얼마나 맞는지 등급으로 보여드려요." },
+  { icon: "docs", title: "신청 방법과 서류", desc: "어디서 어떻게 신청하는지 알려드려요." },
+];
+
+/* 결과 예시 카드의 지원제도 세 줄. 실제 결과가 아닌 보기다(카드 맨 위에 "결과 예시"로 밝힌다). */
+const SAMPLE = [
+  { name: "국민내일배움카드", org: "고용노동부", amount: "최대 500만원", grade: "가능성 높음" },
+  { name: "중장년 취업성공패키지", org: "고용노동부", amount: "최대 195만원", grade: "가능성 높음" },
+  { name: "중장년 일자리희망센터", org: "서울특별시", amount: "무료 상담", grade: "확인 필요" },
+];
 
 function SupportIntro({
   onStart,
   loading,
   latestResultSessionId,
+  showcase,
 }: {
   onStart: () => void;
   loading: boolean;
   latestResultSessionId?: string;
+  showcase?: { data: SupportShowcase; asOf: string };
 }) {
   return (
-    <IntroHero
-      icon={Coins}
-      title="놓치고 있는 취업·교육 혜택을 찾아보세요"
-      description={
+    // 직업진단 첫 화면과 같은 소개 틀(DiagnosisLanding): 첫 칸 · 진행 순서 · 알 수 있는 것 · 안내.
+    <DiagnosisLanding
+      crumbs={[{ label: "지원금 찾기" }]}
+      badges={["무료", "약 2~3분", "결과 바로 확인"]}
+      closingTitle={<>조건 몇 가지만 고르면{" "}<br />내가 받을 수 있는 지원제도를 골라드려요</>}
+      closingLead="어렵지 않아요. 지금 상황부터 고르면 돼요."
+      /* 실제 흐름의 "현재 취업 상태는 어떤가요?" 문항과 선택지(EMPLOYMENT_STATUS_LABELS)를 그대로 쓴다. */
+      closingQuestion={{
+        step: "1단계 · 내 상황",
+        q: "현재 취업 상태는 어떤가요?",
+        options: Object.values(EMPLOYMENT_STATUS_LABELS),
+        start: 1,
+      }}
+      title={
         <>
-          몇 가지 조건만 입력하면{" "}
-          <br className="hidden sm:block" />
-          현재 상황에 맞는 정부·지자체 지원제도를 찾아드립니다.
+          놓치고 있는
+          <br />
+          <span className="text-atomic-blue-600">취업·교육 혜택</span>을 찾아보세요
         </>
       }
-      infoItems={INFO_ITEMS}
-      ctaHeadline="2~3분이면 진단이 끝납니다"
-      ctaDescription="지금 시작하면 받을 수 있는 지원제도를 바로 확인할 수 있어요."
-      cta={
-        /* 이미 결과가 있으면 두 버튼을 나란히 세운다. 카드 밖 작은 글줄로는 눈에 띄지 않았다. */
+      description={
+        showcase ? (
+          <>
+            <ShowcaseCount asOf={showcase.asOf} label="지원제도" count={showcase.data.totalCount} /> 가운데
+            <br />
+            지금 상황에 맞는 것을 골라드려요.
+          </>
+        ) : (
+          "몇 가지 조건만 고르면 지금 상황에 맞는 정부·지자체 지원제도와 신청 방법을 찾아 드려요."
+        )
+      }
+      actions={
+        /* 이미 결과가 있으면 두 단추를 나란히 세운다. 작은 글줄로는 눈에 띄지 않았다. */
         <div className="flex flex-col gap-2 sm:flex-row">
-          {latestResultSessionId && (
-            <Link
-              href={`/support/result/${latestResultSessionId}`}
-              className="flex h-14 items-center justify-center gap-1.5 rounded-lg bg-brand-blue-50 px-6 text-body-2 font-bold text-brand-blue-700 transition-colors hover:bg-brand-blue-100/60"
-            >
-              지난 결과 보기
-            </Link>
-          )}
           <Button
             size="lg"
             onClick={onStart}
             disabled={loading}
-            className="h-14 w-full rounded-lg bg-brand-blue-400 px-8 text-body-2 font-bold hover:bg-brand-blue-600 sm:w-auto"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 px-8 text-body-2 font-semibold text-white sm:w-auto"
           >
             {loading ? (
               <Loader2 className="size-5 animate-spin" />
@@ -569,14 +612,53 @@ function SupportIntro({
               </>
             )}
           </Button>
+          {latestResultSessionId && (
+            <Link
+              href={`/support/result/${latestResultSessionId}`}
+              className="flex h-14 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
+            >
+              지난 결과 보기
+            </Link>
+          )}
         </div>
       }
-      highlightTitle="이 진단으로 확인할 수 있는 것"
-      highlights={RESULT_ITEMS}
+      preview={
+        showcase ? (
+          <SupportShowcaseSection data={showcase.data} onStart={onStart} />
+        ) : (
+          <PreviewCard label="결과 예시" title="받을 수 있는 지원제도">
+            <ul className="flex flex-col divide-y divide-border">
+              {SAMPLE.map((s) => (
+                <li key={s.name} className="flex items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <p className="truncate text-body-2 font-semibold text-slate-900">{s.name}</p>
+                    <p className="mt-0.5 text-caption-1 font-medium text-slate-600">{s.org}</p>
+                  </div>
+                  <div className="shrink-0 text-right">
+                    <p className="text-body-2 font-semibold text-baro-blue">{s.amount}</p>
+                    <p className={`mt-0.5 text-caption-1 font-semibold ${s.grade === "가능성 높음" ? "text-emerald-700" : "text-amber-700"}`}>{s.grade}</p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </PreviewCard>
+        )
+      }
+      steps={INTRO_STEPS}
+      itemsTitle={
+        <>
+          이 진단으로{" "}
+          <br />
+          확인할 수 있는 것
+        </>
+      }
+      itemsDescription="조건을 고르면 아래 네 가지를 한 번에 볼 수 있어요."
+      stepsDescription="세 단계면 끝나요. 약 2~3분 걸려요."
+      items={RESULT_ITEMS}
       note={
         <>
-          주민등록번호, 상세 재산정보 등 민감정보는 수집하지 않습니다. 소득/재산 조건이 필요한 정책은 &quot;확인
-          필요&quot;로 안내되며, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 합니다.
+          주민등록번호, 상세 재산정보 등 민감정보는 받지 않아요. 소득/재산 조건이 필요한 정책은 &quot;확인
+          필요&quot;로 안내하고, 최종 신청 가능 여부는 해당 운영기관에서 확인해야 해요.
         </>
       }
     />
@@ -596,11 +678,14 @@ export function SupportFlow({
   autoStart = false,
   isLoggedIn = true,
   latestResultSessionId,
+  showcase,
 }: {
   autoStart?: boolean;
   isLoggedIn?: boolean;
   /** 이미 받은 진단이 있으면 그 결과 세션. 소개 화면에서 지난 결과로 가는 길을 보여준다. */
   latestResultSessionId?: string;
+  /** 소개 화면 진행 순서 아래 "지원제도 모음" 구역에 쓸 데이터(서버에서 읽어 넘긴다). */
+  showcase?: { data: SupportShowcase; asOf: string };
 }) {
   const router = useRouter();
   const [phase, setPhase] = useState<"intro" | "wizard">("intro");
@@ -664,30 +749,28 @@ export function SupportFlow({
       return;
     }
     setLoadingPrefill(true);
-    // 하다 만 진단이 있으면 새로 시작하기 전에 팝업으로 물어본다.
-    try {
-      const found = await getResumableSupportSessionAction({
-        anonymousId: getOrCreateAnonymousId() || undefined,
-      });
-      if (found) {
-        setResumable(found);
-        setLoadingPrefill(false);
-        return;
-      }
-    } catch {
+    const anonymousId = getOrCreateAnonymousId() || undefined;
+    const [found, prefill] = await Promise.all([
       // 조회 실패는 진단 시작을 막지 않는다 - 새로 시작한다.
+      getResumableSupportSessionAction({ anonymousId }).catch(() => null),
+      // 프리필 실패도 진단 진행을 막지 않는다 - 빈 값으로 시작한다.
+      getSupportAssessmentPrefillAction({ anonymousId }).catch(() => ({})),
+    ]);
+
+    /*
+      하다 만 진단이 있으면 새로 시작하기 전에 팝업으로 물어본다. 다만 첫 문항(출생연도)만 답하고 나머지가
+      프로필에서 미리 채운 값 그대로면 이어서 할 것이 없다 - 묻지 않고 그 진단을 첫 문항부터, 채운 값을 보이며 시작한다.
+    */
+    if (found && !onlyPrefilled(found.answers, prefill)) {
+      setResumable(found);
+      setLoadingPrefill(false);
+      return;
     }
 
-    try {
-      const anonymousId = getOrCreateAnonymousId();
-      const prefill = await getSupportAssessmentPrefillAction({ anonymousId: anonymousId || undefined });
-      setAnswers((prev) => ({ ...prev, ...prefill }));
-    } catch {
-      // 프리필 실패는 진단 진행을 막지 않는다 - 빈 값으로 시작한다.
-    } finally {
-      setLoadingPrefill(false);
-      setPhase("wizard");
-    }
+    setAnswers((prev) => ({ ...prev, ...prefill, ...(found?.answers ?? {}) }));
+    if (found) setSessionId(found.sessionId);
+    setLoadingPrefill(false);
+    setPhase("wizard");
   }
 
   if (phase === "intro") {
@@ -696,13 +779,13 @@ export function SupportFlow({
       return (
         <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col items-center justify-center px-4 text-center">
           <Loader2 className="size-6 animate-spin text-brand-blue-400" />
-          <p className="mt-4 text-label-1 text-slate-500">지원금 찾기를 준비하고 있어요…</p>
+          <p className="mt-4 text-body-3 font-medium text-slate-600">지원금 찾기를 준비하고 있어요…</p>
         </div>
       );
     }
     return (
       <>
-        <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} latestResultSessionId={latestResultSessionId} />
+        <SupportIntro onStart={() => void handleStart()} loading={loadingPrefill} latestResultSessionId={latestResultSessionId} showcase={showcase} />
         <ResumeSessionDialog
           open={Boolean(resumable)}
           onOpenChange={(open) => {
@@ -797,11 +880,12 @@ export function SupportFlow({
   }
 
   return (
-    // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다.
-    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
+    // data-wizard: 한 문항에 집중시키는 화면이라 globals.css에서 푸터를 숨긴다. 바탕은 세부 화면 공통대로 흰색.
+    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-white pb-32">
       {/* 진행 바 - 대분류 3칸 */}
-      <div className="sticky top-16 z-30">
-        <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
+      {/* 넓은 화면은 머리글(80px)이 붙어 따라오므로 그 아래에, 휴대폰은 머리글이 붙지 않아 맨 위에 붙인다. */}
+      <div className="sticky top-0 z-30 lg:top-20">
+        <div className="flex gap-1.5 bg-white px-4 pt-3 sm:px-[max(1rem,calc((100%-36rem)/2+1rem))]">
           {GROUPS.map((g, i) => (
             <div key={g.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
               <div
@@ -815,18 +899,18 @@ export function SupportFlow({
           문항 영역과 같은 폭·패딩을 써서 뒤로가기 화살표가 아래 선택지 박스와 왼쪽 라인을 맞춘다.
           -ml-2는 아이콘 버튼의 안쪽 여백(36px 박스 안 20px 아이콘)을 상쇄해 아이콘 자체를 정렬시킨다.
         */}
-        <div className="mx-auto flex max-w-[24.5rem] items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
+        <div className="mx-auto flex max-w-xl items-center bg-white px-4 py-3">
           <button
             type="button"
             onClick={handlePrev}
             disabled={stepIndex === 0 || submitting}
             aria-label="이전 문항"
-            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowLeft className="size-5" />
           </button>
           {/* 지금 어느 분류인지는 화면 상단에 고정으로 둔다. */}
-          <span className="flex-1 truncate text-center text-label-1 font-semibold text-brand-blue-600">
+          <span className="flex-1 truncate text-center text-body-3 font-semibold text-slate-700">
             {GROUPS[groupIndex]?.label}
           </span>
           {/* 이미 지나온 문항이면 하단 CTA를 쓰지 않고도 앞으로 되돌아갈 수 있게 한다. */}
@@ -835,7 +919,7 @@ export function SupportFlow({
             onClick={handleNext}
             disabled={(stepIndex >= furthestIndex && !canProceed) || isLast || submitting}
             aria-label="다음 문항"
-            className="-mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+            className="-mr-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowRight className="size-5" />
           </button>
@@ -843,34 +927,34 @@ export function SupportFlow({
       </div>
 
       {/* 문항 */}
-      <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
+      <div className="mx-auto mt-8 max-w-xl px-4">
         {/* 분류 안에서 몇 번째 문항인지 - 질문과 함께 읽히는 정보라 질문 위에 둔다. */}
-        <p className="text-center text-body-2 font-bold text-slate-900">
+        <p className="text-center text-body-2 font-semibold text-slate-900">
           {posInGroup + 1}/{groupSteps.length}
         </p>
         {/* 진단·온보딩 위저드와 같은 규칙: 어절 중간 잘림 방지 + 두 줄 길이 균형 + 살짝 여유 있는 줄간격. */}
-        <h2 className="mt-3 text-center text-title-2 leading-[1.4] font-bold break-keep text-balance text-slate-900">{step.title}</h2>
+        <h2 className="mt-3 text-center text-title-2 leading-[1.4] font-extrabold break-keep text-balance text-slate-900">{step.title}</h2>
         {step.description && (
-          <p className="mt-3 text-center text-body-2-reading text-slate-500">{step.description}</p>
+          <p className="mt-3 text-center text-body-2-reading font-medium text-slate-600">{step.description}</p>
         )}
 
         <div className="mt-10">
           <StepBody step={step} answers={answers} onChange={updateAnswer} />
         </div>
 
-        {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
+        {error && <p className="mt-6 text-center text-body-3 font-medium text-red-500">{error}</p>}
 
         {/* 선택지가 긴 단계에서만 "아래에 더 있어요" 힌트를 띄운다. 끝까지 내려오면 사라진다. */}
         {step.scrollHint && <ScrollMoreHint key={step.id} />}
       </div>
 
       {/* 하단 고정 CTA */}
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-atomic-mono-50 via-atomic-mono-50 to-transparent pt-6">
-        <div className="mx-auto max-w-[24.5rem] px-4 pb-8">
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-white via-white to-transparent pt-6">
+        <div className="mx-auto max-w-xl px-4 pb-8">
           <Button
             onClick={() => void handleNext()}
             disabled={submitting || (step.required && !canProceed)}
-            className="h-14 w-full rounded-lg bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold text-white"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "결과 확인하기" : "다음"}
           </Button>

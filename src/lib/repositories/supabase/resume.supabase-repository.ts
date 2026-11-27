@@ -2,7 +2,7 @@ import type { Resume, ResumeInput } from "@/types";
 import type { ResumeRepository } from "../resume-repository";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { throwDataSourceError } from "@/lib/data/errors";
-import { unwrapList, unwrapMaybe } from "./query-helpers";
+import { isUuid, unwrapList, unwrapMaybe } from "./query-helpers";
 
 function mapRow(row: Record<string, unknown>): Resume {
   return {
@@ -76,6 +76,7 @@ export function createSupabaseResumeRepository(): ResumeRepository | null {
       return rows.map((row) => mapRow(row as Record<string, unknown>));
     },
     async findById(id) {
+      if (!isUuid(id)) return null;
       const result = await client.from("resumes").select("*").eq("id", id).maybeSingle();
       const row = unwrapMaybe("ResumeRepository.findById", result);
       return row ? mapRow(row as Record<string, unknown>) : null;

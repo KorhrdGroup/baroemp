@@ -38,7 +38,7 @@ function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="card-title"
       className={cn(
-        /* 본문 글자(#010101)보다 한 단계 눅인 진회색. 카드가 여러 장 쌓이면 제목만 새까매 눈이 아팠다. */
+        /* 본문 글자(slate-900)보다 한 단계 눅인 진회색. 카드가 여러 장 쌓이면 제목만 새까매 눈이 아팠다. */
         "font-heading text-body-2 font-medium text-slate-800 group-data-[size=sm]/card:text-label-1",
         className
       )}

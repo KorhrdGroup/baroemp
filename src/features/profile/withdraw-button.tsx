@@ -53,24 +53,24 @@ export function WithdrawButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="text-label-1 font-medium text-slate-400 underline underline-offset-4"
+        className="relative tap-44 text-body-3 font-medium text-slate-500 underline underline-offset-4"
       >
         탈퇴하기
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-md">
+        <DialogContent className="max-h-[85vh] overflow-y-auto rounded-card sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>정말 탈퇴하시겠어요?</DialogTitle>
-            <DialogDescription className="break-keep">
-              계정과 함께 이력서·자기소개서, 찜한 일자리·지원제도, 직업진단·지원금 진단 결과가 모두 삭제됩니다.
+            <DialogTitle className="text-title-3 font-bold text-slate-900">정말 탈퇴하시겠어요?</DialogTitle>
+            <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
+              계정과 함께 이력서·자기소개서, 찜한 일자리·지원제도, 직업진단·지원금 진단 결과가 모두 삭제돼요.
               삭제한 정보는 되돌릴 수 없어요.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-2">
-            <p className="text-label-1 font-semibold text-slate-700">
-              떠나시는 이유를 알려주시겠어요? <span className="font-medium text-slate-400">(선택)</span>
+            <p className="text-body-3 font-semibold text-slate-700">
+              떠나시는 이유를 알려주시겠어요? <span className="font-medium text-slate-600">(선택)</span>
             </p>
             <div className="flex flex-wrap gap-2">
               {REASONS.map((r) => (
@@ -79,10 +79,11 @@ export function WithdrawButton() {
                   type="button"
                   onClick={() => setReason(reason === r ? null : r)}
                   className={cn(
-                    "rounded-lg border px-3 py-2 text-label-1 transition-colors",
+                    /* 고른 이유는 파랑으로 채운다. 이 창은 .draft3-theme 바깥에 그려져 색 토큰을 직접 쓴다. */
+                    "h-10 cursor-pointer rounded-full border px-4 text-body-3",
                     reason === r
-                      ? "border-brand-blue-400 bg-brand-blue-50 font-semibold text-brand-blue-600"
-                      : "border-border bg-white font-medium text-slate-600",
+                      ? "border-baro-blue bg-baro-blue font-semibold text-white"
+                      : "border-slate-300 bg-white font-medium text-slate-700",
                   )}
                 >
                   {r}
@@ -96,18 +97,18 @@ export function WithdrawButton() {
               rows={2}
               maxLength={300}
               placeholder="더 하고 싶은 말씀이 있다면 적어주세요."
-              className="w-full resize-none rounded-lg border border-input bg-background px-3 py-2 text-label-1 outline-none placeholder:text-slate-400 focus-visible:border-ring"
+              className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-body-2 font-medium outline-none placeholder:text-slate-500 focus-visible:border-ring"
             />
           </div>
 
-          {error && <p className="text-label-1 text-red-600">{error}</p>}
+          {error && <p className="text-body-3 font-medium text-red-600">{error}</p>}
 
           <DialogFooter className="gap-2 sm:gap-2">
-            <Button variant="outline" onClick={() => setOpen(false)} disabled={pending}>
+            <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-semibold text-slate-800" onClick={() => setOpen(false)} disabled={pending}>
               돌아가기
             </Button>
             <Button
-              className="bg-red-600 text-white hover:bg-red-700"
+              className="h-12 rounded-xl bg-red-600 text-body-2 font-semibold text-white hover:bg-red-700"
               onClick={handleWithdraw}
               disabled={pending}
             >

@@ -1,0 +1,31 @@
+/*
+ * 바로취업 디자인 토큰 (/draft3 기준).
+ * 디자인 시스템 문서(claude.ai 아티팩트 "바로취업 디자인 시스템")의 tokens.json 과 같은 값이다. 한쪽을 바꾸면 다른 쪽도 맞춘다.
+ *
+ * @theme static 에 두어(쓰지 않은 변수도 늘 내보낸다 - var() 로만 읽는 곳이 있어서) Tailwind 클래스(bg-baro-blue, rounded-card, shadow-hover …)와
+ * CSS 변수(var(--color-baro-blue) …)가 함께 생긴다. 이름 앞 baro- 는 기존 HDS(atomic-*) 눈금과 섞이지 않게.
+ *
+ * 색은 두 가지로만 짠다: 파랑(누르는 곳 · 핵심 숫자 · 선 아이콘)과 남색(첫 화면 · 선택된 탭 · 그림 포인트).
+ * 나머지는 이 둘을 흰색에 섞은 옅은 단계와 쿨그레이(.draft-cool-grey 의 slate-*)뿐. 마감 임박 빨강만 뜻이 있는 예외.
+ */
+@theme static {
+  /* 색 */
+  --color-baro-blue: #2469FF; /* 단추 바탕, 핵심 숫자, 선 아이콘, 포커스 테두리. 흰 바탕 글자 4.63:1 */
+  --color-baro-navy: #00184D; /* 첫 화면, 선택된 탭 알약, 남색 단추 */
+  --color-baro-blue-600: #1F5EEB; /* 옅은 파랑 판(baro-blue-50) 위 파란 글자. 4.94:1 (baro-blue 는 4.2:1 로 모자람) */
+  --color-baro-blue-300: #7CA5FF; /* 남색 위 강조 글자(6.9:1), 그림 중간 톤. 흰 바탕 글자로는 쓰지 않는다 */
+  --color-baro-blue-100: #DEE8FF; /* 그림의 옅은 면, 파랑 띠 위 머리말 */
+  --color-baro-blue-50: #EFF4FF; /* 옅은 하늘 판(지원금 대표 · 자격증), 선택된 메뉴 알약 */
+  --color-baro-field: #F3F5F8; /* 머리글의 둥근 검색 단추 · 화면 크기 알약 바탕 */
+  --color-baro-page: #F8F9FB; /* 세부 화면(흰 머리 아래) 본문 바탕. 흰 카드가 놓인다. gov-surface 보다 한 단계 옅게 */
+  --color-baro-danger: #D04040; /* 마감 임박(7일 이내)만 */
+
+  /* 모서리: 담는 것 20 · 누르는 네모 단추 12(rounded-xl) · 첫 화면 검색 칸 14(rounded-2xl) · 알약(rounded-full) */
+  --radius-card: 20px;
+
+  /* 그림자: 이 네 곳에만 쓴다 */
+  --shadow-float: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px rgba(15, 23, 42, 0.08); /* 첫 화면에 걸친 서비스 입구 판 */
+  --shadow-hover: 0 0 10px rgba(0, 24, 77, 0.12); /* 마우스를 올린 카드 · 자격증 단추. 위치 0,0 */
+  --shadow-icon-hover: 0 0 8px rgba(18, 65, 166, 0.32); /* 마우스를 올린 서비스 입구 아이콘 원 */
+  --shadow-chip: 0 1px 3px rgba(0, 24, 77, 0.15); /* 화면 크기 알약 안 고른 글자 */
+}

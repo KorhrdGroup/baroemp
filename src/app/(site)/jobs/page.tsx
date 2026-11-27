@@ -18,12 +18,16 @@ import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { findCareerProfileByUserId, getOccupationRepository } from "@/lib/repositories";
 import type { JobSortOrder, Region } from "@/types";
 import { parseJobCategories, toJobCategoryPatterns } from "@/lib/jobs/job-category-groups";
+import { parseSalaryAtLeast, parseSalaryUnit } from "@/lib/jobs/salary-filter";
+import { cn } from "@/lib/utils";
+import { objectParticle } from "@/lib/utils/korean";
 
 export const metadata: Metadata = {
   title: "일자리 찾기 | 한평생 바로취업",
 };
 
-const PAGE_SIZE = 20;
+/** 넓은 화면 3장 · 중간 2장 줄이 마지막 줄까지 꽉 차게 2와 3의 배수로 둔다. */
+const PAGE_SIZE = 24;
 /** "자격 따면 열리는" 섹션을 전체 공고 몇 개 뒤에 끼울지. */
 const INTERLEAVE_AFTER = 6;
 
@@ -35,6 +39,9 @@ interface JobsPageSearchParams {
   category?: string;
   beginner?: string;
   closingSoon?: string;
+  /** 급여 받는 방식(monthly · hourly · daily · annual)과 그 최소 금액(원). lib/jobs/salary-filter. */
+  pay?: string;
+  payMin?: string;
   sort?: string;
   page?: string;
 }
@@ -71,6 +78,9 @@ export default async function JobsPage({
   const region: Region | undefined =
     sp.region === "all" ? undefined : ((sp.region as Region | undefined) ?? careerProfile?.region);
 
+  const salaryType = parseSalaryUnit(sp.pay);
+  const salaryAtLeast = parseSalaryAtLeast(salaryType, sp.payMin);
+
   const filter: JobSearchParams = {
     keyword: sp.keyword,
     region,
@@ -80,6 +90,8 @@ export default async function JobsPage({
     jobCategoryPatterns: toJobCategoryPatterns(parseJobCategories(sp.category)),
     isBeginnerFriendly: sp.beginner === "1" ? true : undefined,
     closingWithinDays: sp.closingSoon === "1" ? 7 : undefined,
+    salaryType,
+    salaryAtLeast,
     sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
     activeOnly: true,
     page,
@@ -133,6 +145,8 @@ export default async function JobsPage({
     if (sp.category) params.set("category", sp.category);
     if (sp.beginner) params.set("beginner", sp.beginner);
     if (sp.closingSoon) params.set("closingSoon", sp.closingSoon);
+    if (sp.pay) params.set("pay", sp.pay);
+    if (sp.payMin) params.set("payMin", sp.payMin);
     if (sp.sort) params.set("sort", sp.sort);
     if (targetPage > 1) params.set("page", String(targetPage));
     const qs = params.toString();
@@ -145,14 +159,8 @@ export default async function JobsPage({
       바로 로그인 화면으로 밀지 않고 가입 안내 창을 띄운다 - 보던 것이 사라지면 대부분 떠난다.
     */
     <GuestGate active={!isAuthenticated}>
-    <div className="mx-auto max-w-6xl px-4.5 py-10 lg:px-8">
-      <div className="mb-8">
-        <p className="text-label-1 font-semibold text-brand-blue-600">일자리찾기</p>
-        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">나에게 맞는 일자리를 찾아보세요</h1>
-        <p className="mt-2 text-body-2-reading text-balance text-slate-500">
-          실시간 채용정보를 조건에 맞게 확인하고, 관심 있는 공고에 바로 지원해보세요.
-        </p>
-      </div>
+    <div className="draft3-theme">
+    {/* 화면 머리(위치 · 제목 · 추천)와 회색 바탕 판(검색창 · 조건 줄 → 목록)은 JobFiltersForm 이 그린다. */}
 
       <JobFiltersForm
         initial={{
@@ -162,50 +170,47 @@ export default async function JobsPage({
           jobCategories: parseJobCategories(sp.category),
           isBeginnerFriendly: sp.beginner === "1",
           closingSoon: sp.closingSoon === "1",
+          salaryType,
+          salaryAtLeast,
           sort: (sp.sort as JobSortOrder | undefined) ?? "recommended",
         }}
         jobCategoryLabel={jobCategoryLabel}
         profileRegion={careerProfile?.region}
+        /* 건수를 정렬 줄 왼쪽에 둔다 - 같은 목록을 다루는 정보라 한 줄로 읽히게. */
         summary={
-          <p className="text-body-2 text-slate-500">
-            총 <span className="font-bold text-brand-blue-600">{result.total.toLocaleString()}건</span>
-          </p>
+          <h2 className="text-title-3 font-bold text-slate-900">
+            전체 공고 <span className="ml-1">{result.total.toLocaleString()}</span>
+            <span className="ml-0.5 text-body-1 font-medium text-slate-600">건</span>
+          </h2>
+        }
+        /* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */
+        curation={
+          <JobCurationSection
+            initialActive={initialCuration}
+            bookmarkedIds={bookmarkedIds}
+            isAuthenticated={isAuthenticated}
+          />
         }
       >
-      {/* 검사 기반 "맞춤 공고"는 큐레이션의 맞춤 추천 탭이 담당한다 - job-curation.service. */}
-      <div className="mt-8">
-        <JobCurationSection
-          initialActive={initialCuration}
-          bookmarkedIds={bookmarkedIds}
-          isAuthenticated={isAuthenticated}
-        />
-      </div>
-      </JobFiltersForm>
-
-      <div className="mt-8">
-        <h2 className="text-body-1 font-bold text-slate-900">
-          전체 공고 <span className="font-semibold text-brand-blue-600">{result.total.toLocaleString()}</span>
-          <span className="ml-0.5 text-body-2 font-medium text-slate-500">건</span>
-        </h2>
+      <div className="mt-2">
         {result.items.length === 0 ? (
           <EmptyState
             icon={Briefcase}
             title="조건에 맞는 채용공고가 없어요"
             description="검색어나 필터 조건을 조정해서 다시 확인해보세요."
-            className="mt-4"
+            className="mt-4 rounded-card border-0 bg-white"
           />
         ) : (
           <>
-            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {result.items.slice(0, INTERLEAVE_AFTER).map((job) => (
                 <JobCard
                   key={job.id}
                   job={job}
-                  matchReasonLabel={job.match?.reasons[0]?.label}
+                  showTags={false}
                   isAuthenticated={isAuthenticated}
                   isBookmarked={bookmarkedSet.has(job.id)}
                   readiness={readinessMap.get(job.id)}
-                  hoverTint
                 />
               ))}
             </div>
@@ -216,20 +221,21 @@ export default async function JobsPage({
               페이지를 넘길 때마다 또 나오면 광고처럼 읽혀 첫 페이지에만 둔다.
             */}
             {page === 1 && recommendation?.preparation && recommendation.preparation.jobs.length > 0 && (
-              <div className="mt-6 rounded-2xl bg-amber-50/70 p-5 sm:p-6">
+              <div className="mt-6 rounded-card bg-atomic-blue-50 p-5 sm:p-6">
                 <div className="flex items-center gap-2">
-                  <KeyRound className="size-5 text-amber-600" />
-                  <h2 className="text-body-1 font-bold text-slate-900">
+                  <KeyRound className="size-5 text-atomic-blue-600" />
+                  <h2 className="text-body-1 font-semibold text-slate-900">
                     자격 따면 열리는 &ldquo;{recommendation.preparation.occupationName}&rdquo; 공고
                   </h2>
                 </div>
-                <p className="mt-1 text-label-1 text-slate-600">
+                <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">
                   진단에서 성향이 잘 맞았던 직업이에요.
                   {recommendation.preparation.missingQualifications?.length
-                    ? ` ${recommendation.preparation.missingQualifications.join(", ")}을(를) 취득하면 지원할 수 있어요.`
+                    ? ` ${recommendation.preparation.missingQualifications.join(", ")}${objectParticle(recommendation.preparation.missingQualifications.at(-1) ?? "")} 취득하면 지원할 수 있어요.`
                     : ""}
                 </p>
-                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {/* 네 장이면 넓은 화면에서 세 칸 줄에 한 장만 남아, 두 칸씩 두 줄로 채운다. */}
+                <div className={cn("mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2", recommendation.preparation.jobs.length % 3 === 1 ? "lg:grid-cols-2" : "lg:grid-cols-3")}>
                   {recommendation.preparation.jobs.map((job) => (
                     <JobRowCompact
                       key={`prep-${job.id}`}
@@ -243,17 +249,16 @@ export default async function JobsPage({
             )}
 
             {result.items.length > INTERLEAVE_AFTER && (
-              <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {result.items.slice(INTERLEAVE_AFTER).map((job) => (
                   <JobCard
                     key={job.id}
                     job={job}
-                    matchReasonLabel={job.match?.reasons[0]?.label}
+                    showTags={false}
                     isAuthenticated={isAuthenticated}
                     isBookmarked={bookmarkedSet.has(job.id)}
                     readiness={readinessMap.get(job.id)}
-                    hoverTint
-                  />
+                    />
                 ))}
               </div>
             )}
@@ -262,6 +267,7 @@ export default async function JobsPage({
           </>
         )}
       </div>
+      </JobFiltersForm>
     </div>
     </GuestGate>
   );

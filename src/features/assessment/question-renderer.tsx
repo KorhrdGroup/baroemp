@@ -56,19 +56,19 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               aria-checked={selected}
               onClick={() => onChange({ type: "SINGLE", optionId: option.id })}
               className={cn(
-                "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
+                "flex min-h-14 items-center justify-start gap-3 rounded-xl border bg-white px-4 py-3.5 text-left text-body-2 font-medium break-keep",
                 selected
-                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-                  : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                  ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+                  : "border-border text-slate-700",
               )}
             >
               <span
                 className={cn(
-                  "absolute left-4 flex size-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors",
-                  selected ? "border-brand-blue-400" : "border-slate-300",
+                  "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
+                  selected ? "border-brand-blue-600" : "border-slate-300",
                 )}
               >
-                {selected && <span className="size-2.5 rounded-full bg-brand-blue-400" />}
+                {selected && <span className="size-2.5 rounded-full bg-brand-blue-600" />}
               </span>
               {option.optionText}
             </button>
@@ -95,16 +95,16 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 onChange({ type: "MULTI", optionIds: next, customTexts });
               }}
               className={cn(
-                "relative flex min-h-14 items-center justify-center rounded-xl border bg-white px-11 py-3.5 text-center text-body-2 font-medium transition-colors",
+                "flex min-h-14 items-center justify-start gap-3 rounded-xl border bg-white px-4 py-3.5 text-left text-body-2 font-medium break-keep",
                 selected
-                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-                  : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                  ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+                  : "border-border text-slate-700",
               )}
             >
               <span
                 className={cn(
-                  "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2",
-                  selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
+                  "flex size-5 shrink-0 items-center justify-center rounded-sm border-2",
+                  selected ? "border-brand-blue-600 bg-brand-blue-600 text-white" : "border-slate-300",
                 )}
               >
                 {selected && <Check className="size-3.5" />}
@@ -122,7 +122,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             onChange={(next) => onChange({ type: "MULTI", optionIds: current, customTexts: next })}
           />
         )}
-        <p className="mt-2 text-center text-label-1 text-slate-400">해당하는 항목이 없다면 선택하지 않고 다음으로 넘어가셔도 됩니다.</p>
+        <p className="mt-2 text-center text-body-3 font-medium text-slate-600">해당하는 항목이 없으면 고르지 않고 다음으로 넘어가도 돼요.</p>
       </div>
     );
   }
@@ -144,7 +144,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
           "이쪽이 부정, 저쪽이 긍정"임을 확인하게 되어 척도 해석이 늦어졌다.
           그림문자는 방향(부정→긍정)을 눈으로 잡아주는 장식이라 읽어주지 않는다.
         */}
-        <div className="mb-3 flex items-start justify-between gap-3 text-label-1 font-medium text-slate-700">
+        <div className="mb-3 flex items-start justify-between gap-3 text-body-3 font-medium text-slate-700">
           <span className="flex items-center gap-1.5 break-keep">
             <span aria-hidden className="text-title-3 leading-none">😓</span>
             {endpointLabels?.min ?? `${min}점`}
@@ -163,10 +163,10 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
                 type="button"
                 onClick={() => onChange({ type: "SCALE", value: n })}
                 className={cn(
-                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-bold transition-colors",
+                  "flex aspect-square min-h-14 flex-col items-center justify-center rounded-xl border text-body-1 font-semibold",
                   selected
-                    ? "border-brand-blue-400 bg-brand-blue-400 text-white"
-                    : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                    ? "border-brand-blue-600 bg-brand-blue-600 text-white"
+                    : "border-border text-slate-700",
                 )}
               >
                 {n}
@@ -192,7 +192,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
           className="h-14 w-40 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
           placeholder="0"
         />
-        {unit && <span className="text-body-2 text-slate-500">{unit}</span>}
+        {unit && <span className="text-body-2 font-medium text-slate-600">{unit}</span>}
       </div>
     );
   }
@@ -204,7 +204,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
         value={current ?? ""}
         onChange={(e) => onChange({ type: "TEXT", value: e.target.value })}
         rows={3}
-        className="w-full rounded-xl border border-border px-4 py-3 text-body-2 text-slate-800 focus:border-brand-blue-400 focus:outline-none"
+        className="w-full rounded-xl border border-border px-4 py-3 text-body-2 font-medium text-slate-800 focus:border-brand-blue-400 focus:outline-none"
         placeholder="자유롭게 입력해주세요."
       />
     );
@@ -222,10 +222,10 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
               type="button"
               onClick={() => onChange({ type: "REGION", sido: code })}
               className={cn(
-                "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
+                "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium",
                 selected
-                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-                  : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                  ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+                  : "border-border text-slate-700",
               )}
             >
               {label}
@@ -253,7 +253,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             className="h-14 w-32 rounded-xl border border-border px-4 text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
             placeholder="최소"
           />
-          <span className="text-slate-400">~</span>
+          <span className="text-slate-600">~</span>
           <input
             type="number"
             min={0}
@@ -266,7 +266,7 @@ export function QuestionRenderer({ question, value, onChange }: QuestionRenderer
             placeholder="최대"
           />
         </div>
-        <span className="text-body-2 text-slate-500">만원</span>
+        <span className="text-body-2 font-medium text-slate-600">만원</span>
       </div>
     );
   }

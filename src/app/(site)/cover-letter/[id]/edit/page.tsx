@@ -35,17 +35,15 @@ export default async function CoverLetterEditPage({
   const applicantName = linkedResume?.name?.trim() || user.name?.trim() || undefined;
 
   return (
-    // 입력칸이 흰색으로 도드라지도록 편집 화면만 회색 바탕을 깐다.
-    <div className="min-h-screen bg-slate-100">
-      {/* 하단 고정 액션 바(fixed)에 마지막 문항이 가려지지 않도록 아래 여백을 크게 둔다. */}
-      <div className="mx-auto max-w-5xl px-4.5 pb-28 pt-10 lg:px-8">
-        <CoverLetterEditor
-          initialDetail={detail}
-          experienceBank={experienceBank}
-          catalog={buildQuestionCatalog(templates)}
-          applicantName={applicantName}
-        />
-      </div>
+    // 흰 머리 아래 회색 바탕에 흰 카드(테두리 · 그림자 없음). /draft3 색 구성 (globals.css .draft3-theme).
+    <div className="draft3-theme min-h-screen bg-baro-page">
+      {/* 화면 머리와 두 칸 짜임(폭 · 여백)은 편집기가 직접 잡는다 - 머리는 화면 끝까지, 본문은 max-w-7xl. */}
+      <CoverLetterEditor
+        initialDetail={detail}
+        experienceBank={experienceBank}
+        catalog={buildQuestionCatalog(templates)}
+        applicantName={applicantName}
+      />
     </div>
   );
 }

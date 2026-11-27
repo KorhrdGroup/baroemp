@@ -252,7 +252,15 @@ export async function getUserJobBookmarkIdsAction(): Promise<string[]> {
 }
 
 /** 큐레이션 탭 allowlist. 서버 액션에 임의 문자열이 들어오는 것을 차단한다. */
-const VALID_CURATION_TABS: readonly JobCurationTab[] = ["new", "closing_soon", "matched", "ready_to_apply", "unlockable"];
+/* JobCurationTab 의 모든 값. 진단 맞춤 탭(assessment_matched)이 빠져 있어 그 탭의 조회 기록 · 단독 불러오기가 오류로 끝났다. */
+const VALID_CURATION_TABS: readonly JobCurationTab[] = [
+  "new",
+  "closing_soon",
+  "matched",
+  "assessment_matched",
+  "ready_to_apply",
+  "unlockable",
+];
 
 function assertValidCurationTab(tab: JobCurationTab): void {
   if (!VALID_CURATION_TABS.includes(tab)) {

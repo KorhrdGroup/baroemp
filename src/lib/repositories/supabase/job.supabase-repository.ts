@@ -112,6 +112,16 @@ function toRow(input: Partial<JobInput>): Record<string, unknown> {
   return row;
 }
 
+/**
+ * 한국 날짜로 오늘 0시(UTC ISO 문자열).
+ * 마감일은 날짜만 와서 UTC 자정으로 들어 있다. 이 시각과 견주면 마감일 당일 공고가 하루 종일 남는다.
+ */
+function startOfTodayKst(): string {
+  const KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+  const kstNow = new Date(Date.now() + KST_OFFSET_MS);
+  return new Date(Date.UTC(kstNow.getUTCFullYear(), kstNow.getUTCMonth(), kstNow.getUTCDate()) - KST_OFFSET_MS).toISOString();
+}
+
 // Supabase-js의 PostgrestFilterBuilder 제네릭 체이닝 타입은 매우 장황하므로,
 // 필터 적용 헬퍼는 any로 받고 호출부에서 반환 타입을 다시 좁혀서 사용한다.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,6 +129,8 @@ function applySearchFilters(query: any, filter: JobSearchFilter) {
   let q = query;
   if (filter.activeOnly !== false) {
     q = q.eq("is_active", true).eq("status", "published");
+    /* 마감일이 지난 공고는 활성이어도 뺀다 - 검색 함수(0077)와 같은 기준. 마감일 당일은 한국 날짜로 하루 종일 보인다. */
+    q = q.or(`apply_deadline.is.null,apply_deadline.gte.${startOfTodayKst()}`);
   }
   /* 직종은 코드 앞자리로 훑는다. 여러 개면 그중 하나라도 걸리면 된다. */
   if (filter.jobCategoryPatterns && filter.jobCategoryPatterns.length > 0) {
@@ -140,6 +152,10 @@ function applySearchFilters(query: any, filter: JobSearchFilter) {
   if (filter.isBeginnerFriendly !== undefined) q = q.eq("is_beginner_friendly", filter.isBeginnerFriendly);
   if (filter.salaryMin !== undefined) q = q.gte("salary_max", filter.salaryMin);
   if (filter.salaryMax !== undefined) q = q.lte("salary_min", filter.salaryMax);
+  if (filter.salaryType) q = q.eq("salary_type", filter.salaryType);
+  if (filter.salaryAtLeast !== undefined) {
+    q = q.or(`salary_min.gte.${filter.salaryAtLeast},salary_max.gte.${filter.salaryAtLeast}`);
+  }
   if (filter.closingWithinDays !== undefined) {
     const until = new Date(Date.now() + filter.closingWithinDays * 24 * 60 * 60 * 1000).toISOString();
     q = q.not("apply_deadline", "is", null).gte("apply_deadline", new Date().toISOString()).lte("apply_deadline", until);
@@ -190,6 +206,8 @@ function hasFiltersOutsideRpc(filter: JobSearchFilter): boolean {
     filter.isBeginnerFriendly === false ||
     filter.salaryMin !== undefined ||
     filter.salaryMax !== undefined ||
+    filter.salaryType !== undefined ||
+    filter.salaryAtLeast !== undefined ||
     (filter.preferentialCodes?.length ?? 0) > 0 ||
     (filter.tags?.length ?? 0) > 0
   );

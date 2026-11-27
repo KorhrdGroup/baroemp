@@ -15,15 +15,32 @@ export function SupportLongText({ text, className }: { text: string; className?:
 
   return (
     <div>
-      <p className={cn("whitespace-pre-line text-justify", className, collapsible && !expanded && "line-clamp-6")}>
-        {text}
-      </p>
+      {/*
+        공공데이터 원문은 "○ 항목", "- 세부" 같은 기호를 글자로 담아 보낸다. 그대로 찍으면 원자료처럼 보여서
+        줄마다 기호를 떼고 점 목록(세부는 한 단 들여쓰기)으로 그린다. 기호가 없는 줄은 그대로 문단이다.
+      */}
+      <div className={cn(className, collapsible && !expanded && "line-clamp-6")}>
+        {text.split("\n").map((raw, i) => {
+          const line = raw.trim();
+          if (!line) return <span key={i} className="block h-2" />;
+          const top = line.match(/^[○●◦❍◯■□▶▷◆◇※*•·]\s*(.+)$/);
+          const sub = top ? null : line.match(/^[-–‐]\s*(.+)$/);
+          if (top || sub) {
+            return (
+              <span key={i} className={cn("block pl-[1em] -indent-[1em]", sub && "ml-[1em]")}>
+                {sub ? "–" : "•"} {(top || sub)![1]}
+              </span>
+            );
+          }
+          return <span key={i} className="block">{line}</span>;
+        })}
+      </div>
       {collapsible && (
         <button
           type="button"
           onClick={() => setExpanded((v) => !v)}
           aria-expanded={expanded}
-          className="mt-2 cursor-pointer text-label-1 font-semibold text-brand-blue-600 hover:underline"
+          className="relative tap-44 mt-2 cursor-pointer text-body-3 font-semibold text-atomic-blue-600"
         >
           {expanded ? "접기" : "더보기"}
         </button>

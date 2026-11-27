@@ -14,7 +14,6 @@ import {
 } from "@/lib/labels";
 import { ChipToggle, JOB_CATEGORY_OPTIONS, QUALIFICATION_OPTIONS } from "./profile-form-fields";
 import { CustomQualificationInput } from "./custom-qualification-input";
-import { WithdrawButton } from "./withdraw-button";
 
 /*
   고르는 칸. 창은 OS 기본 피커를 그대로 쓴다 - 모바일에서 커스텀 목록보다 그편이 낫다.
@@ -37,28 +36,26 @@ function SelectField({
         id={id}
         name={name}
         defaultValue={defaultValue}
-        className="h-12 w-full appearance-none rounded-lg border border-input bg-background pr-11 pl-4 text-body-2 outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-label-1"
+        className="h-12 w-full appearance-none rounded-xl border border-slate-300 bg-white pr-11 pl-4 text-body-2 font-medium outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         {children}
       </select>
       <ChevronDown
         aria-hidden
-        className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-slate-400"
+        className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-slate-600"
       />
     </div>
   );
 }
 import { updateProfileAction, type ProfileEditFormState } from "./profile-actions";
-import type { CareerProfile, Profile, WorkType } from "@/types";
+import type { CareerProfile, WorkType } from "@/types";
 
 const initialState: ProfileEditFormState = {};
 
 export function ProfileEditForm({
-  profile,
   careerProfile,
   heldQualificationNames = [],
 }: {
-  profile: Profile;
   careerProfile: CareerProfile | null;
   /** Career DB(user_qualifications)에 등록된 보유 자격. 선택지에 있는 것만 체크 상태로 보인다. */
   heldQualificationNames?: string[];
@@ -77,51 +74,26 @@ export function ProfileEditForm({
   return (
     <form action={formAction} className="space-y-8">
       {state.success && (
-        <div className="rounded-lg bg-emerald-50 px-3 py-2.5 text-label-1 text-emerald-700" role="status">
-          변경사항이 저장되었습니다.
+        <div className="rounded-xl bg-emerald-50 px-4 py-3 text-body-3 font-medium text-emerald-700" role="status">
+          바꾼 내용을 저장했어요.
         </div>
       )}
       {state.error && (
-        <div className="rounded-lg bg-red-50 px-3 py-2.5 text-label-1 text-red-600" role="alert">
+        <div className="rounded-xl bg-red-50 px-4 py-3 text-body-3 font-medium text-red-600" role="alert">
           {state.error}
         </div>
       )}
 
       <section className="space-y-4">
-        <h2 className="text-body-2 font-bold text-slate-900">내 정보</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <Label htmlFor="name" className="mb-1.5 text-slate-700">
-              이름
-            </Label>
-            <Input id="name" name="name" defaultValue={profile.name} required />
-            {state.fieldErrors?.name && <p className="mt-1 text-label-2 text-red-600">{state.fieldErrors.name}</p>}
-          </div>
-          <div>
-            <Label htmlFor="phone" className="mb-1.5 text-slate-700">
-              휴대전화번호
-            </Label>
-            <Input id="phone" name="phone" type="tel" defaultValue={profile.phone} placeholder="010-1234-5678" />
-            {state.fieldErrors?.phone && <p className="mt-1 text-label-2 text-red-600">{state.fieldErrors.phone}</p>}
-          </div>
-          <div>
-            <Label className="mb-1.5 text-slate-700">이메일</Label>
-            <Input value={profile.email ?? ""} disabled />
-            <p className="mt-1 text-label-2 text-slate-400">이메일은 변경할 수 없습니다.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="space-y-4 border-t border-slate-100 pt-6">
-        <h2 className="text-body-2 font-bold text-slate-900">취업 프로필</h2>
+        <h2 className="text-body-1 font-semibold text-slate-900">취업 프로필</h2>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <Label htmlFor="employmentStatus" className="mb-1.5 text-slate-700">
-              취업상태
+            <Label htmlFor="employmentStatus" className="mb-1.5 text-body-3 font-semibold text-slate-700">
+              취업 상태
             </Label>
             <SelectField id="employmentStatus" name="employmentStatus" defaultValue={careerProfile?.employmentStatus ?? ""}>
-              <option value="">선택 안함</option>
+              <option value="">선택 안 함</option>
               {Object.entries(EMPLOYMENT_STATUS_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
@@ -131,11 +103,11 @@ export function ProfileEditForm({
           </div>
 
           <div>
-            <Label htmlFor="region" className="mb-1.5 text-slate-700">
-              희망지역
+            <Label htmlFor="region" className="mb-1.5 text-body-3 font-semibold text-slate-700">
+              희망 지역
             </Label>
             <SelectField id="region" name="region" defaultValue={careerProfile?.region ?? ""}>
-              <option value="">선택 안함</option>
+              <option value="">선택 안 함</option>
               {Object.entries(REGION_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
@@ -145,11 +117,11 @@ export function ProfileEditForm({
           </div>
 
           <div>
-            <Label htmlFor="desiredStartTiming" className="mb-1.5 text-slate-700">
-              희망 취업시기
+            <Label htmlFor="desiredStartTiming" className="mb-1.5 text-body-3 font-semibold text-slate-700">
+              희망 취업 시기
             </Label>
             <SelectField id="desiredStartTiming" name="desiredStartTiming" defaultValue={careerProfile?.desiredStartTiming ?? ""}>
-              <option value="">선택 안함</option>
+              <option value="">선택 안 함</option>
               {Object.entries(DESIRED_START_TIMING_LABELS).map(([code, label]) => (
                 <option key={code} value={code}>
                   {label}
@@ -160,8 +132,8 @@ export function ProfileEditForm({
 
           <div className="flex gap-2">
             <div className="flex-1">
-              <Label htmlFor="desiredSalaryMin" className="mb-1.5 text-slate-700">
-                희망급여(만원, 최소)
+              <Label htmlFor="desiredSalaryMin" className="mb-1.5 text-body-3 font-semibold text-slate-700">
+                희망 월급 최소(만원)
               </Label>
               <Input
                 id="desiredSalaryMin"
@@ -169,11 +141,12 @@ export function ProfileEditForm({
                 type="number"
                 inputMode="numeric"
                 defaultValue={careerProfile?.desiredSalaryMin ?? ""}
+                className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
               />
             </div>
             <div className="flex-1">
-              <Label htmlFor="desiredSalaryMax" className="mb-1.5 text-slate-700">
-                최대
+              <Label htmlFor="desiredSalaryMax" className="mb-1.5 text-body-3 font-semibold text-slate-700">
+                최대(만원)
               </Label>
               <Input
                 id="desiredSalaryMax"
@@ -181,13 +154,14 @@ export function ProfileEditForm({
                 type="number"
                 inputMode="numeric"
                 defaultValue={careerProfile?.desiredSalaryMax ?? ""}
+                className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-medium md:text-body-2"
               />
             </div>
           </div>
         </div>
 
         <div>
-          <Label className="mb-2 text-slate-700">희망 근무형태</Label>
+          <Label className="mb-2 text-body-3 font-semibold text-slate-700">희망 근무 형태</Label>
           <div className="flex flex-wrap gap-2">
             {Object.entries(WORK_TYPE_LABELS).map(([code, label]) => {
               const value = code as WorkType;
@@ -211,7 +185,7 @@ export function ProfileEditForm({
         </div>
 
         <div>
-          <Label className="mb-2 text-slate-700">희망 직종</Label>
+          <Label className="mb-2 text-body-3 font-semibold text-slate-700">희망 직종</Label>
           <div className="flex flex-wrap gap-2">
             {JOB_CATEGORY_OPTIONS.map((opt) => {
               const selected = jobCategories.includes(opt.code);
@@ -236,7 +210,7 @@ export function ProfileEditForm({
         </div>
 
         <div>
-          <Label className="mb-2 text-slate-700">보유 자격증</Label>
+          <Label className="mb-2 text-body-3 font-semibold text-slate-700">보유 자격증</Label>
           <div className="flex flex-wrap gap-2">
             {QUALIFICATION_OPTIONS.map((name) => {
               const selected = qualifications.includes(name);
@@ -265,19 +239,15 @@ export function ProfileEditForm({
           ))}
         </div>
 
-        <label className="flex items-center gap-2 text-label-1 text-slate-700">
-          <Checkbox name="isOpenToTraining" defaultChecked={careerProfile?.isOpenToTraining ?? false} />
+        <label className="flex items-center gap-2 text-body-2 font-medium break-keep text-slate-700">
+          <Checkbox className="relative tap-44" name="isOpenToTraining" defaultChecked={careerProfile?.isOpenToTraining ?? false} />
           직업훈련·교육 과정에 참여할 의향이 있어요
         </label>
       </section>
 
-      {/*
-        저장은 오른쪽 끝, 탈퇴는 왼쪽 끝. 같은 줄에 두되 서로 멀리 떼어 놓아야
-        되돌릴 수 없는 쪽이 손에 잘못 걸리지 않는다.
-      */}
-      <div className="flex items-center justify-between gap-3 border-t border-slate-100 pt-6">
-        <WithdrawButton />
-        <Button type="submit" disabled={pending} className="bg-brand-blue-400 hover:bg-brand-blue-600">
+      {/* 이름 · 연락처 · 탈퇴는 내 정보(/mypage/account)로 옮겼다. 여기는 희망 조건만. */}
+      <div className="flex justify-end border-t border-slate-100 pt-6">
+        <Button type="submit" disabled={pending} className="h-12 rounded-xl bg-brand-blue-400 px-6 text-body-2 font-semibold hover:bg-brand-blue-600">
           {pending ? "저장 중..." : "저장하기"}
         </Button>
       </div>

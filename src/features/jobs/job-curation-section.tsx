@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { JobCurationResult, JobCurationTab } from "@/types";
 import { cn } from "@/lib/utils";
-import { filterPillClass, filterPillOffClass, filterPillOnSolidClass } from "@/lib/ui-classes";
+import { filterPillClass } from "@/lib/ui-classes";
 import { JobCard } from "./job-card";
 import {
   getAllJobCurationsAction,
@@ -15,28 +16,34 @@ import {
 } from "./job-actions";
 
 /** 탭 순서. 기준은 job-curation.service (신규 3일 · 마감임박 7일 · 개인화 탭은 희망 직종/지역 후보군). */
-const TABS: { key: JobCurationTab; emoji: string; label: string }[] = [
-  { key: "matched", emoji: "🎯", label: "맞춤 추천" },
-  { key: "assessment_matched", emoji: "🧭", label: "진단 맞춤 공고" },
-  { key: "ready_to_apply", emoji: "✅", label: "지금 지원가능" },
-  { key: "unlockable", emoji: "🔑", label: "자격 따면 열리는 공고" },
-  { key: "new", emoji: "✨", label: "신규 일자리" },
-  { key: "closing_soon", emoji: "⏰", label: "마감임박" },
+/* 이모지는 홈 추천 공고 탭처럼 라벨 앞에 두고 읽기에서는 뺀다(aria-hidden). */
+const TABS: { key: JobCurationTab; label: string; emoji: string }[] = [
+  { key: "matched", label: "맞춤 추천", emoji: "✨" },
+  { key: "assessment_matched", label: "진단 맞춤 공고", emoji: "🧭" },
+  { key: "ready_to_apply", label: "지금 지원가능", emoji: "✅" },
+  { key: "unlockable", label: "자격 따면 열리는 공고", emoji: "🎓" },
+  { key: "new", label: "신규 일자리", emoji: "🌱" },
+  { key: "closing_soon", label: "마감임박", emoji: "⏰" },
 ];
 
 
 /**
  * 카드 한 장의 높이. 빈 상태와 자리지킴 카드가 같은 자리를 잡아
  * 탭을 옮길 때 판이 접혔다 펴지지 않게 한다.
- * 내용이 가장 긴 카드가 249.2px 남짓이라, 조금 위에서 못박아야 어느 탭이든 같은 높이가 된다.
+ * 공고 카드(리뉴얼)는 제목 두 줄 + 맞은 근거 한 줄일 때 216px 남짓이라, 조금 위에서 못박아야 어느 탭이든 같은 높이가 된다.
  * 최소높이를 내용보다 낮게 잡으면 내용 짧은 카드만 최소높이로 잘려 소수점만큼 덜컹인다.
  * JobCard 안쪽 여백이 바뀌면 이 값도 함께 맞춰야 한다.
  * 카드 줄 아래에 있던 탭 설명 한 줄(19.6px + 여백 16px)을 걷어내고 그만큼 카드 줄에 얹었다.
  * 탭 라벨이 이미 무엇을 고른 결과인지 말하고, 자격 조건은 카드 배지에 적혀 있어 겹쳤다.
  */
-const CARD_HEIGHT = "min-h-[286px]";
-/** 위 클래스와 같은 값. 줄 높이를 계산할 때 쓴다. */
-const CARD_HEIGHT_PX = 286;
+const CARD_HEIGHT = "min-h-[218px]";
+/**
+ * 카드 폭. 줄 폭에 딱 맞게 넓은 화면 3장 · 중간 2장이 들어가고(아래 전체 공고 격자와 같은 수),
+ * 마지막 카드 오른쪽 선이 줄 끝과 맞아떨어져 화살표가 그 선에 걸친다. 4장이면 한 장이 280px 로 좁아져
+ * 아랫줄(자격 배지 · 고용형태 · 남은 날 · 찜)이 넘친다.
+ * 휴대폰은 다음 카드가 조금 보이게 85% 로 두어 옆으로 밀 수 있다는 것을 보인다. 사이 틈(gap-4 = 1rem)을 빼고 나눈다.
+ */
+const CARD_WIDTH = "w-[85%] sm:w-[calc((100%-1rem)/2)] lg:w-[calc((100%-2rem)/3)]";
 
 const EMPTY_MESSAGES: Record<string, string> = {
   EMPTY: "조건에 맞는 공고가 아직 없어요.",
@@ -72,30 +79,30 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
   const [loadingTabs, setLoadingTabs] = useState<Set<JobCurationTab>>(new Set());
 
   /*
-   * 가로 목록 좌우 끝을 흰색으로 흐린다. 카드가 뚝 잘려 보이는 대신 이어지는 느낌을 준다.
-   * 갈 곳이 있는 쪽만 켜야 한다. 양쪽을 늘 켜두면 더 볼 게 없는데도 잘린 것처럼 보인다.
+   * 카드 줄이 어느 쪽으로 더 넘어갈 수 있는지. 그쪽에만 화살표를 띄운다.
+   * (예전에는 이 기준으로 좌우 끝을 흐렸는데, 카드가 줄 폭에 딱 맞게 바뀌어 흐림은 걷었다 - 카드 선을 흐려 화살표가 떠 보였다.)
    */
   const rowRef = useRef<HTMLDivElement>(null);
   const [fade, setFade] = useState({ start: false, end: false });
+  /* 들어올 때 한 번: 카드 떠오르기 → 오른쪽 화살표 톡. 끝나면 표시를 떼어, 탭을 바꿀 때는 카드만 조금 빠르게 다시 떠오른다(globals.css .jc-rise). */
+  const [intro, setIntro] = useState(true);
+  useEffect(() => {
+    const id = setTimeout(() => setIntro(false), 2400);
+    return () => clearTimeout(id);
+  }, []);
 
   /*
-    카드 줄 높이 = 카드 + 가로 스크롤바가 차지하는 자리.
-    스크롤바는 넘칠 때만 생겨, 카드가 한 장뿐인 탭이 그만큼 낮아 탭을 옮길 때 판이 덜컹였다.
-    두께는 기기마다 다르다 - 데스크톱은 11px 남짓, 모바일은 화면 위에 겹쳐 떠서 0 이다.
-    같은 규격(scrollbar-on-hover)의 자를 하나 만들어 재 두고, 그만큼만 더 잡는다.
-    (scrollbar-gutter 는 세로 스크롤바에만 자리를 잡아줘 가로 줄에는 듣지 않는다.)
+    넓은 화면은 스크롤바 대신 좌우 화살표로 넘긴다. 호버해야 보이는 얇은 막대는 옆에 더 있는 줄 모르고 지나치기 쉽고 잡기도 어려웠다.
+    한 번에 보이는 카드 묶음(줄 폭 + 틈 16px)만큼 넘겨, 넘긴 뒤에도 카드 선이 줄 끝과 맞는다.
+    움직임 줄이기를 켠 분께는 바로 옮긴다. 휴대폰은 손가락으로 민다.
   */
-  const sectionRef = useRef<HTMLElement>(null);
-  useEffect(() => {
-    const probe = document.createElement("div");
-    probe.className = "scrollbar-on-hover";
-    probe.style.cssText = "position:absolute;visibility:hidden;overflow-x:scroll;width:100px;height:100px";
-    document.body.appendChild(probe);
-    const thickness = probe.offsetHeight - probe.clientHeight;
-    probe.remove();
-    /* 값은 상태가 아니라 CSS 변수로 흘린다. 그려진 판의 규격을 재서 판에 되돌려주는 일이다. */
-    sectionRef.current?.style.setProperty("--curation-row-h", `${CARD_HEIGHT_PX + thickness}px`);
-  }, []);
+  function scrollRow(direction: -1 | 1) {
+    const row = rowRef.current;
+    if (!row) return;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // clientWidth 에는 그림자 틈(양쪽 12px)이 들어 있어 빼고 센다.
+    row.scrollBy({ left: direction * (row.clientWidth - 24 + 16), behavior: reduce ? "auto" : "smooth" });
+  }
   const tabRowRef = useRef<HTMLDivElement>(null);
   const [tabFade, setTabFade] = useState({ start: false, end: false });
 
@@ -209,11 +216,12 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
 
   return (
     /*
-      하늘색 판을 깔아 아래 검색 결과 목록과 갈라 놓는다.
+      옅은 하늘색 판 위에 흰 카드를 놓아 아래 검색 결과 목록과 갈라 놓는다.
+      흰 판 위 회색 카드였을 때는 회색 바탕 화면에 묻혀 추천 상자인 줄 잘 안 보였다.
       배경은 반투명으로 두지 않는다. 좌우 페이드가 같은 색을 solid 로 깔아서
       반투명이면 페이드 자리에만 진한 띠가 남는다.
     */
-    <section ref={sectionRef} className="mb-8 rounded-2xl bg-brand-blue-50 p-5 pt-6 sm:p-6 sm:pt-8">
+    <section data-intro={intro ? "on" : undefined} className="mb-8 rounded-card bg-baro-blue-100 p-5 pt-6 sm:p-6 sm:pt-8">
       {/* "큐레이션"은 주 이용층인 중장년에게 낯선 말이라 우리말 문구로 쓴다. */}
       {/*
         제목 4px · 탭 8px · 안내 8px 로 왼쪽을 조금씩 들여 둔다.
@@ -221,10 +229,10 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         튀어나와 보인다. 제목은 글자가 굵어 더 튀므로 한 단계 덜 준다.
       */}
       <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 pl-1">
-        <h2 className="text-body-1 font-bold text-slate-900">이런 일자리 어때요?</h2>
+        <h2 className="text-title-3 font-bold text-slate-900">이런 일자리 어때요?</h2>
         {/* 비로그인에게는 지금 보는 것이 전부가 아니라는 것과, 무엇을 더 볼 수 있는지 알린다. */}
         {!isAuthenticated && (
-          <p className="text-label-1 text-slate-600">
+          <p className="text-body-3 font-medium break-keep text-slate-600">
             로그인하시면 내 조건에 맞는 맞춤 공고를 보여드려요.
           </p>
         )}
@@ -234,14 +242,14 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-brand-blue-50 to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-baro-blue-100 to-transparent transition-opacity",
             tabFade.start ? "opacity-100" : "opacity-0",
           )}
         />
         <div
           aria-hidden
           className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-brand-blue-50 to-transparent transition-opacity",
+            "pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-baro-blue-100 to-transparent transition-opacity",
             tabFade.end ? "opacity-100" : "opacity-0",
           )}
         />
@@ -258,18 +266,14 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             onFocus={() => prefetchTab(t.key)}
             className={cn(
               filterPillClass,
-              /*
-                그림문자의 글자 상자는 한글보다 높아서, 그냥 글 안에 두면 줄 높이를 늘려
-                글자가 위로 밀리고 아래쪽만 넓어 보인다. 칩을 flex 로 만들어 세로 가운데로 맞춘다.
-              */
-              "inline-flex items-center gap-1",
-              activeTab === t.key ? filterPillOnSolidClass : filterPillOffClass,
+              "flex items-center gap-1.5 whitespace-nowrap",
+              /* 고른 탭은 파란 알약, 나머지는 테두리 없는 흰 알약 (하늘색 판 위). */
+              activeTab === t.key
+                ? "border-baro-blue bg-baro-blue font-semibold text-white"
+                : "border-transparent bg-white font-semibold text-slate-700",
             )}
           >
-            {/* 그림문자는 읽어줄 것이 없다. 라벨이 이미 같은 말을 하므로 화면에서만 보이게 둔다. */}
-            <span aria-hidden className="leading-none">
-              {t.emoji}
-            </span>
+            <span aria-hidden>{t.emoji}</span>
             {t.label}
             </button>
           ))}
@@ -285,20 +289,20 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
         <div
           aria-busy="true"
           aria-label="불러오는 중"
-          className="flex min-h-[var(--curation-row-h,250px)] items-start gap-4 overflow-hidden"
+          className="flex min-h-[218px] items-start gap-4 overflow-hidden"
         >
           {[0, 1, 2, 3].map((i) => (
-            <div key={i} className={cn("w-80 shrink-0 animate-pulse rounded-xl border border-border bg-white/60", CARD_HEIGHT)} />
+            <div key={i} className={cn("shrink-0 animate-pulse rounded-card bg-white", CARD_WIDTH, CARD_HEIGHT)} />
           ))}
         </div>
       )}
 
       {current && current.items.length === 0 && (
         /* 카드 줄과 같은 높이로 세워, 빈 탭으로 옮겨도 판이 들썩이지 않게 한다. */
-        <div className="flex min-h-[var(--curation-row-h,250px)] items-start">
+        <div className="flex min-h-[218px] items-start">
           <div
             className={cn(
-              "flex w-full flex-col items-center justify-center gap-3 rounded-xl bg-white/70 px-6 text-center text-label-1 text-slate-500",
+              "flex w-full flex-col items-center justify-center gap-3 rounded-card bg-white px-6 text-center text-body-3 font-medium break-keep text-slate-600",
               CARD_HEIGHT,
             )}
           >
@@ -312,7 +316,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             {current.state === "NEEDS_ASSESSMENT" && (
               <Link
                 href="/assessment?start=1"
-                className="rounded-lg bg-brand-blue-400 px-4 py-2 text-label-1 font-semibold text-white hover:bg-brand-blue-600"
+                className="flex h-12 items-center rounded-xl bg-brand-blue-400 px-5 text-body-2 font-semibold text-white"
               >
                 직업진단 시작하기
               </Link>
@@ -320,7 +324,7 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
             {current.state === "NEEDS_PROFILE" && (
               <Link
                 href="/mypage/profile"
-                className="rounded-lg border border-border bg-white px-4 py-2 text-label-1 font-semibold text-slate-700 hover:bg-slate-50"
+                className="flex h-12 items-center rounded-xl bg-baro-blue-50 px-5 text-body-2 font-semibold text-slate-800"
               >
                 희망직무 설정하기
               </Link>
@@ -330,40 +334,49 @@ export function JobCurationSection({ initialActive, bookmarkedIds, isAuthenticat
       )}
 
       {current && current.items.length > 0 && (
-        /* 높이는 바깥 칸이 잡는다. 안쪽 스크롤 줄에 걸면 카드까지 늘어나, 스크롤바가 없는
-           탭에서만 카드가 11px 더 길어진다. */
-        <div className="relative min-h-[var(--curation-row-h,250px)]">
-        {/* 페이드는 스크롤을 가리면 안 되므로 클릭·스크롤을 통과시킨다. */}
-        <div
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-y-0 left-0 z-10 w-12 bg-gradient-to-r from-brand-blue-50 to-transparent transition-opacity",
-            fade.start ? "opacity-100" : "opacity-0",
-          )}
-        />
-        <div
-          aria-hidden
-          className={cn(
-            "pointer-events-none absolute inset-y-0 right-0 z-10 w-12 bg-gradient-to-l from-brand-blue-50 to-transparent transition-opacity",
-            fade.end ? "opacity-100" : "opacity-0",
-          )}
-        />
+        /* 높이는 바깥 칸이 잡는다(빈 상태 · 자리지킴 카드와 같은 높이). */
+        <div className="relative min-h-[218px]">
         {/*
-          스크롤바는 넓은 화면에서 밀리는 줄임을 알려주는 표시라 남긴다(호버하면 드러난다).
-          스크롤바가 차지하는 자리가 곧 카드 아래 여백이라 padding 은 주지 않는다.
+          좌우 화살표. 넘길 것이 남은 쪽에만 띄운다. 넓은 화면만 - 휴대폰은 손가락으로 민다.
+          지름 40px 의 한가운데가 줄 끝(= 카드 선)에 오도록 -left-5 · -right-5 로 반쯤 걸친다.
+          남은 쪽이 없으면 안 보이게만 하지 않고 지워서, 키보드 이동에서도 빠지게 한다.
         */}
+        {fade.start && (
+          <button
+            type="button"
+            onClick={() => scrollRow(-1)}
+            aria-label="이전 공고 보기"
+            className="absolute top-1/2 -left-5 z-20 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-800 shadow-[0_4px_12px_rgba(15,40,90,0.16)] sm:flex"
+          >
+            <ChevronLeft aria-hidden className="size-5" strokeWidth={2.4} />
+          </button>
+        )}
+        {fade.end && (
+          <button
+            type="button"
+            onClick={() => scrollRow(1)}
+            aria-label="다음 공고 보기"
+            className="jc-nudge absolute top-1/2 -right-5 z-20 hidden size-10 -translate-y-1/2 items-center justify-center rounded-full bg-white text-slate-800 shadow-[0_4px_12px_rgba(15,40,90,0.16)] sm:flex"
+          >
+            <ChevronRight aria-hidden className="size-5" strokeWidth={2.4} />
+          </button>
+        )}
+        {/* 스크롤바는 화살표가 대신하므로 숨긴다. 스크롤바 자리가 없어져 카드 아래 여백도 판 여백 그대로다. */}
         <div
           ref={rowRef}
           onScroll={syncFade}
-          className="scrollbar-on-hover flex gap-4 overflow-x-auto"
+          /* 가로로 넘기는 줄은 위아래도 잘라 내어, 카드에 마우스를 올릴 때 그림자가 잘렸다. 둘레에 12px 틈을 두고 그만큼 바깥으로 당긴다(넘겨 멈추는 자리도 12px 안쪽). */
+          className="scrollbar-hidden -m-3 flex snap-x snap-mandatory scroll-px-3 gap-4 overflow-x-auto p-3"
         >
-          {current.items.map((item) => {
+          {current.items.map((item, i) => {
             return (
               <div
-                key={item.job.id}
+                /* 탭마다 새로 그려 카드가 다시 떠오르게 한다 - 두 탭에 같은 공고가 있어도 그대로 남지 않게 탭 이름을 붙인다. */
+                key={`${activeTab}-${item.job.id}`}
+                style={{ ["--jc-i" as string]: Math.min(i, 3) }}
                 /* 한 장뿐인 탭에서는 옆에 늘어날 카드가 없어 내용 높이로 주저앉는다.
                    탭을 옮길 때마다 띠 높이가 널뛰지 않게 여기서도 최소 높이를 준다. */
-                className={cn("w-80 shrink-0", CARD_HEIGHT)}
+                className={cn("jc-rise shrink-0 snap-start", CARD_WIDTH, CARD_HEIGHT)}
                 onClickCapture={(e) => {
                   const t = e.target as HTMLElement;
                   if (t.closest("button")) return;

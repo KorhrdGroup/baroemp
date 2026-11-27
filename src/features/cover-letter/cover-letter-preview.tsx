@@ -38,16 +38,16 @@ export function CoverLetterPreview({
 
       {ordered.map((section) => (
         <div key={section.id} className="mb-8">
-          <h2 className="mb-3 border-b border-slate-300 pb-1.5 text-body-2 font-bold tracking-wide text-slate-900">
+          <h2 className="mb-3 border-b border-slate-300 pb-1.5 text-body-2 font-semibold tracking-wide text-slate-900">
             {questionHeading(section.questionType, section.question)}
           </h2>
           {section.content?.trim() ? (
             /* 문단 사이를 살려야 읽힌다. 답변은 줄바꿈을 그대로 두고 줄간격만 넉넉히 준다. */
-            <p className="text-label-1 leading-relaxed whitespace-pre-wrap text-slate-700">
+            <p className="text-body-3 leading-relaxed font-medium whitespace-pre-wrap text-slate-700">
               {section.content}
             </p>
           ) : (
-            <p className="text-label-1 text-slate-400">아직 작성하지 않은 문항입니다.</p>
+            <p className="text-body-3 font-medium text-slate-600">아직 작성하지 않은 문항입니다.</p>
           )}
         </div>
       ))}

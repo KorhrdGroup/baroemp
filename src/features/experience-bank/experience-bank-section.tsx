@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Plus } from "lucide-react";
+import { ChevronRight, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ExperienceBankItem } from "@/types";
 import { cn } from "@/lib/utils";
-import { interactiveCardClass, sectionCountClass } from "@/lib/ui-classes";
+import { sectionCountClass } from "@/lib/ui-classes";
 import { DocumentMenu } from "@/components/common/document-menu";
 import { ExperienceFormDialog } from "./experience-form-dialog";
 import { deleteExperienceBankItemAction } from "./experience-bank-actions";
@@ -47,16 +47,16 @@ export function ExperienceBankSection({
     // sticky 헤더에 제목이 가리지 않도록 scroll-mt를 준다.
     <div
       id="experience-bank"
-      className={cn("scroll-mt-24", nested ? "mt-4 rounded-xl bg-slate-50 p-5" : "mt-10")}
+      className={cn("scroll-mt-24", nested ? "mt-4 rounded-card bg-white p-5" : "mt-10")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="min-w-0">
           {/* 안에 들여 넣을 때도 한 단계만 낮춘다. 두 단계를 내리면 설명글이 각주처럼 작아진다. */}
-          <h2 className={cn("font-bold text-slate-900", nested ? "text-body-2" : "text-body-1")}>
+          <h2 className={cn("font-semibold text-slate-900", nested ? "text-body-2" : "text-body-1")}>
             내 경험뱅크<span className={sectionCountClass}>{items.length}</span>
           </h2>
           {nested && (
-            <p className="mt-1 text-label-1 text-slate-500">
+            <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">
               여기 저장해둔 경험은 자기소개서 문항을 쓸 때 그대로 불러와 쓸 수 있어요.
             </p>
           )}
@@ -68,7 +68,7 @@ export function ExperienceBankSection({
         <Button
           variant="outline"
           size={nested ? "sm" : "default"}
-          className="text-slate-600"
+          className="rounded-xl border-slate-300 bg-white text-body-3 font-semibold text-slate-800"
           onClick={openCreate}
         >
           <Plus className="size-4" /> 내 경험 추가하기
@@ -76,17 +76,18 @@ export function ExperienceBankSection({
       </div>
 
       {items.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-border bg-white p-8 text-center">
-          <p className="text-label-1 text-slate-500">
+        <div className="mt-4 rounded-xl bg-gov-surface p-8 text-center">
+          <p className="text-body-3 font-medium break-keep text-slate-600">
             아직 저장한 경험이 없어요. 미리 정리해두면 자기소개서 문항마다 골라 쓸 수 있어요.
           </p>
           {/* 다른 섹션의 빈 상태 CTA와 같은 텍스트 링크 형태. 이동이 아니라 모달을 열어야 해서 button이다. */}
           <button
             type="button"
             onClick={openCreate}
-            className="mt-3 inline-block cursor-pointer text-label-1 font-semibold text-brand-blue-600 hover:underline"
+            className="mt-3 inline-flex cursor-pointer items-center gap-0.5 text-body-3 font-semibold text-brand-blue-600"
           >
-            경험 추가하기 →
+            경험 추가하기
+            <ChevronRight aria-hidden className="size-4" />
           </button>
         </div>
       ) : (
@@ -95,8 +96,8 @@ export function ExperienceBankSection({
             <div
               key={item.id}
               className={cn(
-                "relative flex items-center justify-between gap-3 rounded-xl border border-border bg-white p-5",
-                interactiveCardClass,
+                // 흰 카드 안의 회색 면 (테두리 · 호버 없이 - /draft3 구성).
+                "relative flex items-center justify-between gap-3 rounded-xl bg-gov-surface p-5",
               )}
             >
               {/*
@@ -112,9 +113,9 @@ export function ExperienceBankSection({
               />
               <div className="pointer-events-none relative min-w-0">
                 <p className="truncate text-body-2 font-semibold text-slate-900">{item.title}</p>
-                <p className="mt-1 text-label-1 text-slate-400">
+                <p className="mt-1 text-body-3 font-medium text-slate-600">
                   {item.skills.length > 0 ? `${item.skills.slice(0, 3).join(" · ")} · ` : ""}
-                  최근수정 {new Date(item.updatedAt).toLocaleDateString("ko-KR")}
+                  {new Date(item.updatedAt).toLocaleDateString("ko-KR")} 수정
                 </p>
               </div>
               {/* 이력서·자기소개서 목록과 같은 더보기 메뉴. 되돌릴 수 없는 삭제를 한 겹 안에 둔다. */}

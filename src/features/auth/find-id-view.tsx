@@ -32,7 +32,7 @@ export function FindIdView() {
     const res = await findIdAction({ name, phone, verificationId });
     setPending(false);
     if (!res.ok || !res.maskedEmail) {
-      setError(res.error ?? "일치하는 회원 정보를 찾을 수 없습니다.");
+      setError(res.error ?? "일치하는 회원 정보를 찾지 못했어요.");
       return;
     }
     setResult({ maskedEmail: res.maskedEmail, joinedAt: res.joinedAt ?? "" });
@@ -40,7 +40,7 @@ export function FindIdView() {
 
   return (
     <AuthShell>
-      <PageTitle title="아이디 찾기" desc="가입 시 등록한 휴대전화번호로 확인합니다." />
+      <PageTitle title="아이디 찾기" desc="가입할 때 등록한 휴대전화번호로 확인해요." />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
@@ -70,10 +70,10 @@ export function FindIdView() {
       </form>
 
       {result ? (
-        <div className="mt-[22px] rounded-xl bg-slate-100 px-5 py-[18px]">
-          <div className="mb-2 text-[12.5px] text-slate-500">확인된 아이디</div>
-          <div className="text-[16.5px] font-bold tracking-[-0.01em] text-[#1c1a17]">{result.maskedEmail}</div>
-          <div className="mt-1.5 text-[12.5px] text-slate-500">{result.joinedAt} 가입</div>
+        <div className="mt-[22px] rounded-xl bg-baro-blue-50 px-5 py-[18px]">
+          <div className="mb-2 text-body-3 font-medium text-slate-600">확인된 아이디</div>
+          <div className="text-body-1 font-semibold tracking-[-0.01em] break-all text-slate-900">{result.maskedEmail}</div>
+          <div className="mt-1.5 text-body-3 font-medium text-slate-600">{result.joinedAt} 가입</div>
         </div>
       ) : null}
 

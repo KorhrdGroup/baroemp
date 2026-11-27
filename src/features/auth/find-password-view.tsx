@@ -45,7 +45,7 @@ export function FindPasswordView() {
     });
     setPending(false);
     if (!res.ok) {
-      setError(res.error ?? "비밀번호 변경에 실패했습니다.");
+      setError(res.error ?? "비밀번호를 바꾸지 못했어요. 다시 시도해 주세요.");
       return;
     }
     setDone(true);
@@ -55,8 +55,8 @@ export function FindPasswordView() {
     return (
       <AuthShell>
         <PageTitle title="비밀번호 변경 완료" desc="새 비밀번호로 로그인해주세요." />
-        <div className="rounded-xl border border-slate-200 bg-white px-5 py-[18px] text-[14px] text-[#1c1a17]">
-          비밀번호가 변경되었습니다.
+        <div className="rounded-xl bg-baro-blue-50 px-5 py-[18px] text-body-3 font-medium break-keep text-slate-900">
+          비밀번호를 바꿨어요.
         </div>
         <BottomLinks items={[{ label: "로그인", href: "/login", strong: true }]} />
       </AuthShell>
@@ -65,7 +65,7 @@ export function FindPasswordView() {
 
   return (
     <AuthShell>
-      <PageTitle title="비밀번호 찾기" desc="아이디와 휴대전화 인증 후 새 비밀번호를 설정합니다." />
+      <PageTitle title="비밀번호 찾기" desc="아이디와 휴대전화를 인증한 뒤 새 비밀번호를 정해요." />
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div>
@@ -117,7 +117,7 @@ export function FindPasswordView() {
           />
           {pw2.length > 0 ? (
             <HelpText tone={pwMatch ? "ok" : "error"}>
-              {pwMatch ? "비밀번호가 일치합니다" : "비밀번호가 일치하지 않습니다"}
+              {pwMatch ? "비밀번호가 일치해요" : "비밀번호가 일치하지 않아요"}
             </HelpText>
           ) : null}
         </div>

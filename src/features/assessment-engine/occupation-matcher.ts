@@ -9,18 +9,18 @@ import { isPreferredQualification, NO_REQUIRED_QUALIFICATION_RISK } from "@/lib/
 import { getDimensionScore } from "./dimension-scorer";
 
 const DIMENSION_REASON_TEMPLATES: Record<string, string> = {
-  people_interaction: "사람을 상대하는 업무 선호가 높습니다.",
-  care_orientation: "복지·돌봄 업무 수용도가 높습니다.",
-  administrative_skill: "문서/행정 업무 처리 능력이 준비되어 있습니다.",
-  physical_activity: "신체활동이 필요한 업무에 적합한 편입니다.",
-  driving: "운전이 가능해 이동이 필요한 업무에 유리합니다.",
-  computer_skill: "컴퓨터 활용 능력이 준비되어 있습니다.",
-  stress_response: "예상치 못한 상황 대응에 자신감이 있습니다.",
-  teamwork: "협업이 필요한 업무 환경에 잘 맞습니다.",
-  schedule_flexibility: "근무시간에 대한 유연성이 높습니다.",
-  education_willingness: "자격 취득·교육 의향이 높아 진입 가능성이 있습니다.",
-  teaching_orientation: "아이·청소년을 가르치고 지도하는 일에 잘 맞습니다.",
-  aesthetic_skill: "손재주와 미적 감각을 살리는 업무에 강점이 있습니다.",
+  people_interaction: "사람을 상대하는 업무 선호가 높아요.",
+  care_orientation: "복지·돌봄 업무 수용도가 높아요.",
+  administrative_skill: "문서/행정 업무 처리 능력이 준비되어 있어요.",
+  physical_activity: "신체활동이 필요한 업무에 적합한 편이에요.",
+  driving: "운전이 가능해 이동이 필요한 업무에 유리해요.",
+  computer_skill: "컴퓨터 활용 능력이 준비되어 있어요.",
+  stress_response: "예상치 못한 상황 대응에 자신감이 있어요.",
+  teamwork: "협업이 필요한 업무 환경에 잘 맞아요.",
+  schedule_flexibility: "근무시간에 대한 유연성이 높아요.",
+  education_willingness: "자격 취득·교육 의향이 높아 진입 가능성이 있어요.",
+  teaching_orientation: "아이·청소년을 가르치고 지도하는 일에 잘 맞아요.",
+  aesthetic_skill: "손재주와 미적 감각을 살리는 업무에 강점이 있어요.",
 };
 
 const DIMENSION_LABELS: Record<string, string> = {
@@ -172,12 +172,12 @@ export function matchOccupations(input: OccupationMatchInput, limit = 5): Occupa
       }
     }
     if (hasRequiredQualification && occupation.requiredQualifications.length > 0) {
-      reasons.push("필요한 자격을 이미 보유하고 있습니다.");
+      reasons.push("필요한 자격을 이미 갖고 있어요.");
     } else if (educationScore >= 70 && occupation.requiredQualifications.length > 0) {
-      reasons.push("자격 취득 의향이 높아 진입 가능성이 있습니다.");
+      reasons.push("자격 취득 의향이 높아 진입 가능성이 있어요.");
     }
     if (reasons.length === 0) {
-      reasons.push("전반적인 성향과 근무조건이 이 직업과 무난하게 맞는 편입니다.");
+      reasons.push("전반적인 성향과 근무조건이 이 직업과 무난하게 맞는 편이에요.");
     }
 
     const risks: string[] = [];
@@ -196,7 +196,7 @@ export function matchOccupations(input: OccupationMatchInput, limit = 5): Occupa
     }
     for (const dimension of weakRequiredDimensions) {
       const label = DIMENSION_LABELS[dimension];
-      if (label) risks.push(`${label} 보완이 필요할 수 있습니다.`);
+      if (label) risks.push(`${label} 보완이 필요할 수 있어요.`);
     }
 
     const missingConditions = occupation.requiredQualifications.filter(

@@ -37,10 +37,10 @@ export function ConfirmDialog({
 }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="draft3-theme rounded-card sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+          <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">{title}</DialogTitle>
+          <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">{description}</DialogDescription>
         </DialogHeader>
         {/*
           공용 DialogFooter 의 회색 띠(bg-muted/50 + 위 테두리)를 걷어낸다.
@@ -52,14 +52,14 @@ export function ConfirmDialog({
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={pending}
-            className="min-w-24"
+            className="h-12 min-w-24 rounded-xl border-slate-300 bg-white text-body-2 font-semibold text-slate-800"
           >
             취소
           </Button>
           <Button
             onClick={onConfirm}
             disabled={pending}
-            className="min-w-24 bg-destructive text-white hover:bg-destructive/90 active:bg-destructive/80"
+            className="h-12 min-w-24 rounded-xl bg-destructive text-body-2 font-semibold text-white hover:bg-destructive/90 active:bg-destructive/80"
           >
             {pending ? <Loader2 className="animate-spin" /> : confirmLabel}
           </Button>

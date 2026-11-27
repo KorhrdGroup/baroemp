@@ -18,7 +18,8 @@ function mapRow(row: Record<string, unknown>): MatchResult {
     reasons: (row.reason as MatchResult["reasons"]) ?? [],
     detail: (row.detail as MatchResult["detail"]) ?? undefined,
     engineVersion: (row.engine_version as string | null) ?? undefined,
-    computedAt: String(row.created_at),
+    // 다시 진단하면 같은 행을 갱신하므로(create 참고) 계산 시각은 updated_at 이다. mock 저장소도 갱신 때 computedAt 을 바꾼다.
+    computedAt: String(row.updated_at ?? row.created_at),
   };
 }
 

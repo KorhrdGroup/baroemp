@@ -7,8 +7,10 @@ import {
   ArrowLeft,
   ArrowUp,
   Check,
+  ChevronRight,
   Eye,
   Loader2,
+  Pencil,
   Plus,
   Printer,
   Repeat2,
@@ -16,16 +18,14 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { CoverLetterPreview } from "./cover-letter-preview";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AiButton } from "@/components/common/ai-button";
 import { MarketComparisonCard } from "@/features/career-gap/market-comparison-card";
 import { cn } from "@/lib/utils";
+import { TitleField } from "@/components/common/title-field";
 import type { CoverLetterDetail, CoverLetterSectionInput, ExperienceBankItem, ResumeMarketComparisonView } from "@/types";
 import type { QuestionCatalogEntry } from "@/lib/cover-letter/questions";
 import { questionHeading } from "@/lib/cover-letter/questions";
@@ -79,7 +79,9 @@ export function CoverLetterEditor({
   const [detail, setDetail] = useState(initialDetail);
   const [title, setTitle] = useState(initialDetail.coverLetter.title);
   const [sections, setSections] = useState<EditableSection[]>(
-    initialDetail.sections.map((s) => ({ ...s, _key: nextKey() })),
+    // 처음 받은 문항은 순서로 키를 정한다. 모듈 카운터는 서버에서 요청마다 계속 올라가
+    // 브라우저와 값이 어긋나고, 그게 data-strip-key 속성 불일치(hydration 경고)를 낸다.
+    initialDetail.sections.map((s, i) => ({ ...s, _key: `cl-section-init-${i}` })),
   );
   /** 한 번에 한 문항만 보여준다. 다섯 문항이 한 화면에 늘어서면 어디부터 쓸지 정하다 지친다. */
   const [activeKey, setActiveKey] = useState<string | null>(null);
@@ -300,13 +302,62 @@ export function CoverLetterEditor({
   return (
     <>
     {/* 인쇄 시 편집 화면은 display:none. 눈에만 숨기면(visibility) 높이가 남아 PDF가 빈 장으로 늘어난다. */}
-    <div className="space-y-4 print:hidden">
+    <div className="print:hidden">
+      {/*
+        화면 머리. 이력서 편집과 같다 - 다른 화면(PageHead)과 같은 자리에 위치와 큰 제목을 두고,
+        제목은 그 자리에서 바로 고친다. 오른쪽은 저장 상태와 공고 연결 여부.
+      */}
+      <div className="border-b border-border bg-white">
+        <div className="mx-auto max-w-7xl px-4.5 pt-6 pb-7 sm:pt-8 lg:px-8">
+          <nav aria-label="현재 위치">
+            <ol className="flex flex-wrap items-center gap-1 text-body-3 font-medium text-slate-600">
+              <li><Link href="/">홈</Link></li>
+              <li className="flex items-center gap-1">
+                <ChevronRight aria-hidden className="size-3.5 text-slate-500" />
+                <Link href="/resume#cover-letters">자기소개서</Link>
+              </li>
+              <li className="flex items-center gap-1">
+                <ChevronRight aria-hidden className="size-3.5 text-slate-500" />
+                <span aria-current="page" className="text-slate-900">편집</span>
+              </li>
+            </ol>
+          </nav>
+          <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <label className="min-w-0 flex-1">
+              <span className="sr-only">자기소개서 이름</span>
+              <TitleField
+                placeholder="제목을 입력해주세요"
+                value={title}
+                onChange={setTitle}
+                className="w-full max-w-3xl border-0 bg-transparent px-0 py-1 text-title-1 font-extrabold tracking-[-0.02em] text-slate-900 outline-none placeholder:text-slate-400 sm:text-headline-3"
+              />
+              {/* 밑줄로 고칠 수 있는 칸이라는 것을 알린다. 누르고 있을 때만 파랑. */}
+              <span aria-hidden className="mt-1 block h-0.5 max-w-3xl rounded-full bg-slate-200 [label:focus-within_&]:bg-baro-blue" />
+            </label>
+            <div className="flex shrink-0 flex-wrap items-center gap-2">
+              {detail.coverLetter.targetJobId && (
+                <span className="rounded-full bg-baro-blue-50 px-3 py-1.5 text-body-3 font-semibold text-baro-blue-600">지원공고 연결됨</span>
+              )}
+              <span
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full px-3 py-1.5 text-body-3 font-semibold",
+                  isDirty ? "bg-amber-50 text-amber-800" : "bg-emerald-50 text-emerald-700",
+                )}
+              >
+                {isDirty ? <Pencil className="size-3.5" /> : <Check className="size-4" strokeWidth={2.6} />}
+                {isDirty ? "저장하지 않은 내용이 있어요" : "저장됨"}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/*
         좁은 화면용 문항 띠. 문항 목록 상자는 위로 올라가 본문을 쓰는 동안 사라져,
-        다음 문항으로 건너갈 길이 없었다. 이력서 편집과 같은 자리(헤더 밑)에 붙인다.
+        다음 문항으로 건너갈 길이 없었다. 이력서 편집과 같은 자리(화면 맨 위)에 붙인다.
         본문은 한 문항씩 갈아끼우는 방식이라 누르면 그 문항으로 바뀐다.
       */}
-      <div className="scrollbar-hidden sticky top-16 z-30 -mx-4.5 -mt-10 mb-2 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur lg:hidden">
+      <div className="scrollbar-hidden sticky top-0 z-30 flex items-center gap-1 overflow-x-auto border-b border-border bg-white/95 px-4.5 py-2 backdrop-blur lg:hidden">
         {sections.map((section, idx) => {
           const written = Boolean(section.content?.trim());
           const isActive = section._key === active?._key;
@@ -317,14 +368,14 @@ export function CoverLetterEditor({
               data-strip-key={section._key}
               onClick={() => setActiveKey(section._key)}
               className={cn(
-                "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-label-1 whitespace-nowrap transition-colors",
-                isActive ? "bg-brand-blue-50 font-semibold text-brand-blue-600" : "font-medium text-slate-500",
+                "flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-body-3 whitespace-nowrap",
+                isActive ? "bg-brand-blue-50 font-semibold text-baro-blue-600" : "font-medium text-slate-600",
               )}
             >
               {written ? (
                 <Check className="size-3.5 text-brand-blue-600" />
               ) : (
-                <span className="text-label-2 font-bold text-slate-400">{idx + 1}</span>
+                <span className="text-caption-1 font-semibold text-slate-600">{idx + 1}</span>
               )}
               {questionHeading(section.questionType, section.question)}
             </button>
@@ -334,33 +385,57 @@ export function CoverLetterEditor({
           type="button"
           onClick={addSection}
           aria-label="문항 추가"
-          className="flex shrink-0 items-center rounded-lg border border-border p-2 text-slate-500"
+          className="flex shrink-0 items-center rounded-xl border border-slate-300 bg-white p-2.5 text-slate-700"
         >
           <Plus className="size-4" />
         </button>
       </div>
 
-      <div className="flex flex-wrap items-end justify-between gap-3 rounded-xl bg-white p-4">
-        <div className="min-w-48 flex-1">
-          <Label className="text-label-2 text-slate-400">자기소개서 이름</Label>
-          <Input
-            placeholder="제목을 입력해주세요"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            className="mt-1 h-10 bg-white"
-          />
-        </div>
-        {detail.coverLetter.targetJobId && <Badge variant="outline">지원공고 연결됨</Badge>}
-      </div>
-
       {/*
-        왼쪽은 문항 목록, 오른쪽은 지금 쓰는 문항 하나.
-        좁은 화면에서는 목록이 위로 올라가 가로로 눕는다.
+        이력서 편집 · 공고 상세와 같은 두 칸: 왼쪽 넓은 칸에 지금 쓰는 문항, 오른쪽 22.5rem 에 따라 내려오는 요약 카드.
+        요약 카드는 채운 문항 → 단추(미리보기 · 저장) → 문항 목록 차례. 좁은 화면은 위 띠 · 아래 고정 줄이 같은 일을 해 감춘다.
       */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-        <nav className="hidden rounded-xl bg-white p-3 lg:sticky lg:top-24 lg:block lg:w-60 lg:shrink-0">
-          <p className="px-2 pb-2 text-label-2 font-semibold text-slate-400">문항 {sections.length}개</p>
-          <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:overflow-visible">
+      <div className="mx-auto max-w-7xl px-4.5 pt-8 pb-28 lg:grid lg:grid-cols-[minmax(0,1fr)_22.5rem] lg:items-start lg:gap-8 lg:px-8 lg:pb-20">
+        <aside className="hidden rounded-card bg-white p-5 lg:sticky lg:top-24 lg:col-start-2 lg:row-start-1 lg:block">
+          <div className="flex items-baseline justify-between gap-2">
+            <p className="text-body-2 font-semibold text-slate-900">채운 문항</p>
+            <p className="text-title-3 font-bold text-baro-blue-600">
+              {writtenCount} / {sections.length}
+            </p>
+          </div>
+          <Progress value={writtenRatio} className="mt-2 h-2" />
+          <p className="mt-2 text-body-3 font-medium break-keep text-slate-600">
+            {firstEmptyIndex >= 0
+              ? `다음은 ${questionHeading(sections[firstEmptyIndex].questionType, sections[firstEmptyIndex].question)} 차례예요.`
+              : "모든 문항을 채웠어요!"}
+          </p>
+
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              className="h-12 rounded-xl border-slate-300 bg-white text-body-2 font-semibold text-slate-800"
+              onClick={() => setPreviewOpen(true)}
+            >
+              <Eye className="size-4" /> 미리보기
+            </Button>
+            <Button
+              className="h-12 rounded-xl bg-baro-navy text-body-2 font-semibold text-white"
+              onClick={() => void handleSave()}
+              disabled={isSaving || !isDirty}
+            >
+              {isSaving && <Loader2 className="size-4 animate-spin" />}
+              {isSaving || isDirty ? "저장" : "저장됨"}
+            </Button>
+          </div>
+          {saveMessage && <p className="mt-2 text-center text-caption-1 font-medium text-slate-600">{saveMessage}</p>}
+          <Link href="/resume" className="mt-1 flex h-11 items-center justify-center gap-1.5 text-body-3 font-semibold text-slate-600">
+            <ArrowLeft className="size-4" />
+            목록으로
+          </Link>
+
+          <div className="mt-3 border-t border-border pt-4">
+          <p className="px-1 pb-2 text-caption-1 font-semibold text-slate-600">문항 {sections.length}개</p>
+          <ul className="flex gap-2 overflow-x-auto lg:flex-col lg:gap-1 lg:overflow-visible">
             {sections.map((section, idx) => {
               const written = Boolean(section.content?.trim());
               const isActive = section._key === active?._key;
@@ -372,18 +447,18 @@ export function CoverLetterEditor({
                     aria-current={isActive}
                     className={cn(
                       // 좁은 화면에서는 가로로 눕는 줄이라, 이름이 길면 한 칸이 화면을 다 먹는다.
-                      "flex w-full max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-label-1 transition-colors lg:max-w-none",
-                      isActive ? "bg-brand-blue-50 font-semibold text-brand-blue-700" : "text-slate-600 hover:bg-slate-50",
+                      "flex w-full max-w-36 cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-left text-body-3 lg:max-w-none lg:gap-3 lg:rounded-xl lg:px-3 lg:py-3",
+                      isActive ? "bg-baro-blue-50 font-semibold text-baro-blue-600" : "font-semibold text-slate-800",
                     )}
                   >
                     <span
                       className={cn(
-                        "flex size-6 shrink-0 items-center justify-center rounded-full text-label-2 font-bold",
+                        "flex size-6 shrink-0 items-center justify-center rounded-full text-caption-1 font-semibold",
                         written
                           ? "bg-brand-blue-600 text-white"
                           : isActive
-                            ? "bg-white text-brand-blue-700 ring-1 ring-brand-blue-200"
-                            : "bg-slate-100 text-slate-400",
+                            ? "bg-white text-brand-blue-700"
+                            : "bg-slate-100 text-slate-600",
                       )}
                     >
                       {written ? <Check className="size-3.5" /> : idx + 1}
@@ -394,18 +469,23 @@ export function CoverLetterEditor({
               );
             })}
           </ul>
-          <Button variant="ghost" size="sm" className="mt-2 w-full justify-start text-slate-600" onClick={addSection}>
+          <Button
+            variant="outline"
+            className="mt-3 h-12 w-full rounded-xl border-slate-300 bg-white text-body-3 font-semibold text-slate-700"
+            onClick={addSection}
+          >
             <Plus className="size-4" /> 문항 추가
           </Button>
-        </nav>
+          </div>
+        </aside>
 
-        <div className="min-w-0 flex-1 space-y-4">
+        <div className="min-w-0 space-y-4 lg:col-start-1 lg:row-start-1">
           {active && (
-            <div className="rounded-xl bg-white p-5">
+            <div className="rounded-card bg-white p-5 sm:p-6">
               <div className="flex items-center justify-between gap-2">
-                <p className="text-label-2 font-semibold text-slate-400">문항 {activeIndex + 1}</p>
+                <p className="text-caption-1 font-semibold text-slate-600">문항 {activeIndex + 1}</p>
                 <div className="flex items-center gap-1">
-                  <Button variant="ghost" size="sm" className="text-slate-500" onClick={() => setSwapOpen(true)}>
+                  <Button variant="ghost" size="sm" className="text-slate-600" onClick={() => setSwapOpen(true)}>
                     <Repeat2 className="size-3.5" /> 문항 바꾸기
                   </Button>
                   <Button
@@ -455,25 +535,26 @@ export function CoverLetterEditor({
               {/*
                 Textarea 는 field-sizing-content 라 rows 를 무시하고 내용만큼만 커진다.
                 빈 칸이 두 줄짜리로 보이면 한 문단 쓰는 자리로 안 읽혀서 최소 높이를 직접 준다.
-                글자도 기본값(md:text-label-1, 14px)이면 길게 쓰는 칸치고 작아 16px로 올린다.
+                글자도 기본값(md:text-label-1, 14px)이면 길게 쓰는 칸치고 작아, 좁은 화면 16px · 넓은 화면 18px, 줄 간격 1.7로 둔다.
               */}
               <Textarea
-                className="mt-2 min-h-80 bg-white text-body-2 leading-relaxed md:text-body-2"
+                className="mt-2 min-h-80 border-slate-300 bg-white text-body-2 leading-[1.7] font-medium md:text-body-1 md:leading-[1.7]"
                 value={active.content ?? ""}
                 onChange={(e) => updateSection(active._key, { content: e.target.value })}
                 placeholder="이 질문에 대한 답변을 작성해주세요."
               />
-              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-label-2 text-slate-400">
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-caption-1 font-medium text-slate-600">
                 <span>
                   {active.content?.length ?? 0}
                   {active.characterLimit ? ` / ${active.characterLimit}자` : "자"}
                 </span>
                 <div className="flex gap-2">
-                  <AiButton size="xs" onClick={() => handleGenerateDraft(active)} loading={busyKey === active._key}>
+                  <AiButton size="xs" className="h-10 rounded-lg px-3 text-body-3" onClick={() => handleGenerateDraft(active)} loading={busyKey === active._key}>
                     AI 초안 만들기
                   </AiButton>
                   <AiButton
                     size="xs"
+                    className="h-10 rounded-lg px-3 text-body-3"
                     onClick={() => handleReviewSection(active)}
                     loading={busyKey === `review-${active._key}`}
                     /* 다듬을 글이 없으면 누를 수 없다. 빈 칸에서 눌러도 할 일이 없다. */
@@ -485,13 +566,13 @@ export function CoverLetterEditor({
               </div>
 
               {suggestion && (
-                <div className="mt-3 rounded-lg bg-brand-blue-50 p-3 text-label-1">
+                <div className="mt-3 rounded-lg bg-brand-blue-50 p-3 text-body-3 font-medium">
                   {suggestion.text && (
                     <>
                       <p className="whitespace-pre-line text-slate-700">{suggestion.text}</p>
                       <Button
                         size="sm"
-                        className="mt-2"
+                        className="mt-2 bg-atomic-blue-600 font-semibold text-white"
                         onClick={() => {
                           updateSection(active._key, { content: suggestion.text });
                           setSuggestions((prev) => {
@@ -522,21 +603,22 @@ export function CoverLetterEditor({
             이 문항에 안 맞는 것만 빼게 한다. 매번 고르게 하면 초안 한 번 받기까지 손이 많이 간다.
           */}
           {active && (
-            <div className="rounded-xl bg-white p-5">
+            <div className="rounded-card bg-white p-5 sm:p-6">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div>
-                  <p className="text-label-1 font-semibold text-slate-900">이 문항에 쓸 내 경험</p>
-                  <p className="mt-0.5 text-label-2 text-slate-500">
+                  <p className="text-body-3 font-semibold text-slate-900">이 문항에 쓸 내 경험</p>
+                  <p className="mt-0.5 text-caption-1 font-medium text-slate-600">
                     {experiencePool.length > 0
-                      ? "고른 경험을 재료로 AI가 초안을 씁니다. 이 문항과 안 맞는 것은 빼주세요."
+                      ? "고른 경험을 재료로 AI가 초안을 써요. 이 문항과 안 맞는 것은 빼주세요."
                       : "따로 정리한 경험이 없으면 이력서에 쓰신 경력을 재료로 초안을 만들어드려요."}
                   </p>
                 </div>
                 <Link
                   href="/resume#experience-bank"
-                  className="text-label-1 font-medium text-brand-blue-600 hover:underline"
+                  className="relative tap-44 flex items-center gap-0.5 text-body-3 font-medium text-brand-blue-600"
                 >
-                  경험뱅크 관리 →
+                  경험뱅크 관리
+                  <ChevronRight aria-hidden className="size-4" />
                 </Link>
               </div>
 
@@ -559,10 +641,11 @@ export function CoverLetterEditor({
                           })
                         }
                         className={cn(
-                          "flex cursor-pointer items-center gap-1.5 rounded-full border px-3 py-1.5 text-label-1 transition-colors",
+                          /* 고른 경험은 파랑으로 채운다. 선만 바꾸면 고른 것과 안 고른 것이 잘 구별되지 않는다. */
+                          "flex h-10 cursor-pointer items-center gap-1.5 rounded-full border px-4 text-body-3",
                           checked
-                            ? "border-brand-blue-400 bg-brand-blue-50 font-medium text-brand-blue-700"
-                            : "border-border bg-white text-slate-600 hover:border-brand-blue-200",
+                            ? "border-baro-blue bg-baro-blue font-semibold text-white"
+                            : "border-slate-300 bg-white font-medium text-slate-700",
                         )}
                       >
                         {checked && <Check className="size-3.5" />}
@@ -590,10 +673,10 @@ export function CoverLetterEditor({
         저장만 채운다. 화면 전체 폭에 고정해야 해서 sticky가 아니라 fixed다.
         삭제는 이력서와 같이 목록에서만 한다.
       */}
-      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur">
+      <div className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-white/95 backdrop-blur lg:hidden">
         {/* 좁은 화면에서는 셋이 한 줄에 안 들어가 왼쪽 버튼이 잘렸다. 남는 자리를 가운데가 먹게 둔다. */}
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-2 px-4.5 py-3 lg:px-8">
-          <Button variant="outline" size="sm" className="shrink-0 text-slate-500" asChild>
+          <Button variant="outline" size="sm" className="h-12 shrink-0 border-slate-300 bg-white font-semibold text-slate-800" asChild>
             <Link href="/resume">
               <ArrowLeft className="size-4" /> 목록으로
             </Link>
@@ -604,8 +687,8 @@ export function CoverLetterEditor({
             다음에 무엇을 채울지 알게 한다.
           */}
           <div className="mx-4 hidden min-w-0 flex-1 sm:block">
-            <div className="flex items-center justify-between gap-2 text-label-2">
-              <span className="truncate text-slate-500">
+            <div className="flex items-center justify-between gap-2 text-caption-1 font-medium">
+              <span className="truncate text-slate-600">
                 {firstEmptyIndex >= 0 ? `다음: 문항 ${firstEmptyIndex + 1}` : "모든 문항을 채웠어요"}
               </span>
               <span className="shrink-0 font-semibold text-slate-600">
@@ -616,12 +699,12 @@ export function CoverLetterEditor({
           </div>
 
           <div className="flex shrink-0 items-center gap-2">
-            {saveMessage && <span className="text-label-2 text-slate-400">{saveMessage}</span>}
-            <Button variant="outline" size="sm" onClick={() => setPreviewOpen(true)}>
+            {saveMessage && <span className="text-caption-1 font-medium text-slate-600">{saveMessage}</span>}
+            <Button variant="outline" size="sm" className="h-12 border-slate-300 bg-white font-semibold text-slate-800" onClick={() => setPreviewOpen(true)}>
               <Eye className="size-4" /> 미리보기
             </Button>
             {/* 넓은 화면에서만 넉넉히 잡는다. 좁은 화면에서는 이 폭 때문에 줄이 넘쳤다. */}
-            <Button size="sm" className="sm:min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
+            <Button size="sm" className="h-12 bg-atomic-blue-600 font-semibold text-white sm:min-w-40" onClick={() => void handleSave()} disabled={isSaving || !isDirty}>
               {isSaving && <Loader2 className="size-4 animate-spin" />}
               {isSaving || isDirty ? "저장" : "저장됨"}
             </Button>
@@ -636,15 +719,15 @@ export function CoverLetterEditor({
 
       {/* 이력서와 같은 방식. 입력 폭을 좁히지 않도록 팝업으로 띄우고 인쇄로 PDF 저장한다. */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="print:hidden sm:max-w-4xl">
+        <DialogContent className="draft3-theme rounded-card print:hidden sm:max-w-4xl">
           <DialogHeader>
-            <DialogTitle>미리보기</DialogTitle>
+            <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">미리보기</DialogTitle>
           </DialogHeader>
-          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-slate-100 p-4 ring-1 ring-border">
+          <div className="max-h-[70vh] overflow-y-auto rounded-xl bg-gov-surface p-4">
             <CoverLetterPreview detail={currentPreviewDetail()} applicantName={applicantName} />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handlePopupPrint}>
+            <Button variant="outline" className="h-12 rounded-xl border-slate-300 bg-white px-5 text-body-2 font-semibold text-slate-800" onClick={handlePopupPrint}>
               <Printer className="size-4" /> PDF로 저장/인쇄
             </Button>
           </DialogFooter>
@@ -653,10 +736,10 @@ export function CoverLetterEditor({
 
       {/* 문항 통째로 바꾸기. 쓴 내용은 그대로 두고 질문만 갈아끼운다. */}
       <Dialog open={swapOpen} onOpenChange={setSwapOpen}>
-        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-lg">
+        <DialogContent className="draft3-theme max-h-[80vh] overflow-y-auto rounded-card sm:max-w-lg">
           <DialogHeader>
-            <DialogTitle>어떤 문항으로 바꿀까요?</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">어떤 문항으로 바꿀까요?</DialogTitle>
+            <DialogDescription className="text-body-3 font-medium break-keep text-slate-600">
               이미 쓴 내용은 지워지지 않아요. 질문만 바뀝니다.
             </DialogDescription>
           </DialogHeader>
@@ -678,12 +761,12 @@ export function CoverLetterEditor({
                     setSwapOpen(false);
                   }}
                   className={cn(
-                    "w-full cursor-pointer rounded-xl border border-border px-4 py-3 text-left transition-colors hover:border-brand-blue-200 disabled:cursor-not-allowed disabled:opacity-40",
+                    "w-full cursor-pointer rounded-xl border border-border px-4 py-3 text-left disabled:cursor-not-allowed disabled:opacity-40",
                     active?.questionType === entry.questionType && "border-brand-blue-600 bg-brand-blue-50",
                   )}
                 >
                   <p className="text-body-2 font-semibold text-slate-900">{entry.label}</p>
-                  <p className="mt-0.5 text-label-1 text-slate-500">
+                  <p className="mt-0.5 text-body-3 font-medium text-slate-600">
                     {used ? "이미 담긴 문항이에요." : entry.question}
                   </p>
                 </button>

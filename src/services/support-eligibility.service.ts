@@ -57,6 +57,17 @@ const AGE_GROUP_MIDPOINT: Record<AgeGroup, number> = {
   "70plus": 75,
 };
 
+/* 청년 대상 제도에서 나이 상한이 없을 때 확인 필요로 넘기는 나이. 대부분의 지자체 청년 기준(만 39세)을 따른다. */
+const YOUTH_AGE_MAX = 39;
+
+/** 청년만 대상으로 하는데(중장년도 함께 대상인 제도는 빼고) 나이 상한이 없거나 100세 이상으로 들어온 제도. */
+function isYouthOnlyWithoutAgeLimit(program: SupportProgram): boolean {
+  const text = `${program.title} ${program.targetDescription ?? ""} ${program.targetConditions.join(" ")}`;
+  if (!text.includes("청년")) return false;
+  if (/중장년|중·장년|장년|전 ?연령/.test(text)) return false;
+  return program.targetAgeMax === undefined || program.targetAgeMax >= 100;
+}
+
 function deriveAge(profile: Pick<SupportMatchProfile, "ageGroup" | "birthYear">): number | undefined {
   // 출생연도가 있으면 만 나이로 정확히, 없으면 연령대 중간값으로 근사한다.
   if (profile.birthYear) return new Date().getFullYear() - profile.birthYear;
@@ -160,7 +171,14 @@ function evaluateBaseFields(program: SupportProgram, profile: SupportMatchProfil
   const age = deriveAge(profile);
 
   // 연령
-  if (program.targetAgeMin !== undefined || program.targetAgeMax !== undefined) {
+  if (age !== undefined && age > YOUTH_AGE_MAX && isYouthOnlyWithoutAgeLimit(program)) {
+    /*
+      "청년" 대상인데 나이 상한이 없거나(빈 값) 120세처럼 무의미하게 들어온 제도. 데이터만 믿으면
+      40대 이상에게도 "나이 조건이 맞아요"가 되거나 나이를 아예 따지지 않는다. 청년 기준은 제도마다
+      34 · 39 · 45세 등으로 달라 맞다 · 아니다를 정하지 않고 확인 필요로 둔다.
+    */
+    checkRequired.push("연령 조건(청년 대상)");
+  } else if (program.targetAgeMin !== undefined || program.targetAgeMax !== undefined) {
     if (age !== undefined) {
       const min = program.targetAgeMin ?? 0;
       const max = program.targetAgeMax ?? 200;

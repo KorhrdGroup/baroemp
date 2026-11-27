@@ -1,12 +1,10 @@
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { interactiveCardClass } from "@/lib/ui-classes";
-import { ExternalLink, RotateCcw, UserPlus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { BookOpen, Briefcase, ChevronRight, ExternalLink, FileText, RotateCcw, UserPlus } from "lucide-react";
+import { PageHead } from "@/components/layout/page-head";
 import { REGION_LABELS } from "@/lib/labels";
 import { splitRecommendationTracks } from "./recommendation-tracks";
 import type { AssessmentResult, CareerContent, Occupation, OccupationRecommendation } from "@/types";
-import { OccupationRecommendationCard, type ExternalCourseLink } from "./occupation-recommendation-card";
+import { OccupationRecommendationCard, jobSearchKeyword, type ExternalCourseLink } from "./occupation-recommendation-card";
 import { TrackedLink } from "./tracked-link";
 
 interface ResultViewProps {
@@ -21,6 +19,8 @@ interface ResultViewProps {
   /** 마이페이지 등에서 특정 직업을 보러 온 경우, 그 카드를 열어서 보여준다. */
   focusOccupationId?: string;
   jobCounts?: Record<string, { total: number; highMatchCount: number }>;
+  /** 제목에서 부를 이름. 지원금 결과처럼 "김미영님", 없으면 "회원님". */
+  userName?: string;
 }
 
 export function ResultView({
@@ -32,6 +32,7 @@ export function ResultView({
   externalCourses = [],
   focusOccupationId,
   jobCounts,
+  userName,
 }: ResultViewProps) {
   /** 지목된 카드가 있으면 그 카드만, 없으면 첫 카드를 열어둔다. */
   const isCardOpen = (occupationId: string, isFirstDefault: boolean) =>
@@ -53,37 +54,39 @@ export function ResultView({
   const { ready: readyRecs, preparation: preparationRecs } = splitRecommendationTracks(result.recommendations);
   const regionLabel = result.extractedProfile.region ? REGION_LABELS[result.extractedProfile.region] : undefined;
   const isAnonymous = !result.userId;
+  /* 오른쪽 "다음 할 일" 카드가 기준으로 삼는 직업: 지금 바로 지원할 수 있는 첫 직업, 없으면 첫 추천. */
+  const nextOcc = readyRecs[0] ?? top;
 
   return (
-    <div className="space-y-6">
-      {/* 지원금 결과 화면과 같은 머리말: 배경 상자 없이 라벨 → 제목 → 안내문 순으로만 둔다. */}
-      <div>
-        <p className="text-label-1 font-semibold text-brand-blue-600">검사 결과</p>
-        <h1 className="mt-1 text-title-2 font-bold text-slate-900 sm:text-headline-3">회원님께 잘 맞는 직업을 찾았습니다</h1>
-        <p className="mt-2 max-w-2xl text-body-2-reading text-slate-600">{result.summary}</p>
-        {top && (
-          <p className="mt-2 text-label-1 text-slate-400">
-            추천 가능성은 확정적인 취업 결과가 아닌, 성향·조건 기반의 참고 정보입니다.
-          </p>
-        )}
-        {result.generatedTags.length > 0 && (
-          <div className="mt-5 flex flex-wrap gap-2">
-            {result.generatedTags.map((tag) => (
-              <span key={tag} className="rounded-full bg-white px-3 py-1 text-label-1 font-medium text-slate-700">
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
-      </div>
+    <>
+      {/* 세부 화면 공통 머리: 위치 줄 → 큰 제목 → 결과 요약. */}
+      <PageHead icon="assessment"
+        crumbs={[{ label: "직업진단", href: "/assessment" }, { label: "진단 결과" }]}
+        title={`${userName ? `${userName}님` : "회원님"}께 잘 맞는 직업을 찾았어요`}
+        description={result.summary}
+      />
+
+    {/*
+      본문은 회색 바탕에 흰 카드(모서리 20px, 테두리 없음). 머리 제목과 같은 왼쪽 선에 맞춘다.
+      넓은 화면은 오른쪽에 "다음 할 일" 카드를 두고 스크롤을 따라오게 한다(아래 고정 단추 줄을 대신한다).
+    */}
+    <div className="bg-baro-page">
+    <div className="mx-auto max-w-7xl px-4.5 pt-4 pb-12 lg:grid lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start lg:gap-8 lg:px-8">
+     <div className="max-w-3xl space-y-6 lg:max-w-none">
+      {/* 진단이 붙인 태그(generatedTags, 예: "기타경력" · "즉시준비가능")는 내부 분류 말이라 화면에 늘어놓지 않는다. */}
+      {top && (
+        <p className="pt-6 text-body-3 font-medium text-slate-600">
+          추천 결과는 취업을 약속하는 것이 아니라, 성향과 조건을 바탕으로 한 참고 정보예요.
+        </p>
+      )}
 
       {readyRecs.length > 0 && (
         <div className="space-y-4">
           {/* 준비 트랙이 없으면 화면 전체가 한 목록이므로 굳이 머리말로 가르지 않는다. */}
           {preparationRecs.length > 0 && (
-            <div className="pt-2">
-              <h2 className="text-body-1 font-bold text-slate-900">지금 바로 지원할 수 있는 직업</h2>
-              <p className="mt-1 text-label-1 text-slate-500">현재 조건 그대로 도전할 수 있는 직업이에요.</p>
+            <div className="pt-4">
+              <h2 className="text-title-3 font-bold text-slate-900">지금 바로 지원할 수 있는 직업</h2>
+              <p className="mt-1 text-body-3 font-medium text-slate-600">현재 조건 그대로 도전할 수 있는 직업이에요.</p>
             </div>
           )}
           {readyRecs.map((rec, i) => (
@@ -108,9 +111,9 @@ export function ResultView({
 
       {preparationRecs.length > 0 && (
         <div className="space-y-4">
-          <div className="pt-2">
-            <h2 className="text-body-1 font-bold text-slate-900">준비하면 열리는 직업</h2>
-            <p className="mt-1 text-label-1 text-slate-500">
+          <div className="pt-4">
+            <h2 className="text-title-3 font-bold text-slate-900">준비하면 열리는 직업</h2>
+            <p className="mt-1 text-body-3 font-medium text-slate-600">
               성향은 잘 맞지만 자격이 필요한 직업이에요. 자격을 갖추면 지원할 수 있는 범위가 넓어져요.
             </p>
           </div>
@@ -136,15 +139,15 @@ export function ResultView({
       )}
 
       {result.recommendations.length === 0 && (
-        <div className="rounded-xl bg-white p-10 text-center text-slate-500">
+        <div className="rounded-card bg-white p-10 text-center text-body-2 font-medium text-slate-600">
           조건에 맞는 추천 직업을 찾지 못했어요. 답변을 조금 더 넓혀서 다시 시도해보세요.
         </div>
       )}
 
       {contentRecs.length > 0 && (
-        <div className="rounded-xl bg-white p-6 sm:p-8">
-          <h2 className="text-body-1 font-bold text-slate-900">도움이 되는 자격 취득 과정</h2>
-          <p className="mt-1 text-label-1 text-slate-400">검사 결과와 회원님의 조건을 기준으로 추천된 자격 과정입니다.</p>
+        <section id="courses" className="scroll-mt-24 pt-4">
+          <h2 className="text-title-3 font-bold text-slate-900">도움이 되는 자격 취득 과정</h2>
+          <p className="mt-1 text-body-3 font-medium text-slate-600">검사 결과와 회원님의 조건에 맞춰 고른 자격 과정이에요.</p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {contentRecs.map((content) => (
               <TrackedLink
@@ -165,42 +168,167 @@ export function ResultView({
                 }
                 target={content.externalUrl ? "_blank" : undefined}
                 rel={content.externalUrl ? "noopener noreferrer" : undefined}
-                className={cn("rounded-xl bg-slate-50 p-4", interactiveCardClass)}
+                className="rounded-card bg-white p-5"
               >
                 <p className="flex items-center gap-1.5 text-body-2 font-semibold text-slate-800">
                   {content.title}
-                  {content.externalUrl && <ExternalLink className="size-3.5 shrink-0 text-slate-400" />}
+                  {content.externalUrl && <ExternalLink className="size-3.5 shrink-0 text-slate-500" />}
                 </p>
-                <p className="mt-1 text-label-1 text-slate-500">{content.summary ?? content.shortDescription}</p>
+                {/* 요약이 제목을 그대로 되풀이하는 과정이 있어, 다를 때만 보인다. */}
+                {(() => {
+                  const sub = [content.summary, content.shortDescription].find((t) => t && t.trim() !== content.title.trim());
+                  return sub && <p className="mt-1 text-body-3 font-medium text-slate-600">{sub}</p>;
+                })()}
               </TrackedLink>
             ))}
           </div>
-        </div>
+        </section>
       )}
 
       {/* 안내문은 흐름 안에 남기고, 실제 동작은 아래 고정 바에서 한다. */}
-      <div className="flex items-center gap-3 rounded-xl bg-white p-6">
-        <UserPlus className="size-5 shrink-0 text-brand-blue-600" />
-        <p className="text-label-1 text-slate-600">
+      <div className="flex items-center gap-3 rounded-card bg-baro-blue-50 p-5 sm:p-6">
+        <UserPlus className="size-5 shrink-0 text-baro-blue" />
+        <p className="text-body-3 font-medium text-slate-700">
           {isAnonymous
             ? "회원가입하면 이 결과를 저장하고 1:1 상담을 받을 수 있어요."
             : "마이페이지에서 이 결과를 언제든 다시 확인할 수 있어요."}
         </p>
       </div>
 
-      {/* ── 하단 고정 CTA (지원금 상세와 같은 구성) ── */}
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-white/95 shadow-[0_-4px_16px_rgba(0,0,0,0.08)] backdrop-blur-sm">
-        <div className="mx-auto flex max-w-3xl items-center gap-3 px-4.5 py-3 lg:px-8">
-          <Button variant="outline" size="sm" className="h-12 shrink-0" asChild>
-            <Link href="/assessment">
+     </div>
+
+      {nextOcc && (
+        <aside className="hidden lg:sticky lg:top-24 lg:mt-10 lg:block">
+          <NextStepsCard
+            sessionId={sessionId}
+            userId={result.userId}
+            anonymousId={result.anonymousId}
+            occupationId={nextOcc.occupationId}
+            occupationName={nextOcc.occupationName}
+            postingCount={jobCounts?.[nextOcc.occupationId]?.total ?? 0}
+            regionLabel={regionLabel}
+            courseTitles={contentRecs.map((c) => c.title)}
+            isAnonymous={isAnonymous}
+          />
+        </aside>
+      )}
+    </div>
+    </div>
+
+      {/*
+        ── 하단 CTA (흰 바탕 + 위쪽 얇은 선, 그림자 없음) ──
+        화면 아래에 붙어 따라오다가 본문이 끝나면 그 자리에 멈춘다(sticky). fixed 로 두면 맨 끝에서 푸터를 가린다.
+      */}
+      <div className="sticky bottom-0 z-40 border-t border-border bg-white lg:hidden">
+        <div className="mx-auto flex max-w-7xl items-center px-4.5 py-3 lg:px-8">
+          <div className="flex w-full max-w-3xl items-center gap-3">
+            <Link
+              href="/assessment"
+              className="flex h-12 shrink-0 items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-4 text-body-3 font-semibold text-slate-800"
+            >
               <RotateCcw className="size-4" />
               다시 진단하기
             </Link>
-          </Button>
-          <Button className="h-12 flex-1 bg-brand-blue-400 hover:bg-brand-blue-600" asChild>
-            <Link href="/mypage">{isAnonymous ? "회원가입하고 저장하기" : "마이페이지로 이동"}</Link>
-          </Button>
+            <Link
+              href="/mypage"
+              className="flex h-12 flex-1 items-center justify-center rounded-xl bg-atomic-blue-600 px-4 text-body-2 font-semibold text-white"
+            >
+              {isAnonymous ? "회원가입하고 저장하기" : "마이페이지로 이동"}
+            </Link>
+          </div>
         </div>
+      </div>
+    </>
+  );
+}
+
+/**
+ * 넓은 화면 오른쪽 카드. 결과를 읽고 끝나지 않게 바로 이어 갈 세 가지(공고 · 이력서 · 자격 과정)를 줄로 둔다.
+ * 마이페이지 · 다시 진단은 맨 아래 작은 줄로. 좁은 화면은 이 카드 대신 아래 고정 단추 줄을 쓴다.
+ */
+function NextStepsCard({
+  sessionId,
+  userId,
+  anonymousId,
+  occupationId,
+  occupationName,
+  postingCount,
+  regionLabel,
+  courseTitles,
+  isAnonymous,
+}: {
+  sessionId: string;
+  userId?: string;
+  anonymousId?: string;
+  occupationId: string;
+  occupationName: string;
+  postingCount: number;
+  regionLabel?: string;
+  courseTitles: string[];
+  isAnonymous: boolean;
+}) {
+  const keyword = jobSearchKeyword(occupationName);
+  const rowClass = "flex items-center gap-3 rounded-xl bg-slate-50 px-4 py-3.5 transition-colors hover:bg-baro-blue-50";
+  const rowInner = (Icon: typeof Briefcase, title: string, sub: string) => (
+    <>
+      <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white text-baro-blue">
+        <Icon className="size-5" />
+      </span>
+      <span className="min-w-0 flex-1">
+        <span className="block text-body-2 font-semibold break-keep text-slate-900">{title}</span>
+        <span className="mt-0.5 block text-body-3 font-medium break-keep text-slate-600">{sub}</span>
+      </span>
+      <ChevronRight className="size-4 shrink-0 text-slate-500" />
+    </>
+  );
+
+  return (
+    <div className="rounded-card bg-white p-6">
+      <p className="text-title-3 font-bold text-slate-900">이제 이렇게 해 보세요</p>
+      <p className="mt-1 text-body-3 font-medium break-keep text-slate-600">가장 잘 맞는 직업인 {occupationName} 기준이에요.</p>
+      <ul className="mt-5 space-y-2">
+        <li>
+          {/* 내 지역에 공고가 없으면 전국(region=all)으로 넘긴다. 카드 안 "채용공고 보기"와 같은 규칙. */}
+          <TrackedLink
+            sessionId={sessionId}
+            kind="occupation"
+            targetId={occupationId}
+            userId={userId}
+            anonymousId={anonymousId}
+            href={`/jobs?keyword=${encodeURIComponent(keyword)}${postingCount > 0 ? "" : "&region=all"}`}
+            className={rowClass}
+          >
+            {rowInner(
+              Briefcase,
+              `${keyword} 공고 보기`,
+              postingCount > 0
+                ? `${regionLabel ? `${regionLabel} ` : ""}${postingCount}건`
+                : `${regionLabel ? `${regionLabel}에는 아직 없어 ` : ""}전국에서 찾아봐요`,
+            )}
+          </TrackedLink>
+        </li>
+        <li>
+          <Link href={`/resume/new?occupation=${occupationId}&title=${encodeURIComponent(occupationName)}`} className={rowClass}>
+            {rowInner(FileText, "이 직업으로 이력서 쓰기", "내 정보를 불러와 빠르게 시작해요")}
+          </Link>
+        </li>
+        {courseTitles.length > 0 && (
+          <li>
+            <a href="#courses" className={rowClass}>
+              {rowInner(BookOpen, "자격 과정 알아보기", courseTitles.slice(0, 2).join(" · "))}
+            </a>
+          </li>
+        )}
+      </ul>
+      <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4 text-body-3 font-semibold text-slate-600">
+        <Link href="/assessment" className="flex h-10 items-center gap-1.5">
+          <RotateCcw className="size-4" />
+          다시 진단하기
+        </Link>
+        <Link href="/mypage" className="flex h-10 items-center gap-0.5">
+          {isAnonymous ? "회원가입하고 저장하기" : "마이페이지"}
+          <ChevronRight className="size-4" />
+        </Link>
       </div>
     </div>
   );

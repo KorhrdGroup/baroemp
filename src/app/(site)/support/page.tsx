@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { SupportFlow } from "@/features/support/support-flow";
 import { getCurrentUser, requireUser } from "@/lib/auth/session";
 import { getSupportAssessmentSessionRepository } from "@/lib/repositories";
+import { getSupportShowcase } from "@/services/support-search.service";
 
 export const metadata: Metadata = {
   title: "지원금 찾기 | 한평생 바로취업",
@@ -23,14 +24,26 @@ export default async function SupportPage({
   const user = await getCurrentUser();
 
   // 이미 받은 진단이 있으면 소개 화면에서 지난 결과로 가는 길을 보여준다.
-  const latestSession = user
-    ? (await getSupportAssessmentSessionRepository().findAll({ userId: user.id, status: "completed" }))[0]
-    : undefined;
+  const [latestSession, showcase] = await Promise.all([
+    user
+      ? getSupportAssessmentSessionRepository()
+          .findAll({ userId: user.id, status: "completed" })
+          .then((all) => all[0])
+      : undefined,
+    // 소개 화면 "분야별 대표 지원제도". 읽기만 한다. 실패해도 소개 화면은 그대로 보이게.
+    getSupportShowcase().catch(() => null),
+  ]);
+  const now = new Date();
+  // 홈 첫 화면과 같은 "11.27 기준" 꼴(월.일, 한국 시간).
+  const asOf = now.toLocaleDateString("ko-KR", { month: "2-digit", day: "2-digit", timeZone: "Asia/Seoul" }).replace(/\.\s?/g, ".").replace(/\.$/, "");
 
   return (
-    <div>
+    // /draft3 색 구성 (globals.css .draft3-theme)
+    <div className="draft3-theme">
       {/* ?start=1: 이미 무엇을 하려는지 아는 경로(마이페이지 등)에서 소개 화면을 건너뛴다. */}
-      <SupportFlow autoStart={start === "1"} isLoggedIn={Boolean(user)} latestResultSessionId={latestSession?.id} />
+      <SupportFlow autoStart={start === "1"} isLoggedIn={Boolean(user)} latestResultSessionId={latestSession?.id}
+        showcase={showcase ? { data: showcase, asOf } : undefined}
+      />
     </div>
   );
 }

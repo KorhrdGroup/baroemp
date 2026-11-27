@@ -3,12 +3,9 @@
 import { revalidatePath } from "next/cache";
 import { requireSessionUser } from "@/lib/auth/session";
 import { logActivityEvent } from "@/lib/activity/event-logger";
-import { getProfileRepository } from "@/lib/repositories/profile-repository";
 import { getCareerProfileRepository, findCareerProfileByUserId } from "@/lib/repositories";
 import { recalculateLeadScore } from "@/services/lead-score.service";
 import { syncHeldQualifications } from "@/services/career-profile-merge.service";
-import { applyMarketingConsent } from "./marketing-consent";
-import { normalizePhone, isValidKoreanPhone } from "@/lib/utils/phone";
 import type { DesiredStartTiming, EmploymentStatus, Region, WorkType } from "@/types";
 
 export interface ProfileEditFormState {
@@ -18,8 +15,8 @@ export interface ProfileEditFormState {
 }
 
 /**
- * /mypage/profile 저장. Profile(이름/전화번호)과 Career Profile(취업 관련 정보)의 책임을 구분해
- * 각각의 Repository로 나눠 갱신한다. userId는 항상 서버 세션에서 도출한다 (클라이언트 입력 불신).
+ * /mypage/profile(희망 조건) 저장 - Career Profile(취업 관련 정보)만. 이름 · 전화번호는 내 정보(account-actions.ts)가 맡는다.
+ * userId는 항상 서버 세션에서 도출한다 (클라이언트 입력 불신).
  *
  * 매 입력마다가 아니라 "저장" 시 1회만 호출되므로 Lead 재계산은 여기서 수행해도 무겁지 않다.
  * 전체 Match 재계산(추천 직업/공고 재산정)은 이번 STEP에서는 트리거하지 않는다 (스펙 23번:
@@ -32,8 +29,6 @@ export async function updateProfileAction(
 ): Promise<ProfileEditFormState> {
   const user = await requireSessionUser();
 
-  const name = String(formData.get("name") ?? "").trim();
-  const phoneRaw = String(formData.get("phone") ?? "").trim();
   const region = String(formData.get("region") ?? "") || undefined;
   const employmentStatus = String(formData.get("employmentStatus") ?? "") || undefined;
   const desiredStartTiming = String(formData.get("desiredStartTiming") ?? "") || undefined;
@@ -43,21 +38,6 @@ export async function updateProfileAction(
   const desiredWorkTypes = formData.getAll("desiredWorkTypes").map(String).filter(Boolean) as WorkType[];
   const isOpenToTraining = formData.get("isOpenToTraining") === "on";
   const heldQualifications = formData.getAll("heldQualifications").map(String).filter(Boolean);
-  /*
-    알림톡 수신 동의는 마이페이지의 공고 알림 카드가 대신 다룬다. 이 폼에는 그 칸이 없다.
-    칸이 없는 것을 "해제"로 읽으면 프로필을 저장할 때마다 동의가 꺼지므로, 들어온 경우에만 반영한다.
-  */
-  const marketingConsentRaw = formData.get("marketingConsent");
-
-  const fieldErrors: Record<string, string> = {};
-  if (!name || name.length < 2) fieldErrors.name = "이름을 2자 이상 입력해주세요.";
-  if (phoneRaw && !isValidKoreanPhone(phoneRaw)) fieldErrors.phone = "휴대전화번호 형식을 확인해주세요.";
-  if (Object.keys(fieldErrors).length > 0) return { fieldErrors };
-
-  const phone = normalizePhone(phoneRaw);
-
-  await getProfileRepository().update(user.id, { name, phone });
-  if (marketingConsentRaw !== null) await applyMarketingConsent(user.id, marketingConsentRaw === "on");
 
   const existing = await findCareerProfileByUserId(user.id);
   const careerPatch = {

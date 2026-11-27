@@ -52,6 +52,8 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
   const recommendedContents = await findContentForMissingQualifications(missingQualCodes);
 
   return (
+    // /draft3 색 구성 (globals.css .draft3-theme)
+    <div className="draft3-theme">
     <JobDetailView
       job={job}
       match={match}
@@ -62,5 +64,6 @@ export default async function JobDetailPage({ params }: { params: Promise<{ id: 
       requirementComparison={requirementComparison}
       applicationStatus={applicationStatus}
     />
+    </div>
   );
 }

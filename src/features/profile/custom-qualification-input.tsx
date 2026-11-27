@@ -60,14 +60,14 @@ export function CustomQualificationInput({
           {values.map((name) => (
             <span
               key={name}
-              className="inline-flex items-center gap-1 rounded-full border border-brand-blue-400 bg-brand-blue-50 py-1 pl-3.5 pr-1.5 text-label-1 font-medium text-brand-blue-700"
+              className="inline-flex items-center gap-1 rounded-full border border-brand-blue-400 bg-brand-blue-50 py-1 pl-3.5 pr-1.5 text-label-1 font-medium text-brand-blue-700 in-[.draft3-theme]:text-body-3"
             >
               {name}
               <button
                 type="button"
                 aria-label={`${name} 빼기`}
                 onClick={() => onChange(values.filter((v) => v !== name))}
-                className="rounded-full p-0.5 text-brand-blue-500 hover:bg-brand-blue-100 hover:text-brand-blue-700"
+                className="relative tap-44 rounded-full p-0.5 text-brand-blue-500 hover:bg-brand-blue-100 hover:text-brand-blue-700"
               >
                 <X className="size-3.5" />
               </button>
@@ -90,17 +90,17 @@ export function CustomQualificationInput({
             }
           }}
           maxLength={CUSTOM_QUALIFICATION_MAX_LENGTH}
-          placeholder="목록에 없는 자격증을 직접 적어 주세요"
+          placeholder="자격증 직접 적기"
           aria-label="자격증 직접 입력"
-          className="h-12 flex-1"
+          className="h-12 flex-1 in-[.draft3-theme]:rounded-xl in-[.draft3-theme]:border-slate-300 in-[.draft3-theme]:bg-white in-[.draft3-theme]:text-body-2 in-[.draft3-theme]:font-medium"
         />
-        <Button type="button" variant="outline" className="h-12 shrink-0" onClick={add} disabled={!draft.trim()}>
+        <Button type="button" variant="outline" className="h-12 shrink-0 in-[.draft3-theme]:rounded-xl in-[.draft3-theme]:border-slate-300 in-[.draft3-theme]:bg-white in-[.draft3-theme]:font-semibold in-[.draft3-theme]:text-slate-800" onClick={add} disabled={!draft.trim()}>
           <Plus className="size-4" />
           추가
         </Button>
       </div>
       {notice && (
-        <p className="text-label-2 text-amber-700" role="status">
+        <p className="text-label-2 text-amber-700 in-[.draft3-theme]:text-body-3" role="status">
           {notice}
         </p>
       )}

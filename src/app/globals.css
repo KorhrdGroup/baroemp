@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
+@import "./baro-tokens.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -95,8 +96,17 @@
   --text-label-1--line-height: 19.6px;
   --text-label-2: 12px;
   --text-label-2--line-height: 16.8px;
+  /* KRDS 본문 small(15px) · xsmall(13px). 카드 보조 글자와 배지에 쓴다. */
+  --text-body-3: 15px;
+  --text-body-3--line-height: 21px;
+  --text-caption-1: 13px;
+  --text-caption-1--line-height: 18.2px;
 
-  /* 굵기 체계. Semibold(600)는 HDS에 없는 프로젝트 확장값 */
+  /*
+   * 굵기 체계. Semibold(600)는 HDS에 없는 프로젝트 확장값.
+   * 위계: 800 = 24px 이상 페이지 제목, 700 = 20px 구역 제목 · 큰 숫자, 600 = 18px 이하 제목 · 라벨 · 단추 · 강조, 500 = 본문.
+   * 18px 이하에 700 · 800 을 쓰면 화면 전체가 굵어져 강조가 강조로 안 보인다.
+   */
   --font-weight-normal: 400;
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
@@ -228,8 +238,9 @@
   --atomic-mono-500: #919191;
   --atomic-mono-600: #656565;
   --atomic-mono-700: #3D3D3D;
-  --atomic-mono-800: #1D1D1D;
-  --atomic-mono-900: #010101;
+  /* 900 은 원래 #010101(순검정)이었다. 흰 바탕에서 굵은 글자가 너무 무거워 한 단계 눅이고, 800 은 900 과 구분되게 둔다. */
+  --atomic-mono-800: #303030;
+  --atomic-mono-900: #222222;
   --atomic-blue-50: #E5EDFF;
   --atomic-blue-100: #B2CAFF;
   --atomic-blue-200: #7FA8FF;
@@ -256,6 +267,27 @@
   --gov-blue: #CFE0FF;
   --gov-ice: #F2FBFF;
   --gov-surface: #F5F6F8;
+}
+
+/*
+  디자인 리뉴얼 시안(/draft)의 회색. 기본 회색(mono)은 색기가 전혀 없어, 푸른 기운이 도는
+  바탕(gov-surface)·파란 주색 옆에서 누렇게(웜그레이로) 보였다. 단계마다 밝기는 거의 그대로 두고
+  푸른 기를 조금 얹은 쿨그레이로 바꾼다. 글자 600 은 흰 바탕 대비 5.60:1, 아이콘 500 은 3.05:1 로
+  KRDS 기준을 그대로 넘는다. slate-* 클래스가 이 변수를 바로 읽어(@theme inline) 시안 안에서만 바뀐다.
+*/
+.draft-cool-grey {
+  --atomic-mono-50: #F9FAFB;
+  --atomic-mono-100: #F1F3F6;
+  --atomic-mono-200: #E3E6EB;
+  --atomic-mono-300: #CED3DA;
+  --atomic-mono-400: #AFB5BE;
+  --atomic-mono-500: #8E949E;
+  --atomic-mono-600: #626873;
+  --atomic-mono-700: #3B4049;
+  /* 글자색 900 · 800 은 기본 판과 같게(순검정에 가깝던 것을 눅임). 회색 단계만 쿨그레이. */
+  --atomic-mono-800: #303030;
+  --atomic-mono-900: #222222;
+  --border: #E8EBEF;
 }
 
 .dark {
@@ -296,6 +328,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* Tailwind v4 는 버튼에 손 모양 커서를 주지 않는다. 눌리는 것임을 알 수 있게 되돌린다. */
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
   body {
     @apply bg-background text-foreground font-medium;
     /*
@@ -327,7 +364,8 @@
    * 지원금 위저드는 /support 한 라우트 안에서 상태로 전환되므로 경로가 아니라
    * 위저드가 렌더링됐는지(data-wizard)로 판단한다.
    */
-  body:has([data-wizard="true"]) footer {
+  body:has([data-wizard="true"]) footer,
+  body:has([data-wizard="true"]) .site-bottom-tabs {
     display: none;
   }
 }
@@ -362,6 +400,220 @@
   }
 }
 
+/*
+ * /draft3 색 구성을 세부 화면에도 입히는 판. 파랑 #2469FF · 남색 #00184D 두 가지와 그 옅은 단계만 쓴다.
+ * 이 판 안에서만 파랑 변수를 덮어써, 판을 씌우지 않은 화면은 예전 색 그대로다.
+ * 공용 조각(PageHead · JobCard 등)은 in-[.draft3-theme]: 로 이 판 안에서만 모양을 바꾼다.
+ */
+.draft3-theme {
+  --atomic-blue-50: var(--color-baro-blue-50);
+  --atomic-blue-100: var(--color-baro-blue-100);
+  --atomic-blue-200: #BCD1FF;
+  --atomic-blue-300: var(--color-baro-blue-300);
+  --atomic-blue-400: var(--color-baro-blue);
+  --atomic-blue-500: var(--color-baro-blue);
+  --atomic-blue-600: var(--color-baro-blue);
+  --atomic-blue-700: var(--color-baro-navy);
+  --atomic-blue-800: var(--color-baro-navy);
+  --atomic-blue-900: var(--color-baro-navy);
+  --icon-mid: var(--color-baro-blue-300);
+  --icon-soft: var(--color-baro-blue-100);
+  --icon-accent: var(--color-baro-navy);
+  --icon-on-accent: #FFFFFF;
+}
+
+/* 키보드(Tab)로 움직일 때 지금 어디인지 굵은 파란 테두리로. 마우스로 누를 때는 나오지 않는다. */
+.draft3-theme :is(a, button, select, [role="checkbox"]):focus-visible {
+  outline: 3px solid #2469FF;
+  outline-offset: 2px;
+}
+
+/* /draft3 상황별 서비스: 상황 알약을 바꿀 때 카드가 살짝 아래에서 떠오른다 (situation-tabs.tsx). */
+@keyframes situation-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/*
+ * 진단 첫 화면 "알 수 있는 것" 그림 속 작은 움직임 (landing-item-icons.tsx). 칸이 떠오른 뒤 한 번만 움직이고 멈춘다.
+ * 칸마다 늦춤(--li-delay)을 달리해 차례로 살아난다. 감싼 PlayWhenSeen 이 화면에 충분히 들어와
+ * data-play="on" 이 붙어야 시작한다(그 전에는 멈춘 그림). 움직임 줄이기를 켠 사람에게는 처음부터 멈춘 그림.
+ */
+.li-anim {
+  transform-box: fill-box;
+  animation-delay: var(--li-delay, 0ms);
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.33, 0, 0.2, 1);
+}
+/* 조상 중에 data-play="on" 이 없는 그림 조각은 멈춰 둔다. */
+.li-anim:not([data-play="on"] .li-anim) {
+  animation-name: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .li-anim {
+    animation-name: none !important;
+  }
+}
+/* 확인 표시가 선을 따라 그려진다(path 에 pathLength=1). */
+.li-draw {
+  stroke-dasharray: 1;
+  /* 줄여 쓰기(animation:)는 .li-anim 의 늦춤 · 채움을 지워서 이름과 길이만 따로 준다. */
+  animation-name: li-draw;
+  animation-duration: 520ms;
+}
+@keyframes li-draw {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+/* 지갑에서 지폐가 톡 튀어나왔다 들어간다. */
+.li-pop {
+  transform-origin: center bottom;
+  animation-name: li-pop;
+  animation-duration: 700ms;
+}
+@keyframes li-pop {
+  0% { transform: translateY(6px); }
+  45% { transform: translateY(-5px); }
+  70% { transform: translateY(1px); }
+  100% { transform: none; }
+}
+/* 지도 핀이 위에서 떨어져 살짝 튕긴다. */
+.li-drop {
+  animation-name: li-drop;
+  animation-duration: 760ms;
+}
+@keyframes li-drop {
+  0% { transform: translateY(-14px); opacity: 0; }
+  50% { transform: translateY(1.5px); opacity: 1; }
+  72% { transform: translateY(-2.5px); }
+  100% { transform: none; }
+}
+/* 별 · 포인트가 반짝 커졌다 제자리. */
+.li-twinkle {
+  transform-origin: center;
+  animation-name: li-twinkle;
+  animation-duration: 640ms;
+}
+@keyframes li-twinkle {
+  0% { transform: scale(0) rotate(-40deg); }
+  60% { transform: scale(1.3) rotate(8deg); }
+  100% { transform: none; }
+}
+/* 막대가 바닥에서 자란다. */
+.li-grow {
+  transform-origin: center bottom;
+  animation-name: li-grow;
+  animation-duration: 620ms;
+}
+@keyframes li-grow {
+  from { transform: scaleY(0); }
+  to { transform: none; }
+}
+/* 학사모 술이 흔들리다 선다. */
+.li-swing {
+  transform-origin: center top;
+  animation-name: li-swing;
+  animation-duration: 900ms;
+}
+@keyframes li-swing {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(14deg); }
+  55% { transform: rotate(-9deg); }
+  80% { transform: rotate(4deg); }
+  100% { transform: none; }
+}
+/* 깃발까지 이어진 점선이 앞으로 흐른다. */
+.li-flow {
+  animation-name: li-flow;
+  animation-duration: 900ms;
+}
+@keyframes li-flow {
+  from { stroke-dashoffset: 24; }
+  to { stroke-dashoffset: 0; }
+}
+
+/*
+  일자리 찾기 "이런 일자리 어때요?" 들어올 때 한 번(job-curation-section 의 data-intro).
+  카드가 왼쪽부터 차례로 떠오르고 → 오른쪽 화살표가 톡 밀려 넘겨 볼 수 있음을 알린다. 탭을 바꿀 때도 카드는 다시 떠오른다.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  /* 탭을 바꿀 때: 새 카드가 바로 차례로 떠오른다. */
+  .jc-rise {
+    animation: jc-rise 460ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--jc-i, 0) * 70ms);
+  }
+  /* 처음 들어올 때: 판이 자리 잡을 틈을 조금 두고 한 장씩 천천히. */
+  [data-intro="on"] .jc-rise {
+    animation-duration: 560ms;
+    animation-delay: calc(120ms + var(--jc-i, 0) * 100ms);
+  }
+  [data-intro="on"] .jc-nudge {
+    animation: jc-nudge 900ms cubic-bezier(0.33, 0, 0.2, 1) 900ms both;
+  }
+}
+
+/*
+  마이페이지 들어올 때 한 번(mypage/page.tsx · journey-steps.tsx).
+  A: 인사 → 진행 막대 줄 → 다음 할 일 판 → 다섯 단계 카드(왼쪽부터) → 아래 구역 순으로 떠오른다. 순서는 --mp-d(지연).
+  B: 진행 막대가 0에서 제 길이까지 차오르고, 다 한 단계의 파란 동그라미가 카드가 떠오른 뒤 차례로 톡 켜진다.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .mp-rise {
+    animation: jc-rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--mp-d, 0ms);
+  }
+  .mp-fill {
+    animation: mp-fill 900ms cubic-bezier(0.33, 0, 0.2, 1) 300ms both;
+  }
+  .mp-pop {
+    animation: mp-pop 420ms cubic-bezier(0.33, 0, 0.2, 1) both;
+    animation-delay: calc(var(--mp-d, 0ms) + 260ms);
+  }
+}
+
+/* 지원금 진단 결과 머리의 등급 동그라미(support-result-hero.tsx): 하나씩 작게 시작해 살짝 튀며 자리 잡는다. */
+@media (prefers-reduced-motion: no-preference) {
+  .sr-pop {
+    animation: sr-pop 560ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(150ms + var(--sr-i, 0) * 120ms);
+  }
+}
+
+@keyframes sr-pop {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+
+/* to 를 비워 두면 인라인 width(제 길이)까지 자란다. */
+@keyframes mp-fill {
+  from { width: 0; }
+}
+
+@keyframes mp-pop {
+  0% { background-color: var(--color-slate-100); color: var(--color-slate-500); transform: scale(1); }
+  55% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+@keyframes jc-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes jc-nudge {
+  0%, 100% { transform: none; }
+  22% { transform: translateX(5px); }
+  44% { transform: none; }
+  62% { transform: translateX(3px); }
+  80% { transform: none; }
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -376,6 +628,16 @@
  * 스크롤 자체는 그대로라 트랙패드·키보드 조작에는 영향이 없다.
  * 접근성을 위해 키보드 포커스가 안으로 들어왔을 때(focus-within)도 함께 드러낸다.
  */
+/* 겉모습은 그대로 두고 누르는 영역만 44px까지 넓힌다(작은 단추 · 글자 링크용).
+   위치 기준이 있어야 해서, 위치가 없는 요소에는 relative 를 함께 붙인다. */
+@utility tap-44 {
+  &::after {
+    content: "";
+    position: absolute;
+    inset: min(0px, calc((100% - 44px) / 2));
+  }
+}
+
 @utility scrollbar-hidden {
   /* 가로로 미는 줄 중에서 스크롤바까지 보일 필요가 없는 것(탭 알약 줄 등). */
   scrollbar-width: none;
@@ -385,36 +647,22 @@
   }
 }
 
-@utility scrollbar-on-hover {
-  /*
-   * 스크롤바 자리는 항상 잡아두고 색만 투명 -> 회색으로 바꾼다.
-   * scrollbar-width 를 none <-> thin 으로 토글하면 호버할 때마다 스크롤바 높이만큼
-   * 안쪽 카드가 위아래로 흔들린다.
-   */
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-
-  &::-webkit-scrollbar {
-    height: 8px;
+/*
+  펼치고 접는 <details>(직업진단 결과 카드 등)를 부드럽게. 높이를 auto 까지 옮기려면 interpolate-size 가 필요하다.
+  이 기능이 없는 브라우저(사파리 등)는 지금처럼 바로 펼쳐진다. 움직임 줄이기를 켠 기기에서도 바로 펼친다.
+*/
+@media (prefers-reduced-motion: no-preference) {
+  .smooth-details {
+    interpolate-size: allow-keywords;
   }
-
-  &::-webkit-scrollbar-track {
-    background: transparent;
+  .smooth-details::details-content {
+    block-size: 0;
+    overflow: clip;
+    transition:
+      block-size 360ms cubic-bezier(0.22, 1, 0.36, 1),
+      content-visibility 360ms allow-discrete;
   }
-
-  &::-webkit-scrollbar-thumb {
-    background-color: transparent;
-    border-radius: 9999px;
-  }
-
-  /* 접근성을 위해 키보드 포커스가 안으로 들어왔을 때도 함께 드러낸다. */
-  &:hover,
-  &:focus-within {
-    scrollbar-color: var(--color-slate-300) transparent;
-  }
-
-  &:hover::-webkit-scrollbar-thumb,
-  &:focus-within::-webkit-scrollbar-thumb {
-    background-color: var(--color-slate-300);
+  .smooth-details[open]::details-content {
+    block-size: auto;
   }
 }

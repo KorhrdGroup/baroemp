@@ -32,17 +32,18 @@ export function JobRowCompact({
     <Link
       href={`/jobs/${job.id}`}
       className={cn(
-        // 호버는 배경만 연파랑으로. 테두리·제목 색까지 파래지면 목록에서 눈이 시끄럽다.
-        "group flex items-center gap-3 rounded-xl border border-border bg-white px-4 py-3 transition-colors hover:bg-brand-blue-50/40",
+        // 옅은 파랑 판 위에 흰 면만으로 띄운다 (테두리 · 호버 없이 - /draft3 구성).
+        // 휴대폰 폭에서는 자격 배지를 아랫줄로 내린다. 옆에 두면 배지가 자리를 먹어 공고 제목이 몇 글자만 남고 잘린다.
+        "group flex flex-col items-start gap-2 rounded-xl bg-white px-4 py-3 sm:flex-row sm:items-center sm:gap-3",
         className,
       )}
     >
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-label-2 font-medium text-slate-400">{job.companyName}</p>
-        <p className="mt-0.5 truncate text-label-1 font-semibold text-slate-800 group-hover:underline">{job.title}</p>
-        <p className="mt-1 flex items-center gap-2 text-label-2 text-slate-500">
+      <div className="w-full min-w-0 sm:w-auto sm:flex-1">
+        <p className="truncate text-caption-1 font-medium text-slate-600">{job.companyName}</p>
+        <p className="mt-0.5 truncate text-body-3 font-semibold text-slate-800">{job.title}</p>
+        <p className="mt-1 flex items-center gap-2 text-caption-1 font-medium text-slate-600">
           <span className="font-semibold text-brand-blue-600">
-            {salary.typeLabel && <span className="mr-1 font-medium text-slate-400">{salary.typeLabel}</span>}
+            {salary.typeLabel && <span className="mr-1 font-medium text-slate-600">{salary.typeLabel}</span>}
             {salary.amount}
           </span>
           {location && <span className="truncate">{location}</span>}
@@ -54,7 +55,7 @@ export function JobRowCompact({
       {readiness && (
         <Badge
           className={cn(
-            "shrink-0 rounded-full border border-transparent text-label-2 font-semibold",
+            "shrink-0 rounded-full border border-transparent text-caption-1 font-semibold",
             READINESS_BADGE_CLASS[readiness.level],
           )}
         >

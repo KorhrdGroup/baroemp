@@ -1,66 +1,129 @@
 import Link from "next/link";
-import { Briefcase, Clock, Sparkles } from "lucide-react";
-import { IntroHero } from "@/components/common/intro-hero";
+import { BadgeCheck, ClipboardList, MessageCircleQuestion } from "lucide-react";
+import { DiagnosisLanding, PreviewCard } from "@/components/layout/diagnosis-landing";
 import { StartAssessmentButton } from "./start-assessment-button";
+import { AssessmentShowcase } from "./assessment-showcase";
+import { ShowcaseCount } from "@/components/layout/diagnosis-showcase";
+import type { OccupationShowcase } from "@/services/occupation-showcase.service";
 
-const RESULT_ITEMS = [
-  "나에게 맞는 직업",
-  "직업별 적합도",
-  "현재 준비도",
-  "부족한 조건",
-  "필요한 자격·교육",
-  "추천 취업경로",
+const STEPS = [
+  { title: "경력·희망 조건 고르기", desc: "해 온 일과 원하는 지역·급여·근무형태를 골라요.", icon: ClipboardList },
+  { title: "성향 문항에 답하기", desc: "어떤 일이 편한지 쉬운 질문 몇 개에 답해요.", icon: MessageCircleQuestion },
+  { title: "맞는 직업 확인하기", desc: "적합도와 준비도를 바로 보여드려요.", icon: BadgeCheck },
 ];
 
-const INFO_ITEMS = [
-  { icon: Clock, label: "약 3~5분" },
-  { icon: Sparkles, label: "결과 즉시 확인" },
+const ITEMS = [
+  { icon: "match", title: "나에게 맞는 직업", desc: "경력과 성향에 맞는 직업을 골라 드려요." },
+  { icon: "fit", title: "직업별 적합도", desc: "직업마다 얼마나 잘 맞는지 점수로 보여드려요." },
+  { icon: "ready", title: "현재 준비도", desc: "지금 바로 지원할 수 있는지 알려드려요." },
+  { icon: "gap", title: "부족한 조건", desc: "지원 전에 채워야 할 것을 짚어 드려요." },
+  { icon: "cert", title: "필요한 자격·교육", desc: "따면 길이 열리는 자격과 과정을 알려드려요." },
+  { icon: "route", title: "추천 취업경로", desc: "공고 · 이력서 · 상담으로 바로 이어 드려요." },
+];
+
+/* 결과 예시 카드의 직업 세 줄. 실제 결과가 아닌 보기다(카드 맨 위에 "결과 예시"로 밝힌다). */
+const SAMPLE = [
+  { name: "요양보호사", fit: 92, ready: "바로 지원 가능" },
+  { name: "시설 경비원", fit: 85, ready: "바로 지원 가능" },
+  { name: "조리 보조원", fit: 78, ready: "자격 준비 필요" },
 ];
 
 export function AssessmentIntro({
   isLoggedIn = true,
   latestResultSessionId,
+  showcase,
 }: {
   isLoggedIn?: boolean;
   /** 이미 받은 진단이 있으면 그 결과 세션. 다시 하라고만 권하면 지난 결과를 잃은 줄 안다. */
   latestResultSessionId?: string;
+  /** 첫 칸 오른쪽 "직업 모음"(분야 탭 + 카드)과 왼쪽 큰 숫자에 쓸 데이터(서버에서 읽어 넘긴다). */
+  showcase?: { data: OccupationShowcase; asOf: string };
 }) {
   return (
-    <IntroHero
-      icon={Briefcase}
-      title="지금 나에게 맞는 일은 무엇일까요?"
-      description={
+    <DiagnosisLanding
+      crumbs={[{ label: "직업진단" }]}
+      badges={["무료", "약 3~5분", "결과 바로 확인"]}
+      closingTitle={<>몇 가지 질문에 답하면{" "}<br />나에게 맞는 직업을 알려드려요</>}
+      closingLead="어렵지 않아요. 해 온 일부터 고르면 돼요."
+      /* 문항은 DB 에 있어 문구는 보기다. 첫 단계(경력·희망 조건)에서 묻는 것과 같은 결로 적는다. */
+      closingQuestion={{
+        step: "1단계 · 경력·희망 조건",
+        q: "지금까지 해 온 일을 골라 주세요",
+        options: ["요양보호·돌봄", "사무·행정", "조리·급식", "매장판매·서비스", "교육·보육", "처음이에요"],
+        start: 0,
+      }}
+      title={
         <>
-          경력, 희망조건, 성향을 바탕으로{" "}
-          <br className="hidden sm:block" />
-          지금 도전하기 좋은 직업을 찾아드립니다.
+          지금 나에게 맞는 일,
+          <br />
+          <span className="text-atomic-blue-600">3분이면</span> 찾을 수 있어요
         </>
       }
-      infoItems={INFO_ITEMS}
-      ctaHeadline="3~5분이면 진단이 끝납니다"
-      ctaDescription="지금 시작하면 적합도와 준비도를 바로 확인할 수 있어요."
-      cta={
-        latestResultSessionId ? (
-          /* 이미 결과가 있으면 두 버튼을 나란히 세운다. 카드 밖 작은 글줄로는 눈에 띄지 않았다. */
-          <div className="flex flex-col gap-2 sm:flex-row">
+      description={
+        showcase ? (
+          <>
+            <ShowcaseCount asOf={showcase.asOf} label="직업" count={showcase.data.totalCount} /> 가운데
+            <br />
+            경력 · 성향에 맞는 일을 골라드려요.
+          </>
+        ) : (
+          "경력, 희망 조건, 성향을 바탕으로 지금 도전하기 좋은 직업과 준비할 것을 알려드려요."
+        )
+      }
+      actions={
+        /* 이미 결과가 있으면 두 단추를 나란히 세운다. 작은 글줄로는 눈에 띄지 않았다. */
+        <div className="flex flex-col gap-2 sm:flex-row">
+          <StartAssessmentButton isLoggedIn={isLoggedIn} />
+          {latestResultSessionId && (
             <Link
               href={`/assessment/result/${latestResultSessionId}`}
-              className="flex h-14 items-center justify-center gap-1.5 rounded-lg bg-brand-blue-50 px-6 text-body-2 font-bold text-brand-blue-700 transition-colors hover:bg-brand-blue-100/60"
+              className="flex h-14 items-center justify-center rounded-xl border border-slate-300 bg-white px-6 text-body-2 font-semibold text-slate-800"
             >
               지난 결과 보기
             </Link>
-            <StartAssessmentButton isLoggedIn={isLoggedIn} />
-          </div>
+          )}
+        </div>
+      }
+      preview={
+        showcase ? (
+          <AssessmentShowcase data={showcase.data} isLoggedIn={isLoggedIn} />
         ) : (
-          <StartAssessmentButton isLoggedIn={isLoggedIn} />
+          <PreviewCard label="결과 예시" title="회원님께 잘 맞는 직업">
+            <ul className="flex flex-col gap-4">
+              {SAMPLE.map((s, i) => (
+                <li key={s.name}>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="flex items-center gap-2 text-body-2 font-semibold text-slate-900">
+                      <span className="flex size-6 items-center justify-center rounded-full bg-baro-blue-50 text-caption-1 font-semibold text-baro-blue-600">{i + 1}</span>
+                      {s.name}
+                    </span>
+                    <span className="text-body-2 font-semibold text-baro-blue">{s.fit}%</span>
+                  </div>
+                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-baro-blue-50">
+                    <div className="h-full rounded-full bg-baro-blue" style={{ width: `${s.fit}%` }} />
+                  </div>
+                  <p className={`mt-1.5 text-caption-1 font-semibold ${s.ready === "바로 지원 가능" ? "text-emerald-700" : "text-amber-700"}`}>{s.ready}</p>
+                </li>
+              ))}
+            </ul>
+          </PreviewCard>
         )
       }
-      highlightTitle="이 검사로 알 수 있는 것"
-      highlights={RESULT_ITEMS}
+      steps={STEPS}
+      itemsTitle={
+        <>
+          이 진단으로{" "}
+          <br />
+          알 수 있는 것
+        </>
+      }
+      itemsDescription="진단을 마치면 아래 여섯 가지를 한 번에 알려드려요."
+      stepsDescription="세 단계면 끝나요. 약 3~5분 걸려요."
+      items={ITEMS}
       note={
         <>
-          검사 결과는 확정적인 취업 결과가 아닌 &quot;적합도&quot;와 &quot;준비도&quot;를 바탕으로 한 참고 정보입니다.
-          검사 진행 중 입력하신 정보는 맞춤 추천을 위한 Career 정보로 활용되며, 마케팅 수신동의와는 별도로 관리됩니다.
+          검사 결과는 취업을 약속하는 것이 아니라 &quot;적합도&quot;와 &quot;준비도&quot;를 바탕으로 한 참고 정보예요.
+          검사 중에 입력하신 정보는 맞춤 추천에만 쓰이고, 마케팅 수신 동의와는 따로 관리돼요.
         </>
       }
     />

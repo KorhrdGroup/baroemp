@@ -12,6 +12,11 @@ export function unwrap<T>(context: string, result: { data: T | null; error: Post
   return result.data as T;
 }
 
+/** UUID 형식인지. id 열이 uuid 인 표에 다른 값을 넣으면 Postgres가 22P02 오류를 내니, 묻기 전에 "없음"으로 거른다. */
+export function isUuid(value: string): boolean {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+}
+
 /** findById / maybeSingle 처럼 "없음"이 정상인 케이스. error만 체크한다. */
 export function unwrapMaybe<T>(
   context: string,

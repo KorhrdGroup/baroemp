@@ -54,7 +54,7 @@ const STEPS: StepConfig[] = [
     id: "desiredSalary",
     group: "condition",
     title: "희망하는 월급 수준은 어느 정도인가요?",
-    description: "만원 단위로 입력해주세요.",
+    description: "가까운 구간을 골라주세요. 정하지 않았다면 그대로 넘어가도 괜찮아요.",
   },
   {
     id: "desiredWorkTypes",
@@ -62,6 +62,7 @@ const STEPS: StepConfig[] = [
     title: "어떤 형태로 일하고 싶으신가요?",
     description: "복수 선택 가능해요.",
   },
+  { id: "isOpenToTraining", group: "condition", title: "직업훈련·교육 과정에 참여할 의향이 있으신가요?" },
   {
     id: "desiredJobCategories",
     group: "target",
@@ -74,12 +75,11 @@ const STEPS: StepConfig[] = [
     title: "보유하고 있는 자격증이 있다면 선택해주세요",
     description: "선택사항이에요. 해당하는 항목이 없다면 그대로 넘어가주세요.",
   },
-  { id: "isOpenToTraining", group: "target", title: "직업훈련·교육 과정에 참여할 의향이 있으신가요?" },
   {
     id: "contact",
     group: "contact",
     title: "맞춤 정보를 알림톡으로 받아보시겠어요?",
-    description: "조건에 맞는 새 공고·지원금이 열릴 때 먼저 알려드려요.",
+    description: "받을 수 있는 지원금·교육 제도가 열릴 때 먼저 알려드려요.",
   },
 ];
 
@@ -114,28 +114,29 @@ function ChipButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "relative flex min-h-14 items-center justify-center rounded-xl border bg-white py-3.5 text-center text-body-2 font-medium transition-colors",
-        indicator === "none" ? "px-4" : "px-11",
+        /* 표시(동그라미 · 네모)가 있으면 글자를 그 옆에 붙여 왼쪽부터 읽힌다. 가운데 글자에 왼쪽 끝 표시는 줄이 안 맞아 보였다. */
+        "flex min-h-14 items-center gap-3 rounded-xl border bg-white px-4 py-3.5 text-body-2 font-medium",
+        indicator === "none" ? "justify-center text-center" : "justify-start text-left",
         selected
-          ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-          : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+          ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+          : "border-border text-slate-700",
       )}
     >
       {indicator === "radio" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-full border-2 transition-colors",
-            selected ? "border-brand-blue-400" : "border-slate-300",
+            "flex size-5 shrink-0 items-center justify-center rounded-full border-2",
+            selected ? "border-brand-blue-600" : "border-slate-300",
           )}
         >
-          {selected && <span className="size-2.5 rounded-full bg-brand-blue-400" />}
+          {selected && <span className="size-2.5 rounded-full bg-brand-blue-600" />}
         </span>
       )}
       {indicator === "check" && (
         <span
           className={cn(
-            "absolute left-4 flex size-5 items-center justify-center rounded-sm border-2 transition-colors",
-            selected ? "border-brand-blue-400 bg-brand-blue-400 text-white" : "border-slate-300",
+            "flex size-5 shrink-0 items-center justify-center rounded-sm border-2",
+            selected ? "border-brand-blue-600 bg-brand-blue-600 text-white" : "border-slate-300",
           )}
         >
           {selected && <Check className="size-3.5" />}
@@ -146,8 +147,26 @@ function ChipButton({
   );
 }
 
-const NUMBER_INPUT_CLASS =
-  "h-14 w-32 rounded-xl border border-border px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none";
+/*
+  희망 월급은 숫자를 직접 치지 않고 구간에서 고른다(만원). 최소 · 최대 두 칸에 숫자를 넣는 건
+  휴대폰 숫자판에 익숙하지 않은 분께 어렵고, 무엇을 넣어야 할지도 막막했다.
+*/
+const SALARY_RANGES: { label: string; min?: number; max?: number }[] = [
+  { label: "200만 원 미만", max: 200 },
+  { label: "200만 ~ 250만 원", min: 200, max: 250 },
+  { label: "250만 ~ 300만 원", min: 250, max: 300 },
+  { label: "300만 ~ 400만 원", min: 300, max: 400 },
+  { label: "400만 원 이상", min: 400 },
+];
+
+/* 지역은 관공서 서식과 같은 순서로: 특별 · 광역시 먼저, 이어 도. */
+const REGION_ORDER = [
+  "seoul", "busan", "daegu", "incheon", "gwangju", "daejeon", "ulsan", "sejong",
+  "gyeonggi", "gangwon", "chungbuk", "chungnam", "jeonbuk", "jeonnam", "gyeongbuk", "gyeongnam", "jeju",
+] as const;
+
+const TEXT_INPUT_CLASS =
+  "h-14 w-full rounded-xl border border-slate-300 bg-white px-4 text-body-1 font-medium text-slate-800 placeholder:text-slate-500 focus:border-brand-blue-400 focus:outline-none";
 
 export function OnboardingWizard({
   careerProfile,
@@ -198,7 +217,12 @@ export function OnboardingWizard({
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const step = steps[stepIndex];
+  const baseStep = steps[stepIndex];
+  /* 동의를 이미 물었거나 받은 사람에게 알림 단계는 연락처만 남는다. 제목도 그에 맞춘다. */
+  const step =
+    baseStep.id === "contact" && !needsMarketingConsent
+      ? { ...baseStep, title: "연락처를 알려주세요", description: "채용 소식이나 상담 연락을 드릴 때 써요." }
+      : baseStep;
   const isLast = stepIndex === steps.length - 1;
 
   const groupIndex = groups.findIndex((g) => g.key === step.group);
@@ -283,13 +307,13 @@ export function OnboardingWizard({
 
   return (
     // data-wizard: 한 번에 하나만 묻는 화면이라 globals.css에서 푸터를 숨긴다.
-    <div data-wizard="true" className="min-h-[calc(100vh-4rem)] bg-atomic-mono-50 pb-32">
+    <div data-wizard="true" className="draft3-theme min-h-[calc(100vh-4rem)] bg-white pb-32">
       <div className="sticky top-16 z-30">
-        <div className="flex gap-1.5 bg-atomic-mono-50 px-4 pt-3">
+        <div className="flex gap-1.5 bg-white px-4 pt-3">
           {progressGroups.map((g, i) => (
             <div key={g.key} className="h-1.5 flex-1 overflow-hidden rounded-full bg-atomic-mono-200">
               <div
-                className="h-full rounded-full bg-brand-blue-400 transition-[width] duration-300"
+                className="h-full rounded-full bg-atomic-blue-600 transition-[width] duration-300"
                 style={{ width: `${segmentFill(i)}%` }}
               />
             </div>
@@ -300,13 +324,13 @@ export function OnboardingWizard({
           오른쪽은 진단과 달리 "나중에 하기"가 들어간다. 입력이 선택이라는 걸 어느 단계에서든
           알 수 있어야 해서 화면마다 노출한다.
         */}
-        <div className="relative mx-auto flex max-w-[24.5rem] items-center bg-atomic-mono-50/90 px-4 py-3 backdrop-blur">
+        <div className="relative mx-auto flex max-w-xl items-center bg-white/90 px-4 py-3 backdrop-blur">
           <button
             type="button"
             onClick={handlePrev}
             disabled={stepIndex === 0 || submitting}
             aria-label="이전 단계"
-            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 transition-colors hover:bg-atomic-mono-200 disabled:pointer-events-none disabled:opacity-30"
+            className="-ml-2 flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-600 disabled:pointer-events-none disabled:opacity-30"
           >
             <ArrowLeft className="size-5" />
           </button>
@@ -314,68 +338,69 @@ export function OnboardingWizard({
             좌우 버튼 폭이 달라(화살표 36px vs "나중에 하기") flex로 나눠서는 가운데가 맞지 않는다.
             컨테이너 기준 절대 중앙에 놓고, 좌우 버튼과 겹치지 않게 폭만 제한한다.
           */}
-          <span className="pointer-events-none absolute left-1/2 max-w-[45%] -translate-x-1/2 truncate text-label-1 font-semibold text-brand-blue-600">
-            {groups[groupIndex]?.label}
+          <span className="pointer-events-none absolute left-1/2 max-w-[45%] -translate-x-1/2 truncate text-body-3 font-semibold text-brand-blue-600">
+            {onContactStep && !needsMarketingConsent ? "연락처" : groups[groupIndex]?.label}
           </span>
           <button
             type="button"
             onClick={handleSkip}
             disabled={submitting}
-            className="-mr-2 ml-auto shrink-0 rounded-lg px-2 py-1.5 text-label-1 font-medium text-slate-500 transition-colors hover:bg-atomic-mono-200 disabled:opacity-40"
+            className="relative tap-44 -mr-2 ml-auto shrink-0 rounded-lg px-2 py-1.5 text-body-3 font-medium text-slate-600 disabled:opacity-40"
           >
             나중에 하기
           </button>
         </div>
       </div>
 
-      <div className="mx-auto mt-8 max-w-[24.5rem] px-4">
+      <div className="mx-auto mt-8 max-w-xl px-4">
         {/*
           가입 버튼을 누르자마자 질문이 시작되므로, 첫 화면에서만 여기가 어디이고 왜 묻는지
           알려준다. 한 줄 텍스트로 두면 곧바로 이어지는 문항에 묻혀 읽히지 않아 카드로 감싼다.
         */}
         {stepIndex === 0 && (
-          <div className="mb-7 rounded-xl border border-brand-blue-200 bg-white px-4 py-3.5 text-center">
-            <p className="flex items-center justify-center gap-1.5 text-label-1 font-semibold text-brand-blue-700">
+          <div className="mb-7 rounded-xl bg-baro-blue-50 px-4 py-3.5 text-center">
+            <p className="flex items-center justify-center gap-1.5 text-body-3 font-semibold text-brand-blue-700">
               <CheckCircle2 className="size-4 shrink-0" />
               {justSignedUp ? "가입이 완료되었어요" : "취업 프로필 채우기"}
             </p>
-            <p className="mt-1.5 text-label-1 break-keep text-slate-500">
-              몇 가지만 알려주시면 맞춤 채용공고와 받을 수 있는 지원금을 찾아드려요. 지금 넘어가셔도 괜찮아요.
+            <p className="mt-1.5 text-body-3 font-medium break-keep text-slate-600">
+              <span className="inline-block">몇 가지만 알려주시면 맞춤 채용공고와 받을 수 있는 지원금을 찾아드려요.</span>{" "}
+              <span className="inline-block">지금 넘어가셔도 괜찮아요.</span>
             </p>
           </div>
         )}
         {/* 한 단계뿐인 분류에서 "1/1"은 알려주는 게 없다. */}
         {groupSteps.length > 1 && (
-          <p className="text-center text-body-2 font-bold text-slate-900">
+          <p className="text-center text-body-2 font-semibold text-slate-900">
             {posInGroup + 1}/{groupSteps.length}
           </p>
         )}
         {/* 진단·지원금 위저드와 같은 규칙: 어절 중간 잘림 방지 + 두 줄 길이 균형 + 살짝 여유 있는 줄간격. */}
         <h2
           className={cn(
-            "text-center text-title-2 leading-[1.4] font-bold break-keep text-balance text-slate-900",
+            "text-center text-title-2 leading-[1.4] font-extrabold break-keep text-balance text-slate-900",
             groupSteps.length > 1 && "mt-3",
           )}
         >
           {step.title}
         </h2>
         {step.description && (
-          <p className="mt-3 text-center text-body-2-reading break-keep text-slate-500">{step.description}</p>
+          <p className="mt-3 text-center text-body-2-reading font-medium break-keep text-slate-600">{step.description}</p>
         )}
 
         <div className="mt-10">
           <StepBody answers={answers} step={step} needsPhone={needsPhone} needsEmail={needsEmail} needsMarketingConsent={needsMarketingConsent} onChange={update} />
         </div>
 
-        {error && <p className="mt-6 text-center text-label-1 font-medium text-red-500">{error}</p>}
+        {error && <p className="mt-6 text-center text-body-3 font-medium text-red-500">{error}</p>}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-atomic-mono-50 via-atomic-mono-50 to-transparent pt-6">
-        <div className="mx-auto max-w-[24.5rem] px-4 pb-8">
+      <div className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-t from-white via-white to-transparent pt-6">
+        <div className="mx-auto max-w-xl px-4 pb-8">
           <Button
             onClick={handleNext}
             disabled={submitting}
-            className="h-14 w-full rounded-lg bg-brand-blue-400 text-body-1 font-semibold hover:bg-brand-blue-600"
+            className="h-14 w-full rounded-xl bg-atomic-blue-600 text-body-1 font-semibold text-white"
           >
             {submitting ? <Loader2 className="size-5 animate-spin" /> : isLast ? "저장하고 시작하기" : "다음"}
           </Button>
@@ -423,16 +448,16 @@ function StepBody({
     case "region":
       return (
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
-          {Object.entries(REGION_LABELS).map(([code, label]) => (
+          {REGION_ORDER.map((code) => [code, REGION_LABELS[code]] as const).map(([code, label]) => (
             <button
               key={code}
               type="button"
               onClick={() => onChange({ region: code })}
               className={cn(
-                "min-h-12 rounded-xl border px-3 py-3 text-body-2 font-medium transition-colors",
+                "min-h-12 rounded-xl border bg-white px-3 py-3 text-body-2 font-medium",
                 answers.region === code
-                  ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-700"
-                  : "border-border text-slate-700 hover:border-brand-blue-300 hover:bg-brand-blue-50/50",
+                  ? "border-brand-blue-600 bg-brand-blue-50 text-baro-blue-600"
+                  : "border-border text-slate-700",
               )}
             >
               {label}
@@ -459,30 +484,27 @@ function StepBody({
 
     case "desiredSalary":
       return (
-        /* 폭을 채울 수 없는 입력 줄이라 가운데로 모은다. */
-        <div className="flex flex-wrap items-center justify-center gap-3">
-          <input
-            type="number"
-            min={0}
-            inputMode="numeric"
-            aria-label="희망 월급 최소"
-            value={answers.desiredSalaryMin ?? ""}
-            onChange={(e) => onChange({ desiredSalaryMin: e.target.value === "" ? undefined : Number(e.target.value) })}
-            className={NUMBER_INPUT_CLASS}
-            placeholder="최소"
-          />
-          <span className="text-slate-400">~</span>
-          <input
-            type="number"
-            min={0}
-            inputMode="numeric"
-            aria-label="희망 월급 최대"
-            value={answers.desiredSalaryMax ?? ""}
-            onChange={(e) => onChange({ desiredSalaryMax: e.target.value === "" ? undefined : Number(e.target.value) })}
-            className={NUMBER_INPUT_CLASS}
-            placeholder="최대"
-          />
-          <span className="text-body-2 text-slate-500">만원</span>
+        <div className="flex flex-col gap-2">
+          {SALARY_RANGES.map((range) => {
+            const selected = answers.desiredSalaryMin === range.min && answers.desiredSalaryMax === range.max;
+            return (
+              <ChipButton
+                key={range.label}
+                indicator="radio"
+                selected={selected}
+                /* 고른 걸 다시 누르면 비운다 - 선택 문항이라 되돌릴 길이 있어야 한다. */
+                onClick={() =>
+                  onChange(
+                    selected
+                      ? { desiredSalaryMin: undefined, desiredSalaryMax: undefined }
+                      : { desiredSalaryMin: range.min, desiredSalaryMax: range.max },
+                  )
+                }
+              >
+                {range.label}
+              </ChipButton>
+            );
+          })}
         </div>
       );
 
@@ -540,20 +562,6 @@ function StepBody({
     case "heldQualifications":
       return (
         <div className="flex flex-col gap-2">
-          {/* 목록에 없는 자격은 아래 칸에 직접 적는다. 적은 것도 같은 배열에 들어간다. */}
-          <CustomQualificationInput
-            className="mb-2"
-            values={answers.heldQualifications.filter((n) => !QUALIFICATION_OPTIONS.includes(n))}
-            reserved={QUALIFICATION_OPTIONS}
-            onChange={(custom) =>
-              onChange({
-                heldQualifications: [
-                  ...answers.heldQualifications.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
-                  ...custom,
-                ],
-              })
-            }
-          />
           {QUALIFICATION_OPTIONS.map((name) => {
             const selected = answers.heldQualifications.includes(name);
             return (
@@ -573,6 +581,20 @@ function StepBody({
               </ChipButton>
             );
           })}
+          {/* 목록에 없는 자격은 목록 아래 칸에 직접 적는다. 적은 것도 같은 배열에 들어간다. */}
+          <CustomQualificationInput
+            className="mt-2"
+            values={answers.heldQualifications.filter((n) => !QUALIFICATION_OPTIONS.includes(n))}
+            reserved={QUALIFICATION_OPTIONS}
+            onChange={(custom) =>
+              onChange({
+                heldQualifications: [
+                  ...answers.heldQualifications.filter((n) => QUALIFICATION_OPTIONS.includes(n)),
+                  ...custom,
+                ],
+              })
+            }
+          />
         </div>
       );
 
@@ -598,41 +620,45 @@ function StepBody({
 
     case "contact":
       return (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           {needsPhone && (
-            <input
-              type="tel"
-              autoComplete="tel"
-              aria-label="휴대전화번호"
-              value={answers.phone}
-              onChange={(e) => onChange({ phone: e.target.value })}
-              className="h-14 w-full rounded-xl border border-border bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
-              placeholder="010-1234-5678"
-            />
+            <label className="block">
+              <span className="text-body-2 font-semibold text-slate-800">휴대전화번호</span>
+              <input
+                type="tel"
+                autoComplete="tel"
+                value={answers.phone}
+                onChange={(e) => onChange({ phone: e.target.value })}
+                className={cn(TEXT_INPUT_CLASS, "mt-2")}
+                placeholder="010-1234-5678"
+              />
+            </label>
           )}
           {needsEmail && (
-            <div>
+            <label className="block">
+              <span className="text-body-2 font-semibold text-slate-800">
+                이메일 <span className="font-medium text-slate-600">(선택)</span>
+              </span>
               <input
                 type="email"
                 autoComplete="email"
                 inputMode="email"
-                aria-label="이메일"
                 value={answers.email}
                 onChange={(e) => onChange({ email: e.target.value })}
-                className="h-14 w-full rounded-xl border border-border bg-white px-4 text-center text-body-1 font-semibold text-slate-800 focus:border-brand-blue-400 focus:outline-none"
-                placeholder="이메일 (선택)"
+                className={cn(TEXT_INPUT_CLASS, "mt-2")}
+                placeholder="example@email.com"
               />
-              <p className="mt-1.5 text-center text-label-2 text-slate-400">이력서에 적히는 연락용 이메일이에요. 나중에 채워도 괜찮아요.</p>
-            </div>
+              <span className="mt-1.5 block text-body-3 font-medium break-keep text-slate-600">이력서에 적히는 연락용 이메일이에요. 나중에 채워도 괜찮아요.</span>
+            </label>
           )}
           {needsMarketingConsent && (
-            <label className="flex items-start gap-2.5 rounded-xl border border-border bg-white px-4 py-3.5 text-label-1 break-keep text-slate-700">
+            <label className="flex items-start gap-2.5 rounded-xl bg-gov-surface px-4 py-3.5 text-body-3 font-medium break-keep text-slate-700">
               <Checkbox
                 className="mt-0.5"
                 checked={answers.marketingConsent}
                 onCheckedChange={(v) => onChange({ marketingConsent: v === true })}
               />
-              <span>맞춤 채용공고·지원금 정보를 알림톡으로 받는 데 동의합니다. (선택, 언제든 해지 가능)</span>
+              <span>지원금·교육훈련 안내와 서비스 소식을 알림톡으로 받는 데 동의해요. (선택 · 언제든 끌 수 있어요)</span>
             </label>
           )}
         </div>

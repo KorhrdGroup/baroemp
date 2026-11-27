@@ -5,7 +5,6 @@
 export const siteConfig = {
   name: "한평생 바로취업",
   description: "중장년의 새로운 시작, 한평생 함께합니다",
-  supportPhone: "1588-1234",
 };
 
 export interface NavItem {

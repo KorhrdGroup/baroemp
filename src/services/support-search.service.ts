@@ -100,6 +100,25 @@ export interface SupportResultView {
 }
 
 /**
+ * 지금 유효한 지원금 매칭 결과 - 마지막으로 끝낸 진단에서 계산한 것만.
+ * match_results 는 회원 · 제도마다 한 줄이라, 다시 진단하면 이번에 걸린 제도만 갱신되고
+ * 이번에는 걸리지 않은 제도의 예전 줄(예: 나이를 바꾸기 전 "가능성 높음")이 그대로 남는다.
+ * 마지막 진단을 시작한 뒤에 계산된 줄만 남겨 그런 줄을 뺀다.
+ */
+export async function findCurrentSupportMatchResults(source: { userId?: string; anonymousId?: string }): Promise<MatchResult[]> {
+  const sourceId = source.userId ?? source.anonymousId ?? "";
+  if (!sourceId) return [];
+  const [sessions, matchResults] = await Promise.all([
+    getSupportAssessmentSessionRepository().findAll(
+      source.userId ? { userId: source.userId, status: "completed" } : { anonymousId: source.anonymousId, status: "completed" },
+    ),
+    getMatchResultRepository().findAll({ sourceId, targetType: "support_program" }),
+  ]);
+  const lastStartedAt = Math.max(0, ...sessions.map((s) => Date.parse(s.startedAt) || 0));
+  return matchResults.filter((m) => (Date.parse(m.computedAt) || 0) >= lastStartedAt);
+}
+
+/**
  * /support/result/[sessionId] 결과 페이지용 뷰 모델.
  * completeSupportAssessment()가 저장한 match_results(target_type=support_program)를 읽어
  * 카테고리별로 그룹핑하고, 각 그룹 내에서는 매칭 점수 내림차순으로 정렬한다.
@@ -113,7 +132,7 @@ export async function getSupportResultView(sessionId: string): Promise<SupportRe
     return { sessionId, gradeCounts: { HIGH: 0, MEDIUM: 0, CHECK_REQUIRED: 0, LOW: 0 }, totalCount: 0, categories: [], employerPrograms: [] };
   }
 
-  const matchResults = await getMatchResultRepository().findAll({ sourceId, targetType: "support_program" });
+  const matchResults = await findCurrentSupportMatchResults({ userId: session.userId, anonymousId: session.anonymousId });
   // 전체 테이블(1만+건)은 PostgREST 기본 1,000행 상한에 걸리므로,
   // 매칭 계산(completeSupportAssessment)과 동일한 "취업 관련" 필터로 조회해 매칭된 제도를 전부 커버한다.
   const allPrograms = await getSupportProgramRepository().findAll({
@@ -154,4 +173,42 @@ export async function getSupportResultView(sessionId: string): Promise<SupportRe
     .slice(0, 5);
 
   return { sessionId, gradeCounts, totalCount: matchResults.length, categories, employerPrograms };
+}
+
+export interface SupportShowcaseCategory {
+  category: SupportCategory;
+  label: string;
+  programs: Pick<SupportProgram, "id" | "title" | "organization" | "summary" | "supportAmountText">[];
+}
+
+export interface SupportShowcase {
+  /** 지금 찾아볼 수 있는(활성 · 취업 관련) 지원제도 수. */
+  totalCount: number;
+  categories: SupportShowcaseCategory[];
+}
+
+const SHOWCASE_CATEGORIES: SupportCategory[] = ["employment", "training", "living"];
+
+/**
+ * /support 소개 화면의 "분야별 대표 지원제도" 구역. 읽기만 한다(조회 기록을 남기지 않는다).
+ * 개수는 결과 화면과 같은 기준(활성 · 취업 관련도 기준 이상), 카드는 분야마다 개인 대상 최신 6개.
+ */
+export async function getSupportShowcase(): Promise<SupportShowcase> {
+  const repo = getSupportProgramRepository();
+  const base = { minCareerRelevanceScore: CAREER_RELEVANCE_THRESHOLD, sort: "latest" as const };
+  const [all, ...perCategory] = await Promise.all([
+    repo.search({ ...base, pageSize: 1 }),
+    ...SHOWCASE_CATEGORIES.map((category) => repo.search({ ...base, category, pageSize: 20 })),
+  ]);
+  return {
+    totalCount: all.total,
+    categories: SHOWCASE_CATEGORIES.map((category, i) => ({
+      category,
+      label: SUPPORT_CATEGORY_LABELS[category] ?? category,
+      programs: perCategory[i].items
+        .filter((p) => (p.audience ?? "personal") !== "business")
+        .slice(0, 6)
+        .map(({ id, title, organization, summary, supportAmountText }) => ({ id, title, organization, summary, supportAmountText })),
+    })).filter((c) => c.programs.length > 0),
+  };
 }

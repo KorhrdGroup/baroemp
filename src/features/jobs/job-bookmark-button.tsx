@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, useSyncExternalStore, useTransition } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore, useTransition } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -11,6 +11,14 @@ import {
   toggleLocalJobBookmark,
 } from "@/lib/jobs/job-bookmark-local";
 import { toggleJobBookmarkAction, trackAnonymousJobBookmarkAction } from "@/features/jobs/job-actions";
+
+/* 같은 공고가 한 화면에 두 번 나올 수 있다(일자리 찾기의 추천 줄 + 목록). 한쪽에서 찜하면 다른 쪽도 따라 바뀌게 알린다. */
+export const JOB_BOOKMARK_SYNC_EVENT = "job-bookmark-sync";
+const SYNC_EVENT = JOB_BOOKMARK_SYNC_EVENT;
+type SyncDetail = { jobId: string; bookmarked: boolean };
+function broadcast(detail: SyncDetail) {
+  window.dispatchEvent(new CustomEvent<SyncDetail>(SYNC_EVENT, { detail }));
+}
 
 /**
  * 채용공고 찜 버튼.
@@ -38,6 +46,16 @@ export function JobBookmarkButton({
   const [dbBookmarked, setDbBookmarked] = useState(initialBookmarked);
   const [pending, startTransition] = useTransition();
 
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const onSync = (e: Event) => {
+      const { detail } = e as CustomEvent<SyncDetail>;
+      if (detail.jobId === jobId) setDbBookmarked(detail.bookmarked);
+    };
+    window.addEventListener(SYNC_EVENT, onSync);
+    return () => window.removeEventListener(SYNC_EVENT, onSync);
+  }, [isAuthenticated, jobId]);
+
   const getSnapshot = useCallback(() => isLocalJobBookmarked(jobId), [jobId]);
   const getServerSnapshot = useCallback(() => false, []);
   const localBookmarked = useSyncExternalStore(subscribeLocalJobBookmarks, getSnapshot, getServerSnapshot);
@@ -47,12 +65,12 @@ export function JobBookmarkButton({
   const handleClick = () => {
     if (isAuthenticated) {
       const next = !dbBookmarked;
-      setDbBookmarked(next);
+      broadcast({ jobId, bookmarked: next });
       startTransition(async () => {
         try {
           await toggleJobBookmarkAction({ jobId, action: next ? "add" : "remove" });
         } catch {
-          setDbBookmarked(!next);
+          broadcast({ jobId, bookmarked: !next });
         }
       });
       return;
@@ -68,7 +86,7 @@ export function JobBookmarkButton({
 
   if (variant === "full") {
     return (
-      <Button type="button" variant="outline" onClick={handleClick} disabled={pending}>
+      <Button type="button" variant="outline" onClick={handleClick} disabled={pending} className={className}>
         {/*
           찜은 하단바에서 "지원하러 가기" 옆에 선다. 채운 파랑으로 두면 파란 버튼이
           둘이 되어 어느 것이 주 동작인지 흐려진다. 흰 버튼으로 두고 찜한 상태만
@@ -90,7 +108,7 @@ export function JobBookmarkButton({
       aria-label={bookmarked ? "찜 취소" : "찜하기"}
       aria-pressed={bookmarked}
       className={cn(
-        "flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors",
+        "relative tap-44 flex size-8 shrink-0 items-center justify-center rounded-full border transition-colors",
         bookmarked
           ? "border-brand-blue-200 bg-brand-blue-50 text-brand-blue-600"
           : "border-border bg-white text-slate-400",

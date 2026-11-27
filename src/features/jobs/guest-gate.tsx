@@ -50,25 +50,25 @@ export function GuestGate({ active, children }: { active: boolean; children: Rea
 
       <Dialog open={open} onOpenChange={setOpen}>
         {/* 알림톡 동의 창과 같은 모양: 동그란 아이콘 · 가운데 정렬 · 주 버튼 + 옅은 보조 버튼. */}
-        <DialogContent className="max-w-md gap-6 px-5 pt-6 pb-4" showCloseButton={false}>
+        <DialogContent className="draft3-theme max-w-md gap-6 rounded-card px-5 pt-6 pb-4" showCloseButton={false}>
           <DialogHeader className="items-center gap-3 text-center sm:text-center">
             <span className="mb-1 flex size-12 items-center justify-center rounded-full bg-brand-blue-50 text-brand-blue-600">
               <UserRoundPlus className="size-6" />
             </span>
-            <DialogTitle className="text-title-3 font-bold text-slate-900">회원가입하고 무료로 이용해보세요</DialogTitle>
-            <DialogDescription className="text-body-2 leading-relaxed break-keep text-slate-500">
+            <DialogTitle className="text-title-3 font-bold break-keep text-slate-900">회원가입하고 무료로 이용해보세요</DialogTitle>
+            <DialogDescription className="text-body-2 leading-relaxed font-medium break-keep text-slate-600">
               가입하시면 공고 자세히 보기와 찜하기,
               <br />내 조건에 맞는 맞춤 공고까지 모두 무료입니다.
-              <span className="mt-3 block text-label-2 text-slate-400">
+              <span className="mt-3 block text-body-3 text-slate-600">
                 직업진단·지원금 찾기·이력서 첨삭도 함께 쓰실 수 있어요.
               </span>
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-1">
-            <Button size="lg" className="w-full bg-brand-blue-400 text-body-2 font-bold hover:bg-brand-blue-600" asChild>
+            <Button size="lg" className="w-full rounded-xl bg-baro-blue text-body-2 font-semibold text-white hover:bg-baro-blue" asChild>
               <Link href="/signup?next=/jobs">무료로 회원가입</Link>
             </Button>
-            <Button variant="ghost" className="h-10 w-full text-slate-500 hover:bg-transparent hover:text-slate-600" asChild>
+            <Button variant="ghost" className="h-10 w-full text-body-3 font-medium text-slate-600 hover:bg-transparent hover:text-slate-600" asChild>
               <Link href="/login?next=/jobs">이미 회원이에요 · 로그인</Link>
             </Button>
           </div>

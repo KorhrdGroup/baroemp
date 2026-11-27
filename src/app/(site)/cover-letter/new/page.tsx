@@ -6,6 +6,7 @@ import { listExperienceBankForUser } from "@/services/experience-bank.service";
 import { listCoverLettersForUser, MAX_COVER_LETTERS_PER_USER } from "@/services/cover-letter.service";
 import { buildQuestionCatalog } from "@/lib/cover-letter/questions";
 import { CoverLetterWizard } from "@/features/cover-letter/cover-letter-wizard";
+import { PageHead } from "@/components/layout/page-head";
 
 export const metadata: Metadata = {
   title: "새 자기소개서 작성 | 한평생 바로취업",
@@ -32,9 +33,15 @@ export default async function CoverLetterNewPage({
   if (existing.length >= MAX_COVER_LETTERS_PER_USER) redirect("/resume");
 
   return (
-    // 방법 고르기 화면은 짧아서, 회색 바탕을 화면 끝까지 깔아야 흰 띠가 안 남는다.
-    <div className="min-h-screen bg-slate-100">
-      <div className="mx-auto max-w-5xl px-4.5 pt-10 pb-20 lg:px-8">
+    // 흰 머리 아래 회색 바탕에 흰 카드(테두리 · 그림자 없음). /draft3 색 구성 (globals.css .draft3-theme).
+    <div className="draft3-theme">
+      <PageHead icon="coverLetter"
+        crumbs={[{ label: "자기소개서", href: "/cover-letter" }, { label: "새 자기소개서" }]}
+        title="새 자기소개서"
+        description="양식을 고르고 문항과 내 경험을 담으면, 편집 화면에서 AI 초안을 받을 수 있어요."
+      />
+      <div className="bg-baro-page">
+      <div className="mx-auto max-w-7xl px-4.5 pt-10 pb-20 lg:px-8">
         <CoverLetterWizard
           templates={ordered.map((t) => ({
             id: t.id,
@@ -49,6 +56,7 @@ export default async function CoverLetterNewPage({
           resumeId={resume && resume.userId === user.id ? resume.id : undefined}
           targetOccupationId={targetOccupationId}
         />
+      </div>
       </div>
     </div>
   );

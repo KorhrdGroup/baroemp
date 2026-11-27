@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requireUser } from "@/lib/auth/session";
 import { notFound } from "next/navigation";
+import { isSessionOwner } from "@/lib/auth/session-ownership";
 import {
   getAssessmentResultBySession,
   getContentRecommendationsForResult,
@@ -27,10 +28,12 @@ export default async function AssessmentResultPage({
   // 마이페이지에서 특정 직업 행을 누르고 온 경우, 그 직업 카드를 열어서 보여준다.
   const { focus } = await searchParams;
   // 목록과 같은 이유로 로그인 필요. 로그인 후 이 화면으로 그대로 돌아온다.
-  await requireUser(`/assessment/result/${sessionId}`);
+  const user = await requireUser(`/assessment/result/${sessionId}`);
   const found = await getAssessmentResultBySession(sessionId);
   if (!found) notFound();
   const { result } = found;
+  // 남의 결과는 없는 화면으로 보인다(있는지조차 알리지 않는다).
+  if (!(await isSessionOwner(result))) notFound();
 
   /*
     조회 기록은 화면을 그리는 데 필요한 값이 아니다. 기다리면 그만큼 화면이 늦게 뜬다.
@@ -72,9 +75,8 @@ export default async function AssessmentResultPage({
   );
 
   return (
-    // 지원금 결과 화면과 같은 뼈대: 회색 바탕 위에 흰 카드를 쌓는다.
-    <div className="min-h-screen bg-slate-50">
-    <div className="mx-auto max-w-3xl px-4.5 pb-28 pt-10 lg:px-8">
+    // /draft3 색 구성 (globals.css .draft3-theme): 흰 머리(PageHead) 아래 회색 바탕에 흰 카드.
+    <div className="draft3-theme bg-white">
       <ResultView
         sessionId={sessionId}
         result={result}
@@ -84,8 +86,8 @@ export default async function AssessmentResultPage({
         externalCourses={externalCourses}
         focusOccupationId={focus}
         jobCounts={jobCounts}
+        userName={user.name}
       />
-    </div>
     </div>
   );
 }

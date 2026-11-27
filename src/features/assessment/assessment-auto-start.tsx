@@ -40,9 +40,9 @@ export function AssessmentAutoStart() {
     <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-2xl flex-col items-center justify-center px-4 text-center">
       {error ? (
         <>
-          <p className="text-label-1 text-rose-600">{error}</p>
+          <p className="text-body-3 font-medium text-rose-600">{error}</p>
           <Button
-            className="mt-4 bg-brand-blue-400 hover:bg-brand-blue-600"
+            className="mt-4 h-12 rounded-lg bg-atomic-blue-600 px-6 font-semibold text-white"
             onClick={() => router.replace("/assessment")}
           >
             소개 화면으로
@@ -50,8 +50,8 @@ export function AssessmentAutoStart() {
         </>
       ) : (
         <>
-          <Loader2 className="size-6 animate-spin text-brand-blue-400" />
-          <p className="mt-4 text-label-1 text-slate-500">직업진단을 준비하고 있어요…</p>
+          <Loader2 className="size-6 animate-spin text-atomic-blue-600" />
+          <p className="mt-4 text-body-3 font-medium text-slate-600">직업진단을 준비하고 있어요…</p>
         </>
       )}
     </div>

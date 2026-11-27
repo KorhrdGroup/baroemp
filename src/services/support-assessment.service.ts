@@ -78,9 +78,19 @@ export async function findResumableSupportSession(params: {
     params.userId ? { userId: params.userId } : { anonymousId: params.anonymousId },
   );
 
+  /*
+    마지막으로 끝낸 진단보다 먼저 시작한 진행 중 세션은 묻지 않는다. "처음부터 다시"로 새로 시작해 끝내도
+    예전 세션은 in_progress 로 남는데(상태에 '그만둠'이 없다), 그것을 다시 이어하기로 띄우면 안 된다.
+    시작 시각으로 비교한다 - updated_at 은 행을 고칠 때마다 DB 트리거가 바꿔 순서가 흔들린다.
+  */
+  const lastCompletedStart = Math.max(
+    0,
+    ...sessions.filter((s) => s.status === "completed").map((s) => Date.parse(s.startedAt) || 0),
+  );
+
   return (
     sessions
-      .filter((s) => s.status === "in_progress" && Object.keys(s.answers ?? {}).length > 0)
+      .filter((s) => s.status === "in_progress" && (Date.parse(s.startedAt) || 0) > lastCompletedStart && Object.keys(s.answers ?? {}).length > 0)
       .sort((a, b) => (a.updatedAt < b.updatedAt ? 1 : -1))[0] ?? null
   );
 }

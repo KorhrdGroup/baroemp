@@ -22,7 +22,8 @@ export function ScrollMoreHint({ label = "아래에 선택지가 더 있어요" 
       frame = 0;
       if (done) return;
       const left = document.documentElement.scrollHeight - window.scrollY - window.innerHeight;
-      if (left > 1) {
+      // 한 줄도 안 되게 남았으면(아래 여백 정도) 띄우지 않는다. 다 보이는데 뜨면 마지막 선택지만 가린다.
+      if (left > 96) {
         seenScrollable = true;
         setShow(true);
         return;
@@ -52,8 +53,9 @@ export function ScrollMoreHint({ label = "아래에 선택지가 더 있어요" 
 
   return (
     // 힌트는 안내일 뿐이라 클릭을 가로채지 않는다.
-    <div className="pointer-events-none fixed inset-x-0 bottom-28 z-40 flex justify-center px-4">
-      <span className="flex animate-bounce items-center gap-1 rounded-full bg-slate-900/85 px-4 py-2 text-label-2 font-medium text-white shadow-lg backdrop-blur-sm">
+    // 선택지 글자가 왼쪽에서 시작하므로 오른쪽에 붙인다. 가운데 두면 바로 아래 선택지의 글자를 덮었다.
+    <div className="pointer-events-none fixed inset-x-0 bottom-28 z-40 mx-auto flex max-w-xl justify-end px-6">
+      <span className="flex animate-bounce items-center gap-1 rounded-full bg-slate-900/85 px-4 py-2 text-body-3 font-semibold text-white shadow-lg backdrop-blur-sm">
         <ChevronDown className="size-4" aria-hidden />
         {label}
       </span>
