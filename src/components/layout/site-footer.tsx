@@ -1,24 +1,17 @@
 import Link from "next/link";
-import { footerCompanyLinks, footerServiceLinks, siteConfig } from "@/lib/site-config";
+import { footerCompanyLinks, footerServiceLinks } from "@/lib/site-config";
 import { Logo } from "./logo";
 
 /**
  * 사이트 공용 푸터. 네 칸 짜리 표 대신 세 줄로 줄였다:
- * 로고 + 고객센터 → 서비스 · 약관 링크 한 줄 → 사업자 정보.
- * 메뉴는 머리글에 이미 있으니 푸터는 "어디에 묻나 · 누가 운영하나"만 또렷하게 둔다.
+ * 로고 → 서비스 · 약관 링크 한 줄 → 사업자 정보.
+ * 메뉴는 머리글에 이미 있으니 푸터는 "누가 운영하나"만 또렷하게 둔다. 고객센터 안내(전화 · 운영 시간)는 뺐다.
  */
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-white">
       <div className="mx-auto max-w-7xl px-4.5 py-10 lg:px-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <Logo height={18} />
-          <p className="flex flex-wrap items-baseline gap-x-2 text-body-3 font-medium text-slate-600">
-            고객센터
-            <span className="text-body-1 font-bold text-slate-900">{siteConfig.supportPhone}</span>
-            <span className="text-slate-600">평일 09:00 - 18:00 (주말·공휴일 휴무)</span>
-          </p>
-        </div>
+        <Logo height={18} />
 
         <nav aria-label="푸터" className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-body-3 font-medium text-slate-600">
           {footerServiceLinks.map((item) => (

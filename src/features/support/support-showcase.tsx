@@ -14,11 +14,7 @@ export function SupportShowcaseSection({
 }) {
   return (
     <DiagnosisShowcase
-      listTitle={
-        <>
-          분야별 <strong className="font-extrabold text-baro-blue">지원제도 예시</strong>
-        </>
-      }
+      listTitle="분야별 지원제도 예시"
       tabs={data.categories.map((c) => ({
         key: c.category,
         label: c.label,

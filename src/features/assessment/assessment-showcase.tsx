@@ -24,11 +24,7 @@ export function AssessmentShowcase({
   return (
     <>
       <DiagnosisShowcase
-        listTitle={
-          <>
-            분야별 <strong className="font-extrabold text-baro-blue">직업 예시</strong>
-          </>
-        }
+        listTitle="분야별 직업 예시"
         tabs={data.groups.map((g) => ({
           key: g.key,
           label: g.label,
